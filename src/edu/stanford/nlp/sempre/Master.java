@@ -21,7 +21,7 @@ import java.util.*;
 public class Master {
   public static class Options {
     @Option(gloss = "Execute these commands before starting")
-    public List<String> scriptPaths;
+    public List<String> scriptPaths = Lists.newArrayList();
     @Option(gloss = "Write out new examples to this directory")
     public String newExamplesPath;
     @Option(gloss = "Write out input lines to this path") public String logPath;
