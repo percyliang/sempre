@@ -176,3 +176,6 @@ data/unittest-learn.grammar
 data/unittest-learn-ccg.grammar
 
 data/unittest-learn.examples.json
+
+data/tutorial.grammar
+data/tutorial.examples.json
