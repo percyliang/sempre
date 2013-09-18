@@ -1,0 +1,17 @@
+# This grammar serves as a unit test to make sure the learning works.
+
+(rule $ROOT ($Unary) (IdentityFn))
+(rule $Unary ($Binary $Unary) (JoinFn binary,unary unaryCanBeArg0 unaryCanBeArg1)) # [born in, California]
+(rule $Unary ($Unary $Unary) (MergeFn and)) # [American, scientist]
+
+# Here, we define unaries and binaries to have ambiguity on purpose.  The
+# learning algorithm will figure out how to weigh these entries based on
+# training examples.
+
+(rule $Unary (american) (ConstantFn (fb:people.person.nationality fb:en.united_states) fb:people.person))
+(rule $Unary (american) (ConstantFn (fb:people.person.nationality fb:en.france) fb:people.person))
+
+(rule $Binary (born in) (ConstantFn fb:people.person.place_of_birth (-> fb:location.location fb:people.person)))
+(rule $Binary (born in) (ConstantFn fb:people.deceased_person.place_of_death (-> fb:location.location fb:people.person)))
+
+(rule $Unary (paris) (ConstantFn fb:en.paris fb:location.location))

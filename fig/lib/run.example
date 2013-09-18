@@ -1,0 +1,25 @@
+#!/usr/bin/ruby
+
+require 'execrunner'
+
+# An example on how to use execrunner.
+
+env!(
+  'echo',
+
+  'some', 'arguments',
+
+  sel(0, # Selects the ith run block
+    run(
+      o('mode', 'on'),
+      # Does the cross-product
+      selo(nil, 'a', 1, 2, 3, 4),
+      selo(nil, 'b', 1, 2, 3),
+    nil),
+
+    run(
+      o('mode', 'off'),
+      selo(2, 'a', 1, 2, 3, 4), # Selects item indexed by 2
+    nil),
+  nil),
+nil)

@@ -1,0 +1,21 @@
+# This small grammar demonstrates how CCG can be used to construct logical
+# forms.  Note that the constructed logical forms are not standard lambda
+# calculus, but these database sugared version with intersection and join.
+
+### Lexical rules
+
+(rule $NP (paris) (ConstantFn fb:en.paris fb:location.location))
+
+(rule $N (american) (ConstantFn (fb:people.person.nationality fb:en.united_states) fb:people.person))
+
+(rule $[N|N]/NP (born in) (ConstantFn (lambda y (lambda f (and (var f) (fb:people.person.place_of_birth (var y))))) (-> fb:location.location (-> fb:people.person fb:people.person))))
+
+### Composition rules
+
+# Forward application
+(rule $[N|N] ($[N|N]/NP $NP) (JoinFn binary,unary unaryCanBeArg1))
+
+# Backward application
+(rule $N ($N $[N|N]) (JoinFn unary,binary unaryCanBeArg1))
+
+(rule $ROOT ($N) (IdentityFn))

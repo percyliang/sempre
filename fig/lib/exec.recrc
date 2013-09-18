@@ -1,0 +1,68 @@
+# Basic commands for executions
+
+maxLoadSize := 1000000000
+#verbose := 2
+
+# Load the record file
+R := . recrc !source
+
+p := / !!plottime
+
+execPath := . state execs
+
+# (search, exec numbers) print option
+o := $execPath '' {\2.exec,\3.exec,\4.exec} '' {options.map,options2.map} /.*\1.*/
+# Select some exec records
+e := $execPath '' {\1.exec,\2.exec,\3.exec,\4.exec,\5.exec,\6.exec,\7.exec,\8.exec,\9.exec,\10.exec,\11.exec,\12.exec,\13.exec,\14.exec,\15.exec,\16.exec,\17.exec,\18.exec,\19.exec,\20.exec}
+r := $execPath '' {\1.exec,\2.exec,\3.exec,\4.exec,\5.exec,\6.exec,\7.exec,\8.exec,\9.exec,\10.exec,\11.exec,\12.exec,\13.exec,\14.exec,\15.exec,\16.exec,\17.exec,\18.exec,\19.exec,\20.exec} record
+# Last exec record
+lr := @{ !flatten !max !!filestat(mtime) . /.*exec/ ... } '' * record
+
+# Write to temporary file
+# Usage <commands> $w(a)
+w := / !save(vars/\1) # Write
+wa := / !save(vars/\1,append=true) # Write and append
+g := . vars \1 # Get (read)
+
+# Selects the executions with the given the execId
+# At root: (execId)
+filterOption := !flatten $execPath !remove0 '' /\d+.exec/ &{ options.map \1 / !raise !identity }
+execId := $filterOption(exec.execId=\1)
+saveExecId := $execId(\1) / * / !save(execIds/\1)
+# Get record of execIds
+rr := $execPath execIds \1 '' * record
+rrf := $execPath execIds \1 '' * {record,options.map} !identity / !raise !key(.) / \
+  $filterOption(\2) / '' * record
+rrr := $rrf(\1,crp.random=\2)
+ 
+# Some shortcuts
+wc := !withoutChildren
+f := !flatten
+
+# At file: print file size
+fs := !filestat(size) !withoutChildren
+
+get := !sub(\1,,1)
+last := !flatten !tail(1) ''
+
+# Put before to merge parent and child (for plotting)
+up := !flatten(integrate) ''
+
+unload := . !unloadChildren
+
+mean := !sub(3,,1) !stat # The third line is the mean
+
+############################################################
+
+# http://t16web.lanl.gov/Kawano/gnuplot/label-e.html
+symbol := {/Symbol\ \1}
+large := {/Helvetica\=20\ \1}
+huge := {/Helvetica\=32\ \1}
+Huge := {/Helvetica\=40\ \1}
+
+theta0 := $symbol(q)_1
+theta1 := $symbol(q)_2
+phi0 := $symbol(f)_1
+phi1 := $symbol(f)_2
+beta0 := $symbol(b)_1
+beta1 := $symbol(b)_2

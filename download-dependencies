@@ -1,0 +1,61 @@
+#!/usr/bin/ruby
+
+$modules = [:code,
+            :core,
+            :emnlp2013,
+            :geofreebase,
+            :fullfreebase]
+
+def usage
+  puts "Usage: ./download-dependencies <#{$modules.join('|')}>"
+end
+
+if ARGV.size == 0
+  usage
+  exit 1
+end
+
+def run(command)
+  puts "RUNNING: #{command}"
+  if not system(command)
+    puts "FAILED: #{command}"
+    exit 1
+  end
+end
+
+def download(release, path, baseUrl='http://nlp.stanford.edu/software/sempre')
+  url = baseUrl + '/release-' + release.to_s
+  if release != :code and !path.end_with?('.gz', '.tgz', '.jar')
+    path += '.bz2'
+  end
+  run("mkdir -p #{File.dirname(path)}")
+  run("wget -c '#{url}/#{path}' -O #{path}")
+  if release != :code and path.end_with?('.bz2')
+    run("bzip2 -fd #{path}")
+  end
+end
+
+def downloadFromFileList(release)
+  files = []
+  File.foreach('release-' + release.to_s + '.files') { |line|
+    file = line.sub(/#.*$/, '').sub(/^\s*/, '').sub(/\s*$/, '')
+    next if file.size == 0
+    files << file
+  }
+  files.each { |path|
+    download(release, path)
+  }
+end
+
+def main(which)
+  if not $modules.include?(which)
+    usage
+    exit 1
+  end
+  downloadFromFileList(which)
+end
+
+ARGV.each { |mod|
+  mod = mod.to_sym
+  main(mod)
+}
