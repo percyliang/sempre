@@ -2,6 +2,7 @@ package edu.stanford.nlp.sempre.fbalignment.utils;
 
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
+import edu.stanford.nlp.stats.Counters;
 
 import java.util.HashSet;
 import java.util.List;
@@ -49,7 +50,7 @@ public class MathUtils {
     return res;
   }
 
-  public static double cosine(List<Double> array1, List<Double> array2) {
+  public static double vectorCosine(List<Double> array1, List<Double> array2) {
 
     if (array1.size() != array2.size())
       throw new RuntimeException("Cannot compute cosine of arrays of differnt sizes: " + array1.size() + " " + array2.size());
@@ -109,5 +110,33 @@ public class MathUtils {
     
     double res = union.size() == 0 ? 1.0 : (double) intersection.size() / union.size();
     return res;
+  }
+  
+  /**
+   * Computes jaccard between sets of objects
+   * @param x
+   * @param y
+   * @return
+   */
+  public static <T> double jaccard(List<T> x, List<T> y) {
+    
+    Set<T> intersection = new HashSet<T>(x);
+    intersection.retainAll(y);
+    Set<T> union= new HashSet<T>(x);
+    union.addAll(y);
+    
+    double res = union.size() == 0 ? 1.0 : (double) intersection.size() / union.size();
+    return res;
+  }
+  
+  public static double tokensCosine(List<String> x, List<String> y) {
+    
+    Counter<String> xCounter = new ClassicCounter<String>();
+    for(String str: x)
+      xCounter.incrementCount(str);
+    Counter<String> yCounter = new ClassicCounter<String>();
+    for(String str: y)
+      yCounter.incrementCount(str);
+    return Counters.cosine(xCounter, yCounter);   
   }
 }

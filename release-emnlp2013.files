@@ -10,17 +10,22 @@
 ############################################################
 # Lexicon alignment data
 
-lib/fb_data/6/unaryInfoStringAndAlignment.txt
-lib/fb_data/6/binaryInfoStringAndAlignment.txt
+#lib/fb_data/6/unaryInfoStringAndAlignment.txt
+#lib/fb_data/6/binaryInfoStringAndAlignment.txt
 
 ############################################################
 # WebQuestions
 
-lib/data/webquestions/dataset_11/webquestions.examples.train.json
-lib/data/webquestions/dataset_11/webquestions.examples.test.json
+#lib/data/webquestions/dataset_11/webquestions.examples.train.json
+#lib/data/webquestions/dataset_11/webquestions.examples.test.json
 
 ############################################################
 # Free917 [Cai & Yates, 2013]
 
-data/yates.train.examples.canonicalized.json
-data/yates.test.examples.canonicalized.json
+#data/free917.train.examples.canonicalized.json
+#data/free917.test.examples.canonicalized.json
+
+############################################################
+# Lucene
+lib/lucene/4.4/free917
+lib/lucene/4.4/inexact

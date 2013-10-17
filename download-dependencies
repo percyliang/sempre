@@ -3,8 +3,10 @@
 $modules = [:code,
             :core,
             :emnlp2013,
-            :geofreebase,
-            :fullfreebase]
+            :geofreebase_vdb,
+            :geofreebase_ttl,
+            :fullfreebase_vdb,
+            :fullfreebase_ttl]
 
 def usage
   puts "Usage: ./download-dependencies <#{$modules.join('|')}>"
@@ -25,13 +27,19 @@ end
 
 def download(release, path, baseUrl='http://nlp.stanford.edu/software/sempre')
   url = baseUrl + '/release-' + release.to_s
+  isDirectory = (path.end_with?('.exec') or path.end_with?('vdb') or path.end_with?('free917') or path.end_with?('inexact'))  # Superficial test for directory
   if release != :code and !path.end_with?('.gz', '.tgz', '.jar')
+    path += '.tar' if isDirectory
     path += '.bz2'
   end
   run("mkdir -p #{File.dirname(path)}")
   run("wget -c '#{url}/#{path}' -O #{path}")
   if release != :code and path.end_with?('.bz2')
-    run("bzip2 -fd #{path}")
+    if isDirectory
+      run("cd #{File.dirname(path)} && tar xjf #{File.basename(path)}")
+    else
+      run("bzip2 -fd #{path}")
+    end
   end
 end
 

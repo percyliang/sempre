@@ -211,4 +211,74 @@ public class LanguageInfo {
     if (pos.startsWith("W")) return "W";
     return pos;
   }
+  
+  public boolean equalTokens(LanguageInfo other) {
+    if(tokens.size()!=other.tokens.size())
+      return false;
+    for(int i = 0; i < tokens.size(); ++i) {
+      if(!tokens.get(i).equals(other.tokens.get(i)))
+        return false;
+    }
+    return true;
+  }
+  
+  public boolean equalLemmas(LanguageInfo other) {
+    if(lemmaTokens.size()!=other.lemmaTokens.size())
+      return false;
+    for(int i = 0; i < tokens.size(); ++i) {
+      if(!lemmaTokens.get(i).equals(other.lemmaTokens.get(i)))
+        return false;
+    }
+    return true;
+  }
+  
+  public int numTokens() {
+    return tokens.size();
+  }
+  
+  public LanguageInfo remove(int startIndex, int endIndex) {
+    
+    if(startIndex > endIndex || startIndex<0 || endIndex > numTokens())
+      throw new RuntimeException("Illegal start or end index, start: " + startIndex + ", end: " + endIndex+", info size: " + numTokens());
+    
+    LanguageInfo res = new LanguageInfo();
+    for(int i = 0; i < numTokens(); ++i) {
+      if(i<startIndex || i>=endIndex) {
+        res.tokens.add(this.tokens.get(i));
+        res.lemmaTokens.add(this.lemmaTokens.get(i));
+        res.nerTags.add(this.nerTags.get(i));
+        res.nerValues.add(this.nerValues.get(i));
+        res.posTags.add(this.posTags.get(i));
+      }
+    }
+    return res;
+  }
+  
+  public void addSpan(LanguageInfo other, int start, int end) {
+    for(int i = start; i < end; ++i) {
+      this.tokens.add(other.tokens.get(i));
+      this.lemmaTokens.add(other.lemmaTokens.get(i));
+      this.posTags.add(other.posTags.get(i));
+      this.nerTags.add(other.nerTags.get(i));
+      this.nerValues.add(other.nerValues.get(i));
+    }
+  }
+    
+  public void  addWordInfo(WordInfo wordInfo) {
+    this.tokens.add(wordInfo.token);
+    this.lemmaTokens.add(wordInfo.lemma);
+    this.posTags.add(wordInfo.pos);
+    this.nerTags.add(wordInfo.nerTag);
+    this.nerValues.add(wordInfo.nerValue);
+  }
+  public static class WordInfo {
+    public final String token;
+    public final String lemma;
+    public final String pos;
+    public final String nerTag;
+    public final String nerValue;
+    public WordInfo(String token, String lemma, String pos, String nerTag, String nerValue) {
+      this.token = token; this.lemma=lemma; this.pos = pos; this.nerTag=nerTag; this.nerValue=nerValue;
+    }
+  }
 }

@@ -1,11 +1,17 @@
 package edu.stanford.nlp.sempre.fbalignment.lexicons;
 
+import fig.basic.Option;
 import org.apache.lucene.queryparser.classic.ParseException;
 
 import java.io.IOException;
 import java.util.List;
 
 public class Lexicon {
+  public static class Options {
+    @Option(gloss = "Version of fb_data lib directory") public int fbData = 6;
+  }
+
+  public static Options opts = new Options();
 
   private EntityLexicon exactMatchEntityLexicon;
   private EntityLexicon inexactMatchEntityLexicon;

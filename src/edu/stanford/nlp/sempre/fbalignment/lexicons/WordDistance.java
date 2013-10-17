@@ -51,7 +51,7 @@ public class WordDistance {
     if (!wordVectors.containsKey(word1) || !wordVectors.containsKey(word2))
       return noVectorScore();
     if (opts.distanceMethod.equals("cosine")) {
-      return Math.max(MathUtils.cosine(wordVectors.get(word1), wordVectors.get(word2)), 0);
+      return Math.max(MathUtils.vectorCosine(wordVectors.get(word1), wordVectors.get(word2)), 0);
     }
     if (opts.distanceMethod.equals("euclid")) {
       return MathUtils.euclidDistance(wordVectors.get(word1), wordVectors.get(word2));

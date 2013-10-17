@@ -91,7 +91,7 @@ def defaultOpts
 
     letDefault(:executor, 1),
     sel(:executor,
-      nil,
+      l(),
       sparqlOpts,
     nil),
     selo(:executor, 'Builder.executor',
@@ -154,7 +154,7 @@ def cachePaths(lexiconFnCachePath, sparqlExecutorCachePath)
   nil)
 end
 
-# tag is either "yates" or "webquestions"
+# tag is either "free917" or "webquestions"
 def emnlp2013AblationExperiments(tag)
   l(
     letDefault(:ablation, 0),
@@ -179,22 +179,22 @@ def emnlp2013AblationExperiments(tag)
   nil)
 end
 
-def yates
+def free917
   l( # Data
     letDefault(:data, 0),
     sel(:data,
-      l(o('Dataset.inPaths', 'train,data/yates.train.examples.canonicalized.json'), unbalancedTrainDevSplit), # (0) train 0.8, dev 0.2
-      l(o('Dataset.inPaths', 'train,data/yates.train.examples.canonicalized.json', 'test,data/yates.test.examples.canonicalized.json')), # (1) Careful, this is test set!
+      l(o('Dataset.inPaths', 'train,data/free917.train.examples.canonicalized.json'), unbalancedTrainDevSplit), # (0) train 0.8, dev 0.2
+      l(o('Dataset.inPaths', 'train,data/free917.train.examples.canonicalized.json', 'test,data/free917.test.examples.canonicalized.json')), # (1) Careful, this is test set!
     nil),
 
     # Grammar
     o('Grammar.inPaths', 'data/emnlp2013.grammar'),
-    o('Grammar.tags', 'yates', 'bridge', 'pivot'),
+    o('Grammar.tags', 'free917', 'bridge', 'pivot'),
 
-    emnlp2013AblationExperiments('yates'),
+    emnlp2013AblationExperiments('free917'),
 
     l(
-      o('EntityLexicon.exactMatchIndex','lib/lucene/4.4/yates/'),
+      o('EntityLexicon.exactMatchIndex','lib/lucene/4.4/free917/'),
       o('LexiconFn.entitySearchStrategy','exact'),
       cachePaths('LexiconFn.cache', 'SparqlExecutor.cache'),
     nil),
@@ -264,7 +264,7 @@ def selectDomain
     sel(:domain, {
       'none' => l(),
       'webquestions' => webquestions,
-      'yates' => yates,
+      'free917' => free917,
       'jayant' => jayant
     }),
   nil)

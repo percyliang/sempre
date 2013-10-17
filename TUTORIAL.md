@@ -341,8 +341,10 @@ Add the small graph to the database:
 
 Aside: if you want to work with a larger database:
 
-    ./download-dependencies geofreebase    # Subset of Freebase for geography
-    ./download-dependencies fullfreebase   # All of Freebase
+    ./download-dependencies geofreebase_ttl    # Subset of Freebase for geography in .ttl format 
+    ./download-dependencies geofreebase_vdb    # Virtuoso index for subset of Freebase for geography
+    ./download-dependencies fullfreebase_ttl   # All of Freebase in .ttl format (BIG FILE)
+    ./download-dependencies fullfreebase_vdb   # Virtuoso index for all of Freebase (BIG FILE)
 
 Then, just replace `tutorial.vdb` with the appropriate `lib/fb_data/??.exec/vdb` path.
 
