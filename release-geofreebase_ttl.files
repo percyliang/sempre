@@ -1,0 +1,8 @@
+# This file contains a raw ttl file for a geographic subset of Freebase.
+#
+# These files are hosted on the Stanford NLP web endpoint and are
+# intended to be obtained via the command
+#
+#     ./download-dependencies geofreebase_ttl
+#
+lib/freebase/98.exec/0.ttl

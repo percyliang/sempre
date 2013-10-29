@@ -1,0 +1,9 @@
+# This file contains a raw ttl file for all of Freebase 
+#
+# These files are hosted on the Stanford NLP web endpoint and are
+# intended to be obtained via the command
+#
+#     ./download-dependencies fullfreebase_ttl
+#
+
+lib/freebase/93.exec/0.ttl

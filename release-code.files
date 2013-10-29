@@ -8,8 +8,10 @@
 release-code.files
 release-core.files
 release-emnlp2013.files
-release-geofreebase.files
-release-fullfreebase.files
+release-fullfreebase_ttl.files
+release-fullfreebase_vdb.files
+release-geofreebase_ttl.files
+release-geofreebase_vdb.files
 
 sempre
 Makefile
