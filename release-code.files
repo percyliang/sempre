@@ -22,7 +22,9 @@ testng.xml
 download-dependencies
 
 # Ruby utils: execrunner script etc.
-fig/lib
+fig/bin/qcreate
+fig/lib/execrunner.rb
+fig/lib/myutils.rb
 
 # Main
 src/edu/stanford/nlp/sempre/Main.java
