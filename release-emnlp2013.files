@@ -29,3 +29,7 @@
 # Lucene
 lib/lucene/4.4/free917
 lib/lucene/4.4/inexact
+
+############################################################
+# Grammars
+data/emnlp2013.grammar
