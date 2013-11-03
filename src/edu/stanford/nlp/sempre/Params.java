@@ -35,7 +35,7 @@ public class Params {
   public static Options opts = new Options();
 
   // Discriminative weights
-  HashMap<String, Double> weights = new HashMap<String, Double>();
+  public HashMap<String, Double> weights = new HashMap<String, Double>();
 
   // For AdaGrad
   Map<String, Double> sumSquaredGradients = new HashMap<String, Double>();

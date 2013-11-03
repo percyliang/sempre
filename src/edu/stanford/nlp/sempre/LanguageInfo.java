@@ -116,11 +116,17 @@ public class LanguageInfo {
   public String lemmaPhrase(int start, int end) {
     return sliceSequence(lemmaTokens, start, end);
   }
+  public String posSeq(int start, int end) {
+    return sliceSequence(posTags, start, end);
+  }
+  public String nerSeq(int start, int end) {
+    return sliceSequence(nerTags, start, end);
+  }
 
   private static String sliceSequence(List<String> items,
                                       int start,
                                       int end) {
-    if (start >= end) throw new RuntimeException("Bad indices");
+    if (start >= end) throw new RuntimeException("Bad indices, start="+start+", end="+end);
     if (end - start == 1) return items.get(start);
     StringBuilder out = new StringBuilder();
     for (int i = start; i < end; i++) {

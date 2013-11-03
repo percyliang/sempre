@@ -36,6 +36,7 @@ src/edu/stanford/nlp/sempre/Dataset.java
 src/edu/stanford/nlp/sempre/Learner.java
 src/edu/stanford/nlp/sempre/Params.java
 src/edu/stanford/nlp/sempre/FeatureVector.java
+src/edu/stanford/nlp/sempre/FeatureMatcher.java
 src/edu/stanford/nlp/sempre/Evaluation.java
 
 # Parsing
