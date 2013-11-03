@@ -359,9 +359,9 @@ end
 def sparqlserver
   l(
     scrOptions,
-    required(:exec),
+    letDefault(:exec, 93),
     'scripts/virtuoso', 'start',
-    lambda{|e| e[:scr]+'/state/execs/'+e[:exec].to_s+'.exec/vdb'}, # DB directory
+    lambda{|e| 'lib/freebase/'+e[:exec].to_s+'.exec/vdb'}, # DB directory
     lambda{|e| 3000+e[:exec]}, # port
   nil)
 end

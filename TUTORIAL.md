@@ -327,9 +327,10 @@ pertaining to geography about California.
 We will use Virtuoso to provide the backend for querying this data.  Make sure
 you have Virtuoso downloaded and compiled:
 
-	  git clone https://github.com/openlink/virtuoso-opensource
-    sudo apt-get install -y automake gawk gperf libtool # For Ubuntu, make sure these dependencies are installed
-	  cd virtuoso-opensource && ./autogen.sh && ./configure --prefix=$PWD/install && make && make install
+    git clone https://github.com/openlink/virtuoso-opensource
+    # For Ubuntu, make sure these dependencies are installed
+    sudo apt-get install -y automake gawk gperf libtool bison flex libssl-dev
+    cd virtuoso-opensource && ./autogen.sh && ./configure --prefix=$PWD/install && make && make install
 
 Start the server:
 

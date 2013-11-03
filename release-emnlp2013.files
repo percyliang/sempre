@@ -10,14 +10,14 @@
 ############################################################
 # Lexicon alignment data
 
-#lib/fb_data/6/unaryInfoStringAndAlignment.txt
-#lib/fb_data/6/binaryInfoStringAndAlignment.txt
+lib/fb_data/6/unaryInfoStringAndAlignment.txt
+lib/fb_data/6/binaryInfoStringAndAlignment.txt
 
 ############################################################
 # WebQuestions
 
-#lib/data/webquestions/dataset_11/webquestions.examples.train.json
-#lib/data/webquestions/dataset_11/webquestions.examples.test.json
+lib/data/webquestions/dataset_11/webquestions.examples.train.json
+lib/data/webquestions/dataset_11/webquestions.examples.test.json
 
 ############################################################
 # Free917 [Cai & Yates, 2013]
