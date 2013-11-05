@@ -1,6 +1,6 @@
 #!/usr/bin/ruby
 
-require ENV['HOME'] + '/system/lib/ruby-myutils/myutils'
+require File.dirname($0)+'/../lib/myutils'
 
 # Print out a chunk of a file.  Specifically, print out the header lines.
 # Use 
