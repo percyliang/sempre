@@ -23,6 +23,7 @@ download-dependencies
 
 # Ruby utils: execrunner script etc.
 fig/bin/qcreate
+fig/bin/chunk
 fig/lib/execrunner.rb
 fig/lib/myutils.rb
 
