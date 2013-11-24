@@ -6,7 +6,6 @@ These commands will download necessary resources:
 
     ./download-dependencies core 
     ./download-dependencies emnlp2013 
-    ./download-dependencies fullfreebase 
     ./download-dependencies fullfreebase_ttl 
     ./download-dependencies fullfreebase_vdb
 
