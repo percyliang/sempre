@@ -28,7 +28,7 @@ public class BeamFigures {
   private void logFileList(List<File> files) {
     LogInfo.begin_track("Files");
     for (File file : files)
-      LogInfo.logs(file);
+      LogInfo.logs("%s", file);
     LogInfo.end_track();
   }
 
