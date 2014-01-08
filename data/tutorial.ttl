@@ -17,5 +17,5 @@ fb:en.mount_whitney	fb:type.object.name	"Mount Whitney"@en.
 fb:en.california	fb:type.object.name	"California"@en.
 
 fb:en.seattle	fb:location.location.area	"369.2"^^xsd:double.
-fb:en.san_francisco	fb:location.location.area	"600.6"@en.
+fb:en.san_francisco	fb:location.location.area	"600.6"^^xsd:double.
 fb:en.los_angeles	fb:location.location.area	"1301.97"^^xsd:double.
