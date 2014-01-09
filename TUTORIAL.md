@@ -390,7 +390,7 @@ We can count the number of cities (should return 3):
 
 We can also get the city with the largest area:
 
-    (execute (argmax 1 1 (fb:type.object.type fb:location.citytown) !fb:location.location.area))
+    (execute (argmax 1 1 (fb:type.object.type fb:location.citytown) fb:location.location.area))
 
 Now let us take a closer look at what is going on with these logical forms
 under the hood.  We are using a logical language called lambda-DCS.
