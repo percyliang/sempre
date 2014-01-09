@@ -509,7 +509,8 @@ public class SparqlExecutor extends Executor {
           select.limit = formula.count;
           block.add(select);
 
-        // TODO: Fix this else case
+        // TODO: Fix this else case. I haven't understood the code yet, but all I know right is that this part,
+        // instead of resolving ties, seemingly answers with random entities
         } else {
           // Method 2: use MAX (can be nested, handles ties at the top)
           // (argmax 1 1 h r) ==> (h (r (mark degree (max ((reverse r) e)))))
