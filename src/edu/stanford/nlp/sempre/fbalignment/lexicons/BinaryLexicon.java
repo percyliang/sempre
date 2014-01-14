@@ -76,7 +76,7 @@ public class BinaryLexicon {
 
     if (opts.pruneLexicon) {
       LogInfo.begin_track("Pruning lexicon");
-      LogInfo.logs("Pruning with beam size: " + opts.pruneBeamSize);
+      LogInfo.log("Pruning with beam size: " + opts.pruneBeamSize);
       pruneLexicon(opts.pruneBeamSize);
       LogInfo.end_track("Pruning lexicon");
     }
@@ -95,7 +95,7 @@ public class BinaryLexicon {
         addEntryToMap(lexemeToEntryMap, normalizedLexemeKey, lv);
       }
     }
-    LogInfo.logs("Number of lexemes in lexicon: " + lexemeToEntryMap.size());
+    LogInfo.log("Number of lexemes in lexicon: " + lexemeToEntryMap.size());
     LogInfo.end_track();
   }
   
@@ -148,7 +148,7 @@ public class BinaryLexicon {
     
     if(info==null) {
       if(opts.verbose>=3)
-        LogInfo.logs("BinaryLexicon: skipping entry since there is no info for formula: " + lexValue.formula.toString());
+        LogInfo.log("BinaryLexicon: skipping entry since there is no info for formula: " + lexValue.formula.toString());
       return Collections.emptyList();
     }
     //get alignment features
@@ -201,10 +201,10 @@ public class BinaryLexicon {
         logicalForms.add(binaryEntry.formula);
       }
     }
-    LogInfo.logs("number of lexemes: " + lexemeToEntryMap.size());
-    LogInfo.logs("Number of full lexemes: " + fullLexemes.size());
-    LogInfo.logs("Number of typed normalized lexemes: " + typedNomralizedLexemes.size());
-    LogInfo.logs("Number of logical forms: " + logicalForms.size());
+    LogInfo.log("number of lexemes: " + lexemeToEntryMap.size());
+    LogInfo.log("Number of full lexemes: " + fullLexemes.size());
+    LogInfo.log("Number of typed normalized lexemes: " + typedNomralizedLexemes.size());
+    LogInfo.log("Number of logical forms: " + logicalForms.size());
   }
 
   public void pruneLexicon(int topK) {

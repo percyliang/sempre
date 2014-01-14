@@ -40,8 +40,8 @@ public abstract class Parser {
   public final Executor executor;
 
   public Parser(Grammar grammar,
-                FeatureExtractor extractor,
-                Executor executor) {
+      FeatureExtractor extractor,
+      Executor executor) {
     this.grammar = grammar;
     this.extractor = extractor;
     this.executor = executor;
@@ -49,16 +49,16 @@ public abstract class Parser {
 
   public abstract int getDefaultBeamSize();
   public abstract ParserState newCoarseParserState(Params params,
-                                                   Example ex);
+      Example ex);
   public abstract ParserState newParserState(Params params,
-                                             Example ex,
-                                             ParserState coarseState);
+      Example ex,
+      ParserState coarseState);
 
   /** Helper function for transitive closure of unary rules. */
   protected void traverse(List<Rule> catUnaryRules,
-                          String node,
-                          Map<String, List<Rule>> graph,
-                          Map<String, Boolean> done) {
+      String node,
+      Map<String, List<Rule>> graph,
+      Map<String, Boolean> done) {
     Boolean d = done.get(node);
     if (Boolean.TRUE.equals(d)) return;
     if (Boolean.FALSE.equals(d))
@@ -120,7 +120,7 @@ public abstract class Parser {
       ex.predDerivations = new ArrayList<Derivation>();
 
     Map<Derivation, Derivation> existingDerivs =
-      new HashMap<Derivation, Derivation>(ex.predDerivations.size());
+        new HashMap<Derivation, Derivation>(ex.predDerivations.size());
     for (Derivation deriv : ex.predDerivations)
       existingDerivs.put(deriv, deriv);
 
@@ -273,7 +273,7 @@ public abstract class Parser {
       trueDeriv.incrementAllFeatureVector(+1, featureDiff);
       predDeriv.incrementAllFeatureVector(-1, featureDiff);
       String heading = String.format("TopTrue (%d) - Pred (%d) = Diff", correct_i, 0);
-      FeatureVector.logFeatureWeights(heading, featureDiff, params.weights);
+      FeatureVector.logFeatureWeights(heading, featureDiff, params);
 
       HashMap<String, Integer> choiceDiff = new LinkedHashMap<String, Integer>();
       trueDeriv.incrementAllChoices(+1, choiceDiff);
@@ -313,12 +313,6 @@ public abstract class Parser {
             "Pred@%04d: %s [score=%s, prob=%s%s]", i, deriv.toString(),
             Fmt.D(deriv.score), Fmt.D(probs[i]), compatibilities != null ? ", comp=" + Fmt.D(compatibilities[i]) : "");
       }
-    }
-
-    double topScore = Double.NEGATIVE_INFINITY;
-    for (Derivation deriv : predDerivations) {
-      topScore = deriv.score;
-      break;
     }
 
     eval.add("correct", correct);
@@ -441,7 +435,7 @@ public abstract class Parser {
       if (aggregationMap.containsKey(deriv.formula))
         aggregationMap.get(deriv.formula).getSecond().inc(deriv.prob);
       else
-        aggregationMap.put(deriv.formula, Pair.makePair(Pair.makePair(deriv.formula, deriv.value), new DoubleContainer(deriv.prob)));
+        aggregationMap.put(deriv.formula, Pair.newPair(Pair.newPair(deriv.formula, deriv.value), new DoubleContainer(deriv.prob)));
     }
 
     List<Pair<Pair<Formula, Value>, DoubleContainer>> formulaList = new ArrayList<Pair<Pair<Formula, Value>, DoubleContainer>>(aggregationMap.values());
@@ -478,9 +472,9 @@ public abstract class Parser {
   }
 
   private int computeMeanBeamJump(Derivation deriv,
-                                  boolean atRoot,
-                                  DoubleRef res,
-                                  DoubleRef rootRes) {
+      boolean atRoot,
+      DoubleRef res,
+      DoubleRef rootRes) {
     double dist = (double) (deriv.preSortBeamPosition - deriv.postSortBeamPosition);
     res.value += dist;
     int n = 1;

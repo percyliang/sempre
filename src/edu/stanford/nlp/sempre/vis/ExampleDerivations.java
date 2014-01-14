@@ -56,7 +56,7 @@ public class ExampleDerivations {
     String basePath = "vis.preds-iter" + iter + "-" + group + ".examples";
     String outPath = Execution.getFile(basePath);
     PrintWriter out = IOUtils.openOutHard(outPath);
-    LogInfo.logs("Writing " + basePath);
+    LogInfo.log("Writing " + basePath);
     pushLog(out);
 
     int i = 0;
@@ -72,9 +72,9 @@ public class ExampleDerivations {
         Derivation firstDeriv = firstDerivs.get(j);
         LogInfo.begin_track("Ex %d, derivation %d", i, j);
         if (firstDeriv.getCompatibility() == 1.0d)
-          LogInfo.logs("DERIV CORRECT");
+          LogInfo.log("DERIV CORRECT");
         else
-          LogInfo.logs("DERIV WRONG");
+          LogInfo.log("DERIV WRONG");
         LogInfo.logs("DERIV %s", firstDeriv);
 
         // TODO no executor stats being written/loaded at present.
@@ -155,23 +155,23 @@ public class ExampleDerivations {
             totals[3][k] = String.format("%12d", deriv.getMaxBeamPosition());
           }
         }
-        LogInfo.logs("");
+        LogInfo.log("");
 
         LogInfo.logs("%-40s\t%12s%s", "POS", "", Joiner.on(' ').join(positions));
-        LogInfo.logs("");
+        LogInfo.log("");
 
         for (int f = 0; f < chart.length; f++) {
           List<Pair<String, Double>> tops = (f < topFeatures.size()) ? topFeatures : botFeatures;
           int topsIndex = (f < topFeatures.size()) ? f : chart.length - 1 - f;
           if (f == topFeatures.size())
-            LogInfo.logs("...");
+            LogInfo.log("...");
           LogInfo.logs(
               "%-40s\t%12.4f%s",
               "FEAT " + tops.get(topsIndex).getFirst(),
               tops.get(topsIndex).getSecond(),
               Joiner.on(' ').join(chart[f]));
         }
-        LogInfo.logs("");
+        LogInfo.log("");
         LogInfo.logs("%-40s\t%12s%s", "SCORE", "", Joiner.on(' ').join(totals[0]));
         LogInfo.logs("%-40s\t%12s%s", "PROB", "", Joiner.on(' ').join(totals[1]));
         LogInfo.logs("%-40s\t%12s%s", "COMPAT", "", Joiner.on(' ').join(totals[2]));

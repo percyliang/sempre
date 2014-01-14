@@ -41,16 +41,16 @@ public class FbEntitySearcher {
         Version.LUCENE_44,
         FbIndexField.TEXT.fieldName(),
         searchingStrategy.equals("exact") ? new KeywordAnalyzer() : new StandardAnalyzer(Version.LUCENE_44));
-    LogInfo.logs("Opening index dir: " + indexDir);
+    LogInfo.log("Opening index dir: " + indexDir);
     IndexReader indexReader = DirectoryReader.open(SimpleFSDirectory.open(new File(indexDir)));
     indexSearcher = new IndexSearcher(indexReader);
-    LogInfo.logs("Opened index with " + indexReader.numDocs() + " documents.");
+    LogInfo.log("Opened index with " + indexReader.numDocs() + " documents.");
 
     this.numOfDocs = numOfDocs;
     LogInfo.end_track("Constructing Searcher");
   }
 
-  public List<Document> searchDocs(String question) throws IOException, ParseException {
+  public synchronized List<Document> searchDocs(String question) throws IOException, ParseException {
 
     List<Document> res = new LinkedList<Document>();
     if (searchStrategy.equals("exact"))
@@ -94,7 +94,7 @@ public class FbEntitySearcher {
       List<Document> docs = searcher.searchDocs(question);
       watch.stop();
       for (Document doc : docs) {
-        LogInfo.logs(
+        LogInfo.log(
             "Mid: " + doc.get(FbIndexField.MID.fieldName()) + "\t" +
                 "id: " + doc.get(FbIndexField.ID.fieldName()) + "\t" +
                 "types: " + doc.get(FbIndexField.TYPES.fieldName()) + "\t" +

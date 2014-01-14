@@ -76,10 +76,11 @@ public class Vis implements Runnable {
       Scanner stdin = new Scanner(System.in);
       while (stdin.hasNextLine())
         s += stdin.nextLine();
+      stdin.close();
     } else {
       s = Joiner.on("").join(IOUtils.readLinesHard(opts.in));
     }
-    LogInfo.logs(LispTree.proto.parseFromString(s).toStringWrap(opts.width));
+    LogInfo.log(LispTree.proto.parseFromString(s).toStringWrap(opts.width));
   }
 
   public void run() {

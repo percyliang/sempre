@@ -84,26 +84,26 @@ public class Master {
   }
 
   void printHelp() {
-    LogInfo.logs("Enter an utterance to parse or one of the following commands:");
-    LogInfo.logs("  (help): show this help message");
-    LogInfo.logs("  (status): prints out status of the system");
-    LogInfo.logs("  (set |option| |value|): set a command-line option (e.g., (set BeamParser.verbose 3))");
-    LogInfo.logs("  (reload): reload the grammar/parameters");
-    LogInfo.logs("  (grammar): prints out the grammar");
-    LogInfo.logs("  (params): dumps all the model parameters");
-    LogInfo.logs("  (select |candidate index|): show information about the |index|-th candidate of the last utterance.");
-    LogInfo.logs("  (accept |candidate index|): record the |index|-th candidate as the correct answer for the last utterance.");
-    LogInfo.logs("  (answer |answer|): record |answer| as the correct answer for the last utterance (e.g., (answer (list (number 3)))).");
-    LogInfo.logs("  (rule |lhs| (|rhs_1| ... |rhs_k|) |sem|): adds a rule to the grammar (e.g., (rule $Number ($TOKEN) (NumberFn)))");
-    LogInfo.logs("  (execute |logical form|): adds a rule to the grammar (e.g., (execute (call + (number 3) (number 4))))");
-    LogInfo.logs("  (def |key| |value|): define a macro to replace |key| with |value| in all commands (e.g., (def type fb:type.object type)))");
+    LogInfo.log("Enter an utterance to parse or one of the following commands:");
+    LogInfo.log("  (help): show this help message");
+    LogInfo.log("  (status): prints out status of the system");
+    LogInfo.log("  (set |option| |value|): set a command-line option (e.g., (set BeamParser.verbose 3))");
+    LogInfo.log("  (reload): reload the grammar/parameters");
+    LogInfo.log("  (grammar): prints out the grammar");
+    LogInfo.log("  (params): dumps all the model parameters");
+    LogInfo.log("  (select |candidate index|): show information about the |index|-th candidate of the last utterance.");
+    LogInfo.log("  (accept |candidate index|): record the |index|-th candidate as the correct answer for the last utterance.");
+    LogInfo.log("  (answer |answer|): record |answer| as the correct answer for the last utterance (e.g., (answer (list (number 3)))).");
+    LogInfo.log("  (rule |lhs| (|rhs_1| ... |rhs_k|) |sem|): adds a rule to the grammar (e.g., (rule $Number ($TOKEN) (NumberFn)))");
+    LogInfo.log("  (execute |logical form|): adds a rule to the grammar (e.g., (execute (call + (number 3) (number 4))))");
+    LogInfo.log("  (def |key| |value|): define a macro to replace |key| with |value| in all commands (e.g., (def type fb:type.object type)))");
   }
 
   public void runInteractivePrompt() {
     Session session = getSession("stdin");
 
     printHelp();
-    LogInfo.logs("Press Ctrl-D to exit.");
+    LogInfo.log("Press Ctrl-D to exit.");
 
     while (true) {
       LogInfo.stdout.print("> ");
@@ -204,7 +204,7 @@ public class Master {
     // Print features
     HashMap<String, Double> featureVector = new HashMap<String, Double>();
     deriv.incrementAllFeatureVector(1, featureVector);
-    FeatureVector.logFeatureWeights("Pred", featureVector, builder.params.weights);
+    FeatureVector.logFeatureWeights("Pred", featureVector, builder.params);
 
     // Print choices
     Map<String, Integer> choices = new LinkedHashMap<String, Integer>();
@@ -257,7 +257,7 @@ public class Master {
     } else if (command.equals("status")) {
       LogInfo.begin_track("%d sessions", sessions.size());
       for (Session otherSession : sessions.values())
-        LogInfo.logs(otherSession + (session == otherSession ? " *" : ""));
+        LogInfo.log(otherSession + (session == otherSession ? " *" : ""));
       LogInfo.end_track();
       StopWatchSet.logStats();
     } else if (command.equals("reload")) {
@@ -269,13 +269,13 @@ public class Master {
       builder.params.write(LogInfo.stdout);
     } else if (command.equals("set")) {
       if (tree.children.size() != 3) {
-        LogInfo.logs("Invalid usage: (set |key| |value|)");
+        LogInfo.log("Invalid usage: (set |key| |value|)");
         return;
       }
       String key = tree.child(1).value;
       String value = tree.child(2).value;
       if (!getOptionsParser().parse(new String[]{"-" + key, value}))
-        LogInfo.logs("Unknown option: " + key);
+        LogInfo.log("Unknown option: " + key);
     } else if (command.equals("select") || command.equals("accept")) {
       // Select an answer
       if (tree.children.size() != 2) {
@@ -284,14 +284,14 @@ public class Master {
       }
 
       if (session.examples.size() == 0) {
-        LogInfo.logs("No examples - please enter a query first.");
+        LogInfo.log("No examples - please enter a query first.");
         return;
       }
 
       Example ex = session.examples.get(session.examples.size() - 1);
       int index = Integer.parseInt(tree.child(1).value);
       if (index < 0 || index >= ex.predDerivations.size()) {
-        LogInfo.logs("Candidate index out of range: " + index);
+        LogInfo.log("Candidate index out of range: " + index);
         return;
       }
 
@@ -308,11 +308,11 @@ public class Master {
       }
     } else if (command.equals("answer")) {
       if (tree.children.size() != 2) {
-        LogInfo.logs("Missing answer.");
+        LogInfo.log("Missing answer.");
       }
 
       if (session.examples.size() == 0) {
-        LogInfo.logs("No examples - please enter a query first.");
+        LogInfo.log("No examples - please enter a query first.");
         return;
       }
 
@@ -333,12 +333,12 @@ public class Master {
       LogInfo.logs("%s", execResponse.value);
     } else if (command.equals("def")) {
       if (tree.children.size() != 3 || !tree.child(1).isLeaf()) {
-        LogInfo.logs("Invalid usage: (def |name| |value|)");
+        LogInfo.log("Invalid usage: (def |name| |value|)");
         return;
       }
       session.macros.put(tree.child(1).value, tree.child(2));
     } else {
-      LogInfo.logs("Invalid command: " + tree);
+      LogInfo.log("Invalid command: " + tree);
     }
   }
 
@@ -352,14 +352,14 @@ public class Master {
         .createExample();
 
     if (!Strings.isNullOrEmpty(opts.newExamplesPath)) {
-      LogInfo.logs("Added new example.");
+      LogInfo.log("Added new example.");
       PrintWriter out = IOUtils.openOutAppendHard(opts.newExamplesPath);
       out.println(ex.toJson());
       out.close();
     }
 
     if (opts.onlineLearnExamples) {
-      LogInfo.logs("Updating parameters.");
+      LogInfo.log("Updating parameters.");
       learner.onlineLearnExample(origEx);
     }
   }

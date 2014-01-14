@@ -180,8 +180,8 @@ public class TokenLevelMatchFeatures {
   public static Counter<String> extractTokenMatchFeatures(List<String> source, List<String> target, boolean strict) {
 
     if (opts.verbose >= 1) {
-      LogInfo.logs("SOURCE: " + source);
-      LogInfo.logs("TARGET: " + target);
+      LogInfo.log("SOURCE: " + source);
+      LogInfo.log("TARGET: " + target);
     }
 
     Counter<String> res = new ClassicCounter<String>();

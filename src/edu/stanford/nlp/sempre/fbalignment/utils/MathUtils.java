@@ -129,6 +129,65 @@ public class MathUtils {
     return res;
   }
   
+  /**
+   * how many of the tokens in x are covered by y
+   * @param x
+   * @param y
+   * @return
+   */
+  public static <T> double coverage(List<T> x, List<T> y) {
+    Set<T> yTokens = new HashSet<T>(y);
+    int covered=0;
+    for(T xItem: x) {
+      if(yTokens.contains(xItem))
+        covered++;
+    }
+    return (double) covered / x.size();
+  }
+  
+  /**
+   * Geometric average of unigram bigram and trigram precision
+   * @param test
+   * @param ref
+   * @return
+   */
+   
+  public static double bleu(List<String> test, List<String> ref) {
+    
+    Set<String> refUnigrams = new HashSet<String>();
+    Set<String> refBigrams = new HashSet<String>();
+    Set<String> refTrigrams = new HashSet<String>();
+    for(int i = 0; i < ref.size(); ++i) {
+      refUnigrams.add(ref.get(i));
+      if(i < ref.size()-1)
+        refBigrams.add(ref.get(i)+" "+ref.get(i+1));
+      if(i < ref.size()-2)
+        refTrigrams.add(ref.get(i)+" "+ref.get(i+1)+" "+ref.get(i+2));
+    }
+    int unigramCov=0;
+    int bigramCov=0;
+    int trigramCov=0;
+    for(int i = 0; i < test.size(); ++i) {
+      if(refUnigrams.contains(test.get(i)))
+        unigramCov++;
+      if(i < test.size()-1) {
+        String bigram = test.get(i)+" "+test.get(i+1);
+        if(refBigrams.contains(bigram))
+          bigramCov++;
+      }
+      if(i < test.size()-2) {
+        String trigram = test.get(i)+" "+test.get(i+1)+" "+test.get(i+2);
+        if(refTrigrams.contains(trigram))
+          trigramCov++;
+      }    
+    }
+    double unigramPrec = (double) unigramCov / test.size();
+    double bigramPrec = (double) bigramCov / (test.size()-1);
+    double trigramPrec = (double) trigramCov / (test.size()-2);
+    double exponent = (double) 1 / 3;
+    return Math.pow(unigramPrec*bigramPrec*trigramPrec,exponent);
+  }
+  
   public static double tokensCosine(List<String> x, List<String> y) {
     
     Counter<String> xCounter = new ClassicCounter<String>();

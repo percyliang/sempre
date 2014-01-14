@@ -131,7 +131,7 @@ public class UnaryLexicon {
 
     if(fbFormulasInfo.getUnaryInfo(formula)==null) {
       if(opts.verbose>=3)
-        LogInfo.logs("Missing info for unary: " + formula);
+        LogInfo.log("Missing info for unary: " + formula);
     }
     else {
       UnaryFormulaInfo uInfo = fbFormulasInfo.getUnaryInfo(formula);
@@ -191,7 +191,7 @@ public class UnaryLexicon {
 
       addEntry(nl, EntrySource.ALIGNMENT.toString(), formula, features, nlToFormulaAndAlignmentMap);
       if (i % 10000 == 0)
-        LogInfo.logs("Number of lines: " + i);
+        LogInfo.log("Number of lines: " + i);
     }
   }
 
@@ -207,7 +207,7 @@ public class UnaryLexicon {
       String nl = tokens[3].toLowerCase();
       Formula formula = Formula.fromString(tokens[1]);
       if(fbFormulasInfo.getUnaryInfo(formula)==null) {
-          LogInfo.logs("Skipping on formula since info is missing from schema: " + formula);
+          LogInfo.log("Skipping on formula since info is missing from schema: " + formula);
       }
       else {
         UnaryFormulaInfo uInfo = fbFormulasInfo.getUnaryInfo(formula);
@@ -227,7 +227,7 @@ public class UnaryLexicon {
         }
         i++;
         if (i % 1000 == 0)
-          LogInfo.logs("Adding mapping from nl: " + nl + " to formula " + formula.toString());  
+          LogInfo.log("Adding mapping from nl: " + nl + " to formula " + formula.toString());  
       }
     }
     return res;
@@ -278,8 +278,8 @@ public class UnaryLexicon {
         formulaSet.add(formulaAndSource.first());
       }
     }
-    LogInfo.logs("number of phrases: " + lexemeToEntryMap.size());
-    LogInfo.logs("Number fo formulas: " + formulaSet.size());
+    LogInfo.log("number of phrases: " + lexemeToEntryMap.size());
+    LogInfo.log("Number fo formulas: " + formulaSet.size());
   }
 
   public static class UnaryLexicalEntryComparator implements Comparator<UnaryLexicalEntry> {

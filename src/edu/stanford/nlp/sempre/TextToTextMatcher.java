@@ -155,9 +155,5 @@ public class TextToTextMatcher {
         vector.add("tokenMatch", prefix + ".suffix", features.getCount("suffix"));
     } else if (features.getCount("overlap") > 0)
       vector.add("tokenMatch", prefix + ".overlap", features.getCount("overlap"));
-
-    if (opts.verbose >= 3) {
-      LogInfo.logs("Matches: %s, final features: %s: ", features, vector.toMap());
-    }
   }
 }

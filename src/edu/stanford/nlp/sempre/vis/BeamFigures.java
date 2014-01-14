@@ -58,7 +58,7 @@ public class BeamFigures {
       iter++;
     }
 
-    LogInfo.logs("Writing " + basePath);
+    LogInfo.log("Writing " + basePath);
     String outPath = Execution.getFile(basePath);
     PrintWriter out = IOUtils.openOutHard(outPath);
 
@@ -68,7 +68,7 @@ public class BeamFigures {
     for (int[] counts : countsPerIter)
       out.println(Joiner.on(' ').join(Ints.asList(counts)));
 
-    LogInfo.logs("Done");
+    LogInfo.log("Done");
 
     out.flush();
     out.close();
@@ -111,7 +111,7 @@ public class BeamFigures {
       iter++;
     }
 
-    LogInfo.logs("Writing " + basePathCorBmp);
+    LogInfo.log("Writing " + basePathCorBmp);
     String outPath = Execution.getFile(basePathCorBmp);
     PrintWriter out = IOUtils.openOutHard(outPath);
 
@@ -123,9 +123,9 @@ public class BeamFigures {
 
     out.flush();
     out.close();
-    LogInfo.logs("Done");
+    LogInfo.log("Done");
 
-    LogInfo.logs("Writing " + basePathMeta);
+    LogInfo.log("Writing " + basePathMeta);
     outPath = Execution.getFile(basePathMeta);
     out = IOUtils.openOutHard(outPath);
 
@@ -138,9 +138,9 @@ public class BeamFigures {
 
     out.flush();
     out.close();
-    LogInfo.logs("Done");
+    LogInfo.log("Done");
 
-    LogInfo.logs("Writing " + basePathItems);
+    LogInfo.log("Writing " + basePathItems);
     outPath = Execution.getFile(basePathItems);
     out = IOUtils.openOutHard(outPath);
 
@@ -163,7 +163,7 @@ public class BeamFigures {
 
     out.flush();
     out.close();
-    LogInfo.logs("Done");
+    LogInfo.log("Done");
   }
 
   /** @param files Example file from each iteration in turn. */
@@ -176,7 +176,7 @@ public class BeamFigures {
     List<List<List<Integer>>> deltasPerIterPerExample = new ArrayList<List<List<Integer>>>();
     int e = 0, iter = 0, beamSize = 0;
     for (List<Example> row : Vis.zipExamples(files)) {
-      LogInfo.logs("example " + e);
+      LogInfo.log("example " + e);
       final Example targetExample = row.get(row.size() - 1);
       final Map<Derivation, Integer> targetBeamPositions = Utils.indicesOf(targetExample.getPredDerivations());
       beamSize = targetBeamPositions.size();
@@ -197,7 +197,7 @@ public class BeamFigures {
 
     String outPath = Execution.getFile(basePath);
     PrintWriter out = IOUtils.openOutHard(outPath);
-    LogInfo.logs("Writing " + basePath);
+    LogInfo.log("Writing " + basePath);
 
     out.printf("examples %d\n", e);
     out.printf("iters %d\n", iter);
@@ -206,7 +206,7 @@ public class BeamFigures {
       for (List<Integer> deltas : deltasPerIter)
         out.println(Joiner.on(' ').join(deltas));
 
-    LogInfo.logs("Done");
+    LogInfo.log("Done");
     out.flush();
     out.close();
   }

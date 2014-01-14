@@ -89,8 +89,8 @@ public class ConfusionMatrices {
       putLine1[i] = String.format("[%" + w + ".2f %" + w + ".2f]", ms.get(i).tp, ms.get(i).fn);
       putLine2[i] = String.format("[%" + w + ".2f %" + w + ".2f]", ms.get(i).fp, ms.get(i).tn);
     }
-    LogInfo.logs(Joiner.on("     ").join(putLine1));
-    LogInfo.logs(Joiner.on("     ").join(putLine2));
+    LogInfo.log(Joiner.on("     ").join(putLine1));
+    LogInfo.log(Joiner.on("     ").join(putLine2));
   }
 
   private void updateConfusionMatrix(ConfusionMatrix m,

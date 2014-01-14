@@ -60,6 +60,7 @@ src/edu/stanford/nlp/sempre/LanguageInfo.java
 src/edu/stanford/nlp/sempre/FbFormulasInfo.java
 src/edu/stanford/nlp/sempre/FreebaseInfo.java
 src/edu/stanford/nlp/sempre/StringCacheServer.java
+src/edu/stanford/nlp/sempre/StringCacheUtils.java
 src/edu/stanford/nlp/sempre/Json.java
 src/edu/stanford/nlp/sempre/Stemmer.java
 src/edu/stanford/nlp/sempre/StringCache.java

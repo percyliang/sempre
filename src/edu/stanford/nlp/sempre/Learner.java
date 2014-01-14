@@ -40,12 +40,6 @@ public class Learner {
     // DELETE?
     @Option(gloss = "Use binary logistic regression model")
     public boolean binaryLogistic = false;
-    @Option(gloss = "Whether to use l2 reg on weights")
-    public boolean l2Reg = false;
-    @Option(gloss = "L2 reg coefficient") public double l2RegCoefficient = 0;
-    @Option(gloss = "Whether to use l1 reg on weights")
-    public boolean l1Reg = false;
-    @Option(gloss = "L1 reg coefficient") public double l1RegCoefficient = 0;
     @Option(gloss = "Only update weights when beam has at least one correct prediction.")
     public boolean binaryLogisticThrottledUpdates = false;
   }
@@ -155,7 +149,6 @@ public class Learner {
 
   // How much reward do we get?
   private double reward(Value targetValue, Value predValue) {
-    //LogInfo.logs("REWARD %s %s", targetValue, predValue);
     if (targetValue != null) {
       if(opts.partialReward)
         return Math.log(targetValue.getCompatibility(predValue));
@@ -310,10 +303,6 @@ public class Learner {
     double sum = 0;
     for (double v : counts.values()) sum += v * v;
     LogInfo.logs("L2 norm: %s", Math.sqrt(sum));
-    if (opts.l2Reg)
-      l2Reg(counts);
-    if(opts.l1Reg)
-      l1Reg(counts);
     params.update(counts);
     counts.clear();
     LogInfo.end_track();
@@ -387,7 +376,7 @@ public class Learner {
     eventsOut.println(Joiner.on('\t').join(fields));
     eventsOut.flush();
   }
-
+/*
   private void l2Reg(Map<String, Double> counts) {
     Set<String> features = new HashSet<String>(params.weights.keySet());
     features.addAll(counts.keySet());
@@ -402,5 +391,5 @@ public class Learner {
     for (String feature : features) {
       MapUtils.incr(counts, feature, opts.l1RegCoefficient * - Math.signum(params.getWeight(feature)));
     }
-  }
+  }*/
 }

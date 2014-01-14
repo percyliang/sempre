@@ -23,7 +23,7 @@ To compile the system, run:
 
 To run the system, run:
 
-    java -cp classes:lib/* edu.stanford.nlp.sempre.Main -executor JavaExecutor -interactive
+    java -Xmx3g -cp classes:lib/* edu.stanford.nlp.sempre.Main -executor JavaExecutor -interactive
 
 This will put you in an interactive prompt where you can develop a system and
 parse utterances into tiny Java programs.  Note: you might find it convenient
@@ -390,7 +390,7 @@ We can count the number of cities (should return 3):
 
 We can also get the city with the largest area:
 
-    (execute (argmax 1 1 (fb:type.object.type fb:location.citytown) !fb:location.location.area))
+    (execute (argmax 1 1 (fb:type.object.type fb:location.citytown) fb:location.location.area))
 
 Now let us take a closer look at what is going on with these logical forms
 under the hood.  We are using a logical language called lambda-DCS.
@@ -452,19 +452,19 @@ For an example of a more complex grammar, look at `data/emnlp2013.grammar`.
 
 1. Convert the following natural language utterances into lambda-DCS logical forms:
 
-      city with the largest area
-      states bordering Oregon and Washington
-      top 5 cities by area
-      countries whose capitals have area at least 500 squared kilometers
-      second tallest mountain in Europe
-      country with the most number of rivers
+    city with the largest area
+    states bordering Oregon and Washington
+    top 5 cities by area
+    countries whose capitals have area at least 500 squared kilometers
+    second tallest mountain in Europe
+    country with the most number of rivers
 
 You should familiarize yourself with the Freebase schema to see which
 predicates to use.
 
 Execute these logical forms on the `geofreebase` subset to verify your answers.
 
-2. Write a grammar that can parse each of the above utterances into a set of
-candidates containing the true logical form you annotated above.  Train a model
-(remember to add features) so that the correct logical forms appear at the top
-of the candidate list.
+2. Write a grammar that can parse the above utterances into a set of candidates
+containing the true logical form you annotated above.  Train a model (remember
+to add features) so that the correct logical forms appear at the top of the
+candidate list.

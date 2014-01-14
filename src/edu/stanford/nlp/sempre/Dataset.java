@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Lists;
+
 import fig.basic.*;
 import fig.exec.Execution;
 import fig.prob.SampleUtils;
@@ -117,12 +118,33 @@ public class Dataset {
         allExamples.put(groupInfo.group, examples = new ArrayList<Example>());
       readHelper(groupInfo.examples, maxExamples, examples, groupInfo.path);
     }
-
     splitDevFromTrain();
     collectStats();
 
     LogInfo.end_track();
   }
+  
+  private void splitDevFromTrain() {
+    // Split original training examples randomly into train and dev.
+    List<Example> origTrainExamples = allExamples.get("train");
+    if (origTrainExamples != null) {
+      int split1 = (int) (opts.trainFrac * origTrainExamples.size());
+      int split2 = (int) ((1 - opts.devFrac) * origTrainExamples.size());
+      int[] perm = SampleUtils.samplePermutation(opts.splitRandom, origTrainExamples.size());
+
+      List<Example> trainExamples = new ArrayList<Example>();
+      allExamples.put("train", trainExamples);
+      List<Example> devExamples = allExamples.get("dev");
+      if (devExamples == null)
+        allExamples.put("dev", devExamples = new ArrayList<Example>());
+      for (int i = 0; i < split1; i++)
+        trainExamples.add(origTrainExamples.get(perm[i]));
+      for (int i = split2; i < origTrainExamples.size(); i++)
+        devExamples.add(origTrainExamples.get(perm[i]));
+    }
+  }
+  
+  
 
   private void readHelper(List<Example> incoming,
                           int maxExamples,
@@ -152,26 +174,6 @@ public class Dataset {
       numTokensFig.add(ex.numTokens());
       for (String token : ex.getTokens()) tokenTypes.add(token);
     }
-  }
-
-  private void splitDevFromTrain() {
-    // Split original training examples randomly into train and dev.
-    List<Example> origTrainExamples = allExamples.get("train");
-    if (origTrainExamples != null) {
-      int split1 = (int) (opts.trainFrac * origTrainExamples.size());
-      int split2 = (int) ((1 - opts.devFrac) * origTrainExamples.size());
-      int[] perm = SampleUtils.samplePermutation(opts.splitRandom, origTrainExamples.size());
-
-      List<Example> trainExamples = new ArrayList<Example>();
-      allExamples.put("train", trainExamples);
-      List<Example> devExamples = allExamples.get("dev");
-      if (devExamples == null)
-        allExamples.put("dev", devExamples = new ArrayList<Example>());
-      for (int i = 0; i < split1; i++)
-        trainExamples.add(origTrainExamples.get(perm[i]));
-      for (int i = split2; i < origTrainExamples.size(); i++)
-        devExamples.add(origTrainExamples.get(perm[i]));
-    }    
   }
 
   private void collectStats() {
@@ -204,10 +206,7 @@ public class Dataset {
         allExamples.put(group, examples = new ArrayList<Example>());
       readLispTreeHelper(path, maxExamples, examples);
     }
-
     splitDevFromTrain();
-    collectStats();
-
     LogInfo.end_track();
   }
 

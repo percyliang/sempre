@@ -24,7 +24,7 @@ public class FbFormulasInfo {
     if (fbFormulaInfo == null) fbFormulaInfo = new FbFormulasInfo();
     return fbFormulaInfo;
   }
-  
+
   private static Set<Formula> binaryFormulasTouched = new HashSet<Formula>(); //all binary formulas touched during parsing in join and bridge
 
   private FreebaseInfo freebaseInfo=null;
@@ -34,6 +34,7 @@ public class FbFormulasInfo {
   private Map<String, Set<Formula>> atomicExtype2ToBinaryMap = new HashMap<String, Set<Formula>>(); //contains map to all atomic properties
   private Map<String, Set<Formula>> extype2ToNonCvtBinaryMap = new HashMap<String, Set<Formula>>(); //contains map to all binaries for which extype 1 is not a CVT
   private Map<Formula, Set<BinaryFormulaInfo>> cvtExpansionsMap = new HashMap<Formula, Set<BinaryFormulaInfo>>();
+  private Map<String,Set<Formula>> cvtTypeToBinaries = new HashMap<String,Set<Formula>>();
 
 
   private FbFormulasInfo() {
@@ -47,16 +48,16 @@ public class FbFormulasInfo {
       throw new RuntimeException(e);
     } 
   }
-  
+
   public static void touchBinaryFormula(Formula binary) {
     binaryFormulasTouched.add(binary);
   }
-  
+
   public static int numOfTouchedBinaries() {
     return binaryFormulasTouched.size();
   }
-  
-  
+
+
 
   /**
    * Map that given a type provides all Freebase predicates that have that type
@@ -87,7 +88,7 @@ public class FbFormulasInfo {
                 info.expectedType2, info.expectedType1, info.unitId, info.unitDesc, info.descriptions, info.popularity));
       }
     }
-    LogInfo.logs("Adding reverse formulas: " + entriesToAdd.size());
+    LogInfo.log("Adding reverse formulas: " + entriesToAdd.size());
     for (BinaryFormulaInfo e : entriesToAdd) {
       binaryFormulaInfoMap.put(e.formula, e);
     }
@@ -104,15 +105,15 @@ public class FbFormulasInfo {
   private void loadFormulaInfo() throws NumberFormatException, IOException {
 
     LogInfo.begin_track("Loading formula info...");
-    LogInfo.logs("Adding schema properties");
+    LogInfo.log("Adding schema properties");
     binaryFormulaInfoMap = freebaseInfo.createBinaryFormulaInfoMap();
     unaryFormulaInfoMap = freebaseInfo.createUnaryFormulaInfoMap();
-    LogInfo.logs("Current number of binary formulas: " + binaryFormulaInfoMap.size());
-    LogInfo.logs("Current number of unary formulas: " + unaryFormulaInfoMap.size());
+    LogInfo.log("Current number of binary formulas: " + binaryFormulaInfoMap.size());
+    LogInfo.log("Current number of unary formulas: " + unaryFormulaInfoMap.size());
 
-    LogInfo.logs("Compuing reverse for schema formulas");
+    LogInfo.log("Compuing reverse for schema formulas");
     computeReverseFormulaInfo();
-    LogInfo.logs("Current number of binary formulas: " + binaryFormulaInfoMap.size());
+    LogInfo.log("Current number of binary formulas: " + binaryFormulaInfoMap.size());
     for (BinaryFormulaInfo info : binaryFormulaInfoMap.values()) {
       MapUtils.addToSet(atomicExtype2ToBinaryMap, info.expectedType2, info.formula);
       if(!isCvt(info.expectedType1)) {
@@ -120,9 +121,9 @@ public class FbFormulasInfo {
       }
     }
 
-    LogInfo.logs("Generate formulas through CVTs");
+    LogInfo.log("Generate formulas through CVTs");
     generateCvtFormulas(); //generate formulas for CVTs
-    LogInfo.logs("Current number of binary formulas: " + binaryFormulaInfoMap.size());
+    LogInfo.log("Current number of binary formulas: " + binaryFormulaInfoMap.size());
     LogInfo.end_track();
   }
 
@@ -132,7 +133,7 @@ public class FbFormulasInfo {
    * @param formula
    */
   private void addMappingFromType2ToFormula(String type2, Formula formula) {
-      MapUtils.addToSet(extype2ToNonCvtBinaryMap, type2, formula);        
+    MapUtils.addToSet(extype2ToNonCvtBinaryMap, type2, formula);        
   }
 
   private void generateCvtFormulas() throws FileNotFoundException {
@@ -141,6 +142,7 @@ public class FbFormulasInfo {
     for (BinaryFormulaInfo innerInfo : binaryFormulaInfoMap.values()) {
 
       if (isCvt(innerInfo.expectedType1)) { //if expected type 1 is a CVT
+        MapUtils.addToSet(cvtTypeToBinaries, innerInfo.expectedType1, innerInfo.formula);
 
         Set<Formula> outers = atomicExtype2ToBinaryMap.get(innerInfo.expectedType1); //find those whose expected type 2 is that CVT
         for (Formula outer : outers) {
@@ -219,7 +221,7 @@ public class FbFormulasInfo {
     String id = formula.value.id;
     return new ValueFormula<NameValue>(
         new NameValue(FreebaseInfo.isReverseProperty(id) ?
-                      id.substring(1) : "!" + id));
+            id.substring(1) : "!" + id));
   }
 
   /** supports chains only */
@@ -263,15 +265,13 @@ public class FbFormulasInfo {
       return FreebaseInfo.isReverseProperty(tree.child(2).child(0).value);
   }
 
-  /** assume we checked there is an opposite formula */
+  /** assumes we checked there is an opposite formula */
   public Formula equivalentFormula(String formula) {
-
     LispTree tree = LispTree.proto.parseFromString(formula);
     return equivalentFormula(tree);
   }
 
   public Formula equivalentFormula(Formula formula) {
-
     LispTree tree = formula.toLispTree();
     return equivalentFormula(tree);
   }
@@ -314,8 +314,36 @@ public class FbFormulasInfo {
     return false;
   }
 
+  private boolean isOpposite(Formula formula1, Formula formula2) {
+
+    if(isReversed(formula1) && !isReversed(formula2)) {
+      String formula1Desc = formula1.toString().substring(1);
+      return formula1Desc.equals(formula2.toString());
+    }
+    if(isReversed(formula2) && !isReversed(formula1)) {
+      String formula2Desc = formula2.toString().substring(1);
+      return formula2Desc.equals(formula1.toString());
+    }
+    if(hasOpposite(formula1)) {
+      Formula equivalentFormula = equivalentFormula(formula1);
+      if(isReversed(equivalentFormula)) {
+        String equivalentFormaulDesc = equivalentFormula.toString().substring(1);
+        return equivalentFormaulDesc.equals(formula2.toString());
+      }
+      else {
+        String formula2Desc = formula2.toString().substring(1);
+        return formula2Desc.equals(equivalentFormula.toString());
+      }
+    }
+    return false;
+  }
+
   public Set<String> getIncludedTypesInclusive(String subtype) {
     return freebaseInfo.getIncludedTypesInclusive(subtype);
+  }
+
+  public Set<String> getSubtypesExclusive(String supertype) {
+    return freebaseInfo.getSubTypesExclusive(supertype);
   }
 
   public Set<Formula> getBinariesForType2(String type) {
@@ -332,6 +360,32 @@ public class FbFormulasInfo {
 
   public Set<BinaryFormulaInfo> getCvtExpansions(BinaryFormulaInfo info) {
     return MapUtils.getSet(cvtExpansionsMap, info.formula);
+  }
+
+  public Set<Formula> expandCvts(String cvt) {
+    return MapUtils.getSet(cvtTypeToBinaries, cvt);
+  }
+
+  public List<Formula> getInjectableBinaries(Formula formula) {
+    List<Formula> res = new ArrayList<Formula>();
+    if(!(formula instanceof LambdaFormula)) return res;
+    LambdaFormula lambdaFormula = (LambdaFormula) formula;
+    Formula first = ((JoinFormula) lambdaFormula.body).relation;
+    Formula second = ((JoinFormula) ((JoinFormula) lambdaFormula.body).child).relation;
+    Set<Formula> binaryFormulas = expandCvts(getBinaryInfo(first).expectedType2);
+
+    //Set<BinaryFormulaInfo> binaries = getCvtExpansions(getBinaryInfo(first));
+    for(Formula binaryFormula: binaryFormulas) {
+      //BinaryFormulaInfo b = getBinaryInfo(binaryFormula);
+      //LambdaFormula lFormula = (LambdaFormula) b.formula;
+      //Formula injectedFormula = ((JoinFormula) ((JoinFormula) lFormula.body).child).relation;
+      
+      if(!second.equals(binaryFormula) &&
+          !isOpposite(first, binaryFormula)) {
+        res.add(binaryFormula);
+      }
+    }
+    return res;
   }
 
   public Map<Formula, BinaryFormulaInfo> getFormulaInfoMap() {
@@ -398,7 +452,7 @@ public class FbFormulasInfo {
         return false;
       return true;
     }
-    
+
     public SemType getSemType() {
       return new FuncSemType(new EntitySemType(expectedType2), new EntitySemType(expectedType1));
     }
@@ -429,6 +483,13 @@ public class FbFormulasInfo {
 
     public String toString() {
       return formula + "\t" + popularity + "\t" + Joiner.on("###").join(descriptions);
+    }
+
+    public String getRepresentativeDescrption() {
+      if(descriptions.get(0).contains("/") &&
+          descriptions.size()>1)
+        return descriptions.get(1);
+      return descriptions.get(0);
     }
   }
 }

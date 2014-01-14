@@ -50,7 +50,7 @@ public class Evaluation {
   public void add(String name, StatFig fig) {
     getFigHard(name).add(fig);
   }
-  public void add(Evaluation eval) {
+  public synchronized void add(Evaluation eval) {
     for (int i = 0; i < eval.names.size(); i++)
       add(eval.names.get(i), eval.values.get(i));
   }
@@ -104,7 +104,7 @@ public class Evaluation {
   public void logStats(String prefix) {
     LogInfo.begin_track_printAll("Evaluation stats for %s", prefix);
     for (int i = 0; i < names.size(); i++)
-      LogInfo.logs(names.get(i) + " = " + values.get(i));
+      LogInfo.log(names.get(i) + " = " + values.get(i));
     LogInfo.end_track();
   }
 
