@@ -86,9 +86,6 @@ def defaultOpts
        'edu.stanford.nlp.sempre.fbalignment.lexicons.WordNetExpansionLexicon',
        'edu.stanford.nlp.sempre.fbalignment.lexicons.GraphPropLexicon'),
 
-    # Features
-    o('FeatureExtractor.featureDomains', *$defaultFeatureDomains),
-
     letDefault(:executor, 1),
     sel(:executor,
       l(),
@@ -191,6 +188,9 @@ def free917
     o('Grammar.inPaths', 'data/emnlp2013.grammar'),
     o('Grammar.tags', 'free917', 'bridge', 'pivot'),
 
+    # Features
+    o('FeatureExtractor.featureDomains', *$defaultFeatureDomains),
+
     emnlp2013AblationExperiments('free917'),
 
     l(
@@ -223,6 +223,9 @@ def webquestions
     o('Grammar.tags', 'webquestions', 'bridge', 'pivot'),
 
     o('BeamParser.beamSize', 200),
+
+    # Features
+    o('FeatureExtractor.featureDomains', *($defaultFeatureDomains+['lexAlign'])),
 
     emnlp2013AblationExperiments('webquestions'),
 

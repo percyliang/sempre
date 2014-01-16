@@ -22,8 +22,8 @@ lib/data/webquestions/dataset_11/webquestions.examples.test.json
 ############################################################
 # Free917 [Cai & Yates, 2013]
 
-#data/free917.train.examples.canonicalized.json
-#data/free917.test.examples.canonicalized.json
+data/free917.train.examples.canonicalized.json
+data/free917.test.examples.canonicalized.json
 
 ############################################################
 # Lucene
