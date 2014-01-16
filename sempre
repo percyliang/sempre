@@ -185,7 +185,7 @@ def free917
     nil),
 
     # Grammar
-    o('Grammar.inPaths', 'data/emnlp2013.grammar'),
+    o('Grammar.inPaths', 'data/emnlp2013.inexactent.grammar'),
     o('Grammar.tags', 'free917', 'bridge', 'pivot'),
 
     # Features
@@ -219,7 +219,7 @@ def webquestions
     nil),
 
     # Grammar
-    o('Grammar.inPaths', 'data/emnlp2013.grammar'),
+    o('Grammar.inPaths', 'data/emnlp2013.inexactent.grammar'),
     o('Grammar.tags', 'webquestions', 'bridge', 'pivot'),
 
     o('BeamParser.beamSize', 200),
@@ -249,7 +249,7 @@ def jayant
     nil),
 
     # Grammar
-    o('Grammar.inPaths', 'data/emnlp2013.grammar'),
+    o('Grammar.inPaths', 'data/emnlp2013.inexactent.grammar'),
     o('Grammar.tags', 'webquestions', 'bridge', 'pivot'),
 
     o('BeamParser.beamSize', 500), 
