@@ -364,6 +364,12 @@ public class LanguageInfo implements MemUsage.Instrumented {
       res.add(new IntPair(start,posTags.size()));
     return res;
   }
+  
+  public Set<IntPair> getNamedEntitiesAndProperNouns() {
+    Set<IntPair> res = getNamedEntitySpans();
+    res.addAll(getProperNounSpans());
+    return res;
+  }
 
   public Map<String,IntPair> getLemmaSpans() {
     if(lemmaSpans==null) {
@@ -445,6 +451,10 @@ public class LanguageInfo implements MemUsage.Instrumented {
     return MemUsage.objectSize(MemUsage.pointerSize*2)+MemUsage.getBytes(tokens)+MemUsage.getBytes(lemmaTokens)
         +MemUsage.getBytes(posTags)+MemUsage.getBytes(nerTags)+MemUsage.getBytes(nerValues)
         +MemUsage.getBytes(lemmaSpans);
+  }
+  
+  public boolean isNumberAndDate(int index) {
+    return posTags.get(index).equals("CD") && nerTags.get(index).equals("DATE");
   }
 
   public static class WordInfo {

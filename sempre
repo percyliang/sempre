@@ -160,8 +160,8 @@ def emnlp2013AblationExperiments(tag)
       l(), # (0) Just run things normally
       selo(nil, 'BeamParser.beamSize', 10, 50, 200), # (1) Vary beam size
       selo(nil, 'Dataset.trainFrac', 0.1, 0.2, 0.4, 0.6), # (2) Vary training set size
-      sel(nil, # (3) Structural: only do pivot or only do bridge
-        o('Grammar.tags', l(tag, 'pivot')),
+      sel(nil, # (3) Structural: only do join or only do bridge
+        o('Grammar.tags', l(tag, 'join')),
         o('Grammar.tags', l(tag, 'bridge')),
       nil),
       sel(nil, # (4) Features
@@ -186,7 +186,7 @@ def free917
 
     # Grammar
     o('Grammar.inPaths', 'data/emnlp2013.inexactent.grammar'),
-    o('Grammar.tags', 'free917', 'bridge', 'pivot'),
+    o('Grammar.tags', 'free917', 'bridge', 'join'),
 
     # Features
     o('FeatureExtractor.featureDomains', *$defaultFeatureDomains),
@@ -220,7 +220,7 @@ def webquestions
 
     # Grammar
     o('Grammar.inPaths', 'data/emnlp2013.inexactent.grammar'),
-    o('Grammar.tags', 'webquestions', 'bridge', 'pivot'),
+    o('Grammar.tags', 'webquestions', 'bridge', 'join'),
 
     o('BeamParser.beamSize', 200),
 
@@ -250,7 +250,7 @@ def jayant
 
     # Grammar
     o('Grammar.inPaths', 'data/emnlp2013.inexactent.grammar'),
-    o('Grammar.tags', 'webquestions', 'bridge', 'pivot'),
+    o('Grammar.tags', 'webquestions', 'bridge', 'join'),
 
     o('BeamParser.beamSize', 500), 
 
