@@ -452,14 +452,19 @@ For an example of a more complex grammar, look at `data/emnlp2013.grammar`.
 
 1. Convert the following natural language utterances into lambda-DCS logical forms:
 
-    city with the largest area
-    states bordering Oregon and Washington
-    top 5 cities by area
-    countries whose capitals have area at least 500 squared kilometers
-    second tallest mountain in Europe
-    country with the most number of rivers
+    `city with the largest area`
 
-You should familiarize yourself with the Freebase schema to see which
+    `states bordering Oregon and Washington`
+
+    `top 5 cities by area`
+
+    `countries whose capitals have area at least 500 squared kilometers`
+
+    `second tallest mountain in Europe`
+
+    `country with the most number of rivers`
+
+You should familiarize yourself with the [Freebase schema](http://www.freebase.com/schema) to see which
 predicates to use.
 
 Execute these logical forms on the `geofreebase` subset to verify your answers.
@@ -468,3 +473,34 @@ Execute these logical forms on the `geofreebase` subset to verify your answers.
 containing the true logical form you annotated above.  Train a model (remember
 to add features) so that the correct logical forms appear at the top of the
 candidate list.
+
+## Background reading
+
+So far this tutorial has provided a very operational view of semantic parsing
+based on SEMPRE.  The following references provide a much broader look at
+the area of semantic parsing and the linguistic and statistical foundations.
+
+* **Natural language semantics**: The question of how to represent natural
+  language utterances using logical forms has been well-studied in linguistics
+  under formal (or compositional) semantics.  Start with the
+  [CS224U course notes from Stanford](http://www.stanford.edu/class/cs224u/readings/cl-semantics-new.pdf)
+  and
+  [an introduction by Lappin](http://web.mit.edu/cilene/www/sema/aula1/15.pdf).
+  You should take away from this an appreciation for the various phenomena in
+  natural language.
+
+* **Log-linear models**: Our semantic parser is based on log-linear models,
+which is a very important tool in machine learning and statistical natural
+language processing.  Start with [a tutorial by Michael
+Collins](http://www.cs.columbia.edu/~mcollins/loglinear.pdf), which is geared towards applications
+in NLP.
+
+* **Semantic parsing**: finally, putting the linguistic insights from formal semantics
+and the computational and statistical tools from machine learning, we get
+semantic parsing.  There has been a lot of work on semantic parsing.
+Check out the [ACL 2013 tutorial by Yoav Artzi and Luke
+Zettlemoyer](http://yoavartzi.com/pub/afz-tutorial.acl.2013.pdf),
+which focuses on how to build semantic parsers using Combinatory Categorical Grammar (CCG).
+Our [EMNLP 2013
+paper](http://cs.stanford.edu/~pliang/papers/freebase-emnlp2013.pdf) is the
+first paper based on SEMPRE.
