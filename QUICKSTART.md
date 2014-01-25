@@ -8,6 +8,9 @@ These commands will download necessary resources:
     ./download-dependencies emnlp2013
     ./download-dependencies fullfreebase_vdb
 
+See `README.md` for other requirements SEMPRE depends on
+(JDK 7 and Ruby).
+
 # Install the Database
 
 Freebase is stored in a database called virtuoso. These commands will
@@ -15,6 +18,9 @@ install a copy of it. Make sure to execute the `git checkout tags/v7.0.0`
 to ensure you have a compatible version of virtuoso (instead of the most
 recent version).
 
+    # For Ubuntu, make sure these dependencies are installed
+    sudo apt-get install -y automake gawk gperf libtool bison flex libssl-dev
+    # Clone into sempre folder
     git clone https://github.com/openlink/virtuoso-opensource
     cd virtuoso-opensource
     git checkout tags/v7.0.0
@@ -31,6 +37,8 @@ This will start the virtuoso database on `localhost:3093` and import freebase:
     ./scripts/virtuoso start lib/freebase/93.exec/vdb 3093
 
 # Running the System on New Questions
+
+First make sure you have compiled sempre by running `make`.
 
 Create a file called `testinput` that has your test questions in this format:
 
@@ -71,3 +79,6 @@ a little over three days to complete.
              @sparqlserver=localhost:3093 \
              @domain=webquestions \
              @cacheserver=local
+
+Alternatively, you can sanity check the system on the Free917 dataset by
+setting `@domain=free917`. This should take a few hours to complete.
