@@ -233,6 +233,7 @@ def webquestions
     cachePaths('LexiconFn.cache', 'SparqlExecutor.cache'),
 
     o('EntityLexicon.inexactMatchIndex','lib/lucene/4.4/inexact/'),
+    o('EntityLexicon.maxEntries',50),
 
     # Learner reward
     o('Learner.partialReward', true),
@@ -278,7 +279,7 @@ def train
     header,
     'edu.stanford.nlp.sempre.Main',
     defaultOpts, selectDomain,
-    o('Learner.maxTrainIters', 6),
+    o('Learner.maxTrainIters', 4),
   nil)
 end
 

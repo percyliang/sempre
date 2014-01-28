@@ -18,6 +18,7 @@ Makefile
 README.md
 LICENSE.txt
 TUTORIAL.md
+QUICKSTART.md
 testng.xml
 download-dependencies
 

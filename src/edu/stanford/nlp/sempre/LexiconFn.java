@@ -124,8 +124,6 @@ public class LexiconFn extends SemanticFn {
       features.addWithBias("basicStats", mode + ".popularity", Math.log(entry.getPopularity() + 1));
       //features.addWithBias(mode + ".distance", entry.getDistance());
     }
-    //if (FeatureExtractor.opts.features.contains("weikum")) 
-    //features.addWithBias(mode + ".distance", entry.getDistance());
 
     if (mode.equals("entity")) {
       // Entities

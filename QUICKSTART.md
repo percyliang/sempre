@@ -53,8 +53,8 @@ Then run this command to test the default trained system on those two examples:
              @cacheserver=local \
              -Learner.maxTrainIters 0 \
              -Dataset.inPaths test:testinput \
-             -Builder.inParamsPath lib/models/2174.exec/params \
-             -Grammar.inPaths lib/models/2174.exec/grammar \
+             -Builder.inParamsPath lib/models/15.exec/params \
+             -Grammar.inPaths lib/models/15.exec/grammar \
              -Dataset.readLispTreeFormat true
 
 This run should take about a minute or two.  This will save the output to
@@ -67,7 +67,7 @@ Alternatively, you can launch an interactive shell to test out the system:
              @domain=webquestions \
              @sparqlserver=localhost:3093 \
              @cacheserver=local \
-             @load=2174 \
+             @load=15\
              @executeTopOnly=0
 
 # Training the System
