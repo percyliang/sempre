@@ -23,7 +23,7 @@ To compile the system, run:
 
 To run the system, run:
 
-    java -cp classes:lib/* edu.stanford.nlp.sempre.Main -executor JavaExecutor -interactive
+    java -Xmx3g -cp classes:lib/* edu.stanford.nlp.sempre.Main -executor JavaExecutor -interactive
 
 This will put you in an interactive prompt where you can develop a system and
 parse utterances into tiny Java programs.  Note: you might find it convenient
@@ -55,7 +55,7 @@ these logical forms automatically from natural language.
 We can execute these logical forms by typing into the interactive prompt:
 
     (execute (call + (number 3) (number 4)))
-    
+
 This should print out `(number 7)`, which we refer to as the *denotation* of
 the logical form.  Try to execute the other logical forms and see what you get.
 
@@ -81,7 +81,7 @@ here, there is no difference.
 This concludes the section on logical forms and denotations.  We have presented
 one system of logical forms, which are executed using the `JavaExecutor`.  The
 system is general in that it supports other types of logical forms, for
-example, which encode SPARQL database queries.
+example, those which encode SPARQL database queries.
 
 ## Parsing
 
@@ -266,7 +266,7 @@ two possibilities:
 Now type in
 
     three and four
-    
+
 There should be two derivations each with probability 0.5:
 
     (derivation (formula (((lambda y (lambda x (call + (var x) (var y)))) (number 4.0)) (number 3.0))) (value (number 7.0)) (type fb:type.number)) [score=0, prob=0.500]
@@ -312,7 +312,7 @@ forms to denotations by executing Java code.  A major application of semantic
 parsing is where the logical forms are database queries.  In this section, we
 will look at querying graph databases.
 
-A graph database (e.g., Freebase) stores information about entities 
+A graph database (e.g., Freebase) stores information about entities
 and their properties; concretely, it is just a set of triples $(s, p, o)$,
 where $s$ and $o$ are entities and $p$ is a property.  For example:
 
@@ -325,12 +325,7 @@ See `data/tutorial.ttl` for an example of a tiny subset of the Freebase graph
 pertaining to geography about California.
 
 We will use Virtuoso to provide the backend for querying this data.  Make sure
-you have Virtuoso downloaded and compiled:
-
-    git clone https://github.com/openlink/virtuoso-opensource
-    # For Ubuntu, make sure these dependencies are installed
-    sudo apt-get install -y automake gawk gperf libtool bison flex libssl-dev
-    cd virtuoso-opensource && ./autogen.sh && ./configure --prefix=$PWD/install && make && make install
+you have Virtuoso downloaded and compiled (see QUICKSTART.md for instructions).
 
 Start the server:
 
@@ -342,12 +337,12 @@ Add the small graph to the database:
 
 Aside: if you want to work with a larger database:
 
-    ./download-dependencies geofreebase_ttl    # Subset of Freebase for geography in .ttl format 
+    ./download-dependencies geofreebase_ttl    # Subset of Freebase for geography in .ttl format
     ./download-dependencies geofreebase_vdb    # Virtuoso index for subset of Freebase for geography
     ./download-dependencies fullfreebase_ttl   # All of Freebase in .ttl format (BIG FILE)
     ./download-dependencies fullfreebase_vdb   # Virtuoso index for all of Freebase (BIG FILE)
 
-Then, just replace `tutorial.vdb` with the appropriate `lib/fb_data/??.exec/vdb` path.
+Then, just replace `tutorial.vdb` with the appropriate `lib/freebase/??.exec/vdb` path.
 
 Now we are ready to make some queries.  Start up the interactive prompt, now with the `SparqlExecutor`:
 
@@ -361,7 +356,7 @@ semantics.  The simplest formula is a single entity:
     fb:en.california
 
 To execute this query, simply type the following into the interactive prompt:
-    
+
     (execute fb:en.california)
 
 This should return:
@@ -404,13 +399,13 @@ Here are the following types of logical forms:
    a binary $b$ and $y$ is in the set denoted by unary $u$.
 1. Count `(count |u|)`: denotes the set containing the cardinality of the set denoted by `u`.
 1. Superlative `(argmax |rank| |count| |u| |b|)`: sort the elements of `z` by decreasing `b`
-   and return `count` elements starting at offset `rank` (0-based).
+   and return `count` elements starting at offset `rank` (1-based).
 1. Mu abstraction `(mark (var |v|) |u|)`: same as the unary |u| denoting
    entities |x|, with the exception that |x| must be equal to all occurrences
    of the variable |v| in |u|.
 2. Lambda abstraction `(lambda (var |v|) |u|)`: produces a binary (x,y) where
    `x` is in the set denoted by `u` and `y` is the value taken on by variable
-   `v`z.
+   `v`.
 
 See `SparqlExecutorTest.java` for examples.
 
@@ -452,19 +447,55 @@ For an example of a more complex grammar, look at `data/emnlp2013.grammar`.
 
 1. Convert the following natural language utterances into lambda-DCS logical forms:
 
-      city with the largest area
-      states bordering Oregon and Washington
-      top 5 cities by area
-      countries whose capitals have area at least 500 squared kilometers
-      second tallest mountain in Europe
-      country with the most number of rivers
+    `city with the largest area`
 
-You should familiarize yourself with the Freebase schema to see which
+    `states bordering Oregon and Washington`
+
+    `top 5 cities by area`
+
+    `countries whose capitals have area at least 500 squared kilometers`
+
+    `second tallest mountain in Europe`
+
+    `country with the most number of rivers`
+
+You should familiarize yourself with the [Freebase schema](http://www.freebase.com/schema) to see which
 predicates to use.
 
 Execute these logical forms on the `geofreebase` subset to verify your answers.
 
-2. Write a grammar that can parse each of the above utterances into a set of
-candidates containing the true logical form you annotated above.  Train a model
-(remember to add features) so that the correct logical forms appear at the top
-of the candidate list.
+2. Write a grammar that can parse the above utterances into a set of candidates
+containing the true logical form you annotated above.  Train a model (remember
+to add features) so that the correct logical forms appear at the top of the
+candidate list.
+
+## Background reading
+
+So far this tutorial has provided a very operational view of semantic parsing
+based on SEMPRE.  The following references provide a much broader look at
+the area of semantic parsing and the linguistic and statistical foundations.
+
+* **Natural language semantics**: The question of how to represent natural
+  language utterances using logical forms has been well-studied in linguistics
+  under formal (or compositional) semantics.  Start with the
+  [CS224U course notes from Stanford](http://www.stanford.edu/class/cs224u/readings/cl-semantics-new.pdf)
+  and
+  [an introduction by Lappin](http://web.mit.edu/cilene/www/sema/aula1/15.pdf).
+  You should take away from this an appreciation for the various phenomena in
+  natural language.
+
+* **Log-linear models**: Our semantic parser is based on log-linear models,
+which is a very important tool in machine learning and statistical natural
+language processing.  Start with [a tutorial by Michael
+Collins](http://www.cs.columbia.edu/~mcollins/loglinear.pdf), which is geared towards applications
+in NLP.
+
+* **Semantic parsing**: finally, putting the linguistic insights from formal semantics
+and the computational and statistical tools from machine learning, we get
+semantic parsing.  There has been a lot of work on semantic parsing.
+Check out the [ACL 2013 tutorial by Yoav Artzi and Luke
+Zettlemoyer](http://yoavartzi.com/pub/afz-tutorial.acl.2013.pdf),
+which focuses on how to build semantic parsers using Combinatory Categorical Grammar (CCG).
+Our [EMNLP 2013
+paper](http://cs.stanford.edu/~pliang/papers/freebase-emnlp2013.pdf) is the
+first paper based on SEMPRE.

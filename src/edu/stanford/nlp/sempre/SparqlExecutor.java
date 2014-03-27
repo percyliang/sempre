@@ -58,7 +58,7 @@ public class SparqlExecutor extends Executor {
     @Option(gloss = "Whether to include entity names (mostly for readability)")
     public boolean includeEntityNames = true;
 
-    @Option public int verbose = 0;
+    @Option public int verbose = 2;
   }
 
   public static Options opts = new Options();
@@ -178,9 +178,11 @@ public class SparqlExecutor extends Executor {
     // If not cached, then make the actual request.
     if (response == null) {
       // Note: begin_track without end_track
-      LogInfo.begin_track("SparqlExecutor.execute()");
-      if (formula != null) LogInfo.logs("%s", formula);
-      LogInfo.logs("%s", queryStr);
+      if (opts.verbose >= 1) {
+        LogInfo.begin_track("SparqlExecutor.execute()");
+        if (formula != null) LogInfo.logs("%s", formula);
+        LogInfo.logs("%s", queryStr);
+      }
 
       // Make actual request
       StopWatch watch = new StopWatch();
@@ -220,13 +222,16 @@ public class SparqlExecutor extends Executor {
 
   // Main entry point.
   public Response execute(Formula formula) {
+    return execute(formula, 0, opts.maxResults);
+  }
+  public synchronized Response execute(Formula formula, int offset, int maxResults) {
     String prefix = "exec-";
 
     Evaluation stats = new Evaluation();
     // Convert to SPARQL
     Converter converter;
     try {
-      converter = new Converter(formula);
+      converter = new Converter(formula, offset, maxResults);
     } catch (BadFormulaException e) {
       stats.add(prefix + "error", true);
       return new Response(ErrorValue.badFormula(e), stats);
@@ -244,10 +249,10 @@ public class SparqlExecutor extends Executor {
       queryStats.timeFig.add(serverResponse.timeMs);
       if (serverResponse.error != null) {
         MapUtils.incr(queryStats.errors, serverResponse.error.type, 1);
-        if (serverResponse.beginTrack)
+        if (serverResponse.beginTrack && opts.verbose >= 1)
           LogInfo.logs("Error: %s", serverResponse.error);
       }
-      if (serverResponse.beginTrack) {
+      if (serverResponse.beginTrack && opts.verbose >= 1) {
         LogInfo.logs("time: %s", queryStats.timeFig);
         LogInfo.logs("errors: %s", queryStats.errors);
       }
@@ -255,7 +260,7 @@ public class SparqlExecutor extends Executor {
 
     // If error, then return out
     if (serverResponse.error != null) {
-      if (serverResponse.beginTrack) LogInfo.end_track();
+      if (serverResponse.beginTrack && opts.verbose >= 1) LogInfo.end_track();
       if (!serverResponse.cached)
         stats.add(prefix + "error", true);
       return new Response(serverResponse.error, stats);
@@ -269,7 +274,7 @@ public class SparqlExecutor extends Executor {
     if (results == null) return new Response(ErrorValue.badFormat, stats);
     List<Value> values = new ValuesExtractor(serverResponse.beginTrack, formula, converter).extract(results);
 
-    if (serverResponse.beginTrack) LogInfo.end_track();
+    if (serverResponse.beginTrack && opts.verbose >= 1) LogInfo.end_track();
 
     return new Response(new ListValue(values), stats);
   }
@@ -282,12 +287,14 @@ public class SparqlExecutor extends Executor {
     String queryStr;
     SparqlSelect query;  // Resulting SPARQL expression
 
-    public Converter(Formula rootFormula) throws BadFormulaException {
+    public Converter(Formula rootFormula, int offset, int maxResults) throws BadFormulaException {
       Ref<PrimitiveFormula> head = new Ref<PrimitiveFormula>();
       Map<VariableFormula, PrimitiveFormula> env = new LinkedHashMap<VariableFormula, PrimitiveFormula>();
       query = closeExistentialScope(convert(rootFormula, head, null, env), head, env, null, null);
-      if (query.limit == -1)  // If it is not set
-        query.limit = opts.maxResults;
+      if (query.offset == 0) // If not set
+        query.offset = offset;
+      if (query.limit == -1)  // If not set
+        query.limit = maxResults;
       queryStr = "PREFIX fb: <" + FreebaseInfo.freebaseNamespace + "> " + query;
     }
 
@@ -609,14 +616,14 @@ public class SparqlExecutor extends Executor {
     // |results| is (result (binding (uri ...)) ...) or (result (binding (literal ...)) ...)
     List<Value> extract(NodeList results) {
       // For each result (row in a table)...
-      if (beginTrack) LogInfo.begin_track("%d results", results.getLength());
+      if (beginTrack && opts.verbose >= 1) LogInfo.begin_track("%d results", results.getLength());
       List<Value> values = new ArrayList<Value>();
       for (int i = 0; i < results.getLength(); i++) {
         Value value = nodeToValue(results.item(i));
         values.add(value);
-        if (beginTrack) LogInfo.logs("%s", value);
+        if (beginTrack && opts.verbose >= 2) LogInfo.logs("%s", value);
       }
-      if (beginTrack) LogInfo.end_track();
+      if (beginTrack && opts.verbose >= 1) LogInfo.end_track();
       return values;
     }
 
@@ -729,7 +736,7 @@ public class SparqlExecutor extends Executor {
     }
 
     if (mainOpts.sparql != null)
-      LogInfo.logs("%s", executor.makeRequest(mainOpts.sparql, opts.endpointUrl));
+      LogInfo.logs("%s", executor.makeRequest(mainOpts.sparql, opts.endpointUrl).xml);
 
     LogInfo.end_track();
   }

@@ -11,26 +11,30 @@ import edu.stanford.nlp.ling.CoreAnnotations.*;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
+//import edu.stanford.nlp.sempre.transformations.TransUtils;
+import fig.basic.IntPair;
+import fig.basic.LispTree;
 import fig.basic.Option;
+import fig.basic.MemUsage;
 
 import java.util.*;
 
 /**
-  * Interface with Stanford CoreNLP to do basic things like POS tagging and NER.
-  * @author akchou
-  */
+ * Interface with Stanford CoreNLP to do basic things like POS tagging and NER.
+ * @author akchou
+ */
 @JsonIgnoreProperties(ignoreUnknown=true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class LanguageInfo {
+public class LanguageInfo implements MemUsage.Instrumented {
   public static class Options {
     @Option(gloss="What CoreNLP annotators to run")
     public List<String> annotators = Lists.newArrayList("tokenize", "ssplit", "pos", "lemma", "ner");
 
     @Option(gloss="Whether to use CoreNLP annotators")
-      public boolean useAnnotators = true;
+    public boolean useAnnotators = true;
 
     @Option(gloss="Whether to be case sensitive")
-      public boolean caseSensitive = false;
+    public boolean caseSensitive = false;
   }
 
   public static Options opts = new Options();
@@ -50,20 +54,22 @@ public class LanguageInfo {
   @JsonProperty
   public final List<String> nerValues;  // NER values (contains times, dates, etc.)
 
+  private Map<String,IntPair> lemmaSpans;
+
   public LanguageInfo() {
     this(new ArrayList<String>(),
-         new ArrayList<String>(),
-         new ArrayList<String>(),
-         new ArrayList<String>(),
-         new ArrayList<String>());
+        new ArrayList<String>(),
+        new ArrayList<String>(),
+        new ArrayList<String>(),
+        new ArrayList<String>());
   }
 
   @JsonCreator
   public LanguageInfo(@JsonProperty("tokens") List<String> tokens,
-                      @JsonProperty("lemmaTokens") List<String> lemmaTokens,
-                      @JsonProperty("posTags") List<String> posTags,
-                      @JsonProperty("nerTags") List<String> nerTags,
-                      @JsonProperty("nerValues") List<String> nerValues) {
+      @JsonProperty("lemmaTokens") List<String> lemmaTokens,
+      @JsonProperty("posTags") List<String> posTags,
+      @JsonProperty("nerTags") List<String> nerTags,
+      @JsonProperty("nerValues") List<String> nerValues) {
     this.tokens = tokens;
     this.lemmaTokens = lemmaTokens;
     this.posTags = posTags;
@@ -74,9 +80,9 @@ public class LanguageInfo {
   // TODO: don't muck with the POS tag; instead have a separate flag for isContent which looks at posTag != "MD" && lemma != "be" && lemma != "have"
   // Need to update TextToTextMatcher
   private static final String[] AUX_VERB_ARR = new String[]{"is", "are", "was",
-      "were", "am", "be", "been", "will", "shall", "have", "has", "had",
-      "would", "could", "should", "do", "does", "did", "can", "may", "might",
-      "must", "seem"};
+    "were", "am", "be", "been", "will", "shall", "have", "has", "had",
+    "would", "could", "should", "do", "does", "did", "can", "may", "might",
+    "must", "seem"};
   private static final Set<String> AUX_VERBS = new HashSet<String>(Arrays.asList(AUX_VERB_ARR));
   private static final String AUX_VERB_TAG = "VBD-AUX";
 
@@ -119,13 +125,24 @@ public class LanguageInfo {
   public String posSeq(int start, int end) {
     return sliceSequence(posTags, start, end);
   }
+  
+  public String canonicalPosSeq(int start, int end) {
+    if (start >= end) throw new RuntimeException("Bad indices, start="+start+", end="+end);
+    if (end - start == 1) return LanguageUtils.getCanonicalPos(posTags.get(start));
+    StringBuilder out = new StringBuilder();
+    for (int i = start; i < end; i++) {
+      if (out.length() > 0) out.append(' ');
+      out.append(LanguageUtils.getCanonicalPos(posTags.get(i)));
+    }
+    return out.toString();
+  }
   public String nerSeq(int start, int end) {
     return sliceSequence(nerTags, start, end);
   }
 
   private static String sliceSequence(List<String> items,
-                                      int start,
-                                      int end) {
+      int start,
+      int end) {
     if (start >= end) throw new RuntimeException("Bad indices, start="+start+", end="+end);
     if (end - start == 1) return items.get(start);
     StringBuilder out = new StringBuilder();
@@ -169,8 +186,8 @@ public class LanguageInfo {
         }
         posTags.add(
             AUX_VERBS.contains(wordLower) ?
-            AUX_VERB_TAG :
-            token.get(PartOfSpeechAnnotation.class));
+                AUX_VERB_TAG :
+                  token.get(PartOfSpeechAnnotation.class));
         nerTags.add(token.get(NamedEntityTagAnnotation.class));
         lemmaTokens.add(token.get(LemmaAnnotation.class));
         nerValues.add(token.get(NormalizedNamedEntityTagAnnotation.class));
@@ -208,16 +225,9 @@ public class LanguageInfo {
   }
 
   public String getCanonicalPos(int index) {
-    return getCanonicalPos(posTags.get(index));
+    return LanguageUtils.getCanonicalPos(posTags.get(index));
   }
 
-  private String getCanonicalPos(String pos) {
-    if (pos.startsWith("N")) return "N";
-    if (pos.startsWith("V")) return "V";
-    if (pos.startsWith("W")) return "W";
-    return pos;
-  }
-  
   public boolean equalTokens(LanguageInfo other) {
     if(tokens.size()!=other.tokens.size())
       return false;
@@ -227,7 +237,7 @@ public class LanguageInfo {
     }
     return true;
   }
-  
+
   public boolean equalLemmas(LanguageInfo other) {
     if(lemmaTokens.size()!=other.lemmaTokens.size())
       return false;
@@ -237,16 +247,16 @@ public class LanguageInfo {
     }
     return true;
   }
-  
+
   public int numTokens() {
     return tokens.size();
   }
-  
+
   public LanguageInfo remove(int startIndex, int endIndex) {
-    
+
     if(startIndex > endIndex || startIndex<0 || endIndex > numTokens())
       throw new RuntimeException("Illegal start or end index, start: " + startIndex + ", end: " + endIndex+", info size: " + numTokens());
-    
+
     LanguageInfo res = new LanguageInfo();
     for(int i = 0; i < numTokens(); ++i) {
       if(i<startIndex || i>=endIndex) {
@@ -259,7 +269,7 @@ public class LanguageInfo {
     }
     return res;
   }
-  
+
   public void addSpan(LanguageInfo other, int start, int end) {
     for(int i = start; i < end; ++i) {
       this.tokens.add(other.tokens.get(i));
@@ -269,7 +279,15 @@ public class LanguageInfo {
       this.nerValues.add(other.nerValues.get(i));
     }
   }
-    
+
+  public List<String> getSpanProperties(int start, int end) { 
+    List<String> res =new ArrayList<String>();
+    res.add("lemmas="+lemmaPhrase(start, end));
+    res.add("pos="+posSeq(start, end));
+    res.add("ner="+nerSeq(start, end));
+    return res;
+  }
+
   public void  addWordInfo(WordInfo wordInfo) {
     this.tokens.add(wordInfo.token);
     this.lemmaTokens.add(wordInfo.lemma);
@@ -277,6 +295,168 @@ public class LanguageInfo {
     this.nerTags.add(wordInfo.nerTag);
     this.nerValues.add(wordInfo.nerValue);
   }
+
+  public void  addWordInfos(List<WordInfo> wordInfos) {
+    for(WordInfo wInfo: wordInfos)
+      addWordInfo(wInfo);
+  }
+
+  public WordInfo getWordInfo(int i) {
+    return new WordInfo(tokens.get(i), lemmaTokens.get(i), posTags.get(i), nerTags.get(i), nerValues.get(i));
+  }
+
+  /**
+   * returns spans of named entities
+   * @return
+   */
+  public Set<IntPair> getNamedEntitySpans() {
+    Set<IntPair> res = new LinkedHashSet<IntPair>();
+    int start=-1;
+    String prevTag = "O";
+
+    for(int i = 0; i < nerTags.size(); ++i) {
+      String currTag = nerTags.get(i);
+      if(currTag.equals("O")) {
+        if(!prevTag.equals("O")) {
+          res.add(new IntPair(start,i));
+          start=-1;
+        }
+      }
+      else { //currNe is not "O"
+        if(!currTag.equals(prevTag)) {
+          if(!prevTag.equals("O")) {
+            res.add(new IntPair(start,i));
+          }
+          start=i;
+        }
+      }
+      prevTag = currTag;
+    }
+    if(start!=-1)
+      res.add(new IntPair(start,nerTags.size()));
+    return res;
+  }
+
+  /**
+   * returns spans of named entities
+   * @return
+   */
+  public Set<IntPair> getProperNounSpans() {
+    Set<IntPair> res = new LinkedHashSet<IntPair>();
+    int start=-1;
+    String prevTag = "O";
+
+    for(int i = 0; i < posTags.size(); ++i) {
+      String currTag = posTags.get(i);
+      if(LanguageUtils.isProperNoun(currTag)) {
+        if(!LanguageUtils.isProperNoun(prevTag))
+          start=i;
+      }
+      else { //curr tag is not proper noun
+        if(LanguageUtils.isProperNoun(prevTag)) {
+          res.add(new IntPair(start,i));
+          start=-1;
+        }
+      }
+      prevTag = currTag;
+    }
+    if(start!=-1)
+      res.add(new IntPair(start,posTags.size()));
+    return res;
+  }
+  
+  public Set<IntPair> getNamedEntitiesAndProperNouns() {
+    Set<IntPair> res = getNamedEntitySpans();
+    res.addAll(getProperNounSpans());
+    return res;
+  }
+
+  public Map<String,IntPair> getLemmaSpans() {
+    if(lemmaSpans==null) {
+      lemmaSpans = new HashMap<String,IntPair>();
+      for(int i = 0; i < numTokens()-1; ++i) {
+        for(int j = i+1; j < numTokens(); ++j)
+          lemmaSpans.put(lemmaPhrase(i, j),new IntPair(i,j));
+      }
+    }
+    return lemmaSpans;
+  }
+  
+  public boolean matchLemmas(List<WordInfo> wordInfos) {
+    for(int i = 0; i < numTokens(); ++i) {
+      if(matchLemmasFromIndex(wordInfos,i))
+        return true;
+    }
+    return false;
+  }
+
+  private boolean matchLemmasFromIndex(List<WordInfo> wordInfos, int start) {
+
+    if(start+wordInfos.size()>numTokens())
+      return false;
+    for(int j = 0; j < wordInfos.size();++j) {
+      if(!wordInfos.get(j).lemma.equals(lemmaTokens.get(start+j)))
+        return false;
+    }
+    return true;
+  }
+
+  /**
+   * Static methods with langauge utilities
+   * @author jonathanberant
+   *
+   */
+  public static class LanguageUtils {
+    public static boolean sameProperNounClass(String noun1, String noun2) {
+      if(( noun1.equals("NNP")|| noun1.equals("NNPS")) &&
+          ( noun2.equals("NNP")|| noun2.equals("NNPS")))
+        return true;
+      return false;
+    }
+
+    public static boolean isProperNoun(String pos) {
+      return pos.startsWith("NNP");
+    }
+
+    public static boolean isEntity(LanguageInfo info, int i) {
+      return isProperNoun(info.posTags.get(i)) || !(info.nerTags.get(i).equals("O"));
+    }
+
+    public static boolean isNN(String pos) {
+      return pos.startsWith("NN") && !pos.startsWith("NNP");
+    }
+
+    public static boolean isContentWord(String pos) {
+      return (pos.startsWith("N") || pos.startsWith("V") || pos.startsWith("J"));
+    }
+
+    public static String getLemmaPhrase(List<WordInfo> wordInfos) {
+      String[] res = new String[wordInfos.size()];
+      for(int i = 0; i < wordInfos.size(); ++i) {
+        res[i]=wordInfos.get(i).lemma;
+      }
+      return Joiner.on(' ').join(res);
+    }
+
+    public static String getCanonicalPos(String pos) {
+      if (pos.startsWith("N")) return "N";
+      if (pos.startsWith("V")) return "V";
+      if (pos.startsWith("W")) return "W";
+      return pos;
+    }
+  }
+
+  @Override
+  public long getBytes() {
+    return MemUsage.objectSize(MemUsage.pointerSize*2)+MemUsage.getBytes(tokens)+MemUsage.getBytes(lemmaTokens)
+        +MemUsage.getBytes(posTags)+MemUsage.getBytes(nerTags)+MemUsage.getBytes(nerValues)
+        +MemUsage.getBytes(lemmaSpans);
+  }
+  
+  public boolean isNumberAndDate(int index) {
+    return posTags.get(index).equals("CD") && nerTags.get(index).equals("DATE");
+  }
+
   public static class WordInfo {
     public final String token;
     public final String lemma;
@@ -285,6 +465,19 @@ public class LanguageInfo {
     public final String nerValue;
     public WordInfo(String token, String lemma, String pos, String nerTag, String nerValue) {
       this.token = token; this.lemma=lemma; this.pos = pos; this.nerTag=nerTag; this.nerValue=nerValue;
+    }
+
+    public String toString() {
+      return toLispTree().toString();
+    }
+    public LispTree toLispTree() {
+      LispTree tree = LispTree.proto.newList();
+      tree.addChild("wordinfo");
+      tree.addChild(token);
+      tree.addChild(lemma);
+      tree.addChild(pos);
+      tree.addChild(nerTag);
+      return tree;
     }
   }
 }

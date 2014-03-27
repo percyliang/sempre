@@ -1,7 +1,6 @@
 #!/usr/bin/ruby
 
-$modules = [:code,
-            :core,
+$modules = [:core,
             :emnlp2013,
             :geofreebase_vdb,
             :geofreebase_ttl,

@@ -116,7 +116,7 @@ public class StringCacheServer implements Runnable {
         Thread t = new Thread(new ClientHandler(client));
         t.start();
       }
-      LogInfo.logs("Done");
+      LogInfo.log("Done");
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

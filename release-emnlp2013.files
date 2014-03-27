@@ -22,8 +22,8 @@ lib/data/webquestions/dataset_11/webquestions.examples.test.json
 ############################################################
 # Free917 [Cai & Yates, 2013]
 
-#data/free917.train.examples.canonicalized.json
-#data/free917.test.examples.canonicalized.json
+data/free917.train.examples.canonicalized.json
+data/free917.test.examples.canonicalized.json
 
 ############################################################
 # Lucene
@@ -32,8 +32,9 @@ lib/lucene/4.4/inexact
 
 ############################################################
 # Model
-lib/models/2174.exec
+lib/models/15.exec
 
 ############################################################
 # Grammars
-data/emnlp2013.grammar
+data/emnlp2013.exactent.grammar
+data/emnlp2013.inexactent.grammar

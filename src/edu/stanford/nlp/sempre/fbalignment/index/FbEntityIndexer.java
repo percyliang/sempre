@@ -69,14 +69,14 @@ public class FbEntityIndexer {
       indexed++;
 
       if (indexed % 1000000 == 0) {
-        LogInfo.logs("Number of lines: " + indexed);
+        LogInfo.log("Number of lines: " + indexed);
       }
     }
     reader.close();
-    LogInfo.logs("Indexed lines: " + indexed);
+    LogInfo.log("Indexed lines: " + indexed);
 
     indexer.close();
-    LogInfo.logs("Done");
+    LogInfo.log("Done");
     LogInfo.end_track("Indexing");
   }
 

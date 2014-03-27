@@ -232,7 +232,14 @@ def a(key, *values); optAppendOrNot(true, key, *values) end
 def optAppendOrNot(append, key, *values)
   lambda { |e|
     values = standarizeList(values.flatten).map { |value| value && envEval(e, value).to_s }
-    values = ['---']+values+['---'] if values.map { |x| x =~ /^-/ ? x : nil }.compact.size > 0 # Quote values: -x -0.5   =>   -x --- -0.5 ---
+    # Quote values (if not already quoted): -x -0.5   =>   -x --- -0.5 ---
+    if values.map { |x| x =~ /^-/ ? x : nil }.compact.size > 0 && values[0] !~ /^--/
+      if values.size > 1
+        values = ['---']+values+['---']
+      else
+        values = ['--']+values
+      end
+    end
     prefixKey = "#{append ? $optAppendPrefix : $optPrefix}#{key}"
     if $optConnective
       prefixKey + $optConnective + values.join(' ')

@@ -20,6 +20,16 @@ public class FeatureVector {
   private ArrayList<String> indicatorFeatures;
   // General features
   private ArrayList<Pair<String, Double>> generalFeatures;
+  //A dense array of features to save memory 
+  private double[] denseFeatures;
+  private static final String DENSE_NAME = "Dns";
+
+  public FeatureVector() {} //constructor that does nothing
+
+  public FeatureVector(int numOfDenseFeatures) {
+    denseFeatures=new double[numOfDenseFeatures];
+    Arrays.fill(denseFeatures,0d);
+  }
 
   private static String toFeature(String domain, String name) { return domain + " :: " + name; }
 
@@ -50,6 +60,10 @@ public class FeatureVector {
     else add(feature, value);
   }
 
+  public void addDenseFeature(int index, double value) {
+    denseFeatures[index]+=value;
+  }
+
   public void add(FeatureVector that) { add(that, AllFeatureMatcher.matcher); }
   public void add(FeatureVector that, FeatureMatcher matcher) {
     if (that.indicatorFeatures != null) {
@@ -62,6 +76,11 @@ public class FeatureVector {
         if (matcher.matches(pair.getFirst()))
           add(pair.getFirst(), pair.getSecond());
     }
+    //dense features are always added
+    if(that.denseFeatures!=null) {
+      for(int i = 0; i < denseFeatures.length;++i)
+        denseFeatures[i]=that.denseFeatures[i];
+    }  
   }
 
   // Return the dot product between this feature vector and the weight vector (parameters).
@@ -75,10 +94,15 @@ public class FeatureVector {
       for (Pair<String, Double> pair : generalFeatures)
         sum += params.getWeight(pair.getFirst()) * pair.getSecond();
     }
+    if(denseFeatures != null) {
+      for(int i = 0; i < denseFeatures.length; ++i)
+        sum += params.getWeight(DENSE_NAME+"_"+i) * denseFeatures[i];
+    }
     return sum;
   }
 
   // Increment |map| by a factor times this feature vector.
+  // converts the dense features to a non-dense representation
   public void increment(double factor, Map<String, Double> map) {
     increment(factor, map, AllFeatureMatcher.matcher);
   }
@@ -93,12 +117,21 @@ public class FeatureVector {
         if (matcher.matches(pair.getFirst()))
           MapUtils.incr(map, pair.getFirst(), factor * pair.getSecond());
     }
+    if (denseFeatures != null) {
+      for(int i = 0; i < denseFeatures.length;++i)
+        MapUtils.incr(map, DENSE_NAME+"_"+i, factor * denseFeatures[i]);
+    }
   }
 
   @JsonValue
   public Map<String, Double> toMap() {
     HashMap<String, Double> map = new HashMap<String, Double>();
     increment(1, map);
+    if(denseFeatures!=null) {
+      for(int i = 0; i < denseFeatures.length; ++i) {
+        map.put(DENSE_NAME+"_"+i,denseFeatures[i]);
+      }
+    }
     return map;
   }
 
@@ -107,14 +140,37 @@ public class FeatureVector {
     // TODO (rf):
     // Encoding is lossy.  We guess that value of 1 means indicator, but we
     // could be wrong.
-    FeatureVector fv = new FeatureVector();
+    //(joberant) - takes care of dense features in a non efficient way - TODO
+    int maxDenseFeaturesIndex = -1;
     for (Map.Entry<String, Double> entry : m.entrySet()) {
-      if (entry.getValue() == 1.0d)
-        fv.add(entry.getKey());
-      else
-        fv.add(entry.getKey(), entry.getValue());
+      if(isDenseFeature(entry.getKey())) {
+        int index = denseFeatureIndex(entry.getKey());
+        if(index>maxDenseFeaturesIndex)
+          maxDenseFeaturesIndex=index;
+      }
+    }
+
+    FeatureVector fv = maxDenseFeaturesIndex==-1 ? new FeatureVector() : new FeatureVector(maxDenseFeaturesIndex+1);
+    for (Map.Entry<String, Double> entry : m.entrySet()) {
+      if(isDenseFeature(entry.getKey())) {
+        fv.addDenseFeature(denseFeatureIndex(entry.getKey()), entry.getValue());
+      }
+      else {
+        if (entry.getValue() == 1.0d)
+          fv.add(entry.getKey());
+        else
+          fv.add(entry.getKey(), entry.getValue());
+      }
     }
     return fv;
+  }
+
+  private static boolean isDenseFeature(String f) {
+    return f.startsWith(DENSE_NAME);
+  }
+  private static int denseFeatureIndex(String denseFeature) {
+    assert denseFeature.startsWith(DENSE_NAME);
+    return Integer.parseInt(denseFeature.split("_")[1]);
   }
 
   public static void logChoices(String prefix, Map<String, Integer> choices) {
@@ -127,13 +183,13 @@ public class FeatureVector {
     LogInfo.end_track();
   }
 
-  public static void logFeatureWeights(String prefix, Map<String, Double> features, Map<String, Double> weights) {
+  public static void logFeatureWeights(String prefix, Map<String, Double> features, Params params) {
     List<Map.Entry<String, Double>> entries = new ArrayList<Map.Entry<String, Double>>();
     double sumValue = 0;
     for (Map.Entry<String, Double> entry : features.entrySet()) {
       String feature = entry.getKey();
       if (entry.getValue() == 0) continue;
-      double value = entry.getValue() * MapUtils.getDouble(weights, feature, Params.opts.defaultWeight);
+      double value = entry.getValue() * params.getWeight(feature);
       sumValue += value;
       entries.add(new java.util.AbstractMap.SimpleEntry<String, Double>(feature, value));
     }
@@ -142,9 +198,17 @@ public class FeatureVector {
     for (Map.Entry<String, Double> entry : entries) {
       String feature = entry.getKey();
       double value = entry.getValue();
-      double weight = MapUtils.getDouble(weights, feature, Params.opts.defaultWeight);
+      double weight = params.getWeight(feature);
       LogInfo.logs("%-50s %6s = %s * %s", "[ " + feature + " ]", Fmt.D(value), Fmt.D(MapUtils.getDouble(features, feature, 0)), Fmt.D(weight));
     }
     LogInfo.end_track();
+  }
+
+  public void clear() {
+    if(indicatorFeatures!=null)
+      indicatorFeatures.clear();
+    if(generalFeatures!=null)
+      generalFeatures.clear();
+    denseFeatures=null;
   }
 }

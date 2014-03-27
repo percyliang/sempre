@@ -50,6 +50,7 @@ public class FreebaseInfo {
 
   private BiMap<String, String> masterToReverseMap = HashBiMap.create(); //mapping from master property to its reverse
   private Map<String, Set<String>> typeToIncludedTypesMap = new HashMap<String, Set<String>>();
+  private Map<String, Set<String>> typeToSubTypesMap = new HashMap<String, Set<String>>();
   private Set<String> cvts = new HashSet<String>();
   private Map<String, String> type1Map = new HashMap<String, String>();  // property => type of arg1
   private Map<String, String> type2Map = new HashMap<String, String>();  // property => type of arg2
@@ -117,9 +118,15 @@ public class FreebaseInfo {
         masterToReverseMap.put(arg1, arg2);
       } else if (property.equals("fb:freebase.type_hints.included_types")) {
         Set<String> set = typeToIncludedTypesMap.get(arg1);
-        if (set == null)
+        if (set == null) {
           typeToIncludedTypesMap.put(arg1, set = new HashSet<String>());
+        }
         set.add(arg2);
+        set = typeToSubTypesMap.get(arg2);
+        if (set == null) {
+          typeToSubTypesMap.put(arg2, set = new HashSet<String>());
+        }
+        set.add(arg1);
       } else if (property.equals("fb:freebase.type_hints.mediator")) {
         if (arg2.equals("\"true\"^^xsd:boolean")) cvts.add(arg1);
         else if (arg2.equals("\"false\"^^xsd:boolean")) cvts.remove(arg1);
@@ -171,7 +178,6 @@ public class FreebaseInfo {
       Formula f = Formulas.fromLispTree(LispTree.proto.parseFromString(property));
       BinaryFormulaInfo info = new BinaryFormulaInfo(f, type1Map.get(property), type2Map.get(property), unit2Map.get(property),"",bDescriptionsMap.get(property),bPopularityMap.get(property));
       if(!info.isComplete()) {
-        //LogInfo.logs("FreebaseInfo: skipping formula for which info is not complete: %s",info);
         continue;
       }
       res.put(f, info);
@@ -189,7 +195,6 @@ public class FreebaseInfo {
           MapUtils.get(professionDescriptionsMap,profession,new LinkedList<String>()),
           Collections.singleton(PERSON));
       if(!info.isComplete()) {
-        //LogInfo.logs("FreebaseInfo: Skipping formula for which info is not complete: %s",info);
         continue;
       }
       res.put(f, info);
@@ -201,7 +206,6 @@ public class FreebaseInfo {
           MapUtils.get(typeDescriptionsMap,type,new LinkedList<String>()),
           Collections.singleton(type));
       if(!info.isComplete()) {
-        //LogInfo.logs("FreebaseInfo: Skipping formula for which info is not complete: %s",info);
         continue;
       }
       res.put(f, info);
@@ -227,11 +231,16 @@ public class FreebaseInfo {
     return supertypes;
   }
 
-  public void addSupertype(String type, String supertype) {
-    Set<String> supertypes = typeToIncludedTypesMap.get(type);
+  public void addSupertype(String subtype, String supertype) {
+    Set<String> supertypes = typeToIncludedTypesMap.get(subtype);
     if (supertypes == null)
-      typeToIncludedTypesMap.put(type, supertypes = new HashSet<String>());
+      typeToIncludedTypesMap.put(subtype, supertypes = new HashSet<String>());
     supertypes.add(supertype);
+    
+    Set<String> subTypes = typeToSubTypesMap.get(supertype);
+    if (subTypes == null)
+      typeToSubTypesMap.put(supertype, subTypes = new HashSet<String>());
+    subTypes.add(subtype);
   }
 
   //Get the measurement unit associated with arg2 of property.
@@ -261,6 +270,7 @@ public class FreebaseInfo {
     return cvts.contains(type);
   }
 
+  /*
   public void computeTransitiveClosureInefficiently() {
 
     boolean added;
@@ -279,19 +289,26 @@ public class FreebaseInfo {
         }
         typesToAdd.removeAll(superTypes);
         if (typesToAdd.size() > 0) {
-          LogInfo.logs("Adding to subtype: " + subType + "with supertypes " + superTypes + " the new types: " + typesToAdd);
+          LogInfo.log("Adding to subtype: " + subType + "with supertypes " + superTypes + " the new types: " + typesToAdd);
           superTypes.addAll(typesToAdd);
           added = true;
         }
       }
     } while (added == true);
-  }
+  }*/
 
   public Set<String> getIncludedTypesInclusive(String subtype) {
     Set<String> set = typeToIncludedTypesMap.get(subtype);
     if (set == null) {
       return addDefaultSupertypes(subtype, new HashSet<String>());
-      //throw new RuntimeException("Unknown type: " + subtype);
+    }
+    return set;
+  }
+  
+  public Set<String> getSubTypesExclusive(String subtype) {
+    Set<String> set = typeToSubTypesMap.get(subtype);
+    if (set == null) {
+      return new HashSet<String>();
     }
     return set;
   }
@@ -328,5 +345,13 @@ public class FreebaseInfo {
       return uri;
     }
     return "fb:" + uri.substring(freebaseNamespace.length()).replaceAll("/", ".");
+  }
+  
+  public static boolean isPrimitive(String type) {
+    return type.equals(BOOLEAN) ||
+        type.equals(INT) ||
+        type.equals(FLOAT) ||
+        type.equals(DATE) || 
+        type.equals(TEXT);
   }
 }

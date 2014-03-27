@@ -86,9 +86,6 @@ def defaultOpts
        'edu.stanford.nlp.sempre.fbalignment.lexicons.WordNetExpansionLexicon',
        'edu.stanford.nlp.sempre.fbalignment.lexicons.GraphPropLexicon'),
 
-    # Features
-    o('FeatureExtractor.featureDomains', *$defaultFeatureDomains),
-
     letDefault(:executor, 1),
     sel(:executor,
       l(),
@@ -163,8 +160,8 @@ def emnlp2013AblationExperiments(tag)
       l(), # (0) Just run things normally
       selo(nil, 'BeamParser.beamSize', 10, 50, 200), # (1) Vary beam size
       selo(nil, 'Dataset.trainFrac', 0.1, 0.2, 0.4, 0.6), # (2) Vary training set size
-      sel(nil, # (3) Structural: only do pivot or only do bridge
-        o('Grammar.tags', l(tag, 'pivot')),
+      sel(nil, # (3) Structural: only do join or only do bridge
+        o('Grammar.tags', l(tag, 'join')),
         o('Grammar.tags', l(tag, 'bridge')),
       nil),
       sel(nil, # (4) Features
@@ -188,8 +185,11 @@ def free917
     nil),
 
     # Grammar
-    o('Grammar.inPaths', 'data/emnlp2013.grammar'),
-    o('Grammar.tags', 'free917', 'bridge', 'pivot'),
+    o('Grammar.inPaths', 'data/emnlp2013.inexactent.grammar'),
+    o('Grammar.tags', 'free917', 'bridge', 'join'),
+
+    # Features
+    o('FeatureExtractor.featureDomains', *$defaultFeatureDomains),
 
     emnlp2013AblationExperiments('free917'),
 
@@ -219,10 +219,13 @@ def webquestions
     nil),
 
     # Grammar
-    o('Grammar.inPaths', 'data/emnlp2013.grammar'),
-    o('Grammar.tags', 'webquestions', 'bridge', 'pivot'),
+    o('Grammar.inPaths', 'data/emnlp2013.inexactent.grammar'),
+    o('Grammar.tags', 'webquestions', 'bridge', 'join'),
 
     o('BeamParser.beamSize', 200),
+
+    # Features
+    o('FeatureExtractor.featureDomains', *($defaultFeatureDomains+['lexAlign'])),
 
     emnlp2013AblationExperiments('webquestions'),
 
@@ -230,6 +233,7 @@ def webquestions
     cachePaths('LexiconFn.cache', 'SparqlExecutor.cache'),
 
     o('EntityLexicon.inexactMatchIndex','lib/lucene/4.4/inexact/'),
+    o('EntityLexicon.maxEntries',50),
 
     # Learner reward
     o('Learner.partialReward', true),
@@ -246,8 +250,8 @@ def jayant
     nil),
 
     # Grammar
-    o('Grammar.inPaths', 'data/emnlp2013.grammar'),
-    o('Grammar.tags', 'webquestions', 'bridge', 'pivot'),
+    o('Grammar.inPaths', 'data/emnlp2013.inexactent.grammar'),
+    o('Grammar.tags', 'webquestions', 'bridge', 'join'),
 
     o('BeamParser.beamSize', 500), 
 
@@ -275,7 +279,7 @@ def train
     header,
     'edu.stanford.nlp.sempre.Main',
     defaultOpts, selectDomain,
-    o('Learner.maxTrainIters', 6),
+    o('Learner.maxTrainIters', 4),
   nil)
 end
 

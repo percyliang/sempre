@@ -218,7 +218,7 @@ def extractArgs(options)
   verbatim = false
   persistentVerbatim = false
   args.each { |arg|
-    if arg == '--' then
+    if arg == '--' and not persistentVerbatim then
       verbatim = true
     elsif arg == '---' then
       persistentVerbatim = !persistentVerbatim

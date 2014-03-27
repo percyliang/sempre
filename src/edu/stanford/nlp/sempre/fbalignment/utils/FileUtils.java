@@ -78,7 +78,7 @@ public class FileUtils {
       res.put(tokens[keyColumn], tokens[valueColumn]);
       i++;
       if (i % 1000000 == 0)
-        LogInfo.logs("Number of lines uploaded: " + i);
+        LogInfo.log("Number of lines uploaded: " + i);
     }
     reader.close();
     return res;
@@ -112,7 +112,7 @@ public class FileUtils {
       res.add(tokens[column]);
       i++;
       if (i % 1000000 == 0) {
-        LogInfo.logs("Number of lines: " + i);
+        LogInfo.log("Number of lines: " + i);
       }
     }
 

@@ -74,11 +74,11 @@ public class JsonTest {
       .setUtterance("A is for Alice")
       .setTargetValue(new StringValue("B is for Bob"))
       .createExample();
-    LogInfo.logs(S(ex));
+    LogInfo.log(S(ex));
     assert exampleEquals(ex, D(S(ex), Example.class));
 
     ex.preprocess();
-    LogInfo.logs(S(ex));
+    LogInfo.log(S(ex));
     assert ex.languageInfo != null;
     assert !ex.languageInfo.tokens.isEmpty();
     assert exampleEquals(ex, D(S(ex), Example.class));
@@ -89,7 +89,7 @@ public class JsonTest {
     LanguageInfo.opts.useAnnotators = false;
 
     ex.preprocess();
-    LogInfo.logs(S(ex, Example.JsonViews.WithDerivations.class));
+    LogInfo.log(S(ex, Example.JsonViews.WithDerivations.class));
     ParserTest.makeSimpleBeamParser().parse(
         new Params(),
         ex);
@@ -97,8 +97,8 @@ public class JsonTest {
     Example back = D(
         there, Example.class, Example.JsonViews.WithDerivations.class);
     String thereAgain = S(back, Example.JsonViews.WithDerivations.class);
-    LogInfo.logs(there);
-    LogInfo.logs(thereAgain);
+    LogInfo.log(there);
+    LogInfo.log(thereAgain);
 
     assert ex.getPredDerivations() != null;
     assert !ex.getPredDerivations().isEmpty();
