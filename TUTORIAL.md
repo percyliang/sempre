@@ -484,9 +484,8 @@ and converts them into Freebase logical forms (e.g.,
 
 Type the following utterances into the prompt:
 
-    `Ulm`
-
-    `physicists`
+    Ulm
+    physicists
 
 Each utterance should return a list of candidate entities.
 
@@ -499,7 +498,7 @@ logical forms and either perform an intersection or a join:
 
 This allows us to type in:
 
-    `physicists born in Ulm`
+    physicists born in Ulm
 
 You should get many candidates, but the correct answer should appear in the list:
 
