@@ -383,10 +383,10 @@ Add the small graph to the database:
 
 Aside: if you want to work with a larger database:
 
-    ./download-dependencies geofreebase_ttl    # Subset of Freebase for geography in .ttl format
+    ./download-dependencies geofreebase_ttl    # Subset of Freebase for geography in .ttl format (not needed to run the server)
     ./download-dependencies geofreebase_vdb    # Virtuoso index for subset of Freebase for geography
-    ./download-dependencies fullfreebase_ttl   # All of Freebase in .ttl format (BIG FILE)
-    ./download-dependencies fullfreebase_vdb   # Virtuoso index for all of Freebase (BIG FILE)
+    ./download-dependencies fullfreebase_ttl   # All of Freebase in .ttl format (not needed to run the server) [BIG FILE]
+    ./download-dependencies fullfreebase_vdb   # Virtuoso index for all of Freebase [BIG FILE]
 
 Then, just replace `tutorial.vdb` with the appropriate `lib/freebase/??.exec/vdb` path.
 
@@ -469,6 +469,18 @@ and ClueWeb, as described the EMNLP 2013 paper, but you can just take these
 mappings as given for now):
 
     ./download-dependencies emnlp2013
+
+The following commands will require you having a Virtuoso instance that has all of Freebase indexed.
+If you do not have this set up, run the following two commands:
+
+    ./download-dependencies fullfreebase_vdb   # Virtuoso index for all of Freebase [BIG FILE]
+
+    scripts/virtuoso start lib/freebase/93.exec/vdb 3093  # Starts server on localhost at port 3093
+
+Now, restart the SEMPRE shell, pointing the SparqlExecutor to the Virtuoso
+instance:
+
+    java -cp classes:lib/* edu.stanford.nlp.sempre.Main -executor SparqlExecutor -endpointUrl http://localhost:3093/sparql -interactive
 
 Now, we can add rules with semantic function `LexiconFn`:
 
