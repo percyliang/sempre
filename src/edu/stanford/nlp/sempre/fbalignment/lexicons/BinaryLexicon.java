@@ -35,7 +35,7 @@ public class BinaryLexicon {
     @Option(gloss = "Whether to drop the preposition when querying the lexicon")
     public boolean prepDropNormalization = true;
     @Option(gloss = "Path to binary lexicon files")
-    public List<String> binaryLexiconFilesPath = Lists.newArrayList();
+    public List<String> binaryLexiconFilesPath = Lists.newArrayList("lib/fb_data/6/binaryInfoStringAndAlignment.txt");
     @Option(gloss = "Whether to prune the lexicon") public boolean pruneLexicon = false;
     @Option(gloss = "Number of entries to leave after pruning")
     public int pruneBeamSize = 5;
@@ -49,7 +49,7 @@ public class BinaryLexicon {
 
   public static Options opts = new Options();
 
-  private EntryNormalizer lexiconLoadingNoramlizer;
+  private EntryNormalizer lexiconLoadingNormalizer;
   private FbFormulasInfo fbFormulasInfo;
   
   public static final String INTERSECTION = "Intersection_size_typed";
@@ -65,9 +65,9 @@ public class BinaryLexicon {
 
     //if we omit prepositions then the lexicon normalizer does that, otherwise, it is a normalizer that does nothing
     if (opts.prepDropNormalization) {
-      lexiconLoadingNoramlizer = new PrepDropNormalizer(); // the alignment lexicon already contains stemmed stuff so just need to drop prepositions
+      lexiconLoadingNormalizer = new PrepDropNormalizer(); // the alignment lexicon already contains stemmed stuff so just need to drop prepositions
     } else {
-      lexiconLoadingNoramlizer = new IdentityNormalizer();
+      lexiconLoadingNormalizer = new IdentityNormalizer();
     }
 
     for (String lexiconFile : opts.binaryLexiconFilesPath) {
@@ -89,13 +89,13 @@ public class BinaryLexicon {
      
       LexiconValue lv = Json.readValueHard(line, LexiconValue.class);
       String lexemeKey = lv.lexeme;
-      String normalizedLexemeKey = lexiconLoadingNoramlizer.normalize(lexemeKey);
+      String normalizedLexemeKey = lexiconLoadingNormalizer.normalize(lexemeKey);
       addEntryToMap(lexemeToEntryMap, lexemeKey, lv);
       if (!lexemeKey.equals(normalizedLexemeKey)) {
         addEntryToMap(lexemeToEntryMap, normalizedLexemeKey, lv);
       }
     }
-    LogInfo.log("Number of lexemes in lexicon: " + lexemeToEntryMap.size());
+    LogInfo.log("Number of entries: " + lexemeToEntryMap.size());
     LogInfo.end_track();
   }
   

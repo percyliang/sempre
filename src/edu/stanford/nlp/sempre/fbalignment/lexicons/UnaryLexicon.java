@@ -24,7 +24,7 @@ public class UnaryLexicon {
     @Option(gloss = "Number of results return by the lexicon")
     public int maxEntries = 1000;
     @Option(gloss = "Path to unary lexicon file")
-    public String unaryLexiconFilePath;
+    public String unaryLexiconFilePath = "lib/fb_data/6/unaryInfoStringAndAlignment.txt";
     @Option(gloss = "Whether to prune the lexicon") public boolean pruneLexicon = false;
     @Option(gloss = "Number of entries to leave after pruning")
     public int pruneBeamSize = 5;
@@ -119,11 +119,14 @@ public class UnaryLexicon {
 
   private static void loadLexiconFileIntoMap(String lexiconFileName,
       Map<String, Map<Pair<Formula, String>, UnaryLexicalEntry>> nlToFormulaAndAlignmentMap) {
+    LogInfo.begin_track("Loading lexicon file " + lexiconFileName);
 
     for (String line : IOUtils.readLines(lexiconFileName)) {
       LexiconValue lv = Json.readValueHard(line, LexiconValue.class);
       addEntry(lv.lexeme, lv.source, lv.formula, lv.features, nlToFormulaAndAlignmentMap);
     }
+    LogInfo.log("Number of entries: " + nlToFormulaAndAlignmentMap.size());
+    LogInfo.end_track();
   }
 
   private static void addEntry(String nl, String source, Formula formula, Map<String,Double> featureMap,

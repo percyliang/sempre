@@ -1,8 +1,12 @@
 # SEMPRE: Semantic Parsing with Execution
 
-In this tutorial, we will provide a brief tour of SEMPRE by constructing a
-semantic parser to understand a toy subset of natural language.  Concretely,
-the system will have the following behavior:
+In this tutorial, we will provide a brief tour of SEMPRE.  This tutorial is
+very much about the mechanics of the system, not about the linguistics or
+semantic parsing from a research point of view (for those, see the recommended
+readings at the end of this document).
+
+We will construct a semantic parser to understand a toy subset of natural
+language.  Concretely, the system will have the following behavior:
 
 - Input: *What is three plus four?*
 - Output: 7
@@ -26,15 +30,15 @@ To run the system, run:
     java -Xmx3g -cp classes:lib/* edu.stanford.nlp.sempre.Main -executor JavaExecutor -interactive
 
 This will put you in an interactive prompt where you can develop a system and
-parse utterances into tiny Java programs.  Note: you might find it convenient
-to use `rlwrap` to get readline support.
+parse utterances into tiny Java programs (hence `JavaExecutor`).  Note: you
+might find it convenient to use `rlwrap` to get readline support.
 
 ## Formulas and denotations
 
-A logical form (`Formula`) is a hierarchical expression.  For example, we have
-primitive logical forms:
+A logical form (`Formula`) is a hierarchical expression.  For example, here are
+some primitive logical forms:
 
-    (boolean 4)
+    (boolean true)
     (number 3)
     (string hello)
     (date 2013 7 28)
@@ -48,9 +52,10 @@ function name followed by arguments:
     (call .substring (string "what is this?") (number 5) (number 7))
     (call if (call < (number 3) (number 4)) (string yes) (string no))
 
-Note the logical form is very explicitly typed.  You would probably not want to
-program directly in this language, but that is not the point; we will generate
-these logical forms automatically from natural language.
+Note that each logical form is painfully explicit about types.  You would
+probably not want to program directly in this language, but that is not the
+point; we will generate these logical forms automatically from natural
+language.
 
 We can execute these logical forms by typing into the interactive prompt:
 
@@ -68,7 +73,7 @@ represents a function that takes a number and returns its square:
 
     (lambda x (call * (var x) (var x)))
 
-We apply a lambda expression in the usual LISP way:
+We apply a lambda expression in the usual Lispy way:
 
     ((lambda x (call * (var x) (var x))) (number 3))
 
@@ -79,56 +84,59 @@ actually representing higher-order functions; since there are no side effects
 here, there is no difference.
 
 This concludes the section on logical forms and denotations.  We have presented
-one system of logical forms, which are executed using the `JavaExecutor`.  The
-system is general in that it supports other types of logical forms, for
-example, those which encode SPARQL database queries.
+one system of logical forms, which are executed using `JavaExecutor`.  The
+system supports other types of logical forms, for example, those which encode
+SPARQL database queries for question answering (we will get to that later).
+Note that there is no mention of natural language yet...
 
 ## Parsing
 
 Having established the nature of logical forms and their denotations, let us
 turn to the problem of mapping a natural language utterance into a logical
 form.  We will proceed by defining a *grammar*, which is a set of rules
-which specify how to perform this mapping piece by piece.
+which specify how to perform this mapping piece by piece.  This is a grammar
+in the computer science sense, not in the linguistic sense (again, SEMPRE
+just provides a framework; you can use whatever grammar you would like).
 
-We can add a rule to the grammar by entering the following:
+We will run through some examples to give you a feel for how things work,
+and then go into the details.  First, let us a rule to the grammar by entering
+the following into the prompt:
 
     (rule $ROOT (three) (ConstantFn (number 3)))
 
-Now just type in:
+Now to parse an utterance, just type it in:
 
     three
 
+Note: The first time you parse an utterance will be slower since Stanford CoreNLP
+components need to be loaded into memory (e.g., the part-of-speech tagger).
+
 The parser should print out (among other information) a line that shows that
-the utterance was interpreted sucessfully as:
+the utterance was parsed sucessfully into a *Derivation*:
 
     (derivation (formula (number 3.0)) (value (number 3.0)) (type fb:type.number))
 
-Note: The first time you parse an utterance will be slower since some models need to be uploaded
-
-You should get no results if you type in:
+Now type in the utterance:
 
     four
 
-This is your first grammar with a single trivial rule.  The rule says that if
-we see *three* in the natural language, we can construct a *Derivation* (the
-one shown above) with
-
-1. category `$ROOT`, and
-2. logical form `(number 3)`.
-
-Let us create a more general rule:
+You should get no results because no rule will match `four`.  To fix that, let
+us create a more general rule:
 
     (rule $ROOT ($PHRASE) (NumberFn))
 
-This rule says match any phrase (sequence of tokens), pass it to a *semantic function* called
-`NumberFn`, which will transform it into a new derivation.
+This rule says match any phrase (sequence of tokens), pass it to a special
+function called `NumberFn`, which will transform the string into a new
+derivation.
 
-Now the system can interpret general numbers.  Try typing in:
+Now the system can interpret general numbers!  Try typing in:
 
     twenty five million
 
-The result shold be `(number 2.5E7)`.  If you type in `three`, you should get
-two derivations that yield the same answer, one coming from each rule.
+The result shold be `(number 2.5E7)`.
+
+Note: if you now type in `three`, you should get two derivations that yield the
+same answer, one coming from each rule.
 
 So far, we have only parsed utterances using one rule, but the true power of
 these grammars come from combining multiple rules.  Copy and paste in the
@@ -156,38 +164,89 @@ We can parse longer sentences.  Type in:
 There should be two derivations, yielding `(number 14)` and `(number 11)`,
 corresponding to either combining *three plus four* first or *four times two*
 first.  Note that this is expected because we have not encoded any order of
-operations here.
+operations anywhere.
 
-Let us examine more formally how grammars work in general.  Each rule has the
-following form:
+Hopefully that should give you a sense of what parsing looks like.  Let us now
+take a closer look.  At the end of the day, a grammar declaratively specifies a
+mapping from utterances to a set of candidate *Derivation*s (which are to be
+scored and ranked later).  A parser is an actual algorithm that takes the
+grammar and generates those derivations.  Recall that a derivation looks like this:
 
-    (rule |target| (|source_1| ... |source_k|) |semantics|)
+    (derivation (formula (number 3.0)) (value (number 3.0)) (type fb:type.number))
 
-Where |target|, |source_1|, ... |source_k| are either tokens (e.g., *three*)
-or syntactic categories (all categories start with `$` by convention), and
-|semantics| specifies a semantic function (for example, `ConstantFn`, which
-always returns a fixed value, or `IdentityFn`, which returns the input, etc.)
+Formally, each Derivation produced by the parser has the following properties:
 
-Derivations are built recursively: for each span (subsequence of the tokens in
-the utterance), we construct a set of Derivations recursively.  We can apply a
-rule if there is some segmentation of that sequence into spans $s_1, \dots,
-s_k$ and a derivation $d_i$ for each span $s_i$ matching |source_i|.  In
-this case, we pass the list of derivations as input into the semantic function.
-The output is a set of derivations (possibly zero if we want the semantic
-function to act as a filter).
+1. Span i:j (e.g., 0:1): specifies the continguous portion of the input
+   utterance (tokens i to j-1) that the Derivation is constructed from.
+2. Category (e.g., `$ROOT`): categories place hard constraints on what
+   Derivations can be combined.
+3. Type (e.g., `(fb:type.number)`): typically more fine-grained than the
+   category, and is generated dynamically.
+4. Logical form (e.g., `(call + (number 3) (number 4))`): what we normally
+   think of as the output of semantic parsing.
+5. Value (e.g., `(number 7)`): the result of executing the logical form.
+
+There are some special categories:
+
+1. `$TOKEN`: matches a single token of the utterance.  Formally, the parser
+   builds a Derivation with category `$TOKEN` and logical form corresponding to
+   the token (e.g., `(string three)`) for each token in the utterance.
+2. `$PHRASE`: matches any contiguous subsequence of tokens.  The logical form created
+   is the concatenation of those tokens (e.g., `(string "twenty-five million")`).
+3. `$LEMMA_TOKEN`: like `$TOKEN`, but the logical form produced is a lemmatized
+   version of the token (for example $TOKEN would yield *cows*, while
+   $LEMMA_TOKEN would yield *cow*).
+4. `$LEMMA_PHRASE`: the lemmatized version of `$PHRASE`.
+5. `$ROOT` Derivations that have category `$ROOT` and span the entire utterance
+   are executed, scored, and sent back to the user.
+
+Now let us see how a grammar specifies the set of derivations.
+A grammar is a set of rules, and each rule has the following form:
+
+    (rule |target| (|source_1| ... |source_k|) |semantic function|)
+
+1. Target category (e.g., `$ROOT`): any derivation produced by this rule is
+   labeled with this category.  `$ROOT` is the designated top-level category.
+   Derivations of type `$ROOT` than span the entire utterance are returned to the
+   user.
+2. Source sequence (e.g., `three`): in general, this is a sequence of tokens and categories
+   (all categories start with `$` by convention).  Tokens (e.g., `three`) are
+   matched verbatim, and categories (e.g., `$PHRASE`) match any derivation that
+   is labeled with that category and has a span at that position.
+3. Semantic function (`SemanticFn`): a semantic function takes a sequence of
+   derivations corresponding to the categories in the children and produces a set
+   of new derivations which are to be labeled with the target category.
+   Semantic functions are arbitrary Java code, and allow the parser to integrate
+   custom logic in a flexible modular way.  In the example above `ConstantFn`
+   is an example of a semantic function which always returns one `Derivation`
+   with the given logical form (e.g., `(number 3)`).
+
+Derivations are built recursively: for each category and span, we construct a
+set of Derivations.  We can apply a rule if there is some segmentation of the
+span into sub-spans $s_1, \dots, s_k$ and a derivation $d_i$ on each span $s_i$
+with category |source_i|.  In this case, we pass the list of derivations as
+input into the semantic function.  The output is a set of derivations (possibly
+zero).
 
 The first rule is a familiar one that just parses numbers such as `three
 million` into the category `$Expr`:
 
     (rule $Expr ($PHRASE) (NumberFn))
 
-The next two map the tokens *plus* and *times* to a static logical form
+Specifically, one derivation with logical form `(string three)` is created
+with category `$PHRASE` and span 0:1.  This derivation is passed into
+`NumberFn`, which returns one derivation with logical form `(number 3)` and
+category `$Expr` and span 0:1.  The same goes for *four* on span 2:3.
+
+The next two rules map the tokens *plus* and *times* to a static logical form
 (returned by `ConstantFn`):
 
     (rule $Operator (plus) (ConstantFn (lambda y (lambda x (call + (var x) (var y)))) (-> fb:type.number (-> fb:type.number fb:type.number))))
     (rule $Operator (times) (ConstantFn (lambda y (lambda x (call * (var x) (var y)))) (-> fb:type.number (-> fb:type.number fb:type.number))))
 
-Here, the logical form is
+Note that the `ConstantFn` specifies both the logical form and the type (note
+that the type is a property of the derivation, not of the logical form).  Here,
+the logical form is
 
     (lambda y (lambda x (call + (var x) (var y))))
 
@@ -223,19 +282,6 @@ term `$Partial` and returns a new derivation by backward application:
 We allow some RHS elements to be optional, so that we could have typed in
 `three plus four` or `three plus four?`.  `IdentityFn` simply takes the logical
 form corresponding to `$Expr` and passes it up.
-
-Note that some categories are special:
-
-- $TOKEN (base case): matches any single token.
-- $PHRASE (base case): matches any span of tokens.
-- $ROOT (final output): any Derivation produced for $ROOT spanning the entire
-  utterance is returned as a Derivation for the utterance.
-
-We also have lemmatized versions of the base cases: the base derivations
-corresponding to $LEMMA_TOKEN and $LEMMA_PHRASE have denotations which are the
-the lemmatized versions of the tokens underneath (for example $TOKEN would
-yield *cows*, while $LEMMA_TOKEN would yield *cow*).  Stanford CoreNLP is
-required for lemmatization.
 
 ## Learning
 
@@ -305,7 +351,7 @@ to perform what we just did:
 This will create a directory `tutorial.out` which records all the information
 associated with this run.
 
-## Lambda calculus and SPARQL
+## Lambda DCS and SPARQL
 
 So far, we have worked with `JavaExecutor` as the engine that maps logical
 forms to denotations by executing Java code.  A major application of semantic
@@ -388,7 +434,7 @@ We can also get the city with the largest area:
     (execute (argmax 1 1 (fb:type.object.type fb:location.citytown) fb:location.location.area))
 
 Now let us take a closer look at what is going on with these logical forms
-under the hood.  We are using a logical language called lambda-DCS.
+under the hood.  We are using a logical language called lambda DCS.
 
 Here are the following types of logical forms:
 
@@ -403,7 +449,7 @@ Here are the following types of logical forms:
 1. Mu abstraction `(mark (var |v|) |u|)`: same as the unary |u| denoting
    entities |x|, with the exception that |x| must be equal to all occurrences
    of the variable |v| in |u|.
-2. Lambda abstraction `(lambda (var |v|) |u|)`: produces a binary (x,y) where
+1. Lambda abstraction `(lambda (var |v|) |u|)`: produces a binary (x,y) where
    `x` is in the set denoted by `u` and `y` is the value taken on by variable
    `v`.
 
@@ -412,34 +458,52 @@ See `SparqlExecutorTest.java` for examples.
 ### Parsing
 
 So far, we have described the denotations of logical forms for querying a graph
-database.  Now we focus on parsing natural language utterances into these logical forms.
+database.  Now we focus on parsing natural language utterances into these
+logical forms.
 
-The core challenge is at the leixcal level: mapping natural language phrases to
-logical predicates.  To do this, we add a rule which relies on `LexiconFn`,
-which uses a Lucene index to perform the lookup:
+The core challenge is at the lexical level: mapping natural language phrases
+(e.g., *born in*) to logical predicates (e.g.,
+`fb:people.person.place_of_birth`).  First, we need to download the files that
+specify this mapping (roughly, the mappings were created by aligning Freebase
+and ClueWeb, as described the EMNLP 2013 paper, but you can just take these
+mappings as given for now):
 
-    (rule $Entity ($PHRASE) (LexiconFn entity allowInexact))  # e.g., California
-    (rule $Unary ($PHRASE) (LexiconFn unary))                 # e.g., cities
-    (rule $Binary ($PHRASE) (LexiconFn binary))               # e.g., in
+    ./download-dependencies emnlp2013
+
+Now, we can add rules with semantic function `LexiconFn`:
+
+    (rule $Entity ($PHRASE) (LexiconFn entity allowInexact))  # e.g., Ulm
+    (rule $Unary ($LEMMA_PHRASE) (LexiconFn unary))           # e.g., physicists
+    (rule $Binary ($PHRASE) (LexiconFn binary))               # e.g., born in
     (rule $ROOT ($Entity) (IdentityFn))
+    (rule $ROOT ($Unary) (IdentityFn))
 
-Type the following into the prompt:
+LexiconFn takes logical forms which corresponds to strings (e.g., `(string physicist)`)
+and converts them into Freebase logical forms (e.g.,
+`(fb:people.person.profession fb:en.physicist)`).
 
-    Barack Obama
+Type the following utterances into the prompt:
 
-This should return a long list of candidate entities which approximately match the input.
+    `Ulm`
 
-Now for some compositionality, add the following rules, which will take two
+    `physicists`
+
+Each utterance should return a list of candidate entities.
+
+Now for compositionality, add the following rules, which will take two
 logical forms and either perform an intersection or a join:
 
     (rule $Set ($Unary $PartialSet) (MergeFn and))
     (rule $PartialSet ($Binary $Entity) (JoinFn binary,unary unaryCanBeArg1))
+    (rule $ROOT ($Set) (IdentityFn))
 
 This allows us to type in:
 
-    cities in California
+    `physicists born in Ulm`
 
-Currently, there are too many possibilities.
+You should get many candidates, but the correct answer should appear in the list:
+
+    (derivation (formula (and (fb:people.person.profession fb:en.physicist) (!fb:location.location.people_born_here fb:en.ulm))) (value (list (name fb:en.albert_einstein "Albert Einstein"))) (type fb:people.person))
 
 For an example of a more complex grammar, look at `data/emnlp2013.grammar`.
 
@@ -449,13 +513,13 @@ For an example of a more complex grammar, look at `data/emnlp2013.grammar`.
 
     `city with the largest area`
 
-    `states bordering Oregon and Washington`
-
     `top 5 cities by area`
 
     `countries whose capitals have area at least 500 squared kilometers`
 
-    `second tallest mountain in Europe`
+    `states bordering Oregon and Washington`
+
+    `second tallest mountain in France`
 
     `country with the most number of rivers`
 
