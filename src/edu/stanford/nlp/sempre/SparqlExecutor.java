@@ -492,8 +492,7 @@ public class SparqlExecutor extends Executor {
         // Superlative (new environment, close scope)
         SuperlativeFormula formula = (SuperlativeFormula)rawFormula;
 
-        // boolean useOrderBy = formula.rank != 1 || formula.count != 1;
-        boolean useOrderBy = true; // Setting this flag to always be true to avoid the buggy argmax 1 1 case.
+        boolean useOrderBy = formula.rank != 1 || formula.count != 1;
         boolean isMax = formula.mode == SuperlativeFormula.Mode.argmax;
         if (useOrderBy) {
           // Method 1: use ORDER BY (can deal with offset and limit, but can't be nested, and doesn't handle ties at the top)
@@ -515,9 +514,6 @@ public class SparqlExecutor extends Executor {
           select.offset = formula.rank - 1;
           select.limit = formula.count;
           block.add(select);
-
-        // TODO: Fix this else case. I haven't understood the code yet, but all I know right is that this part,
-        // instead of resolving ties, seemingly answers with random entities
         } else {
           // Method 2: use MAX (can be nested, handles ties at the top)
           // (argmax 1 1 h r) ==> (h (r (mark degree (max ((reverse r) e)))))
