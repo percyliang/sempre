@@ -6,16 +6,16 @@ require 'execrunner'
 # Note: run this on the NLP machines because SPARQL server is running on jack.
 if ARGV.size == 0
   puts "Usage:"
-  puts "  ./run @mode=train          [additional options] # Train semantic parser"
-  puts "  ./run @mode=interact       [additional options] # Interactive mode for testing"
+  puts "  ./sempre @mode=train          [additional options] # Train semantic parser"
+  puts "  ./sempre @mode=interact       [additional options] # Interactive mode for testing"
   puts
-  puts "  ./run @mode=cacheserver    [additional options] # Start cache server"
-  puts "  ./run @mode=sparqlserver   [additional options] # Start sparql server"
+  puts "  ./sempre @mode=cacheserver    [additional options] # Start cache server"
+  puts "  ./sempre @mode=sparqlserver   [additional options] # Start sparql server"
   puts
-  puts "  ./run @mode=filterfreebase [additional options] # Filter raw Freebase RDF dump"
-  puts "  ./run @mode=indexfreebase  [additional options] # Build Freebase index"
+  puts "  ./sempre @mode=filterfreebase [additional options] # Filter raw Freebase RDF dump"
+  puts "  ./sempre @mode=indexfreebase  [additional options] # Build Freebase index"
   puts
-  puts "  ./run @mode=test           [additional options] # Run TestNG test suite"
+  puts "  ./sempre @mode=test           [additional options] # Run TestNG test suite"
   puts
   puts "Additional options can be any of the following:"
   puts "  - Additional program options (e.g., -BeamParser.beamSize 3)"
