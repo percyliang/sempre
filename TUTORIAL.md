@@ -480,7 +480,7 @@ If you do not have this set up, run the following two commands:
 Now, restart the SEMPRE shell, pointing the SparqlExecutor to the Virtuoso
 instance:
 
-    ./sempre @mode=interact  @domain=webquestions  @sparqlserver=localhost:3093  @cacheserver=local  @load=15 @executeTopOnly=0 -Grammar.inPaths empty_grammar
+    ./sempre @mode=interact  @domain=webquestions  @sparqlserver=localhost:3093  @cacheserver=local  @load=15 @executeTopOnly=0 -Grammar.inPaths data/empty.grammar
 
 Now, we can add rules with semantic function `LexiconFn`:
 
