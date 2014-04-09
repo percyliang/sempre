@@ -139,11 +139,11 @@ def cachePaths(lexiconFnCachePath, sparqlExecutorCachePath)
       case cacheserver
       when 'none' then l()
       when 'local' then l( # Use files directly - don't run more than one job that does this!
-        o('LexiconFn.cachePath', 'LexiconFn.cache'),
+        o('Lexicon.cachePath', 'LexiconFn.cache'),
         o('SparqlExecutor.cachePath', 'SparqlExecutor.cache'),
       nil)
       else l(
-        o('LexiconFn.cachePath', cacheserver + ':' + lexiconFnCachePath),
+        o('Lexicon.cachePath', cacheserver + ':' + lexiconFnCachePath),
         o('SparqlExecutor.cachePath', cacheserver + ':' + sparqlExecutorCachePath),
       nil)
       end
@@ -195,7 +195,7 @@ def free917
 
     l(
       o('EntityLexicon.exactMatchIndex','lib/lucene/4.4/free917/'),
-      o('LexiconFn.entitySearchStrategy','exact'),
+      o('Lexicon.entitySearchStrategy','exact'),
       cachePaths('LexiconFn.cache', 'SparqlExecutor.cache'),
     nil),
   nil)
@@ -269,7 +269,7 @@ def selectDomain
       'none' => l(),
       'webquestions' => webquestions,
       'free917' => free917,
-      'jayant' => jayant
+      'jayant' => jayant,
     }),
   nil)
 end

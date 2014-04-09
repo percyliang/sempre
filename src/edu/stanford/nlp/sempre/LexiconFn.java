@@ -4,11 +4,12 @@ import com.google.common.base.Joiner;
 import edu.stanford.nlp.sempre.fbalignment.lexicons.EntrySource;
 import edu.stanford.nlp.sempre.fbalignment.lexicons.LexicalEntry;
 import edu.stanford.nlp.sempre.fbalignment.lexicons.LexicalEntry.BinaryLexicalEntry;
-import edu.stanford.nlp.sempre.fbalignment.lexicons.LexicalEntry.LexicalEntrySerializer;
 import edu.stanford.nlp.sempre.fbalignment.lexicons.Lexicon;
+import edu.stanford.nlp.sempre.fbalignment.lexicons.EntityLexicon;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import fig.basic.*;
+
 import org.apache.lucene.queryparser.classic.ParseException;
 
 import java.io.IOException;
@@ -26,13 +27,10 @@ public class LexiconFn extends SemanticFn {
     public double entityMaxDistance = Integer.MAX_VALUE;
     @Option(gloss = "Keep entries with at least this popularity")
     public double minPopularity = 0;
-
+    @Option(gloss = "Number of entities to return from entity lexicon")
+    public int maxEntityEntries = 100; //we filter here and not in entity lexicon so that don't need different cache for different numbers
     @Option(gloss = "Verbose") public int verbose = 0;
-    @Option(gloss = "The path for the cache") public String cachePath;
     @Option(gloss = "Class name for lexicon") public String lexiconClassName;
-    @Option(gloss = "Cache entities only") public boolean cacheEntitiesOnly = true;
-    @Option(gloss = "Search strategies for entities: exact, inexact, combined")
-    public String entitySearchStrategy = "inexact";
   }
 
   public static Options opts = new Options();
@@ -41,26 +39,12 @@ public class LexiconFn extends SemanticFn {
   public static Evaluation lexEval = new Evaluation();
 
   private String mode;  // unary, binary, or entity
-  private boolean allowInexact;  // Allow inexact match?
-  private static StringCache cache;  // Lexicon goes out to Lucene, which can be expensive (this makes it cheaper)
+  private EntityLexicon.SearchStrategy entitySearchStrategy = Lexicon.opts.entitySearchStrategy;  // For entities, how to search
   private TextToTextMatcher textToTextMatcher = new TextToTextMatcher();
   private FbFormulasInfo fbFormulaInfo;
 
   public LexiconFn() throws IOException {
-    if (lexicon == null) {
-      LogInfo.begin_track("LexiconFn.lexicon");
-
-      if (!opts.entitySearchStrategy.equals("exact") &&
-          !opts.entitySearchStrategy.equals("inexact") &&
-          !opts.entitySearchStrategy.equals("combined"))
-        throw new RuntimeException("Illegal entity search strategy: " + opts.entitySearchStrategy);
-
-      lexicon = new Lexicon(opts.entitySearchStrategy);
-      LogInfo.end_track();
-
-      if (opts.cachePath != null)
-        cache = StringCacheUtils.create(opts.cachePath);
-    }
+    lexicon = Lexicon.getSingleton();
     fbFormulaInfo = FbFormulasInfo.getSingleton();
   }
 
@@ -71,7 +55,8 @@ public class LexiconFn extends SemanticFn {
       if (value.equals("unary")) this.mode = "unary";
       else if (value.equals("binary")) this.mode = "binary";
       else if (value.equals("entity")) this.mode = "entity";
-      else if (value.equals("allowInexact")) this.allowInexact = true;
+      else if (value.equals("allowInexact")/*deprecate this*/ || value.equals("inexact")) this.entitySearchStrategy = EntityLexicon.SearchStrategy.inexact;
+      else if (value.equals("fbsearch")) this.entitySearchStrategy = EntityLexicon.SearchStrategy.fbsearch;
       else throw new RuntimeException("Invalid argument: " + value);
     }
   }
@@ -228,46 +213,22 @@ public class LexiconFn extends SemanticFn {
     return newDeriv;
   }
 
-  List<LexicalEntry> getCache(String mode, String query) {
-    if (cache == null) return null;
-    String key = mode + ":" + query;
-    String response = cache.get(key);
-    if (response == null) return null;
-    LispTree tree = LispTree.proto.parseFromString(response);
-    List<LexicalEntry> entries = new ArrayList<LexicalEntry>();
-    for (int i = 0; i < tree.children.size(); i++)
-      entries.add(LexicalEntrySerializer.entryFromLispTree(tree.child(i)));
-    return entries;
-  }
-
-  void putCache(String mode, String query, List<? extends LexicalEntry> entries) {
-    if (cache == null) return;
-    String key = mode + ":" + query;
-    LispTree result = LispTree.proto.newList();
-    for (LexicalEntry entry : entries)
-      result.addChild(LexicalEntrySerializer.entryToLispTree(entry));
-    cache.put(key, result.toString());
-  }
-
   public List<Derivation> call(Example ex, Callable c) {
     if (opts.verbose >= 2)
       LogInfo.begin_track("LexicalFn.call: %s", c.childStringValue(0));
 
-    String query = c.childStringValue(0);
     String phrase = c.childStringValue(0);
     List<Derivation> results = new ArrayList<Derivation>();
 
     try {
       // Entities
       if (mode.equals("entity")) {
+        List<? extends LexicalEntry> entries = lexicon.lookupEntities(phrase, entitySearchStrategy);
         if (opts.verbose >= 2)
-          LogInfo.log("LexiconFn: querying for entity: " + phrase);
-        List<? extends LexicalEntry> entries = getCache("entity", phrase);
-        if (entries == null) {
-          putCache("entity", phrase, entries = getEntityEntries(c, phrase));
-        }
+          LogInfo.logs("LexiconFn.call %s: %s => %s entries", mode, phrase, entries.size());
 
         lexEval.add("entity", entries.isEmpty() ? false : true);
+        entries = entries.subList(0, Math.min(opts.maxEntityEntries, entries.size()));
 
         for (LexicalEntry entry : entries)
           results.add(convert(ex, c, "entity", phrase, entry, null));
@@ -275,31 +236,19 @@ public class LexiconFn extends SemanticFn {
 
       // Unaries
       if (mode.equals("unary")) {
-        List<? extends LexicalEntry> entries;
-        if (opts.cacheEntitiesOnly)
-          entries = lexicon.lookupUnaryPredicates(query);
-        else {
-          entries = getCache("unary", query);
-          if (entries == null)
-            putCache("unary", query, entries = lexicon.lookupUnaryPredicates(query));
-        }
-
+        List<? extends LexicalEntry> entries = lexicon.lookupUnaryPredicates(phrase);
+        if (opts.verbose >= 2)
+          LogInfo.logs("LexiconFn.call %s: %s => %s entries", mode, phrase, entries.size());
         lexEval.add("unary", entries.isEmpty() ? false : true);
         for (LexicalEntry entry : entries)
-          results.add(convert(ex, c, "unary", query, entry, null));
+          results.add(convert(ex, c, "unary", phrase, entry, null));
       }
 
       // Binaries
       if (mode.equals("binary")) {
-        List<? extends LexicalEntry> entries;
-        if (opts.cacheEntitiesOnly)
-          entries = lexicon.lookupBinaryPredicates(query);
-        else {
-          entries = getCache("binary", query);
-          if (entries == null)
-            putCache("binary", query, entries = lexicon.lookupBinaryPredicates(query));
-        }
-
+        List<? extends LexicalEntry> entries = lexicon.lookupBinaryPredicates(phrase);
+        if (opts.verbose >= 2)
+          LogInfo.logs("LexiconFn.call %s: %s => %s entries", mode, phrase, entries.size());
         lexEval.add("binary", entries.isEmpty() ? false : true);
 
         //this set will contain pairs of types that appeared, each time a new one appears
@@ -308,15 +257,14 @@ public class LexiconFn extends SemanticFn {
         Counter<Pair<String, String>> typesThatAlreadyAppeared = new ClassicCounter<Pair<String, String>>();
 
         for (LexicalEntry entry : entries) {
-
           //while the lexicon has CVT entries we just ignore them
           if (fbFormulaInfo.isCvt(((BinaryLexicalEntry) entry).expectedType1) || fbFormulaInfo.isCvt(((BinaryLexicalEntry) entry).expectedType2))
             continue;
 
-          Derivation deriv = convert(ex, c, "binary", query, entry, typesThatAlreadyAppeared);
+          Derivation deriv = convert(ex, c, "binary", phrase, entry, typesThatAlreadyAppeared);
           // add context matching feature
           if (FeatureExtractor.containsDomain("context")) {
-            if (!doesContextMatch(ex, deriv, (BinaryLexicalEntry) entry, query))
+            if (!doesContextMatch(ex, deriv, (BinaryLexicalEntry) entry, phrase))
               deriv.addFeature("context", "binary.contextMismatch");
           }
           results.add(deriv);
@@ -331,23 +279,6 @@ public class LexiconFn extends SemanticFn {
     if (opts.verbose >= 2) LogInfo.end_track();
 
     return results;
-  }
-
-  private List<? extends LexicalEntry> getEntityEntries(Callable c, String phrase)
-      throws IOException, ParseException {
-    if (opts.entitySearchStrategy.equals("exact")) {
-      return lexicon.lookupExactMatchEntities(phrase);
-    } else if (opts.entitySearchStrategy.equals("inexact")) { // Do inexact match if it is allowed
-      if (allowInexact)
-        return lexicon.lookupInexactMatchEntities(phrase);
-      return Collections.emptyList();
-    } else if (opts.entitySearchStrategy.equals("combined")) {
-      if (allowInexact)
-        return lexicon.lookupInexactMatchEntities(phrase);
-      return lexicon.lookupExactMatchEntities(phrase);
-    } else {
-      throw new RuntimeException("Invalid entitySearchStrategy: " + opts.entitySearchStrategy);
-    }
   }
 
   /** For now this ignores stemming!!! */

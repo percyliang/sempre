@@ -35,8 +35,8 @@ public class LambdaFormula extends Formula {
     LambdaFormula that = (LambdaFormula) thatObj;
     return this.var.equals(that.var) && this.body.equals(that.body);
   }
-  @Override
-  public int hashCode() {
+  
+  public int computeHashCode() {
     int hash = 0x7ed55d16;
     hash = hash * 0xd3a2646c + var.hashCode();
     hash = hash * 0xd3a2646c + body.hashCode();

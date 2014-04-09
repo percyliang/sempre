@@ -18,7 +18,7 @@ import java.util.List;
 public abstract class SemanticFn {
   public static class Options {
     @Option(gloss = "Whether or not to add to Derivation.localChoices during " +
-        "function application.")
+        "function application (for debugging only).")
     public boolean trackLocalChoices = false;
   }
 
@@ -70,11 +70,8 @@ public abstract class SemanticFn {
       new CallInfo("", -1, -1, Rule.nullRule, new ArrayList<Derivation>());
   }
 
-  // Important: all subclasses are responsible for:
-  //  - setting deriv.semTypes
-  //  - setting deriv.auxSemTypes
-  //  - calling deriv.setFormula()
-  // from applying this semantic function to args.
+  // Main entry point: given information the arguments of the SemanticFn,
+  // return a list of Derivations.
   public abstract List<Derivation> call(Example ex, Callable c);
 
   public LispTree toLispTree() { return tree; }

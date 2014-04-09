@@ -26,8 +26,7 @@ public class ValueFormula<T extends Value> extends PrimitiveFormula {
     return true;
   }
 
-  @Override
-  public int hashCode() {
+  public int computeHashCode() {
     return value.hashCode();
   }
 }

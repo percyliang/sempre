@@ -72,6 +72,8 @@ public class Derivation implements SemanticFn.Callable {
   int maxUnsortedBeamPosition = -1;  // Lowest position that this tree or any of its children is on the beam (before sorting)
   int preSortBeamPosition = -1;
   int postSortBeamPosition = -1;
+  //caching the hashcode
+  int hashCode = -1;
 
   // Initially, derivation is created with these parameters.
   // Then, SemanticFn is called to create many copies of this derivation with different
@@ -79,10 +81,10 @@ public class Derivation implements SemanticFn.Callable {
   // TODO: why do we need these constructors if we have the Builder?
   /** Constructor for humans. */
   public Derivation(String cat, int start, int end,
-                    Rule rule,
-                    List<Derivation> children,
-                    Formula formula,
-                    SemType type) {
+      Rule rule,
+      List<Derivation> children,
+      Formula formula,
+      SemType type) {
     this.cat = cat;
     this.start = start;
     this.end = end;
@@ -95,8 +97,8 @@ public class Derivation implements SemanticFn.Callable {
 
   /** Constructor for humans. */
   public Derivation(String cat, int start, int end,
-                    Rule rule,
-                    List<Derivation> children) {
+      Rule rule,
+      List<Derivation> children) {
     this(cat, start, end, rule, children, null, null);
   }
 
@@ -195,18 +197,18 @@ public class Derivation implements SemanticFn.Callable {
 
   @JsonCreator
   Derivation(@JsonProperty("cat") String cat,
-             @JsonProperty("start") int start,
-             @JsonProperty("end") int end,
-             @JsonProperty("rule") Rule rule,
-             @JsonProperty("children") List<Derivation> children,
-             @JsonProperty("formula") Formula formula,
-             @JsonProperty("type") SemType type,
-             @JsonProperty("localFeatureVector") FeatureVector localFeatureVector,
-             @JsonProperty("score") double score,
-             @JsonProperty("value") Value value,
-             @JsonProperty("executorStats") Evaluation executorStats,
-             @JsonProperty("compatibility") double compatibility,
-             @JsonProperty("prob") double prob) {
+      @JsonProperty("start") int start,
+      @JsonProperty("end") int end,
+      @JsonProperty("rule") Rule rule,
+      @JsonProperty("children") List<Derivation> children,
+      @JsonProperty("formula") Formula formula,
+      @JsonProperty("type") SemType type,
+      @JsonProperty("localFeatureVector") FeatureVector localFeatureVector,
+      @JsonProperty("score") double score,
+      @JsonProperty("value") Value value,
+      @JsonProperty("executorStats") Evaluation executorStats,
+      @JsonProperty("compatibility") double compatibility,
+      @JsonProperty("prob") double prob) {
     this.cat = cat;
     this.start = start;
     this.end = end;
@@ -299,6 +301,7 @@ public class Derivation implements SemanticFn.Callable {
 
   @Override
   public boolean equals(Object thatObj) {
+    //if(thatObj == null || getClass() != thatObj.getClass()) return false;
     Derivation that = (Derivation) thatObj;
     if (!this.cat.equals(that.cat)) return false;
     if (this.start != that.start) return false;
@@ -311,23 +314,19 @@ public class Derivation implements SemanticFn.Callable {
 
   @Override
   public int hashCode() {
-    int hash = 0x7ed55d16;
-    hash = hash * 0xd3a2646c + cat.hashCode();
-    hash = hash * 0xd3a2646c + start;
-    hash = hash * 0xd3a2646c + end;
-    hash = hash * 0xd3a2646c + rule.hashCode();
-    hash = hash * 0xd3a2646c + children.hashCode();
-    hash = hash * 0xd3a2646c + formula.hashCode();
-    return hash;
-  }
-
-  // Like hashCode() but only good enough to break ties (which is all
-  // we need in sortByScore()).  Doesn't need to depend on everything
-  // in Derivation.
-  public int cmpBreakTies() {
-    int hash = 0x7ed55d16;
-    hash = hash * 0xd3a2646c + formula.hashCode();
-    return hash;
+    if(hashCode==-1) {
+      int hash = 0x7ed55d16;
+      hash = hash * 0xd3a2646c + cat.hashCode();
+      hash = hash * 0xd3a2646c + start;
+      hash = hash * 0xd3a2646c + end;
+      hash = hash * 0xd3a2646c + rule.hashCode();
+      hash = hash * 0xd3a2646c + children.hashCode();
+      hash = hash * 0xd3a2646c + formula.hashCode();
+//      Boolean b = isCompleteDerivation();
+//      hash = hash * 0xd3a2646c + b.hashCode(); 
+      hashCode = hash;
+    }
+    return hashCode;
   }
 
   public LispTree toLispTree() {
@@ -348,6 +347,25 @@ public class Derivation implements SemanticFn.Callable {
       if (rule != null) tree.addChild(getRuleLispTree());
     }
     return tree;
+  }
+
+  /**
+   * lisp tree showing the entire parse tree
+   * @return
+   */
+  public LispTree toRecursiveLispTree() {
+    LispTree tree = LispTree.proto.newList();
+    tree.addChild("derivation");
+    tree.addChild(LispTree.proto.newList("span", cat+"["+start+":"+end+"]"));
+    if (formula != null)
+      tree.addChild(LispTree.proto.newList("formula", formula.toLispTree()));
+    for(Derivation child: children)
+      tree.addChild(child.toRecursiveLispTree());
+    return tree;
+  }
+
+  public String toRecursiveString() {
+    return toRecursiveLispTree().toString();
   }
 
   private LispTree getRuleLispTree() {
@@ -402,6 +420,13 @@ public class Derivation implements SemanticFn.Callable {
       child.incrementAllChoices(factor, map);
   }
 
+  //methods added to allow checking if a derivation is complete and completing it
+  public boolean isCompleteDerivation() {return true;}
+  public List<Derivation> complete(Example ex) {
+    throw new RuntimeException("Can not complete a derivation that is already complete, use isCompleteDerivation()");
+  }
+
+
   // Used to compare derivations by score.
   public static class ScoredDerivationComparator implements Comparator<Derivation> {
     @Override
@@ -409,8 +434,8 @@ public class Derivation implements SemanticFn.Callable {
       if (deriv1.score > deriv2.score) return -1;
       if (deriv1.score < deriv2.score) return +1;
       // Ensure reproducible randomness
-      if (deriv1.cmpBreakTies() < deriv2.cmpBreakTies()) return -1;
-      if (deriv1.cmpBreakTies() > deriv2.cmpBreakTies()) return +1;
+      if (deriv1.hashCode() < deriv2.hashCode()) return -1;
+      if (deriv1.hashCode() > deriv2.hashCode()) return +1;
       return 0;
     }
   }

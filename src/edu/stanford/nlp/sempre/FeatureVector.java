@@ -203,6 +203,12 @@ public class FeatureVector {
     }
     LogInfo.end_track();
   }
+  
+  public static void logFeatures(Map<String, Double> features) {
+    for(String key: features.keySet()) {
+      LogInfo.logs("%s\t%s",key,features.get(key));
+    }
+  }
 
   public void clear() {
     if(indicatorFeatures!=null)

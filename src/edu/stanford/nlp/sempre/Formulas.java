@@ -142,6 +142,10 @@ public abstract class Formulas {
       SuperlativeFormula superlative = (SuperlativeFormula)formula;
       return containsFreeVar(superlative.head, var) || containsFreeVar(superlative.relation, var);
     }
+    if (formula instanceof NotFormula) {
+      NotFormula notForm = (NotFormula) formula;
+      return containsFreeVar(notForm.child, var);
+    }
     throw new RuntimeException("Unhandled: " + formula);
   }
     
@@ -203,5 +207,61 @@ public abstract class Formulas {
 
   public static ValueFormula<NameValue> newNameFormula(String id) {
     return new ValueFormula<NameValue>(new NameValue(id));
+  }
+  
+  /*
+   * Extract all subformulas in a string format (to also have primitive values)
+   */
+  public static Set<String> extractSubparts(Formula f) {
+    Set<String> res = new HashSet<String>();
+    extractSubpartsRecursive(f,res);
+    return res;
+  }
+
+  private static void extractSubpartsRecursive(Formula f, Set<String> res) {
+    //base
+    res.add(f.toString());
+    //recurse
+    if(f instanceof AggregateFormula) {
+      AggregateFormula aggFormula = (AggregateFormula) f;
+      extractSubpartsRecursive(aggFormula, res);
+    }
+    else if(f instanceof CallFormula) {
+      CallFormula callFormula = (CallFormula) f;
+      extractSubpartsRecursive(callFormula.func,res);
+      for(Formula argFormula: callFormula.args)
+        extractSubpartsRecursive(argFormula, res);     
+    }
+    else if(f instanceof JoinFormula) {
+      JoinFormula joinFormula = (JoinFormula) f;
+      extractSubpartsRecursive(joinFormula.relation,res);
+      extractSubpartsRecursive(joinFormula.child,res);
+    }
+    else if(f instanceof LambdaFormula) {
+      LambdaFormula lambdaFormula = (LambdaFormula) f;
+      extractSubpartsRecursive(lambdaFormula.body, res);
+    }
+    else if(f instanceof MarkFormula) {
+      MarkFormula markFormula = (MarkFormula) f;
+      extractSubpartsRecursive(markFormula.body, res);
+    }
+    else if(f instanceof MergeFormula) {
+      MergeFormula mergeFormula = (MergeFormula) f;
+      extractSubpartsRecursive(mergeFormula.child1, res);
+      extractSubpartsRecursive(mergeFormula.child2, res);
+    }
+    else if(f instanceof NotFormula) {
+      NotFormula notFormula = (NotFormula) f;
+      extractSubpartsRecursive(notFormula.child, res);
+    }
+    else if(f instanceof ReverseFormula) {
+      ReverseFormula revFormula = (ReverseFormula) f;
+      extractSubpartsRecursive(revFormula.child,res);
+    }
+    else if(f instanceof SuperlativeFormula) {
+      SuperlativeFormula superlativeFormula = (SuperlativeFormula) f;
+      extractSubpartsRecursive(superlativeFormula.head, res);
+      extractSubpartsRecursive(superlativeFormula.relation, res);
+    }
   }
 }

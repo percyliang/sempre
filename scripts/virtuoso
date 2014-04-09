@@ -108,7 +108,7 @@ EOF
   out = open(configPath, 'w')
   out.puts config
   out.close
-  run "#{$virtuosoPath}/install/bin/virtuoso-t +configfile #{configPath} +wait"
+  run "virtuoso-opensource/install/bin/virtuoso-t +configfile #{configPath} +wait"
 end
 
 def add

@@ -58,7 +58,7 @@ public class SparqlExecutor extends Executor {
     @Option(gloss = "Whether to include entity names (mostly for readability)")
     public boolean includeEntityNames = true;
 
-    @Option public int verbose = 2;
+    @Option public int verbose = 1;
   }
 
   public static Options opts = new Options();
@@ -176,12 +176,12 @@ public class SparqlExecutor extends Executor {
     }
 
     // If not cached, then make the actual request.
+    //if (response == null || response.xml == null || response.xml.contains("TIMEOUT")) {
     if (response == null) {
       // Note: begin_track without end_track
       if (opts.verbose >= 1) {
-        LogInfo.begin_track("SparqlExecutor.execute()");
-        if (formula != null) LogInfo.logs("%s", formula);
-        LogInfo.logs("%s", queryStr);
+        LogInfo.begin_track("SparqlExecutor.execute: %s", formula);
+        if (opts.verbose >= 2) LogInfo.logs("%s", queryStr);
       }
 
       // Make actual request
@@ -252,7 +252,7 @@ public class SparqlExecutor extends Executor {
         if (serverResponse.beginTrack && opts.verbose >= 1)
           LogInfo.logs("Error: %s", serverResponse.error);
       }
-      if (serverResponse.beginTrack && opts.verbose >= 1) {
+      if (serverResponse.beginTrack && opts.verbose >= 2) {
         LogInfo.logs("time: %s", queryStats.timeFig);
         LogInfo.logs("errors: %s", queryStats.errors);
       }
@@ -612,14 +612,16 @@ public class SparqlExecutor extends Executor {
     // |results| is (result (binding (uri ...)) ...) or (result (binding (literal ...)) ...)
     List<Value> extract(NodeList results) {
       // For each result (row in a table)...
-      if (beginTrack && opts.verbose >= 1) LogInfo.begin_track("%d results", results.getLength());
+      if (beginTrack && opts.verbose >= 2) {
+        LogInfo.begin_track("%d results", results.getLength());
+      }
       List<Value> values = new ArrayList<Value>();
       for (int i = 0; i < results.getLength(); i++) {
         Value value = nodeToValue(results.item(i));
         values.add(value);
         if (beginTrack && opts.verbose >= 2) LogInfo.logs("%s", value);
       }
-      if (beginTrack && opts.verbose >= 1) LogInfo.end_track();
+      if (beginTrack && opts.verbose >= 2) LogInfo.end_track();
       return values;
     }
 
@@ -676,7 +678,7 @@ public class SparqlExecutor extends Executor {
           LogInfo.warnings("%s returns CVT, probably not intended", formula);
           value = new NameValue(id, description);
         } else {
-          value = new NumberValue("NAN".equals(description) ? Double.NaN : Double.parseDouble(description), unit);
+          value = new NumberValue("NAN".equals(description) || description == null ? Double.NaN : Double.parseDouble(description), unit);
         }
         row.add(value);
       }
@@ -707,7 +709,7 @@ public class SparqlExecutor extends Executor {
   public static class MainOptions {
     @Option(gloss = "Sparql expression to execute") public String sparql;
     @Option(gloss = "Formula to execute") public String formula;
-    @Option(gloss = "File containing formauls to execute")
+    @Option(gloss = "File containing formulas to execute")
     public String formulasPath;
   }
 

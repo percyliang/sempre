@@ -49,8 +49,8 @@ public class AggregateFormula extends Formula {
     if (!this.child.equals(that.child)) return false;
     return true;
   }
-  @Override
-  public int hashCode() {
+  
+  public int computeHashCode() {
     int hash = 0x7ed55d16;
     hash = hash * 0xd3a2646c + mode.toString().hashCode();
     hash = hash * 0xd3a2646c + child.hashCode();

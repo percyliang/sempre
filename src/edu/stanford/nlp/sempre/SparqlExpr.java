@@ -45,7 +45,17 @@ class SparqlBlock implements SparqlExpr {
     //   ?x fb:type.object.type fb:type.datetime
     // because ?x is not actually an entity.
     if (property.equals(FreebaseInfo.TYPE) && isPrimitiveType(arg2)) return;
-    add(new SparqlStatement(arg1, property, arg2, optional));
+    //if (property.equals(FreebaseInfo.CONTAINED_BY)) {
+    // TODO This doesn't work
+    if (false) {
+      int TRANSITIVE_MAX = 3;  // FIXME PARAM
+      String name1 = ((VariableFormula) arg1).name;
+      String name2 = ((VariableFormula) arg2).name;
+      String option_string = String.format("OPTION (TRANSITIVE, t_max (%d), t_in (%s), t_out (%s), t_step('step_no') as %s_%s_dist )", TRANSITIVE_MAX, name1, name2, name1, name2.substring(1));
+      add(new SparqlStatement(arg1, property, arg2, optional, option_string));
+    }
+    else
+      add(new SparqlStatement(arg1, property, arg2, optional));
   }
 
   @Override public String toString() {
@@ -129,12 +139,19 @@ class SparqlStatement implements SparqlExpr {
   public final String relation;
   public final PrimitiveFormula arg2;
   public boolean optional;
+  public String options;
 
   public SparqlStatement(PrimitiveFormula arg1, String relation, PrimitiveFormula arg2, boolean optional) {
     this.arg1 = arg1;
     this.relation = relation;
     this.arg2 = arg2;
     this.optional = optional;
+    this.options = null;
+  }
+
+  public SparqlStatement(PrimitiveFormula arg1, String relation, PrimitiveFormula arg2, boolean optional, String options) {
+    this(arg1, relation, arg2, optional);
+    this.options = options;
   }
 
   public static boolean isOperator(String relation) {
@@ -194,6 +211,9 @@ class SparqlStatement implements SparqlExpr {
     } else {
       result = simpleString();
     }
+
+    if (this.options != null)
+      result += " " + this.options;
 
     return result;
   }

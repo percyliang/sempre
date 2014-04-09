@@ -208,8 +208,10 @@ public class Learner {
     for (int i = 0; i < n; i++) {
       Derivation deriv = derivations.get(i);
       double incr = trueScores[i] - predScores[i];
+      //LogInfo.logs("incr=%s, feature=%s",incr,deriv.getAllFeatureVector().get("alignmentScores :: binary.top"));
       deriv.incrementAllFeatureVector(incr, counts, updateFeatureMatcher);
     }
+    //LogInfo.logs("Gradient=%s",counts);
   }
 
   private Evaluation processExamples(int iter, String group,
@@ -253,8 +255,9 @@ public class Learner {
       logExampleEvaluation(ex);
       accumulateAndLogEvaluation(ex, evaluation, prefix);
       printLearnerEventsIter(ex, iter, group);
-
       LogInfo.end_track();
+      ex.predDerivations.clear();
+      ex.predDerivationsAfterParse.clear();
     }
     if (doUpdateWeights && batchSize > 0)
       updateWeights(counts);

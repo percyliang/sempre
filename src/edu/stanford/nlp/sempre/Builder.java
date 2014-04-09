@@ -15,6 +15,7 @@ public class Builder {
     @Option public String packageName = "edu.stanford.nlp.sempre";
     @Option public String inParamsPath;
     @Option public String executor = "SparqlExecutor";
+    @Option public String parser = "BeamParser";
   }
 
   public static Options opts = new Options();
@@ -51,8 +52,12 @@ public class Builder {
       extractor = new FeatureExtractor(executor);
 
     // Parser
-    if (parser == null)
+    if (parser == null) {
+      if(opts.parser.equals("BeamParser"))
         parser = new BeamParser(grammar, extractor, executor);
+      else
+        throw new RuntimeException("Illegal parser: " + opts.parser);
+    }
 
     // Parameters
     if (params == null) {

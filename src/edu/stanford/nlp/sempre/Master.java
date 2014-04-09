@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import edu.stanford.nlp.sempre.fbalignment.lexicons.BinaryLexicon;
 import edu.stanford.nlp.sempre.fbalignment.lexicons.EntityLexicon;
 import edu.stanford.nlp.sempre.fbalignment.lexicons.UnaryLexicon;
+import edu.stanford.nlp.sempre.fbalignment.lexicons.Lexicon;
 import edu.stanford.nlp.sempre.fbalignment.lexicons.WordDistance;
 import fig.basic.*;
 
@@ -39,7 +40,7 @@ public class Master {
     int candidateIndex = -1;
 
     // Detailed information
-    List<String> lines = new ArrayList<String>();
+    List<String> lines = new ArrayList<>();
 
     public String getAnswer() {
       if (ex.getPredDerivations().size() == 0)
@@ -61,7 +62,7 @@ public class Master {
 
   private Builder builder;
   private Learner learner;
-  private HashMap<String, Session> sessions = new LinkedHashMap<String, Session>();
+  private HashMap<String, Session> sessions = new LinkedHashMap<>();
 
   public Master(Builder builder) {
     this.builder = builder;
@@ -87,7 +88,7 @@ public class Master {
     LogInfo.log("Enter an utterance to parse or one of the following commands:");
     LogInfo.log("  (help): show this help message");
     LogInfo.log("  (status): prints out status of the system");
-    LogInfo.log("  (set |option| |value|): set a command-line option (e.g., (set BeamParser.verbose 3))");
+    LogInfo.log("  (set |option| |value|): set a command-line option (e.g., (set Parser.verbose 5))");
     LogInfo.log("  (reload): reload the grammar/parameters");
     LogInfo.log("  (grammar): prints out the grammar");
     LogInfo.log("  (params): dumps all the model parameters");
@@ -116,9 +117,12 @@ public class Master {
       }
       if (line == null) break;
 
+      int indent = LogInfo.getIndLevel();
       try {
         processLine(session, line);
       } catch (Throwable t) {
+        while (LogInfo.getIndLevel() > indent)
+          LogInfo.end_track();
         t.printStackTrace();
       }
     }
@@ -202,12 +206,12 @@ public class Master {
 
   private void printDerivation(Derivation deriv) {
     // Print features
-    HashMap<String, Double> featureVector = new HashMap<String, Double>();
+    HashMap<String, Double> featureVector = new HashMap<>();
     deriv.incrementAllFeatureVector(1, featureVector);
     FeatureVector.logFeatureWeights("Pred", featureVector, builder.params);
 
     // Print choices
-    Map<String, Integer> choices = new LinkedHashMap<String, Integer>();
+    Map<String, Integer> choices = new LinkedHashMap<>();
     deriv.incrementAllChoices(1, choices);
     FeatureVector.logChoices("Pred", choices);
 
@@ -234,21 +238,9 @@ public class Master {
     LogInfo.setFileOut(null);
   }
 
-  LispTree applyMacros(Session session, LispTree tree) {
-    if (tree.isLeaf()) {
-      LispTree replacement = session.macros.get(tree.value);
-      if (replacement != null) return replacement;
-      return tree;
-    }
-    LispTree newTree = LispTree.proto.newList();
-    for (LispTree child : tree.children)
-      newTree.addChild(applyMacros(session, child));
-    return newTree;
-  }
-
   private void handleCommandHelper(Session session, String line, Response response) {
     LispTree tree = LispTree.proto.parseFromString(line);
-    tree = applyMacros(session, tree);
+    tree = Grammar.applyMacros(session.macros, tree);
 
     String command = tree.child(0).value;
 
@@ -392,6 +384,8 @@ public class Master {
             "FreebaseInfo", FreebaseInfo.opts,
             "BridgeFn", BridgeFn.opts,
             "WordDistance", WordDistance.opts,
+            "FormulaRetriever",FormulaRetriever.opts,
+            "Lexicon", Lexicon.opts,
         });
     return parser;
   }

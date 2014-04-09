@@ -2,6 +2,7 @@ package edu.stanford.nlp.sempre;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
+
 import fig.basic.*;
 
 import java.util.*;
@@ -21,36 +22,17 @@ public class BeamParser extends Parser {
     @Option public int beamSize = 500;
     @Option public int maxNewTreesPerSpan = Integer.MAX_VALUE;
   }
-
   public static Options opts = new Options();
 
-  // Precomputations to make looking up grammar rules faster.
-  ArrayList<Rule> catUnaryRules;  // Unary rules with category on RHS
-  Trie trie;  // For all other rules
+  Trie trie;  //for non-catunary rules
 
   public BeamParser(Grammar grammar, FeatureExtractor extractor, Executor executor) {
     super(grammar, extractor, executor);
-
-    trie = new Trie();
-    catUnaryRules = new ArrayList<Rule>();
-
     // Index the non-cat-unary rules
+    trie = new Trie();
     for (Rule rule : grammar.rules)
       if (!rule.isCatUnary())
         trie.add(rule);
-
-    // Handle catUnaryRules
-    Map<String, List<Rule>> graph = new HashMap<String, List<Rule>>();  // Node from LHS to list of rules
-    for (Rule rule : grammar.rules)
-      if (rule.isCatUnary())
-        MapUtils.addToList(graph, rule.lhs, rule);
-
-    // Topologically sort catUnaryRules so that B->C occurs before A->B
-    Map<String, Boolean> done = new HashMap<String, Boolean>();
-    for (String node : graph.keySet())
-      traverse(catUnaryRules, node, graph, done);
-
-    LogInfo.logs("BeamParser: %d catUnaryRules (sorted), %d nonCatUnaryRules (in trie)", catUnaryRules.size(), grammar.rules.size() - catUnaryRules.size());
   }
 
   public int getDefaultBeamSize() {
@@ -64,8 +46,8 @@ public class BeamParser extends Parser {
   }
 
   public ParserState newParserState(Params params,
-                                    Example ex,
-                                    ParserState coarseState) {
+      Example ex,
+      ParserState coarseState) {
     return new BeamParserState(
         ParserState.Mode.full,
         this, params, ex, coarseState);
@@ -83,10 +65,10 @@ class BeamParserState extends ParserState {
   private final BeamParser parser;
 
   public BeamParserState(Mode mode,
-                         BeamParser parser,
-                         Params params,
-                         Example ex,
-                         ParserState coarseState) {
+      BeamParser parser,
+      Params params,
+      Example ex,
+      ParserState coarseState) {
     super(mode, parser, params, ex, coarseState);
     this.parser = parser;
   }
@@ -177,7 +159,6 @@ class BeamParserState extends ParserState {
             getExample(),
             new SemanticFn.CallInfo(rule.lhs, start, end, rule, ImmutableList.copyOf(children)));
         StopWatchSet.end();
-
         for (Derivation newDeriv : results) {
           featurizeAndScoreDerivation(newDeriv);
           addToChart(newDeriv);
@@ -185,10 +166,10 @@ class BeamParserState extends ParserState {
         return results.size();
       } else if (getMode() == Mode.bool) {
         Derivation deriv = new Derivation.Builder()
-            .cat(rule.lhs).start(start).end(end).rule(rule)
-            .children(ImmutableList.copyOf(children))
-            .formula(Formula.nullFormula)
-            .createDerivation();
+        .cat(rule.lhs).start(start).end(end).rule(rule)
+        .children(ImmutableList.copyOf(children))
+        .formula(Formula.nullFormula)
+        .createDerivation();
         addToChart(deriv);
         return 1;
       } else {
@@ -229,11 +210,11 @@ class BeamParserState extends ParserState {
   // children: the derivations that't we're building up.
   // numNew: Keep track of number of new derivations created
   private void applyNonCatUnaryRules(int start,
-                                     int end,
-                                     int i,
-                                     Trie node,
-                                     ArrayList<Derivation> children,
-                                     IntRef numNew) {
+      int end,
+      int i,
+      Trie node,
+      ArrayList<Derivation> children,
+      IntRef numNew) {
     if (node == null) return;
     if (!coarseAllows(node, start, end)) return;
 
@@ -246,8 +227,11 @@ class BeamParserState extends ParserState {
     // Base case: our fencepost has walked to the end of the span, so
     // apply the rule on all the children gathered during the walk.
     if (i == end) {
-      for (Rule rule : node.rules)
-        numNew.value += applyRule(start, end, rule, children);
+      for (Rule rule : node.rules) {
+        if(coarseAllows(rule.lhs, start, end)) {
+          numNew.value += applyRule(start, end, rule, children);
+        }
+      }
       return;
     }
 
@@ -274,34 +258,3 @@ class BeamParserState extends ParserState {
   }
 }
 
-////////////////////////////////////////////////////////////
-
-/**
- * Used to access rules efficiently by walking down their RHS.
- *
- * @author Percy Liang
- */
-class Trie {
-  ArrayList<Rule> rules = new ArrayList<Rule>();
-  HashMap<String, Trie> children = new HashMap<String, Trie>();
-  // Set of LHS categories of all rules in this subtree
-  Set<String> cats = new HashSet<String>();
-
-  Trie next(String item) { return children.get(item); }
-
-  void add(Rule rule) { add(rule, 0); }
-  private void add(Rule rule, int i) {
-    cats.add(rule.lhs);
-
-    if (i == rule.rhs.size()) {
-      rules.add(rule);
-      return;
-    }
-
-    String item = rule.rhs.get(i);
-    Trie child = children.get(item);
-    if (child == null)
-      children.put(item, child = new Trie());
-    child.add(rule, i + 1);
-  }
-}

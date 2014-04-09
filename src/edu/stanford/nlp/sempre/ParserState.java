@@ -20,12 +20,12 @@ public abstract class ParserState {
   private final Params params;
   private final Example ex;
   private final ParserState coarseState; // Used to prune (optional)
-  private final int numTokens;
+  final int numTokens;
 
   // Dynamic programming chart
   // cell (start, end, category) -> list of derivations (sorted by
   // decreasing score) [beam]
-  private final Map<String, List<Derivation>>[][] chart;
+  final Map<String, List<Derivation>>[][] chart;
 
   private boolean execAllowed;
 
@@ -38,16 +38,22 @@ public abstract class ParserState {
   protected String maxCellDescription;
   // Did any hypotheses fall off the beam?
   protected boolean fallOffBeam;
+  protected int totalDerivsInChart=0;
 
   // Parser timing
-  private StopWatch watch;
+  StopWatch watch;
+
+  //whether to create derivations based on subparts
+  private boolean filterDerivationsBySubparts = false;
+  //subpart descriptions
+  private Set<String> subParts = null;
 
   @SuppressWarnings({"unchecked"})
   public ParserState(Mode mode,
-                     Parser parser,
-                     Params params,
-                     Example ex,
-                     ParserState coarseState) {
+      Parser parser,
+      Params params,
+      Example ex,
+      ParserState coarseState) {
     this.mode = mode;
     this.parser = parser;
     this.params = params;
@@ -58,12 +64,20 @@ public abstract class ParserState {
 
     // Initialize the chart.
     this.chart = (HashMap<String, List<Derivation>>[][])
-      Array.newInstance(
-          HashMap.class,
-          numTokens, numTokens + 1);
+        Array.newInstance(
+            HashMap.class,
+            numTokens, numTokens + 1);
     for (int start = 0; start < numTokens; start++) {
       for (int end = start + 1; end <= numTokens; end++) {
         chart[start][end] = new HashMap<String, List<Derivation>>();
+      }
+    }
+  }
+  
+  public void clearChart() {
+    for (int start = 0; start < numTokens; start++) {
+      for (int end = start + 1; end <= numTokens; end++) {
+        chart[start][end].clear();
       }
     }
   }
@@ -116,7 +130,29 @@ public abstract class ParserState {
   }
 
   void addToChart(Derivation deriv) {
+    if(filterDerivationsBySubparts && !isValidSubpartDerivation(deriv))
+      return;
     MapUtils.addToList(chart[deriv.start][deriv.end], deriv.cat, deriv);
+    totalDerivsInChart++;
+  }
+
+  @SuppressWarnings({"unchecked"})
+  // TODO: hash the formulas rather than the strings.
+  private boolean isValidSubpartDerivation(Derivation deriv) {
+    if(deriv.formula==null)
+      return true;
+    if(deriv.formula instanceof PrimitiveFormula) {
+      ValueFormula<Value> valueFormula = (ValueFormula<Value>) deriv.formula;
+      if(valueFormula.value instanceof StringValue)
+        return true;
+    }
+
+    if("(type fb:type.text)".equals(deriv.type.toString()))
+      return true;
+    boolean valid = subParts.contains(deriv.formula.toString()); 
+    if(parser.verbose(2))
+      LogInfo.logs("ParserState.isValidSubpart: formula=%s, valid=%s",deriv.formula,valid);
+    return valid;
   }
 
   void setExecAllowed(boolean execAllowed) {
@@ -126,8 +162,8 @@ public abstract class ParserState {
   protected void featurizeAndScoreDerivation(Derivation deriv) {
     if (parser.verbose(deriv.isRoot(numTokens) ? 2 : 3))
       LogInfo.logs(
-          "featurizeAndScore %s %s: %s",
-          deriv.cat, ex.spanString(deriv.start, deriv.end), deriv);
+          "featurizeAndScore %s %s: %s, %s",
+          deriv.cat, ex.spanString(deriv.start, deriv.end), deriv,deriv.rule);
 
     // Compute features
     parser.extractor.extractLocal(ex, deriv);
@@ -152,16 +188,20 @@ public abstract class ParserState {
     // Remove all derivations associated with (cat, start, end) that aren't reachable.
     for (int start = 0; start < numTokens; start++) {
       for (int end = start + 1; end <= numTokens; end++) {
-        Set<String> toRemoveCats = new HashSet<String>();
+        List<String> toRemoveCats = new LinkedList<String>();
         for (String cat : chart[start][end].keySet()) {
           String key = catStartEndKey(cat, start, end);
           if (!reachable.contains(key)) {
-            if (parser.verbose(2)) LogInfo.logs("Pruned %s", key);
             toRemoveCats.add(cat);
           }
         }
-        for (String cat : toRemoveCats)
+        Collections.sort(toRemoveCats);
+        for (String cat : toRemoveCats) {
+          if(parser.verbose(1)) {
+            LogInfo.logs("Pruning chart %s(%s,%s)",cat,start,end);
+          }
           chart[start][end].remove(cat);
+        }
       }
     }
   }
@@ -188,14 +228,12 @@ public abstract class ParserState {
   // For pruning with the coarse state
   protected boolean coarseAllows(Trie node, int start, int end) {
     if (coarseState == null) return true;
-    //if (!SetUtils.intersects(node.cats, coarseState.getChart()[start][end].keySet())) LogInfo.logs("PRUNED %s %s", node.cats, ex.spanString(start, end));
     return SetUtils.intersects(
         node.cats,
         coarseState.getChart()[start][end].keySet());
   }
   protected boolean coarseAllows(String cat, int start, int end) {
     if (coarseState == null) return true;
-    //if (!coarseState.chart[start][end].containsKey(cat)) LogInfo.logs("PRUNED %s %s", cat, ex.spanString(start, end));
     return coarseState.getChart()[start][end].containsKey(cat);
   }
 
@@ -212,20 +250,20 @@ public abstract class ParserState {
     for (int i = 0; i < numTokens; i++) {
       derivs.add(
           new Derivation.Builder()
-              .cat(Rule.tokenCat).start(i).end(i + 1)
-              .rule(Rule.nullRule)
-              .children(empty)
-              .withStringFormulaFrom(ex.token(i))
-              .createDerivation());
+          .cat(Rule.tokenCat).start(i).end(i + 1)
+          .rule(Rule.nullRule)
+          .children(empty)
+          .withStringFormulaFrom(ex.token(i))
+          .createDerivation());
 
       // Lemmatized version
       derivs.add(
           new Derivation.Builder()
-              .cat(Rule.lemmaTokenCat).start(i).end(i + 1)
-              .rule(Rule.nullRule)
-              .children(empty)
-              .withStringFormulaFrom(ex.lemmaToken(i))
-              .createDerivation());
+          .cat(Rule.lemmaTokenCat).start(i).end(i + 1)
+          .rule(Rule.nullRule)
+          .children(empty)
+          .withStringFormulaFrom(ex.lemmaToken(i))
+          .createDerivation());
     }
 
     // All phrases (any length)
@@ -233,20 +271,20 @@ public abstract class ParserState {
       for (int j = i + 1; j <= numTokens; j++) {
         derivs.add(
             new Derivation.Builder()
-                .cat(Rule.phraseCat).start(i).end(j)
-                .rule(Rule.nullRule)
-                .children(empty)
-                .withStringFormulaFrom(ex.phrase(i, j))
-                .createDerivation());
+            .cat(Rule.phraseCat).start(i).end(j)
+            .rule(Rule.nullRule)
+            .children(empty)
+            .withStringFormulaFrom(ex.phrase(i, j))
+            .createDerivation());
 
         // Lemmatized version
         derivs.add(
             new Derivation.Builder()
-                .cat(Rule.lemmaPhraseCat).start(i).end(j)
-                .rule(Rule.nullRule)
-                .children(empty)
-                .withStringFormulaFrom(ex.lemmaPhrase(i, j))
-                .createDerivation());
+            .cat(Rule.lemmaPhraseCat).start(i).end(j)
+            .rule(Rule.nullRule)
+            .children(empty)
+            .withStringFormulaFrom(ex.lemmaPhrase(i, j))
+            .createDerivation());
       }
     }
     return derivs;
@@ -268,8 +306,27 @@ public abstract class ParserState {
     if (getCoarseState() != null)
       eval.add("coarseParseTime", getCoarseState().getParseTime());
     eval.add("parseTime", getParseTime());
+    eval.add("totalDerivs", totalDerivsInChart);
 
     ex.setParseEvaluation(eval);
+    LogInfo.end_track();
+  }
+
+  /**
+   * Generate fomrula subparts and only allow derivations with these formulas
+   * TODO: move this logic to FormulaGenerationInfo.  ParserState is generic and
+   * shouldn't depend on FormulaGenerationInfo.
+   * @param fgInfos
+   */
+  public void setFormulaSubparts(List<FormulaGenerationInfo> fgInfos) {
+    LogInfo.begin_track("Setting formulas subparts");
+    filterDerivationsBySubparts=true;
+    subParts = new HashSet<String>();
+    for(FormulaGenerationInfo fgInfo: fgInfos) {
+      Formula f = fgInfo.generateFormula();
+      subParts.addAll(Formulas.extractSubparts(f));
+    }
+    LogInfo.logs("Number of subparts=%s",subParts.size());
     LogInfo.end_track();
   }
 }

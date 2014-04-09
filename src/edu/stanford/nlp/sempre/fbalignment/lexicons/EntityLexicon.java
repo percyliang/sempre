@@ -1,10 +1,16 @@
 package edu.stanford.nlp.sempre.fbalignment.lexicons;
 
+import edu.stanford.nlp.sempre.StringCache;
+import edu.stanford.nlp.sempre.StringCacheUtils;
 import edu.stanford.nlp.sempre.Formula;
 import edu.stanford.nlp.sempre.fbalignment.index.FbEntitySearcher;
 import edu.stanford.nlp.sempre.fbalignment.index.FbIndexField;
 import edu.stanford.nlp.sempre.fbalignment.lexicons.LexicalEntry.EntityLexicalEntry;
 import edu.stanford.nlp.sempre.fbalignment.utils.FileUtils;
+import edu.stanford.nlp.sempre.StringCache;
+import edu.stanford.nlp.sempre.FreebaseSearch;
+import edu.stanford.nlp.sempre.ValueFormula;
+import edu.stanford.nlp.sempre.NameValue;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.ArrayUtils;
 import edu.stanford.nlp.util.StringUtils;
@@ -16,6 +22,7 @@ import java.io.IOException;
 import java.util.*;
 
 public class EntityLexicon {
+  public enum SearchStrategy { exact, inexact, fbsearch };
 
   public static class Options {
     @Option(gloss = "Number of results return by the lexicon")
@@ -26,22 +33,61 @@ public class EntityLexicon {
     public String exactMatchIndex;
     @Option(gloss = "Path to the inexact match lucene index directory")
     public String inexactMatchIndex = "lib/lucene/4.4/inexact";
+    @Option(gloss = "Cache path to the types path")
+    public String entityTypesPath = "localhost:4000:/u/nlp/data/semparse/scr/freebase/freebase-rdf-2013-06-09-00-00.canonicalized.en-types";
+    @Option(gloss = "Cache path to the mid-to-id path")
+    public String mid2idPath = "localhost:4000:/u/nlp/data/semparse/scr/freebase/freebase-rdf-2013-06-09-00-00.canonical-id-map";
   }
 
   public static Options opts = new Options();
 
-  public static final int MAX_EDIT_DISTANCE = 5;
-  FbEntitySearcher searcher;
-  //private int numOfResults = 20;
+  FbEntitySearcher exactSearcher;  // Lucene
+  FbEntitySearcher inexactSearcher;  // Lucene
 
-  public EntityLexicon(String luceneSearchStrategy) throws IOException {
-    if (luceneSearchStrategy.equals("exact"))
-      searcher = new FbEntitySearcher(opts.exactMatchIndex, opts.numOfDocs, luceneSearchStrategy);
-    else
-      searcher = new FbEntitySearcher(opts.inexactMatchIndex, opts.numOfDocs, luceneSearchStrategy);
+  FreebaseSearch freebaseSearch;  // Google's API
+  StringCache mid2idCache;  // Google's API spits back mids, which we need to convert to ids
+  StringCache entityTypesCache;  // Given those ids, we retrieve the set of types
+
+  public List<EntityLexicalEntry> lookupEntries(String query, SearchStrategy strategy) throws ParseException, IOException {
+    switch (strategy) {
+      case exact:
+        if (exactSearcher == null) exactSearcher = new FbEntitySearcher(opts.exactMatchIndex, opts.numOfDocs, "exact");
+        return lookupEntries(exactSearcher, query);
+      case inexact:
+        if (inexactSearcher == null) inexactSearcher = new FbEntitySearcher(opts.inexactMatchIndex, opts.numOfDocs, "inexact");
+        return lookupEntries(inexactSearcher, query);
+      case fbsearch:
+        if (freebaseSearch == null) freebaseSearch = new FreebaseSearch();
+        if (mid2idCache == null) mid2idCache = StringCacheUtils.create(opts.mid2idPath);
+        if (entityTypesCache == null) entityTypesCache = StringCacheUtils.create(opts.entityTypesPath);
+        return lookupFreebaseSearchEntities(query);
+      default:
+        throw new RuntimeException("Unknown entity search strategy: " + strategy);
+    }
   }
 
-  public List<EntityLexicalEntry> lookupEntries(String textDesc) throws ParseException, IOException {
+  public List<EntityLexicalEntry> lookupFreebaseSearchEntities(String query) {
+    FreebaseSearch.ServerResponse response = freebaseSearch.lookup(query);
+    List<EntityLexicalEntry> entities = new ArrayList<EntityLexicalEntry>();
+    for (FreebaseSearch.Entry e : response.entries) {
+      // Note: e.id might not be the same one we're using (e.g., fb:en.john_f_kennedy_airport versus fb:en.john_f_kennedy_international_airport),
+      // so get the one from our canonical mid2idCache
+      String id = mid2idCache.get(e.mid);
+      if (id == null) continue;  // Skip if no ID (probably not worth referencing)
+      int distance = editDistance(query.toLowerCase(), e.name.toLowerCase());  // Is this actually useful?
+      Counter<String> tokenEditDistanceFeatures = TokenLevelMatchFeatures.extractFeatures(query, e.name);
+      Set<String> types = new HashSet<String>();
+      String typesStr = entityTypesCache.get(id);
+      if (typesStr != null) {
+        for (String type : typesStr.split(","))
+          types.add(type);
+      }
+      entities.add(new EntityLexicalEntry(query, query, Collections.singleton(e.name), new ValueFormula<NameValue>(new NameValue(id, e.name)), EntrySource.FBSEARCH, e.score, distance, types, tokenEditDistanceFeatures));
+    }
+    return entities;
+  }
+
+  public List<EntityLexicalEntry> lookupEntries(FbEntitySearcher searcher, String textDesc) throws ParseException, IOException {
 
     List<EntityLexicalEntry> res = new LinkedList<EntityLexicalEntry>();
     textDesc = textDesc.replaceAll("\\?", "\\\\?").toLowerCase();

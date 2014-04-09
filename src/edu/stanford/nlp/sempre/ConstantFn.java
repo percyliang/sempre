@@ -26,17 +26,23 @@ public class ConstantFn extends SemanticFn {
     if (2 < tree.children.size())
       this.type = SemType.fromLispTree(tree.child(2));
     else {
-      // Try to infer the type
-      if (formula instanceof ValueFormula) {
-        Value value = ((ValueFormula)formula).value;
-        if (value instanceof NumberValue) this.type = SemType.numberType;
-        else if (value instanceof StringValue) this.type = SemType.stringType;
-        else if (value instanceof DateValue) this.type = SemType.dateType;
-        else if (value instanceof NameValue) this.type = SemType.entityType;
-      }
-      if (this.type == null)
-        throw new RuntimeException("Can't infer type of " + formula);
+      this.type = crudeInferType(formula);
     }
+  }
+
+  private SemType crudeInferType(Formula formula) {
+    // Try to infer the type
+    if (formula instanceof ValueFormula) {
+      Value value = ((ValueFormula)formula).value;
+      if (value instanceof NumberValue) return SemType.numberType;
+      else if (value instanceof StringValue) return SemType.stringType;
+      else if (value instanceof DateValue) return SemType.dateType;
+      else if (value instanceof NameValue) return SemType.entityType;
+    } else if (formula instanceof LambdaFormula) {
+      return new FuncSemType(SemType.topType, crudeInferType(((LambdaFormula)formula).body));
+    }
+
+    throw new RuntimeException("Can't infer type of " + formula);
   }
 
   @Override

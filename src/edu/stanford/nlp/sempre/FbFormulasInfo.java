@@ -187,7 +187,7 @@ public class FbFormulasInfo {
     return true;
   }
 
-  /** Reverese the order of arguments */
+  /** Reverse the order of arguments */
   //Takes in a |rawFormula| which is a function.
   public static Formula reverseFormula(Formula rawFormula) {
     if (rawFormula instanceof ValueFormula) {
@@ -198,9 +198,13 @@ public class FbFormulasInfo {
       // Convert (lambda x (relation1 (relation2 (var x)))) <=> (lambda x (!relation2 (!relation1 (var x))))
       // Note: currently only handles chains.  Make this more generic.
       LambdaFormula formula = (LambdaFormula) rawFormula;
-      return new LambdaFormula(formula.var, reverseChain(formula.body, new VariableFormula(formula.var)));
+      if (formula.body instanceof JoinFormula || formula.body instanceof VariableFormula)
+        return new LambdaFormula(formula.var, reverseChain(formula.body, new VariableFormula(formula.var)));
+      else
+        return new ReverseFormula(formula);
     } else {
-      throw new RuntimeException("Not handled: " + rawFormula);
+      return new ReverseFormula(rawFormula);
+      //throw new RuntimeException("Not handled: " + rawFormula);
     }
   }
 
@@ -374,12 +378,7 @@ public class FbFormulasInfo {
     Formula second = ((JoinFormula) ((JoinFormula) lambdaFormula.body).child).relation;
     Set<Formula> binaryFormulas = expandCvts(getBinaryInfo(first).expectedType2);
 
-    //Set<BinaryFormulaInfo> binaries = getCvtExpansions(getBinaryInfo(first));
     for(Formula binaryFormula: binaryFormulas) {
-      //BinaryFormulaInfo b = getBinaryInfo(binaryFormula);
-      //LambdaFormula lFormula = (LambdaFormula) b.formula;
-      //Formula injectedFormula = ((JoinFormula) ((JoinFormula) lFormula.body).child).relation;
-      
       if(!second.equals(binaryFormula) &&
           !isOpposite(first, binaryFormula)) {
         res.add(binaryFormula);

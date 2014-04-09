@@ -8,12 +8,14 @@
 release-code.files
 release-core.files
 release-emnlp2013.files
+release-emnlp2014.files
 release-fullfreebase_ttl.files
 release-fullfreebase_vdb.files
 release-geofreebase_ttl.files
 release-geofreebase_vdb.files
 
 sempre
+parasempre
 Makefile
 README.md
 LICENSE.txt
@@ -55,6 +57,8 @@ src/edu/stanford/nlp/sempre/DerivationConstraint.java
 src/edu/stanford/nlp/sempre/DerivOpCountFeatureExtractor.java
 src/edu/stanford/nlp/sempre/Example.java
 src/edu/stanford/nlp/sempre/TextToTextMatcher.java
+src/edu/stanford/nlp/sempre/FormulaRetriever.java
+src/edu/stanford/nlp/sempre/FormulaGenerationInfo.java
 
 # Support
 src/edu/stanford/nlp/sempre/LanguageInfo.java
@@ -65,6 +69,8 @@ src/edu/stanford/nlp/sempre/StringCacheUtils.java
 src/edu/stanford/nlp/sempre/Json.java
 src/edu/stanford/nlp/sempre/Stemmer.java
 src/edu/stanford/nlp/sempre/StringCache.java
+src/edu/stanford/nlp/sempre/Trie.java
+src/edu/stanford/nlp/sempre/FreebaseSearch.java
 
 # Formula
 src/edu/stanford/nlp/sempre/Formulas.java
@@ -146,6 +152,9 @@ src/edu/stanford/nlp/sempre/fbalignment/index/FbIndexField.java
 src/edu/stanford/nlp/sempre/fbalignment/utils/DoubleContainer.java
 src/edu/stanford/nlp/sempre/fbalignment/utils/FileUtils.java
 src/edu/stanford/nlp/sempre/fbalignment/utils/MathUtils.java
+src/edu/stanford/nlp/sempre/fbalignment/utils/CollectionUtils.java
+src/edu/stanford/nlp/sempre/fbalignment/utils/WnExpander.java
+src/edu/stanford/nlp/sempre/fbalignment/utils/WordNet.java
 
 # Freebase
 src/edu/stanford/nlp/sempre/freebase/Utils.java
@@ -172,6 +181,52 @@ src/edu/stanford/nlp/sempre/vis/BeamFigures.java
 src/edu/stanford/nlp/sempre/vis/ConfusionMatrices.java
 src/edu/stanford/nlp/sempre/vis/ExampleDerivations.java
 src/edu/stanford/nlp/sempre/vis/Utils.java
+
+# Paraphrasing
+src/edu/stanford/nlp/sempre/paraphrase/Aligner.java
+src/edu/stanford/nlp/sempre/paraphrase/Context.java
+src/edu/stanford/nlp/sempre/paraphrase/Context.java
+src/edu/stanford/nlp/sempre/paraphrase/ContextModel.java
+src/edu/stanford/nlp/sempre/paraphrase/ContextSimilarityModel.java
+src/edu/stanford/nlp/sempre/paraphrase/DatasetUtils.java
+src/edu/stanford/nlp/sempre/paraphrase/EntityInstance.java
+src/edu/stanford/nlp/sempre/paraphrase/EntityModel.java
+src/edu/stanford/nlp/sempre/paraphrase/FeatureSimilarity.java
+src/edu/stanford/nlp/sempre/paraphrase/FeatureSimilarityComputer.java
+src/edu/stanford/nlp/sempre/paraphrase/Interval.java
+src/edu/stanford/nlp/sempre/paraphrase/NearestNeighborLearner.java
+src/edu/stanford/nlp/sempre/paraphrase/NnBuilder.java
+src/edu/stanford/nlp/sempre/paraphrase/ParaphraseBuilder.java
+src/edu/stanford/nlp/sempre/paraphrase/ParaphraseDataset.java
+src/edu/stanford/nlp/sempre/paraphrase/ParaphraseDerivation.java
+src/edu/stanford/nlp/sempre/paraphrase/ParaphraseExample.java
+src/edu/stanford/nlp/sempre/paraphrase/ParaphraseFeatureExtractor.java
+src/edu/stanford/nlp/sempre/paraphrase/ParaphraseFeatureMatcher.java
+src/edu/stanford/nlp/sempre/paraphrase/ParaphraseLearner.java
+src/edu/stanford/nlp/sempre/paraphrase/ParaphraseMain.java
+src/edu/stanford/nlp/sempre/paraphrase/ParaphraseParser.java
+src/edu/stanford/nlp/sempre/paraphrase/ParaphraseUtils.java
+src/edu/stanford/nlp/sempre/paraphrase/ParsingExample.java
+src/edu/stanford/nlp/sempre/paraphrase/ParsingExampleProcessor.java
+src/edu/stanford/nlp/sempre/paraphrase/Prediction.java
+src/edu/stanford/nlp/sempre/paraphrase/QuestionGenerator.java
+src/edu/stanford/nlp/sempre/paraphrase/VectorSpaceModel.java
+src/edu/stanford/nlp/sempre/paraphrase/paralex/ParalexQuestionReader.java
+src/edu/stanford/nlp/sempre/paraphrase/paralex/ParalexRules.java
+src/edu/stanford/nlp/sempre/paraphrase/paralex/PhraseTable.java
+src/edu/stanford/nlp/sempre/paraphrase/rules/LangItem.java
+src/edu/stanford/nlp/sempre/paraphrase/rules/LanguageExp.java
+src/edu/stanford/nlp/sempre/paraphrase/rules/LanguageExpToken.java
+src/edu/stanford/nlp/sempre/paraphrase/rules/LemmaPosRule.java
+src/edu/stanford/nlp/sempre/paraphrase/rules/LemmaPosSequence.java
+src/edu/stanford/nlp/sempre/paraphrase/rules/ParaphraseAlignment.java
+src/edu/stanford/nlp/sempre/paraphrase/rules/RuleApplication.java
+src/edu/stanford/nlp/sempre/paraphrase/rules/RuleApplier.java
+src/edu/stanford/nlp/sempre/paraphrase/rules/Rulebase.java
+src/edu/stanford/nlp/sempre/paraphrase/rules/SubstitutionRuleExtractor.java
+src/edu/stanford/nlp/sempre/paraphrase/rules/SyntacticRuleSet.java
+src/edu/stanford/nlp/sempre/paraphrase/rules/VerbSemClassExtractor.java
+src/edu/stanford/nlp/sempre/paraphrase/rules/VerbSemClassMatcher.java
 
 # Create Freebase
 scripts/extract-freebase-schema.rb

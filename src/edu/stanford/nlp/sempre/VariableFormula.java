@@ -18,6 +18,6 @@ class VariableFormula extends PrimitiveFormula {
     VariableFormula that = (VariableFormula) thatObj;
     return this.name.equals(that.name);
   }
-  @Override
-  public int hashCode() { return name.hashCode(); }
+  
+  public int computeHashCode() { return name.hashCode(); }
 }

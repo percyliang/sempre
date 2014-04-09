@@ -52,8 +52,8 @@ public class CallFormula extends Formula {
     if (!this.args.equals(that.args)) return false;
     return true;
   }
-  @Override
-  public int hashCode() {
+  
+  public int computeHashCode() {
     int hash = 0x7ed55d16;
     hash = hash * 0xd3a2646c + func.hashCode();
     hash = hash * 0xd3a2646c + args.hashCode();
