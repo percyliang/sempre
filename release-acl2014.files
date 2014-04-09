@@ -10,6 +10,7 @@
 ############################################################
 #wordnet
 lib/wordnet-3.0-prolog
+lib/derivation.txt
 
 #word vectors
 lib/wordreprs/cbow-lowercase-50.vectors
