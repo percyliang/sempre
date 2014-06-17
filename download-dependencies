@@ -2,6 +2,7 @@
 
 $modules = [:core,
             :emnlp2013,
+            :acl2014,
             :geofreebase_vdb,
             :geofreebase_ttl,
             :fullfreebase_vdb,
@@ -26,7 +27,8 @@ end
 
 def download(release, path, baseUrl='http://nlp.stanford.edu/software/sempre')
   url = baseUrl + '/release-' + release.to_s
-  isDirectory = (path.end_with?('.exec') or path.end_with?('vdb') or path.end_with?('free917') or path.end_with?('inexact'))  # Superficial test for directory
+  isDirectory = (path.end_with?('.exec') or path.end_with?('vdb') or 
+                 path.end_with?('free917') or path.end_with?('inexact') or path.end_with?('prolog'))  # Superficial test for directory
   if release != :code and !path.end_with?('.gz', '.tgz', '.jar')
     path += '.tar' if isDirectory
     path += '.bz2'

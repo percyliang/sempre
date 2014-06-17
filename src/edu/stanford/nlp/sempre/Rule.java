@@ -73,6 +73,17 @@ public class Rule {
     return true;
   }
 
+  @Override 
+  public int hashCode() {
+    int hash = 0x7ed55d16;
+    if(this!=nullRule) {
+      hash = hash * 0xd3a2646c + lhs.hashCode();
+      hash = hash * 0xd3a2646c + rhs.hashCode();
+      hash = hash * 0xd3a2646c + sem.toString().hashCode();
+    }
+    return hash;
+  }
+
   public void addInfo(String key, double value) {
     if (info == null) info = Lists.newArrayList();
     info.add(Pair.newPair(key, value));

@@ -7,7 +7,8 @@ public enum EntrySource {
   STRING_MATCH("STRING_MATCH"),
   HARD_CODED("HARD"),
   LUCENE("LUCENE"),
-  GRAPHPROP("GRAPHPROP");
+  GRAPHPROP("GRAPHPROP"),
+  FBSEARCH("FBSEARCH");
 
   EntrySource(String source) {
     this.source = source;
@@ -34,6 +35,8 @@ public enum EntrySource {
       return LUCENE;
     if (desc.equals("GRAPHPROP"))
       return GRAPHPROP;
+    if (desc.equals("FBSEARCH"))
+      return FBSEARCH;
     throw new RuntimeException("Description is not legal: " + desc);
 
   }

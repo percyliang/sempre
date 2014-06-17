@@ -32,6 +32,8 @@ public class Grammar {
   // them however the parser wishes.
   ArrayList<Rule> rules = new ArrayList<Rule>();
 
+  Map<String, LispTree> macros = new HashMap<String, LispTree>();  // Map from macro name to its replacement value
+
   // Verbatim copy of all the lines read, so we can output everything back.
   List<String> statements = new ArrayList<String>();
 
@@ -87,6 +89,24 @@ public class Grammar {
     addStatement(stmt, null);
   }
 
+  // Replace all leaves of LispTree with value in macros if exists
+  public static LispTree applyMacros(Map<String, LispTree> macros, LispTree tree) {
+    if (tree.isLeaf()) {
+      LispTree replacement = macros.get(tree.value);
+      if (replacement != null) return replacement;
+      return tree;
+    }
+    LispTree newTree = LispTree.proto.newList();
+    for (LispTree child : tree.children)
+      newTree.addChild(applyMacros(macros, child));
+    return newTree;
+  }
+
+  // Use macros associated with the grammar
+  public LispTree applyMacros(LispTree tree) {
+    return applyMacros(this.macros, tree);
+  }
+
   private void readOnePath(String path, Set<String> tags) {
     // Save raw lines
     if (statements.size() > 0) statements.add("");
@@ -121,6 +141,8 @@ public class Grammar {
       String command = tree.child(0).value;
       if ("rule".equals(command)) {
         interpretRule(tree);
+      } else if ("rhs_rules".equals(command)) {
+        interpretRhsRules(tree);
       } else if ("include".equals(command)) {
         if (path == null) {
           throw new RuntimeException(
@@ -133,6 +155,8 @@ public class Grammar {
           for (int i = 2; i < tree.children.size(); i++)
             interpret(path, tree.child(i), tags);
         }
+      } else if ("def".equals(command)) {
+        interpretMacroDef(tree);
       } else {
         throw new RuntimeException("Invalid command: " + command);
       }
@@ -147,7 +171,16 @@ public class Grammar {
       return tags.contains(tree.value);
     if ("not".equals(tree.child(0).value))
       return !interpretBoolean(tree.child(1), tags);
+    if ("and".equals(tree.child(0).value))
+      return interpretBoolean(tree.child(1), tags) && interpretBoolean(tree.child(2), tags);
     throw new RuntimeException("Expected a single tag, but got: " + tree);
+  }
+
+  private void interpretMacroDef(LispTree tree) {
+    if (tree.children.size() != 3 || !tree.child(1).isLeaf()) {
+        throw new RuntimeException("Invalid usage: (def |name| |value|)");
+    }
+    macros.put(tree.child(1).toString(), tree.child(2));
   }
 
   private void interpretRule(LispTree tree) {
@@ -202,6 +235,27 @@ public class Grammar {
     }
 
     rules.addAll(binarizeRule(rule, isOptionals));
+  }
+
+  // Allow multiple values in rhs to map to the same ConstantFn
+  // Example: (rhs_rules $A (largest biggest) (IdentityFn))
+  private void interpretRhsRules(LispTree tree) {
+    // FIXME Doesn't handle optional
+    LispTree rhs = tree.child(2);
+    // TODO Way to just copy tree and substitute rhs?
+    for (LispTree rhsChild : rhs.children) {
+      LispTree newTree = LispTree.proto.newList();
+      for (int i = 0; i < tree.children.size(); i++) {
+        if (i == 2) {
+          LispTree newRhs = LispTree.proto.newList();
+          newRhs.addChild(rhsChild);
+          newTree.addChild(newRhs);
+        }
+        else
+          newTree.addChild(tree.child(i));
+      }
+      interpretRule(newTree);
+    }
   }
 
   // Generate intermediate categories for binarization.
@@ -309,21 +363,21 @@ public class Grammar {
     if (!appliedRuleSem)
       newRules.add(new Rule(rule.lhs, Lists.newArrayList(newRhs), rule.sem));
 
-    if (false) {
-      LogInfo.begin_track("binarize %s", rule);
-      for (Rule r : newRules) LogInfo.logs("%s", r);
-      LogInfo.end_track();
-    }
+    //LogInfo.begin_track("binarize %s", rule);
+    //for (Rule r : newRules) LogInfo.logs("%s", r);
+    //LogInfo.end_track();
 
     return newRules;
   }
 
   private SemanticFn parseSemanticFn(LispTree tree) {
     String name = tree.child(0).value;
-    SemanticFn fn = null;
+    if (name.equals("ConstantFn")) {
+      tree = applyMacros(tree);
+    }
 
-    if (fn == null)
-      fn = (SemanticFn) Utils.newInstanceHard(opts.semanticFnPackage + "." + name);
+    SemanticFn fn = null;
+    fn = (SemanticFn) Utils.newInstanceHard(opts.semanticFnPackage + "." + name);
     if (fn == null)
       throw new RuntimeException("Invalid SemanticFn name: " + name);
 

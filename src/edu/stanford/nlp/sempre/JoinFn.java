@@ -46,11 +46,11 @@ public class JoinFn extends SemanticFn {
   private boolean betaReduce = false;
 
   /**
-   * There are four different ways binaries and unaries can be combined: - where
-   * was unary[Obama] binary[born]? (unary,binary unaryCanBeArg0) -
-   * unary[Spanish] binary[speaking] countries (unary,binary unaryCanBeArg1) -
-   * binary[parents] of unary[Obama] (binary,unary unaryCanBeArg0) - has
-   * binary[parents] unary[Obama] (binary,unary unaryCanBeArg1)
+   * There are four different ways binaries and unaries can be combined:
+   * - where was unary[Obama] binary[born]? (unary,binary unaryCanBeArg0)
+   * - unary[Spanish] binary[speaking] countries (unary,binary unaryCanBeArg1)
+   * - binary[parents] of unary[Obama] (binary,unary unaryCanBeArg0)
+   * - has binary[parents] unary[Obama] (binary,unary unaryCanBeArg1)
    */
 
   // Optionally specify the first of the two arguments,
@@ -151,8 +151,9 @@ public class JoinFn extends SemanticFn {
   }
 
   private void performJoins(Example ex, Callable c, Derivation binaryDeriv, Derivation unaryDeriv, List<Derivation> results) {
-    String binaryPos = ex.languageInfo.getCanonicalPos(binaryDeriv.start);
-    String unaryPos = ex.languageInfo.getCanonicalPos(unaryDeriv.start);
+    // Note that the derivations might not start or end because they're not anchored in the text.
+    String binaryPos = binaryDeriv.start == -1 ? "NONE" : ex.languageInfo.getCanonicalPos(binaryDeriv.start);
+    String unaryPos = unaryDeriv.start == -1 ? "NONE" : ex.languageInfo.getCanonicalPos(unaryDeriv.start);
     if (unaryCanBeArg1) {
       results.addAll(
           performJoin(

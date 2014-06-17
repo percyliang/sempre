@@ -11,7 +11,6 @@ import edu.stanford.nlp.ling.CoreAnnotations.*;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
-//import edu.stanford.nlp.sempre.transformations.TransUtils;
 import fig.basic.IntPair;
 import fig.basic.LispTree;
 import fig.basic.Option;

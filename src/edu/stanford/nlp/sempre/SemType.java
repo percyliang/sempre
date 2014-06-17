@@ -20,7 +20,8 @@ import java.util.List;
  * the return type]
  *   (-> fb:location.location * fb:people.person)
  *
- * Note: type equality is not implemented.
+ * Note: type equality is not implemented, since it's better to use meet() and
+ * isSupertypeOf() to exploit the finer lattice structure of the type system.
  *
  * @author Percy Liang
  */
@@ -68,12 +69,14 @@ public abstract class SemType {
     throw new RuntimeException("Invalid type: " + tree);
   }
 
-  // Common types
+  // Common types 
   public static final SemType bottomType = new UnionSemType();
   public static final SemType stringType = new EntitySemType(FreebaseInfo.TEXT);
   public static final SemType numberType = new EntitySemType(FreebaseInfo.NUMBER);
   public static final SemType dateType = new EntitySemType(FreebaseInfo.DATE);
   public static final SemType entityType = new EntitySemType(FreebaseInfo.ENTITY);
+  // Everything (ignore cvt and boolean)
+  public static final SemType topType = UnionSemType.create(stringType, numberType, dateType, entityType);
 }
 
 class EntitySemType extends SemType {
@@ -182,8 +185,8 @@ class UnionSemType extends SemType {
   }
 
   public boolean isSupertypeOf(SemType that) {
-    // Exists baseType that covers that.
-    // TODO: this is incorrect because we assume that one baseType can cover |that|.
+    // Compute whether there exists a baseType in this that covers (is a supertype of) that.
+    // TODO: this is technically incorrect because we assume that one baseType can cover |that|.
     for (SemType baseType : baseTypes)
       if (baseType.isSupertypeOf(that))
         return true;
@@ -221,5 +224,12 @@ class UnionSemType extends SemType {
   public UnionSemType add(SemType baseType) {
     if (baseType.isValid()) baseTypes.add(baseType);
     return this;
+  }
+
+  public static UnionSemType create(SemType... baseTypes) {
+    UnionSemType result = new UnionSemType();
+    for (SemType baseType : baseTypes)
+      result.add(baseType);
+    return result;
   }
 }

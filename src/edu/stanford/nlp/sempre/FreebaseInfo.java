@@ -28,12 +28,16 @@ public class FreebaseInfo {
   }
   public static Options opts = new Options();
 
+  // Types: number (boolean, int, float), date, text, entity (people, loc, org, ...), cvt
+
+  // Concrete primitive types
   public final static String BOOLEAN = "fb:type.boolean";
   public final static String INT = "fb:type.int";
   public final static String FLOAT = "fb:type.float";
   public final static String DATE = "fb:type.datetime";
   public final static String TEXT = "fb:type.text";
 
+  // Entity types
   public final static String PERSON = "fb:people.person";
   public final static String LOC = "fb:location.location";
   public final static String ORG = "fb:organization.organization";
@@ -43,10 +47,14 @@ public class FreebaseInfo {
   public final static String ENTITY  = "fb:type.entity";
   public final static String CVT  = "fb:type.cvt";
 
+  // Common relations
   public final static String TYPE = "fb:type.object.type";
   public final static String PROF = "fb:people.person.profession";
   public final static String NAME = "fb:type.object.name";
   public final static String ALIAS = "fb:common.topic.alias";
+
+  // Transitive types
+  public final static String CONTAINED_BY = "fb:location.location.containedby";
 
   private BiMap<String, String> masterToReverseMap = HashBiMap.create(); //mapping from master property to its reverse
   private Map<String, Set<String>> typeToIncludedTypesMap = new HashMap<String, Set<String>>();
@@ -82,7 +90,6 @@ public class FreebaseInfo {
     addSupertype(FLOAT, NUMBER);
     addSupertype(DATE, DATE);
   }
-
 
   /**
    * Go over schema twice - once to populate all fields except descriptions, the second time we populate descriptions after we now what

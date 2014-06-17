@@ -3,6 +3,7 @@ package edu.stanford.nlp.sempre;
 import edu.stanford.nlp.sempre.fbalignment.utils.DoubleContainer;
 import fig.basic.*;
 
+import java.io.IOException;
 import java.util.*;
 
 ////////////////////////////////////////////////////////////
@@ -28,6 +29,8 @@ public abstract class Parser {
     public boolean executeTopFormulaOnly = false;
     @Option(gloss = "Whether to evaluate with values and formulas")
     public boolean evaluateValuesAndFormulas = true;
+    @Option(gloss = "Whether to use candidate formula parts to construct derivations")
+    public boolean generateFormulaCandidates = false;
   }
 
   public static final Options opts = new Options();
@@ -38,6 +41,10 @@ public abstract class Parser {
   public final Grammar grammar;  // Specifies the set of rules
   public final FeatureExtractor extractor;
   public final Executor executor;
+  public final FormulaRetriever formulaRetriever;
+
+  //Precomputations to make looking up grammar rules faster.
+  ArrayList<Rule> catUnaryRules;  // Unary rules with category on RHS
 
   public Parser(Grammar grammar,
       FeatureExtractor extractor,
@@ -45,6 +52,25 @@ public abstract class Parser {
     this.grammar = grammar;
     this.extractor = extractor;
     this.executor = executor;
+    try {
+      formulaRetriever = (opts.generateFormulaCandidates) ? new FormulaRetriever(true) : null ;
+    }
+    catch(IOException e) {
+      throw new RuntimeException(e);
+    }
+    // Handle catUnaryRules
+    catUnaryRules = new ArrayList<Rule>();
+    Map<String, List<Rule>> graph = new HashMap<String, List<Rule>>();  // Node from LHS to list of rules
+    for (Rule rule : grammar.rules)
+      if (rule.isCatUnary())
+        MapUtils.addToList(graph, rule.lhs, rule);
+
+    // Topologically sort catUnaryRules so that B->C occurs before A->B
+    Map<String, Boolean> done = new HashMap<String, Boolean>();
+    for (String node : graph.keySet())
+      traverse(catUnaryRules, node, graph, done);
+
+    LogInfo.logs("BeamParser: %d catUnaryRules (sorted), %d nonCatUnaryRules (in trie)", catUnaryRules.size(), grammar.rules.size() - catUnaryRules.size());
   }
 
   public abstract int getDefaultBeamSize();
@@ -102,15 +128,19 @@ public abstract class Parser {
     // constructed.
     ParserState coarseState = null;
     if (opts.coarsePrune) {
+      LogInfo.begin_track("Parser.coarsePrune");
       coarseState = newCoarseParserState(params, ex);
       coarseState.setExecAllowed(execAllowed);
       coarseState.infer();
       coarseState.keepTopDownReachable();
+      LogInfo.end_track();
     }
 
     // Step 2: parse, using the coarse information as a way to prune.
     ParserState state = newParserState(params, ex, coarseState);
     state.setExecAllowed(execAllowed);
+    if(opts.generateFormulaCandidates)
+      state.setFormulaSubparts(formulaRetriever.retrieveFormulas(ex));
     state.infer();
     LogInfo.end_track();
 
@@ -173,6 +203,9 @@ public abstract class Parser {
     state.setEvaluation();
     if (execAllowed)
       setEvaluation(ex, params);
+    state.clearChart();
+    if(coarseState!=null)
+      coarseState.clearChart();
   }
 
   // Populate the target.
@@ -312,6 +345,7 @@ public abstract class Parser {
         LogInfo.logs(
             "Pred@%04d: %s [score=%s, prob=%s%s]", i, deriv.toString(),
             Fmt.D(deriv.score), Fmt.D(probs[i]), compatibilities != null ? ", comp=" + Fmt.D(compatibilities[i]) : "");
+        //LogInfo.logs("Derivation tree: %s",deriv.toRecursiveString());
       }
     }
 

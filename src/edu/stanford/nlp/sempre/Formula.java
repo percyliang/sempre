@@ -16,6 +16,8 @@ import fig.basic.LispTree;
  * @author Percy Liang
  */
 public abstract class Formula {
+  //cache the hashcode
+  private int hashCode=-1;
   // Serialize as LispTree.
   public abstract LispTree toLispTree();
 
@@ -32,11 +34,17 @@ public abstract class Formula {
   }
 
   @Override abstract public boolean equals(Object o);
-  @Override abstract public int hashCode();
+  @Override public int hashCode() {
+    if(hashCode==-1)
+      hashCode = computeHashCode();
+    return hashCode;
+  }
+  
+  abstract public int computeHashCode();
 
   public static Formula nullFormula = new PrimitiveFormula() {
       public LispTree toLispTree() { return LispTree.proto.newLeaf("null"); }
       @Override public boolean equals(Object o) { return this == o; }
-      @Override public int hashCode() { return 0; }
+      public int computeHashCode() { return 0; }
   };
 }

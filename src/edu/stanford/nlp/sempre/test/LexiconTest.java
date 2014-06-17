@@ -19,7 +19,7 @@ public class LexiconTest {
   @Test(groups = "emnlp2013")
   public void unary() throws IOException {
     UnaryLexicon.opts.unaryLexiconFilePath =
-      "lib/fb_data/" + Lexicon.opts.fbData + "/unaryInfoStringAndAlignment.txt";
+      "lib/fb_data/6/unaryInfoStringAndAlignment.txt";
     UnaryLexicon unary = new UnaryLexicon();
     boolean existsAlignment = false, existsStringMatch=false;
     double popularity=0.0;
@@ -69,8 +69,6 @@ public class LexiconTest {
   
   @Test(groups = "emnlp2013")
   public void binary() throws IOException {
-    BinaryLexicon.opts.binaryLexiconFilesPath.add(
-        "lib/fb_data/" + Lexicon.opts.fbData + "/binaryInfoStringAndAlignment.txt");
     BinaryLexicon.opts.keyToSortBy = BinaryLexicon.INTERSECTION;
 
     BinaryLexicon lexicon = new BinaryLexicon();

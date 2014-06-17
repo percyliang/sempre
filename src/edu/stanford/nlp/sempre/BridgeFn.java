@@ -5,6 +5,7 @@ import edu.stanford.nlp.sempre.MergeFormula.Mode;
 import fig.basic.LispTree;
 import fig.basic.LogInfo;
 import fig.basic.Option;
+import fig.basic.IOUtils;
 
 import java.io.IOException;
 import java.util.*;
@@ -22,6 +23,7 @@ public class BridgeFn extends SemanticFn {
   public static class Options {
     @Option(gloss = "Verbose") public int verbose = 0;
     @Option(gloss = "Whether to allow entity bridging with no binary string match") public boolean looseEntBridge = false;
+    @Option(gloss = "List of binary formulas to use during bridging") public String binariesFile = "";
   }
 
   public static Options opts = new Options();
@@ -30,6 +32,7 @@ public class BridgeFn extends SemanticFn {
   private String description;
   private boolean headFirst;
   private TextToTextMatcher textToTextMatcher;
+  private static HashSet<Formula> binariesToUse;
 
   public void init(LispTree tree) {
     super.init(tree);
@@ -47,6 +50,18 @@ public class BridgeFn extends SemanticFn {
   public BridgeFn() {
     fbFormulaInfo = FbFormulasInfo.getSingleton();
     textToTextMatcher = TextToTextMatcher.getSingleton();
+    binariesToUse = new HashSet<Formula>();
+    if (!opts.binariesFile.equals("")) {
+      readBinaries();
+    }
+  }
+
+  public static void readBinaries() {
+    for (String line : IOUtils.readLinesHard(opts.binariesFile)) {
+      if (line.startsWith("#")) continue;
+      if (line.equals("")) continue;
+      binariesToUse.add(Formula.fromString(line));
+    }
   }
 
   @Override
@@ -96,8 +111,12 @@ public class BridgeFn extends SemanticFn {
     else if (type instanceof UnionSemType)
       for (SemType baseType : ((UnionSemType) type).baseTypes)
         getSupertypes(baseType, supertypes);
-    else
-      throw new RuntimeException("Unexpected type (must be unary): " + type);
+    else {
+      // FIXME HACK for when passing binary into lambda formula and
+      // getSuperTypes doesn't work
+      getSupertypes(SemType.fromString("topic"), supertypes);
+      //throw new RuntimeException("Unexpected type (must be unary): " + type);
+    }
     return supertypes;
   }
 
@@ -112,9 +131,20 @@ public class BridgeFn extends SemanticFn {
     Set<String> headTypes = getSupertypes(headDeriv.type, new HashSet<String>());
     Set<String> modifierTypes = getSupertypes(modifierDeriv.type, new HashSet<String>());
 
+    HashSet<String> usedBinaries = new HashSet<String>();
+
     for (String modifierType : modifierTypes) { // For each head type...
-      Set<Formula> binaries = fbFormulaInfo.getBinariesForType2(modifierType);
+      Set<Formula> binaries;
+      if (binariesToUse.size() == 0)
+        binaries = fbFormulaInfo.getBinariesForType2(modifierType);
+      else
+        binaries = binariesToUse;
+
       for (Formula binary : binaries) {  // For each possible binary...
+
+        if (usedBinaries.contains(binary.toString()))
+          continue;
+
         BinaryFormulaInfo binaryInfo = fbFormulaInfo.getBinaryInfo(binary);
 
         if (opts.verbose >= 3)
@@ -124,6 +154,7 @@ public class BridgeFn extends SemanticFn {
 
           Formula bridgedFormula = buildBridge(headDeriv.formula, modifierDeriv.formula, binary);
           FbFormulasInfo.touchBinaryFormula(binary);
+          usedBinaries.add(binary.toString());
 
           Derivation newDeriv = new Derivation.Builder()
               .withCallable(c)
@@ -328,7 +359,42 @@ public class BridgeFn extends SemanticFn {
     return res;
   }
 
+  // Checks whether "var" is used as a binary in "formula"
+  private boolean varIsBinary(Formula formula, String var) {
+    boolean isBinary = false;
+    LispTree tree = formula.toLispTree();
+    VariableFormula vf = new VariableFormula(var);
+    for (LispTree child : tree.children) {
+      if (child.isLeaf())
+        continue;
+      if (child.children.size() == 2 && vf.equals(Formulas.fromLispTree(child.child(0)))) {
+        isBinary = true;
+        break;
+      }
+      if (varIsBinary(Formulas.fromLispTree(child), var)) {
+        isBinary = true;
+        break;
+      }
+    }
+    return isBinary;
+  }
+
   private Formula buildBridge(Formula headFormula, Formula modifierFormula, Formula binary) {
+    // Handle cases like "what state has the most cities" where "has the" is mapped
+    // to "contains" predicate via bridging but "most" triggers a nested lambda w/
+    // argmax on a count relation
+    // (Corresponds to $MetaMetaOperator in grammar)
+    if (modifierFormula instanceof LambdaFormula) {
+      LambdaFormula lf = (LambdaFormula) modifierFormula;
+      if (varIsBinary(lf, lf.var)) {
+        Formula newBinary = Formulas.lambdaApply(lf, binary);
+        if (newBinary instanceof LambdaFormula) {
+          Formula result = Formulas.lambdaApply((LambdaFormula) newBinary, headFormula);
+          return result;
+        }
+      }
+    }
+
     Formula join = new JoinFormula(binary, modifierFormula);
     Formula merge = new MergeFormula(Mode.and, headFormula, join);
     //Don't merge on ints and floats

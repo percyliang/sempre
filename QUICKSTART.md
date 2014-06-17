@@ -1,11 +1,12 @@
-This is a quickstart guide for recreating the EMNLP 2013 system.
+This is a quickstart guide for recreating the EMNLP 2013 or ACL 2014 system.
 
 # Download the Dependencies
 
-These commands will download necessary resources:
+These commands will download necessary resources (choose emnlp2013 or acl2014 or both):
 
     ./download-dependencies core
     ./download-dependencies emnlp2013
+    ./download-dependencies acl2014
     ./download-dependencies fullfreebase_vdb
 
 See `README.md` for other requirements SEMPRE depends on
@@ -70,15 +71,23 @@ Alternatively, you can launch an interactive shell to test out the system:
              @load=15\
              @executeTopOnly=0
 
-# Training the System
+# Training the EMNLP 2013/ACL 2014 System
 
-This command will train the system on the WebQuestions dataset. It takes
+This command will train the EMNLP 2013 system on the WebQuestions dataset. It takes
 a little over three days to complete.
 
     ./sempre @mode=train \
              @sparqlserver=localhost:3093 \
              @domain=webquestions \
              @cacheserver=local
+             
+This command will train the ACL 2014 system on the WebQuestions dataset. It takes
+about 24 hours to complete.
+
+    ./parasempre @mode=train \
+             @sparqlserver=localhost:3093 \
+             @domain=webquestions \
+             @cacheserver=local
 
 Alternatively, you can sanity check the system on the Free917 dataset by
-setting `@domain=free917`. This should take a few hours to complete.
+setting `@domain=free917`. This should about an hour to complete.
