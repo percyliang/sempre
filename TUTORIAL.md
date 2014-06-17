@@ -547,30 +547,36 @@ candidate list.
 ## Background reading
 
 So far this tutorial has provided a very operational view of semantic parsing
-based on SEMPRE.  The following references provide a much broader look at
-the area of semantic parsing and the linguistic and statistical foundations.
+based on SEMPRE.  The following references provide a broader look at the area
+of semantic parsing as well as the linguistic and statistical foundations.
 
 * **Natural language semantics**: The question of how to represent natural
   language utterances using logical forms has been well-studied in linguistics
   under formal (or compositional) semantics.  Start with the
   [CS224U course notes from Stanford](http://www.stanford.edu/class/cs224u/readings/cl-semantics-new.pdf)
-  and
-  [an introduction by Lappin](http://web.mit.edu/cilene/www/sema/aula1/15.pdf).
-  You should take away from this an appreciation for the various phenomena in
-  natural language.
+  to get a brief taste of the various phenomena in natural language.
+  The [Bos/Blackburn book](http://www.let.rug.nl/bos/comsem/book1.html)
+  (also see this [related article](http://www.coli.uni-saarland.de/publikationen/softcopies/Blackburn:1997:RIN.pdf))
+  gives more details on how parsing to logical forms works (without any
+  learning); Prolog code is given too.
 
 * **Log-linear models**: Our semantic parser is based on log-linear models,
-which is a very important tool in machine learning and statistical natural
-language processing.  Start with [a tutorial by Michael
-Collins](http://www.cs.columbia.edu/~mcollins/loglinear.pdf), which is geared towards applications
-in NLP.
+  which is a very important tool in machine learning and statistical natural
+  language processing.  Start with [a tutorial by Michael
+  Collins](http://www.cs.columbia.edu/~mcollins/loglinear.pdf), which is geared
+  towards applications in NLP.
 
-* **Semantic parsing**: finally, putting the linguistic insights from formal semantics
-and the computational and statistical tools from machine learning, we get
-semantic parsing.  There has been a lot of work on semantic parsing.
-Check out the [ACL 2013 tutorial by Yoav Artzi and Luke
-Zettlemoyer](http://yoavartzi.com/pub/afz-tutorial.acl.2013.pdf),
-which focuses on how to build semantic parsers using Combinatory Categorical Grammar (CCG).
-Our [EMNLP 2013
-paper](http://cs.stanford.edu/~pliang/papers/freebase-emnlp2013.pdf) is the
-first paper based on SEMPRE.
+* **Semantic parsing**: finally, putting the linguistic insights from formal
+  semantics and the computational and statistical tools from machine learning,
+  we get semantic parsing.  There has been a lot of work on semantic parsing,
+  we will not attempt to list fully here.  Check out the [ACL 2013 tutorial by
+  Yoav Artzi and Luke
+  Zettlemoyer](http://yoavartzi.com/pub/afz-tutorial.acl.2013.pdf), which
+  focuses on how to build semantic parsers using Combinatory Categorical
+  Grammar (CCG).  Our [EMNLP 2013
+  paper](http://cs.stanford.edu/~pliang/papers/freebase-emnlp2013.pdf) is the
+  first paper based on SEMPRE.  This [Annual Reviews
+  paper](http://www.stanford.edu/~cgpotts/manuscripts/liang-potts-semantics.pdf)
+  provides a tutorial of how to learn a simple model of compositional semantics
+  ([Python code](https://github.com/cgpotts/annualreview-complearning) is
+  available) along with a discussion of compositionality and generalization.
