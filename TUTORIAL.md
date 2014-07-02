@@ -99,8 +99,8 @@ in the computer science sense, not in the linguistic sense (again, SEMPRE
 just provides a framework; you can use whatever grammar you would like).
 
 We will run through some examples to give you a feel for how things work,
-and then go into the details.  First, let us a rule to the grammar by entering
-the following into the prompt:
+and then go into the details.  First, let us add a rule to the grammar by
+entering the following into the prompt:
 
     (rule $ROOT (three) (ConstantFn (number 3)))
 
