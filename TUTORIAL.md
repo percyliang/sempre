@@ -133,7 +133,7 @@ Now the system can interpret general numbers!  Try typing in:
 
     twenty five million
 
-The result shold be `(number 2.5E7)`.
+The result should be `(number 2.5E7)`.
 
 Note: if you now type in `three`, you should get two derivations that yield the
 same answer, one coming from each rule.
