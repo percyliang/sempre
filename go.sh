@@ -19,7 +19,7 @@
 #$ -q 'nlp-amd,serial.q,inf.q,eng-inf_parallel.q'
 
 # Define parallel environment for multicore processing
-#$ -pe openmp 16
+#$ -pe openmp 8
 
 # Send mail to. (Comma separated list)
 #$ -M dc34@sussex.ac.uk
@@ -46,7 +46,7 @@ trap "pkill virtuoso" SIGHUP SIGINT SIGTERM
     @sparqlserver=localhost:3093 \
     @domain=webquestions \
     @cacheserver=local \
-    -ParaphraseLearner.numOfThreads 16
+    -ParaphraseLearner.numOfThreads 8
 
 pkill virtuoso
 
