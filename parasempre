@@ -6,7 +6,7 @@ require 'execrunner'
 # Note: run this on the NLP machines because SPARQL server is running on jack.
 if ARGV.size == 0
   puts "Usage:"
-  puts "  ./parasempre @mode=train @domain=<webquestions|free917> @sparqlserver=<host:port> @cacheserver=<none|local>"
+  puts "  ./parasempre @mode=train @domain=<webquestions|free917|small> @sparqlserver=<host:port> @cacheserver=<none|local>"
   puts "Additional options can be any of the following:"
   puts "  - Additional program options (e.g., -BeamParser.beamSize 3)"
   puts "  - Execrunner options, which select the options to include (@data=0)"
@@ -92,13 +92,34 @@ def train
     'edu.stanford.nlp.sempre.paraphrase.ParaphraseMain',
     defaultOpts, sparqlOpts,
     o('ParaphraseMain.mode','train'),
-    required(:domain, 'domain (webquestions or free917)'), 
+    required(:domain, 'domain (webquestions or free917 or small)'), 
     selectDomain,
     o('Rulebase.ruleTypes','Pt','Syntax', 'Move', 'Subst'),
     o('ParaphraseFeatureMatcher.featureDomains', *$defaultFeatureDomains),
     o('Params.l1Reg','lazy'),
     o('Aligner.useWordnet',true),
     o('FeatureSimilarityComputer.mode','lexical_overlap'),
+  nil)
+end
+
+def small
+  l(
+    o('ParaphraseDataset.parsingInPaths', 'train,data/small.train.json'),
+    o('ParaphraseLearner.maxTrainIters',0),
+    o('ParaphraseLearner.partialReward',true),
+    o('ParaphraseParser.alignment',true),
+    o('ParaphraseParser.vsm',true),
+    o('Lexicon.entitySearchStrategy','inexact'),
+    o('FormulaRetriever.supportCountUtterances',false),
+    o('FormulaRetriever.filterRelations',true),
+    o('FormulaRetriever.maxEntries',10),
+    o('FormulaRetriever.conservativeEntityExtraction',true),
+    o('Params.l1RegCoeff','0.00017782794'),
+    o('VectorSpaceModel.wordVectorFile','lib/wordreprs/cbow-lowercase-50.vectors'),
+    l(
+      o('EntityLexicon.exactMatchIndex','lib/lucene/4.4/inexact/'),
+      cachePaths('LexiconFnWebQ.cache', 'SparqlExecutor.cache'),
+    nil),
   nil)
 end
 
@@ -167,6 +188,7 @@ def selectDomain
   sel(:domain, {
     'webquestions' => webquestions,
     'free917' => free917,
+    'small' => small,
   })
 end
 
