@@ -1,0 +1,5 @@
+[
+  {"url": "http://www.freebase.com/view/en/justin_bieber", "targetValue": "(list (description \"Jazmyn Bieber\") (description \"Jaxon Bieber\"))", "utterance": "what is the name of justin bieber brother?"},
+  {"url": "http://www.freebase.com/view/en/natalie_portman", "targetValue": "(list (description \"Padm\u00e9 Amidala\"))", "utterance": "what character did natalie portman play in star wars?"},
+  {"url": "http://www.freebase.com/view/en/selena_gomez", "targetValue": "(list (description \"New York City\"))", "utterance": "what state does selena gomez?"}
+]
