@@ -3,8 +3,8 @@
 In this tutorial, we will provide a brief tour of SEMPRE.  This tutorial is
 very much about the mechanics of the system, not about the linguistics or
 semantic parsing from a research point of view (for those, see the recommended
-readings at the end of this document).  For the full documentation, see
-[DOCUMENTATION.md](https://github.com/percyliang/sempre/blob/master/DOCUMENTATION.md).
+readings at the end of this document).  Once you have gone through the tutorial,
+you can read the [full documentation](DOCUMENTATION.md).
 
 We will construct a semantic parser to understand a toy subset of natural
 language.  Concretely, the system we will build will have the following
@@ -564,8 +564,8 @@ First, pull the dependencies needed for Freebase:
 We use the graph database engine, Virtuoso, to store these triples and allow
 querying.  Follow these instructions if you want to create your own Virtuoso instance.
 
-First, make sure you have Virtuoso installed (see Installation section of the
-README.md).
+First, make sure you have Virtuoso installed &mdash; see the Installation
+section of the [readme](README.md).
 
 Then start the server:
 

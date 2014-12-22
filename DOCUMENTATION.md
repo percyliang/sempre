@@ -1,7 +1,7 @@
 # SEMPRE 2.0 documentation
 
 This document describes SEMPRE 2.0 in detail.  See 
-[TUTORIAL.md](TUTORIAL.md) for a more engaging introduction.  This document
+[the tutorial](TUTORIAL.md) for a more engaging introduction.  This document
 assumes a modest understanding of how SEMPRE works.
 
 If you find any bugs, please report them or fix them (file a GitHub issue or

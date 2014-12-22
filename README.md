@@ -65,14 +65,11 @@ SEMPRE has been used in the following papers:
 ## Where do I go next?
 
 - If you're new to semantic parsing, you can learn more from the [background
-  reading section of the
-  tutorial](http://github.com/percyliang/sempre/blob/master/TUTORIAL.md).
+  reading section of the tutorial](TUTORIAL.md).
 - Install SEMPRE using the instructions under **Installation** below.
-- Walk through the
-  [tutorial](http://github.com/percyliang/sempre/blob/master/TUTORIAL.md)
+- Walk through the [tutorial](TUTORIAL.md)
   to get a hands-on introduction to semantic parsing through SEMPRE.
-- Read the complete
-  [documentation](http://github.com/percyliang/sempre/blob/master/DOCUMENTATION.md)
+- Read the complete [documentation](DOCUMENTATION.md)
   to learn about the different components in SEMPRE.
 
 # Installation
@@ -111,8 +108,8 @@ similar your system is.
    
         (execute (call + (number 3) (number 4)))
 
-To go further, check out the
-[tutorial](http://github.com/percyliang/sempre/blob/master/TUTORIAL.md).
+To go further, check out the [tutorial](TUTORIAL.md) and then the [full
+documentation](DOCUMENTATION.md).
 
 ## Virtuoso graph database
 
