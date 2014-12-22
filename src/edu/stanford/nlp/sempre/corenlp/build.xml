@@ -1,0 +1,14 @@
+<project>
+  <target name="compile">
+    <property name="module_name" value="corenlp"/>
+    <property name="root" location="../../../../../../"/>
+    <property name="classes" location="${root}/classes/${module_name}"/>
+    <mkdir dir="${classes}"/>
+    <mkdir dir="${root}/libsempre"/>
+    <path id="lib.path"><fileset dir="${root}/lib"/><fileset dir="${root}/libsempre"/></path>
+    <javac srcdir="${root}/src" destdir="${classes}" classpathref="lib.path" debug="true" includeantruntime="false">
+      <include name="edu/stanford/nlp/sempre/corenlp/"/>
+    </javac>
+    <jar destfile="${root}/libsempre/sempre-${module_name}.jar" basedir="${classes}"/>
+  </target>
+</project>

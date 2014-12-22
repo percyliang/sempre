@@ -1,0 +1,64 @@
+a:link {text-decoration: none; color: 00008b}
+a:visited {text-decoration: none}
+a:active {text-decoration: none}
+a:hover {text-decoration: none; color: red}
+body {background-color: white; margin-left: 50px; font-family: sans-serif}
+
+.question {margin: 10px; font-size: 24px}
+.ask {font-size: 24px}
+.answer {
+  font-size: 20;
+  /*background-image: url(bullet.png);
+  background-repeat: no-repeat;*/
+  padding-left: 24px; 
+}
+.message {font-size: 15}
+.description {margin-top: 50px; font-size: 18}
+.details {
+  border-style: groove;
+  margin-top: 10px;
+  padding: 10px;
+  font-size: 13px;
+  margin-right: 50px
+}
+
+.listHeader {font-size:18; font-weight:bold; color:brown; white-space:nowrap}
+.nowrap {white-space:nowrap}
+.bubble {width:300px}
+
+.word {font-size:16; color:darkgreen; font-style:italic}
+.predicate {font-size:16; color:red}
+.tag {font-size:14; color:black; white-space:nowrap}
+
+.correctButton {color:green}
+.wrongButton {color:red}
+
+.lexicalResponse table {border-spacing:3px 0px; text-align:center}
+table.predInfo td {padding:1px; text-align:left; font-size:14; white-space:nowrap}
+
+table.context {padding:5; border:1px dashed brown}
+
+.valueTable {border: 2px solid gray; padding: 2px}
+
+.groupResponse td {vertical-align:top; padding:1px}
+.listResponse li {font-size:12}
+
+.error {color:red; font-weight:bold}
+
+/* Tooltip (http://psacake.com/web/jl.asp) */
+a.info {
+  position:relative;
+  z-index:24;
+  color:#000;
+  text-decoration:none
+}
+a.info span.tooltip {display: none}
+
+a.info:hover {z-index:25; background-color:#ff0}
+a.info:hover span.tooltip {
+    display:block;
+    position:absolute;
+    border:1px solid #0cf;
+    background-color:#eff; color:#000;
+    top:2em; left:2em
+}

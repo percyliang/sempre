@@ -3,12 +3,14 @@ package edu.stanford.nlp.sempre;
 import com.google.common.base.Function;
 import fig.basic.LispTree;
 
+import java.util.List;
+
 /**
  * If |expr| denotes a set of pairs S,
- * then (reverse |expr|) denotes the set of pairs {(y,x) : (x,y) \in S}.
+ * then (reverse |expr|) denotes the set of pairs {(y, x) : (x, y) \in S}.
  * Example:
- *   (rev fb:people.person.date_of_birth)
- *   (rev (lambda x (fb:location.statistical_region.population (fb:measurement_unit.dated_integer.number (var x)))))
+ *   (reverse fb:people.person.date_of_birth)
+ *   (reverse (lambda x (fb:location.statistical_region.population (fb:measurement_unit.dated_integer.number (var x)))))
  *
  * @author Percy Liang
  */
@@ -30,13 +32,21 @@ public class ReverseFormula extends Formula {
   }
 
   @Override
+  public List<Formula> mapToList(Function<Formula, List<Formula>> func, boolean alwaysRecurse) {
+    List<Formula> res = func.apply(this);
+    if (res.isEmpty() || alwaysRecurse)
+      res.addAll(child.mapToList(func, alwaysRecurse));
+    return res;
+  }
+
+  @Override
   public boolean equals(Object thatObj) {
     if (!(thatObj instanceof ReverseFormula)) return false;
     ReverseFormula that = (ReverseFormula) thatObj;
     if (!this.child.equals(that.child)) return false;
     return true;
   }
-  
+
   public int computeHashCode() {
     int hash = 0x7ed55d16;
     hash = hash * 0xd3a2646c + child.hashCode();

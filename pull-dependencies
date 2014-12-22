@@ -1,0 +1,163 @@
+#!/usr/bin/env ruby
+
+# SEMPRE depends on several library/data files into *lib*.  Run this script to
+# copy those dependencies to your local directory.  This allows you to run
+# SEMPRE from anywhere.  This file consists of a set of modules (which loosely
+# correspond to the code modules).
+
+# The master copy of these dependencies are stored on the Stanford NLP
+# machines.
+
+$version = '2.0'
+$isPublic = true
+
+
+def isZip(name)
+  # Directories are zipped
+  name.end_with?('.exec') or name !~ /\./
+end
+
+# - Download the dependencies from the Stanford SEMPRE servers.
+def pull(sourcePath, dir=nil, opts={})
+  puts sourcePath
+  destDir = 'lib' + (dir ? '/' + dir : '')
+  system "mkdir -p #{destDir}"
+
+  name = File.basename(sourcePath)
+  ext = isZip(name) ? '.zip' : ''
+
+  if $isPublic
+    # Download url => localPath
+    url = 'http://nlp.stanford.edu/software/sempre/dependencies-' + $version + sourcePath + ext
+    localPath = destDir + '/' + name + ext
+    system "mkdir -p #{File.dirname(localPath)}" or exit 1
+    system "wget -c '#{url}' -O #{localPath}" or exit 1
+    # Unzip localPath to destDir if it's a zip file
+    if isZip(name)
+      system "cd #{File.dirname(localPath)} && unzip #{File.basename(localPath)}" or exit 1
+      system "rm #{localPath}" or exit 1
+    end
+  else
+  end
+end
+
+# source: path to master git repository
+def updateGit(source)
+  dir = File.basename(source.sub(/\.git$/, ''))
+  if File.exists?(dir)
+    system 'cd '+dir+' && git pull' or exit 1
+  else
+    system 'git clone ' + source or exit 1
+  end
+end
+
+def downloadExec(path)
+  ['options.map', 'params', 'grammar'].each { |file|
+    if File.exists?(path+'/'+file)
+      pull(path+'/'+file, 'models/'+File.basename(path))
+    end
+  }
+end
+
+$modules = []
+def addModule(name, description, func)
+  $modules << [name, description, func]
+end
+
+############################################################
+
+addModule('core', 'Core utilities (need to compile)', lambda {
+  # fig: options parsing, experiment management, utils
+  updateGit('https://github.com/percyliang/fig')
+  system 'make -C fig' or exit 1
+  system 'mkdir -p lib && cd lib && ln -sf ../fig/fig.jar' or exit 1
+
+  # Google libraries
+  pull('/u/nlp/data/semparse/resources/guava-14.0.1.jar')
+
+  # TestNG -- testing framework
+  pull('/u/nlp/data/semparse/resources/testng-6.8.5.jar')
+  pull('/u/nlp/data/semparse/resources/jcommander-1.30.jar')
+
+  # Checkstyle: make sure code looks fine
+  pull('/u/nlp/data/semparse/resources/checkstyle')
+
+  # JSON
+  pull('/u/nlp/data/semparse/resources/jackson-core-2.2.0.jar')
+  pull('/u/nlp/data/semparse/resources/jackson-annotations-2.2.0.jar')
+  pull('/u/nlp/data/semparse/resources/jackson-databind-2.2.0.jar')
+})
+
+addModule('corenlp', 'Stanford CoreNLP (code and modules)', lambda {
+  pull('/u/nlp/data/semparse/resources/stanford-corenlp-full-2013-06-20.zip', '', {:symlink => true})
+  if not File.exists?('lib/stanford-corenlp-full-2013-06-20')
+    system "cd lib && unzip stanford-corenlp-full-2013-06-20.zip" or exit 1
+  end
+  ['stanford-corenlp-3.2.0.jar', 'stanford-corenlp-3.2.0-models.jar', 'joda-time.jar', 'jollyday.jar'].each { |file|
+    system "ln -sfv stanford-corenlp-full-2013-06-20/#{file} lib" or exit 1
+  }
+  pull('/u/nlp/data/semparse/resources/stanford-corenlp-caseless-2013-06-07-models.jar', '', {:symlink => true})
+})
+
+addModule('freebase', 'Freebase: need to construct Freebase schemas', lambda {
+  # Freebase schema
+  pull('/u/nlp/data/semparse/scr/freebase/state/execs/93.exec/schema2.ttl', 'fb_data/93.exec')
+
+  # Lucene libraries
+  pull('/u/nlp/data/semparse/resources/lucene-core-4.4.0.jar')
+  pull('/u/nlp/data/semparse/resources/lucene-analyzers-common-4.4.0.jar')
+  pull('/u/nlp/data/semparse/resources/lucene-queryparser-4.4.0.jar')
+
+  # Freebase data (for lexicon)
+  pull('/u/nlp/data/semparse/scr/fb_data/7', 'fb_data')
+
+  # WebQuestions dataset
+  pull('/u/nlp/data/semparse/webquestions/dataset_11/webquestions.examples.train.json', 'data/webquestions/dataset_11')
+  pull('/u/nlp/data/semparse/webquestions/dataset_11/webquestions.examples.test.json', 'data/webquestions/dataset_11')
+})
+
+
+
+addModule('virtuoso', 'Virtuoso: if want to run own SPARQL server locally', lambda {
+  updateGit('https://github.com/openlink/virtuoso-opensource')
+  # Run this command to compile:
+  #system "cd virtuoso-opensource && ./autogen.sh && ./configure --prefix=$PWD/install && make && make install" or exit 1
+})
+
+addModule('fullfreebase-ttl', 'Freebase (ttl file)', lambda {
+  # This is just for your reference.  It is not directly used by SEMPRE.
+  pull('/u/nlp/data/semparse/scr/freebase/state/execs/93.exec/0.ttl.bz2', 'fb_data/93.exec', {:symlink => true})
+})
+
+addModule('fullfreebase-vdb', 'Freebase (Virtuoso database)', lambda {
+  # Virtuoso index of 0.ttl above.  This is read (and written) by Virtuoso.
+  pull('/u/nlp/data/semparse/scr/freebase/state/execs/93.exec/vdb.tar.bz2', 'fb_data/93.exec', {:symlink => true})
+  # You need to unzip this yourself and move these files to the right place.
+})
+
+addModule('fullfreebase-types', 'Freebase types', lambda {
+  # Map from mid (e.g., fb:m.02mjmr) to id (e.g., fb:en.barack_obama) (used to link external things like Freebase API search with our internal Freebase)
+  pull('/u/nlp/data/semparse/scr/freebase/freebase-rdf-2013-06-09-00-00.canonical-id-map.gz', 'fb_data', {:symlink => true})
+  # Map from id to types (used to do type inference on internal entities)
+  pull('/u/nlp/data/semparse/scr/freebase/freebase-rdf-2013-06-09-00-00.canonicalized.en-types.gz', 'fb_data', {:symlink => true})
+  # You need to unzip these yourself and move these files to the right place.
+})
+
+
+############################################################
+
+if ARGV.size == 0
+  puts "#{$0} <module-1> ... <module-n>"
+  puts
+  puts "Modules:"
+  $modules.each { |name,description,func|
+    puts "  #{name}: #{description}"
+  }
+end
+
+$modules.each { |name,description,func|
+  if ARGV.index(name)
+    puts "===== Downloading #{name}: #{description}"
+    func.call
+  end
+}

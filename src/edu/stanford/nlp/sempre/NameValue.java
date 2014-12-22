@@ -42,9 +42,11 @@ public class NameValue extends Value {
   }
 
   @Override public int hashCode() { return id.hashCode(); }
-  @Override public boolean equals(Object thatObj) {
-    if (!(thatObj instanceof NameValue)) return false;
-    NameValue that = (NameValue)thatObj;
+  @Override public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    NameValue that = (NameValue) o;
+    // Note: only check id, not description
     return this.id.equals(that.id);
   }
 }

@@ -19,17 +19,11 @@ public class StringValue extends Value {
     return tree;
   }
 
-  public double getCompatibility(Value thatValue) {
-    if (!(thatValue instanceof StringValue))
-      return 0;
-    StringValue that = (StringValue) thatValue;
-    return this.value.equals(that.value) ? 1 : 0;
-  }
-
   @Override public int hashCode() { return value.hashCode(); }
-  @Override public boolean equals(Object thatObj) {
-    if (!(thatObj instanceof StringValue)) return false;
-    StringValue that = (StringValue)thatObj;
+  @Override public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    StringValue that = (StringValue) o;
     return this.value.equals(that.value);
   }
 }

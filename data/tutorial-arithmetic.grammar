@@ -1,0 +1,12 @@
+# Arithmetic example from TUTORIAL.md
+
+(rule $Expr ($PHRASE) (NumberFn))
+(rule $Operator (plus) (ConstantFn (lambda y (lambda x (call + (var x) (var y))))))
+(rule $Operator (times) (ConstantFn (lambda y (lambda x (call * (var x) (var y))))))
+(rule $Partial ($Operator $Expr) (JoinFn forward))
+(rule $Expr ($Expr $Partial) (JoinFn backward))
+(rule $ROOT ((what optional) (is optional) $Expr (? optional)) (IdentityFn))
+
+# Example of ambiguity to demonstrate learning
+(rule $Operator (and) (ConstantFn (lambda y (lambda x (call * (var x) (var y))))))
+(rule $Operator (and) (ConstantFn (lambda y (lambda x (call + (var x) (var y))))))

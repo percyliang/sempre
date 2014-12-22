@@ -9,6 +9,7 @@ import fig.basic.*;
 import fig.exec.Execution;
 import fig.prob.SampleUtils;
 
+import java.io.*;
 import java.util.*;
 
 /**
@@ -35,9 +36,6 @@ public class Dataset {
 
     @Option(gloss = "Only keep examples which have at most this number of tokens")
     public int maxTokens = Integer.MAX_VALUE;
-
-    @Option(gloss = "Read dataset in full lisptree format (otherwise JSON).")
-    public boolean readLispTreeFormat = false;
   }
 
   public static Options opts = new Options();
@@ -89,18 +87,25 @@ public class Dataset {
   }
 
   public void readFromPathPairs(List<Pair<String, String>> pathPairs) {
-    if (opts.readLispTreeFormat) {
-      readLispTreeFromPathPairs(pathPairs);
-      return;
+    // Try to detect whether we need JSON.
+    for (Pair<String, String> pathPair : pathPairs) {
+      if (pathPair.getSecond().endsWith(".json")) {
+        readJsonFromPathPairs(pathPairs);
+        return;
+      }
     }
 
+    readLispTreeFromPathPairs(pathPairs);
+  }
+
+  private void readJsonFromPathPairs(List<Pair<String, String>> pathPairs) {
     List<GroupInfo> groups = Lists.newArrayListWithCapacity(pathPairs.size());
     for (Pair<String, String> pathPair : pathPairs) {
       String group = pathPair.getFirst();
       String path = pathPair.getSecond();
       List<Example> examples = Json.readValueHard(
           IOUtils.openInHard(path),
-          new TypeReference<List<Example>>() {});
+          new TypeReference<List<Example>>() { });
       GroupInfo gi = new GroupInfo(group, examples);
       gi.path = path;
       groups.add(gi);
@@ -123,7 +128,7 @@ public class Dataset {
 
     LogInfo.end_track();
   }
-  
+
   private void splitDevFromTrain() {
     // Split original training examples randomly into train and dev.
     List<Example> origTrainExamples = allExamples.get("train");
@@ -143,8 +148,6 @@ public class Dataset {
         devExamples.add(origTrainExamples.get(perm[i]));
     }
   }
-  
-  
 
   private void readHelper(List<Example> incoming,
                           int maxExamples,
@@ -162,7 +165,7 @@ public class Dataset {
         ex = new Example.Builder().withExample(ex).setId(id).createExample();
       }
       i++;
-      ex.preprocess();
+      ex.preprocess(LanguageAnalyzer.getSingleton());
 
       // Skip example if too long
       if (ex.numTokens() > opts.maxTokens) continue;
@@ -176,27 +179,8 @@ public class Dataset {
     }
   }
 
-  private void collectStats() {
-    LogInfo.begin_track_printAll("Dataset stats");
-    Execution.putLogRec("numTokenTypes", tokenTypes.size());
-    Execution.putLogRec("numTokensPerExample", numTokensFig);
-    for (Map.Entry<String, List<Example>> e : allExamples.entrySet())
-      Execution.putLogRec("numExamples." + e.getKey(), e.getValue().size());
-    LogInfo.end_track();
-  }
-
-  /**
-   * For reading datasets entirely in lisptree format.
-   */
-  @Deprecated
-  public void readLispTree() {
-    readLispTreeFromPathPairs(opts.inPaths);
-  }
-
-  @Deprecated
   private void readLispTreeFromPathPairs(List<Pair<String, String>> pathPairs) {
     LogInfo.begin_track_printAll("Dataset.read");
-
     for (Pair<String, String> pathPair : pathPairs) {
       String group = pathPair.getFirst();
       String path = pathPair.getSecond();
@@ -210,7 +194,6 @@ public class Dataset {
     LogInfo.end_track();
   }
 
-  @Deprecated
   private void readLispTreeHelper(String path, int maxExamples, List<Example> examples) {
     if (examples.size() >= maxExamples) return;
     LogInfo.begin_track("Reading %s", path);
@@ -225,7 +208,7 @@ public class Dataset {
 
       Example ex = Example.fromLispTree(tree, path + ":" + n);  // Specify a default id if it doesn't exist
       n++;
-      ex.preprocess();
+      ex.preprocess(LanguageAnalyzer.getSingleton());
 
       // Skip example if too long
       if (ex.numTokens() > opts.maxTokens) continue;
@@ -239,11 +222,35 @@ public class Dataset {
     LogInfo.end_track();
   }
 
+  private void collectStats() {
+    LogInfo.begin_track_printAll("Dataset stats");
+    Execution.putLogRec("numTokenTypes", tokenTypes.size());
+    Execution.putLogRec("numTokensPerExample", numTokensFig);
+    for (Map.Entry<String, List<Example>> e : allExamples.entrySet())
+      Execution.putLogRec("numExamples." + e.getKey(), e.getValue().size());
+    LogInfo.end_track();
+  }
+
   private static int getMaxExamplesForGroup(String group) {
     int maxExamples = Integer.MAX_VALUE;
     for (Pair<String, Integer> maxPair : opts.maxExamples)
       if (maxPair.getFirst().equals(group))
         maxExamples = maxPair.getSecond();
     return maxExamples;
+  }
+
+  public static void appendExampleToFile(String path, Example ex) {
+    // JSON is an annoying format because we can't just append.
+    // So currently we have to read the entire file in and write it out.
+    List<Example> examples;
+    if (new File(path).exists()) {
+      examples = Json.readValueHard(
+          IOUtils.openInHard(path),
+          new TypeReference<List<Example>>() { });
+    } else {
+      examples = new ArrayList<Example>();
+    }
+    examples.add(ex);
+    Json.prettyWriteValueHard(new File(path), examples);
   }
 }

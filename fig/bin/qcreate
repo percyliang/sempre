@@ -83,6 +83,7 @@ cmdFile = "#{execPath}/#{id}.sh"
 out = open(cmdFile, 'w')
 cmd = ARGV.map{|x| x =~ /[ "]/ ? x.inspect : x}.join(' ').gsub(/_OUTPATH_/, execPath)
 cmd += " > #{execPath}/stdout 2> #{execPath}/stderr" if qsub
+out.puts "#!/bin/bash"
 out.puts "cd #{Dir.pwd}"
 out.puts cmd
 out.close
@@ -91,7 +92,7 @@ puts cmd
 system "git rev-parse HEAD > #{execPath}/git-hash" if File.exists?('.git')
 
 if qsub
-  exec("qsub #{cmdFile} -o /dev/null -e /dev/null")
+  exec("qsub #{File.expand_path(cmdFile)} -o /dev/null -e /dev/null")
 else
-  exec("bash #{cmdFile}")
+  exec("bash #{File.expand_path(cmdFile)}")
 end

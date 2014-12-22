@@ -1,5 +1,7 @@
 package edu.stanford.nlp.sempre;
 
+import fig.basic.Evaluation;
+
 /**
  * An Executor takes a logical form (Formula) and computes its denotation
  * (Value).
@@ -17,6 +19,6 @@ public abstract class Executor {
     public final Evaluation stats;
   }
 
-  // Execute the formula on the database.
-  public abstract Response execute(Formula formula);
+  // Execute the formula in the given context.
+  public abstract Response execute(Formula formula, ContextValue context);
 }

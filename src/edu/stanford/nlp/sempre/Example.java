@@ -1,8 +1,12 @@
 package edu.stanford.nlp.sempre;
 
-import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
+import fig.basic.Evaluation;
 import fig.basic.LispTree;
 import fig.basic.LogInfo;
 
@@ -18,14 +22,9 @@ import java.util.List;
  * @author Percy Liang
  * @author Roy Frostig
  */
-@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Example {
-  public static class JsonViews {
-    public static class WithDerivations {}
-    public static class WithDPChart {}
-  }
-
   //// Information from the input file.
 
   // Unique identifier for this example.
@@ -34,181 +33,96 @@ public class Example {
   // Input utterance
   @JsonProperty public final String utterance;
 
-  // Provides
-  @JsonProperty public final DerivationConstraint derivConstraint;
+  // Context
+  @JsonProperty public ContextValue context;
 
   // What we should try to predict.
-  @JsonProperty public Formula targetFormula;  // Logical form
-  @JsonProperty public Value targetValue;  // Answer
+  @JsonProperty public Formula targetFormula;  // Logical form (e.g., database query)
+  @JsonProperty public Value targetValue;  // Denotation (e.g., answer)
 
   //// Information after preprocessing (e.g., tokenization, POS tagging, NER, syntactic parsing, etc.).
   @JsonProperty public LanguageInfo languageInfo = null;
 
-  // Tokens come from languageInfo, but if we don't have one,
-  // they go here (usually due to deserialization).
-  // DELETE
-  private List<String> backupTokens = null;
-
   //// Output of the parser.
 
-  // Predicted derivations: sorted by score.
-  @JsonProperty @JsonView(JsonViews.WithDerivations.class)
-  List<Derivation> predDerivations;
+  // Predicted derivations (sorted by score).
+  public List<Derivation> predDerivations;
 
-  // To debug amount of ordering change due to executing and obtaining
-  // denotation features.
-  List<Derivation> predDerivationsAfterParse;
-
-  // Statistics about how well we did during parsing and execution.
-  private Evaluation parseEvaluation;
-  private Evaluation evaluation;
-
-  // Maximum position in any cell of the chart of any sub-derivation of a
-  // correct derivation.  Under the current parameters, we would need to set
-  // the beam size to at least this to get it right.
-  int correctMaxBeamPosition = -1;
-  // Beam size to use for parsing
-  int beamSize = -1;
+  // Statistics relating to processing the example.
+  public Evaluation evaluation;
 
   public static class Builder {
     private String id;
     private String utterance;
-    private DerivationConstraint derivConstraint;
+    private ContextValue context;
     private Formula targetFormula;
     private Value targetValue;
     private List<Derivation> predDerivations;
     private LanguageInfo languageInfo;
 
-    public Builder setId(String id) {
-      this.id = id;
-      return this;
-    }
-    public Builder setUtterance(String utterance) {
-      this.utterance = utterance;
-      return this;
-    }
-    public Builder setDerivConstraint(DerivationConstraint derivConstraint) {
-      this.derivConstraint = derivConstraint;
-      return this;
-    }
-    public Builder setTargetFormula(Formula targetFormula) {
-      this.targetFormula = targetFormula;
-      return this;
-    }
-    public Builder setTargetValue(Value targetValue) {
-      this.targetValue = targetValue;
-      return this;
-    }
-    public Builder setPredDerivations(List<Derivation> predDerivations) {
-      this.predDerivations = predDerivations;
-      return this;
-    }
-    public Builder setLanguageInfo(LanguageInfo languageInfo) {
-      this.languageInfo = languageInfo;
-      return this;
-    }
+    public Builder setId(String id) { this.id = id; return this; }
+    public Builder setUtterance(String utterance) { this.utterance = utterance; return this; }
+    public Builder setContext(ContextValue context) { this.context = context; return this; }
+    public Builder setTargetFormula(Formula targetFormula) { this.targetFormula = targetFormula; return this; }
+    public Builder setTargetValue(Value targetValue) { this.targetValue = targetValue; return this; }
+    public Builder setLanguageInfo(LanguageInfo languageInfo) { this.languageInfo = languageInfo; return this; }
     public Builder withExample(Example ex) {
       setId(ex.id);
       setUtterance(ex.utterance);
-      setDerivConstraint(ex.derivConstraint);
+      setContext(ex.context);
       setTargetFormula(ex.targetFormula);
       setTargetValue(ex.targetValue);
-      setPredDerivations(ex.predDerivations);
       return this;
     }
-
     public Example createExample() {
-      return new Example(
-          id, utterance, derivConstraint, targetFormula,
-          targetValue, predDerivations, languageInfo);
+      return new Example(id, utterance, context, targetFormula, targetValue, languageInfo);
     }
   }
 
   @JsonCreator
   public Example(@JsonProperty("id") String id,
                  @JsonProperty("utterance") String utterance,
-                 @JsonProperty("derivConstraint") DerivationConstraint derivConstraint,
+                 @JsonProperty("context") ContextValue context,
                  @JsonProperty("targetFormula") Formula targetFormula,
                  @JsonProperty("targetValue") Value targetValue,
-                 @JsonProperty("predDerivations") List<Derivation> predDerivations,
                  @JsonProperty("languageInfo") LanguageInfo languageInfo) {
     this.id = id;
     this.utterance = utterance;
-    this.derivConstraint = derivConstraint;
+    this.context = context;
     this.targetFormula = targetFormula;
     this.targetValue = targetValue;
-    this.predDerivations = predDerivations;
     this.languageInfo = languageInfo;
   }
 
   // Accessors
   public String getId() { return id; }
   public String getUtterance() { return utterance; }
-  public Evaluation getEvaluation() { return evaluation; }
   public int numTokens() { return languageInfo.tokens.size(); }
   public List<Derivation> getPredDerivations() { return predDerivations; }
-  public void setTargetFormula(Formula targetFormula) {
-    this.targetFormula = targetFormula;
-  }
-  public void setTargetValue(Value targetValue) {
-    this.targetValue = targetValue;
-  }
+
+  public void setContext(ContextValue context) { this.context = context; }
+  public void setTargetFormula(Formula targetFormula) { this.targetFormula = targetFormula; }
+  public void setTargetValue(Value targetValue) { this.targetValue = targetValue; }
 
   public String spanString(int start, int end) {
-    return String.format("%d:%d[%s]", start, end, phraseString(start, end));
+    return String.format("%d:%d[%s]", start, end, start != -1 ? phraseString(start, end) : "...");
   }
   public String phraseString(int start, int end) {
     return Joiner.on(' ').join(languageInfo.tokens.subList(start, end));
   }
 
   // Return a string representing the tokens between start and end.
-  public List<String> getTokens() {
-    return (languageInfo != null) ? languageInfo.tokens : backupTokens;
-  }
+  public List<String> getTokens() { return languageInfo.tokens; }
   public List<String> getLemmaTokens() { return languageInfo.lemmaTokens; }
   public String token(int i) { return languageInfo.tokens.get(i); }
   public String lemmaToken(int i) { return languageInfo.lemmaTokens.get(i); }
   public String posTag(int i) { return languageInfo.posTags.get(i); }
-  public String phrase(int start, int end) {
-    return languageInfo.phrase(start, end);
-  }
-  public String lemmaPhrase(int start, int end) {
-    return languageInfo.lemmaPhrase(start, end);
-  }
+  public String phrase(int start, int end) { return languageInfo.phrase(start, end); }
+  public String lemmaPhrase(int start, int end) { return languageInfo.lemmaPhrase(start, end); }
 
-  void setParseEvaluation(Evaluation eval) { parseEvaluation = eval; }
-  public void setEvaluation(Evaluation eval) { evaluation = eval; }
+  public String toJson() { return Json.writeValueAsStringHard(this); }
+  public static Example fromJson(String json) { return Json.readValueHard(json, Example.class); }
 
-  public Evaluation computeTotalEvaluation() {
-    Evaluation eval = new Evaluation();
-    if (parseEvaluation != null)
-      eval.add(parseEvaluation);
-    if (evaluation != null)
-      eval.add(evaluation);
-    return eval;
-  }
-
-  void rescoreAndSortPredDerivations(Params params) {
-    for (Derivation deriv : predDerivations)
-      deriv.computeScore(params);
-    Derivation.sortByScore(predDerivations);
-  }
-
-  public String toJson() {
-    return Json.writeValueAsStringHard(this);
-  }
-
-  public static Example fromJson(String json) {
-    return Json.readValueHard(json, Example.class);
-  }
-
-  /** Use JSON instead. */
-  @Deprecated
-  public static Example fromLispTree(LispTree tree) {
-    return fromLispTree(tree, null);
-  }
-
-  @Deprecated
   public static Example fromLispTree(LispTree tree, String defaultId) {
     Builder b = new Builder().setId(defaultId);
 
@@ -225,8 +139,11 @@ public class Example {
         if (arg.children.size() != 2)
           throw new RuntimeException("Expect one target value");
         b.setTargetValue(Values.fromLispTree(arg.child(1)));
+      } else if ("context".equals(label)) {
+        b.setContext(new ContextValue(arg));
       }
     }
+    b.setLanguageInfo(new LanguageInfo());
 
     Example ex = b.createExample();
 
@@ -237,18 +154,15 @@ public class Example {
         // Do nothing
       } else if ("tokens".equals(label)) {
         int n = arg.child(1).children.size();
-        ex.backupTokens = new ArrayList<String>(n);
         for (int j = 0; j < n; j++)
-          ex.backupTokens.add(arg.child(1).child(j).value);
+          ex.languageInfo.tokens.add(arg.child(1).child(j).value);
       } else if ("evaluation".equals(label)) {
         ex.evaluation = Evaluation.fromLispTree(arg.child(1));
-      } else if ("parseEvaluation".equals(label)) {
-        ex.parseEvaluation = Evaluation.fromLispTree(arg.child(1));
       } else if ("predDerivations".equals(label)) {
-        ex.predDerivations = new ArrayList<Derivation>();
+        ex.predDerivations = new ArrayList<>();
         for (int j = 1; j < arg.children.size(); j++)
           ex.predDerivations.add(derivationFromLispTree(arg.child(j)));
-      } else if (!Sets.newHashSet("id", "utterance", "targetFormula", "targetValue", "targetValues").contains(label)) {
+      } else if (!Sets.newHashSet("id", "utterance", "targetFormula", "targetValue", "targetValues", "context").contains(label)) {
         throw new RuntimeException("Invalid example argument: " + arg);
       }
     }
@@ -256,11 +170,8 @@ public class Example {
     return ex;
   }
 
-  public void preprocess() {
-    if (this.languageInfo == null)
-      this.languageInfo = new LanguageInfo();
-    this.languageInfo.analyze(this.utterance);
-    this.log();
+  public void preprocess(LanguageAnalyzer analyzer) {
+    this.languageInfo = analyzer.analyze(this.utterance);
   }
 
   public void log() {
@@ -270,20 +181,32 @@ public class Example {
     LogInfo.logs("POS tags: %s", languageInfo.posTags);
     LogInfo.logs("NER tags: %s", languageInfo.nerTags);
     LogInfo.logs("NER values: %s", languageInfo.nerValues);
+    if (context != null)
+      LogInfo.logs("context: %s", context);
     if (targetFormula != null)
       LogInfo.logs("targetFormula: %s", targetFormula);
     if (targetValue != null)
       LogInfo.logs("targetValue: %s", targetValue);
+    LogInfo.logs("Dependency children: %s", languageInfo.dependencyChildren);
     LogInfo.end_track();
   }
 
+  // To save memory
   public void clearPredDerivations() {
     predDerivations.clear();
-    predDerivationsAfterParse.clear();
   }
 
-  /** Use JSON serialization instead. */
-  @Deprecated
+  public List<Derivation> getCorrectDerivations() {
+    List<Derivation> res = new ArrayList<>();
+    for (Derivation deriv : predDerivations) {
+      if (deriv.compatibility == Double.NaN)
+        throw new RuntimeException("Compatibility is not set");
+      if (deriv.compatibility > 0)
+        res.add(deriv);
+    }
+    return res;
+  }
+
   public LispTree toLispTree(boolean outputPredDerivations) {
     LispTree tree = LispTree.proto.newList();
     tree.addChild("example");
@@ -308,8 +231,6 @@ public class Example {
 
     if (evaluation != null)
       tree.addChild(LispTree.proto.newList("evaluation", evaluation.toLispTree()));
-    if (parseEvaluation != null)
-      tree.addChild(LispTree.proto.newList("parseEvaluation", parseEvaluation.toLispTree()));
 
     if (predDerivations != null && outputPredDerivations) {
       LispTree list = LispTree.proto.newList();
@@ -322,7 +243,6 @@ public class Example {
     return tree;
   }
 
-  @Deprecated
   private static Derivation derivationFromLispTree(LispTree item) {
     Derivation.Builder b = new Derivation.Builder()
         .cat(Rule.rootCat)
@@ -352,12 +272,9 @@ public class Example {
     return b.createDerivation();
   }
 
-  @Deprecated
   private static LispTree derivationToLispTree(Derivation deriv) {
     LispTree item = LispTree.proto.newList();
 
-    // TODO: label scores and compatibilities in derivations to make output
-    // more self-documenting.
     item.addChild(deriv.compatibility + "");
     item.addChild(deriv.prob + "");
     item.addChild(deriv.score + "");
@@ -367,7 +284,7 @@ public class Example {
       item.addChild("null");
     item.addChild(deriv.formula.toLispTree());
 
-    HashMap<String, Double> features = new HashMap<String, Double>();
+    HashMap<String, Double> features = new HashMap<>();
     deriv.incrementAllFeatureVector(1, features);
     item.addChild(LispTree.proto.newList(features));
 

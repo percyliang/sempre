@@ -1,17 +1,18 @@
 package edu.stanford.nlp.sempre;
 
-import java.util.Collections;
-
 /**
  * Return a string representation of a formula as the value.  This enables
  * evaluation against exact match of logical forms.  This is overly stringent
  * right now.
  */
 public class FormulaMatchExecutor extends Executor {
-  public Response execute(Formula formula) {
+  public Response execute(Formula formula, ContextValue context) {
     formula = Formulas.betaReduction(formula);
-    return new Response(new ListValue(
-        Collections.singletonList(
-            (Value) new NameValue(formula.toLispTree().toString(), null))));
+    Value value;
+    if (formula instanceof ValueFormula)
+      value = ((ValueFormula) formula).value;
+    else
+      value = new StringValue(formula.toLispTree().toString());
+    return new Response(value);
   }
 }

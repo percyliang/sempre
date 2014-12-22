@@ -1,9 +1,9 @@
 #!/usr/bin/ruby
 
-require File.dirname($0)+'/../lib/myutils'
+require 'pathname'
+require File.dirname(Pathname.new($0).realpath) + '/../lib/myutils'
 
 # Print out a chunk of a file.  Specifically, print out the header lines.
-# Use 
 $file, $headerNumLines, $chunkSize, $indices, $printNumChunks, $verbose = extractArgs(:spec => [
   ['file', String, nil, true, 'Big file to read'],
   ['headerNumLines', Fixnum, 0, false, 'Number of header lines to include'],

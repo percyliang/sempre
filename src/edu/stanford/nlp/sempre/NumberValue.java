@@ -11,6 +11,7 @@ import fig.basic.Fmt;
  */
 public class NumberValue extends Value {
   public static final String unitless = "fb:en.unitless";
+  public static final String yearUnit = "fb:en.year";
 
   public final double value;
   public final String unit;  // What measurement (e.g., "fb:en.meter" or unitless)
@@ -39,9 +40,10 @@ public class NumberValue extends Value {
   }
 
   @Override public int hashCode() { return Double.valueOf(value).hashCode(); }
-  @Override public boolean equals(Object thatObj) {
-    if (!(thatObj instanceof NumberValue)) return false;
-    NumberValue that = (NumberValue)thatObj;
+  @Override public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    NumberValue that = (NumberValue) o;
     if (this.value != that.value) return false;  // Warning: doing exact equality checking
     if (!this.unit.equals(that.unit)) return false;
     return true;

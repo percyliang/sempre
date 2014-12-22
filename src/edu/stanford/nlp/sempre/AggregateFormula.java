@@ -3,14 +3,15 @@ package edu.stanford.nlp.sempre;
 import com.google.common.base.Function;
 import fig.basic.LispTree;
 
+import java.util.List;
+
 /**
- * Aggregate takes a set and computes some number of that set.
- * Includes existential quantification.
+ * 'Aggregate' takes a set and computes some number on that set.
  *
  * @author Percy Liang
  */
 public class AggregateFormula extends Formula {
-  public enum Mode {count, sum, mean, min, max, exists};
+  public enum Mode { count, sum, avg, min, max };
   public final Mode mode;
   public final Formula child;
 
@@ -29,16 +30,23 @@ public class AggregateFormula extends Formula {
   public static Mode parseMode(String mode) {
     if ("count".equals(mode)) return Mode.count;
     if ("sum".equals(mode)) return Mode.sum;
-    if ("mean".equals(mode)) return Mode.mean;
+    if ("avg".equals(mode)) return Mode.avg;
     if ("min".equals(mode)) return Mode.min;
     if ("max".equals(mode)) return Mode.max;
-    if ("exists".equals(mode)) return Mode.max;
     return null;
   }
 
   public Formula map(Function<Formula, Formula> func) {
     Formula result = func.apply(this);
     return result == null ? new AggregateFormula(mode, child.map(func)) : result;
+  }
+
+  @Override
+  public List<Formula> mapToList(Function<Formula, List<Formula>> func, boolean alwaysRecurse) {
+    List<Formula> res = func.apply(this);
+    if (res.isEmpty() || alwaysRecurse)
+      res.addAll(child.mapToList(func, alwaysRecurse));
+    return res;
   }
 
   @Override
@@ -49,7 +57,7 @@ public class AggregateFormula extends Formula {
     if (!this.child.equals(that.child)) return false;
     return true;
   }
-  
+
   public int computeHashCode() {
     int hash = 0x7ed55d16;
     hash = hash * 0xd3a2646c + mode.toString().hashCode();

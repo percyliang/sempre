@@ -1,0 +1,127 @@
+# Grammar used for the EMNLP 2013 submission.
+# This grammar handles simple questions involving one entity, one binary, and
+# at most one unary.
+# Supports Webquestions and Free917.
+
+############################################################
+# Lexicon
+
+### POS filter: Use POS tags to decide which spans should trigger something.
+
+# Matching unaries (SimpleNounPhrase)
+(rule $Noun ($LEMMA_TOKEN) (FilterPosTagFn token WRB WP NN NNS NNP NNPS))
+(rule $SimpleNounPhrase ($Noun) (ConcatFn " "))
+(rule $SimpleNounPhrase ($Noun $SimpleNounPhrase) (ConcatFn " "))
+
+# Matching entities (NamedEntity): note - don't lemmatize
+# Match an entity if it is a sequence of NE tags or NNP tags or of minimal length
+(rule $NamedEntity ($PHRASE) (FilterNerSpanFn PERSON ORGANIZATION LOCATION MISC))
+(rule $NamedEntity ($PHRASE) (FilterPosTagFn span NNP))
+
+# Allow length 1 spans to trigger entities in Free917, but not in WebQuestions.
+(when webquestions
+  (rule $TokenSpan ($PHRASE) (FilterSpanLengthFn 2))
+)
+(when free917
+  (rule $TokenSpan ($PHRASE) (FilterSpanLengthFn 1))
+  (rule $TokenSpan ($LEMMA_TOKEN) (FilterSpanLengthFn 1))
+)
+
+# Matching binaries (CompositeRel)
+(rule $Verb ($LEMMA_TOKEN) (FilterPosTagFn token VB VBD VBN VBG VBP VBZ VBD-AUX))
+(rule $Particle ($LEMMA_TOKEN) (FilterPosTagFn token RP))
+(rule $Prep ($LEMMA_TOKEN) (FilterPosTagFn token IN TO))
+(rule $Adj ($LEMMA_TOKEN) (FilterPosTagFn token JJ))
+
+(rule $Rel ($LEMMA_TOKEN) (FilterPosTagFn token NN NNS NNP NNPS VB VBD VBN VBG VBP VBZ IN VBD-AUX JJ))
+(rule $BaseRel ($Rel) (IdentityFn)) # parents
+(rule $BaseRel ($Verb $SimpleNounPhrase) (ConcatFn " "))
+(rule $BaseRel ($Verb $Particle) (ConcatFn " ")) # grow up
+(rule $CompositeRel ($BaseRel) (ConcatFn " ")) # grow up, parents
+(rule $CompositeRel ($BaseRel $Prep) (ConcatFn " ")) # grow up in, parents of
+
+### Lexicon: call LexiconFn on the spans.
+
+(when inexact
+  (rule $Entity ($NamedEntity) (LexiconFn entity inexact))
+  (rule $Entity ($TokenSpan) (LexiconFn entity inexact))
+)
+(when exact
+  (rule $Entity ($NamedEntity) (LexiconFn entity exact))
+  (rule $Entity ($TokenSpan) (LexiconFn entity exact))
+)
+(when fbsearch
+  (rule $Entity ($NamedEntity) (LexiconFn entity fbsearch))
+  (rule $Entity ($TokenSpan) (LexiconFn entity fbsearch))
+)
+(when fbsearch0
+  (rule $Entity ($NamedEntity) (LexiconFn entity fbsearch))
+)
+(rule $Entity ($PHRASE) (DateFn)) # Example: 2002
+(rule $Unary ($SimpleNounPhrase) (LexiconFn unary)) # Example: "city"
+(rule $Unary (how $Adj) (ConstantFn (fb:type.object.type fb:type.int) fb:type.int))
+(rule $Unary (how $Adj) (ConstantFn (fb:type.object.type fb:type.float) fb:type.float))
+(rule $Binary ($CompositeRel) (LexiconFn binary)) # Example: "capital", "developed"
+
+#### Lexicon: hard coded unaries
+(rule $Unary (who) (ConstantFn (fb:type.object.type fb:people.person) fb:people.person))
+(rule $Unary (who) (ConstantFn (fb:type.object.type fb:organization.organization) fb:organization.organization))
+(rule $Unary (who) (ConstantFn (fb:type.object.type fb:business.company) fb:business.company))
+(rule $Unary (where) (ConstantFn (fb:type.object.type fb:organization.organization) fb:organization.organization))
+(rule $Unary (where) (ConstantFn (fb:type.object.type fb:location.location) fb:location.location))
+(rule $Unary (where) (ConstantFn (fb:type.object.type fb:education.educational_institution) fb:education.educational_institution))
+(rule $Unary (when) (ConstantFn (fb:type.object.type fb:type.datetime) fb:type.datetime))
+(rule $Unary (date) (ConstantFn (fb:type.object.type fb:type.datetime) fb:type.datetime))
+(rule $Unary (year) (ConstantFn (fb:type.object.type fb:type.datetime) fb:type.datetime))
+(rule $Unary (day) (ConstantFn (fb:type.object.type fb:type.datetime) fb:type.datetime))
+
+### Lexicon: hard coded binaries
+(rule $Binary (,) (ConstantFn fb:location.location.containedby (-> fb:location.location fb:location.location)))
+
+# Aggregation
+(rule $CountStr (how many) (ConstantFn null null))
+(rule $CountStr (number of) (ConstantFn null null))
+(rule $Operator ($CountStr) (ConstantFn (lambda x (count (var x))) (-> fb:common.topic fb:type.number)))
+
+############################################################
+
+(rule $Padding ($PHRASE) (IdentityFn)) # Can skip these sequences
+
+(rule $ROOT (($Padding optional) $Operator ($Padding optional) $Set) (JoinFn forward betaReduce))
+(rule $ROOT (($Padding optional) $Set ($Padding optional)) (IdentityFn))
+
+### Combine entity and binary
+(when join
+  (rule $BaseSet ($Entity ($Padding optional) $Binary) (JoinFn unary,binary unaryCanBeArg0 unaryCanBeArg1))
+  (rule $BaseSet ($Binary ($Padding optional) $Entity) (JoinFn binary,unary unaryCanBeArg0 unaryCanBeArg1))
+)
+
+### Create binary out of thin air
+(when bridge
+  (rule $BaseSet ($Unary ($Padding optional) $Entity) (BridgeFn unary headFirst))
+  (rule $BaseSet ($Entity ($Padding optional) $Unary) (BridgeFn unary headLast))
+  (rule $BaseSet ($Entity) (BridgeFn entity headLast))
+)
+
+(when inject
+  (rule $BaseSet ($BaseSet ($Padding optional) $Entity) (BridgeFn inject headFirst))
+  (rule $BaseSet ($Entity ($Padding optional) $BaseSet) (BridgeFn inject headLast))
+)
+
+(when (not compositional)
+  (rule $Set ($BaseSet) (IdentityFn))
+  (rule $Set ($Unary ($Padding optional) $BaseSet) (MergeFn and))
+)
+
+(when compositional
+  (rule $Set ($BaseSet) (IdentityFn))
+  
+  ### Combine set and binary
+  (when join
+    (rule $Set ($Binary ($Padding optional) $Set) (JoinFn binary,unary unaryCanBeArg0 unaryCanBeArg1))
+    (rule $Set ($Set ($Padding optional) $Binary) (JoinFn unary,binary unaryCanBeArg0 unaryCanBeArg1))
+  )
+
+  # Merge two sets
+  (rule $Set ($Set ($Padding optional) $Set) (MergeFn and))
+)

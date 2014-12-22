@@ -3,6 +3,8 @@ package edu.stanford.nlp.sempre;
 import com.google.common.base.Function;
 import fig.basic.LispTree;
 
+import java.util.List;
+
 /**
  * Takes two unary formulas and performs either the intersection or union.
  *
@@ -33,6 +35,16 @@ public class MergeFormula extends Formula {
     return result == null ? new MergeFormula(mode, child1.map(func), child2.map(func)) : result;
   }
 
+  @Override
+  public List<Formula> mapToList(Function<Formula, List<Formula>> func, boolean alwaysRecurse) {
+    List<Formula> res = func.apply(this);
+    if (res.isEmpty() || alwaysRecurse) {
+      res.addAll(child1.mapToList(func, alwaysRecurse));
+      res.addAll(child2.mapToList(func, alwaysRecurse));
+    }
+    return res;
+  }
+
   public static Mode parseMode(String mode) {
     if ("and".equals(mode)) return Mode.and;
     if ("or".equals(mode)) return Mode.or;
@@ -48,7 +60,7 @@ public class MergeFormula extends Formula {
     if (!this.child2.equals(that.child2)) return false;
     return true;
   }
-  
+
   public int computeHashCode() {
     int hash = 0x7ed55d16;
     hash = hash * 0xd3a2646c + mode.toString().hashCode();  // Note: don't call hashCode() on mode directly.

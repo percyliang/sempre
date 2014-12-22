@@ -1,17 +1,19 @@
 package edu.stanford.nlp.sempre;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
 import fig.basic.LispTree;
 import fig.basic.Option;
-import fig.basic.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * A semantic function takes a sequence of child derivations and produces a set
- * of parent derivations.
+ * of parent derivations.  This is a pretty general concept, which can be used to:
+ * - Generating candidates (lexicon)
+ * - Do simple combination
+ * - Filtering of derivations
+ *
+ * To override implement this function, you just need to fill out the call() function.
  *
  * @author Percy Liang
  */
@@ -24,7 +26,7 @@ public abstract class SemanticFn {
 
   public static final Options opts = new Options();
 
-  // Used to define this SemanticFn (right now, mostly for printing).
+  // Used to define this SemanticFn.
   private LispTree tree;
 
   // Initialize the semantic function with any arguments (optional).
@@ -33,14 +35,14 @@ public abstract class SemanticFn {
     this.tree = tree;
   }
 
-  public static interface Callable {
-    public String getCat();
-    public int getStart();
-    public int getEnd();
-    public Rule getRule();
-    public List<Derivation> getChildren();
-    public Derivation child(int i);
-    public String childStringValue(int i);
+  public interface Callable {
+    String getCat();
+    int getStart();
+    int getEnd();
+    Rule getRule();
+    List<Derivation> getChildren();
+    Derivation child(int i);
+    String childStringValue(int i);
   }
 
   public static class CallInfo implements Callable {
@@ -70,33 +72,17 @@ public abstract class SemanticFn {
       new CallInfo("", -1, -1, Rule.nullRule, new ArrayList<Derivation>());
   }
 
-  // Main entry point: given information the arguments of the SemanticFn,
-  // return a list of Derivations.
-  public abstract List<Derivation> call(Example ex, Callable c);
+  // Main entry point: return a stream of Derivations (possibly none).
+  // The computation of the Derivations should be done lazily.
+  public abstract DerivationStream call(Example ex, Callable c);
 
   public LispTree toLispTree() { return tree; }
+  @Override public String toString() { return tree.toString(); }
 
-  public static SemanticFn fromLispTree(LispTree tree) {
-    String name = tree.child(0).value;
-    SemanticFn fn = null;
+ // default does nothing
+  public void addFeedback(Example ex) { return; }
 
-    if (fn == null)
-      fn = (SemanticFn) Utils.newInstanceHard(Grammar.opts.semanticFnPackage + "." + name);
-    if (fn == null)
-      throw new RuntimeException("Invalid SemanticFn name: " + name);
+ // default does nothing
+  public void sortOnFeedback(Params params) { return; }
 
-    fn.init(tree);
-    return fn;
-  }
-
-  @JsonValue
-  @Override
-  public String toString() { return tree.toString(); }
-
-  @JsonCreator
-  public static SemanticFn fromString(String s) {
-    return fromLispTree(LispTree.proto.parseFromString(s));
-  }
-
-  @Override abstract public boolean equals(Object o);
 }

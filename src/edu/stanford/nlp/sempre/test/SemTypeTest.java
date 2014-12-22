@@ -1,37 +1,66 @@
 package edu.stanford.nlp.sempre.test;
 
-import edu.stanford.nlp.sempre.SemType;
-import fig.basic.LispTree;
+import static org.testng.AssertJUnit.assertEquals;
+
 import org.testng.annotations.Test;
 
+import edu.stanford.nlp.sempre.*;
+import fig.basic.*;
+
 /**
- * Test Formulas.
+ * Test type system.
  * @author Percy Liang
+ * @author ppasupat
  */
 public class SemTypeTest {
   // For testing
   private static SemType T(String str) {
     return SemType.fromLispTree(LispTree.proto.parseFromString(str));
   }
-  private static void verify(SemType predType, SemType wantedType) {
-    if (!predType.toString().equals(wantedType.toString()))
-      throw new RuntimeException(String.format("Wanted %s, but got %s", wantedType, predType));
+
+  private static void verifyEquals(SemType predType, SemType wantedType) {
+    assertEquals(wantedType.toString(), predType.toString());
   }
-  private static void verifySupertypeOf(String supertype, String subtype) {
-    if (!T(supertype).isSupertypeOf(T(subtype)))
-      throw new RuntimeException(supertype + " is not a supertype of " + subtype);
+
+  private static void verifyMeet(String t1, String t2) { verifyMeet(t1, t2, t2); }
+  private static void verifyMeet(String t1, String t2, String t) {
+    verifyEquals(T(t1).meet(T(t2)), T(t));
+    verifyEquals(T(t2).meet(T(t1)), T(t));
   }
 
   @Test public void simpleSemType() {
-    verify(T("city").meet(T("city")), T("city"));
-    verify(T("city").meet(T("country")), T("(union)"));
-    verify(T("city").meet(T("(union city country)")), T("city"));
-    verify(T("(union country city river)").meet(T("(union city country)")), T("(union country city)"));
-    verify(T("(-> city fb:type.int)").apply(T("(union city country)")), T("fb:type.int"));
-    verify(T("(-> city fb:type.int fb:type.float)").apply(T("(union city country)")).apply(T("fb:type.int")), T("fb:type.float"));
-    verify(T("fb:type.datetime").apply(T("fb:common.topic")), T("(union)"));
-    verify(T("(-> fb:location.citytown fb:type.datetime)").apply(T("fb:location.location")), T("(union)"));
-    verify(T("(-> fb:location.location fb:type.datetime)").apply(T("fb:location.citytown")), T("fb:type.datetime"));
-    verifySupertypeOf("(-> fb:location.location fb:type.number)", "(-> fb:location.location fb:type.float)");
+    SemTypeHierarchy.opts.failOnUnknownTypes = false;
+    verifyMeet("city", "city");
+    verifyMeet("city", "country", "(union)");
+    verifyMeet("city", "(union city country)", "city");
+    verifyMeet("(union city country river)", "(union city country)");
+
+    verifyEquals(T("(-> city fb:type.int)").apply(T("(union city country)")), T("fb:type.int"));
+    verifyEquals(T("(-> city fb:type.int fb:type.float)").apply(T("(union city country)")).apply(T("fb:type.int")), T("fb:type.float"));
+    verifyEquals(T("fb:type.datetime").apply(T("fb:common.topic")), T("(union)"));
+    verifyEquals(T("(-> fb:type.int fb:type.datetime)").apply(T("fb:type.number")), T("fb:type.datetime"));
+    verifyEquals(T("(-> fb:type.number fb:type.datetime)").apply(T("fb:type.int")), T("fb:type.datetime"));
+
+    verifyMeet("(-> fb:location.location fb:type.number)", "(-> fb:location.location fb:type.float)");
+    verifyMeet("fb:common.topic", "fb:location.location");
+    verifyMeet("fb:type.any", "fb:type.boolean");
+    verifyMeet("fb:type.any", "fb:type.number");
+    verifyMeet("fb:type.any", "fb:type.datetime");
+    verifyMeet("fb:type.any", "fb:type.cvt");
+    verifyMeet("fb:type.any", "fb:type.text");
+    verifyMeet("fb:type.any", "fb:location.location");
+    verifyMeet("fb:type.any", "fb:common.topic");
+
+    verifyMeet("fb:common.topic", "fb:common.topic");
+    verifyMeet("top", "(-> t t)");
+    verifyMeet("top", "fb:type.datetime");
+    verifyMeet("top", "(union a b)");
+
+    verifyMeet("(-> (-> a b) top)", "(-> top (-> a b))", "(-> (-> a b) (-> a b))");
+    verifyMeet("(-> (union city country) person)", "(-> city (union person dog))", "(-> city person)");
+  }
+
+  public static void main(String[] args) {
+    new SemTypeTest().simpleSemType();
   }
 }

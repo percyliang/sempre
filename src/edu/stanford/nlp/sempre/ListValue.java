@@ -1,6 +1,7 @@
 package edu.stanford.nlp.sempre;
 
 import fig.basic.LispTree;
+import fig.basic.LogInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,53 +21,13 @@ public class ListValue extends Value {
     LispTree tree = LispTree.proto.newList();
     tree.addChild("list");
     for (Value value : values)
-      tree.addChild(value.toLispTree());
+      tree.addChild(value == null ? LispTree.proto.newLeaf(null) : value.toLispTree());
     return tree;
-  }
-
-  // Compute F1 score between two lists (partial match).
-  // this is target, that is predicted.
-  public double getCompatibility(Value thatValue) {
-    if (!(thatValue instanceof ListValue))
-      return 0;
-    ListValue that = (ListValue) thatValue;
-
-    if (this.values.size() == 0 && that.values.size() == 0)
-      return 1;
-    if (this.values.size() == 0 || that.values.size() == 0)
-      return 0;
-
-    double precision = 0;
-    for (Value v2 : that.values) {  // For every predicted value...
-      double score = 0;
-      for (Value v1 : this.values)
-        score = Math.max(score, v1.getCompatibility(v2));
-      precision += score;
-    }
-    precision /= that.values.size();
-    assert precision >= 0 && precision <= 1 : precision;
-
-    double recall = 0;
-    for (Value v1 : this.values) {  // For every true value...
-      double score = 0;
-      for (Value v2 : that.values)
-        score = Math.max(score, v1.getCompatibility(v2));
-      recall += score;
-    }
-    recall /= this.values.size();
-    assert recall >= 0 && recall <= 1 : recall;
-
-    if (precision + recall == 0) return 0;
-
-    double f1 = 2 * precision * recall / (precision + recall);
-    assert f1 >= 0 && f1 <= 1 : f1;
-
-    return f1;
   }
 
   public void log() {
     for (Value value : values)
-      value.log();
+      LogInfo.logs("%s", value);
   }
 
   @Override

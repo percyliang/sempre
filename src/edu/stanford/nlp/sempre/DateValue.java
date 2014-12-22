@@ -1,6 +1,7 @@
 package edu.stanford.nlp.sempre;
 
 import fig.basic.LispTree;
+import java.util.Calendar;
 
 public class DateValue extends Value {
   public final int year;
@@ -19,7 +20,16 @@ public class DateValue extends Value {
     int year = -1, month = -1, day = -1;
     boolean isBC = dateStr.startsWith("-");
     if (isBC) dateStr = dateStr.substring(1);
-    String dateParts[];
+
+    // Ignore time
+    int t = dateStr.indexOf('T');
+    if (t != -1) dateStr = dateStr.substring(0, t);
+
+    String[] dateParts;
+
+    if (dateStr.indexOf('T') != -1)
+      dateStr = dateStr.substring(0, dateStr.indexOf('T'));
+
     dateParts = dateStr.split("-");
     if (dateParts.length > 3)
       throw new RuntimeException("Date has more than 3 parts: " + dateStr);
@@ -39,6 +49,14 @@ public class DateValue extends Value {
       val = -1;
     }
     return val;
+  }
+
+  public static DateValue now() {
+    Calendar cal = Calendar.getInstance();
+    int year = cal.get(Calendar.YEAR);
+    int month = cal.get(Calendar.MONTH);
+    int day = cal.get(Calendar.DAY_OF_MONTH);
+    return new DateValue(year, month, day);
   }
 
   public DateValue(int year, int month, int day) {
@@ -62,17 +80,6 @@ public class DateValue extends Value {
     return tree;
   }
 
-  public double getCompatibility(Value thatValue) {
-    if (!(thatValue instanceof DateValue))
-      return 0;
-    DateValue that = (DateValue) thatValue;
-    // TODO: Only comparing the year right now.
-    boolean perfectMatch = (this.year == that.year);
-    //&& (this.month == that.month)
-    //&& (this.day == that.day);
-    return perfectMatch ? 1.0 : 0.0;
-  }
-
   @Override public int hashCode() {
     int hash = 0x7ed55d16;
     hash = hash * 0xd3a2646c + year;
@@ -81,9 +88,10 @@ public class DateValue extends Value {
     return hash;
   }
 
-  @Override public boolean equals(Object thatObj) {
-    if (!(thatObj instanceof DateValue)) return false;
-    DateValue that = (DateValue)thatObj;
+  @Override public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    DateValue that = (DateValue) o;
     if (this.year != that.year) return false;
     if (this.month != that.month) return false;
     if (this.day != that.day) return false;

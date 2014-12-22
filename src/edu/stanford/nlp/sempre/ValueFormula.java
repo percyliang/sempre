@@ -13,7 +13,7 @@ public class ValueFormula<T extends Value> extends PrimitiveFormula {
 
   public ValueFormula(T value) { this.value = value; }
   public LispTree toLispTree() {
-    if (value instanceof NameValue) return LispTree.proto.newLeaf(((NameValue)value).id);
+    if (value instanceof NameValue) return LispTree.proto.newLeaf(((NameValue) value).id);
     return value.toLispTree();
   }
 

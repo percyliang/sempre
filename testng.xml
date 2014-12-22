@@ -1,9 +1,14 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
 
-<suite name="SempreTestSuite" parallel="tests" thread-count="4" verbose="10">
+<suite name="SempreTestSuite" verbose="10">
   <test name="AllTests">
     <packages>
-      <package name="edu.stanford.nlp.sempre.test" />
+      <package name="edu.stanford.nlp.sempre" />
     </packages>
+    <groups>
+      <run>
+        <exclude name="grammar" />
+      </run>
+    </groups>
   </test>
 </suite>
