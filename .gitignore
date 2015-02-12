@@ -1,9 +1,0 @@
-lib
-state
-test-output
-*.cache
-
-virtuoso-opensource
-
-data/free917*.json
-data/emnlp*.grammar

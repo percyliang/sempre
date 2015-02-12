@@ -1,0 +1,5 @@
+{"formula":"(lambda x (fb:people.person.education (fb:education.education.institution (var x))))","source":"ALIGNMENT","features":{"FB_typed_size":1740.0,"Intersection_size_typed":53.0,"NL-size":18096.0,"NL_typed_size":65.0},"lexeme":"bear in"}
+{"formula":"fb:people.deceased_person.place_of_cremation","source":"ALIGNMENT","features":{"FB_typed_size":3.0,"Intersection_size_typed":1.0,"NL-size":18096.0,"NL_typed_size":7156.0},"lexeme":"bear in"}
+{"formula":"fb:location.location.people_born_here","source":"ALIGNMENT","features":{"FB_typed_size":351.0,"Intersection_size_typed":1.0,"NL-size":18096.0,"NL_typed_size":1.0},"lexeme":"bear in"}
+{"formula":"!fb:location.location.people_born_here","source":"ALIGNMENT","features":{"FB_typed_size":16184.0,"Intersection_size_typed":13856.0,"NL-size":18096.0,"NL_typed_size":15765.0},"lexeme":"bear in"}
+{"formula":"(lambda x (!fb:tv.tv_producer_term.producer (!fb:tv.tv_program.tv_producer (var x))))","source":"ALIGNMENT","features":{"FB_typed_size":156.0,"Intersection_size_typed":1.0,"NL-size":10.0,"NL_typed_size":1.0},"lexeme":"hilarious in"}

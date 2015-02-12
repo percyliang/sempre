@@ -1,169 +1,66 @@
 package edu.stanford.nlp.sempre;
 
+import fig.basic.Fmt;
 import fig.basic.LogInfo;
-import fig.basic.MapUtils;
-import fig.basic.SetUtils;
-import fig.basic.StopWatch;
+import fig.basic.NumUtils;
+import fig.basic.Evaluation;
 
-import java.lang.reflect.Array;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
-/** @author Roy Frostig */
+/**
+ * Actually does the parsing.  Main method is infer(), whose job is to fill in
+ *
+ * @author Roy Frostig
+ * @author Percy Liang
+ */
 public abstract class ParserState {
-  // Modes:
-  // 1) Bool: just check if cells (cat, start, end) are reachable (to prune chart)
-  // 2) Full: compute everything
-  public enum Mode { bool, full };
+  //// Input: specification of how to parse
 
-  private final Mode mode;
-  private final Parser parser;
-  private final Params params;
-  private final Example ex;
-  private final ParserState coarseState; // Used to prune (optional)
-  final int numTokens;
+  public final Parser parser;
+  public final Params params;
+  public final Example ex;
+  public final boolean computeExpectedCounts;  // Whether we're learning
 
-  // Dynamic programming chart
-  // cell (start, end, category) -> list of derivations (sorted by
-  // decreasing score) [beam]
-  final Map<String, List<Derivation>>[][] chart;
+  //// Output
 
-  private boolean execAllowed;
+  public final List<Derivation> predDerivations = new ArrayList<Derivation>();
+  public final Evaluation evaluation = new Evaluation();
 
-  // -- Some informational stats --
-  // Number of milliseconds to parse this sentence
-  protected long time;
-  // Maximum number of derivations in any chart cell prior to pruning.
-  protected int maxCellSize;
-  // Description of that cell (for debugging)
-  protected String maxCellDescription;
-  // Did any hypotheses fall off the beam?
-  protected boolean fallOffBeam;
-  protected int totalDerivsInChart=0;
+  // If computeExpectedCounts is true (for learning), then fill this out.
+  public Map<String, Double> expectedCounts;
+  public double objectiveValue;
 
-  // Parser timing
-  StopWatch watch;
+  // Statistics generated while parsing
+  public final int numTokens;
+  public long parseTime;  // Number of milliseconds to parse this example
+  public int maxCellSize; // Maximum number of derivations in any chart cell prior to pruning.
+  public String maxCellDescription; // Description of that cell (for debugging)
+  public boolean fallOffBeam; // Did any hypotheses fall off the beam?
+  public int totalGeneratedDerivs; // Total number of derivations produced
+  public int numOfFeaturizedDerivs = 0; // Number of derivations featured
 
-  //whether to create derivations based on subparts
-  private boolean filterDerivationsBySubparts = false;
-  //subpart descriptions
-  private Set<String> subParts = null;
 
-  @SuppressWarnings({"unchecked"})
-  public ParserState(Mode mode,
-      Parser parser,
-      Params params,
-      Example ex,
-      ParserState coarseState) {
-    this.mode = mode;
+  @SuppressWarnings({ "unchecked" })
+  public ParserState(Parser parser, Params params, Example ex, boolean computeExpectedCounts) {
     this.parser = parser;
     this.params = params;
     this.ex = ex;
-    this.coarseState = coarseState;
+    this.computeExpectedCounts = computeExpectedCounts;
     this.numTokens = ex.numTokens();
-    this.execAllowed = true;
-
-    // Initialize the chart.
-    this.chart = (HashMap<String, List<Derivation>>[][])
-        Array.newInstance(
-            HashMap.class,
-            numTokens, numTokens + 1);
-    for (int start = 0; start < numTokens; start++) {
-      for (int end = start + 1; end <= numTokens; end++) {
-        chart[start][end] = new HashMap<String, List<Derivation>>();
-      }
-    }
-  }
-  
-  public void clearChart() {
-    for (int start = 0; start < numTokens; start++) {
-      for (int end = start + 1; end <= numTokens; end++) {
-        chart[start][end].clear();
-      }
-    }
   }
 
-  public Mode getMode() { return mode; }
-  public Example getExample() { return ex; }
-  public ParserState getCoarseState() { return coarseState; }
-  public Params getModelParams() { return params; }
-  public long getParseTime() { return time; }
-  public Map<String, List<Derivation>>[][] getChart() { return chart; }
+  protected int getBeamSize() { return Parser.opts.beamSize; }
 
-  public List<Derivation> getPredDerivations() {
-    final List<Derivation> empty = Collections.emptyList();
-    if (numTokens == 0)
-      return empty;
-    List<Derivation> result = chart[0][numTokens].get(Rule.rootCat);
-    return result == null ? empty : result;
-  }
-
-  // Subclass entry point.
-  protected abstract void build(int start, int end);
-
-  public void infer() {
-    if (numTokens == 0)
-      return;
-
-    watch = new StopWatch();
-    watch.start();
-    if (parser.verbose(2))
-      LogInfo.begin_track("ParserState.infer");
-
-    for (Derivation deriv : gatherTokenAndPhraseDerivations()) {
-      featurizeAndScoreDerivation(deriv);
-      addToChart(deriv);
-    }
-
-    // Recurse
-    for (int len = 1; len <= numTokens; len++)
-      for (int i = 0; i + len <= numTokens; i++)
-        build(i, i + len);
-
-    if (parser.verbose(2))
-      LogInfo.end_track();
-    watch.stop();
-    time = watch.getCurrTimeLong();
-  }
-
-  int getBeamSize() {
-    return ex.beamSize != -1 ? ex.beamSize : parser.getDefaultBeamSize();
-  }
-
-  void addToChart(Derivation deriv) {
-    if(filterDerivationsBySubparts && !isValidSubpartDerivation(deriv))
-      return;
-    MapUtils.addToList(chart[deriv.start][deriv.end], deriv.cat, deriv);
-    totalDerivsInChart++;
-  }
-
-  @SuppressWarnings({"unchecked"})
-  // TODO: hash the formulas rather than the strings.
-  private boolean isValidSubpartDerivation(Derivation deriv) {
-    if(deriv.formula==null)
-      return true;
-    if(deriv.formula instanceof PrimitiveFormula) {
-      ValueFormula<Value> valueFormula = (ValueFormula<Value>) deriv.formula;
-      if(valueFormula.value instanceof StringValue)
-        return true;
-    }
-
-    if("(type fb:type.text)".equals(deriv.type.toString()))
-      return true;
-    boolean valid = subParts.contains(deriv.formula.toString()); 
-    if(parser.verbose(2))
-      LogInfo.logs("ParserState.isValidSubpart: formula=%s, valid=%s",deriv.formula,valid);
-    return valid;
-  }
-
-  void setExecAllowed(boolean execAllowed) {
-    this.execAllowed = execAllowed;
-  }
+  // Main entry point.  Should set all the output variables.
+  public abstract void infer();
 
   protected void featurizeAndScoreDerivation(Derivation deriv) {
-    if (parser.verbose(deriv.isRoot(numTokens) ? 2 : 3))
-      LogInfo.logs(
-          "featurizeAndScore %s %s: %s, %s",
-          deriv.cat, ex.spanString(deriv.start, deriv.end), deriv,deriv.rule);
+    if (deriv.isFeaturizedAndScored()) {
+      LogInfo.warnings("Derivation already featurized: %s", deriv);
+      return;
+    }
 
     // Compute features
     parser.extractor.extractLocal(ex, deriv);
@@ -171,80 +68,76 @@ public abstract class ParserState {
     // Compute score
     deriv.computeScoreLocal(params);
 
-    if (parser.verbose(deriv.isRoot(numTokens) ? 2 : 3))
-      LogInfo.logs("featurizeAndScore score=%.4f", deriv.score);
+    if (parser.verbose(5)) {
+      LogInfo.logs("featurizeAndScoreDerivation(score=%s) %s %s: %s [rule: %s]",
+          Fmt.D(deriv.score), deriv.cat, ex.spanString(deriv.start, deriv.end), deriv, deriv.rule);
+    }
+    numOfFeaturizedDerivs++;
   }
 
-  // -- Coarse state pruning --
+  /**
+   * Prune down the number of derivations in |derivations| to the beam size.
+   * Sort the beam by score.
+   * Update beam statistics.
+   */
+  protected void pruneCell(String cellDescription, List<Derivation> derivations) {
+    if (derivations == null) return;
 
-  // Remove any (cat, start, end) which isn't reachable from the
-  // (Rule.rootCat, 0, numTokens)
-  public void keepTopDownReachable() {
-    if (numTokens == 0) return;
+    // Update stats about cell size.
+    if (derivations.size() > maxCellSize) {
+      maxCellSize = derivations.size();
+      maxCellDescription = cellDescription;
+      if (maxCellSize > 5000)
+        LogInfo.logs("ParserState.pruneCell %s: %s entries", maxCellDescription, maxCellSize);
+    }
 
-    Set<String> reachable = new HashSet<String>();
-    collectReachable(reachable, Rule.rootCat, 0, numTokens);
+    // The extra code blocks in here that set |deriv.maxXBeamPosition|
+    // are there to track, over the course of parsing, the lowest
+    // position at which any of a derivation's constituents ever
+    // placed on any of the relevant beams.
 
-    // Remove all derivations associated with (cat, start, end) that aren't reachable.
-    for (int start = 0; start < numTokens; start++) {
-      for (int end = start + 1; end <= numTokens; end++) {
-        List<String> toRemoveCats = new LinkedList<String>();
-        for (String cat : chart[start][end].keySet()) {
-          String key = catStartEndKey(cat, start, end);
-          if (!reachable.contains(key)) {
-            toRemoveCats.add(cat);
-          }
-        }
-        Collections.sort(toRemoveCats);
-        for (String cat : toRemoveCats) {
-          if(parser.verbose(1)) {
-            LogInfo.logs("Pruning chart %s(%s,%s)",cat,start,end);
-          }
-          chart[start][end].remove(cat);
-        }
+    // Max beam position (before sorting)
+    int i = 0;
+    for (Derivation deriv : derivations) {
+      deriv.maxUnsortedBeamPosition = i;
+      if (deriv.children != null) {
+        for (Derivation child : deriv.children)
+          deriv.maxUnsortedBeamPosition = Math.max(deriv.maxUnsortedBeamPosition, child.maxUnsortedBeamPosition);
       }
-    }
-  }
-  private void collectReachable(Set<String> reachable, String cat, int start, int end) {
-    String key = catStartEndKey(cat, start, end);
-    if (reachable.contains(key)) return;
-
-    if (!chart[start][end].containsKey(cat)) {
-      // This should only happen for the root when there are no parses.
-      return;
-    }
-
-    reachable.add(key);
-    for (Derivation deriv : chart[start][end].get(cat)) {
-      for (Derivation subderiv : deriv.children) {
-        collectReachable(reachable, subderiv.cat, subderiv.start, subderiv.end);
+      if (deriv.preSortBeamPosition == -1) {
+        // Need to be careful to only do this once since |pruneCell()|
+        // might be called several times for the same beam and the
+        // second time around we have already sorted once.
+        deriv.preSortBeamPosition = i;
       }
+      i++;
+    }
+
+    Derivation.sortByScore(derivations);
+
+    // Max beam position (after sorting)
+    i = 0;
+    for (Derivation deriv : derivations) {
+      deriv.maxBeamPosition = i;
+      if (deriv.children != null) {
+        for (Derivation child : deriv.children)
+          deriv.maxBeamPosition = Math.max(deriv.maxBeamPosition, child.maxBeamPosition);
+      }
+      deriv.postSortBeamPosition = i;
+      i++;
+    }
+
+    // Keep only the top hypotheses
+    int beamSize = getBeamSize();
+    while (derivations.size() > beamSize) {
+      derivations.remove(derivations.size() - 1);
+      fallOffBeam = true;
     }
   }
-  private String catStartEndKey(String cat, int start, int end) {
-    return cat + ":" + start + ":" + end;
-  }
 
-  // For pruning with the coarse state
-  protected boolean coarseAllows(Trie node, int start, int end) {
-    if (coarseState == null) return true;
-    return SetUtils.intersects(
-        node.cats,
-        coarseState.getChart()[start][end].keySet());
-  }
-  protected boolean coarseAllows(String cat, int start, int end) {
-    if (coarseState == null) return true;
-    return coarseState.getChart()[start][end].containsKey(cat);
-  }
-
-  // -- Initialization --
-
+  // -- Base case --
   public List<Derivation> gatherTokenAndPhraseDerivations() {
-    List<Derivation> derivs = new ArrayList<Derivation>();
-    Example ex = getExample();
-    int numTokens = ex.numTokens();
-
-    final List<Derivation> empty = Collections.emptyList();
+    List<Derivation> derivs = new ArrayList<>();
 
     // All tokens (length 1)
     for (int i = 0; i < numTokens; i++) {
@@ -252,8 +145,9 @@ public abstract class ParserState {
           new Derivation.Builder()
           .cat(Rule.tokenCat).start(i).end(i + 1)
           .rule(Rule.nullRule)
-          .children(empty)
+          .children(Derivation.emptyList)
           .withStringFormulaFrom(ex.token(i))
+          .canonicalUtterance(ex.token(i))
           .createDerivation());
 
       // Lemmatized version
@@ -261,8 +155,9 @@ public abstract class ParserState {
           new Derivation.Builder()
           .cat(Rule.lemmaTokenCat).start(i).end(i + 1)
           .rule(Rule.nullRule)
-          .children(empty)
+          .children(Derivation.emptyList)
           .withStringFormulaFrom(ex.lemmaToken(i))
+          .canonicalUtterance(ex.token(i))
           .createDerivation());
     }
 
@@ -273,8 +168,9 @@ public abstract class ParserState {
             new Derivation.Builder()
             .cat(Rule.phraseCat).start(i).end(j)
             .rule(Rule.nullRule)
-            .children(empty)
+            .children(Derivation.emptyList)
             .withStringFormulaFrom(ex.phrase(i, j))
+            .canonicalUtterance(ex.phrase(i, j))
             .createDerivation());
 
         // Lemmatized version
@@ -282,51 +178,76 @@ public abstract class ParserState {
             new Derivation.Builder()
             .cat(Rule.lemmaPhraseCat).start(i).end(j)
             .rule(Rule.nullRule)
-            .children(empty)
+            .children(Derivation.emptyList)
             .withStringFormulaFrom(ex.lemmaPhrase(i, j))
+            .canonicalUtterance(ex.phrase(i, j))
             .createDerivation());
       }
     }
     return derivs;
   }
 
-  // -- Evaluation --
-
-  public void setEvaluation() {
-    LogInfo.begin_track_printAll("ParserState.setEvaluation");
-
-    final Example ex = getExample();
-    final Evaluation eval = new Evaluation();
-    final boolean parsed = ex.predDerivations.size() > 0;
-    eval.add("parsed", parsed);
-    eval.add("numTokens", numTokens);
-    eval.add("maxCellSize", maxCellDescription, maxCellSize);
-    eval.add("fallOffBeam", fallOffBeam);
-
-    if (getCoarseState() != null)
-      eval.add("coarseParseTime", getCoarseState().getParseTime());
-    eval.add("parseTime", getParseTime());
-    eval.add("totalDerivs", totalDerivsInChart);
-
-    ex.setParseEvaluation(eval);
+  // Ensure that all the logical forms are executed and compatibilities are computed.
+  protected void ensureExecuted() {
+    LogInfo.begin_track("Parser.ensureExecuted");
+    // Execute predicted derivations to get value.
+    for (Derivation deriv : predDerivations) {
+      deriv.ensureExecuted(parser.executor, ex.context);
+      if (ex.targetValue != null)
+        deriv.compatibility = parser.valueEvaluator.getCompatibility(ex.targetValue, deriv.value);
+      if (!computeExpectedCounts && Parser.opts.executeTopFormulaOnly) break;
+    }
     LogInfo.end_track();
   }
 
+  // Add statistics to |evaluation|.
+  // Override if we have more statistics.
+  protected void setEvaluation() {
+    evaluation.add("numTokens", numTokens);
+    evaluation.add("parseTime", parseTime);
+    evaluation.add("maxCellSize", maxCellDescription, maxCellSize);
+    evaluation.add("fallOffBeam", fallOffBeam);
+    evaluation.add("totalDerivs", totalGeneratedDerivs);
+    evaluation.add("numOfFeaturizedDerivs", numOfFeaturizedDerivs);
+  }
+
+  public static double compatibilityToReward(double compatibility) {
+    if (Parser.opts.partialReward)
+      return compatibility;
+    return compatibility == 1 ? 1 : 0;  // All or nothing
+  }
+
   /**
-   * Generate fomrula subparts and only allow derivations with these formulas
-   * TODO: move this logic to FormulaGenerationInfo.  ParserState is generic and
-   * shouldn't depend on FormulaGenerationInfo.
-   * @param fgInfos
+   * Fill |counts| with the gradient with respect to the derivations
+   * according to a standard exponential family model over a finite set of derivations.
+   * Assume that everything has been executed, and compatibility has been computed.
    */
-  public void setFormulaSubparts(List<FormulaGenerationInfo> fgInfos) {
-    LogInfo.begin_track("Setting formulas subparts");
-    filterDerivationsBySubparts=true;
-    subParts = new HashSet<String>();
-    for(FormulaGenerationInfo fgInfo: fgInfos) {
-      Formula f = fgInfo.generateFormula();
-      subParts.addAll(Formulas.extractSubparts(f));
+  public static void computeExpectedCounts(List<Derivation> derivations, Map<String, Double> counts) {
+    double[] trueScores;
+    double[] predScores;
+
+    int n = derivations.size();
+    if (n == 0) return;
+
+    trueScores = new double[n];
+    predScores = new double[n];
+    for (int i = 0; i < n; i++) {
+      Derivation deriv = derivations.get(i);
+      double logReward = Math.log(compatibilityToReward(deriv.compatibility));
+
+      trueScores[i] = deriv.score + logReward;
+      predScores[i] = deriv.score;
     }
-    LogInfo.logs("Number of subparts=%s",subParts.size());
-    LogInfo.end_track();
+
+    // Usually this happens when there are no derivations.
+    if (!NumUtils.expNormalize(trueScores)) return;
+    if (!NumUtils.expNormalize(predScores)) return;
+
+    // Update parameters
+    for (int i = 0; i < n; i++) {
+      Derivation deriv = derivations.get(i);
+      double incr = trueScores[i] - predScores[i];
+      deriv.incrementAllFeatureVector(incr, counts);
+    }
   }
 }

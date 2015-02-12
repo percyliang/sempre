@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.base.Function;
 import fig.basic.LispTree;
 
+import java.util.List;
+
 /**
  * A Formula is a logical form, which is the result of semantic parsing. Current
  * implementation is lambda calculus with primitives like description logic and
@@ -16,14 +18,18 @@ import fig.basic.LispTree;
  * @author Percy Liang
  */
 public abstract class Formula {
-  //cache the hashcode
-  private int hashCode=-1;
+  // cache the hashcode
+  private int hashCode = -1;
   // Serialize as LispTree.
   public abstract LispTree toLispTree();
 
   // Recursively perform some operation on each formula.
   // Apply to formulas.  If |func| returns null, then recurse on children.
   public abstract Formula map(Function<Formula, Formula> func);
+
+  // Recursively perform some operation on each formula.
+  // Apply to formulas.  If |func| returns an empty set or |alwaysRecurse|, then recurse on children.
+  public abstract List<Formula> mapToList(Function<Formula, List<Formula>> func, boolean alwaysRecurse);
 
   @JsonValue
   public String toString() { return toLispTree().toString(); }
@@ -33,14 +39,14 @@ public abstract class Formula {
     return Formulas.fromLispTree(LispTree.proto.parseFromString(str));
   }
 
-  @Override abstract public boolean equals(Object o);
+  @Override public abstract boolean equals(Object o);
   @Override public int hashCode() {
-    if(hashCode==-1)
+    if (hashCode == -1)
       hashCode = computeHashCode();
     return hashCode;
   }
-  
-  abstract public int computeHashCode();
+
+  public abstract int computeHashCode();
 
   public static Formula nullFormula = new PrimitiveFormula() {
       public LispTree toLispTree() { return LispTree.proto.newLeaf("null"); }

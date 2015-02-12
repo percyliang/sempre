@@ -1,7 +1,5 @@
 package edu.stanford.nlp.sempre;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import fig.basic.LispTree;
@@ -26,25 +24,21 @@ public class Rule {
   public static final String lemmaTokenCat = "$LEMMA_TOKEN";  // Lemmatized version
   public static final String lemmaPhraseCat = "$LEMMA_PHRASE";  // Lemmatized version
 
-  @JsonProperty String lhs;  // Left-hand side: category.
-  @JsonProperty
-  List<String> rhs;  // Right-hand side: sequence of categories (have $ prefix) and tokens.
-  @JsonProperty
-  SemanticFn sem;  // Takes derivations corresponding to RHS categories and produces a set of derivations corresponding to LHS.
-  List<Pair<String, Double>> info;  // Extra info
+  public final String lhs;  // Left-hand side: category.
+  public final List<String> rhs;  // Right-hand side: sequence of categories (have $ prefix) and tokens.
+  public final SemanticFn sem;  // Takes derivations corresponding to RHS categories and produces a set of derivations corresponding to LHS.
+  public List<Pair<String, Double>> info;  // Extra info
 
-  private String semRepn = null;
+  // Cache the semanticRepn
   public String getSemRepn() {
     if (semRepn == null) semRepn = sem.getClass().getSimpleName();
     return semRepn;
   }
+  private String semRepn = null;
 
-  public Rule() {}
-
-  @JsonCreator
-  public Rule(@JsonProperty("lhs") String lhs,
-      @JsonProperty("rhs") List<String> rhs,
-      @JsonProperty("sem") SemanticFn sem) {
+  public Rule(String lhs,
+              List<String> rhs,
+              SemanticFn sem) {
     this.lhs = lhs;
     this.rhs = rhs;
     this.sem = sem;
@@ -58,42 +52,28 @@ public class Rule {
   }
   private String stringRepn;  // Cache toString()
 
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-
-    Rule rule = (Rule) o;
-
-    if (info != null ? !info.equals(rule.info) : rule.info != null) return false;
-    if (lhs != null ? !lhs.equals(rule.lhs) : rule.lhs != null) return false;
-    if (rhs != null ? !rhs.equals(rule.rhs) : rule.rhs != null) return false;
-    if (sem != null ? !sem.equals(rule.sem) : rule.sem != null) return false;
-
-    return true;
-  }
-
-  @Override 
-  public int hashCode() {
-    int hash = 0x7ed55d16;
-    if(this!=nullRule) {
-      hash = hash * 0xd3a2646c + lhs.hashCode();
-      hash = hash * 0xd3a2646c + rhs.hashCode();
-      hash = hash * 0xd3a2646c + sem.toString().hashCode();
-    }
-    return hash;
-  }
-
+  // Get/set info
   public void addInfo(String key, double value) {
     if (info == null) info = Lists.newArrayList();
     info.add(Pair.newPair(key, value));
   }
+  public Rule setInfo(Rule rule) { this.info = rule.info; return this; }
 
   // Accessors
   public SemanticFn getSem() { return sem; }
+  public String getLhs() { return lhs; }
 
   // Return whether rule has form A -> B (both LHS and RHS contain one category).
   public boolean isCatUnary() { return rhs.size() == 1 && isCat(rhs.get(0)); }
+
+  // Return if all RHS tokens are terminals
+  public boolean isRhsTerminals() {
+    for (int i = 0; i < rhs.size(); ++i) {
+      if (isCat(rhs.get(i)))
+        return false;
+    }
+    return true;
+  }
 
   public LispTree toLispTree() {
     LispTree tree = LispTree.proto.newList();
@@ -101,10 +81,42 @@ public class Rule {
     tree.addChild(lhs);
     tree.addChild(LispTree.proto.newList(rhs));
     tree.addChild(sem.toLispTree());
+    if (info != null) {
+      for (Pair<String, Double> p : info)
+        tree.addChild(LispTree.proto.newList(p.getFirst(), "" + p.getSecond()));
+    }
     return tree;
   }
 
-  public String getLhs() { 
-    return lhs;
+  /* Extract tag info */
+  private double getInfoTag(String infoTag) {
+    if (info != null) {
+      for (Pair<String, Double> p : info) {
+        if (p.getFirst().equals(infoTag)) return p.getSecond();
+      }
+    }
+    return -1.0;
+  }
+
+  public boolean isFloating() {
+    double f = getInfoTag("floating");
+    double a = getInfoTag("anchored");
+    if (f == 1.0)
+      return true;
+    else if (f == 0.0)
+      return false;
+    else
+      return a == 1.0 ? false : FloatingParser.opts.defaultIsFloating;
+  }
+
+  public boolean isAnchored() {
+    double f = getInfoTag("floating");
+    double a = getInfoTag("anchored");
+    if (a == 1.0)
+      return true;
+    else if (a == 0.0)
+      return false;
+    else
+      return f == 1.0 ? false : !FloatingParser.opts.defaultIsFloating;
   }
 }

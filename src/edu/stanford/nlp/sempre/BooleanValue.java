@@ -15,14 +15,15 @@ public class BooleanValue extends Value {
   public LispTree toLispTree() {
     LispTree tree = LispTree.proto.newList();
     tree.addChild("boolean");
-    tree.addChild(value+"");
+    tree.addChild(value + "");
     return tree;
   }
 
   @Override public int hashCode() { return Boolean.valueOf(value).hashCode(); }
-  @Override public boolean equals(Object thatObj) {
-    if (!(thatObj instanceof BooleanValue)) return false;
-    BooleanValue that = (BooleanValue)thatObj;
+  @Override public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    BooleanValue that = (BooleanValue) o;
     return this.value == that.value;
   }
 }

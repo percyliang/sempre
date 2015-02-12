@@ -6,7 +6,7 @@ package edu.stanford.nlp.sempre;
  * @author Percy Liang
  */
 public class NullExecutor extends Executor {
-  public Response execute(Formula formula) {
+  public Response execute(Formula formula, ContextValue context) {
     return new Response(null);
   }
 }

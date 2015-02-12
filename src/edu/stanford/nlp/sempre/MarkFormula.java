@@ -3,6 +3,8 @@ package edu.stanford.nlp.sempre;
 import com.google.common.base.Function;
 import fig.basic.LispTree;
 
+import java.util.List;
+
 /**
  * Usage:
  *   (mark |var| |body|).
@@ -37,12 +39,20 @@ public class MarkFormula extends Formula {
   }
 
   @Override
+  public List<Formula> mapToList(Function<Formula, List<Formula>> func, boolean alwaysRecurse) {
+    List<Formula> res = func.apply(this);
+    if (res.isEmpty() || alwaysRecurse)
+      res.addAll(body.mapToList(func, alwaysRecurse));
+    return res;
+  }
+
+  @Override
   public boolean equals(Object thatObj) {
     if (!(thatObj instanceof MarkFormula)) return false;
     MarkFormula that = (MarkFormula) thatObj;
     return this.var.equals(that.var) && this.body.equals(that.body);
   }
-  
+
   public int computeHashCode() {
     int hash = 0x7ed55d16;
     hash = hash * 0xd3a2646c + var.hashCode();

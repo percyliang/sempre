@@ -3,16 +3,12 @@ package edu.stanford.nlp.sempre;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import edu.stanford.nlp.sempre.fbalignment.lexicons.BinaryLexicon;
-import edu.stanford.nlp.sempre.fbalignment.lexicons.EntityLexicon;
-import edu.stanford.nlp.sempre.fbalignment.lexicons.UnaryLexicon;
-import edu.stanford.nlp.sempre.fbalignment.lexicons.Lexicon;
-import edu.stanford.nlp.sempre.fbalignment.lexicons.WordDistance;
 import fig.basic.*;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.Field;
 import java.util.*;
 
 /**
@@ -23,11 +19,21 @@ public class Master {
   public static class Options {
     @Option(gloss = "Execute these commands before starting")
     public List<String> scriptPaths = Lists.newArrayList();
+    @Option(gloss = "Write out input lines to this path")
+    public String logPath;
+
+    @Option(gloss = "Number of exchanges to keep in the context")
+    public int contextMaxExchanges = 1;
+
+    @Option(gloss = "Online update weights on new examples.")
+    public boolean onlineLearnExamples = true;
     @Option(gloss = "Write out new examples to this directory")
     public String newExamplesPath;
-    @Option(gloss = "Write out input lines to this path") public String logPath;
-    @Option(gloss = "Online update weights on new examples.")
-    public boolean onlineLearnExamples;
+    @Option(gloss = "Write out new parameters to this directory")
+    public String newParamsPath;
+
+    @Option(gloss = "Write out new grammar rules")
+    public String newGrammarPath;
   }
 
   public static Options opts = new Options();
@@ -42,13 +48,21 @@ public class Master {
     // Detailed information
     List<String> lines = new ArrayList<>();
 
+    public String getFormulaAnswer() {
+      if (ex.getPredDerivations().size() == 0)
+        return "(no answer)";
+      else {
+        Derivation deriv = getDerivation();
+        return deriv.getFormula() + " => " + deriv.getValue();
+      }
+    }
     public String getAnswer() {
       if (ex.getPredDerivations().size() == 0)
         return "(no answer)";
       else {
         Derivation deriv = getDerivation();
-        deriv.ensureExecuted(builder.executor);
-        return getDerivation().getValue().toString();
+        deriv.ensureExecuted(builder.executor, ex.context);
+        return deriv.getValue().toString();
       }
     }
     public List<String> getLines() { return lines; }
@@ -79,7 +93,8 @@ public class Master {
       session = new Session(id);
       for (String path : opts.scriptPaths)
         processScript(session, path);
-      sessions.put(id, session);
+      if (id != null)
+        sessions.put(id, session);
     }
     return session;
   }
@@ -88,16 +103,19 @@ public class Master {
     LogInfo.log("Enter an utterance to parse or one of the following commands:");
     LogInfo.log("  (help): show this help message");
     LogInfo.log("  (status): prints out status of the system");
+    LogInfo.log("  (get |option|): get a command-line option (e.g., (get Parser.verbose))");
     LogInfo.log("  (set |option| |value|): set a command-line option (e.g., (set Parser.verbose 5))");
     LogInfo.log("  (reload): reload the grammar/parameters");
     LogInfo.log("  (grammar): prints out the grammar");
-    LogInfo.log("  (params): dumps all the model parameters");
+    LogInfo.log("  (params [|file|]): dumps all the model parameters");
     LogInfo.log("  (select |candidate index|): show information about the |index|-th candidate of the last utterance.");
     LogInfo.log("  (accept |candidate index|): record the |index|-th candidate as the correct answer for the last utterance.");
     LogInfo.log("  (answer |answer|): record |answer| as the correct answer for the last utterance (e.g., (answer (list (number 3)))).");
     LogInfo.log("  (rule |lhs| (|rhs_1| ... |rhs_k|) |sem|): adds a rule to the grammar (e.g., (rule $Number ($TOKEN) (NumberFn)))");
-    LogInfo.log("  (execute |logical form|): adds a rule to the grammar (e.g., (execute (call + (number 3) (number 4))))");
+    LogInfo.log("  (type |logical form|): perform type inference (e.g., (type (number 3)))");
+    LogInfo.log("  (execute |logical form|): execute the logical form (e.g., (execute (call + (number 3) (number 4))))");
     LogInfo.log("  (def |key| |value|): define a macro to replace |key| with |value| in all commands (e.g., (def type fb:type.object type)))");
+    LogInfo.log("  (context [(user |user|) (date |date|) (exchange |exchange|) (graph |graph|)]): prints out or set the context");
   }
 
   public void runInteractivePrompt() {
@@ -119,7 +137,7 @@ public class Master {
 
       int indent = LogInfo.getIndLevel();
       try {
-        processLine(session, line);
+        processQuery(session, line);
       } catch (Throwable t) {
         while (LogInfo.getIndLevel() > indent)
           LogInfo.end_track();
@@ -133,7 +151,7 @@ public class Master {
     Iterator<LispTree> it = LispTree.proto.parseFromFile(scriptPath);
     while (it.hasNext()) {
       LispTree tree = it.next();
-      processLine(session, tree.toString());
+      processQuery(session, tree.toString());
     }
   }
 
@@ -141,14 +159,25 @@ public class Master {
   // Currently, synchronize a very crude level.
   // In the future, refine this.
   // Currently need the synchronization because of writing to stdout.
-  public synchronized Response processLine(Session session, String line) {
+  public synchronized Response processQuery(Session session, String line) {
+    line = line.trim();
     Response response = new Response();
 
-    line = line.trim();
+    // Capture log output and put it into response.
+    // Hack: modifying a static variable to capture the logging.
+    // Make sure we're synchronized!
+    StringWriter stringOut = new StringWriter();
+    LogInfo.setFileOut(new PrintWriter(stringOut));
+
     if (line.startsWith("("))
       handleCommand(session, line, response);
     else
-      handleQuery(session, line, response);
+      handleUtterance(session, line, response);
+
+    // Clean up
+    for (String outLine : stringOut.toString().split("\n"))
+      response.lines.add(outLine);
+    LogInfo.setFileOut(null);
 
     // Log interaction to disk
     if (!Strings.isNullOrEmpty(opts.logPath)) {
@@ -156,11 +185,12 @@ public class Master {
       out.println(
           Joiner.on("\t").join(
               Lists.newArrayList(
-                  new Date().toString(),
-                  session.id,
-                  session.lastRemoteAddr != null ? session.lastRemoteAddr : "(none)",
-                  line,
-                  summaryString(response))));
+                  "date=" + new Date().toString(),
+                  "sessionId=" + session.id,
+                  "remote=" + session.remoteHost,
+                  "format=" + session.format,
+                  "query=" + line,
+                  "response=" + summaryString(response))));
       out.close();
     }
 
@@ -169,39 +199,33 @@ public class Master {
 
   String summaryString(Response response) {
     if (response.getExample() != null)
-      return response.getAnswer();
+      return response.getFormulaAnswer();
     if (response.getLines().size() > 0)
       return response.getLines().get(0);
     return null;
   }
 
-  private void handleQuery(Session session, String query, Response response) {
-    session.lastQuery = query;
+  private void handleUtterance(Session session, String query, Response response) {
+    session.updateContext();
 
+    // Create example
     Example.Builder b = new Example.Builder();
-
     b.setId("session:" + session.id);
-    int slashIndex = query.indexOf('/');
-    if (slashIndex != -1) {
-      // if query = "where was obama born? /place_of_birth", that constrains
-      // derivations to only ones whose formula contains place_of_birth.
-      b.setDerivConstraint(new DerivationConstraint(query.substring(slashIndex + 1)));
-      query = query.substring(0, slashIndex).trim();
-    }
     b.setUtterance(query);
-
+    b.setContext(session.context);
     Example ex = b.createExample();
-    ex.preprocess();
+
+    ex.preprocess(LanguageAnalyzer.getSingleton());
 
     // Parse!
-    builder.parser.parse(builder.params, ex);
+    builder.parser.parse(builder.params, ex, false);
 
-    session.examples.add(ex);
     response.ex = ex;
     if (ex.predDerivations.size() > 0) {
       response.candidateIndex = 0;
       printDerivation(response.getDerivation());
     }
+    session.updateContext(ex, opts.contextMaxExchanges);
   }
 
   private void printDerivation(Derivation deriv) {
@@ -224,23 +248,8 @@ public class Master {
   }
 
   private void handleCommand(Session session, String line, Response response) {
-    // Capture log output and put it into response.
-    // Hack: modifying a static variable to capture the logging.
-    // Make sure we're synchronized!
-    StringWriter stringOut = new StringWriter();
-    LogInfo.setFileOut(new PrintWriter(stringOut));
-
-    handleCommandHelper(session, line, response);
-
-    for (String outLine : stringOut.toString().split("\n"))
-      response.lines.add(outLine);
-
-    LogInfo.setFileOut(null);
-  }
-
-  private void handleCommandHelper(Session session, String line, Response response) {
     LispTree tree = LispTree.proto.parseFromString(line);
-    tree = Grammar.applyMacros(session.macros, tree);
+    tree = builder.grammar.applyMacros(tree);
 
     String command = tree.child(0).value;
 
@@ -258,29 +267,42 @@ public class Master {
       for (Rule rule : builder.grammar.rules)
         LogInfo.logs("%s", rule.toLispTree());
     } else if (command.equals("params")) {
-      builder.params.write(LogInfo.stdout);
-    } else if (command.equals("set")) {
-      if (tree.children.size() != 3) {
-        LogInfo.log("Invalid usage: (set |key| |value|)");
+      if (tree.children.size() == 1) {
+        builder.params.write(LogInfo.stdout);
+        if (LogInfo.getFileOut() != null)
+          builder.params.write(LogInfo.getFileOut());
+      } else {
+        builder.params.write(tree.child(1).value);
+      }
+    } else if (command.equals("get")) {
+      if (tree.children.size() != 2) {
+        LogInfo.log("Invalid usage: (get |option|)");
         return;
       }
-      String key = tree.child(1).value;
+      String option = tree.child(1).value;
+      LogInfo.logs("%s", getOptionsParser().getValue(option));
+    } else if (command.equals("set")) {
+      if (tree.children.size() != 3) {
+        LogInfo.log("Invalid usage: (set |option| |value|)");
+        return;
+      }
+      String option = tree.child(1).value;
       String value = tree.child(2).value;
-      if (!getOptionsParser().parse(new String[]{"-" + key, value}))
-        LogInfo.log("Unknown option: " + key);
-    } else if (command.equals("select") || command.equals("accept")) {
+      if (!getOptionsParser().parse(new String[] {"-" + option, value}))
+        LogInfo.log("Unknown option: " + option);
+    } else if (command.equals("select") || command.equals("accept") ||
+               command.equals("s") || command.equals("a")) {
       // Select an answer
       if (tree.children.size() != 2) {
         LogInfo.logs("Invalid usage: (%s |candidate index|)", command);
         return;
       }
 
-      if (session.examples.size() == 0) {
+      Example ex = session.getLastExample();
+      if (ex == null) {
         LogInfo.log("No examples - please enter a query first.");
         return;
       }
-
-      Example ex = session.examples.get(session.examples.size() - 1);
       int index = Integer.parseInt(tree.child(1).value);
       if (index < 0 || index >= ex.predDerivations.size()) {
         LogInfo.log("Candidate index out of range: " + index);
@@ -289,13 +311,22 @@ public class Master {
 
       response.ex = ex;
       response.candidateIndex = index;
-
+      session.updateContextWithNewAnswer(ex, response.getDerivation());
       printDerivation(response.getDerivation());
 
-      // Set logical form
-      if (command.equals("accept")) {
+      // Add a training example.  While the user selects a particular derivation, there are three ways to interpret this signal:
+      // 1. This is the correct derivation (Derivation).
+      // 2. This is the correct logical form (Formula).
+      // 3. This is the correct denotation (Value).
+      // Currently:
+      // - Parameters based on the denotation.
+      // - Grammar rules are induced based on the denotation.
+      // We always save the logical form and the denotation (but not the entire
+      // derivation) in the example.
+      if (command.equals("accept") || command.equals("a")) {
         ex.setTargetFormula(response.getDerivation().getFormula());
         ex.setTargetValue(response.getDerivation().getValue());
+        ex.setContext(session.getContextExcludingLast());
         addNewExample(ex);
       }
     } else if (command.equals("answer")) {
@@ -303,13 +334,12 @@ public class Master {
         LogInfo.log("Missing answer.");
       }
 
-      if (session.examples.size() == 0) {
-        LogInfo.log("No examples - please enter a query first.");
+      // Set the target value.
+      Example ex = session.getLastExample();
+      if (ex == null) {
+        LogInfo.log("Please enter a query first.");
         return;
       }
-
-      // Set the target value.
-      Example ex = session.examples.get(session.examples.size() - 1);
       ex.setTargetValue(Values.fromLispTree(tree.child(1)));
       addNewExample(ex);
     } else if (command.equals("rule")) {
@@ -320,15 +350,21 @@ public class Master {
       // Need to update the parser given that the grammar has changed.
       builder.parser = null;
       builder.buildUnspecified();
+    } else if (command.equals("type")) {
+      LogInfo.logs("%s", TypeInference.inferType(Formulas.fromLispTree(tree.child(1))));
     } else if (command.equals("execute")) {
-      Executor.Response execResponse = builder.executor.execute(Formulas.fromLispTree(tree.child(1)));
+      Example ex = session.getLastExample();
+      ContextValue context = (ex != null ? ex.context : session.context);
+      Executor.Response execResponse = builder.executor.execute(Formulas.fromLispTree(tree.child(1)), context);
       LogInfo.logs("%s", execResponse.value);
     } else if (command.equals("def")) {
-      if (tree.children.size() != 3 || !tree.child(1).isLeaf()) {
-        LogInfo.log("Invalid usage: (def |name| |value|)");
-        return;
+      builder.grammar.interpretMacroDef(tree);
+    } else if (command.equals("context")) {
+      if (tree.children.size() == 1) {
+        LogInfo.logs("%s", session.context);
+      } else {
+        session.context = new ContextValue(tree);
       }
-      session.macros.put(tree.child(1).value, tree.child(2));
     } else {
       LogInfo.log("Invalid command: " + tree);
     }
@@ -339,54 +375,69 @@ public class Master {
     Example ex = new Example.Builder()
         .setId(origEx.id)
         .setUtterance(origEx.utterance)
+        .setContext(origEx.context)
         .setTargetFormula(origEx.targetFormula)
         .setTargetValue(origEx.targetValue)
         .createExample();
 
     if (!Strings.isNullOrEmpty(opts.newExamplesPath)) {
-      LogInfo.log("Added new example.");
-      PrintWriter out = IOUtils.openOutAppendHard(opts.newExamplesPath);
-      out.println(ex.toJson());
-      out.close();
+      LogInfo.begin_track("Adding new example");
+      Dataset.appendExampleToFile(opts.newExamplesPath, ex);
+      LogInfo.end_track();
     }
 
     if (opts.onlineLearnExamples) {
-      LogInfo.log("Updating parameters.");
+      LogInfo.begin_track("Updating parameters");
       learner.onlineLearnExample(origEx);
+      if (!Strings.isNullOrEmpty(opts.newParamsPath))
+        builder.params.write(opts.newParamsPath);
+      LogInfo.end_track();
     }
   }
 
   public static OptionsParser getOptionsParser() {
     OptionsParser parser = new OptionsParser();
-    parser.registerAll(
-        new Object[]{
-            "Master", Master.opts,
-            "Builder", Builder.opts,
-            "Grammar", Grammar.opts,
-            "Derivation", Derivation.opts,
-            "Parser", Parser.opts,
-            "BeamParser", BeamParser.opts,
-            "SparqlExecutor", SparqlExecutor.opts,
-            "Dataset", Dataset.opts,
-            "Params", Params.opts,
-            "Learner", Learner.opts,
-            "SemanticFn", SemanticFn.opts,
-            "LexiconFn", LexiconFn.opts,
-            "SelectFn", SelectFn.opts,
-            "MergeFn", MergeFn.opts,
-            "JoinFn", JoinFn.opts,
-            "DescriptionValue", DescriptionValue.opts,
-            "FeatureExtractor", FeatureExtractor.opts,
-            "LanguageInfo", LanguageInfo.opts,
-            "EntityLexicon", EntityLexicon.opts,
-            "BinaryLexicon", BinaryLexicon.opts,
-            "UnaryLexicon", UnaryLexicon.opts,
-            "FreebaseInfo", FreebaseInfo.opts,
-            "BridgeFn", BridgeFn.opts,
-            "WordDistance", WordDistance.opts,
-            "FormulaRetriever",FormulaRetriever.opts,
-            "Lexicon", Lexicon.opts,
-        });
+    // Dynamically figure out which options we need to load
+    // To specify this:
+    //   java -Dmodules=core,freebase
+    List<String> modules = Arrays.asList(System.getProperty("modules", "core").split(","));
+
+    // All options are assumed to be of the form <class>opts.
+    // Read the module-classes.txt file, which specifies which classes are
+    // associated with each module.
+    List<Object> args = new ArrayList<Object>();
+    for (String line : IOUtils.readLinesHard("module-classes.txt")) {
+
+      // Example: core edu.stanford.nlp.sempre.Grammar
+      String[] tokens = line.split(" ");
+      if (tokens.length != 2) throw new RuntimeException("Invalid: " + line);
+      String module = tokens[0];
+      String className = tokens[1];
+      if (!modules.contains(tokens[0])) continue;
+
+      // Group (e.g., Grammar)
+      String[] classNameTokens = className.split("\\.");
+      String group = classNameTokens[classNameTokens.length - 1];
+
+      // Object (e.g., Grammar.opts)
+      Object opts = null;
+      try {
+        for (Field field : Class.forName(className).getDeclaredFields()) {
+          if (!"opts".equals(field.getName())) continue;
+          opts = field.get(null);
+        }
+      } catch (Throwable t) {
+        System.out.println("Problem processing: " + line);
+        throw new RuntimeException(t);
+      }
+
+      if (opts != null) {
+        args.add(group);
+        args.add(opts);
+      }
+    }
+
+    parser.registerAll(args.toArray(new Object[0]));
     return parser;
   }
 }

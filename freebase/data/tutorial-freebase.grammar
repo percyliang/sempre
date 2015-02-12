@@ -1,0 +1,6 @@
+(rule $Unary ($PHRASE) (SimpleLexiconFn (type fb:type.any)))
+(rule $Binary ($PHRASE) (SimpleLexiconFn (type (-> fb:type.any fb:type.any))))
+(rule $Set ($Unary) (IdentityFn))
+(rule $Set ($Unary $Set) (MergeFn and))
+(rule $Set ($Binary $Set) (JoinFn forward))
+(rule $ROOT ($Set) (IdentityFn))

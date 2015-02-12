@@ -2,8 +2,11 @@ package edu.stanford.nlp.sempre.test;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
+
 import edu.stanford.nlp.sempre.*;
 import fig.basic.Pair;
+import fig.basic.Evaluation;
+
 import org.testng.annotations.Test;
 
 import java.util.Collections;
@@ -33,7 +36,7 @@ public class SystemSanityTest {
   private static Dataset makeDataset() {
     Dataset d = new Dataset();
     d.readFromPathPairs(Collections.singletonList(
-        Pair.newPair("train", "data/unittest-learn.examples.json")));
+        Pair.newPair("train", "freebase/data/unittest-learn.examples")));
     return d;
   }
 
@@ -43,13 +46,14 @@ public class SystemSanityTest {
     return evals;
   }
 
-  @Test
+  @Test(groups = { "sparql", "corenlp" })
   public void easyEndToEnd() {
+    LanguageAnalyzer.setSingleton(new SimpleAnalyzer());
     // Make sure learning works
     Dataset dataset = makeDataset();
     String[] grammarPaths = new String[] {
-      "data/unittest-learn.grammar",
-      "data/unittest-learn-ccg.grammar",
+      "freebase/data/unittest-learn.grammar",
+      "freebase/data/unittest-learn-ccg.grammar",
     };
     for (String grammarPath : grammarPaths) {
       Builder builder = makeBuilder(grammarPath);

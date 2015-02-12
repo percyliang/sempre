@@ -1,0 +1,4 @@
+{"formula":"(fb:people.person.profession fb:en.attorney)","source":"STRING_MATCH","features":{},"lexeme":"lawyer"}
+{"formula":"(fb:people.person.profession fb:en.attorney)","source":"ALIGNMENT","features":{"fb_size":847.0,"intersection":26.0,"nl_size":57.0},"lexeme":"lawyer"}
+{"formula":"(fb:type.object.type fb:location.continent)","source":"STRING_MATCH","features":{},"lexeme":"continent"}
+{"formula":"(fb:type.object.type fb:location.continent)","source":"ALIGNMENT","features":{"fb_size":6.0,"intersection":5.0,"nl_size":15.0},"lexeme":"continent"}

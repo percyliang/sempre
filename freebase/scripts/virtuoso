@@ -1,0 +1,229 @@
+#!/usr/bin/ruby
+
+# This script provides a convenient wrapper for the Virtuoso SPARQL server.
+
+$virtuosoPath = File.dirname($0)+"/../../virtuoso-opensource"
+if not File.exists?($virtuosoPath)
+  puts "#{$virtuosoPath} does not exist"
+  exit 1
+end
+
+# Virtuoso has two services: the server (isql) and SPARQL endpoint
+def isqlPort(port); 10000 + port end
+def httpPort(port); port end
+
+def parseInt(s, default=nil)
+  return default if default && (not s)
+  raise "Integer not specified" unless s
+  Integer(s)
+end
+
+def run(command)
+  puts "RUNNING: #{command}"
+  if not system(command)
+    puts "FAILED: #{command}"
+    exit 1
+  end
+end
+
+def start
+  if ARGV.size < 2
+    puts "Usage: <db directory> <port> [memory (MB)]"
+    exit 1
+  end
+  dbPath = ARGV.shift
+  port = parseInt(ARGV.shift)
+
+  Dir.mkdir(dbPath) if not File.exists?(dbPath)
+
+  # Recommended: 70% of RAM, each buffer is 8K
+  if ARGV[0]
+    memFree = Integer(ARGV[0]) * 1000
+  else
+    memFree = parseInt(`cat /proc/meminfo | grep MemFree | awk '{print $2}'`) # KB
+  end
+  numberOfBuffers = parseInt(memFree * 0.7 / 8)
+  maxDirtyBuffers = numberOfBuffers / 2
+  puts "#{memFree} KB free, using #{numberOfBuffers} buffers, #{maxDirtyBuffers} dirty buffers"
+
+  # Configuration options:
+  #   http://docs.openlinksw.com/virtuoso/dbadm.html
+  #   http://virtuoso.openlinksw.com/dataspace/doc/dav/wiki/Main/VirtConfigScale
+config = <<EOF
+[Database]
+DatabaseFile = #{dbPath}/virtuoso.db
+ErrorLogFile = #{dbPath}/virtuoso.log
+LockFile = #{dbPath}/virtuoso.lck
+TransactionFile = #{dbPath}/virtuoso.trx
+xa_persistent_file = #{dbPath}/virtuoso.pxa
+ErrorLogLevel = 7
+FileExtend = 200
+MaxCheckpointRemap = 2000
+Striping = 0
+TempStorage = TempDatabase
+
+[TempDatabase]
+DatabaseFile = #{dbPath}/virtuoso-temp.db
+TransactionFile = #{dbPath}/virtuoso-temp.trx
+MaxCheckpointRemap = 2000
+Striping = 0
+
+[Parameters]
+ServerPort = #{isqlPort(port)}
+LiteMode = 0
+DisableUnixSocket = 1
+DisableTcpSocket = 0
+ServerThreads = 20
+CheckpointInterval = 60
+O_DIRECT = 0
+CaseMode = 2
+MaxStaticCursorRows = 5000
+CheckpointAuditTrail = 0
+AllowOSCalls = 0
+SchedulerInterval = 10
+DirsAllowed = .
+ThreadCleanupInterval = 0
+ThreadThreshold = 10
+ResourcesCleanupInterval = 0
+FreeTextBatchSize = 100000
+SingleCPU = 0
+PrefixResultNames = 0
+RdfFreeTextRulesSize = 100
+IndexTreeMaps = 256
+MaxMemPoolSize = 200000000
+PrefixResultNames = 0
+MacSpotlight = 0
+IndexTreeMaps = 64
+NumberOfBuffers = #{numberOfBuffers}
+MaxDirtyBuffers = #{maxDirtyBuffers}
+
+[SPARQL]
+ResultSetMaxRows = 10000
+MaxQueryCostEstimationTime = 6000 ; in seconds (increased)
+MaxQueryExecutionTime = 600; in seconds (increased)
+
+[HTTPServer]
+ServerPort = #{httpPort(port)}
+Charset = UTF-8
+EOF
+  configPath = "#{dbPath}/virtuoso.ini"
+
+  puts "==== Starting Virtuoso server for #{dbPath} on port #{port}..."
+  out = open(configPath, 'w')
+  out.puts config
+  out.close
+  run "virtuoso-opensource/install/bin/virtuoso-t +configfile #{configPath} +wait"
+end
+
+def add
+  ttl = ARGV.shift or exit 1
+  port = parseInt(ARGV.shift)
+  offset = parseInt(ARGV.shift, 0)
+  if not File.exists?(ttl)
+    puts "File does not exist: #{ttl}"
+    exit 1
+  end
+
+  # Break up the ttl file into chunks
+  headerNumLines= parseInt(`head -100 #{ttl} | grep "^@prefix" | wc -l`)
+  chunkCmd = "fig/bin/chunk -file #{ttl} -headerNumLines #{headerNumLines} -chunkSize 100m"
+  numChunks = parseInt(`#{chunkCmd} -printNumChunks`)
+
+  $logPath = "virtuoso-#{port}.log"
+  def log(s)
+    s = "[#{Time.now}] " + s
+    puts s
+    out = open($logPath, 'a')
+    out.puts s
+    out.close
+  end
+
+  log "******** Indexing #{ttl} into #{port} ********"
+  log "This could take a while if the file is large."
+  log "If it fails, you can restart from where it left off by specifying the offset chunk."
+
+  # Iterate over all the chunks...
+  (offset...numChunks).each { |i|
+    break if File.exists?('STOP')
+
+    log "================ Chunk #{i}/#{numChunks}"
+
+    # Virtuoso can't handle prefixes in the second argument, so need to expand.
+    tmp = "virtuoso-#{port}-#{i}.ttl"
+    log "==== Step A: Converting #{ttl} to #{tmp}..."
+    run "time #{chunkCmd} -indices #{i} | sed -r -e 's/\\tfb:([^\\t]*).$/\\t\\<http:\\/\\/rdf.freebase.com\\/ns\\/\\1\\>./' > #{tmp}"
+
+    # Index the ttl file
+    log "==== Step B: Indexing #{tmp}..."
+
+    graph = "http://rdf.freebase.com"
+    cmd = "DB.DBA.TTLP_MT (file_to_string_output ('#{File.expand_path(tmp)}'), '', '#{graph}', 128);"
+    out = "virtuoso-#{port}-#{i}.out"
+    run "echo \"#{cmd}\" | #{$virtuosoPath}/install/bin/isql localhost:#{isqlPort(port)} 2>&1 | tee #{out}"
+    run "cat #{out} >> #{$logPath}"
+    # Have to check the output for errors because isql's exit code doesn't determine success/failure.
+    if IO.readlines(out).any? { |x| x =~ / Error / }
+      log "FAILED"
+      exit 1
+    end
+    log ""
+    
+    File.unlink(tmp)
+    File.unlink(out)
+  }
+end
+
+def deleteAll
+  port = parseInt(ARGV.shift)
+  run "echo 'RDF_GLOBAL_RESET();' | #{$virtuosoPath}/install/bin/isql localhost:#{isqlPort(port)}"
+end
+
+def stop
+  port = parseInt(ARGV.shift)
+  run "echo 'shutdown;' | #{$virtuosoPath}/install/bin/isql localhost:#{isqlPort(port)}"
+end
+
+def count
+  port = parseInt(ARGV.shift)
+  run "echo 'SPARQL SELECT COUNT(*) { ?s ?p ?o };' | #{$virtuosoPath}/install/bin/isql localhost:#{isqlPort(port)}"
+  puts "If the database is empty, this number should be 2617."
+end
+
+def status
+  port = parseInt(ARGV.shift)
+  run "echo 'status();' | #{$virtuosoPath}/install/bin/isql localhost:#{isqlPort(port)}"
+end
+
+def shell
+  port = parseInt(ARGV.shift)
+  cmd = "#{$virtuosoPath}/install/bin/isql localhost:#{isqlPort(port)}"
+  cmd = "rlwrap #{cmd}" if system("which rlwrap")
+  run cmd
+end
+
+############################################################
+# Main
+
+if ARGV.size == 0
+  puts "Usage:"
+  puts "  #{$0} start <db directory> <port> [memory (MB)] # Starts the server on the given port"
+  puts "  #{$0} stop <port>                               # Stop the server"
+  puts "  #{$0} add <ttl file> <port> [offset]            # Add new triples to the server (from offset)"
+  puts "  #{$0} deleteAll <port>                          # Delete the entire database (CAREFUL!)"
+  puts "  #{$0} status <port>                             # Display server status"
+  puts "  #{$0} count <port>                              # Display number of triples"
+  puts "  #{$0} shell <port>                              # Open shell"
+  exit 1
+end
+
+command = ARGV.shift
+case command
+  when 'start' then start
+  when 'stop' then stop
+  when 'add' then add
+  when 'deleteAll' then deleteAll
+  when 'status' then status
+  when 'count' then count
+  when 'shell' then shell
+  else raise "Invalid command: #{command}"
+end

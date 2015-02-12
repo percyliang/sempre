@@ -9,7 +9,9 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Utils {
+public final class Utils {
+  private Utils() { }
+
   public static final String ttlPrefix = "@prefix fb: <http://rdf.freebase.com/ns/>.";
 
   // Somewhat of a crude approximation.
@@ -22,13 +24,13 @@ public class Utils {
 
   // Convert a string from the ns: namespace to the fb: namespace.
   // "ns:en.barack_obama" => "fb:en.barack_obama"
-  public static String ns_to_fb(String s) {
+  public static String nsToFb(String s) {
     if (s.startsWith("ns:")) return "fb:" + s.substring(3);
     return s;
   }
 
   // "\"/en/distributive_writing\"" => "fb:en.distributive_writing"
-  public static String string_to_rdf(String arg2) {
+  public static String stringToRdf(String arg2) {
     if (!arg2.startsWith("\"/") || !arg2.endsWith("\""))
       throw new RuntimeException("Bad: " + arg2);
     return "fb:" + arg2.substring(2, arg2.length() - 1).replaceAll("/", ".");
@@ -38,21 +40,21 @@ public class Utils {
     if (!line.endsWith(".")) return null;
     String[] tokens = line.substring(0, line.length() - 1).split("\t");
     if (tokens.length != 3) return null;
-    tokens[0] = Utils.ns_to_fb(tokens[0]);
-    tokens[1] = Utils.ns_to_fb(tokens[1]);
-    tokens[2] = Utils.ns_to_fb(tokens[2]);
+    tokens[0] = Utils.nsToFb(tokens[0]);
+    tokens[1] = Utils.nsToFb(tokens[1]);
+    tokens[2] = Utils.nsToFb(tokens[2]);
     return tokens;
   }
-  
+
   public static int parseInt(String arg2) {
-    if(!arg2.endsWith("^^xsd:int"))
+    if (!arg2.endsWith("^^xsd:int"))
       throw new RuntimeException("Arg2 is not a valid integer: " + arg2);
     int closingQuoteIndex = arg2.lastIndexOf('"');
     return Integer.parseInt(arg2.substring(1, closingQuoteIndex));
   }
-  
+
   public static String parseStr(String arg2) {
-    if(!arg2.endsWith("@en"))
+    if (!arg2.endsWith("@en"))
       throw new RuntimeException("Arg2 is not a valid String: " + arg2);
     int closingQuoteIndex = arg2.lastIndexOf('"');
     return arg2.substring(1, closingQuoteIndex);

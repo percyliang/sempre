@@ -1,7 +1,8 @@
 package edu.stanford.nlp.sempre;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
+import fig.basic.*;
 
 /**
  * Maps a string to a number (double).
@@ -9,25 +10,99 @@ import java.util.List;
  * @author Percy Liang
  */
 public class NumberFn extends SemanticFn {
-  // TODO: handle measurements too (e.g., 3cm)
+  private List<String> requests;  // List of types of fields to get (e.g., NUMBER)
 
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    return o != null && getClass() == o.getClass();
+  private boolean request(String req) {
+    return requests == null || requests.contains(req);
   }
 
-  public List<Derivation> call(Example ex, Callable c) {
-    String value = ex.languageInfo.getNormalizedNerSpan("NUMBER", c.getStart(), c.getEnd());
-    if (value == null) return Collections.emptyList();
+  public void init(LispTree tree) {
+    super.init(tree);
+    if (tree.children.size() > 1) {
+      requests = new ArrayList<String>();
+      for (int i = 1; i < tree.children.size(); i++)
+        requests.add(tree.child(1).value);
+    }
+  }
 
-    NumberValue numberValue = new NumberValue(Double.parseDouble(value));
+  // TODO(pliang): handle measurements too (e.g., 3cm)
+  public DerivationStream call(final Example ex, final Callable c) {
+    return new SingleDerivationStream() {
+      public Derivation createDerivation() {
+        // Numbers: If it is an integer, set its type to integer.  Otherwise, use float.
+        if (request("NUMBER")) {
+          String value = ex.languageInfo.getNormalizedNerSpan("NUMBER", c.getStart(), c.getEnd());
+          if (value != null) {
+            try {
+              NumberValue numberValue = new NumberValue(Double.parseDouble(value));
+              SemType type = numberValue.value == (int) numberValue.value ? SemType.intType : SemType.floatType;
+              return new Derivation.Builder()
+                    .withCallable(c)
+                    .formula(new ValueFormula<>(numberValue))
+                    .type(type)
+                    .createDerivation();
+            } catch (NumberFormatException e) {
+              LogInfo.warnings("NumberFn: Cannot convert NerSpan \"%s\" to a number", value);
+            }
+          }
+        }
 
-    return Collections.singletonList(
-        new Derivation.Builder()
-            .withCallable(c)
-            .formula(new ValueFormula<NumberValue>(numberValue))
-            .type(SemType.numberType)
-            .createDerivation());
+        // Ordinals
+        if (request("ORDINAL")) {
+          String value = ex.languageInfo.getNormalizedNerSpan("ORDINAL", c.getStart(), c.getEnd());
+          if (value != null) {
+            try {
+              NumberValue numberValue = new NumberValue(Double.parseDouble(value), "fb:en.ordinal_number");
+              SemType type = SemType.intType;
+              return new Derivation.Builder()
+                    .withCallable(c)
+                    .formula(new ValueFormula<>(numberValue))
+                    .type(type)
+                    .createDerivation();
+            } catch (NumberFormatException e) {
+              LogInfo.warnings("NumberFn: Cannot convert NerSpan \"%s\" to a number", value);
+            }
+          }
+        }
+
+        // Percents
+        if (request("PERCENT")) {
+          String value = ex.languageInfo.getNormalizedNerSpan("PERCENT", c.getStart(), c.getEnd());
+          if (value != null) {
+            try {
+              NumberValue numberValue = new NumberValue(0.01 * Double.parseDouble(value.substring(1)));
+              SemType type = SemType.floatType;
+              return new Derivation.Builder()
+                    .withCallable(c)
+                    .formula(new ValueFormula<>(numberValue))
+                    .type(type)
+                    .createDerivation();
+            } catch (NumberFormatException e) {
+              LogInfo.warnings("NumberFn: Cannot convert NerSpan \"%s\" to a number", value);
+            }
+          }
+        }
+
+        // Money
+        if (request("MONEY")) {
+          String value = ex.languageInfo.getNormalizedNerSpan("MONEY", c.getStart(), c.getEnd());
+          if (value != null) {
+            try {
+              NumberValue numberValue = new NumberValue(Double.parseDouble(value.substring(1)), "fb:en.dollar");
+              SemType type = SemType.floatType;
+              return new Derivation.Builder()
+                    .withCallable(c)
+                    .formula(new ValueFormula<>(numberValue))
+                    .type(type)
+                    .createDerivation();
+            } catch (NumberFormatException e) {
+              LogInfo.warnings("NumberFn: Cannot convert NerSpan \"%s\" to a number", value);
+            }
+          }
+        }
+
+        return null;
+      }
+    };
   }
 }

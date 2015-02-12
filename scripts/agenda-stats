@@ -1,0 +1,7 @@
+#!/usr/bin/ruby
+
+ARGV.each { |e|
+  e = e.sub(/\.exec$/, '')
+  puts "===== #{e}"
+  system "./fig/bin/tab -s -H -i e/#{e}.exec/learner.events -a iter group .sort utterance / ^parseTime$ ^numOfFeaturizedDerivs$ ^firstCorrectItem$ ^totalDerivs$ ^partCorrect$ ^partOracle$"
+}

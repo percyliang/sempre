@@ -7,7 +7,7 @@ import fig.basic.LispTree;
  *
  * @author Percy Liang
  */
-class VariableFormula extends PrimitiveFormula {
+public class VariableFormula extends PrimitiveFormula {
   public final String name;  // Name of variable.
   public VariableFormula(String name) { this.name = name; }
   public LispTree toLispTree() { return LispTree.proto.newList("var", name); }
@@ -18,6 +18,6 @@ class VariableFormula extends PrimitiveFormula {
     VariableFormula that = (VariableFormula) thatObj;
     return this.name.equals(that.name);
   }
-  
+
   public int computeHashCode() { return name.hashCode(); }
 }

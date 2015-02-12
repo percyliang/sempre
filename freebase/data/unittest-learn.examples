@@ -1,0 +1,9 @@
+(example
+  (utterance "American")
+  (targetFormula (fb:people.person.nationality fb:en.united_states))
+)
+
+(example
+  (utterance "American born in Paris")
+  (targetFormula (and (fb:people.person.nationality fb:en.united_states) (fb:people.person.place_of_birth fb:en.paris)))
+)

@@ -3,7 +3,6 @@ package edu.stanford.nlp.sempre;
 import fig.basic.LispTree;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -14,7 +13,7 @@ import java.util.List;
  */
 public class FilterNerSpanFn extends SemanticFn {
   // Accepted NER tags (PERSON, LOCATION, ORGANIZATION, etc)
-  List<String> acceptableNerTags = new ArrayList<String>();
+  List<String> acceptableNerTags = new ArrayList<>();
 
   public void init(LispTree tree) {
     super.init(tree);
@@ -22,40 +21,42 @@ public class FilterNerSpanFn extends SemanticFn {
       acceptableNerTags.add(tree.child(j).value);
   }
 
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    FilterNerSpanFn that = (FilterNerSpanFn) o;
-    if (!acceptableNerTags.equals(that.acceptableNerTags)) return false;
-    return true;
+  public DerivationStream call(final Example ex, final Callable c) {
+    return new SingleDerivationStream() {
+      @Override
+      public Derivation createDerivation() {
+        if (!isValid(ex, c))
+          return null;
+        else {
+          return new Derivation.Builder()
+                  .withCallable(c)
+                  .withFormulaFrom(c.child(0))
+                  .createDerivation();
+        }
+      }
+    };
   }
 
-  public List<Derivation> call(Example ex, Callable c) {
+  private boolean isValid(Example ex, Callable c) {
     String nerTag = ex.languageInfo.nerTags.get(c.getStart());
 
     // Check that it's an acceptable tag
     if (!acceptableNerTags.contains(nerTag))
-      return Collections.emptyList();
+      return false;
 
     // Check to make sure that all the tags are the same
     for (int j = c.getStart() + 1; j < c.getEnd(); j++)
       if (!nerTag.equals(ex.languageInfo.nerTags.get(j)))
-        return Collections.emptyList();
+        return false;
 
     // Make sure that the whole NE is matched
     if (c.getStart() > 0 && nerTag.equals(ex.languageInfo.nerTags.get(c.getStart() - 1)))
-      return Collections.emptyList();
+      return false;
 
     if (c.getEnd() < ex.languageInfo.nerTags.size() &&
-        nerTag.equals(ex.languageInfo.nerTags.get(c.getEnd())))
-      return Collections.emptyList();
-
+            nerTag.equals(ex.languageInfo.nerTags.get(c.getEnd())))
+      return false;
     assert (c.getChildren().size() == 1) : c.getChildren();
-    return Collections.singletonList(
-        new Derivation.Builder()
-            .withCallable(c)
-            .withFormulaFrom(c.child(0))
-            .createDerivation());
+    return true;
   }
 }

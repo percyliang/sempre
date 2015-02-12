@@ -10,6 +10,7 @@ import fig.exec.Execution;
  */
 public class Main implements Runnable {
   @Option public boolean interactive = false;
+  @Option public boolean server = false;
 
   public void run() {
     Builder builder = new Builder();
@@ -20,6 +21,12 @@ public class Main implements Runnable {
 
     Learner learner = new Learner(builder.parser, builder.params, dataset);
     learner.learn();
+
+    if (server) {
+      Master master = new Master(builder);
+      Server server = new Server(master);
+      server.run();
+    }
 
     if (interactive) {
       Master master = new Master(builder);

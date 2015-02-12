@@ -19,16 +19,12 @@ public class UriValue extends Value {
     tree.addChild(value != null ? value : "");
     return tree;
   }
-  public double getCompatibility(Value thatValue) {
-    if (!(thatValue instanceof UriValue))
-      return 0.0;
-    UriValue that = (UriValue) thatValue;
-    return this.value.equals(that.value) ? 1.0 : 0.0;
-  }
 
   @Override public int hashCode() { return value.hashCode(); }
-  @Override public boolean equals(Object thatObj) {
-    UriValue that = (UriValue)thatObj;
+  @Override public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    UriValue that = (UriValue) o;
     return this.value.equals(that.value);
   }
 }

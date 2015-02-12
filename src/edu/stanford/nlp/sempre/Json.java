@@ -21,7 +21,7 @@ import java.util.Map;
  * @author Roy Frostig
  */
 public final class Json {
-  private Json() {}
+  private Json() { }
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   static {
@@ -113,6 +113,13 @@ public final class Json {
     }
   }
 
+  public static String prettyWriteValueAsStringHard(Object o) {
+    try {
+      return getMapper().writerWithDefaultPrettyPrinter().writeValueAsString(o);
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException(e);
+    }
+  }
   public static String writeValueAsStringHard(Object o) {
     return writeValueAsStringHard(o, Object.class);
   }
@@ -135,6 +142,17 @@ public final class Json {
     }
   }
 
+  public static void prettyWriteValueHard(File f, Object o) {
+    try {
+      getMapper().writerWithDefaultPrettyPrinter().writeValue(f, o);
+    } catch (JsonMappingException e) {
+      e.printStackTrace();
+    } catch (JsonGenerationException e) {
+      e.printStackTrace();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
   public static void writeValueHard(File f, Object o) {
     writeValueHard(f, o, Object.class);
   }
