@@ -13,7 +13,7 @@ import fig.basic.*;
 public class FreebaseTypeLookup implements TypeLookup {
   public static class Options {
     @Option(gloss = "Cache path to the types path")
-    public String entityTypesPath = "localhost:4000:/u/nlp/data/semparse/scr/freebase/freebase-rdf-2013-06-09-00-00.canonicalized.en-types";
+    public String entityTypesPath;
   }
   public static Options opts = new Options();
 

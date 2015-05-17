@@ -135,6 +135,10 @@ def cachePaths(lexiconFnCachePath, sparqlExecutorCachePath)
       else l(
         o('Lexicon.cachePath', cacheserver+':/u/nlp/data/semparse/cache/'+lexiconFnCachePath),
         o('SparqlExecutor.cachePath', cacheserver+':/u/nlp/data/semparse/cache/'+sparqlExecutorCachePath),
+        o('FreebaseSearch.cachePath', cacheserver+':/u/nlp/data/semparse/cache/fbsearch/1.cache'),
+        # Read-only
+        o('EntityLexicon.mid2idPath', cacheserver+':/u/nlp/data/semparse/scr/freebase/freebase-rdf-2013-06-09-00-00.canonical-id-map'),
+        o('FreebaseTypeLookup.entityTypesPath', cacheserver+':/u/nlp/data/semparse/scr/freebase/freebase-rdf-2013-06-09-00-00.canonicalized.en-types'),
       nil)
       end
     },
@@ -403,6 +407,20 @@ addMode('simple-sparql', 'Simple shell for querying SPARQL', lambda { |e| l(
   sparqlOpts,
   o('interactive'),
 nil) })
+
+addMode('simple-freebase', 'Simple shell for using Freebase', lambda { |e| l(
+  rlwrap, 'java', '-Dmodules=core,freebase', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.Main',
+  o('executor', 'freebase.SparqlExecutor'),
+  letDefault(:sparqlserver, 'freebase.cloudapp.net:3093'),
+  sparqlOpts,
+  # Assume ./run @mode=cacheserver -readOnly -basePath lib/fb_data
+  o('EntityLexicon.mid2idPath', 'freebase.cloudapp.net:4000:freebase-rdf-2013-06-09-00-00.canonical-id-map'),
+  o('FreebaseTypeLookup.entityTypesPath', 'freebase.cloudapp.net:4000:freebase-rdf-2013-06-09-00-00.canonicalized.en-types'),
+  o('FreebaseSearch.cachePath', 'FreebaseSearch.cache'),
+  o('EntityLexicon.maxEntries', 3), o('coarsePrune'),
+  o('interactive'),
+nil) })
+
 
 
 

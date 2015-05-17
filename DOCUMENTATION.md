@@ -425,7 +425,7 @@ We can construct logical forms that have more than one argument:
 
     (lambda binary (lambda unary ((var binary) (var unary))))
 
-We can apply this ternary logical form two two arguments,
+We can apply this ternary logical form to two arguments,
 
     (((lambda binary (lambda unary ((var binary) (var unary)))) fb:people.person.place_of_birth) fb:en.seattle)
 
@@ -433,7 +433,7 @@ which after beta reduction results in the very mundane
 
     (fb:people.person.place_of_birth fb:en.seattle)
 
-In lambda DCS, all logical forms are either unaries or binaries.  Ternaries are
+In lambda DCS, all logical forms are either unaries or binaries.  Ternaries and
 beyond are exclusively used for macro substitution to construct logical forms
 in a controlled compositional way.
 
@@ -493,7 +493,7 @@ Here is *those whose place of birth is the same as their place of death*:
     (mark x (fb:people.person.place_of_birth (!fb:people.deceased_person.place_of_death (var x))))
 
 Note that `x` binds to the head of `fb:people.person.place_of_birth`,
-representing the person in question.  Using allows us to use this head again
+representing the person in question.  This allows us to use this head again
 deeper in the logical form.  Here's a pictorial representation:
 
     x -- [fb:people.person.place_of_birth] --> ?

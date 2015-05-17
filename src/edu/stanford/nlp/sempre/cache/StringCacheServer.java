@@ -7,6 +7,7 @@ import fig.exec.Execution;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.File;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -26,6 +27,8 @@ import java.util.HashMap;
 public class StringCacheServer implements Runnable {
   @Option(gloss = "Open port here", required = true) public int port;
   @Option(gloss = "How much output to print") public int verbose = 0;
+  @Option(gloss = "Read only") public boolean readOnly = false;
+  @Option(gloss = "Only allow files in this directory") public String basePath;
 
   // Shared state
   private HashMap<String, FileStringCache> caches = new HashMap<String, FileStringCache>();
@@ -53,26 +56,32 @@ public class StringCacheServer implements Runnable {
           String[] tokens = line.split("\t");
           String response = null;
           if (tokens[0].equals("open") && tokens.length == 2) {
-            String path = tokens[1];
-            // Create the cache if necessary
-            synchronized (caches) {
-              cache = caches.get(path);
-              if (cache == null) {
-                cache = new FileStringCache();
-                caches.put(path, cache);
-              }
-            }
-            response = "OK";
-            synchronized (cache) {
-              if (cache.getPath() == null) {
-                LogInfo.begin_track("Loading %s", path);
-                try {
-                  cache.init(path);
-                } catch (Throwable t) {
-                  response = "ERROR: " + t;
+            if (basePath != null && tokens[1].contains("/")) {
+              response = "ERROR: only simple file names allowed";
+            } else {
+              String path = tokens[1];
+              if (basePath != null)
+                path = new File(basePath, path).toString();
+              // Create the cache if necessary
+              synchronized (caches) {
+                cache = caches.get(path);
+                if (cache == null) {
+                  cache = new FileStringCache();
+                  caches.put(path, cache);
                 }
-                LogInfo.logs("Response: %s", response);
-                LogInfo.end_track();
+              }
+              response = "OK";
+              synchronized (cache) {
+                if (cache.getPath() == null) {
+                  LogInfo.begin_track("Loading %s", path);
+                  try {
+                    cache.init(path);
+                  } catch (Throwable t) {
+                    response = "ERROR: " + t;
+                  }
+                  LogInfo.logs("Response: %s", response);
+                  LogInfo.end_track();
+                }
               }
             }
           } else if (tokens[0].equals("get") && tokens.length == 2) {
@@ -84,7 +93,9 @@ public class StringCacheServer implements Runnable {
               numGets++;
             }
           } else if (tokens[0].equals("put") && tokens.length == 3) {
-            if (cache == null) {
+            if (readOnly) {
+              response = "ERROR: read-only";
+            } else if (cache == null) {
               response = "ERROR: no file opened yet";
             } else {
               synchronized (cache) { cache.put(tokens[1], tokens[2]); }
@@ -98,8 +109,12 @@ public class StringCacheServer implements Runnable {
                 response += "\n  " + path + " (" + caches.get(path).size() + " entries)";
             }
           } else if (tokens[0].equals("terminate")) {
-            response = "OK; telnet to the port again to terminate";
-            terminated = true;
+            if (readOnly) {
+              response = "ERROR: read-only";
+            } else {
+              response = "OK; telnet to the port again to terminate";
+              terminated = true;
+            }
           } else if (tokens[0].equals("help")) {
             response = "Commands (tab-separated):\n  open |path|\n  get |key|\n  put |key| |value|\n  terminate\n  stats\n  help";
           } else {

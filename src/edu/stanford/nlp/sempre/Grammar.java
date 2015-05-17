@@ -311,7 +311,7 @@ public class Grammar {
         i++;
       // Find the next non-optional category
       int j = i + 1;
-      while (j < rule.rhs.size() && !(Rule.isCat(rule.rhs.get(i)) && !isOptionals.get(i)))
+      while (j < rule.rhs.size() && !(Rule.isCat(rule.rhs.get(j)) && !isOptionals.get(j)))
         j++;
       // If one exists, then we have to invoke special binarization
       if (j < rule.rhs.size()) {

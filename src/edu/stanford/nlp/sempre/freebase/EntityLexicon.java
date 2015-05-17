@@ -37,7 +37,7 @@ public final class EntityLexicon {
     @Option(gloss = "Path to the inexact match lucene index directory")
     public String inexactMatchIndex = "lib/lucene/4.4/inexact";
     @Option(gloss = "Cache path to the mid-to-id path")
-    public String mid2idPath = "localhost:4000:/u/nlp/data/semparse/scr/freebase/freebase-rdf-2013-06-09-00-00.canonical-id-map";
+    public String mid2idPath;
     @Option(gloss = "Path to entity popularity file")
     public String entityPopularityPath;
   }
