@@ -40,14 +40,16 @@ Commands:
   !                         compute listing for all items in list
 EOF
 
-$mid2id = TCPSocket.new('localhost', 4000)
+$server = 'freebase.cloudapp.net'
+
+$mid2id = TCPSocket.new($server, 4000)
 def call(command)
   $mid2id.puts command
   result = $mid2id.gets.strip
   return nil if result == '__NULL__'
   return result
 end
-call("open\t/u/nlp/data/semparse/scr/freebase/freebase-rdf-2013-06-09-00-00.canonical-id-map")
+call("open\tfreebase-rdf-2013-06-09-00-00.canonical-id-map.gz")
 
 # Explore the Freebase graph
 def fbsearch(query)
@@ -70,7 +72,7 @@ end
 def sparql(query)
   query = 'PREFIX fb: <http://rdf.freebase.com/ns/> ' + query + ' LIMIT 1000'
   encodedQuery = URI::encode(query).gsub(/\+/, '%2b')
-  queryUrl = "http://localhost:3093/sparql?query=#{encodedQuery}"
+  queryUrl = "http://#{$server}:3093/sparql?query=#{encodedQuery}"
   raw = open(queryUrl).read
   raw.sub!(/<sparql.*>/, '<sparql>')  # Remove namespace
   xml = Nokogiri::XML(raw)

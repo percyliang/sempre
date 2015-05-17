@@ -415,15 +415,22 @@ addMode('simple-freebase', 'Simple shell for using Freebase', lambda { |e| l(
   letDefault(:cacheserver, 'freebase.cloudapp.net:4000'),
   sparqlOpts,
   # Set up Freebase search for entities
-  # Assume run following on the server:
-  #   ./run @mode=cacheserver -readOnly -basePath lib/fb_data
+  # Assume run following on the server (read-only and capacity are important!)
+  #   ./run @mode=cacheserver -readOnly -capacity MAX -basePath lib/fb_data
   o('FreebaseSearch.cachePath', 'FreebaseSearch.cache'),
   o('EntityLexicon.mid2idPath', lambda { |e| e[:cacheserver] + ':freebase-rdf-2013-06-09-00-00.canonical-id-map.gz' }),
   o('TypeInference.typeLookup', 'freebase.FreebaseTypeLookup'),
   o('FreebaseTypeLookup.entityTypesPath', lambda { |e| e[:cacheserver] + ':freebase-rdf-2013-06-09-00-00.canonicalized.en-types.gz' }),
-  o('EntityLexicon.maxEntries', 3),
-  o('coarsePrune'),
-  o('interactive'),
+  o('EntityLexicon.maxEntries', 2),
+  o('Parser.coarsePrune'),
+  o('JoinFn.typeInference'),
+  o('UnaryLexicon.unaryLexiconFilePath', '/dev/null'),
+  o('BinaryLexicon.binaryLexiconFilesPath', '/dev/null'),
+  #o('JoinFn.showTypeCheckFailures'),  # Use this to debug
+  o('Grammar.inPaths', 'freebase/data/demo1.grammar'),  # Override with your own custom grammar
+  o('SparqlExecutor.returnTable'),
+  #o('SparqlExecutor.includeSupportingInfo'),  # Show full information
+  o('Main.interactive'),
 nil) })
 
 

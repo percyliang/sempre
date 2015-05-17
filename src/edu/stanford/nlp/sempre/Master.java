@@ -240,6 +240,9 @@ public class Master {
     FeatureVector.logChoices("Pred", choices);
 
     // Print denotation
+    LogInfo.begin_track("Top formula");
+    LogInfo.logs("%s", deriv.formula);
+    LogInfo.end_track();
     if (deriv.value != null) {
       LogInfo.begin_track("Top value");
       deriv.value.log();
