@@ -41,6 +41,7 @@ public class FileStringCache implements StringCache, LruCallback<String, String>
   private final StatFig valStats = new StatFig();
   private int numTouches = 0;
   private int numEvictions = 0;
+  private boolean readOnly;
 
   public FileStringCache() {
     int cap = opts.capacity;
@@ -54,9 +55,11 @@ public class FileStringCache implements StringCache, LruCallback<String, String>
 
   public String getPath() { return path; }
 
-  public void init(String path) {
+  public void init(String path) { init(path, false); }
+  public void init(String path, boolean readOnly) {
     if (this.path != null) throw new RuntimeException("Already initialized with " + this.path);
     this.path = path;
+    this.readOnly = readOnly;
 
     // Read existing.
     if (new File(path).exists()) {
@@ -76,12 +79,15 @@ public class FileStringCache implements StringCache, LruCallback<String, String>
 
     LogInfo.logs("Using cache %s (%d entries)", path, cache.size());
 
-    if (opts.appendMode)
+    if (!readOnly && opts.appendMode)
       out = IOUtils.openOutAppendHard(path);
     flush();
   }
 
   private void flush() {
+    if (readOnly)
+      return;
+
     if (out != null) // Append mode
       return;
 

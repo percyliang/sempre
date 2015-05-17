@@ -75,7 +75,7 @@ public class StringCacheServer implements Runnable {
                 if (cache.getPath() == null) {
                   LogInfo.begin_track("Loading %s", path);
                   try {
-                    cache.init(path);
+                    cache.init(path, readOnly);
                   } catch (Throwable t) {
                     response = "ERROR: " + t;
                   }
