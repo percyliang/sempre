@@ -1,0 +1,43 @@
+# This is a simple grammar that demonstrates how one can query Freebase using a
+# restricted set of compositional phrases.
+
+# To run:
+#   ./run @mode=simple-freebase
+#   (optionally, include -apiKey <your Freebase Search API key>)
+# To explore the Freebase schema:
+#   rlwrap freebase/scripts/fbshell.rb
+
+# Example queries:
+#   height of tom cruise
+#   cities in california with the largest area
+#   people that attended Stanford
+#   number of things that Edison invented
+
+# Noun phrases
+(rule $Str ($PHRASE) (FilterSpanLengthFn 1 2))  # Constrain the length of the entities we try to lookup
+(rule $NP ($Str) (LexiconFn entity fbsearch))  # Use the Freebase Search API
+(rule $NP (things) (ConstantFn (fb:type.object.type fb:common.topic)))
+(rule $NP (people) (ConstantFn (fb:type.object.type fb:people.person)))
+(rule $NP (cities) (ConstantFn (fb:type.object.type fb:location.citytown)))
+(rule $NP (countries) (ConstantFn (fb:type.object.type fb:location.country)))
+(rule $NP (movies) (ConstantFn (fb:type.object.type fb:film.film)))
+(rule $NP (actors) (ConstantFn (fb:people.person.profession fb:en.film_actor)))
+
+# Relational noun phrases
+(rule $RelNP (height) (ConstantFn fb:people.person.height_meters))
+(rule $RelNP (area) (ConstantFn fb:location.location.area))
+(rule $NP ($RelNP of $NP) (lambda r (lambda x ((reverse (var r)) (var x)))))  # height of tom cruise
+
+# Generalized verbs
+(rule $VP/NP (were born in) (ConstantFn fb:people.person.place_of_birth))
+(rule $VP/NP (are in) (ConstantFn fb:location.location.containedby))
+(rule $VP/NP (attended) (ConstantFn (lambda x (fb:people.person.education (fb:education.education.institution (var x))))))
+(rule $VP/NP (invented) (ConstantFn fb:law.inventor.inventions))
+(rule $VP/NP (starred in) (ConstantFn (lambda x (fb:film.actor.film (fb:film.performance.film (var x))))))
+(rule $NP ($NP that $VP/NP $NP) (lambda x (lambda r (lambda y (and (var x) ((var r) (var y)))))))  # people that were born in Seattle
+(rule $NP ($NP that $NP $VP/NP) (lambda x (lambda y (lambda r (and (var x) ((reverse (var r)) (var y)))))))  # things that Edison invented
+
+# Top-level
+(rule $ROOT ($NP with the largest $RelNP) (lambda x (lambda y (argmax 1 5 (var x) (var y)))))
+(rule $ROOT (number of $NP) (lambda x (count (var x))))
+(rule $ROOT ($NP) (IdentityFn))
