@@ -422,6 +422,7 @@ addMode('simple-freebase', 'Simple shell for using Freebase', lambda { |e| l(
   o('TypeInference.typeLookup', 'freebase.FreebaseTypeLookup'),
   o('FreebaseTypeLookup.entityTypesPath', lambda { |e| e[:cacheserver] + ':freebase-rdf-2013-06-09-00-00.canonicalized.en-types.gz' }),
   o('EntityLexicon.maxEntries', 2),
+  o('FeatureExtractor.featureDomains', 'rule'),
   o('Parser.coarsePrune'),
   o('JoinFn.typeInference'),
   o('UnaryLexicon.unaryLexiconFilePath', '/dev/null'),
