@@ -107,7 +107,9 @@ public class QuestionGenerator {
     //generate from formula info
     Set<String> res = generateQuestions(fgInfo);
     //generate from equivalent formula if it exists
-    if(fbFormulasInfo.hasOpposite(fgInfo.bInfo.formula)) {
+		//added the check for equivalent formula based on github question (unclear why hasn't happened earlier)
+    if(fbFormulasInfo.hasOpposite(fgInfo.bInfo.formula) && 
+			fbFormulasInfo.getBinaryInfo(fbFormulasInfo.equivalentFormula(fgInfo.bInfo.formula)) != null) {
       FormulaGenerationInfo eqInfo = 
           new FormulaGenerationInfo(fbFormulasInfo.getBinaryInfo(fbFormulasInfo.equivalentFormula(fgInfo.bInfo.formula)),
               fgInfo.injectedInfo, fgInfo.entityInfo1, fgInfo.entityInfo2, fgInfo.uInfo, fgInfo.isCount, fgInfo.isInject, fgInfo.isUnary);
