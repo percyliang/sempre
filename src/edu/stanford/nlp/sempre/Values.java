@@ -27,6 +27,7 @@ public final class Values {
     if ("context".equals(type)) return new ContextValue(tree);
     if ("date".equals(type)) return new DateValue(tree);
     if ("error".equals(type)) return new ErrorValue(tree);
+    if ("time".equals(type)) return new TimeValue(tree);
     return null;
   }
 

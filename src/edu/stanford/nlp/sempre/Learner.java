@@ -59,11 +59,11 @@ public class Learner {
     this.params = params;
     this.dataset = dataset;
     this.eventsOut = IOUtils.openOutAppendEasy(Execution.getFile("learner.events"));
-    if (opts.initialization != null)
+    if (opts.initialization != null && this.params.isEmpty())
       this.params.init(opts.initialization);
-   // collect all semantic functions to update
-    semFuncsToUpdate = new ArrayList<>();
 
+    // Collect all semantic functions to update.
+    semFuncsToUpdate = new ArrayList<>();
     for (Rule rule : parser.grammar.getRules()) {
       SemanticFn currSemFn = rule.getSem();
       boolean toAdd = true;
@@ -124,11 +124,6 @@ public class Learner {
         params.write(path);
         Utils.systemHard("ln -sf params." + iter + " " + Execution.getFile("params"));
       }
-
-      // Write out examples and predictions
-      if (opts.outputPredDerivations)
-        for (String group : dataset.groups())
-          ExampleUtils.writeSDF(iter, group, meanEvaluations.get(group), dataset.examples(group), opts.outputPredDerivations);
 
       LogInfo.end_track();
     }
@@ -199,6 +194,11 @@ public class Learner {
       if (opts.addFeedback && computeExpectedCounts)
         addFeedback(ex);
 
+      // Write out examples and predictions
+      if (opts.outputPredDerivations && Builder.opts.parser.equals("FloatingParser")) {
+        ExampleUtils.writeParaphraseSDF(iter, group, ex, opts.outputPredDerivations);
+      }
+
       // To save memory
       ex.predDerivations.clear();
     }
@@ -212,6 +212,7 @@ public class Learner {
     LogInfo.end_track();
     logEvaluationStats(evaluation, prefix);
     printLearnerEventsSummary(evaluation, iter, group);
+    ExampleUtils.writeEvaluationSDF(iter, group, evaluation, examples.size());
     LogInfo.end_track();
     return evaluation;
   }

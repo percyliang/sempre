@@ -1,0 +1,27 @@
+# Agile grammar for publications
+
+(include general.grammar)
+
+# Types
+(rule $TypeNP (article) (ConstantFn en.article))
+(rule $EntityNP1 (multivariate data analysis) (ConstantFn en.article.multivariate_data_analysis))
+
+# Properties
+(rule $RelNP (author) (ConstantFn (string author)))
+(rule $TypeNP (person) (ConstantFn en.person))
+(rule $EntityNP1 (efron) (ConstantFn en.person.efron))
+(rule $EntityNP2 (lakoff) (ConstantFn en.person.lakoff))
+
+(rule $RelNP (venue) (ConstantFn (string venue)))
+(rule $TypeNP (venue) (ConstantFn en.venue))
+(rule $EntityNP1 (annals of statistics) (ConstantFn en.venue.annals_of_statistics))
+(rule $EntityNP2 (computational linguistics) (ConstantFn en.venue.computational_linguistics))
+
+(rule $RelNP (publication date) (ConstantFn (string publication_date)))
+(rule $EntityNP1 (2004) (ConstantFn (date 2004 -1 -1)))
+(rule $EntityNP2 (2010) (ConstantFn (date 2010 -1 -1)))
+
+(rule $VP/NP (cites) (ConstantFn (string cites)))
+
+# Unaries
+(rule $VP (won an award) (ConstantFn (string won_award)))

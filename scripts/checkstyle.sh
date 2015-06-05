@@ -7,4 +7,5 @@ else
 fi
 
 d=`dirname $0`
-java -cp $d/../lib/checkstyle/checkstyle-6.1.1-all.jar com.puppycrawl.tools.checkstyle.Main -c `dirname $0`/checkstyle.xml $files
+prog="$d/../lib/checkstyle/checkstyle-6.6-all.jar"
+java -cp $prog com.puppycrawl.tools.checkstyle.Main -c `dirname $0`/checkstyle.xml $files

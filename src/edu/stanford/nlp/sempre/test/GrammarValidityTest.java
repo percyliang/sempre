@@ -18,7 +18,7 @@ import static org.testng.AssertJUnit.assertEquals;
  */
 
 public class GrammarValidityTest {
-  private String[] dataPaths = new String[] {"data/", "freebase/", "tables/", "regex/"};
+  private String[] dataPaths = new String[] {"data/", "freebase/", "tables/", "regex/", "overnight/"};
 
   @Test(groups = {"grammar"})
   public void readGrammars() {

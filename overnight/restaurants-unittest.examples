@@ -1,0 +1,19 @@
+# Unittest
+
+# Type
+(example (utterance "restaurant"))
+
+# R1
+(example (utterance "restaurant that takes reservations"))
+(example (utterance "restaurant that has outdoor seating"))
+
+# R2
+(example (utterance "restaurant whose cuisine is chinese"))
+(example (utterance "restaurant whose neighborhood is tribeca"))
+
+# R3
+(example (utterance "restaurant whose price rating is 2 dollar signs"))
+(example (utterance "restaurant whose star rating is at least 3 stars"))
+
+# R4
+(example (utterance "restaurant that serves lunch"))

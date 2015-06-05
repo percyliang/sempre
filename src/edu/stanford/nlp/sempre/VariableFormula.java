@@ -12,6 +12,7 @@ public class VariableFormula extends PrimitiveFormula {
   public VariableFormula(String name) { this.name = name; }
   public LispTree toLispTree() { return LispTree.proto.newList("var", name); }
 
+  @SuppressWarnings({"equalshashcode"})
   @Override
   public boolean equals(Object thatObj) {
     if (!(thatObj instanceof VariableFormula)) return false;

@@ -35,6 +35,9 @@ public class LanguageInfo implements MemUsage.Instrumented {
   public final List<String> nerValues;  // NER values (contains times, dates, etc.)
 
   private Map<String, IntPair> lemmaSpans;
+  private Set<String> lowercasedSpans;
+
+
 
   public static class DependencyEdge {
     @JsonProperty
@@ -291,13 +294,24 @@ public class LanguageInfo implements MemUsage.Instrumented {
 
   public Map<String, IntPair> getLemmaSpans() {
     if (lemmaSpans == null) {
-      lemmaSpans = new HashMap<String, IntPair>();
+      lemmaSpans = new HashMap<>();
       for (int i = 0; i < numTokens() - 1; ++i) {
         for (int j = i + 1; j < numTokens(); ++j)
           lemmaSpans.put(lemmaPhrase(i, j), new IntPair(i, j));
       }
     }
     return lemmaSpans;
+  }
+
+  public Set<String> getLowerCasedSpans() {
+    if (lowercasedSpans == null) {
+      lowercasedSpans = new HashSet<>();
+      for (int i = 0; i < numTokens() - 1; ++i) {
+        for (int j = i + 1; j < numTokens(); ++j)
+          lowercasedSpans.add(phrase(i, j).toLowerCase());
+      }
+    }
+    return lowercasedSpans;
   }
 
   public boolean matchLemmas(List<WordInfo> wordInfos) {
@@ -324,6 +338,7 @@ public class LanguageInfo implements MemUsage.Instrumented {
    *
    */
   public static class LanguageUtils {
+
     public static boolean sameProperNounClass(String noun1, String noun2) {
       if ((noun1.equals("NNP") || noun1.equals("NNPS")) &&
           (noun2.equals("NNP") || noun2.equals("NNPS")))
@@ -334,6 +349,10 @@ public class LanguageInfo implements MemUsage.Instrumented {
     public static boolean isProperNoun(String pos) {
       return pos.startsWith("NNP");
     }
+
+    public static boolean isSuperlative(String pos) { return pos.equals("RBS") || pos.equals("JJS"); }
+    public static boolean isComparative(String pos) { return pos.equals("RBR") || pos.equals("JJR"); }
+
 
     public static boolean isEntity(LanguageInfo info, int i) {
       return isProperNoun(info.posTags.get(i)) || !(info.nerTags.get(i).equals("O"));
@@ -361,6 +380,30 @@ public class LanguageInfo implements MemUsage.Instrumented {
       if (pos.startsWith("W")) return "W";
       return pos;
     }
+
+    // Uses a few rules to stem tokens
+    public static String stem(String a) {
+      int i = a.indexOf(' ');
+      if (i != -1)
+        return stem(a.substring(0, i)) + ' ' + stem(a.substring(i + 1));
+      //Maybe we should just use the Stanford stemmer
+      String res = a;
+      //hard coded words
+      if (a.equals("having") || a.equals("has")) res = "have";
+      else if (a.equals("using")) res =  "use";
+      else if (a.equals("including")) res =  "include";
+      else if (a.equals("beginning")) res = "begin";
+      else if (a.equals("utilizing")) res = "utilize";
+      else if (a.equals("featuring")) res =  "feature";
+      else if (a.equals("preceding")) res =  "precede";
+      //rules
+      else if (a.endsWith("ing")) res =  a.substring(0, a.length() - 3);
+      else if (a.endsWith("s") && !a.equals("'s")) res =  a.substring(0, a.length() - 1);
+      //don't return an empty string
+      if (res.length() > 0) return res;
+      return a;
+    }
+
   }
 
   @Override

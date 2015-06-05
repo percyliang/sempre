@@ -1,0 +1,12 @@
+# R1
+(example (utterance "housing unit whose neighborhood is chelsea"))
+(example (utterance "housing unit whose housing type is apartment"))
+
+# R2
+(example (utterance "housing unit that allows cats"))
+(example (utterance "housing unit that allows dogs"))
+
+# R3
+(example (utterance "housing unit whose size is at least 800 square feet"))
+
+(example (utterance "number of housing type"))

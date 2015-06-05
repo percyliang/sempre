@@ -17,6 +17,7 @@ public class ValueFormula<T extends Value> extends PrimitiveFormula {
     return value.toLispTree();
   }
 
+  @SuppressWarnings({"equalshashcode"})
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;

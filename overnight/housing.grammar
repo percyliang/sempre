@@ -1,0 +1,42 @@
+# Agile grammar for housing (based on craigslist)
+# - What is the price of house?
+# - How many apartments are there?
+# - Create house with price 225000 
+# - Move price of house from 225000 to 250000
+# - Is there any apartment whose rent is less than 2000
+
+(include general.grammar)
+
+# Types
+(rule $TypeNP (housing unit) (ConstantFn en.housing_unit))
+(rule $EntityNP1 (123 sesame street) (ConstantFn en.housing_unit.123_sesame_street))
+(rule $EntityNP2 (900 mission ave) (ConstantFn en.housing_unit.900_mission_ave))
+
+# Properties
+(rule $RelNP (monthly rent) (ConstantFn (string rent)))
+(rule $EntityNP1 (1500 dollars) (ConstantFn (number 1500 en.dollar)))
+(rule $EntityNP2 (2000 dollars) (ConstantFn (number 2000 en.dollar)))
+
+(rule $RelNP (size) (ConstantFn (string size)))
+(rule $EntityNP1 (800 square feet) (ConstantFn (number 800 en.square_feet)))
+(rule $EntityNP2 (1000 square feet) (ConstantFn (number 1000 en.square_feet)))
+
+(rule $RelNP (posting date) (ConstantFn (string posting_date)))
+(rule $EntityNP1 (jan 2) (ConstantFn (date 2015 1 2)))
+(rule $EntityNP2 (feb 3) (ConstantFn (date 2015 2 3)))
+
+(rule $RelNP (neighborhood) (ConstantFn (string neighborhood)))
+(rule $TypeNP (neighborhood) (ConstantFn en.neighborhood))
+(rule $EntityNP1 (midtown west) (ConstantFn en.neighborhood.midtown_west))
+(rule $EntityNP2 (chelsea) (ConstantFn en.neighborhood.chelsea))
+
+(rule $RelNP (housing type) (ConstantFn (string housing_type)))
+(rule $TypeNP (housing type) (ConstantFn en.housing))
+(rule $EntityNP1 (apartment) (ConstantFn en.housing.apartment))
+(rule $EntityNP2 (condo) (ConstantFn en.housing.condo))
+
+# Unaries
+(rule $VP (allows cats) (ConstantFn (string allows_cats)))
+(rule $VP (allows dogs) (ConstantFn (string allows_dogs)))
+(rule $VP (has a private bath) (ConstantFn (string has_private_bath)))
+(rule $VP (has a private room) (ConstantFn (string has_private_room)))

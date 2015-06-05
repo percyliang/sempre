@@ -1,0 +1,72 @@
+# Agile grammar for social network (think Facebook Graph Search)
+
+(include general.grammar)
+
+# Types
+(rule $TypeNP (person) (ConstantFn en.person))
+(rule $EntityNP1 (alice) (ConstantFn en.person.alice))
+(rule $EntityNP2 (bob) (ConstantFn en.person.bob))
+
+(rule $VP/NP (is friends with) (ConstantFn (string friend)))
+
+# Properties
+(rule $RelNP (birthdate) (ConstantFn (string birthdate)))
+(rule $EntityNP1 (2004) (ConstantFn (date 2004 -1 -1)))
+(rule $EntityNP2 (2010) (ConstantFn (date 2010 -1 -1)))
+
+(rule $RelNP (gender) (ConstantFn (string gender)))
+(rule $TypeNP (gender) (ConstantFn en.gender))
+(rule $EntityNP1 (male) (ConstantFn en.gender.male))
+(rule $EntityNP2 (female) (ConstantFn en.gender.female))
+
+(rule $RelNP (relationship status) (ConstantFn (string relationship_status)))
+(rule $TypeNP (relationship status) (ConstantFn en.relationship_status))
+(rule $EntityNP1 (single) (ConstantFn en.relationship_status.single))
+(rule $EntityNP2 (married) (ConstantFn en.relationship_status.married))
+
+(rule $RelNP (birthplace) (ConstantFn (string birthplace)))
+(rule $TypeNP (city) (ConstantFn en.city))
+(rule $EntityNP1 (new york) (ConstantFn en.city.new_york))
+(rule $EntityNP2 (beijing) (ConstantFn en.city.bejing))
+
+(rule $RelNP (height) (ConstantFn (string height)))
+(rule $EntityNP1 (180 cm) (ConstantFn (number 180 en.cm)))
+(rule $EntityNP2 (200 cm) (ConstantFn (number 200 en.cm)))
+
+# Education
+#(rule $EventNP (education) (ConstantFn (call @getProperty (call @singleton en.education) (string !type)))) # for debugging
+
+(rule $Rel0NP (student) (ConstantFn (string student)))
+
+(rule $RelNP (university) (ConstantFn (string university)))
+(rule $TypeNP (university) (ConstantFn en.university))
+(rule $EntityNP1 (brown university) (ConstantFn en.university.brown))
+(rule $EntityNP2 (ucla) (ConstantFn en.university.ucla))
+
+(rule $RelNP (field of study) (ConstantFn (string field_of_study)))
+(rule $TypeNP (field) (ConstantFn en.field))
+(rule $EntityNP1 (computer science) (ConstantFn en.field.computer_science))
+(rule $EntityNP2 (history) (ConstantFn en.field.history))
+
+(rule $RelNP (start date) (ConstantFn (string education_start_date)))
+(rule $RelNP (end date) (ConstantFn (string education_end_date)))
+
+# Employment
+
+(rule $Rel0NP (employee) (ConstantFn (string employee)))
+
+(rule $RelNP (employer) (ConstantFn (string employer)))
+(rule $TypeNP (company) (ConstantFn en.company))
+(rule $EntityNP1 (mckinsey) (ConstantFn en.company.mckinsey))
+(rule $EntityNP2 (google) (ConstantFn en.company.google))
+
+(rule $RelNP (job title) (ConstantFn (string job_title)))
+(rule $TypeNP (job title) (ConstantFn en.job_title))
+(rule $EntityNP1 (software engineer) (ConstantFn en.job_title.software_engineer))
+(rule $EntityNP2 (program manager) (ConstantFn en.job_title.program_manager))
+
+(rule $RelNP (start date) (ConstantFn (string employment_start_date)))
+(rule $RelNP (end date) (ConstantFn (string employment_end_date)))
+
+# Unaries
+(rule $VP (is logged in) (ConstantFn (string logged_in)))

@@ -1,4 +1,4 @@
-# SEMPRE 2.0: Semantic Parsing with Execution
+# SEMPRE 2.1: Semantic Parsing with Execution
 
 ## What is semantic parsing?
 

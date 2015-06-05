@@ -1,0 +1,126 @@
+# Restrictive Grammar
+# Use fixed patterns with limited number of layers of compositionality.
+
+################################################################
+# Macros
+
+(def @R reverse)
+(def @type fb:type.object.type)
+(def @any fb:type.any)
+(def @row fb:type.row)
+(def @cell fb:type.cell)
+(def @next fb:row.row.next)
+(def @!next fb:row.row.next)
+(def @index fb:row.row.index)
+(def @p.num fb:cell.cell.number)
+(def @!p.num !fb:cell.cell.number)
+
+################################################################
+# Lexicon
+
+################################
+# TokenSpan
+(rule $TokenSpan ($PHRASE) (FilterSpanLengthFn 1) (anchored 1))
+
+################################
+# Entity, Unary, Binary (using FuzzyMatchFn)
+(rule $Entity ($TokenSpan) (FuzzyMatchFn entity) (anchored 1))
+(rule $Num ($PHRASE) (NumberFn) (anchored 1))
+#(rule $Entity ($PHRASE) (DateFn) (anchored 1))
+(rule $Binary ($TokenSpan) (FuzzyMatchFn binary) (anchored 1))
+
+################################
+# Create binary from thin air
+(rule $Binary (nothing) (FuzzyMatchFn any binary))
+(rule $Num (nothing) (ConstantFn (number 0)))
+
+################################################################
+# Composition Patterns
+
+# (!b1 (b2 e))
+(rule $ROOT ($Binary $Binary $Entity) (lambda b1 (lambda b2 (lambda e
+  ((@R (var b1)) ((var b2) (var e)))
+))))
+
+# (!b1 (next (b2 e)))
+(for @movement (@next @!next)
+  (rule $ROOT ($Binary $Binary $Entity) (lambda b1 (lambda b2 (lambda e
+    ((@R (var b1)) (@movement ((var b2) (var e))))
+  ))))
+)
+
+# (count (type row))
+(rule $ROOT (nothing) (ConstantFn (count (@type @row))))
+
+# (count (b e))
+(rule $ROOT ($Binary $Entity) (lambda b (lambda e
+  (count ((var b) (var e)))
+)))
+
+# (count (!b1 (b2 e)))
+(rule $ROOT ($Binary $Binary $Entity) (lambda b1 (lambda b2 (lambda e
+  (count ((@R (var b1)) ((var b2) (var e))))
+))))
+
+# (count (and (!b (type row)) (p.num (> num))))
+#(for @comparison (< > <= >=)
+#  (rule $ROOT ($Binary $Num) (lambda b (lambda num
+#    (count (and ((@R (var b)) (@type @row)) (@p.num (@comparison (var num)))))
+#  )))
+#)
+
+# (count (and (type row) (b (p.num (> num)))))
+(for @comparison (< > <= >=)
+  (rule $ROOT ($Binary $Num) (lambda b (lambda num
+    (count (and (@type @row) ((var b) (@p.num (@comparison (var num))))))
+  )))
+)
+
+# (count (and (!b1 (b2 e)) (p.num (> num))))
+#(for @comparison (< > <= >=)
+#  (rule $ROOT ($Binary $Binary $Entity $Num) (lambda b1 (lambda b2 (lambda e (lambda num
+#    (count (and ((@R (var b1)) ((var b2) (var e))) (@p.num (@comparison (var num)))))
+#  )))))
+#)
+
+# (count (and (b1 e) (b2 (p.num (> num)))))
+(for @comparison (< > <= >=)
+  (rule $ROOT ($Binary $Binary $Entity $Num) (lambda b1 (lambda b2 (lambda e (lambda num
+    (count (and ((var b1) (var e)) ((var b2) (@p.num (@comparison (var num))))))
+  )))))
+)
+
+# (argmax 1 1 (!b1 (type row)) (reverse (lambda x (@!p.num (!b2 (b1 x))))))
+(for @f (argmax argmin)
+  (rule $ROOT ($Binary $Binary) (lambda b1 (lambda b2
+    (@f 1 1 ((@R (var b1)) (@type @row)) (@R (lambda x (@!p.num ((@R (var b2)) ((var b1) (var x)))))))
+  )))
+)
+
+# (argmax 1 1 (!b1 (type row)) (reverse (lambda x (count (b1 x)))))
+(for @f (argmax argmin)
+  (rule $ROOT ($Binary $Binary) (lambda b1
+    (@f 1 1 ((@R (var b1)) (@type @row)) (@R (lambda x (count ((var b1) (var x))))))
+  ))
+)
+
+# (!b1 (argmax 1 1 (and (b2 e) (type row)) index)
+(for @f (argmax argmin)
+  (rule $ROOT ($Binary $Binary $Entity) (lambda b1 (lambda b2 (lambda e
+    ((@R (var b1)) (@f 1 1 (and ((var b2) (var e)) (@type @row)) @index))
+  ))))
+)
+
+# (max (@!p.num (!b (type row))))
+(for @f (max min sum)
+  (rule $ROOT ($Binary) (lambda b
+    (@f (@!p.num ((@R (var b)) (@type @row))))
+  ))
+)
+
+# (max (@!p.num (!b1 (b2 e))))
+(for @f (max min sum)
+  (rule $ROOT ($Binary $Binary $Entity) (lambda b1 (lambda b2 (lambda e
+    (@f (@!p.num ((@R (var b1)) ((var b2) (var e)))))
+  ))))
+)

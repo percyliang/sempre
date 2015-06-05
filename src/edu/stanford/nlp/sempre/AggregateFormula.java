@@ -49,6 +49,7 @@ public class AggregateFormula extends Formula {
     return res;
   }
 
+  @SuppressWarnings({"equalshashcode"})
   @Override
   public boolean equals(Object thatObj) {
     if (!(thatObj instanceof AggregateFormula)) return false;

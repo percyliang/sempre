@@ -1,6 +1,7 @@
 package edu.stanford.nlp.sempre;
 
 import fig.basic.*;
+
 import java.util.*;
 
 /**
@@ -56,6 +57,13 @@ public final class TypeInference {
   }
 
   private static final ValueFormula typeFormula = new ValueFormula(new NameValue(CanonicalNames.TYPE));
+
+  private static final Set<Formula> comparisonFormulas = new HashSet<>(Arrays.asList(
+      new ValueFormula(new NameValue("<")),
+      new ValueFormula(new NameValue(">")),
+      new ValueFormula(new NameValue("<=")),
+      new ValueFormula(new NameValue(">="))));
+
   private static class TypeException extends Exception { }
 
   private static class Env {
@@ -109,16 +117,6 @@ public final class TypeInference {
     return type;
   }
 
-  // Unary: fb:domain.type [contains exactly one period]
-  // Binary: fb:domain.type.property, <, >, etc.
-  private static boolean isUnary(String s) {
-    int i = s.indexOf('.');
-    if (i == -1) return false;
-    i = s.indexOf('.', i + 1);
-    if (i == -1) return true;
-    return false;
-  }
-
   private static SemType check(SemType type) throws TypeException {
     if (!type.isValid()) throw new TypeException();
     return type;
@@ -137,10 +135,11 @@ public final class TypeInference {
       if (value instanceof NumberValue) return check(type.meet(SemType.numberType));
       else if (value instanceof StringValue) return check(type.meet(SemType.stringType));
       else if (value instanceof DateValue) return check(type.meet(SemType.dateType));
+      else if (value instanceof TimeValue) return check(type.meet(SemType.timeType));
       else if (value instanceof NameValue) {
         String id = ((NameValue) value).id;
 
-        if (isUnary(id)) {  // Unary
+        if (CanonicalNames.isUnary(id)) {  // Unary
           SemType unaryType = env.typeLookup.getEntityType(id);
           if (unaryType == null)
             unaryType = SemType.entityType;
@@ -169,6 +168,10 @@ public final class TypeInference {
       // Special case: (fb:type.object.type fb:people.person) => fb:people.person
       if (typeFormula.equals(join.relation) && join.child instanceof ValueFormula)
         return check(type.meet(SemType.newAtomicSemType(Formulas.getString(join.child))));
+
+      // Special case: (<= (number 5)) => same type as (number 5)
+      if (comparisonFormulas.contains(join.relation))
+        return check(type.meet(inferType(join.child, env, SemType.numberOrDateType)));
 
       SemType relationType = inferType(join.relation, env, new FuncSemType(SemType.topType, type)); // Relation
       SemType childType = inferType(join.child, env, relationType.getArgType()); // Child

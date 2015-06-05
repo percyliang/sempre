@@ -92,8 +92,8 @@ while true
   log("Testing...")
   run('git log -3', true) or restart # Print out last commit messages
   run('./pull-dependencies', true) or restart
-  run('make clean', true) or restart
-  run('make', true) or restart
+  run('ant clean', true) or restart
+  run('ant', true) or restart
 
   run('scripts/find-hard-coded-paths.rb', true) or restart
 

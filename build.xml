@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project default="compile" name="semparse">
+  <!-- Set useful variables -->
+  <property name="target" value="1.8"/>
+  <property name="source" value="1.8"/>
+  <property name="root" value="."/>
+  <property name="src" location="${root}/src/"/>
+  <property name="classes" location="${root}/classes"/>
+  <property name="lib" location="${root}/lib"/>
+  <property name="libsempre" location="${root}/libsempre"/>
+  <path id="lib.path">
+    <fileset dir="${libsempre}" includes="*.jar"/>
+    <fileset dir="${lib}" includes="*.jar"/>
+  </path>
+
+  <!-- Create directories -->
+  <target name="init">
+    <exec executable="${root}/scripts/extract-module-classes.rb"/>
+    <mkdir dir="${classes}"/>
+    <mkdir dir="${libsempre}"/>
+  </target>
+
+  <!-- Compile -->
+  <target name="compile" depends="init">
+    <antcall target="compile.released"/>
+  </target>
+
+  <target name="compile.released" depends="init,core,cache,corenlp,freebase,tables,overnight"/>
+
+  <!-- Compile core -->
+  <target name="core" depends="init">
+    <echo message="Compiling ${ant.project.name}: core"/>
+    <mkdir dir="${classes}"/>
+    <javac srcdir="${src}" destdir="${classes}" classpathref="lib.path" debug="true" includeantruntime="false" source="${source}" target="${target}">
+      <include name="edu/stanford/nlp/sempre/*.java"/>
+      <include name="edu/stanford/nlp/sempre/test/"/>
+    </javac>
+    <jar destfile="${libsempre}/sempre-core.jar" basedir="${classes}" includes="edu/**"/>
+  </target>
+
+  <!-- Compile cache -->
+  <target name="cache" depends="init">
+    <echo message="Compiling ${ant.project.name}: cache"/>
+    <mkdir dir="${classes}/cache"/>
+    <javac srcdir="${src}" destdir="${classes}/cache" classpathref="lib.path" debug="true" includeantruntime="false" source="${source}" target="${target}">
+      <include name="edu/stanford/nlp/sempre/cache/"/>
+    </javac>
+    <jar destfile="${libsempre}/sempre-cache.jar" basedir="${classes}/cache"/>
+  </target>
+
+  <!-- Compile corenlp -->
+  <target name="corenlp" depends="init,core,cache">
+    <echo message="Compiling ${ant.project.name}: corenlp"/>
+    <mkdir dir="${classes}/corenlp"/>
+    <javac srcdir="${src}" destdir="${classes}/corenlp" classpathref="lib.path" debug="true" includeantruntime="false" source="${source}" target="${target}">
+      <include name="edu/stanford/nlp/sempre/corenlp/"/>
+    </javac>
+    <jar destfile="${libsempre}/sempre-corenlp.jar" basedir="${classes}/corenlp"/>
+  </target>
+
+  <!-- Compile freebase -->
+  <target name="freebase" depends="init,core,cache">
+    <echo message="Compiling ${ant.project.name}: freebase"/>
+    <mkdir dir="${classes}/freebase"/>
+    <javac srcdir="${src}" destdir="${classes}/freebase" classpathref="lib.path" debug="true" includeantruntime="false" source="${source}" target="${target}">
+      <include name="edu/stanford/nlp/sempre/freebase/"/>
+    </javac>
+    <jar destfile="${libsempre}/sempre-freebase.jar" basedir="${classes}/freebase"/>
+  </target>
+
+  <!-- Compile tables -->
+  <target name="tables" depends="init,core">
+    <echo message="Compiling ${ant.project.name}: tables"/>
+    <mkdir dir="${classes}/tables"/>
+    <javac srcdir="${src}" destdir="${classes}/tables" classpathref="lib.path" debug="true" includeantruntime="false" source="${source}" target="${target}">
+      <include name="edu/stanford/nlp/sempre/tables/"/>
+    </javac>
+    <jar destfile="${libsempre}/sempre-tables.jar" basedir="${classes}/tables"/>
+  </target>
+
+  <!-- Compile overnight -->
+  <target name="overnight" depends="init,core">
+    <echo message="Compiling ${ant.project.name}: overnight"/>
+    <mkdir dir="${classes}/overnight"/>
+    <javac srcdir="${src}" destdir="${classes}/overnight" classpathref="lib.path" debug="true" includeantruntime="false" source="${source}" target="${target}">
+      <include name="edu/stanford/nlp/sempre/overnight/"/>
+    </javac>
+    <jar destfile="${libsempre}/sempre-overnight.jar" basedir="${classes}/overnight"/>
+  </target>
+
+
+  <!-- Clean up -->
+  <target name="clean">
+    <delete includeemptydirs="true" quiet="true">
+      <fileset dir="${classes}" followsymlinks="false"/>
+      <fileset dir="${libsempre}" followsymlinks="false"/>
+      <fileset file="module-classes.txt" followsymlinks="false"/>
+    </delete>
+  </target>
+
+</project>

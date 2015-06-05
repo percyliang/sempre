@@ -1,0 +1,4 @@
+(include general.grammar)
+
+# Types
+(rule $TypeNP (person) (ConstantFn en.person))

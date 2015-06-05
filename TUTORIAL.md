@@ -175,7 +175,7 @@ derivation representing a number.
 Now, you can parse the following:
 
     four
-    2.718
+    20
 
 Note: if you now type in `three`, you should get two derivations that yield the
 same answer, one coming from each rule.  Note that `twenty-five million` will
@@ -334,7 +334,7 @@ The complete derivation for *three plus four* is illustrated here:
     three                  plus                                                         four
 
 
-**Exercise 2.1**: write rules can parse the following utterances into
+**Exercise 2.1**: write rules that can parse the following utterances into
 into the category `$Expr`:
 
     length of hello world         # 11
@@ -375,7 +375,7 @@ You can put a set of grammar rules in a file (e.g.,
 
     ./run @mode=simple -Grammar.inPaths data/tutorial-arithmetic.grammar
 
-If you make edit the grammar, you can reload the grammar without exiting the
+If you edit the grammar, you can reload the grammar without exiting the
 prompt by typing:
 
     (reload) 

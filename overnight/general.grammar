@@ -1,0 +1,416 @@
+############################################################
+# General grammar
+# There are two types of grammars
+# - generate: used to generate canonical utterances
+# - parse: used to actually parse
+
+(def @domain edu.stanford.nlp.sempre.overnight.SimpleWorld.domain)
+(def @singleton edu.stanford.nlp.sempre.overnight.SimpleWorld.singleton)
+(def @filter edu.stanford.nlp.sempre.overnight.SimpleWorld.filter)
+(def @getProperty edu.stanford.nlp.sempre.overnight.SimpleWorld.getProperty)
+(def @superlative edu.stanford.nlp.sempre.overnight.SimpleWorld.superlative)
+(def @countSuperlative edu.stanford.nlp.sempre.overnight.SimpleWorld.countSuperlative)
+(def @countComparative edu.stanford.nlp.sempre.overnight.SimpleWorld.countComparative)
+(def @aggregate edu.stanford.nlp.sempre.overnight.SimpleWorld.aggregate)
+(def @concat edu.stanford.nlp.sempre.overnight.SimpleWorld.concat)
+(def @reverse edu.stanford.nlp.sempre.overnight.SimpleWorld.reverse)
+(def @arithOp edu.stanford.nlp.sempre.overnight.SimpleWorld.arithOp)
+(def @sortAndToString edu.stanford.nlp.sempre.overnight.SimpleWorld.sortAndToString)
+(def @ensureNumericProperty edu.stanford.nlp.sempre.overnight.SimpleWorld.ensureNumericProperty)
+(def @ensureNumericEntity edu.stanford.nlp.sempre.overnight.SimpleWorld.ensureNumericEntity)
+(def @listValue edu.stanford.nlp.sempre.overnight.SimpleWorld.listValue)
+
+############################################################
+# Base cases
+
+(when parse
+  # G1
+  # Generic values
+  (rule $EntityNP ($PHRASE) (NumberFn) (anchored 1))
+  (rule $EntityNP ($PHRASE) (DateFn) (anchored 1))
+
+  # Currently, just cheat and use the entities defined in the base grammar.
+  # In the future, want actually NER.
+  (rule $EntityNP ($EntityNP1) (IdentityFn))
+  (rule $EntityNP ($EntityNP2) (IdentityFn))
+  #(rule $EntityNP ($PHRASE) (FilterNerSpanFn PERSON ORGANIZATION LOCATION MISC) (anchored 1))
+  #(rule $EntityNP ($PHRASE) (FilterPosTagFn span NNP) (anchored 1))
+
+  (rule $Num ($PHRASE) (NumberFn) (anchored 1))
+)
+(when generate
+  (rule $Num (two) (ConstantFn (number 2)))
+)
+
+(when (and parse general)
+  # G1
+  (rule $NP ($EntityNP) (IdentityFn))
+  # G2
+  (rule $NP ($TypeNP) (lambda t (call @getProperty (call @singleton (var t)) (string !type)))) # Unary
+)
+(when (and generate general)
+  (rule $UnaryNP ($TypeNP) (lambda t (call @getProperty (call @singleton (var t)) (string !type)))) # Unary
+)
+
+(when (and parse regex)
+  (rule $NP ($EntityNP) (IdentityFn))
+  (rule $NP ($TypeNP) (IdentityFn))
+)
+(when (and generate regex)
+  (rule $UnaryNP ($TypeNP) (IdentityFn))
+)
+
+(when (and parse general)
+  (rule $NumberRelNP ($RelNP) (lambda r (call @ensureNumericProperty (var r))))
+  (rule $NumberNP ($NP) (lambda r (call @ensureNumericEntity (var r))))
+)
+(when (and generate general)
+  (rule $NumberRelNP ($RelNP) (lambda r (call @ensureNumericProperty (var r))))
+  (rule $NumberEntityNP ($EntityNP1) (lambda r (call @ensureNumericEntity (var r))))
+  (rule $NumberNP0 ($NP0) (lambda r (call @ensureNumericEntity (var r))))
+)
+
+############################################################
+# Complementizer phrase (filtering)
+
+(when (and parse general)
+  # R0
+  (rule $CP (that $VP) (lambda r (lambda s (call @filter (var s) (var r))))) # Vunary
+  # R1
+  (rule $CP (whose $RelNP is              $NP) (lambda r (lambda n (lambda s (call @filter (var s) (var r) (string =)  (var n)))))) # Req
+  (rule $CP (whose $RelNP is not          $NP) (lambda r (lambda n (lambda s (call @filter (var s) (var r) (string !=) (var n)))))) # Rnot
+  (rule $CP (whose $NumberRelNP is smaller than $NumberNP) (lambda r (lambda n (lambda s (call @filter (var s) (var r) (string <)  (var n)))))) # Rl
+  (rule $CP (whose $NumberRelNP is larger than  $NumberNP) (lambda r (lambda n (lambda s (call @filter (var s) (var r) (string >)  (var n)))))) # Rg
+  (rule $CP (whose $NumberRelNP is at most      $NumberNP) (lambda r (lambda n (lambda s (call @filter (var s) (var r) (string <=) (var n)))))) # Rle
+  (rule $CP (whose $NumberRelNP is at least     $NumberNP) (lambda r (lambda n (lambda s (call @filter (var s) (var r) (string >=) (var n)))))) # Rge
+  # R2
+  (rule $CP (that     $VP/NP $NP) (lambda r (lambda n (lambda s (call @filter (var s) (var r) (string =)  (var n)))))) # Vobj
+  (rule $CP (that not $VP/NP $NP) (lambda r (lambda n (lambda s (call @filter (var s) (var r) (string !=) (var n)))))) # Vobj-not
+  # R3
+  (rule $CP (that is     $RelNP of $NP) (lambda r (lambda n (lambda s (call @filter (var s) (call @reverse (var r)) (string =) (var n)))))) # Reqrev
+  (rule $CP (that is not $RelNP of $NP) (lambda r (lambda n (lambda s (call @filter (var s) (call @reverse (var r)) (string !=) (var n)))))) # Reqrev-not
+  # R4
+  (rule $CP (that $NP     $VP/NP) (lambda n (lambda r (lambda s (call @filter (var s) (call @reverse (var r)) (string =)  (var n)))))) # Vsubj
+  (rule $CP (that $NP not $VP/NP) (lambda n (lambda r (lambda s (call @filter (var s) (call @reverse (var r)) (string !=) (var n)))))) # Vsubj-not
+)
+(when (and generate general)
+  # R0
+  (rule $CP00 (that $VP) (lambda r (lambda s (call @filter (var s) (var r))))) # Vunary
+  # R1
+  (rule $CP00 (whose $RelNP is $EntityNP1) (lambda r (lambda n (lambda s (call @filter (var s) (var r) (string =) (var n)))))) # Req
+  (rule $CP1 (whose $RelNP is $NP0) (lambda r (lambda n (lambda s (call @filter (var s) (var r) (string =) (var n)))))) # Req
+  (rule $CP0 (whose $RelNP is not $EntityNP1) (lambda r (lambda n (lambda s (call @filter (var s) (var r) (string !=) (var n)))))) # Rnot
+  (rule $CP0 (whose $NumberRelNP is smaller than $NumberEntityNP) (lambda r (lambda n (lambda s (call @filter (var s) (var r) (string <) (var n)))))) # Rl
+  (rule $CP1 (whose $NumberRelNP is smaller than $NumberNP0) (lambda r (lambda n (lambda s (call @filter (var s) (var r) (string <) (var n)))))) # Rl
+  (rule $CP0 (whose $NumberRelNP is larger than $NumberEntityNP) (lambda r (lambda n (lambda s (call @filter (var s) (var r) (string >) (var n)))))) # Rg
+  (rule $CP1 (whose $NumberRelNP is larger than $NumberNP0) (lambda r (lambda n (lambda s (call @filter (var s) (var r) (string >) (var n)))))) # Rg
+  (rule $CP0 (whose $NumberRelNP is at most $NumberEntityNP) (lambda r (lambda n (lambda s (call @filter (var s) (var r) (string <=) (var n)))))) #Rle
+  (rule $CP1 (whose $NumberRelNP is at most $NumberNP0) (lambda r (lambda n (lambda s (call @filter (var s) (var r) (string <=) (var n)))))) # Rle
+  (rule $CP0 (whose $NumberRelNP is at least $NumberEntityNP) (lambda r (lambda n (lambda s (call @filter (var s) (var r) (string >=) (var n)))))) # Rge
+  (rule $CP1 (whose $NumberRelNP is at least $NumberNP0) (lambda r (lambda n (lambda s (call @filter (var s) (var r) (string >=) (var n)))))) # Rge
+  # R2
+  (rule $CP00 (that $VP/NP $EntityNP1) (lambda r (lambda n (lambda s (call @filter (var s) (var r) (string =) (var n)))))) # Vobj
+  (rule $CP0 (that not $VP/NP $EntityNP1) (lambda r (lambda n (lambda s (call @filter (var s) (var r) (string !=) (var n)))))) # Vobj-neg
+  (rule $CP1 (that $VP/NP $NP0) (lambda r (lambda n (lambda s (call @filter (var s) (var r) (string =) (var n)))))) # Vobj
+  # R3
+  (rule $CP00 (that is $RelNP of $EntityNP1) (lambda r (lambda n (lambda s (call @filter (var s) (call @reverse (var r)) (string  =) (var n)))))) # Req2
+  (rule $CP0 (that is not $RelNP of $EntityNP1) (lambda r (lambda n (lambda s (call @filter (var s) (call @reverse (var r)) (string  !=) (var n)))))) # Req2
+  (rule $CP1 (that is $RelNP of $NP0) (lambda r (lambda n (lambda s (call @filter (var s) (call @reverse (var r)) (string =) (var n)))))) # Req2
+  # R4
+  (rule $CP00 (that $EntityNP1 $VP/NP) (lambda n (lambda r (lambda s (call @filter (var s) (call @reverse (var r)) (string =) (var n)))))) # Vsubj
+  (rule $CP0 (that $EntityNP1 not $VP/NP) (lambda n (lambda r (lambda s (call @filter (var s) (call @reverse (var r)) (string !=) (var n)))))) # Vsubj
+  (rule $CP1 (that $NP0 $VP/NP) (lambda n (lambda r (lambda s (call @filter (var s) (call @reverse (var r)) (string =) (var n)))))) # Vsubj
+)
+(when geo880
+  (rule $CP2 (that $NP1 $VP/NP) (lambda n (lambda r (lambda s (call @filter (var s) (call @reverse (var r)) (string =) (var n)))))) # Vsubj
+  (rule $CP2 (that $VP/NP $NP1) (lambda r (lambda n (lambda s (call @filter (var s) (var r) (string =) (var n)))))) # Vobj
+  (rule $CP2 (that is $RelNP of $NP1) (lambda r (lambda n (lambda s (call @filter (var s) (call @reverse (var r)) (string =) (var n)))))) # Req2
+  (rule $CP2 (whose $RelNP is $NP1) (lambda r (lambda n (lambda s (call @filter (var s) (var r) (string =) (var n)))))) # Req
+)
+(when geo440
+  (rule $CP2 (that $VP/NP $NP1) (lambda r (lambda n (lambda s (call @filter (var s) (var r) (string =) (var n)))))) # Vobj
+  (rule $CP2 (whose $RelNP is $NP1) (lambda r (lambda n (lambda s (call @filter (var s) (var r) (string =) (var n)))))) # Req
+)
+
+(when (and parse regex)
+  # I use modifier for negation, we did not have this negation in previous grammars
+  (rule $Modifier ($VP/NP $NP) (JoinFn forward betaReduce))
+  (rule $Modifier ($VP/NP1 $NP) (JoinFn forward betaReduce))
+  (rule $CP (that $Modifier) (IdentityFn))
+  (rule $CP (that not $Modifier) (lambda m (call + (string "~\(") (var m) (string "\)"))))
+)
+(when (and generate regex)
+  (rule $Modifier0 ($VP/NP $EntityNP1) (JoinFn forward betaReduce))
+  (rule $Modifier1 ($VP/NP $NP0) (JoinFn forward betaReduce))
+  (rule $Modifier0 ($VP/NP1 $EntityNP1) (JoinFn forward betaReduce))
+  (rule $Modifier1 ($VP/NP1 $NP0) (JoinFn forward betaReduce))
+  (rule $CP00 (that $Modifier0) (IdentityFn))
+  (rule $CP1 (that $Modifier1) (IdentityFn))
+  (rule $CP1 (that not $Modifier0) (lambda m (call + (string "~\(") (var m) (string "\)"))))
+)
+
+############################################################
+# Complementizer phrase (superlatives and comparatives)
+
+(when (and parse general)
+  # S0
+  (rule $CP (that has the smallest $NumberRelNP) (lambda r (lambda s (call @superlative (var s) (string min) (var r))))) # Smin
+  (rule $CP (that has the largest  $NumberRelNP) (lambda r (lambda s (call @superlative (var s) (string max) (var r))))) # Smax
+  # S1
+  (rule $CP (that has the least number of $RelNP) (lambda r (lambda s (call @countSuperlative (var s) (string min) (var r))))) # Scmin
+  (rule $CP (that has the most  number of $RelNP) (lambda r (lambda s (call @countSuperlative (var s) (string max) (var r))))) # Scmax
+  # S2
+  (rule $CP (that $VP/NP the least number of $NP) (lambda r (lambda s2 (lambda s1 (call @countSuperlative (var s1) (string min) (var r) (var s2)))))) # Scvmin
+  (rule $CP (that $VP/NP the most  number of $NP) (lambda r (lambda s2 (lambda s1 (call @countSuperlative (var s1) (string max) (var r) (var s2)))))) # Scvmax
+  # S3
+  (rule $CP (that is $RelNP of the least number of $NP) (lambda r (lambda np (lambda s (call @countSuperlative (var s) (string min) (call @reverse (var r)) (var np)))))) # Scmin
+  (rule $CP (that is $RelNP of the most  number of $NP) (lambda r (lambda np (lambda s (call @countSuperlative (var s) (string max) (call @reverse (var r)) (var np)))))) # Scmax
+  # S4
+  (rule $CP (that the least number of $NP $VP/NP) (lambda np (lambda r (lambda s (call @countSuperlative (var s) (string min) (call @reverse (var r)) (var np)))))) # Scvmin
+  (rule $CP (that the most  number of $NP $VP/NP) (lambda np (lambda r (lambda s (call @countSuperlative (var s) (string max) (call @reverse (var r)) (var np)))))) # Scvmax
+  # C1
+  (rule $CP (that has           $Num $RelNP) (lambda num (lambda r (lambda s (call @countComparative (var s) (var r) (string =)  (var num)))))) # Ceq
+  (rule $CP (that has less than $Num $RelNP) (lambda num (lambda r (lambda s (call @countComparative (var s) (var r) (string <)  (var num)))))) # Cl
+  (rule $CP (that has more than $Num $RelNP) (lambda num (lambda r (lambda s (call @countComparative (var s) (var r) (string >)  (var num)))))) # Cg
+  (rule $CP (that has at most   $Num $RelNP) (lambda num (lambda r (lambda s (call @countComparative (var s) (var r) (string <=) (var num)))))) # Cleq
+  (rule $CP (that has at least  $Num $RelNP) (lambda num (lambda r (lambda s (call @countComparative (var s) (var r) (string >=) (var num)))))) # Cgeq 
+  # C2
+  (rule $CP (that $VP/NP           $Num $NP) (lambda r (lambda num (lambda np (lambda s (call @countComparative (var s) (var r) (string =)  (var num) (var np))))))) # Ceq
+  (rule $CP (that $VP/NP less than $Num $NP) (lambda r (lambda num (lambda np (lambda s (call @countComparative (var s) (var r) (string <)  (var num) (var np))))))) # Cl
+  (rule $CP (that $VP/NP more than $Num $NP) (lambda r (lambda num (lambda np (lambda s (call @countComparative (var s) (var r) (string >)  (var num) (var np))))))) # Cg
+  (rule $CP (that $VP/NP at most   $Num $NP) (lambda r (lambda num (lambda np (lambda s (call @countComparative (var s) (var r) (string <=) (var num) (var np))))))) # Cleq
+  (rule $CP (that $VP/NP at least  $Num $NP) (lambda r (lambda num (lambda np (lambda s (call @countComparative (var s) (var r) (string >=) (var num) (var np))))))) # Cgeq 
+  # C3
+  (rule $CP (that is $RelNP of           $Num $NP) (lambda r (lambda num (lambda np (lambda s (call @countComparative (var s) (call @reverse (var r)) (string =)  (var num) (var np))))))) # Ceq
+  (rule $CP (that is $RelNP of less than $Num $NP) (lambda r (lambda num (lambda np (lambda s (call @countComparative (var s) (call @reverse (var r)) (string <)  (var num) (var np))))))) # Cl
+  (rule $CP (that is $RelNP of more than $Num $NP) (lambda r (lambda num (lambda np (lambda s (call @countComparative (var s) (call @reverse (var r)) (string >)  (var num) (var np))))))) # Cg
+  (rule $CP (that is $RelNP of at most   $Num $NP) (lambda r (lambda num (lambda np (lambda s (call @countComparative (var s) (call @reverse (var r)) (string <=) (var num) (var np))))))) # Cleq
+  (rule $CP (that is $RelNP of at least  $Num $NP) (lambda r (lambda num (lambda np (lambda s (call @countComparative (var s) (call @reverse (var r)) (string >=) (var num) (var np))))))) # Cgeq 
+  # C4
+  (rule $CP (that           $Num $NP $VP/NP) (lambda num (lambda np (lambda r (lambda s (call @countComparative (var s) (call @reverse (var r)) (string =)  (var num) (var np))))))) # Ceq
+  (rule $CP (that less than $Num $NP $VP/NP) (lambda num (lambda np (lambda r (lambda s (call @countComparative (var s) (call @reverse (var r)) (string <)  (var num) (var np))))))) # Cl
+  (rule $CP (that more than $Num $NP $VP/NP) (lambda num (lambda np (lambda r (lambda s (call @countComparative (var s) (call @reverse (var r)) (string >)  (var num) (var np))))))) # Cg
+  (rule $CP (that at most   $Num $NP $VP/NP) (lambda num (lambda np (lambda r (lambda s (call @countComparative (var s) (call @reverse (var r)) (string <=) (var num) (var np))))))) # Cleq
+  (rule $CP (that at least  $Num $NP $VP/NP) (lambda num (lambda np (lambda r (lambda s (call @countComparative (var s) (call @reverse (var r)) (string >=) (var num) (var np))))))) # Cgeq 
+)
+(when (and generate general) # $CP => $CP1, $NP => $UnaryNP
+  # S1
+  (rule $CP1 (that has the smallest $NumberRelNP) (lambda r (lambda s (call @superlative (var s) (string min) (var r))))) # Smin
+  (rule $CP1 (that has the largest  $NumberRelNP) (lambda r (lambda s (call @superlative (var s) (string max) (var r))))) # Smax
+  # S2
+  (rule $CP1 (that has the least number of $RelNP) (lambda r (lambda s (call @countSuperlative (var s) (string min) (var r))))) # Scmin
+  (rule $CP1 (that has the most  number of $RelNP) (lambda r (lambda s (call @countSuperlative (var s) (string max) (var r))))) # Scmax
+  # S3
+  (rule $CP1 (that $VP/NP the least number of $UnaryNP) (lambda r (lambda s2 (lambda s1 (call @countSuperlative (var s1) (string min) (var r) (var s2)))))) # Scvmin
+  (rule $CP1 (that $VP/NP the most  number of $UnaryNP) (lambda r (lambda s2 (lambda s1 (call @countSuperlative (var s1) (string max) (var r) (var s2)))))) # Scvmax
+  # S4
+  (rule $CP1 (that is $RelNP of the least number of $UnaryNP) (lambda r (lambda np (lambda s (call @countSuperlative (var s) (string min) (call @reverse (var r)) (var np)))))) # Scmin
+  (rule $CP1 (that is $RelNP of the most  number of $UnaryNP) (lambda r (lambda np (lambda s (call @countSuperlative (var s) (string max) (call @reverse (var r)) (var np)))))) # Scmax
+  # S5
+  (rule $CP1 (that the least number of $UnaryNP $VP/NP) (lambda np (lambda r (lambda s (call @countSuperlative (var s) (string min) (call @reverse (var r)) (var np)))))) # Scvmin
+  (rule $CP1 (that the most  number of $UnaryNP $VP/NP) (lambda np (lambda r (lambda s (call @countSuperlative (var s) (string max) (call @reverse (var r)) (var np)))))) # Scvmax
+  # C1
+  (rule $CP1 (that has           $Num $RelNP) (lambda num (lambda r (lambda s (call @countComparative (var s) (var r) (string =)  (var num)))))) # Ceq
+  (rule $CP1 (that has less than $Num $RelNP) (lambda num (lambda r (lambda s (call @countComparative (var s) (var r) (string <)  (var num)))))) # Cl
+  (rule $CP1 (that has more than $Num $RelNP) (lambda num (lambda r (lambda s (call @countComparative (var s) (var r) (string >)  (var num)))))) # Cg
+  (rule $CP1 (that has at most   $Num $RelNP) (lambda num (lambda r (lambda s (call @countComparative (var s) (var r) (string <=) (var num)))))) # Cleq
+  (rule $CP1 (that has at least  $Num $RelNP) (lambda num (lambda r (lambda s (call @countComparative (var s) (var r) (string >=) (var num)))))) # Cgeq 
+  # C2
+  (rule $CP1 (that $VP/NP           $Num $UnaryNP) (lambda r (lambda num (lambda np (lambda s (call @countComparative (var s) (var r) (string =)  (var num) (var np))))))) # Ceq
+  (rule $CP1 (that $VP/NP less than $Num $UnaryNP) (lambda r (lambda num (lambda np (lambda s (call @countComparative (var s) (var r) (string <)  (var num) (var np))))))) # Cl
+  (rule $CP1 (that $VP/NP more than $Num $UnaryNP) (lambda r (lambda num (lambda np (lambda s (call @countComparative (var s) (var r) (string >)  (var num) (var np))))))) # Cg
+  (rule $CP1 (that $VP/NP at most   $Num $UnaryNP) (lambda r (lambda num (lambda np (lambda s (call @countComparative (var s) (var r) (string <=) (var num) (var np))))))) # Cleq
+  (rule $CP1 (that $VP/NP at least  $Num $UnaryNP) (lambda r (lambda num (lambda np (lambda s (call @countComparative (var s) (var r) (string >=) (var num) (var np))))))) # Cgeq 
+  # C3
+  (rule $CP1 (that is $RelNP of           $Num $UnaryNP) (lambda r (lambda num (lambda np (lambda s (call @countComparative (var s) (call @reverse (var r)) (string =)  (var num) (var np))))))) # Ceq
+  (rule $CP1 (that is $RelNP of less than $Num $UnaryNP) (lambda r (lambda num (lambda np (lambda s (call @countComparative (var s) (call @reverse (var r)) (string <)  (var num) (var np))))))) # Cl
+  (rule $CP1 (that is $RelNP of more than $Num $UnaryNP) (lambda r (lambda num (lambda np (lambda s (call @countComparative (var s) (call @reverse (var r)) (string >)  (var num) (var np))))))) # Cg
+  (rule $CP1 (that is $RelNP of at most   $Num $UnaryNP) (lambda r (lambda num (lambda np (lambda s (call @countComparative (var s) (call @reverse (var r)) (string <=) (var num) (var np))))))) # Cleq
+  (rule $CP1 (that is $RelNP of at least  $Num $UnaryNP) (lambda r (lambda num (lambda np (lambda s (call @countComparative (var s) (call @reverse (var r)) (string >=) (var num) (var np))))))) # Cgeq 
+  # C4
+  (rule $CP1 (that           $Num $UnaryNP $VP/NP) (lambda num (lambda np (lambda r (lambda s (call @countComparative (var s) (call @reverse (var r)) (string =)  (var num) (var np))))))) # Ceq
+  (rule $CP1 (that less than $Num $UnaryNP $VP/NP) (lambda num (lambda np (lambda r (lambda s (call @countComparative (var s) (call @reverse (var r)) (string <)  (var num) (var np))))))) # Cl
+  (rule $CP1 (that more than $Num $UnaryNP $VP/NP) (lambda num (lambda np (lambda r (lambda s (call @countComparative (var s) (call @reverse (var r)) (string >)  (var num) (var np))))))) # Cg
+  (rule $CP1 (that at most   $Num $UnaryNP $VP/NP) (lambda num (lambda np (lambda r (lambda s (call @countComparative (var s) (call @reverse (var r)) (string <=) (var num) (var np))))))) # Cleq
+  (rule $CP1 (that at least  $Num $UnaryNP $VP/NP) (lambda num (lambda np (lambda r (lambda s (call @countComparative (var s) (call @reverse (var r)) (string >=) (var num) (var np))))))) # Cgeq 
+)
+
+# Regex
+(when (and parse regex)
+  (rule $CP (that $VP/NP1 at least $Num $NP) (lambda v (lambda num (lambda n (call + (string "\(") ((var v) (var n)) (string "\)") (string "{") (var num) (string ",}"))))))
+  (rule $CP (that $VP/NP1 at most $Num $NP) (lambda v (lambda num (lambda n (call + (string "\(") ((var v) (var n)) (string "\)") (string "{0,") (var num) (string "}"))))))
+  (rule $CP (that $VP/NP1 $Num $NP) (lambda v (lambda num (lambda n (call + (string "\(") ((var v) (var n)) (string "\)") (string "{") (var num) (string "}"))))))
+  (rule $CP (that $VP/NP at least $Num $NP) (lambda v (lambda num (lambda n ((var v) (call + (string "\(") (var n) (string "\)") (string "{") (var num) (string ",}")))))))
+  (rule $CP (that $VP/NP at most $Num $NP) (lambda v (lambda num (lambda n ((var v) (call + (string "\(") (var n) (string "\)") (string "{0,") (var num) (string "}")))))))
+  (rule $CP (that $VP/NP $Num $NP) (lambda v (lambda num (lambda n ((var v) (call + (string "\(") (var n) (string "\)") (string "{") (var num) (string "}")))))))
+)
+(when (and generate regex)
+  (rule $CP1 (that $VP/NP1 at least $Num $UnaryNP) (lambda v (lambda num (lambda n (call + (string "\(") ((var v) (var n)) (string "\)") (string "{") (var num) (string ",}"))))))
+  (rule $CP1 (that $VP/NP1 at most $Num $UnaryNP) (lambda v (lambda num (lambda n (call + (string "\(") ((var v) (var n)) (string "\)") (string "{0,") (var num) (string "}"))))))
+  (rule $CP1 (that $VP/NP1 $Num $UnaryNP) (lambda v (lambda num (lambda n (call + (string "\(") ((var v) (var n)) (string "\)") (string "{") (var num) (string "}"))))))
+  (rule $CP1 (that $VP/NP at least $Num $UnaryNP) (lambda v (lambda num (lambda n ((var v) (call + (string "\(") (var n) (string "\)") (string "{") (var num) (string ",}")))))))
+  (rule $CP1 (that $VP/NP at most $Num $UnaryNP) (lambda v (lambda num (lambda n ((var v) (call + (string "\(") (var n) (string "\)") (string "{0,") (var num) (string "}")))))))
+  (rule $CP1 (that $VP/NP $Num $UnaryNP) (lambda v (lambda num (lambda n ((var v) (call + (string "\(") (var n) (string "\)") (string "{") (var num) (string "}")))))))
+)
+
+############################################################
+# Construct NPs from CPs
+
+(when (and parse general)
+  # G3
+  (rule $NPCP ($NP $CP) (JoinFn backward betaReduce))
+  (rule $NPCP ($NPCP and $CP) (JoinFn backward betaReduce))
+  (rule $NP ($NPCP) (IdentityFn)) 
+)
+(when (and generate general)
+  # G3
+  (rule $NP0 ($UnaryNP $CP00) (JoinFn backward betaReduce))
+  (rule $NP1 ($UnaryNP $CP0) (JoinFn backward betaReduce))
+  (rule $NP1 ($UnaryNP $CP1) (JoinFn backward betaReduce))
+  (rule $NPCP1 ($UnaryNP $CP00) (JoinFn backward betaReduce))
+  (rule $NP1 ($NPCP1 and $CP00) (JoinFn backward betaReduce)) 
+)
+(when geo880 
+  (rule $NP2 ($NP0 $CP00) (JoinFn backward betaReduce))
+  (rule $NP2 ($NP0 $CP0) (JoinFn backward betaReduce))
+  (rule $NP2 ($NP0 $CP1) (JoinFn backward betaReduce))
+  (rule $NP2 ($UnaryNP $CP2) (JoinFn backward betaReduce))
+)
+(when geo440
+  (rule $NP2 ($NP0 $CP00) (JoinFn backward betaReduce))
+  (rule $NP2 ($NP0 $CP0) (JoinFn backward betaReduce))
+  (rule $NP2 ($UnaryNP $CP2) (JoinFn backward betaReduce))
+)
+
+# Regex
+(when (and parse regex)
+  (rule $CP ($CP and $CP) (lambda c1 (lambda c2 (call + (string "\(\(") (var c1) (string "\)&\(") (var c2) (string "\)\)")))))
+  (rule $NP ($NP $CP) (JoinFn betaReduce forward))
+)
+(when (and generate regex)
+  (rule $CP1 ($CP00 and $CP00) (lambda c1 (lambda c2 (call + (string "\(\(") (var c1) (string "\)&\(") (var c2) (string "\)\)")))))
+  (rule $NP1 ($UnaryNP $CP0) (JoinFn betaReduce forward))
+  (rule $NP1 ($UnaryNP $CP1) (JoinFn betaReduce forward))
+)
+
+############################################################
+# Transformations
+
+(when (and parse general)
+  # T1
+  (rule $NP ($RelNP of $NP) (lambda r (lambda s (call @getProperty (var s) (var r))))) # Tr
+  # T3
+  (rule $NP ($NP or $NP) (lambda n1 (lambda n2 (call @concat (var n1) (var n2))))) # Tdisj
+)
+(when (and generate general)
+  # T1
+  (rule $NP0 ($RelNP of $EntityNP1) (lambda r (lambda s (call @getProperty (var s) (var r))))) # Tr
+  # T3
+  (rule $NP0 ($EntityNP1 or $EntityNP2) (lambda n1 (lambda n2 (call @concat (var n1) (var n2))))) # Tdisj
+)
+(when (or geo880 geo440)
+  (rule $NP2 ($RelNP of $NP0) (lambda r (lambda s (call @getProperty (var s) (var r))))) # Tr
+  (rule $NP2 ($RelNP of $NP1) (lambda r (lambda s (call @getProperty (var s) (var r))))) # Tr
+)
+
+(when (and parse regex)
+  (rule $NP ($NP or $NP) (lambda n1 (lambda n2 (call + (string "\(") (var n1) (string "|") (var n2) (string "\)")))))
+)
+(when (and generate regex)
+  # TODO - do we want "location of meeting"? I think not, probably only "area of california"??
+  (rule $NP0 ($EntityNP1 or $EntityNP2) (lambda n1 (lambda n2 (call + (string "\(") (var n1) (string "|") (var n2) (string "\)")))))
+)
+
+############################################################
+# Transformations: events
+
+(when parse
+  # T2
+  (rule $EventNP ($Rel0NP $NP) (lambda r0 (lambda e (call @getProperty (var e) (call @reverse (var r0)))))) # student John
+  (rule $EventNPCP ($EventNP $CP) (JoinFn backward betaReduce)) # ... whose field of study is history
+  (rule $EventNPCP ($EventNPCP and $CP) (JoinFn backward betaReduce))
+  (rule $EventNP ($EventNPCP) (IdentityFn))
+  (rule $NP ($RelNP of $EventNP) (lambda r (lambda x (call @getProperty (var x) (var r))))) # university of ...
+  # T2'
+  (rule $NP ($Rel0NP $CP) (lambda r (lambda cp (call @getProperty ((var cp) (call @domain (var r))) (var r))))) # student whose field of study is history
+)
+(when generate
+  # T2
+  (rule $EventNP0 ($Rel0NP $EntityNP1) (lambda r0 (lambda e (call @getProperty (var e) (call @reverse (var r0)))))) # student John
+  (rule $EventNP1 ($EventNP0 $CP00) (JoinFn backward betaReduce)) # ... whose field of study is history
+  (rule $NP0 ($RelNP of $EventNP0) (lambda r (lambda x (call @getProperty (var x) (var r))))) # university of ...
+  (rule $NP1 ($RelNP of $EventNP1) (lambda r (lambda x (call @getProperty (var x) (var r))))) # university of ...
+  # T2'
+  (rule $NP0 ($Rel0NP $CP0) (lambda r (lambda cp (call @getProperty ((var cp) (call @domain (var r))) (var r))))) # student whose field of study is history
+  (rule $NP1 ($Rel0NP $CP1) (lambda r (lambda cp (call @getProperty ((var cp) (call @domain (var r))) (var r))))) # student whose field of study is history
+)
+
+############################################################
+# Transformations: binary operators
+
+(when parse
+  # T4
+  (rule $BinaryOpRight ($BinaryOp $NP) (JoinFn betaReduce forward))
+  (rule $NP ($NP $BinaryOpRight) (JoinFn betaReduce backward))
+)
+(when generate
+  # T4
+  (rule $BinaryOpRight ($BinaryOp $EntityNP2) (JoinFn betaReduce forward))
+  (rule $NP0 ($EntityNP1 $BinaryOpRight) (JoinFn betaReduce backward))
+)
+
+############################################################
+# Aggregation
+
+(when (and parse general)
+  # A1
+  (rule $NP (number of $NP) (lambda x (call .size (var x)))) # An
+  # A2
+  (rule $NP (total $RelNP of $NP) (lambda r (lambda n (call @aggregate (string sum) (call @getProperty (var n) (var r)))))) # At
+  # A3
+  (rule $NP (average $RelNP of $NP) (lambda r (lambda n (call @aggregate (string avg) (call @getProperty (var n) (var r)))))) # Am
+  # TODO: add 'all' before $NP's
+)
+(when (and generate general)
+  # A1
+  (rule $NP1 (number of $UnaryNP) (lambda x (call .size (var x)))) # An
+  # A2
+  (rule $NP1 (total $RelNP of $UnaryNP) (lambda r (lambda n (call @aggregate (string sum) (call @getProperty (var n) (var r)))))) # At
+  # A3
+  (rule $NP1 (average $RelNP of $UnaryNP) (lambda r (lambda n (call @aggregate (string avg) (call @getProperty (var n) (var r)))))) # Am
+)
+# Supporting more for geo880
+(when (or geo880 geo440)
+  # A1
+  (rule $NP2 (number of $NP0) (lambda x (call .size (var x)))) # An
+  (rule $NP2 (number of $NP1) (lambda x (call .size (var x)))) # An
+  # A2
+  (rule $NP2 (total $RelNP of $NP0) (lambda r (lambda n (call @aggregate (string sum) (call @getProperty (var n) (var r)))))) # At
+  (rule $NP2 (total $RelNP of $NP1) (lambda r (lambda n (call @aggregate (string sum) (call @getProperty (var n) (var r)))))) # At
+  # A3
+  (rule $NP2 (average $RelNP of $NP0) (lambda r (lambda n (call @aggregate (string avg) (call @getProperty (var n) (var r)))))) # Am
+  (rule $NP2 (average $RelNP of $NP1) (lambda r (lambda n (call @aggregate (string avg) (call @getProperty (var n) (var r)))))) # Am
+)
+
+############################################################
+# Top-level
+
+(when (and parse general)
+  (rule $ROOT ($NP) (lambda x (call @listValue (var x))))
+)
+(when (and generate general)
+  (rule $ROOT ($NP0) (lambda x (call @listValue (var x))))
+  (rule $ROOT ($NP1) (lambda x (call @listValue (var x))))
+)
+(when (or geo880 geo440)
+  (rule $ROOT ($NP2) (lambda x (call @listValue (var x))))
+  (rule $ROOT ($UnaryNP) (lambda x (call @listValue (var x))))
+)
+
+(when (and parse regex)
+  (rule $ROOT ($NP) (IdentityFn))
+)
+(when (and generate regex)
+  (rule $ROOT ($NP0) (IdentityFn))
+  (rule $ROOT ($NP1) (IdentityFn))
+)

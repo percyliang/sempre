@@ -4,6 +4,7 @@ import fig.basic.Fmt;
 import fig.basic.LogInfo;
 import fig.basic.NumUtils;
 import fig.basic.Evaluation;
+import fig.basic.Option;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +17,14 @@ import java.util.Map;
  * @author Percy Liang
  */
 public abstract class ParserState {
+  public static class Options {
+    @Option(gloss = "Use a custom distribution for computing expected counts")
+    public CustomExpectedCount customExpectedCounts = CustomExpectedCount.NONE;
+  }
+  public static Options opts = new Options();
+
+  public enum CustomExpectedCount { NONE, UNIFORM, TOP, RANDOM, }
+
   //// Input: specification of how to parse
 
   public final Parser parser;
@@ -41,8 +50,6 @@ public abstract class ParserState {
   public int totalGeneratedDerivs; // Total number of derivations produced
   public int numOfFeaturizedDerivs = 0; // Number of derivations featured
 
-
-  @SuppressWarnings({ "unchecked" })
   public ParserState(Parser parser, Params params, Example ex, boolean computeExpectedCounts) {
     this.parser = parser;
     this.params = params;
@@ -70,7 +77,7 @@ public abstract class ParserState {
 
     if (parser.verbose(5)) {
       LogInfo.logs("featurizeAndScoreDerivation(score=%s) %s %s: %s [rule: %s]",
-          Fmt.D(deriv.score), deriv.cat, ex.spanString(deriv.start, deriv.end), deriv, deriv.rule);
+              Fmt.D(deriv.score), deriv.cat, ex.spanString(deriv.start, deriv.end), deriv, deriv.rule);
     }
     numOfFeaturizedDerivs++;
   }
@@ -113,7 +120,25 @@ public abstract class ParserState {
       i++;
     }
 
+    // Inject noise into the noise (to simulate sampling); ideally would add Gumbel noise
+    if (Parser.opts.derivationScoreNoise > 0) {
+      for (Derivation deriv : derivations)
+        deriv.score += Parser.opts.derivationScoreRandom.nextDouble() * Parser.opts.derivationScoreNoise;
+    }
+
     Derivation.sortByScore(derivations);
+
+    // Print out information
+    if (parser.opts.verbose >= 3) {
+      LogInfo.begin_track("ParserState.pruneCell(%s): %d derivations", cellDescription, derivations.size());
+      for (Derivation deriv : derivations) {
+        LogInfo.logs("%s(%s,%s): %s %s, [score=%s]", deriv.cat, deriv.start, deriv.end, deriv.formula,
+                deriv.canonicalUtterance, deriv.score);
+      }
+
+
+      LogInfo.end_track();
+    }
 
     // Max beam position (after sorting)
     i = 0;
@@ -142,46 +167,46 @@ public abstract class ParserState {
     // All tokens (length 1)
     for (int i = 0; i < numTokens; i++) {
       derivs.add(
-          new Derivation.Builder()
-          .cat(Rule.tokenCat).start(i).end(i + 1)
-          .rule(Rule.nullRule)
-          .children(Derivation.emptyList)
-          .withStringFormulaFrom(ex.token(i))
-          .canonicalUtterance(ex.token(i))
-          .createDerivation());
+              new Derivation.Builder()
+                      .cat(Rule.tokenCat).start(i).end(i + 1)
+                      .rule(Rule.nullRule)
+                      .children(Derivation.emptyList)
+                      .withStringFormulaFrom(ex.token(i))
+                      .canonicalUtterance(ex.token(i))
+                      .createDerivation());
 
       // Lemmatized version
       derivs.add(
-          new Derivation.Builder()
-          .cat(Rule.lemmaTokenCat).start(i).end(i + 1)
-          .rule(Rule.nullRule)
-          .children(Derivation.emptyList)
-          .withStringFormulaFrom(ex.lemmaToken(i))
-          .canonicalUtterance(ex.token(i))
-          .createDerivation());
+              new Derivation.Builder()
+                      .cat(Rule.lemmaTokenCat).start(i).end(i + 1)
+                      .rule(Rule.nullRule)
+                      .children(Derivation.emptyList)
+                      .withStringFormulaFrom(ex.lemmaToken(i))
+                      .canonicalUtterance(ex.token(i))
+                      .createDerivation());
     }
 
     // All phrases (any length)
     for (int i = 0; i < numTokens; i++) {
       for (int j = i + 1; j <= numTokens; j++) {
         derivs.add(
-            new Derivation.Builder()
-            .cat(Rule.phraseCat).start(i).end(j)
-            .rule(Rule.nullRule)
-            .children(Derivation.emptyList)
-            .withStringFormulaFrom(ex.phrase(i, j))
-            .canonicalUtterance(ex.phrase(i, j))
-            .createDerivation());
+                new Derivation.Builder()
+                        .cat(Rule.phraseCat).start(i).end(j)
+                        .rule(Rule.nullRule)
+                        .children(Derivation.emptyList)
+                        .withStringFormulaFrom(ex.phrase(i, j))
+                        .canonicalUtterance(ex.phrase(i, j))
+                        .createDerivation());
 
         // Lemmatized version
         derivs.add(
-            new Derivation.Builder()
-            .cat(Rule.lemmaPhraseCat).start(i).end(j)
-            .rule(Rule.nullRule)
-            .children(Derivation.emptyList)
-            .withStringFormulaFrom(ex.lemmaPhrase(i, j))
-            .canonicalUtterance(ex.phrase(i, j))
-            .createDerivation());
+                new Derivation.Builder()
+                        .cat(Rule.lemmaPhraseCat).start(i).end(j)
+                        .rule(Rule.nullRule)
+                        .children(Derivation.emptyList)
+                        .withStringFormulaFrom(ex.lemmaPhrase(i, j))
+                        .canonicalUtterance(ex.phrase(i, j))
+                        .createDerivation());
       }
     }
     return derivs;
@@ -231,12 +256,36 @@ public abstract class ParserState {
 
     trueScores = new double[n];
     predScores = new double[n];
+    // For update schemas that choose one good and one bad candidate to update
+    int[] goodAndBad = null;
+    if (opts.customExpectedCounts == CustomExpectedCount.TOP) {
+      goodAndBad = getTopDerivations(derivations);
+      if (goodAndBad == null) return;
+    } else if (opts.customExpectedCounts == CustomExpectedCount.RANDOM) {
+      goodAndBad = getRandomDerivations(derivations);
+      if (goodAndBad == null) return;
+    }
+
     for (int i = 0; i < n; i++) {
       Derivation deriv = derivations.get(i);
       double logReward = Math.log(compatibilityToReward(deriv.compatibility));
 
-      trueScores[i] = deriv.score + logReward;
-      predScores[i] = deriv.score;
+      switch (opts.customExpectedCounts) {
+        case NONE:
+          trueScores[i] = deriv.score + logReward;
+          predScores[i] = deriv.score;
+          break;
+        case UNIFORM:
+          trueScores[i] = logReward;
+          predScores[i] = 0;
+          break;
+        case TOP: case RANDOM:
+          trueScores[i] = (i == goodAndBad[0]) ? 0 : Double.NEGATIVE_INFINITY;
+          predScores[i] = (i == goodAndBad[1]) ? 0 : Double.NEGATIVE_INFINITY;
+          break;
+        default:
+          throw new RuntimeException("Unknown customExpectedCounts: " + opts.customExpectedCounts);
+      }
     }
 
     // Usually this happens when there are no derivations.
@@ -247,7 +296,45 @@ public abstract class ParserState {
     for (int i = 0; i < n; i++) {
       Derivation deriv = derivations.get(i);
       double incr = trueScores[i] - predScores[i];
+      if (incr == 0) continue;
       deriv.incrementAllFeatureVector(incr, counts);
     }
+  }
+
+  private static int[] getTopDerivations(List<Derivation> derivations) {
+    int chosenGood = -1, chosenBad = -1;
+    double chosenGoodScore = Double.NEGATIVE_INFINITY, chosenBadScore = Double.NEGATIVE_INFINITY;
+    for (int i = 0; i < derivations.size(); i++) {
+      Derivation deriv = derivations.get(i);
+      if (deriv.compatibility == 1) {    // good
+        if (deriv.score > chosenGoodScore) {
+          chosenGood = i; chosenGoodScore = deriv.score;
+        }
+      } else {    // bad
+        if (deriv.score > chosenBadScore) {
+          chosenBad = i; chosenBadScore = deriv.score;
+        }
+      }
+    }
+    return (chosenGood == -1 || chosenBad == -1) ? null : new int[] {chosenGood, chosenBad};
+  }
+
+  private static int[] getRandomDerivations(List<Derivation> derivations) {
+    int chosenGood = -1, chosenBad = -1, numGoodSoFar = 0, numBadSoFar = 0;
+    for (int i = 0; i < derivations.size(); i++) {
+      Derivation deriv = derivations.get(i);
+      if (deriv.compatibility == 1) {
+        numGoodSoFar++;
+        if (Math.random() <= 1.0 / numGoodSoFar) {
+          chosenGood = i;
+        }
+      } else {    // bad
+        numBadSoFar++;
+        if (Math.random() <= 1.0 / numBadSoFar) {
+          chosenBad = i;
+        }
+      }
+    }
+    return (chosenGood == -1 || chosenBad == -1) ? null : new int[] {chosenGood, chosenBad};
   }
 }

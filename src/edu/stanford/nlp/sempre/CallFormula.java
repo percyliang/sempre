@@ -56,6 +56,7 @@ public class CallFormula extends Formula {
     return res;
   }
 
+  @SuppressWarnings({"equalshashcode"})
   @Override
   public boolean equals(Object thatObj) {
     if (!(thatObj instanceof CallFormula)) return false;

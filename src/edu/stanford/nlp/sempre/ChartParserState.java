@@ -77,6 +77,8 @@ public abstract class ChartParserState extends ParserState {
   void addToChart(Derivation deriv) {
     if (parser.verbose(3)) LogInfo.logs("addToChart %s: %s", deriv.cat, deriv);
 
+    if (Parser.opts.pruneErrorValues && deriv.value instanceof ErrorValue) return;
+
     List<Derivation> derivations = chart[deriv.start][deriv.end].get(deriv.cat);
     if (chart[deriv.start][deriv.end].get(deriv.cat) == null)
       chart[deriv.start][deriv.end].put(deriv.cat, derivations = new ArrayList<>());

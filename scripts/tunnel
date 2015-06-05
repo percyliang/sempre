@@ -20,6 +20,14 @@ pid=$(ps ax | grep ssh.*:$port | grep -v grep | awk '{print $1}')
 if [ -n "$pid" ]; then kill $pid; fi
 ssh -N -n -L $port:$host:$port jacob.stanford.edu &
 
+# Sparql server for geo
+host=jonsson
+port=3094
+echo "Tunnel localhost:$port => $host:$port"
+pid=$(ps ax | grep ssh.*:$port | grep -v grep | awk '{print $1}')
+if [ -n "$pid" ]; then kill $pid; fi
+ssh -N -n -L $port:$host:$port jacob.stanford.edu &
+
 # Sparql server for Paleo
 host=jonsson
 port=3021

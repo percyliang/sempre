@@ -1,0 +1,33 @@
+# Agile grammar for recipes (based on allrecipes.com)
+
+(include general.grammar)
+
+# Types
+(rule $TypeNP (recipe) (ConstantFn en.recipe))
+(rule $EntityNP1 (rice pudding) (ConstantFn en.recipe.rice_pudding))
+(rule $EntityNP2 (quiche) (ConstantFn en.recipe.quiche))
+
+# Properties
+(rule $RelNP (preparation time) (ConstantFn (string preparation_time)))
+(rule $RelNP (cooking time) (ConstantFn (string cooking_time)))
+(rule $Value (10) (ConstantFn (number 10 en.minute)))
+(rule $Value (30) (ConstantFn (number 300 en.minute)))
+
+(rule $RelNP (cuisine) (ConstantFn (string cuisine)))
+(rule $TypeNP (cuisine) (ConstantFn fb:en.cuisine))
+(rule $EntityNP1 (chinese) (ConstantFn (string chinese)))
+(rule $EntityNP2 (french) (ConstantFn (string french)))
+
+(rule $VP/NP (requires) (ConstantFn (string requires)))
+(rule $TypeNP (ingredient) (ConstantFn en.ingredient))
+(rule $EntityNP1 (milk) (ConstantFn en.ingredient.milk))
+(rule $EntityNP2 (spinach) (ConstantFn en.ingredient.spinach))
+
+(rule $VP/NP (is for) (ConstantFn (string meal)))
+(rule $TypeNP (meal) (ConstantFn en.meal))
+(rule $EntityNP1 (lunch) (ConstantFn en.meal.lunch))
+(rule $EntityNP2 (dinner) (ConstantFn en.meal.dinner))
+
+(rule $RelNP (posting date) (ConstantFn (string posting_date)))
+(rule $EntityNP1 (2004) (ConstantFn (date 2004 -1 -1)))
+(rule $EntityNP2 (2010) (ConstantFn (date 2010 -1 -1)))

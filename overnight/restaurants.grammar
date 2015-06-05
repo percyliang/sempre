@@ -1,0 +1,46 @@
+# Agile grammar for restaurants (based on yelp)
+
+(include general.grammar)
+
+# Types
+(rule $TypeNP (restaurant) (ConstantFn en.restaurant))
+(rule $EntityNP1 (thai cafe) (ConstantFn en.restaurant.thai_cafe))
+(rule $EntityNP2 (pizzeria juno) (ConstantFn en.restaurant.pizzeria_juno))
+
+# Properties
+(rule $RelNP (star rating) (ConstantFn (string star_rating)))
+(rule $EntityNP1 (3 stars) (ConstantFn (number 3 en.star)))
+(rule $EntityNP2 (5 stars) (ConstantFn (number 5 en.star)))
+
+(rule $RelNP (price rating) (ConstantFn (string price_rating)))
+(rule $EntityNP1 (2 dollar signs) (ConstantFn (number 2 en.dollar_sign)))
+(rule $EntityNP2 (3 dollar signs) (ConstantFn (number 3 en.dollar_sign)))
+
+(rule $RelNP (number of reviews) (ConstantFn (string reviews)))
+(rule $EntityNP1 (30 reviews) (ConstantFn (number 30 en.review)))
+(rule $EntityNP2 (40 reviews) (ConstantFn (number 40 en.review)))
+
+(rule $RelNP (neighborhood) (ConstantFn (string neighborhood)))
+(rule $TypeNP (neighborhood) (ConstantFn en.neighborhood))
+(rule $EntityNP1 (midtown west) (ConstantFn en.neighborhood.midtown_west))
+(rule $EntityNP2 (chelsea) (ConstantFn en.neighborhood.chelsea))
+
+(rule $RelNP (cuisine) (ConstantFn (string cuisine)))
+(rule $TypeNP (cuisine) (ConstantFn en.cuisine))
+(rule $EntityNP1 (thai) (ConstantFn en.cuisine.thai))
+(rule $EntityNP2 (italian) (ConstantFn en.cuisine.italian))
+
+(rule $VP/NP (serves) (ConstantFn (string meals)))
+(rule $TypeNP (meal) (ConstantFn en.food))
+(rule $EntityNP1 (lunch) (ConstantFn en.food.lunch))
+(rule $EntityNP2 (dinner) (ConstantFn en.food.dinner))
+
+# Unaries
+(rule $VP (takes reservations) (ConstantFn (string reserve)))
+(rule $VP (takes credit cards) (ConstantFn (string credit)))
+(rule $VP (has outdoor seating) (ConstantFn (string outdoor)))
+(rule $VP (has take-out) (ConstantFn (string takeout)))
+(rule $VP (has delivery) (ConstantFn (string delivery)))
+(rule $VP (has waiter service) (ConstantFn (string waiter)))
+(rule $VP (is good for kids) (ConstantFn (string kids)))
+(rule $VP (is good for groups) (ConstantFn (string groups)))

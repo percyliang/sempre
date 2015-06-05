@@ -33,6 +33,7 @@ public class Params {
     @Option(gloss = "Use dual averaging") public boolean dualAveraging = false;
     @Option(gloss = "Whether to do lazy l1 reg updates") public String l1Reg = "none";
     @Option(gloss = "L1 reg coefficient") public double l1RegCoeff = 0d;
+    @Option(gloss = "Lazy L1 full update frequency") public int lazyL1FullUpdateFreq = 5000;
   }
   public static Options opts = new Options();
   public enum L1Reg {
@@ -49,7 +50,7 @@ public class Params {
   private L1Reg l1Reg = parseReg(opts.l1Reg);
 
   // Discriminative weights
-  private HashMap<String, Double> weights = new HashMap<>();
+  private Map<String, Double> weights = new HashMap<>();
 
   // For AdaGrad
   Map<String, Double> sumSquaredGradients = new HashMap<>();
@@ -110,13 +111,12 @@ public class Params {
 
   // Update weights by adding |gradient| (modified appropriately with step size).
   public synchronized void update(Map<String, Double> gradient) {
-    numUpdates++;
-
     for (Map.Entry<String, Double> entry : gradient.entrySet()) {
       String f = entry.getKey();
       double g = entry.getValue();
       if (g * g == 0) continue;  // In order to not divide by zero
 
+      if (l1Reg == L1Reg.LAZY) lazyL1Update(f);
       double stepSize = computeStepSize(f, g);
 
       if (opts.dualAveraging) {
@@ -132,16 +132,24 @@ public class Params {
           throw new RuntimeException("Gradient absolute value is too large or too small");
         }
         MapUtils.incr(weights, f, stepSize * g);
+        if (l1Reg == L1Reg.LAZY) l1UpdateTimeMap.put(f, numUpdates);
       }
     }
     // non lazy implementation goes over all weights
     if (l1Reg == L1Reg.NONLAZY) {
       Set<String> features = new HashSet<String>(weights.keySet());
-      for (String f :features) {
+      for (String f : features) {
         double stepSize = computeStepSize(f, 0d); // no update for gradient here
         double update = opts.l1RegCoeff * -Math.signum(MapUtils.getDouble(weights, f, opts.defaultWeight));
         clipUpdate(f, stepSize * update);
       }
+    }
+    numUpdates++;
+    if (l1Reg == L1Reg.LAZY && opts.lazyL1FullUpdateFreq > 0 && numUpdates % opts.lazyL1FullUpdateFreq == 0) {
+      LogInfo.begin_track("Fully apply L1 regularization.");
+      finalizeWeights();
+      System.gc();
+      LogInfo.end_track();
     }
   }
 
@@ -174,20 +182,24 @@ public class Params {
   }
 
   private void lazyL1Update(String f) {
+    if (MapUtils.getDouble(weights, f, 0.0) == 0) return;
+    // For pre-initialized weights, which have no updates yet
     if (sumSquaredGradients.get(f) == null || l1UpdateTimeMap.get(f) == null) {
       l1UpdateTimeMap.put(f, numUpdates);
+      sumSquaredGradients.put(f, 0.0);
       return;
     }
-    int numOfIter = numUpdates - l1UpdateTimeMap.get(f);
-    if (numOfIter <= 0) {
-      l1UpdateTimeMap.put(f, numUpdates);
-      return;
-    }
+    int numOfIter = numUpdates - MapUtils.get(l1UpdateTimeMap, f, 0);
+    if (numOfIter == 0) return;
+    if (numOfIter < 0) throw new RuntimeException("l1UpdateTimeMap is out of sync.");
 
     double stepSize = (numOfIter * opts.initStepSize) / (Math.sqrt(sumSquaredGradients.get(f) + 1));
     double update = -opts.l1RegCoeff * Math.signum(MapUtils.getDouble(weights, f, 0.0));
     clipUpdate(f, stepSize * update);
-    l1UpdateTimeMap.put(f, numUpdates);
+    if (weights.containsKey(f))
+      l1UpdateTimeMap.put(f, numUpdates);
+    else
+      l1UpdateTimeMap.remove(f);
   }
 
   public synchronized double getWeight(String f) {
@@ -200,7 +212,7 @@ public class Params {
     }
   }
 
-  public synchronized Map<String, Double> getWeights() { return weights; }
+  public synchronized Map<String, Double> getWeights() { finalizeWeights(); return weights; }
 
   public void write(PrintWriter out) { write(null, out); }
 

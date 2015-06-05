@@ -86,6 +86,7 @@ public class Builder {
         } catch (ClassNotFoundException e1) {
           throw new RuntimeException("Illegal parser: " + opts.parser);
         } catch (Exception e) {
+          e.printStackTrace();
           throw new RuntimeException("Error while instantiating parser: " + opts.parser + "\n" + e);
         }
     }

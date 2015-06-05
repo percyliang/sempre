@@ -143,6 +143,52 @@ addModule('fullfreebase-types', 'Freebase types', lambda {
   # You need to unzip these yourself and move these files to the right place.
 })
 
+addModule('tables', 'Semantic parsing with execution on tables', lambda {
+  # CSV reader
+  pull('/u/nlp/data/semparse/resources/opencsv-3.0.jar')
+})
+
+addModule('tables-data', 'Data for semantic parsing with execution on tables', lambda {
+  pull('/u/nlp/data/semparse/wikitable/data', 'data/tables/', {:symlink => true})
+  pull('/u/nlp/data/semparse/wikitable/mturk-trivia-data/csv', 'data/tables/', {:symlink => true})
+})
+
+
+addModule('overnight', 'Creating a parser for multiple domains', lambda {
+  # Geo evaluation
+  pull('/u/nlp/data/semparse/overnight/geo880.db', 'data/overnight/', {:symlink => true})
+  pull('/u/nlp/data/semparse/overnight/geo880/geo880-train.examples', 'data/overnight/', {:symlink => true})
+  pull('/u/nlp/data/semparse/overnight/geo880/geo880-test.examples', 'data/overnight/', {:symlink => true})
+
+
+  # Cache for turking
+  pull('/u/nlp/data/semparse/overnight/cache/', 'data/overnight/', {:symlink => true})
+  pull('/u/nlp/data/semparse/overnight/layouts/', 'data/overnight/', {:symlink => true})
+
+  # Pull testing code
+  pull('/u/nlp/data/semparse/overnight/test/', 'data/overnight/', {:symlink => true})
+
+  # Pull geo880
+  pull('/u/nlp/data/semparse/overnight/geo880/geo880.paraphrases.train.superlatives.examples', 'data/overnight/', {:symlink => true})
+  pull('/u/nlp/data/semparse/overnight/geo880/geo880.paraphrases.train.superlatives2.examples', 'data/overnight/', {:symlink => true})
+  pull('/u/nlp/data/semparse/overnight/geo880/geo880.lexicon', 'data/overnight/', {:symlink => true})
+  pull('/u/nlp/data/semparse/overnight/geo880/geo880.predicate.dict', 'data/overnight/', {:symlink => true})
+
+  # Pull dependencies for everything else
+  domains = ['geo880', 'regex', 'publications', 'socialnetwork', 'restaurants', 'blocks', 'calendar', 'housing', 'basketball', 'recipes', 'calendarplus']
+  domains.each do |domain|
+    pull('/u/nlp/data/semparse/overnight/' + domain + '/' + domain + '.paraphrases.train.examples', 'data/overnight/', {:symlink => true})
+    pull('/u/nlp/data/semparse/overnight/' + domain + '/' + domain + '.paraphrases.test.examples', 'data/overnight/', {:symlink => true})
+    pull('/u/nlp/data/semparse/overnight/' + domain + '/' + domain + '.paraphrases.groups', 'data/overnight/', {:symlink => true})
+    pull('/u/nlp/data/semparse/overnight/' + domain + '/' + domain + '.word_alignments.berkeley', 'data/overnight/', {:symlink => true})
+    pull('/u/nlp/data/semparse/overnight/' + domain + '/' + domain + '.phrase_alignments', 'data/overnight/', {:symlink => true})
+    pull('/u/nlp/data/semparse/overnight/' + domain + '/' + domain + '-ppdb.txt', 'data/overnight/', {:symlink => true})
+  end
+
+  # Pull the independent sets for calendar
+  pull('/u/nlp/data/semparse/overnight/calendar/eval/calendar.test.turk.examples', 'data/overnight/', {:symlink => true})
+})
+
 
 ############################################################
 

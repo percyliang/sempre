@@ -1,0 +1,28 @@
+(include general.grammar)
+
+# Types
+(rule $TypeNP (block) (ConstantFn en.block))
+(rule $EntityNP1 (block 1) (ConstantFn en.block.block1))
+(rule $EntityNP2 (block 2) (ConstantFn en.block.block2))
+
+# Properties
+(rule $RelNP (shape) (ConstantFn (string shape)))
+(rule $EntityNP1 (a pyramid) (ConstantFn en.shape.pyramid))
+(rule $EntityNP2 (a cube) (ConstantFn en.shape.cube))
+
+(rule $RelNP (color) (ConstantFn (string color)))
+(rule $EntityNP1 (red) (ConstantFn en.color.red))
+(rule $EntityNP2 (green) (ConstantFn en.color.green))
+
+(rule $RelNP (length) (ConstantFn (string length)))
+(rule $RelNP (width) (ConstantFn (string width)))
+(rule $RelNP (height) (ConstantFn (string height)))
+(rule $EntityNP1 (3 inches) (ConstantFn (number 3 en.inch)))
+(rule $EntityNP2 (6 inches) (ConstantFn (number 6 en.inch)))
+
+(rule $VP/NP (is left of) (ConstantFn (string left)))
+(rule $VP/NP (is right of) (ConstantFn (string right)))
+(rule $VP/NP (is above) (ConstantFn (string above)))
+(rule $VP/NP (is below) (ConstantFn (string below)))
+
+(rule $VP (is special) (ConstantFn (string is_special)))

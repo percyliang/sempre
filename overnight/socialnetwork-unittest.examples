@@ -1,0 +1,59 @@
+# Unittest
+
+# G1
+(example (utterance "google"))
+# G2
+(example (utterance "gender"))
+# G3
+(example (utterance "person whose gender is male and that is friends with alice"))
+
+# R1
+(example (utterance "person whose gender is male"))
+(example (utterance "person whose gender is not male"))
+(example (utterance "person whose birthdate is smaller than 2010"))
+(example (utterance "person whose birthdate is larger than 2010"))
+(example (utterance "person whose birthdate is at most 2010"))
+(example (utterance "person whose birthdate is at least 2010"))
+(example (utterance "person whose height is at least 200 cm"))
+# R2
+(example (utterance "person that is friends with alice"))
+(example (utterance "person that not is friends with alice"))
+# R3
+(example (utterance "city that is birthplace of alice"))
+(example (utterance "city that is not birthplace of alice"))
+# R4
+(example (utterance "person that is friends with alice"))
+(example (utterance "person that not is friends with alice"))
+# R5
+(example (utterance "person that is logged in"))
+
+# S1
+(example (utterance "person that has the smallest birthdate"))
+(example (utterance "person that has the largest birthdate"))
+# S2
+(example (utterance "person that has the most birthplace"))
+(example (utterance "person that has the least birthplace"))
+# S3
+(example (utterance "person that is friends with the most person"))
+(example (utterance "person that is friends with the least person"))
+
+# C1
+(example (utterance "person that is friends with 1 person"))
+(example (utterance "person that is friends with less than 1 person"))
+(example (utterance "person that is friends with more than 1 person"))
+(example (utterance "person that is friends with at most 1 person"))
+(example (utterance "person that is friends with at least 1 person"))
+
+# T1
+(example (utterance "birthdate of alice"))
+# T2
+(example (utterance "employer of employee bob"))
+(example (utterance "employer of employee bob whose start date is 2004"))
+# T3
+(example (utterance "alice or bob"))
+# T4 (none)
+
+# A1
+(example (utterance "number of person"))
+# A2
+(example (utterance "total height of person"))

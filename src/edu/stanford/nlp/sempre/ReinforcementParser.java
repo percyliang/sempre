@@ -412,7 +412,7 @@ final class ReinforcementParserState extends AbstractReinforcementParserState {
         updateBackpointers(pds.derivStream, nextDeriv);
 
         DerivationStream derivStream = SingleDerivationStream.constant(nextDeriv);
-        if (parser.verbose(3)) {
+        if (parser.verbose(3) && derivStream.hasNext()) {
           Derivation deriv  = derivStream.peek();
           LogInfo.logs("unrollHighProbStreams(): add deriv=%s(%s,%s) [%s] score=%s, |stream|=%s",
                   deriv.cat, deriv.start, deriv.end, deriv.formula, deriv.score, pds.derivStream.estimatedSize());
@@ -820,7 +820,7 @@ final class ReinforcementParserState extends AbstractReinforcementParserState {
           modified = true;
           Derivation nextDeriv = pds.derivStream.next();
           DerivationStream newDerivStream = SingleDerivationStream.constant(nextDeriv);
-          if (parser.verbose(3)) {
+          if (parser.verbose(3) && newDerivStream.hasNext()) {
             Derivation deriv  = newDerivStream.peek();
             LogInfo.logs("MultiplicativeSampler.unroll(): add necessary deriv=%s(%s,%s) [%s] score=%s, |stream|=%s, creationIndex=%s",
                     deriv.cat, deriv.start, deriv.end, deriv.formula, deriv.score, pds.derivStream.estimatedSize(), deriv.creationIndex);

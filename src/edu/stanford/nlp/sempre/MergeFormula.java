@@ -51,6 +51,7 @@ public class MergeFormula extends Formula {
     return null;
   }
 
+  @SuppressWarnings({"equalshashcode"})
   @Override
   public boolean equals(Object thatObj) {
     if (!(thatObj instanceof MergeFormula)) return false;

@@ -1,10 +1,13 @@
 package edu.stanford.nlp.sempre.freebase;
 
-import java.io.*;
-import java.util.*;
+import edu.stanford.nlp.sempre.*;
 import fig.basic.*;
 import fig.exec.Execution;
-import edu.stanford.nlp.sempre.*;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.*;
 
 /**
  * Converts Luke Zettlemoyer's lambda calculus data format into our example files.
@@ -15,25 +18,25 @@ import edu.stanford.nlp.sempre.*;
 public class LambdaCalculusConverter implements Runnable {
   public static class Options {
     @Option(gloss = "Input path (lambda calculus)")
-      public String inPath = "freebase/data/geo/geosents600-typed.ccg.dev";
+    public String inPath = "overnight/geo/geosents280-typed.ccg.test.new";
     @Option(gloss = "Specification of translations")
-      public String specPath = "freebase/data/geo/geo.spec";
+    public String specPath = "overnight/geo/geo.spec";
     @Option(gloss = "Specification of variable names")
-      public String varPath = "freebase/data/geo/geo.vars";
+    public String varPath = "overnight/geo/geo.vars";
     @Option(gloss = "Specification of primitive types")
-      public String primPath = "freebase/data/geo/geo.primitives";
+    public String primPath = "overnight/geo/geo.primitives";
     @Option(gloss = "Specification of formula replacements")
-      public String replacePath = "freebase/data/geo/geo.replace";
+    public String replacePath = "overnight/geo/geo.replace";
     @Option(gloss = "Specification of manual conversions")
-      public String manualConversionsPath = "freebase/data/geo/geo.manual_conversions";
-    @Option(gloss = "Input path (examples)")
-      public String outPath = "freebase/data/geo/geo.out.json";
+    public String manualConversionsPath = "overnight/geo/geo.manual_conversions";
+    @Option(gloss = "Output path (examples)")
+    public String outPath = "overnight/geo/geo.out.json";
     @Option(gloss = "Specific example to parse and run")
-      public int runInd = -1;
+    public int runInd = -1;
     @Option(gloss = "Output path for lexicon grammar")
-      public String lexiconPath = "freebase/data/geo/geo.out.grammar";
+    public String lexiconPath = "overnight/geo/geo.out.grammar";
     @Option(gloss = "Verbose output (for debugging)")
-      public boolean verbose = false;  // TODO Currently unused
+    public boolean verbose = false;  // TODO Currently unused
   }
   public static Options opts = new Options();
 
@@ -72,11 +75,13 @@ public class LambdaCalculusConverter implements Runnable {
   }
 
   public void readPrereqs() {
+    LogInfo.begin_track("Reading prereq");
     readSpec();
     readPrimitives();
     readVars();
     readStringMap(opts.replacePath, replaceMap);
     readStringMap(opts.manualConversionsPath, manualConversionsMap);
+    LogInfo.end_track();
   }
 
   void readSpec() {
@@ -248,7 +253,7 @@ public class LambdaCalculusConverter implements Runnable {
     if (primitive == null)
       return null;
     // if (primitive.equals("string"))
-      // parts[0] = capitalizeWords(parts[0]);
+    // parts[0] = capitalizeWords(parts[0]);
     // return Formula.fromString(String.format("(%s %s)", primitive, parts[0]));
     if (primitive.equals("string"))
       return Formula.fromString(String.format("(!fb:type.object.name fb:en.%s)", parts[0]));
@@ -257,41 +262,41 @@ public class LambdaCalculusConverter implements Runnable {
   }
 
   Formula handleExists(LispTree tree, String headVar, List<String> existsVars) {
-      // (exists $1 (and (river:t $1) (loc:t $1 $0)))
-      String eVar = tree.child(1).value;
-      existsVars.add(eVar);
-      // FIXME Currently assuming format where exists contains and statement with
-      // n clauses where first n - 1 clauses describe exists var and last clause
-      // relates exists var to the head var
-      List<LispTree> andTreeList = tree.child(2).children;
-      // FIXME Don't assume and tree
-      LispTree newAndTree = LispTree.proto.newList();
+    // (exists $1 (and (river:t $1) (loc:t $1 $0)))
+    String eVar = tree.child(1).value;
+    existsVars.add(eVar);
+    // FIXME Currently assuming format where exists contains and statement with
+    // n clauses where first n - 1 clauses describe exists var and last clause
+    // relates exists var to the head var
+    List<LispTree> andTreeList = tree.child(2).children;
+    // FIXME Don't assume and tree
+    LispTree newAndTree = LispTree.proto.newList();
 
-      int predTreeInd = -1;
-      int numPredTrees = 0;
-      for (int k = 0; k < andTreeList.size(); k++) {
-        String childStr = andTreeList.get(k).toString();
-        if (childStr.contains(headVar)) {
-          predTreeInd = k;
-          numPredTrees++;
-        }
+    int predTreeInd = -1;
+    int numPredTrees = 0;
+    for (int k = 0; k < andTreeList.size(); k++) {
+      String childStr = andTreeList.get(k).toString();
+      if (childStr.contains(headVar)) {
+        predTreeInd = k;
+        numPredTrees++;
       }
+    }
 
-      String func = tree.child(2).child(0).value;
-      if (numPredTrees == 0 || func.equals("exists")) {
-        return toLambda(eVar, toFormula(tree.child(2), eVar, existsVars));
-      }
+    String func = tree.child(2).child(0).value;
+    if (numPredTrees == 0 || func.equals("exists")) {
+      return toLambda(eVar, toFormula(tree.child(2), eVar, existsVars));
+    }
 
-      newAndTree.children = new ArrayList<LispTree>(andTreeList.subList(0, andTreeList.size()));
-      LispTree predTree = newAndTree.children.remove(predTreeInd);
-      if (newAndTree.children.size() == 2)
-        newAndTree = newAndTree.child(1);
+    newAndTree.children = new ArrayList<LispTree>(andTreeList.subList(0, andTreeList.size()));
+    LispTree predTree = newAndTree.children.remove(predTreeInd);
+    if (newAndTree.children.size() == 2)
+      newAndTree = newAndTree.child(1);
 
-      LispTree newPredTree = LispTree.proto.parseFromString(predTree.toString().replace(eVar, newAndTree.toString()));
+    LispTree newPredTree = LispTree.proto.parseFromString(predTree.toString().replace(eVar, newAndTree.toString()));
 
-      Formula form = toFormula(newPredTree, eVar, existsVars);
-      existsVars.remove(eVar);
-      return form;
+    Formula form = toFormula(newPredTree, eVar, existsVars);
+    existsVars.remove(eVar);
+    return form;
   }
 
   // hit: ignore these clauses in (and ...) constructions
@@ -323,7 +328,7 @@ public class LambdaCalculusConverter implements Runnable {
       // (sum $0 (and (state:t $0) (next_to:t $0 texas:s)) (population:i $0))
       String numFunc = tree.child(3).child(0).value;
       return new AggregateFormula(AggregateFormula.Mode.sum,
-        toJoin(numFunc, toFormula(tree.child(2), tree.child(1).value, existsVars)));
+              toJoin(numFunc, toFormula(tree.child(2), tree.child(1).value, existsVars)));
     } else if (func.equals("argmax") || func.equals("argmin")) {
       // (argmax $0 (state:t $0) (density:i $0))
       // (argmin $1 (river:t $1) (len:i $1))
@@ -379,7 +384,7 @@ public class LambdaCalculusConverter implements Runnable {
         else  // secondIsHead
           return toJoin("!" + func, form1);
         // else
-          // return toJoin(func, form1);
+        // return toJoin(func, form1);
       } else {
         throw new RuntimeException("Bad arity: " + tree);
       }
@@ -458,8 +463,10 @@ public class LambdaCalculusConverter implements Runnable {
           ArrayList<String> existsVars = new ArrayList<String>();
 
           if (manualConversionsMap.containsKey(line)) {
+            LogInfo.logs("MANUAL CONVERSION=%s", line);
             ex.setTargetFormula(Formula.fromString(manualConversionsMap.get(line)));
           } else {
+            LogInfo.log("AUTOMATIC CONVERSION");
             ex.setTargetFormula(toFormula(tree, null, existsVars));
           }
           LogInfo.logs(color.colorize("OUT [%d]: %s", "yellow"), newId, ex.createExample().targetFormula.toLispTree());
@@ -476,8 +483,9 @@ public class LambdaCalculusConverter implements Runnable {
   void executeExamples() {
     int runInd = opts.runInd;
     // FIXME Should be passed in
-    SparqlExecutor.opts.endpointUrl = "http://localhost:3093/sparql";
+    SparqlExecutor.opts.endpointUrl = "http://localhost:3094/sparql";
     SparqlExecutor.opts.cachePath = "SparqlExecutor.cache";
+    SparqlExecutor.opts.lambdaAllowDiagonals = false; //jonathan
     SparqlExecutor executor = new SparqlExecutor();
 
     int exInd = 1;
@@ -506,12 +514,12 @@ public class LambdaCalculusConverter implements Runnable {
 
   void writeExamples() {
     // Sort validExampleIds by the length of the utterance of the example
-    Collections.sort(validExampleIds, new Comparator<Integer>() {
-      public int compare(Integer left, Integer right) {
-        return Integer.compare(validExampleLengths.get(validExampleIds.indexOf(left)),
-                               validExampleLengths.get(validExampleIds.indexOf(right)));
-      }
-    });
+//    Collections.sort(validExampleIds, new Comparator<Integer>() {
+//      public int compare(Integer left, Integer right) {
+//        return Integer.compare(validExampleLengths.get(validExampleIds.indexOf(left)),
+//                validExampleLengths.get(validExampleIds.indexOf(right)));
+//      }
+//    });
 
     PrintWriter out = IOUtils.openOutHard(opts.outPath);
     out.println("[");  // Print out as a list

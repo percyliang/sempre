@@ -75,6 +75,16 @@ public class Rule {
     return true;
   }
 
+  // Return the number of categories on the RHS
+  public int numRhsCats() {
+    int ret = 0;
+    for (int i = 0; i < rhs.size(); ++i) {
+      if (isCat(rhs.get(i)))
+        ret++;
+    }
+    return ret;
+  }
+
   public LispTree toLispTree() {
     LispTree tree = LispTree.proto.newList();
     tree.addChild("rule");

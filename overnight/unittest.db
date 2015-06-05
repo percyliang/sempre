@@ -1,0 +1,5 @@
+friend	fb:en.person.alice	fb:en.person.bob
+enemy	fb:en.person.alice	fb:en.person.eve
+person	fb:en.person.alice
+person	fb:en.person.bob
+person	fb:en.person.eve

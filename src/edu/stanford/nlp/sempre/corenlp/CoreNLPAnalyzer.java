@@ -2,7 +2,6 @@ package edu.stanford.nlp.sempre.corenlp;
 
 import edu.stanford.nlp.sempre.*;
 import edu.stanford.nlp.sempre.LanguageInfo.DependencyEdge;
-
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.ling.CoreAnnotations.*;
@@ -13,9 +12,13 @@ import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.util.CoreMap;
+
 import com.google.common.collect.Lists;
 import com.google.common.base.Joiner;
+
 import fig.basic.*;
+
+import java.io.*;
 import java.util.*;
 
 /**
@@ -113,6 +116,7 @@ public class CoreNLPAnalyzer extends LanguageAnalyzer {
     // Fills in a stanford dependency graph for constructing a feature
     for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
       SemanticGraph ccDeps = sentence.get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class);
+      if (ccDeps == null) continue;
       int sentenceBegin = sentence.get(CoreAnnotations.TokenBeginAnnotation.class);
 
       // Iterate over all tokens and their dependencies
@@ -132,5 +136,28 @@ public class CoreNLPAnalyzer extends LanguageAnalyzer {
       }
     }
     return languageInfo;
+  }
+
+  // Test on example sentence.
+  public static void main(String[] args) {
+    CoreNLPAnalyzer analyzer = new CoreNLPAnalyzer();
+    while (true) {
+      try {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        System.out.println("Enter some text:");
+        String text = reader.readLine();
+        LanguageInfo langInfo = analyzer.analyze(text);
+        LogInfo.begin_track("Analyzing \"%s\"", text);
+        LogInfo.logs("tokens: %s", langInfo.tokens);
+        LogInfo.logs("lemmaTokens: %s", langInfo.lemmaTokens);
+        LogInfo.logs("posTags: %s", langInfo.posTags);
+        LogInfo.logs("nerTags: %s", langInfo.nerTags);
+        LogInfo.logs("nerValues: %s", langInfo.nerValues);
+        LogInfo.logs("dependencyChildren: %s", langInfo.dependencyChildren);
+        LogInfo.end_track();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
   }
 }

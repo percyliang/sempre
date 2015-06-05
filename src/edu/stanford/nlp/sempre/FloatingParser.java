@@ -1,7 +1,9 @@
 package edu.stanford.nlp.sempre;
 
 import fig.basic.*;
+import fig.exec.Execution;
 
+import java.io.PrintWriter;
 import java.util.*;
 
 import static fig.basic.LogInfo.logs;
@@ -46,7 +48,18 @@ public class FloatingParser extends Parser {
     @Option public boolean defaultIsFloating = true;
     @Option (gloss = "Flag specifying whether anchored spans/tokens can only be used once in a derivation")
     public boolean useAnchorsOnce = false;
+    @Option (gloss = "Flag specifying whether floating rules are allowed to be applied consecutively")
+    public boolean consecutiveRules = true;
+    @Option (gloss = "Whether to always execute the derivation")
+    public boolean executeAllDerivations = false;
+    @Option (gloss = "Whether to output a file with all utterances predicted")
+    public boolean printPredictedUtterances = false;
+    @Option(gloss = "Put a limit on formula size instead of formula depth")
+    public boolean useSizeInsteadOfDepth = false;
+    @Option(gloss = "Custom beam size at training time (default = Parser.beamSize)")
+    public int trainBeamSize = -1;
   }
+
   public static Options opts = new Options();
 
   public FloatingParser(Spec spec) { super(spec); }
@@ -70,11 +83,24 @@ class FloatingParserState extends ParserState {
   // Examples of state:
   //   (category, depth)
   //   (category, depth, set of tokens)
+
   private final Map<Object, List<Derivation>> chart = new HashMap<>();
+
+  private final DerivationPruner pruner;
 
   public FloatingParserState(FloatingParser parser, Params params, Example ex, boolean computeExpectedCounts) {
     super(parser, params, ex, computeExpectedCounts);
+    pruner = new DerivationPruner(this);
   }
+
+  @Override
+  protected int getBeamSize() {
+    if (computeExpectedCounts && FloatingParser.opts.trainBeamSize > 0)
+      return FloatingParser.opts.trainBeamSize;
+    return Parser.opts.beamSize;
+  }
+
+
 
   // Construct state names.
   private Object floatingCell(String cat, int depth) {
@@ -88,10 +114,11 @@ class FloatingParserState extends ParserState {
   }
 
   private void addToChart(Object cell, Derivation deriv) {
-    if (Parser.opts.verbose >= 3)
-      LogInfo.logs("addToChart %s: %s", cell, deriv);
     if (!deriv.isFeaturizedAndScored())  // A derivation could be belong in multiple cells.
       featurizeAndScoreDerivation(deriv);
+    if (Parser.opts.pruneErrorValues && deriv.value instanceof ErrorValue) return;
+    if (Parser.opts.verbose >= 4)
+      LogInfo.logs("addToChart %s: %s", cell, deriv);
     MapUtils.addToList(chart, cell, deriv);
   }
 
@@ -103,29 +130,32 @@ class FloatingParserState extends ParserState {
     else if (child2 == null)  // 1-ary
       children = Collections.singletonList(child1);
     else {
-      children = ListUtils.newList(child1, child2);
-      // optionally: ensure that specific anchors are only used once per final derivation
+      // Optional: ensure that each anchor is only used once per derivation.
       if (FloatingParser.opts.useAnchorsOnce &&
-          FloatingRuleUtils.derivationAnchorsOverlap(child1, child2))
+              FloatingRuleUtils.derivationAnchorsOverlap(child1, child2))
         return;
+      children = ListUtils.newList(child1, child2);
+    }
+
+    // optionally: ensure that rule being applied is not the same as one of the children's
+    if (!FloatingParser.opts.consecutiveRules) {
+      for (Derivation child : children) {
+        if (child.rule.equals(rule)) return;
+      }
     }
 
     DerivationStream results = rule.sem.call(ex,
-        new SemanticFn.CallInfo(rule.lhs, start, end, rule, children));
+            new SemanticFn.CallInfo(rule.lhs, start, end, rule, children));
     while (results.hasNext()) {
       Derivation newDeriv = results.next();
       newDeriv.canonicalUtterance = canonicalUtterance;
+
+      // make sure we execute
+      if (FloatingParser.opts.executeAllDerivations && !(newDeriv.type instanceof FuncSemType))
+        newDeriv.ensureExecuted(parser.executor, ex.context);
+
+      if (pruner.isPruned(newDeriv)) continue;
       // Avoid repetitive floating cells
-      /*
-         if (depth > 0) {
-         if (MapUtils.getSet(setChart, rule.lhs).contains(newDeriv.formula)) {
-         continue;
-         }
-         if (rule.lhs == Rule.rootCat)
-         LogInfo.logs("adding %s to root for floating", newDeriv);
-         MapUtils.addToSet(setChart, rule.lhs, newDeriv.formula);
-         }
-         */
       addToChart(cell(rule.lhs, start, end, depth), newDeriv);
       if (depth == -1)  // In addition, anchored cells become floating at level 0
         addToChart(floatingCell(rule.lhs, 0), newDeriv);
@@ -236,19 +266,30 @@ class FloatingParserState extends ParserState {
         for (Derivation deriv : derivations)
           applyFloatingRule(rule, depth, deriv, null, deriv.canonicalUtterance + " " + rhs2);
       } else {  // $Cat $Cat
-        for (int subDepth = 0; subDepth < depth; subDepth++) {  // depth-1 <=depth-1
-          List<Derivation> derivations1 = getDerivations(floatingCell(rhs1, depth - 1));
-          List<Derivation> derivations2 = getDerivations(floatingCell(rhs2, subDepth));
-          for (Derivation deriv1 : derivations1)
-            for (Derivation deriv2 : derivations2)
-              applyFloatingRule(rule, depth, deriv1, deriv2, deriv1.canonicalUtterance + " " + deriv2.canonicalUtterance);
-        }
-        for (int subDepth = 0; subDepth < depth - 1; subDepth++) {  // <depth-1 depth-1
-          List<Derivation> derivations1 = getDerivations(floatingCell(rhs1, subDepth));
-          List<Derivation> derivations2 = getDerivations(floatingCell(rhs2, depth - 1));
-          for (Derivation deriv1 : derivations1)
-            for (Derivation deriv2 : derivations2)
-              applyFloatingRule(rule, depth, deriv1, deriv2, deriv1.canonicalUtterance + " " + deriv2.canonicalUtterance);
+        if (FloatingParser.opts.useSizeInsteadOfDepth) {
+          for (int depth1 = 0; depth1 < depth; depth1++) {
+            int depth2 = depth - 1 - depth1;
+            List<Derivation> derivations1 = getDerivations(floatingCell(rhs1, depth1));
+            List<Derivation> derivations2 = getDerivations(floatingCell(rhs2, depth2));
+            for (Derivation deriv1 : derivations1)
+              for (Derivation deriv2 : derivations2)
+                applyFloatingRule(rule, depth, deriv1, deriv2, deriv1.canonicalUtterance + " " + deriv2.canonicalUtterance);
+          }
+        } else {
+          for (int subDepth = 0; subDepth < depth; subDepth++) {  // depth-1 <=depth-1
+            List<Derivation> derivations1 = getDerivations(floatingCell(rhs1, depth - 1));
+            List<Derivation> derivations2 = getDerivations(floatingCell(rhs2, subDepth));
+            for (Derivation deriv1 : derivations1)
+              for (Derivation deriv2 : derivations2)
+                applyFloatingRule(rule, depth, deriv1, deriv2, deriv1.canonicalUtterance + " " + deriv2.canonicalUtterance);
+          }
+          for (int subDepth = 0; subDepth < depth - 1; subDepth++) {  // <depth-1 depth-1
+            List<Derivation> derivations1 = getDerivations(floatingCell(rhs1, subDepth));
+            List<Derivation> derivations2 = getDerivations(floatingCell(rhs2, depth - 1));
+            for (Derivation deriv1 : derivations1)
+              for (Derivation deriv2 : derivations2)
+                applyFloatingRule(rule, depth, deriv1, deriv2, deriv1.canonicalUtterance + " " + deriv2.canonicalUtterance);
+          }
         }
       }
     }
@@ -289,14 +330,6 @@ class FloatingParserState extends ParserState {
         buildAnchored(i, i + len);
         for (String cat : categories) {
           String cell = anchoredCell(cat, i, i + len).toString();
-          /*if (cat.equals("$Word") || cat.equals("$Fragment")) {
-            LogInfo.logs("Looking at cell: %s", cell);
-            if (chart.get(cell) == null) LogInfo.logs("???");
-            else {
-              for (Derivation deriv : chart.get(cell))
-                LogInfo.logs("Found cell of interest: %s", deriv.toString());
-            }
-          }*/
           pruneCell(cell, chart.get(cell));
         }
       }
@@ -307,14 +340,6 @@ class FloatingParserState extends ParserState {
       buildFloating(depth);
       for (String cat : categories) {
         String cell = floatingCell(cat, depth).toString();
-        /*if (cat.equals("$Word") || cat.equals("$Fragment")) {
-          LogInfo.logs("Looking at floating cell: %s", cell);
-          if (chart.get(cell) == null) LogInfo.logs("???");
-          else {
-            for (Derivation deriv : chart.get(cell))
-              LogInfo.logs("Found cell of interest: %s", deriv.toString());
-          }
-        }*/
         pruneCell(cell, chart.get(cell));
       }
     }
@@ -339,7 +364,27 @@ class FloatingParserState extends ParserState {
       LogInfo.end_track();
     }
 
+    if (FloatingParser.opts.printPredictedUtterances) {
+      PrintWriter writer = IOUtils.openOutAppendEasy(Execution.getFile("canonical_utterances"));
+      PrintWriter fWriter = IOUtils.openOutAppendEasy(Execution.getFile("utterances_formula.tsv"));
+      Derivation.sortByScore(predDerivations);
+      for (Derivation deriv: predDerivations) {
+        if (deriv.score > -10) {
+          writer.println(String.format("%s\t%s", deriv.canonicalUtterance, deriv.score));
+          fWriter.println(String.format("%s\t%s", deriv.canonicalUtterance, deriv.formula.toString()));
+        }
+      }
+      writer.close();
+      fWriter.close();
+    }
+
     LogInfo.end_track();
+  }
+
+  @Override
+  protected void setEvaluation() {
+    super.setEvaluation();
+    evaluation.add("numCells", chart.size());
   }
 
   private void visualizeAnchoredChart(Set<String> categories) {

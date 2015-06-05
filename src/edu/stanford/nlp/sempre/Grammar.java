@@ -184,6 +184,8 @@ public class Grammar {
       return !interpretBoolean(tree.child(1), tags);
     if ("and".equals(tree.child(0).value))
       return interpretBoolean(tree.child(1), tags) && interpretBoolean(tree.child(2), tags);
+    if ("or".equals(tree.child(0).value))
+      return interpretBoolean(tree.child(1), tags) || interpretBoolean(tree.child(2), tags);
     throw new RuntimeException("Expected a single tag, but got: " + tree);
   }
 

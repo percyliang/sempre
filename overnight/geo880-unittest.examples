@@ -1,0 +1,49 @@
+# Unittest
+
+# R1
+(example (utterance "state whose capital is sacramento"))
+(example (utterance "state whose capital is not sacramento"))
+(example (utterance "state whose capital is capital of california"))
+(example (utterance "mountain whose elevation is smaller than elevation of mount whitney"))
+(example (utterance "mountain whose elevation is larger than elevation of mount whitney"))
+(example (utterance "mountain whose elevation is at most elevation of mount whitney"))
+(example (utterance "mountain whose elevation is at least elevation of mount whitney"))
+(example (utterance "city that is in california and that is capital of california"))
+
+# R2
+(example (utterance "city that is in california"))
+(example (utterance "city that not is in california"))
+# R3
+# R4
+(example (utterance "state that california borders"))
+(example (utterance "state that california not borders"))
+(example (utterance "river that traverses california"))
+# R5
+(example (utterance "city that is major"))
+
+# S1
+(example (utterance "state that has the largest area"))
+(example (utterance "state that has the smallest area"))
+# S2
+# S3
+(example (utterance "state that borders the most number of state"))
+(example (utterance "state that borders the least number of state"))
+
+# C1
+(example (utterance "river that is in two state"))
+(example (utterance "river that is in more than two state"))
+(example (utterance "river that is in less than two state"))
+(example (utterance "river that is in at most two state"))
+(example (utterance "river that is in at least two state"))
+
+# T1
+(example (utterance "population of sacramento"))
+# T2: TODO
+# T3
+(example (utterance "california or texas"))
+# T4
+# A1
+(example (utterance "number of lake"))
+# A2
+(example (utterance "total elevation of mountain"))
+(example (utterance "average elevation of mountain"))

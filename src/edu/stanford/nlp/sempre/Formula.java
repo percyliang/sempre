@@ -50,6 +50,7 @@ public abstract class Formula {
 
   public static Formula nullFormula = new PrimitiveFormula() {
       public LispTree toLispTree() { return LispTree.proto.newLeaf("null"); }
+      @SuppressWarnings({"equalshashcode"})
       @Override public boolean equals(Object o) { return this == o; }
       public int computeHashCode() { return 0; }
   };

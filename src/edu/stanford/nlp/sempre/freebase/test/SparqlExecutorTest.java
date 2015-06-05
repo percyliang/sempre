@@ -69,8 +69,10 @@ public class SparqlExecutorTest {
   SparqlExecutor executor = new SparqlExecutor();
 
   public SparqlExecutorTest() {
+    SparqlExecutor.opts.endpointUrl = System.getProperty("sparqlserver");
     // Hard-coding not ideal.
-    SparqlExecutor.opts.endpointUrl = "http://localhost:3093/sparql";
+    if (SparqlExecutor.opts.endpointUrl == null)
+      SparqlExecutor.opts.endpointUrl = "http://freebase.cloudapp.net:3093/sparql";
     SparqlExecutor.opts.verbose = 3;
   }
 

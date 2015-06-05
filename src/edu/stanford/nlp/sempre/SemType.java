@@ -102,6 +102,7 @@ public abstract class SemType {
   public static final SemType intType = new AtomicSemType(CanonicalNames.INT);
   public static final SemType floatType = new AtomicSemType(CanonicalNames.FLOAT);
   public static final SemType dateType = new AtomicSemType(CanonicalNames.DATE);
+  public static final SemType timeType = new AtomicSemType(CanonicalNames.TIME);
   public static final SemType numberType = new AtomicSemType(CanonicalNames.NUMBER);
   public static final SemType numberOrDateType = new UnionSemType(numberType, dateType);
   public static final SemType entityType = new AtomicSemType(CanonicalNames.ENTITY);

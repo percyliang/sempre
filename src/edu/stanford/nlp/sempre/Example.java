@@ -10,9 +10,7 @@ import fig.basic.Evaluation;
 import fig.basic.LispTree;
 import fig.basic.LogInfo;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * An example corresponds roughly to an input-output pair, the basic unit which
@@ -41,12 +39,15 @@ public class Example {
   @JsonProperty public Value targetValue;  // Denotation (e.g., answer)
 
   //// Information after preprocessing (e.g., tokenization, POS tagging, NER, syntactic parsing, etc.).
-  @JsonProperty public LanguageInfo languageInfo = null;
+  public LanguageInfo languageInfo = null;
 
   //// Output of the parser.
 
   // Predicted derivations (sorted by score).
   public List<Derivation> predDerivations;
+
+  // Temporary state while parsing an Example (see Derivation.java for analogous struture).
+  private Map<String, Object> tempState;
 
   // Statistics relating to processing the example.
   public Evaluation evaluation;
@@ -133,6 +134,8 @@ public class Example {
         b.setId(arg.child(1).value);
       } else if ("utterance".equals(label)) {
         b.setUtterance(arg.child(1).value);
+      } else if ("canonicalUtterance".equals(label)) {
+        b.setUtterance(arg.child(1).value);
       } else if ("targetFormula".equals(label)) {
         b.setTargetFormula(Formulas.fromLispTree(arg.child(1)));
       } else if ("targetValue".equals(label) || "targetValues".equals(label)) {
@@ -162,7 +165,7 @@ public class Example {
         ex.predDerivations = new ArrayList<>();
         for (int j = 1; j < arg.children.size(); j++)
           ex.predDerivations.add(derivationFromLispTree(arg.child(j)));
-      } else if (!Sets.newHashSet("id", "utterance", "targetFormula", "targetValue", "targetValues", "context").contains(label)) {
+      } else if (!Sets.newHashSet("id", "utterance", "targetFormula", "targetValue", "targetValues", "context", "original").contains(label)) {
         throw new RuntimeException("Invalid example argument: " + arg);
       }
     }
@@ -170,8 +173,9 @@ public class Example {
     return ex;
   }
 
-  public void preprocess(LanguageAnalyzer analyzer) {
-    this.languageInfo = analyzer.analyze(this.utterance);
+  public void preprocess() {
+    this.languageInfo = LanguageAnalyzer.getSingleton().analyze(this.utterance);
+    this.targetValue = TargetValuePreprocessor.getSingleton().preprocess(this.targetValue);
   }
 
   public void log() {
@@ -189,11 +193,6 @@ public class Example {
       LogInfo.logs("targetValue: %s", targetValue);
     LogInfo.logs("Dependency children: %s", languageInfo.dependencyChildren);
     LogInfo.end_track();
-  }
-
-  // To save memory
-  public void clearPredDerivations() {
-    predDerivations.clear();
   }
 
   public List<Derivation> getCorrectDerivations() {
@@ -289,5 +288,15 @@ public class Example {
     item.addChild(LispTree.proto.newList(features));
 
     return item;
+  }
+
+  public Map<String, Object> getTempState() {
+    // Create the tempState if it doesn't exist.
+    if (tempState == null)
+      tempState = new HashMap<String, Object>();
+    return tempState;
+  }
+  public void clearTempState() {
+    tempState = null;
   }
 }

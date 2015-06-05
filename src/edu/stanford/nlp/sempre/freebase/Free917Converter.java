@@ -87,7 +87,7 @@ public class Free917Converter implements Runnable {
         questionWriter.println("(lambda $0 /common/topic (exists $1 (exists $2 (/film/film/estimated_budget&/measurement_unit/dated_money_value@valid_date@amount@currency:t /en/transformers:/film/film $-1 $1 $0 $2))))");
       else if (line.equals("(lambda $0 /location/location (exists $1 (exists $2 (exists $3 (exists $4 (exists $5 (/library/public_library/address&/location/mailing_address@street_address@street_address_2@citytown@postal_code@state_province_region@country:t /m/02ncllz:/library/public_library $1 $2 $0 $3 $4 $5)))))))"))
         questionWriter.println("(lambda $0 /location/location (exists $1 (exists $2 (exists $3 (exists $4 (exists $5 (/library/public_library/address&/location/mailing_address@street_address@street_address_2@citytown@postal_code@state_province_region@country:t /m/02ncllz:/library/public_library $-1 $1 $2 $0 $3 $4 $5)))))))");
-      else if (line.equals("who won aliÃ¢â‚¬â€œfrazier ii"))
+      else if (line.matches("who won ali.*frazier ii"))
         questionWriter.println("who won muhammad ali vs. joe frazier ii");
       else if (line.equals("(lambda $0 /people/person (exists $1 (exists $2 (exists $3 (/base/boxing/match_boxer_relationship@match@boxer@winner_won@points:t $1 $0 $2 $3)))))")) {
         if (i++ == 0)
@@ -341,7 +341,7 @@ public class Free917Converter implements Runnable {
         npWriter.println("film domain :- NP : /m/010s:/freebase/domain_profile");
       else if (line.equals("newscaster :- NP : /en/newscaster:/tv/non_character_role"))
         npWriter.println("newscaster :- NP : /en/news_presenter:/tv/non_character_role");
-      else if (line.equals("ali�frazier ii :- NP : /en/ali-frazier_ii:/base/boxing/boxing_match")) {
+      else if (line.matches("ali.*frazier ii :- NP : /en/ali-frazier_ii:/base/boxing/boxing_match")) {
       } else
         npWriter.println(line);
     }

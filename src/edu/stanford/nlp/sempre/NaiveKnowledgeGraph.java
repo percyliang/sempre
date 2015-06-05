@@ -50,6 +50,11 @@ public class NaiveKnowledgeGraph extends KnowledgeGraph {
       tree.addChild(e2.toLispTree());
       return tree;
     }
+
+    @Override
+    public String toString() {
+      return "<" + e1 + ", " + r + ", " + e2 + ">";
+    }
   }
 
   // Simplest graph representation: triples of values

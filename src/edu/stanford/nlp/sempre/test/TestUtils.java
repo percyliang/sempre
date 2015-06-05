@@ -75,7 +75,7 @@ public final class TestUtils {
         .setUtterance(utterance)
         .setTargetValue(targetValue)
         .createExample();
-    ex.preprocess(LanguageAnalyzer.getSingleton());
+    ex.preprocess();
     return ex;
   }
 }

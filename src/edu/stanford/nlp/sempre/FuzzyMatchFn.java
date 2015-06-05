@@ -5,7 +5,7 @@ import java.util.*;
 import fig.basic.*;
 
 /**
- * Similar to LexiconFn, but list all approximate matches from a TableKnowledgeGraph.
+ * Similar to LexiconFn, but list all approximate matches from a TableKnowledgeGraph or PuzzleKnowledgeGraph.
  *
  * @author ppasupat
  */
@@ -15,7 +15,8 @@ public class FuzzyMatchFn extends SemanticFn {
   }
   public static Options opts = new Options();
 
-  public enum FuzzyMatchFnMode { UNARY, BINARY, ENTITY };
+  public enum FuzzyMatchFnMode { UNARY, BINARY, ENTITY,
+    ORDER_BEFORE, ORDER_AFTER, ORDER_NEXT, ORDER_PREV, ORDER_ADJACENT };
   private FuzzyMatchFnMode mode;
 
   // Generate all possible denotations regardless of the phrase
@@ -29,6 +30,11 @@ public class FuzzyMatchFn extends SemanticFn {
       else if ("binary".equals(value)) this.mode = FuzzyMatchFnMode.BINARY;
       else if ("entity".equals(value)) this.mode = FuzzyMatchFnMode.ENTITY;
       else if ("any".equals(value)) this.matchAny = true;
+      else if ("before".equals(value)) this.mode = FuzzyMatchFnMode.ORDER_BEFORE;
+      else if ("after".equals(value)) this.mode = FuzzyMatchFnMode.ORDER_AFTER;
+      else if ("next".equals(value)) this.mode = FuzzyMatchFnMode.ORDER_NEXT;
+      else if ("prev".equals(value)) this.mode = FuzzyMatchFnMode.ORDER_PREV;
+      else if ("adjacent".equals(value)) this.mode = FuzzyMatchFnMode.ORDER_ADJACENT;
       else throw new RuntimeException("Invalid argument: " + value);
     }
   }
@@ -57,7 +63,7 @@ public class FuzzyMatchFn extends SemanticFn {
       this.ex = ex;
       this.graph = (ex.context == null) ? null : ex.context.graph;
       this.c = c;
-      this.query = matchAny ? null : c.childStringValue(0);
+      this.query = (matchAny || c.getChildren().isEmpty()) ? null : c.childStringValue(0);
       this.mode = mode;
       this.matchAny = matchAny;
       if (opts.verbose >= 2)
@@ -68,6 +74,7 @@ public class FuzzyMatchFn extends SemanticFn {
     @Override
     public Derivation createDerivation() {
       if (graph == null) return null;
+      if (query == null && !matchAny) return null;
 
       // Compute the formulas if not computed yet
       if (formulas == null) {

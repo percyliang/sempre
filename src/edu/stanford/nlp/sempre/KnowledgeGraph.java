@@ -25,8 +25,13 @@ public abstract class KnowledgeGraph {
           String className = tree.child(1).value;
           Class<?> classObject = Class.forName(SempreUtils.resolveClassName(className));
           return (KnowledgeGraph) classObject.getDeclaredMethod("fromLispTree", LispTree.class).invoke(null, tree);
-        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
-            | NoSuchMethodException | SecurityException | ClassNotFoundException e) {
+        } catch (InvocationTargetException e) {
+          e.getCause().printStackTrace();
+          LogInfo.fail(e.getCause());
+          throw new RuntimeException(e);
+        } catch (IllegalAccessException | IllegalArgumentException |
+            NoSuchMethodException | SecurityException | ClassNotFoundException e) {
+          e.printStackTrace();
           throw new RuntimeException(e);
         }
       } else {

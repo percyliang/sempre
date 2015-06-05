@@ -1,0 +1,68 @@
+############################################################
+# Domain general
+# Keep track of coarse types:
+# - Entity: "day 1"
+# - Value: "3pm"
+# - EntitySet: "meeting"
+# - ValueSet: "start time of meeting"
+
+(def @allEntities edu.stanford.nlp.sempre.SimpleWorld.allEntities)
+(def @filter edu.stanford.nlp.sempre.SimpleWorld.filter)
+(def @merge edu.stanford.nlp.sempre.SimpleWorld.merge)
+(def @getProperty edu.stanford.nlp.sempre.SimpleWorld.getProperty)
+(def @superlative edu.stanford.nlp.sempre.SimpleWorld.superlative)
+(def @sum edu.stanford.nlp.sempre.SimpleWorld.sum)
+(def @list edu.stanford.nlp.sempre.SimpleWorld.list)
+(def @act edu.stanford.nlp.sempre.SimpleWorld.act)
+
+# Operations
+(def @create edu.stanford.nlp.sempre.SimpleWorld.create)
+(def @remove edu.stanford.nlp.sempre.SimpleWorld.remove)
+(def @change edu.stanford.nlp.sempre.SimpleWorld.change)
+
+# General values
+(rule $Value ($PHRASE) (NumberFn) (anchored 1))
+(rule $Value ($PHRASE) (DateFn) (anchored 1))
+
+(rule $TypeSet ($Type) (lambda t (call @filter (call @allEntities) (string type) (string =) (var t))))
+
+# 0. Show me all meetings
+(rule $Command (show me all $TypeSet) (IdentityFn))
+
+# 1. Get property: "what is the location of meeting"
+(rule $Command (what is the $EntityProperty of the $TypeSet) (lambda p (lambda s (call @getProperty (var s) (var p)))))
+(rule $Command (what is the $ValueProperty of the $TypeSet) (lambda p (lambda s (call @getProperty (var s) (var p)))))
+# what is the block left of block whose color is red
+(rule $Command (what is the $TypeSet $BinaryProperty the $TypeSet) (lambda s1 (lambda p (lambda s2 (call @getProperty (var s2) (var p))))))
+
+# 2. Filter: "what is the meeting whose location is cafe"
+(rule $Command (what is the $TypeSet whose $EntityProperty is $Entity) (lambda s (lambda p (lambda v (call @filter (var s) (var p) (string =) (var v))))))
+(rule $Command (what is the $TypeSet whose $ValueProperty is $Value) (lambda s (lambda p (lambda v (call @filter (var s) (var p) (string =) (var v))))))
+(rule $Command (what is the $TypeSet whose $EntityProperty is not $Entity) (lambda s (lambda p (lambda v (call @filter (var s) (var p) (string !=) (var v))))))
+(rule $Command (what is the $TypeSet whose $ValueProperty is not $Value) (lambda s (lambda p (lambda v (call @filter (var s) (var p) (string !=) (var v))))))
+
+# 3. Count: what is the number of meeting whose location is cafe
+(rule $Command (what is the number of $TypeSet whose $EntityProperty is $Entity) (lambda s (lambda p (lambda v (call .size (call @filter (var s) (var p) (string =) (var v)))))))
+
+# 4. Sum: what is the total length of meeting
+(rule $Command (what is the total $ValueProperty of all $TypeSet) (lambda p (lambda s (call @sum (call @getProperty (var s) (var p))))))
+
+# 5. Comparatives: what is the meeting whose start time is smaller than 10am
+(rule $Command (what is the $TypeSet whose $ValueProperty is smaller than $Value) (lambda s (lambda p (lambda v (call @filter (var s) (var p) (string <) (var v))))))
+(rule $Command (what is the $TypeSet whose $ValueProperty is larger than $Value) (lambda s (lambda p (lambda v (call @filter (var s) (var p) (string >) (var v))))))
+(rule $Command (what is the $TypeSet whose $ValueProperty is at most $Value) (lambda s (lambda p (lambda v (call @filter (var s) (var p) (string <=) (var v))))))
+(rule $Command (what is the $TypeSet whose $ValueProperty is at least $Value) (lambda s (lambda p (lambda v (call @filter (var s) (var p) (string >=) (var v))))))
+
+# 6. Superlatives - what is the meeting with the smallest start time
+(rule $Command (what is the $TypeSet with the smallest $ValueProperty) (lambda s (lambda p (call @superlative (var s) (string min) (var p)))))
+(rule $Command (what is the $TypeSet with the largest $ValueProperty) (lambda s (lambda p (call @superlative (var s) (string max) (var p)))))
+
+# 7. create and remove
+(rule $Command (create a $Type with $EntityProperty $Entity) (lambda t (lambda p (lambda v (call @create (var t) (var p) (var v))))))
+(rule $Command (create a $Type with $ValueProperty $Value) (lambda t (lambda p (lambda v (call @create (var t) (var p) (var v))))))
+(rule $Command (remove the $TypeSet with $EntityProperty $Entity) (lambda s (lambda p (lambda v (call @remove (call @filter (var s) (var p) (string =) (var v)))))))
+
+# 8. Two joins
+(rule $Command (what is the $TypeSet whose $ValueProperty is $ValueProperty of $TypeSet) (lambda s1 (lambda p1 (lambda p2 (lambda s2 (call @filter (var s1) (var p1) (string =) (call @getProperty (var s2) (var p2))))))))
+
+(rule $ROOT ($Command) (lambda x (call .toString (var x))))

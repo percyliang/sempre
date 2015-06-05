@@ -1,0 +1,38 @@
+(include general.grammar)
+
+# Types
+(rule $TypeNP (player) (ConstantFn en.player))
+(rule $EntityNP1 (kobe bryant) (ConstantFn en.player.kobe_bryant))
+(rule $EntityNP2 (lebron james) (ConstantFn en.player.lebron_james))
+
+(rule $TypeNP (team) (ConstantFn en.team))
+(rule $EntityNP1 (los angeles lakers) (ConstantFn en.team.lakers))
+(rule $EntityNP2 (cleveland cavaliers) (ConstantFn en.team.cavaliers))
+
+(rule $TypeNP (position) (ConstantFn en.position))
+(rule $EntityNP1 (point guard) (ConstantFn en.position.point_guard))
+(rule $EntityNP2 (forward) (ConstantFn en.position.forward))
+
+(rule $EntityNP1 (2004) (ConstantFn (date 2004 -1 -1)))
+(rule $EntityNP2 (2010) (ConstantFn (date 2010 -1 -1)))
+
+(for @x (point assist steal turnover rebound block foul game fg ft)
+  (rule $EntityNP1 (3) (ConstantFn (number 3 @x)))
+  #(rule $EntityNP2 (6) (ConstantFn (number 6 @x)))
+)
+
+# Season statistics
+
+(rule $Rel0NP (player) (ConstantFn (string player)))
+(rule $RelNP (position) (ConstantFn (string position)))
+(rule $RelNP (team) (ConstantFn (string team)))
+(rule $RelNP (season) (ConstantFn (string season)))
+
+(rule $RelNP (number of points        "(over a season)") (ConstantFn (string num_points)))
+(rule $RelNP (number of assists       "(over a season)") (ConstantFn (string num_assists)))
+(rule $RelNP (number of steals        "(over a season)") (ConstantFn (string num_steals)))
+(rule $RelNP (number of turnovers     "(over a season)") (ConstantFn (string num_turnovers)))
+(rule $RelNP (number of rebounds      "(over a season)") (ConstantFn (string num_rebounds)))
+(rule $RelNP (number of blocks        "(over a season)") (ConstantFn (string num_blocks)))
+(rule $RelNP (number of fouls         "(over a season)") (ConstantFn (string num_fouls)))
+(rule $RelNP (number of played games  "(over a season)") (ConstantFn (string num_games_played)))

@@ -3,12 +3,13 @@ package edu.stanford.nlp.sempre;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import fig.basic.MapUtils;
+import fig.basic.Option;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +20,12 @@ import java.util.Map;
  * @author Percy Liang
  */
 public class JavaExecutor extends Executor {
+  public static class Options {
+    @Option(gloss = "Whether to convert NumberValue to int/double") public boolean convertNumberValues = true;
+    @Option(gloss = "Print stack trace on exception") public boolean printStackTrace = false;
+  }
+  public static Options opts = new Options();
+
   private static JavaExecutor defaultExecutor = new JavaExecutor();
 
   // To simplify logical forms, define some shortcuts.
@@ -77,6 +84,12 @@ public class JavaExecutor extends Executor {
     }
     public static String plus(String a, String b, String c, String d, String e) {
       return a + b + c + d + e;
+    }
+    public static String plus(String a, String b, String c, String d, String e, String f) {
+      return a + b + c + d + e + f;
+    }
+    public static String plus(String a, String b, String c, String d, String e, String f, String g) {
+      return a + b + c + d + e + f + g;
     }
     private static String toString(Object x) {
       if (x instanceof String)
@@ -146,7 +159,8 @@ public class JavaExecutor extends Executor {
     try {
       return new Response(toValue(processFormula(formula)));
     } catch (Exception e) {
-      e.printStackTrace();
+      // Comment this out if we expect lots of innocuous type checking failures
+      if (opts.printStackTrace) e.printStackTrace();
       return new Response(ErrorValue.badJava(e.toString()));
     }
   }
@@ -156,6 +170,7 @@ public class JavaExecutor extends Executor {
       return toObject(((ValueFormula) formula).value);
 
     if (formula instanceof CallFormula) {  // Invoke the function.
+      //LogInfo.logs("formula=%s", formula);
       // Recurse
       CallFormula call = (CallFormula) formula;
       Object func = processFormula(call.func);
@@ -170,8 +185,9 @@ public class JavaExecutor extends Executor {
       String id = ((NameValue) func).id;
       id = MapUtils.get(shortcuts, id, id);
 
-      if (id.startsWith("."))  // Instance method
+      if (id.startsWith(".")) // Instance method
         return invoke(id.substring(1), args.get(0), args.subList(1, args.size()).toArray(new Object[0]));
+
       else  // Static method
         return invoke(id, null, args.toArray(new Object[0]));
     }
@@ -199,7 +215,7 @@ public class JavaExecutor extends Executor {
   // Convert a Value (which are specified in the formulas) to an Object (which
   // many Java functions take).
   private static Object toObject(Value value) {
-    if (value instanceof NumberValue) {
+    if (value instanceof NumberValue && opts.convertNumberValues) {
       // Unfortunately, NumberValues don't make a distinction between ints and
       // doubles, so this is a hack.
       double x = ((NumberValue) value).value;
@@ -252,6 +268,7 @@ public class JavaExecutor extends Executor {
     int bestCost = INVALID_TYPE_COST;
     for (Method m : methods) {
       if (!m.getName().equals(methodName)) continue;
+      m.setAccessible(true);
       nameMatches.add(m);
       if (isStatic != Modifier.isStatic(m.getModifiers())) continue;
       int cost = typeCastCost(m.getParameterTypes(), args);

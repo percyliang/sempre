@@ -53,14 +53,14 @@ public class JsonTest {
     LogInfo.log(S(ex));
     assert exampleEquals(ex, D(S(ex), Example.class));
 
-    ex.preprocess(new SimpleAnalyzer());
+    ex.preprocess();
     LogInfo.log(S(ex));
     assert ex.languageInfo != null;
     assert !ex.languageInfo.tokens.isEmpty();
     assert exampleEquals(ex, D(S(ex), Example.class));
 
     ex = TestUtils.makeSimpleExample("1 2 3");
-    ex.preprocess(new SimpleAnalyzer());
+    ex.preprocess();
     makeSimpleBeamParser().parse(new Params(), ex, true);
     String there = S(ex);
     Example back = D(there, Example.class);

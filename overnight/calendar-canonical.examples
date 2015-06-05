@@ -1,0 +1,6 @@
+# Make sure these test cases always parse
+(example (utterance "create a meeting with start time 3pm"))
+(example (utterance "what is the meeting whose start time is 9am or 3pm"))
+(example (utterance "remove the meeting whose date is day 2"))
+(example (utterance "what is the location of the meeting whose start time is 9am"))
+(example (utterance "what is the length of the free block whose date is day 1 with the largest end time"))

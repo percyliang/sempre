@@ -35,7 +35,7 @@ public class ParserTest {
   }
 
   private static void checkNumDerivations(Parser parser, Params params, String utterance, String targetValue, int numExpected) {
-    Parser.opts.verbose = 1;
+    Parser.opts.verbose = 5;
     Example ex = TestUtils.makeSimpleExample(utterance, targetValue != null ? Value.fromString(targetValue) : null);
     ParserState state = parser.parse(params, ex, targetValue != null);
 

@@ -1,0 +1,33 @@
+(include general.grammar)
+
+# Types
+(rule $TypeNP (meeting) (ConstantFn en.meeting))
+(rule $EntityNP1 (weekly standup) (ConstantFn en.meeting.weekly_standup))
+(rule $EntityNP2 (annual review) (ConstantFn en.meeting.annual_review))
+
+# Properties
+(rule $RelNP (date) (ConstantFn (string date)))
+(rule $EntityNP1 (jan 2) (ConstantFn (date 2015 1 2)))
+(rule $EntityNP2 (jan 3) (ConstantFn (date 2015 1 3)))
+
+(rule $RelNP (start time) (ConstantFn (string start_time)))
+(rule $RelNP (end time) (ConstantFn (string end_time)))
+(rule $EntityNP1 (10am) (ConstantFn (time 10 0)))
+(rule $EntityNP2 (3pm) (ConstantFn (time 15 0)))
+
+(rule $RelNP (length) (ConstantFn (string length)))
+(rule $EntityNP1 (three hours) (ConstantFn (number 3 en.hour)))
+(rule $EntityNP2 (one hour) (ConstantFn (number 1 en.hour)))
+
+(rule $RelNP (attendee) (ConstantFn (string attendee)))
+(rule $TypeNP (person) (ConstantFn en.person))
+(rule $EntityNP1 (alice) (ConstantFn en.person.alice))
+(rule $EntityNP2 (bob) (ConstantFn en.person.bob))
+
+(rule $RelNP (location) (ConstantFn (string location)))
+(rule $TypeNP (location) (ConstantFn en.location))
+(rule $EntityNP1 (greenberg cafe) (ConstantFn en.location.greenberg_cafe))
+(rule $EntityNP2 (central office) (ConstantFn en.location.central_office))
+
+# Unaries
+(rule $VP (is important) (ConstantFn (string is_important)))

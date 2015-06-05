@@ -1,9 +1,10 @@
 package edu.stanford.nlp.sempre;
 
-import java.util.*;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
 import fig.basic.*;
+
+import java.util.*;
 
 /**
  * A FeatureExtractor specifies a mapping from derivations to feature vectors.
@@ -34,6 +35,8 @@ public class FeatureExtractor {
     public boolean useAllFeatures = false;
     @Option(gloss = "For bigram features in paraphrased utterances, maximum distance to consider")
     public int maxBigramDistance = 3;
+    @Option(gloss = "Whether or not paraphrasing and bigram features should be lexicalized")
+    public boolean lexicalBigramParaphrase = true;
   }
 
   private Executor executor;
@@ -63,7 +66,6 @@ public class FeatureExtractor {
     extractDependencyFeatures(ex, deriv);
     extractWhTypeFeatures(ex, deriv);
     conjoinLemmaAndBinary(ex, deriv);
-    extractParaphraseFeatures(ex, deriv);
     extractBigramFeatures(ex, deriv);
     for (FeatureComputer featureComputer : featureComputers)
       featureComputer.extractLocal(ex, deriv);
@@ -100,21 +102,24 @@ public class FeatureExtractor {
       return;
     }
 
+    if (deriv.value instanceof StringValue) {
+      if (((StringValue) deriv.value).value.equals("[]") || ((StringValue) deriv.value).value.equals("[null]"))
+        deriv.addFeature("denotation", "empty");
+      return;
+    }
+
     if (deriv.value instanceof ListValue) {
       ListValue list = (ListValue) deriv.value;
 
-      // TODO(pliang): this is hacky; don't depend on the logical form
-      if (Formulas.isCountFormula(deriv.formula)) {
-        if (list.values.size() != 1) {
-          deriv.addFeature("denotation", "size", list.values.size());
-        } else {
-          int count = getNumber(list.values.get(0));
-          deriv.addFeature("denotation", "count-size" + (count == 0 ? "=0" : ">0"));
-        }
-      } else {
+      if (list.values.size() == 1 && list.values.get(0) instanceof NumberValue) {
+        int count = getNumber(list.values.get(0));
+        deriv.addFeature("denotation", "count-size" + (count <= 1 ? "=" + count : ">1"));
+      }
+      else {
         int size = list.values.size();
         deriv.addFeature("denotation", "size" + (size < 3 ? "=" + size : ">=" + 3));
       }
+
     }
   }
 
@@ -137,11 +142,11 @@ public class FeatureExtractor {
               String containment = deriv.containsIndex(dependency.modifier) ? "internal" : "external";
               if (containsDomain("fullDependencyParse"))
                 addAllDependencyFeatures(dependency, direction, containment,
-                    deriv);
+                        deriv);
               else
                 deriv.addFeature("dependencyParse",
-                    "(" + dependency.label + " " + direction + " " + containment + ") --- "
-                    + deriv.getRule().toString());
+                        "(" + dependency.label + " " + direction + " " + containment + ") --- "
+                                + deriv.getRule().toString());
             }
           }
         }
@@ -150,7 +155,7 @@ public class FeatureExtractor {
   }
 
   private void addAllDependencyFeatures(LanguageInfo.DependencyEdge dependency,
-      String direction, String containment, Derivation deriv) {
+                                        String direction, String containment, Derivation deriv) {
     String[] types = {dependency.label, "*"};
     String[] directions = {" " + direction, ""};
     String[] containments = {" " + containment, ""};
@@ -160,7 +165,7 @@ public class FeatureExtractor {
         for (String containmentPresent : containments) {
           for (String rulePresent : rules) {
             deriv.addFeature("fullDependencyParse",
-                "(" + typePresent + directionPresent + containmentPresent + ") --- " + rulePresent);
+                    "(" + typePresent + directionPresent + containmentPresent + ") --- " + rulePresent);
           }
         }
       }
@@ -175,8 +180,8 @@ public class FeatureExtractor {
 
     if (ex.posTag(0).startsWith("W")) {
       deriv.addFeature("whType",
-          "token0=" + ex.token(0) + "," +
-              "type=" + coarseType(deriv.type.toString()));
+              "token0=" + ex.token(0) + "," +
+                      "type=" + coarseType(deriv.type.toString()));
     }
   }
 
@@ -229,7 +234,7 @@ public class FeatureExtractor {
   //Used in Berant et., EMNLP 2013, and in the agenda RL parser
   //Extracts all content-word lemmas in the derivation tree not dominated by the category $Entity
   private void extractNonEntityLemmas(Example ex, Derivation deriv,
-      List<String> nonEntityLemmas) {
+                                      List<String> nonEntityLemmas) {
     if (deriv.children.size() == 0) { // base case this means it is a word that should be appended
       for (int i = deriv.start; i < deriv.end; i++) {
         String pos = ex.languageInfo.posTags.get(i);
@@ -260,31 +265,6 @@ public class FeatureExtractor {
   }
 
   /**
-   * Add an indicator for each token alignment between a token in the utterance and its
-   * canonical form in the grammar using the ParaphraseModel, if applicable.
-   */
-  // Compute paraphrasing features.  In the future, need to store temporary
-  // state to make this more efficient.
-  void extractParaphraseFeatures(Example ex, Derivation deriv) {
-    if (!containsDomain("paraphrasing")) return;
-    if (deriv.rule == Rule.nullRule) return;
-    extractParaphrasePrecision(ex, deriv);
-    extractParaphraseRecall(ex, deriv);
-
-    // Make sure we have a valid, floating, paraphraseable rule
-    if (!deriv.rule.isFloating() || !deriv.rule.isRhsTerminals()) return;
-    String key = join(deriv.rule.rhs, " ");
-    ParaphraseModel model = ParaphraseModel.getSingleton();
-    if (!model.containsKey(key)) return;
-    for (String token : ex.getTokens()) {
-      double score = model.get(key, token);
-      if (score > 0.0) {
-        deriv.addFeature("paraphrasing", "(" + key + ", " + token + ")");
-      }
-    }
-  }
-
-  /**
    * Add an indicator for each pair of bigrams that can be aligned from the original
    * utterance and two (not necessarily contiguous) lemmas in the generated utterance
    */
@@ -294,45 +274,26 @@ public class FeatureExtractor {
     LanguageInfo derivInfo = LanguageAnalyzer.getSingleton().analyze(deriv.canonicalUtterance);
     List<String> derivLemmas = derivInfo.lemmaTokens;
     List<String> exLemmas = ex.languageInfo.lemmaTokens;
+    Map<Integer, Integer> bigramCounts = new HashMap<Integer, Integer>();
     for (int i = 0; i < exLemmas.size() - 1; i++) {
       for (int j = 0; j < derivLemmas.size() - 1; j++) {
         if (derivLemmas.get(j).equals(exLemmas.get(i))) {
           // Consider bigrams separated by up to maxBigramDistance in generated utterance
           for (int k = 1; j + k < derivLemmas.size() && k <= opts.maxBigramDistance; k++) {
             if (derivLemmas.get(j + k).equals(exLemmas.get(i + 1))) {
-              deriv.addFeature("bigram",
-                exLemmas.get(i) + "," + exLemmas.get(i + 1) + " - " + k);
+              if (opts.lexicalBigramParaphrase)
+                deriv.addFeature("bigram",
+                        exLemmas.get(i) + "," + exLemmas.get(i + 1) + " - " + k);
+              else MapUtils.incr(bigramCounts, k, 1);
             }
           }
         }
       }
     }
-  }
-
-  private void extractParaphraseRecall(Example ex, Derivation deriv) {
-    if (!deriv.cat.equals(Rule.rootCat)) return;
-    String[] derivTokens = deriv.canonicalUtterance.split("\\s+");
-    int n = 0;
-    for (int i = 0; i < ex.languageInfo.numTokens(); ++i) {
-      for (int j = 0; j < derivTokens.length; ++j) {
-        if (derivTokens[j].equals(ex.languageInfo.tokens.get(i))) {
-          n++;
-          break;
-        }
-      }
+    if (!opts.lexicalBigramParaphrase) {
+      for (Integer dist : bigramCounts.keySet())
+        deriv.addFeature("bigram", "distance " + dist + " - " + bigramCounts.get(dist));
     }
-    deriv.addFeature("paraphrasing", "deriv_recall", (double) n / ex.languageInfo.numTokens());
-  }
-
-  private void extractParaphrasePrecision(Example ex, Derivation deriv) {
-    //how many of the generated stuff is in the original utterance
-    int n = 0;
-    for (String item : deriv.rule.rhs) {
-      if (Rule.isCat(item)) continue;
-      if (ex.languageInfo.tokens.contains(item))
-        n++;
-    }
-    deriv.addFeature("paraphrasing", "deriv_prec", n);
   }
 
   // Joins arrayList of strings into string

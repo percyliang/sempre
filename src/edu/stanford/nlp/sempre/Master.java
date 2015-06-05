@@ -19,11 +19,16 @@ public class Master {
   public static class Options {
     @Option(gloss = "Execute these commands before starting")
     public List<String> scriptPaths = Lists.newArrayList();
-    @Option(gloss = "Write out input lines to this path")
+    @Option(gloss = "Execute these commands before starting (after scriptPaths)")
+    public List<String> commands = Lists.newArrayList();
+    @Option(gloss = "Write a log of this session to this path")
     public String logPath;
 
+    @Option(gloss = "Print help on startup")
+    public boolean printHelp = true;
+
     @Option(gloss = "Number of exchanges to keep in the context")
-    public int contextMaxExchanges = 1;
+    public int contextMaxExchanges = 0;
 
     @Option(gloss = "Online update weights on new examples.")
     public boolean onlineLearnExamples = true;
@@ -93,6 +98,8 @@ public class Master {
       session = new Session(id);
       for (String path : opts.scriptPaths)
         processScript(session, path);
+      for (String command : opts.commands)
+        processQuery(session, command);
       if (id != null)
         sessions.put(id, session);
     }
@@ -116,13 +123,14 @@ public class Master {
     LogInfo.log("  (execute |logical form|): execute the logical form (e.g., (execute (call + (number 3) (number 4))))");
     LogInfo.log("  (def |key| |value|): define a macro to replace |key| with |value| in all commands (e.g., (def type fb:type.object type)))");
     LogInfo.log("  (context [(user |user|) (date |date|) (exchange |exchange|) (graph |graph|)]): prints out or set the context");
+    LogInfo.log("Press Ctrl-D to exit.");
   }
 
   public void runInteractivePrompt() {
     Session session = getSession("stdin");
 
-    printHelp();
-    LogInfo.log("Press Ctrl-D to exit.");
+    if (opts.printHelp)
+      printHelp();
 
     while (true) {
       LogInfo.stdout.print("> ");
@@ -215,12 +223,13 @@ public class Master {
     b.setContext(session.context);
     Example ex = b.createExample();
 
-    ex.preprocess(LanguageAnalyzer.getSingleton());
+    ex.preprocess();
 
     // Parse!
     builder.parser.parse(builder.params, ex, false);
 
     response.ex = ex;
+    ex.log();
     if (ex.predDerivations.size() > 0) {
       response.candidateIndex = 0;
       printDerivation(response.getDerivation());

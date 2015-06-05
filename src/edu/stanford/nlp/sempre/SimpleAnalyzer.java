@@ -38,18 +38,36 @@ public class SimpleAnalyzer extends LanguageAnalyzer {
     utterance = breakHyphens(utterance);
 
     // Default analysis - create tokens crudely
-    utterance = utterance.replaceAll(",", " ,");
-    utterance = utterance.replaceAll("\\.", " .");
-    utterance = utterance.replaceAll("\\?", " ?");
-    utterance = utterance.replaceAll("'", " '");
-    utterance = utterance.replaceAll("\\[", " [ ");
-    utterance = utterance.replaceAll("\\]", " ] ");
-    utterance = utterance.trim();
+    StringBuilder buf = new StringBuilder();
+    for (int i = 0; i < utterance.length(); i++) {
+      char c = utterance.charAt(i);
+      // Put whitespace around certain characters.
+      // TODO(pliang): handle contractions such as "can't" properly.
+      boolean boundaryBefore = !(i - 1 >= 0) || utterance.charAt(i - 1) == ' ';
+      boolean boundaryAfter = !(i + 1 < utterance.length()) || utterance.charAt(i + 1) == ' ';
+      boolean separate;
+      if (c == '.') // Break off period if already space around it (to preserve numbers like 3.5)
+        separate = boundaryBefore || boundaryAfter;
+      else
+        separate = (",?'\"[]".indexOf(c) != -1);
+
+      if (separate) buf.append(' ');
+      // Convert quotes
+      if (c == '"')
+        buf.append(boundaryBefore ? "``" : "''");
+      else if (c == '\'')
+        buf.append(boundaryBefore ? "`" : "'");
+      else
+        buf.append(c);
+      if (separate) buf.append(' ');
+    }
+    utterance = buf.toString().trim();
     if (!utterance.equals("")) {
-      for (String token : utterance.split("\\s+")) {
+      String[] tokens = utterance.split("\\s+");
+      for (String token : tokens) {
         languageInfo.tokens.add(LanguageAnalyzer.opts.lowerCaseTokens ? token.toLowerCase() : token);
         String lemma = token;
-        if (token.endsWith("s"))
+        if (token.endsWith("s") && token.length() > 1)
           lemma = token.substring(0, token.length() - 1);
         languageInfo.lemmaTokens.add(LanguageAnalyzer.opts.lowerCaseTokens ? lemma.toLowerCase() : lemma);
 
@@ -65,15 +83,14 @@ public class SimpleAnalyzer extends LanguageAnalyzer {
         try {
           Double.parseDouble(token);
           languageInfo.posTags.add("CD");
-          if (token.length() == 4)
-            languageInfo.nerTags.add("DATE");
-          else
-            languageInfo.nerTags.add("NUMBER");
+          languageInfo.nerTags.add("NUMBER");
           languageInfo.nerValues.add(token);
         } catch (NumberFormatException e) {
           // Guess that capitalized nouns are proper
           if (Character.isUpperCase(token.charAt(0)))
             languageInfo.posTags.add("NNP");
+          else if (token.equals("'") || token.equals("\"") || token.equals("''") || token.equals("``"))
+            languageInfo.posTags.add("''");
           else
             languageInfo.posTags.add("UNK");
           languageInfo.nerTags.add("UNK");

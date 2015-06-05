@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import fig.basic.LispTree;
 import fig.basic.LogInfo;
 
+import java.util.Comparator;
+
 /**
  * Values represent denotations (or partial denotations).
  *
@@ -26,4 +28,11 @@ public abstract class Value {
 
   @Override public abstract boolean equals(Object o);
   @Override public abstract int hashCode();
+
+  public static class ValueComparator implements Comparator<Value> {
+    @Override
+    public int compare(Value o1, Value o2) {
+      return o1.toString().compareTo(o2.toString());
+    }
+  }
 }

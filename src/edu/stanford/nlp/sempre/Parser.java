@@ -21,6 +21,8 @@ public abstract class Parser {
 
     @Option(gloss = "Maximal number of predictions to print")
     public int maxPrintedPredictions = Integer.MAX_VALUE;
+    @Option(gloss = "Maximal number of correct predictions to print")
+    public int maxPrintedTrue = Integer.MAX_VALUE;
 
     @Option(gloss = "Use a coarse pass to prune the chart before full parsing")
     public boolean coarsePrune = false;
@@ -42,6 +44,18 @@ public abstract class Parser {
 
     @Option(gloss = "Whether to unroll derivation streams (applies to lazy parsers)")
     public boolean unrollStream = false;
+
+    @Option(gloss = "Inject random noise into the score (to mix things up a bit)")
+    public double derivationScoreNoise = 0;
+
+    @Option(gloss = "Source of random noise")
+    public Random derivationScoreRandom = new Random(1);
+
+    @Option (gloss = "Prune away error denotations")
+    public boolean pruneErrorValues = false;
+
+    @Option(gloss = "Dump all features (for debugging)")
+    public boolean dumpAllFeatures = false;
   }
 
   public static final Options opts = new Options();
@@ -155,6 +169,11 @@ public abstract class Parser {
     ex.evaluation = new Evaluation();
     addToEvaluation(state, ex.evaluation);
 
+    // Clean up temporary state used during parsing
+    ex.clearTempState();
+    for (Derivation deriv : ex.predDerivations)
+      deriv.clearTempState();
+
     return state;
   }
 
@@ -214,7 +233,6 @@ public abstract class Parser {
     double topMass = 0;
     if (ex.targetValue != null) {
       while (numTop < numCandidates &&
-              compatibilities[numTop] > 0.0d &&
               Math.abs(predDerivations.get(numTop).score - predDerivations.get(0).score) < 1e-10) {
         topMass += probs[numTop];
         numTop++;
@@ -248,21 +266,33 @@ public abstract class Parser {
     }
 
     // Fully correct
+    int numPrintedSoFar = 0;
     for (int i = 0; i < predDerivations.size(); i++) {
       Derivation deriv = predDerivations.get(i);
       if (compatibilities != null && compatibilities[i] == 1) {
-        LogInfo.logs(
-                "True@%04d: %s [score=%s, prob=%s%s]", i, deriv.toString(),
-                Fmt.D(deriv.score), Fmt.D(probs[i]), compatibilities != null ? ", comp=" + Fmt.D(compatibilities[i]) : "");
+        boolean print = printAllPredictions || (numPrintedSoFar < opts.maxPrintedTrue);
+        if (print) {
+          LogInfo.logs(
+                  "True@%04d: %s [score=%s, prob=%s%s]", i, deriv.toString(),
+                  Fmt.D(deriv.score), Fmt.D(probs[i]), compatibilities != null ? ", comp=" + Fmt.D(compatibilities[i]) : "");
+          numPrintedSoFar++;
+          if (opts.dumpAllFeatures) FeatureVector.logFeatureWeights("Features", deriv.getAllFeatureVector(), state.params);
+        }
       }
     }
     // Partially correct
+    numPrintedSoFar = 0;
     for (int i = 0; i < predDerivations.size(); i++) {
       Derivation deriv = predDerivations.get(i);
       if (compatibilities != null && compatibilities[i] > 0 && compatibilities[i] < 1) {
-        LogInfo.logs(
-                "Part@%04d: %s [score=%s, prob=%s%s]", i, deriv.toString(),
-                Fmt.D(deriv.score), Fmt.D(probs[i]), compatibilities != null ? ", comp=" + Fmt.D(compatibilities[i]) : "");
+        boolean print = printAllPredictions || (numPrintedSoFar < opts.maxPrintedTrue);
+        if (print) {
+          LogInfo.logs(
+                  "Part@%04d: %s [score=%s, prob=%s%s]", i, deriv.toString(),
+                  Fmt.D(deriv.score), Fmt.D(probs[i]), compatibilities != null ? ", comp=" + Fmt.D(compatibilities[i]) : "");
+          numPrintedSoFar++;
+          if (opts.dumpAllFeatures) FeatureVector.logFeatureWeights("Features", deriv.getAllFeatureVector(), state.params);
+        }
       }
     }
     // Anything that's predicted.
@@ -276,6 +306,7 @@ public abstract class Parser {
                 "Pred@%04d: %s [score=%s, prob=%s%s]", i, deriv.toString(),
                 Fmt.D(deriv.score), Fmt.D(probs[i]), compatibilities != null ? ", comp=" + Fmt.D(compatibilities[i]) : "");
         // LogInfo.logs("Derivation tree: %s", deriv.toRecursiveString());
+        if (opts.dumpAllFeatures) FeatureVector.logFeatureWeights("Features", deriv.getAllFeatureVector(), state.params);
       }
     }
 

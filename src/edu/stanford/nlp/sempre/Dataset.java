@@ -33,6 +33,8 @@ public class Dataset {
     public double devFrac = 0;
     @Option(gloss = "Used to randomly divide training examples")
     public Random splitRandom = new Random(1);
+    @Option(gloss = "whether to split dev from train")
+    public boolean splitDevFromTrain = true;
 
     @Option(gloss = "Only keep examples which have at most this number of tokens")
     public int maxTokens = Integer.MAX_VALUE;
@@ -44,8 +46,8 @@ public class Dataset {
   private LinkedHashMap<String, List<Example>> allExamples = new LinkedHashMap<String, List<Example>>();
 
   // General statistics about the examples.
-  private HashSet<String> tokenTypes = new HashSet<String>();
-  private StatFig numTokensFig = new StatFig();  // For each example, number of tokens
+  private final HashSet<String> tokenTypes = new HashSet<String>();
+  private final StatFig numTokensFig = new StatFig();  // For each example, number of tokens
 
   public Set<String> groups() { return allExamples.keySet(); }
   public List<Example> examples(String group) { return allExamples.get(group); }
@@ -123,7 +125,7 @@ public class Dataset {
         allExamples.put(groupInfo.group, examples = new ArrayList<Example>());
       readHelper(groupInfo.examples, maxExamples, examples, groupInfo.path);
     }
-    splitDevFromTrain();
+    if (opts.splitDevFromTrain) splitDevFromTrain();
     collectStats();
 
     LogInfo.end_track();
@@ -140,8 +142,16 @@ public class Dataset {
       List<Example> trainExamples = new ArrayList<Example>();
       allExamples.put("train", trainExamples);
       List<Example> devExamples = allExamples.get("dev");
-      if (devExamples == null)
-        allExamples.put("dev", devExamples = new ArrayList<Example>());
+      if (devExamples == null) {
+        // Preserve order
+        LinkedHashMap<String, List<Example>> newAllExamples = new LinkedHashMap<>();
+        for (Map.Entry<String, List<Example>> entry : allExamples.entrySet()) {
+          newAllExamples.put(entry.getKey(), entry.getValue());
+          if (entry.getKey().equals("train"))
+            newAllExamples.put("dev", devExamples = new ArrayList<>());
+        }
+        allExamples = newAllExamples;
+      }
       for (int i = 0; i < split1; i++)
         trainExamples.add(origTrainExamples.get(perm[i]));
       for (int i = split2; i < origTrainExamples.size(); i++)
@@ -165,7 +175,7 @@ public class Dataset {
         ex = new Example.Builder().withExample(ex).setId(id).createExample();
       }
       i++;
-      ex.preprocess(LanguageAnalyzer.getSingleton());
+      ex.preprocess();
 
       // Skip example if too long
       if (ex.numTokens() > opts.maxTokens) continue;
@@ -190,7 +200,7 @@ public class Dataset {
         allExamples.put(group, examples = new ArrayList<Example>());
       readLispTreeHelper(path, maxExamples, examples);
     }
-    splitDevFromTrain();
+    if (opts.splitDevFromTrain) splitDevFromTrain();
     LogInfo.end_track();
   }
 
@@ -208,7 +218,7 @@ public class Dataset {
 
       Example ex = Example.fromLispTree(tree, path + ":" + n);  // Specify a default id if it doesn't exist
       n++;
-      ex.preprocess(LanguageAnalyzer.getSingleton());
+      ex.preprocess();
 
       // Skip example if too long
       if (ex.numTokens() > opts.maxTokens) continue;

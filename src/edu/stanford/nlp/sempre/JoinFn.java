@@ -24,6 +24,8 @@ public class JoinFn extends SemanticFn {
     @Option(gloss = "Verbose") public int verbose = 0;
     @Option public boolean showTypeCheckFailures = false;
     @Option public boolean typeInference = false;
+    // TODO(joberant): this flag is for backward compatibility.  If we don't
+    // need it for the new results, get rid of it.
     @Option public boolean specializedTypeCheck = true;
   }
 

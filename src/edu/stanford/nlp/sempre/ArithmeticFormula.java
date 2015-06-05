@@ -65,6 +65,7 @@ public class ArithmeticFormula extends Formula {
     }
   }
 
+  @SuppressWarnings({"equalshashcode"})
   @Override
   public boolean equals(Object thatObj) {
     if (!(thatObj instanceof ArithmeticFormula)) return false;

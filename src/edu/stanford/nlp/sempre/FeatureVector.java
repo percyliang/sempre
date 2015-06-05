@@ -17,6 +17,14 @@ import java.util.*;
  * @author Jonathan Berant
  */
 public class FeatureVector {
+  public static class Options {
+    @Option(gloss = "When logging, ignore features with zero weight")
+    public boolean ignoreZeroWeight = false;
+    @Option(gloss = "Log only this number of top and bottom features")
+    public int logFeaturesLimit = Integer.MAX_VALUE;
+  }
+  public static Options opts = new Options();
+
   // These features map to the value 1 (most common case in NLP).
   private ArrayList<String> indicatorFeatures;
   // General features
@@ -90,21 +98,27 @@ public class FeatureVector {
   }
 
   public void add(FeatureVector that) { add(that, AllFeatureMatcher.matcher); }
-  public void add(FeatureVector that, FeatureMatcher matcher) {
+  public void add(double scale, FeatureVector that) { add(scale, that, AllFeatureMatcher.matcher); }
+  public void add(FeatureVector that, FeatureMatcher matcher) { add(1, that, matcher); }
+  public void add(double scale, FeatureVector that, FeatureMatcher matcher) {
     if (that.indicatorFeatures != null) {
       for (String f : that.indicatorFeatures)
-        if (matcher.matches(f))
-          add(f);
+        if (matcher.matches(f)) {
+          if (scale == 1)
+            add(f);
+          else
+            add(f, scale);
+        }
     }
     if (that.generalFeatures != null) {
       for (Pair<String, Double> pair : that.generalFeatures)
         if (matcher.matches(pair.getFirst()))
-          add(pair.getFirst(), pair.getSecond());
+          add(pair.getFirst(), scale * pair.getSecond());
     }
     // dense features are always added
     if (that.denseFeatures != null) {
       for (int i = 0; i < denseFeatures.length; ++i)
-        denseFeatures[i] = that.denseFeatures[i];
+        denseFeatures[i] += scale * that.denseFeatures[i];
     }
   }
 
@@ -229,16 +243,33 @@ public class FeatureVector {
       String feature = entry.getKey();
       if (entry.getValue() == 0) continue;
       double value = entry.getValue() * params.getWeight(feature);
+      if (opts.ignoreZeroWeight && value == 0) continue;
       sumValue += value;
       entries.add(new java.util.AbstractMap.SimpleEntry<String, Double>(feature, value));
     }
     Collections.sort(entries, new ValueComparator<String, Double>(false));
     LogInfo.begin_track_printAll("%s features [sum = %s] (format is feature value * weight)", prefix, Fmt.D(sumValue));
-    for (Map.Entry<String, Double> entry : entries) {
-      String feature = entry.getKey();
-      double value = entry.getValue();
-      double weight = params.getWeight(feature);
-      LogInfo.logs("%-50s %6s = %s * %s", "[ " + feature + " ]", Fmt.D(value), Fmt.D(MapUtils.getDouble(features, feature, 0)), Fmt.D(weight));
+    if (entries.size() / 2 > opts.logFeaturesLimit) {
+      for (Map.Entry<String, Double> entry : entries.subList(0, opts.logFeaturesLimit)) {
+        String feature = entry.getKey();
+        double value = entry.getValue();
+        double weight = params.getWeight(feature);
+        LogInfo.logs("%-50s %6s = %s * %s", "[ " + feature + " ]", Fmt.D(value), Fmt.D(MapUtils.getDouble(features, feature, 0)), Fmt.D(weight));
+      }
+      LogInfo.logs("... (%d more features) ...", entries.size() - 2 * opts.logFeaturesLimit);
+      for (Map.Entry<String, Double> entry : entries.subList(entries.size() - opts.logFeaturesLimit, entries.size())) {
+        String feature = entry.getKey();
+        double value = entry.getValue();
+        double weight = params.getWeight(feature);
+        LogInfo.logs("%-50s %6s = %s * %s", "[ " + feature + " ]", Fmt.D(value), Fmt.D(MapUtils.getDouble(features, feature, 0)), Fmt.D(weight));
+      }
+    } else {
+      for (Map.Entry<String, Double> entry : entries) {
+        String feature = entry.getKey();
+        double value = entry.getValue();
+        double weight = params.getWeight(feature);
+        LogInfo.logs("%-50s %6s = %s * %s", "[ " + feature + " ]", Fmt.D(value), Fmt.D(MapUtils.getDouble(features, feature, 0)), Fmt.D(weight));
+      }
     }
     LogInfo.end_track();
   }

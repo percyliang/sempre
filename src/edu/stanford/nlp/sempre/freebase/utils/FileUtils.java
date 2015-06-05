@@ -1,12 +1,18 @@
 package edu.stanford.nlp.sempre.freebase.utils;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.objectbank.ObjectBank;
+import edu.stanford.nlp.sempre.DateValue;
+import edu.stanford.nlp.sempre.DescriptionValue;
+import edu.stanford.nlp.sempre.Json;
+import edu.stanford.nlp.sempre.NameValue;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.StringUtils;
+import fig.basic.LispTree;
 import fig.basic.LogInfo;
 
 import java.io.BufferedReader;
@@ -201,5 +207,55 @@ public final class FileUtils {
       }
     }
     return sb.toString();
+  }
+
+  //input: tab separated file with |utterance| |gold| |predicted|
+  //output: prediction file for codalab
+  public static void generatePredictionFile(String inFile, String outFile) throws IOException {
+
+    PrintWriter writer = IOUtils.getPrintWriter(outFile);
+    for (String line : IOUtils.readLines(inFile)) {
+      String[] tokens = line.split("\\t");
+      if (tokens.length == 0)
+        continue;
+      if (tokens.length < 2)
+        throw new RuntimeException("Illegal line: " + line);
+      String utterance = tokens[0];
+      // get gold
+      List<String> goldDescriptions = new ArrayList<>();
+      LispTree goldTree = LispTree.proto.parseFromString(tokens[1]);
+      for (int i = 1; i < goldTree.children.size(); ++i) {
+        DescriptionValue dValue = (DescriptionValue) DescriptionValue.fromString(goldTree.child(i).toString());
+        goldDescriptions.add(dValue.value);
+      }
+      // get predicted
+      List<String> predictedDescriptions = new ArrayList<>();
+      if (tokens.length > 2) {
+        LispTree predictedTree = LispTree.proto.parseFromString(tokens[2]);
+        for (int i = 1; i < predictedTree.children.size(); ++i) {
+          if (predictedTree.child(i).child(0).value.equals("name")) {
+            NameValue nValue = (NameValue) NameValue.fromString(predictedTree.child(i).toString());
+            predictedDescriptions.add(nValue.description);
+          } else if (predictedTree.child(i).child(0).value.equals("date")) {
+            DateValue dateValue = (DateValue) DateValue.fromString(predictedTree.child(i).toString());
+            predictedDescriptions.add(dateValue.toString());
+          } else
+            throw new RuntimeException("Can not support this value: " + line);
+        }
+      }
+      writer.println(Joiner.on('\t').join(utterance,
+              Json.writeValueAsStringHard(goldDescriptions),
+              Json.writeValueAsStringHard(predictedDescriptions)));
+    }
+    writer.close();
+  }
+
+  public static void main(String[] args) {
+    try {
+      generatePredictionFile(args[0], args[1]);
+    } catch (IOException e) {
+      e.printStackTrace();
+      throw new RuntimeException(e);
+    }
   }
 }

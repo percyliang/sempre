@@ -1,0 +1,69 @@
+(include general.grammar)
+
+# Types
+(rule $TypeNP (city) (ConstantFn fb:en.city))
+(rule $EntityNP1 (sacramento) (ConstantFn fb:en.city.sacramento_ca))
+(rule $EntityNP2 (austin) (ConstantFn fb:en.city.austin_tx))
+
+(rule $TypeNP (state) (ConstantFn fb:en.state))
+(rule $EntityNP1 (california) (ConstantFn fb:en.state.california))
+(rule $EntityNP2 (texas) (ConstantFn fb:en.state.texas))
+
+(rule $TypeNP (river) (ConstantFn fb:en.river))
+(rule $EntityNP1 (colorado river) (ConstantFn fb:en.river.colorado))
+(rule $EntityNP2 (red river) (ConstantFn fb:en.river.red))
+
+(rule $TypeNP (lake) (ConstantFn fb:en.lake))
+(rule $EntityNP1 (lake tahoe) (ConstantFn fb:en.lake.tahoe))
+(rule $EntityNP2 (lake huron) (ConstantFn fb:en.lake.huron))
+
+(rule $TypeNP (mountain) (ConstantFn fb:en.mountain))
+(rule $EntityNP1 (mount whitney) (ConstantFn fb:en.mountain.whitney))
+(rule $EntityNP2 (mount rainier) (ConstantFn fb:en.mountain.rainier))
+
+(rule $TypeNP (place) (ConstantFn fb:en.place))
+(rule $EntityNP1 (death valley) (ConstantFn fb:en.place.death_valley))
+(rule $EntityNP2 (pacific ocean) (ConstantFn fb:en.place.pacific_ocean))
+
+# Unaries
+(rule $VP (is major) (ConstantFn (string major_city)))
+(rule $VP (is major) (ConstantFn (string major_river)))
+(rule $VP (is major) (ConstantFn (string major_lake)))
+(rule $VP (is a capital) (ConstantFn (string capital_city)))
+
+# Properties
+(rule $VP/NP (is contained by) (ConstantFn (string loc_city_state)))
+(rule $VP/NP (is contained by) (ConstantFn (string loc_lake_state)))
+(rule $VP/NP (is contained by) (ConstantFn (string loc_mountain_state)))
+(rule $VP/NP (is contained by) (ConstantFn (string loc_state_country)))
+(rule $VP/NP (is contained by) (ConstantFn (string loc_place_state)))
+
+(rule $VP/NP (traverses) (ConstantFn (string traverse_river_state)))
+(rule $VP/NP (borders) (ConstantFn (string next_to_state_state)))
+
+(rule $RelNP (capital) (ConstantFn (string capital_state_city)))
+(rule $RelNP (area) (ConstantFn (string area_state_length^2)))
+(rule $RelNP (area) (ConstantFn (string area_city_length^2)))
+(rule $RelNP (area) (ConstantFn (string area_country_length^2)))
+(rule $RelNP (area) (ConstantFn (string area_lake_length^2)))
+(rule $RelNP (length) (ConstantFn (string len_river_length)))
+(rule $RelNP (elevation) (ConstantFn (string elevation_mountain_length)))
+(rule $RelNP (elevation) (ConstantFn (string elevation_place_length)))
+(rule $RelNP (population) (ConstantFn (string population_city_count)))
+(rule $RelNP (population) (ConstantFn (string population_state_count)))
+(rule $RelNP (population) (ConstantFn (string population_country_count)))
+(rule $RelNP (density) (ConstantFn (string density_state_count)))
+(rule $RelNP (density) (ConstantFn (string density_city_count)))
+(rule $RelNP (density) (ConstantFn (string density_country_count)))
+
+# simple lexicon
+(rule $EntityNP1 ($PHRASE) (SimpleLexiconFn))
+(rule $EntityNP2 ($PHRASE) (SimpleLexiconFn))
+
+# TODO: named is a funny relation: do we really want to include it?
+# I estimate less than 2% requires the 'name' property, so let's punt
+#(rule $EntityNP1 (sacramento) (ConstantFn (string Sacramento))) 
+#(rule $EntityNP1 (california) (ConstantFn (string California)))
+#(rule $EntityNP1 (carson river) (ConstantFn (string Carson River)))
+#(rule $EntityNP1 (lake austin) (ConstantFn (string Lake Austin)))
+#(rule $EntityNP1 (mount whitney) (ConstantFn (string Mount Whitney)))

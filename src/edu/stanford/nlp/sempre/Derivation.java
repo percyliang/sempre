@@ -24,6 +24,8 @@ public class Derivation implements SemanticFn.Callable, HasScore {
     public boolean showRules = false;
     @Option(gloss = "When printing derivations, to show canonical utterance")
     public boolean showUtterance = false;
+    @Option(gloss = "When executing, show formulae (for debugging)")
+    public boolean showExecutions = false;
   }
 
   public static Options opts = new Options();
@@ -34,7 +36,11 @@ public class Derivation implements SemanticFn.Callable, HasScore {
   public final String cat;
   public final int start;
   public final int end;
+
+  // Floating cell information
+  // TODO(yushi): make fields final
   public String canonicalUtterance;
+  private boolean[] anchoredTokens;   // Tokens which anchored rules are defined on
 
   // If this derivation is composed of other derivations
   public final Rule rule;  // Which rule was used to produce this derivation?  Set to nullRule if not.
@@ -57,6 +63,14 @@ public class Derivation implements SemanticFn.Callable, HasScore {
   // Information for scoring
   private final FeatureVector localFeatureVector;  // Features
   double score = Double.NaN;  // Weighted combination of features
+
+  // Used during parsing (by FeatureExtractor, SemanticFn) to cache arbitrary
+  // computation across different sub-Derivations.
+  // Convention:
+  // - use the featureDomain, FeatureComputer or SemanticFn as the key.
+  // - the value is whatever the FeatureExtractor needs.
+  // This information should be set to null after parsing is done.
+  private Map<String, Object> tempState;
 
   // What the formula evaluates to (optionally set later; only non-null for the root Derivation)
   public Value value;
@@ -141,12 +155,14 @@ public class Derivation implements SemanticFn.Callable, HasScore {
     public Derivation createDerivation() {
       return new Derivation(
           cat, start, end, rule, children, formula, type,
-          localFeatureVector, score, value, executorStats, compatibility, prob, canonicalUtterance);
+          localFeatureVector, score, value, executorStats, compatibility, prob,
+          canonicalUtterance);
     }
   }
 
   Derivation(String cat, int start, int end, Rule rule, List<Derivation> children, Formula formula, SemType type,
-      FeatureVector localFeatureVector, double score, Value value, Evaluation executorStats, double compatibility, double prob, String canonicalUtterance) {
+      FeatureVector localFeatureVector, double score, Value value, Evaluation executorStats, double compatibility, double prob,
+      String canonicalUtterance) {
     this.cat = cat;
     this.start = start;
     this.end = end;
@@ -180,6 +196,7 @@ public class Derivation implements SemanticFn.Callable, HasScore {
   public boolean containsIndex(int i) { return i < end && i >= start; }
   public Rule getRule() { return rule; }
   public Evaluation getExecutorStats() { return executorStats; }
+  public FeatureVector getLocalFeatureVector() { return localFeatureVector; }
 
   public Derivation child(int i) { return children.get(i); }
   public String childStringValue(int i) {
@@ -189,6 +206,11 @@ public class Derivation implements SemanticFn.Callable, HasScore {
   // Return whether |deriv| is built over the root Derivation.
   public boolean isRoot(int numTokens) {
     return cat.equals(Rule.rootCat) && ((start == 0 && end == numTokens) || (start == -1));
+  }
+
+  // Return whether |deriv| has root category (for floating parser)
+  public boolean isRootCat() {
+    return cat.equals(Rule.rootCat);
   }
 
   // Functions that operate on features.
@@ -234,6 +256,8 @@ public class Derivation implements SemanticFn.Callable, HasScore {
   public void ensureExecuted(Executor executor, ContextValue context) {
     if (isExecuted()) return;
     StopWatchSet.begin("Executor.execute");
+    if (opts.showExecutions)
+      LogInfo.logs("%s - %s", canonicalUtterance, formula);
     Executor.Response response = executor.execute(formula, context);
     StopWatchSet.end();
     value = response.value;
@@ -304,7 +328,7 @@ public class Derivation implements SemanticFn.Callable, HasScore {
   }
 
   public String startEndString(List<String> tokens) {
-    return start + ":" + end + tokens.subList(start, end);
+    return start + ":" + end + (start == -1 ? "" : tokens.subList(start, end));
   }
   public String toString() { return toLispTree().toString(); }
 
@@ -319,8 +343,13 @@ public class Derivation implements SemanticFn.Callable, HasScore {
     for (Derivation child : children)
       child.incrementAllFeatureVector(factor, map, updateFeatureMatcher);
   }
+  public void incrementAllFeatureVector(double factor, FeatureVector fv) {
+    localFeatureVector.add(factor, fv);
+    for (Derivation child : children)
+      child.incrementAllFeatureVector(factor, fv);
+  }
 
-  // recursively renames all features in derivation by adding a prefix
+  // returns feature vector with renamed features by prefix
   public FeatureVector addPrefixLocalFeatureVector(String prefix) {
     return localFeatureVector.addPrefix(prefix);
   }
@@ -403,5 +432,43 @@ public class Derivation implements SemanticFn.Callable, HasScore {
     if (probs.length > 0)
       NumUtils.expNormalize(probs);
     return probs;
+  }
+
+  // Manipulation of temporary state used during parsing.
+  public Map<String, Object> getTempState() {
+    // Create the tempState if it doesn't exist.
+    if (tempState == null)
+      tempState = new HashMap<String, Object>();
+    return tempState;
+  }
+  public void clearTempState() {
+    tempState = null;
+    if (children != null)
+      for (Derivation child : children)
+        child.clearTempState();
+  }
+
+  // Compute anchoredTokens and return the result
+  // anchoredTokens[>= anchoredTokens.length] are False by default
+  public boolean[] getAnchoredTokens() {
+    if (anchoredTokens == null) {
+      if (rule.isAnchored()) {
+        anchoredTokens = new boolean[end];
+        for (int i = start; i < end; i++) anchoredTokens[i] = true;
+      } else {
+        anchoredTokens = new boolean[0];
+        for (Derivation child : children) {
+          boolean[] childAnchoredTokens = child.getAnchoredTokens();
+          if (anchoredTokens.length < childAnchoredTokens.length) {
+            boolean[] newAnchoredTokens = new boolean[childAnchoredTokens.length];
+            for (int i = 0; i < anchoredTokens.length; i++) newAnchoredTokens[i] = anchoredTokens[i];
+            anchoredTokens = newAnchoredTokens;
+          }
+          for (int i = 0; i < childAnchoredTokens.length; i++)
+            anchoredTokens[i] = anchoredTokens[i] || childAnchoredTokens[i];
+        }
+      }
+    }
+    return anchoredTokens.clone();
   }
 }

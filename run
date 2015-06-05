@@ -13,8 +13,21 @@ def addMode(name, description, func)
   $modes << [name, description, func]
 end
 
-def header(modules='core')
+def codalab(dependencies=nil)
+  # Set @cl=1 to run job on CodaLab
+  dependencies ||= l(':fig', ':lib', ':module-classes.txt', ':libsempre')
   l(
+    letDefault(:cl, 0),
+    sel(:cl,
+      l(),
+      l('cl', 'run', dependencies, '---'),
+    nil),
+  nil)
+end
+
+def header(modules='core', codalabDependencies=nil)
+  l(
+    codalab(codalabDependencies),
     # Queuing system
     letDefault(:q, 0), sel(:q, l(), l('fig/bin/q', '-shareWorkingPath', o('mem', '5g'), o('memGrace', 10), '-add', '---')),
     # Create execution directory
@@ -23,7 +36,18 @@ def header(modules='core')
     'java',
     '-ea',
     '-Dmodules='+modules,
-    '-Xmx10g',
+    # Memory size
+    letDefault(:memsize, 'default'),
+    sel(:memsize, {
+      'tiny' => l('-Xms2G', '-Xmx4G'),
+      'low' => l('-Xms5G', '-Xmx7G'),
+      'default' => l('-Xms8G', '-Xmx10G'),
+      'medium' => l('-Xms12G', '-Xmx14G'),
+      'high' => l('-Xms20G', '-Xmx24G'),
+      'higher' => l('-Xms40G', '-Xmx50G'),
+      'impressive' => l('-Xms75G', '-Xmx90G'),
+    }),
+    # Classpath
     '-cp', 'libsempre/*:lib/*',
     # Profiling
     letDefault(:prof, 0), sel(:prof, l(), '-Xrunhprof:cpu=samples,depth=100,file=_OUTPATH_/java.hprof.txt'),
@@ -46,7 +70,11 @@ def figOpts; l(o('execDir', '_OUTPATH_'), o('overwriteExecDir'), o('addToView', 
 
 addMode('test', 'Run unit tests', lambda { |e|
   l(
-    'java', '-ea', '-Xmx12g', '-cp', 'libsempre/*:lib/*', 'org.testng.TestNG',
+    'java', '-ea', '-Xmx12g', '-cp', 'libsempre/*:lib/*',
+    lambda { |e|
+      e.key?(:sparqlserver) ? "-Dsparqlserver=http://#{e[:sparqlserver]}/sparql" : l()
+    },
+    'org.testng.TestNG',
     lambda { |e|
       if e[:class]
         l('-testclass', 'edu.stanford.nlp.sempre.' + e[:class])
@@ -131,6 +159,7 @@ def cachePaths(lexiconFnCachePath, sparqlExecutorCachePath)
       when 'local' then l( # Use files directly - don't run more than one job that does this!
         o('Lexicon.cachePath', 'LexiconFn.cache'),
         o('SparqlExecutor.cachePath', 'SparqlExecutor.cache'),
+        o('FreebaseSearch.cachePath', 'FreebaseSearch.cache'),
       nil)
       else l(
         o('Lexicon.cachePath', cacheserver+':/u/nlp/data/semparse/cache/'+lexiconFnCachePath),
@@ -225,7 +254,8 @@ def webquestions
     nil),
 
     # Grammar
-    o('Grammar.inPaths', 'freebase/data/emnlp2013.grammar'),
+    letDefault(:grammar, 1),
+    sel(:grammar, l(), l(o('Grammar.inPaths', 'freebase/data/emnlp2013.grammar'))),
 
     o('Parser.beamSize', 200), # {07/03/13}: WebQuestions is too slow to run with default 500, so set to 200 for now...
 
@@ -350,9 +380,19 @@ nil) })
 addMode('sparqlserver', '(2) Start the SPARQL server [do this every time]', lambda { |e| l(
   scrOptions,
   required(:exec),
-  'freebase/scripts/virtuoso', 'start',
-  lambda{|e| e[:scr]+'/state/execs/'+e[:exec].to_s+'.exec/vdb'}, # DB directory
-  lambda{|e| 3000+e[:exec]}, # port
+  sel(nil,
+    l(
+      'freebase/scripts/virtuoso', 'start',
+      lambda{|e| e[:scr]+'/state/execs/'+e[:exec].to_s+'.exec/vdb'}, # DB directory
+      lambda{|e| 3000+e[:exec]}, # port
+    nil),
+    # Give everyone permissions so that anyone can kill the server if needed.
+    l(
+      'chmod', '-R', 'og=u',
+      lambda{|e| e[:scr]+'/state/execs/'+e[:exec].to_s+'.exec/vdb'}, # DB directory
+    nil),
+    # To stop the server: freebase/scripts/virtuoso stop 3093
+  nil),
 nil) })
 
 # (3) Index the filtered RDF dump [takes 48 hours]
@@ -387,6 +427,7 @@ addMode('convertfree917', 'Convert the Free917 dataset', lambda { |e| l(
 nil) })
 
 addMode('query', 'Query a single logical form or SPARQL', lambda { |e| l(
+  codalab,
   'java', '-ea',
   '-cp', 'libsempre/*:lib/*',
   'edu.stanford.nlp.sempre.freebase.SparqlExecutor',
@@ -395,17 +436,18 @@ nil) })
 
 ############################################################
 
+
 # Just start a simple interactive shell to try out SEMPRE commands
 addMode('simple', 'Simple shell', lambda { |e| l(
-  rlwrap, 'java', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.Main',
-  o('interactive'),
+  codalab, rlwrap, 'java', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.Main',
+  o('Main.interactive'),
 nil) })
 
 addMode('simple-sparql', 'Simple shell for querying SPARQL', lambda { |e| l(
-  rlwrap, 'java', '-Dmodules=core,freebase', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.Main',
+  codalab, rlwrap, 'java', '-Dmodules=core,freebase', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.Main',
   o('executor', 'freebase.SparqlExecutor'),
   sparqlOpts,
-  o('interactive'),
+  o('Main.interactive'),
 nil) })
 
 addMode('simple-freebase', 'Simple shell for using Freebase', lambda { |e| l(
@@ -434,6 +476,382 @@ addMode('simple-freebase', 'Simple shell for using Freebase', lambda { |e| l(
   o('Main.interactive'),
 nil) })
 
+
+############################################################
+# {2014-12-27} [Percy]: Overnight semantic parsing
+addMode('overnight', 'Overnight semantic parsing', lambda { |e| l(
+  'rlwrap',
+  header('core,freebase,overnight'),
+  'edu.stanford.nlp.sempre.Main',
+  figOpts,
+  o('JavaExecutor.convertNumberValues', false),
+  o('useAnchorsOnce', true),
+  o('trackLocalChoices'),
+  o('JoinFn.typeInference', true),
+  o('Builder.parser', 'FloatingParser'),
+  o('FloatingParser.executeAllDerivations', 'true'),
+  o('LanguageAnalyzer', 'corenlp.CoreNLPAnalyzer'),
+  o('Learner.maxTrainIters', 1),
+  #o('printAllPredictions'),
+  o('Derivation.showUtterance'),
+  letDefault(:domain, 'publications'),
+  letDefault(:debug, 0),
+
+  selo(1, 'maxExamples', 'train:10', 'train:MAX'),
+
+  # Exact matching is needed on most simple domains
+  # o('executor', 'FormulaMatchExecutor'),
+  # o('Builder.valueEvaluator', 'ExactValueEvaluator'),
+
+  # Features
+  o('FeatureExtractor.featureDomains', 'denotation'), # denotation features from general feature extractor
+  o('FeatureExtractor.featureComputers', 'overnight.OvernightFeatureComputer'), # 
+  o('OvernightFeatureComputer.featureDomains', *overnightFeatureDomains),
+  #o('initialization', 'paraphrase :: match,1', 'paraphrase :: size,-0.1', 'paraphrase :: ppdb,0.3',
+  #  'paraphrase :: skip-bigram,0.8', 'paraphrase :: skip-ppdb,0.2','denotation :: error,-1000'),
+  o('coarsePrune'),
+  o('OvernightDerivationPruningComputer.applyHardConstraints'),
+  sel(2,
+    l(), # no reg
+    l(o('Params.l1Reg','lazy'),o('Params.l1RegCoeff',0)),
+    l(o('Params.l1Reg','lazy'),o('Params.l1RegCoeff',0.001)),
+  nil),
+  # Set up the domain
+  required(:domain),
+  o('Grammar.inPaths', lambda { |e| 'overnight/' + e[:domain] + '.grammar' }),
+  o('SimpleWorld.domain', lambda { |e| e[:domain] }),
+  o('PPDBModel.ppdbModelPath', lambda { |e| 'lib/data/overnight/' + e[:domain] + '-ppdb.txt' }),
+  #o('PPDBModel.ppdbModelPath', lambda { |e| 'overnightData/' + e[:domain] + '-ppdb.txt' }), # codalab
+  o('Dataset.trainFrac', 0.8), o('Dataset.devFrac', 0.2),
+  o('FloatingParser.maxDepth', 11),
+  o('Parser.beamSize', 20),
+  letDefault(:alignment,1),
+  sel(:alignment, 
+    o('wordAlignmentPath', 'lib/data/overnight/' + e[:domain] + '.word_alignments.heuristic'), 
+    o('wordAlignmentPath', 'lib/data/overnight/' + e[:domain] + '.word_alignments.berkeley'),
+    #o('wordAlignmentPath', 'overnightData/' + e[:domain] + '.word_alignments.heuristic'), # codalab
+    #o('wordAlignmentPath', 'overnightData/' + e[:domain] + '.word_alignments.berkeley'),
+  nil),
+  o('phraseAlignmentPath', 'lib/data/overnight/' + e[:domain] + '.phrase_alignments'), 
+  o('PPDBModel.ppdbModelPath', 'lib/data/overnight/' + e[:domain] + '-ppdb.txt'),
+  #o('phraseAlignmentPath', 'overnightData/' + e[:domain] + '.phrase_alignments'), # codalab
+  #o('PPDBModel.ppdbModelPath', 'overnightData/' + e[:domain] + '-ppdb.txt'),
+  o('DerivationPruner.pruningComputers', ['overnight.OvernightDerivationPruningComputer']),
+  o('Dataset.inPaths', 
+    'train:lib/data/overnight/' + e[:domain] + '.paraphrases.train.examples',
+    'test:lib/data/overnight/' + e[:domain] + '.paraphrases.test.examples'),
+    #'train:overnightData/' + e[:domain] + '.paraphrases.train.examples', # codalab
+    #'test:overnightData/' + e[:domain] + '.paraphrases.test.examples'),
+  sel(:domain, {
+    'regex' => l(
+      letDefault(:data,0),
+      sel(:data,
+        l(o('Dataset.inPaths', 'train:lib/data/overnight/regex.paraphrases.train.examples')),
+        l(o('Dataset.inPaths', 'train:lib/data/overnight/regex.paraphrases.train.examples', 'test:lib/data/overnight/regex.examples.train.json')),
+        l(o('Dataset.inPaths', 'train:lib/data/overnight/regex.paraphrases.train.examples', 'test:lib/data/overnight/regex.examples.test.json')),
+      nil),
+      # selo(:debug, 'Dataset.inPaths', 'train:lib/data/overnight/regex.paraphrases.train.examples', 'train:regex/regex-debug.examples'),
+      o('executor', 'JavaExecutor'),
+      o('Builder.valueEvaluator', 'regex.RegexValueEvaluator'),
+      o('OvernightFeatureComputer.approxEmptyDenotation', 'true'),
+      # o('OvernightFeatureComputer.featureDomains', *regexFeatureDomains),
+      o('JavaExecutor.convertNumberValues', true),
+      o('Grammar.tags','generate','regex'),
+      o('lowerCaseTokens', false),  # case sensitivity is important for correctness of regular expressions
+      o('initialization', 'paraphrase :: match,1', 'paraphrase :: size,-0.1', 'paraphrase :: ppdb,0.3',
+        'paraphrase :: skip-bigram,0.8', 'paraphrase :: skip-ppdb,0.2','denotation :: error,-1000'),
+    nil),
+    'geo880' => l(
+      letDefault(:data,0),
+      sel(:data,
+        l(o('Dataset.inPaths', 'train:lib/data/overnight/geo880.paraphrases.train.superlatives.examples')),
+        l(o('Dataset.inPaths', 'train:lib/data/overnight/geo880.paraphrases.train.superlatives.examples', 'test:lib/data/overnight/geo880-train.examples')),
+        l(o('Dataset.inPaths', 'train:lib/data/overnight/geo880.paraphrases.train.superlatives2.examples', 'test:lib/data/overnight/geo880-train.examples')),
+        l(o('Dataset.inPaths', 'train:lib/data/overnight/geo880.paraphrases.train.superlatives.examples', 'test:lib/data/overnight/geo880-test.examples')),
+        l(o('Dataset.inPaths', 'train:lib/data/overnight/geo880.paraphrases.train.superlatives2.examples', 'test:lib/data/overnight/geo880-test.examples')),
+      nil),
+      o('Parser.beamSize', 20),
+      o('initialization', 'paraphrase :: match,1', 'paraphrase :: size,-0.1', 'paraphrase :: ppdb,0.3',
+          'lf :: edu.stanford.nlp.sempre.SimpleWorld.superlative& superlative,10',
+          'root :: pos0=WRB&returnType=class edu.stanford.nlp.sempre.NumberValue,10'),
+      o('FloatingParser.maxDepth', 11),
+      o('Grammar.tags','generate','general', 'geo880'),
+      o('SimpleLexicon.inPaths', 'lib/data/overnight/geo880.lexicon'),
+      #o('Params.l1Reg','lazy'),
+      #o('Params.l1RegCoeff',0.00001),
+      o('OvernightDerivationPruningComputer.usePredicateDict'),
+      o('OvernightDerivationPruningComputer.predicateDictPath','lib/data/overnight/geo880.predicate.dict'),
+    nil),
+    'calendar' => l(
+      o('Grammar.tags','generate','general'),
+    nil),
+    'calendarplus' => l(
+      o('Grammar.tags','generate','general','geo440'),
+      o('Grammar.inPaths','overnight/calendar.grammar'),
+      o('SimpleWorld.domain', 'calendar'),
+    nil),
+    'blocks' => l(
+      o('Grammar.tags','generate','general'),
+    nil),
+    'restaurants' => l(
+      o('Grammar.tags','generate','general'),
+    nil),
+    'housing' => l(
+      o('Grammar.tags','generate','general'),
+    nil),
+    'socialnetwork' => l(
+      o('Grammar.tags','generate','general'),
+    nil),
+    'publications' => l(
+      o('Grammar.tags','generate','general'),
+    nil),
+    'basketball' => l(
+      o('Grammar.tags','generate','general'),
+    nil),
+    'recipes' => l(
+      o('Grammar.tags','generate','general'),
+    nil),
+  }),
+nil) })
+
+def overnightFeatureDomains
+  [
+    'match',
+    'ppdb',
+    'skip-bigram',
+    'root',
+    'alignment',
+    'lexical',
+    'root_lexical',
+    'lf',
+    'simpleworld',
+  nil].compact
+end
+
+############################################################
+# {5/27/15} [Ice]
+addMode('tables', 'QA on HTML tables', lambda { |e| l(
+  # Add @cldir=1 to use CodaLab's directory paths
+  letDefault(:cldir, 0),
+  # Usual header
+  rlwrap, header('core,tables,corenlp'),
+  # Select class
+  letDefault(:class, 'main'),
+  sel(:class, {
+    'main' => 'edu.stanford.nlp.sempre.Main',
+    'check' => 'edu.stanford.nlp.sempre.tables.test.DPParserChecker',
+    'align' => 'edu.stanford.nlp.sempre.tables.alignment.IBMAligner',
+    'dump' => 'edu.stanford.nlp.sempre.tables.serialize.SerializedDumper',
+    'load' => 'edu.stanford.nlp.sempre.tables.serialize.SerializedLoader',
+    'stats' => 'edu.stanford.nlp.sempre.tables.test.TableStatsComputer',
+  }),
+  # Fig parameters
+  selo(:cldir, 'execDir', '_OUTPATH_', '.'),
+  o('overwriteExecDir'), o('addToView', 0), o('jarFiles', 'libsempre/*'),
+  sel(:cldir, l(), '>/dev/null'),
+  # Set environment for table execution
+  o('executor', 'tables.lambdadcs.LambdaDCSExecutor'),
+  o('Builder.valueEvaluator', 'tables.TableValueEvaluator'),
+  o('TargetValuePreprocessor.targetValuePreprocessor', 'tables.TableValuePreprocessor'),
+  o('NumberFn.unitless'), o('NumberFn.alsoTestByConversion'),
+  o('TypeInference.typeLookup', 'tables.TableTypeLookup'),
+  o('JoinFn.specializedTypeCheck', false), o('JoinFn.typeInference', true),
+  # Parser
+  letDefault(:parser, 'floatsize'),
+  sel(:parser, {
+    'floatsize' => l(
+      o('Builder.parser', 'FloatingParser'),
+      o('useSizeInsteadOfDepth'),
+      o('FloatingParser.maxDepth', 15),
+    nil),
+    'baseline' => l(
+      o('Builder.parser', 'tables.baseline.TableBaselineParser'),
+    nil),
+    'dummy' => o('Builder.parser', 'tables.serialize.DummyParser'),
+  }),
+  o('FloatingParser.useAnchorsOnce', true),
+  letDefault(:pruning, 1),
+  sel(:pruning,
+    l(),
+    l(
+      o('DerivationPruner.pruningStrategies', *tablesPruningStrategies),
+      o('DerivationPruner.pruningComputers', 'tables.TableDerivationPruningComputer'),
+    nil),
+  nil),
+  # Grammar
+  tablesGrammarPaths,
+  # Dataset
+  letDefault(:data, 'none'),
+  letDefault(:unseen, 0),
+  tablesDataPaths,
+  # Verbosity
+  o('FeatureVector.ignoreZeroWeight'),
+  o('maxPrintedPredictions', 10), o('maxPrintedTrue', 10), o('logFeaturesLimit', 10),
+  letDefault(:verbose, 0),
+  sel(:verbose,
+    l(),
+    l(
+      o('showRules'),
+      o('Parser.verbose', 2),
+      o('JoinFn.verbose', 3),
+      o('JoinFn.showTypeCheckFailures'),
+    nil),
+  nil),
+  # Language Analyzer
+  letDefault(:lang, 'corenlp'),
+  sel(:lang, {
+    'simple' => o('LanguageAnalyzer', 'SimpleAnalyzer'),
+    'corenlp' => l(o('LanguageAnalyzer', 'corenlp.CoreNLPAnalyzer'), o('annotators', *'tokenize ssplit pos lemma ner'.split)),
+    'fullcorenlp' => l(o('LanguageAnalyzer', 'corenlp.CoreNLPAnalyzer'), o('annotators', *'tokenize ssplit pos lemma ner parse'.split)),
+  }),
+  # Training
+  letDefault(:train, 0),
+  sel(:train,
+    l(),
+    l(
+      o('combineFromFloatingParser'),
+      sel(:unseen, unbalancedTrainDevSplit, l()),
+      o('maxTrainIters', 3),
+      o('showValues', false), o('showFirstValue'),
+    nil),
+    l(
+      # for dumping derivations (@class=dump)
+      # force unbalancedTrainDevSplit + combine from floating parser
+      o('combineFromFloatingParser'), o('DPParser.cheat'),
+      sel(:unseen, unbalancedTrainDevSplit, l()),
+    nil),
+  nil),
+  # Regularization
+  letDefault(:l1, 1),
+  sel(:l1,
+    l(),
+    l(o('Params.l1Reg','lazy'), o('Params.l1RegCoeff', '3e-5')),
+    l(o('Params.l1Reg','lazy'), selo(nil, 'Params.l1RegCoeff', 0, 0.00001, 0.0001, 0.001, 0.01)),
+    l(o('Params.l1Reg','lazy'), selo(nil, 'Params.l1RegCoeff', 0.00001, 0.00003, 0.0001, 0.0003)),
+    l(o('Params.l1Reg','lazy'), selo(nil, 'Params.l1RegCoeff', 0.00001, 0.00003, 0.0005)),
+  nil),
+  # Features
+  letDefault(:feat, 'none'),
+  sel(:feat, {
+    'none' => l(),   # No features (random)
+    'some' => l(     # Add your own features! (only set up the feature computers)
+      o('FeatureExtractor.featureComputers', 'tables.features.PhrasePredicateFeatureComputer tables.features.PhraseDenotationFeatureComputer'.split),
+    nil),
+    'all' => l(      # All features
+      o('FeatureExtractor.featureDomains', 'custom-denotation phrase-predicate phrase-denotation headword-denotation missing-predicate'.split),
+      o('FeatureExtractor.featureComputers', 'tables.features.PhrasePredicateFeatureComputer tables.features.PhraseDenotationFeatureComputer'.split),
+    nil),
+    'baseline' => l( # For the baseline classifier
+      o('FeatureExtractor.featureDomains', 'custom-denotation phrase-denotation headword-denotation table-baseline'.split),
+      o('FeatureExtractor.featureComputers', 'tables.baseline.TableBaselineFeatureComputer tables.features.PhraseDenotationFeatureComputer'.split),
+    nil),
+    'ablate' => l(
+      o('FeatureExtractor.featureComputers', 'tables.features.PhrasePredicateFeatureComputer tables.features.PhraseDenotationFeatureComputer'.split),
+      selo(nil,
+        'FeatureExtractor.featureDomains',
+        'phrase-predicate phrase-denotation headword-denotation missing-predicate'.split,
+        'custom-denotation phrase-denotation headword-denotation missing-predicate'.split,
+        'custom-denotation phrase-predicate headword-denotation missing-predicate'.split,
+        'custom-denotation phrase-predicate phrase-denotation missing-predicate'.split,
+        'custom-denotation phrase-predicate phrase-denotation headword-denotation'.split,
+      nil),
+    nil),
+  }),
+  letDefault(:featOp, 'careful'),
+  sel(:featOp, {
+    'none' => l(),
+    'base' => l(
+      o('usePredicateLemma'), o('usePhraseLemmaOnly'),
+    nil),
+    'careful' => l(
+      o('usePredicateLemma'), o('usePhraseLemmaOnly'),
+      o('maxNforLexicalizeAllPairs', 2),
+      o('traverseWithFormulaTypes'), o('reverseNameValueConversion', 'allBang'),
+      o('lookUnderCellProperty'), o('useGenericCellType'),
+      o('computeFuzzyMatchPredicates'),
+    nil),
+  }),
+nil) })
+
+def tablesGrammarPaths
+  lambda { |e|
+    baseDir = ['tables/grammars/', 'grammars/'][e[:cldir]]
+    l(
+      letDefault(:grammar, 'combined-all'),
+      sel(:grammar, {
+        'restrict' => o('Grammar.inPaths', "#{baseDir}restrict.grammar"),
+        'simple' => o('Grammar.inPaths', "#{baseDir}simple.grammar"),
+        'combined' => o('Grammar.inPaths', "#{baseDir}combined.grammar"),
+        'combined-jnc' => l(    # WQ baseline
+          o('Grammar.inPaths', "#{baseDir}combined.grammar"),
+          o('Grammar.tags', *'movement count'.split),
+        nil),
+        'combined-cut' => l(    # No intersection / union
+          o('Grammar.inPaths', "#{baseDir}combined.grammar"),
+          o('Grammar.tags', *'movement comparison count aggregate superlative arithmetic'.split),
+        nil),
+        'combined-all' => l(    # Default
+          o('Grammar.inPaths', "#{baseDir}combined.grammar"),
+          o('Grammar.tags', *'alternative movement comparison count aggregate superlative arithmetic merge'.split),
+        nil),
+        'combined-trigger' => l(    # Use trigger words for operations
+          o('Grammar.inPaths', "#{baseDir}combined.grammar"),
+          o('Grammar.tags', *'t-alternative t-movement t-comparison t-count t-aggregate t-superlative t-arithmetic merge'.split),
+        nil),
+      }),
+    nil)
+  }
+end
+
+def tablesDataPaths
+  lambda { |e|
+    baseDir = ['lib/data/tables/data/', 'WikiTableQuestions/data/'][e[:cldir]]
+    csvDir = ['lib/data/tables/', 'WikiTableQuestions/'][e[:cldir]]
+    datasets = {
+      'none' => l(),
+      # Pristine test test
+      'test' => l(
+        o('Dataset.inPaths',
+          "train,#{baseDir}training.examples",
+          "test,#{baseDir}pristine-unseen-tables.examples"),
+        o('Dataset.trainFrac', 1), o('Dataset.devFrac', 0),
+        let(:unseen, 1),
+      nil),
+    }
+    # Development sets: 80:20 random split of training data
+    ['1', '2', '3', '4', '5'].each do |x|
+      datasets['u-' + x] = l(
+        o('Dataset.inPaths',
+          "train,#{baseDir}random-split-seed-#{x}-train.examples",
+          "dev,#{baseDir}random-split-seed-#{x}-test.examples",
+        nil),
+        let(:unseen, 1),
+      nil)
+    end
+    # That's it!
+    l(
+      o('TableKnowledgeGraph.baseCSVDir', csvDir),
+      sel(:data, datasets),
+    nil)
+  }
+end
+
+def tablesPruningStrategies
+  [
+    # Formula
+    "singleton",
+    "multipleSuperlatives",
+    "sameMerge",
+    "forwardBackward",
+    "doubleNext",
+    # Denotation
+    "emptyDenotation",
+    "nonLambdaError",
+    "tooManyValues",
+    "badSuperlativeHead",
+    "mistypedMerge",
+  nil].compact
+end
 
 
 

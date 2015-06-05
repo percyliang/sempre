@@ -39,6 +39,8 @@
         <property name="basedir" value="${basedir}"/>
     -->
 
+    <property name="fileExtensions" value="java, properties, xml"/>
+
     <!-- Checks that a package-info.java file exists for each package.     -->
     <!-- See http://checkstyle.sf.net/config_javadoc.html#JavadocPackage -->
     <!-- RELAX -->
@@ -76,7 +78,15 @@
     <!--   <property name="fileExtensions" value="java"/> -->
     <!-- </module> -->
 
+    <!-- RELAX: Allow warning suppression -->
+    <!-- Usage: Add @SuppressWarnings({"checkname"}) -->
+    <!--        checkname must be lowercased -->
+    <module name="SuppressWarningsFilter" />
+
     <module name="TreeWalker">
+
+        <!-- RELAX: Allow warning suppression -->
+        <module name="SuppressWarningsHolder" />
 
         <!-- Checks for Javadoc comments.                     -->
         <!-- See http://checkstyle.sf.net/config_javadoc.html -->
@@ -167,9 +177,6 @@
         <!-- RELAX: allow numbers -->
         <!--<module name="MagicNumber"/>-->
         <module name="MissingSwitchDefault"/>
-        <module name="RedundantThrows">
-          <property name="suppressLoadErrors" value="true"/>
-        </module>
         <module name="SimplifyBooleanExpression"/>
         <module name="SimplifyBooleanReturn"/>
 
