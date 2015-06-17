@@ -19,7 +19,7 @@ public class OvernightDerivationPruningComputer extends DerivationPruningCompute
   }
   public static Options opts = new Options();
 
-
+  
   public OvernightDerivationPruningComputer(DerivationPruner pruner) {
     super(pruner);
   }

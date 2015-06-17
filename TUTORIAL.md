@@ -396,7 +396,7 @@ etc.):
 
 Compile it:
 
-    make corenlp
+    ant corenlp
 
 Now we can load the SEMPRE interactive shell with `CoreNLPAnalyzer`:
 

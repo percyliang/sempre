@@ -47,9 +47,7 @@ abstract class AbstractReinforcementParserState extends ChartParserState {
       derivations.add(deriv);
       Collections.sort(derivations, Derivation.derivScoreComparator); // todo - perhaps can be removed
       return true;
-    } else {
-      return false;
-    }
+    } else return false;
   }
 
   // for [start, end) we try to create [start, end + i) or [start - i, end) and add unary rules

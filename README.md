@@ -99,7 +99,7 @@ similar your system is.
 
 3. Compile the source code (this produces `libsempre/sempre-core.jar`):
 
-        make core
+        ant core
 
 4. Run an interactive shell:
 
@@ -145,6 +145,11 @@ Changes from SEMPRE 1.0 to SEMPRE 2.0:
   interacting with Freebase and Stanford CoreNLP are just different modules.
 - Removed fbalignment (EMNLP 2013) and paraphrase (ACL 2014) components to
   avoid confusion.  If you want to reproduce those systems, use SEMPRE 1.0.
+
+Changes from SEMPRE 2.0 to SEMPRE 2.1:
+
+- Added the `tables` package for the paper *Compositional semantic parsing on semi-structured tables* (ACL 2015).
+- Add and `overnight` package for the paper *Building a semantic parser overnight* (ACL 2015).
 
 # License
 

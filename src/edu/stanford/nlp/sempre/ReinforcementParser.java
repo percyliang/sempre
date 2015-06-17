@@ -36,13 +36,11 @@ public class ReinforcementParser extends Parser {
     @Option (gloss = "Whether to update gradient only for correct moves")
     public boolean updateGradientForCorrectMovesOnly = true;
     @Option (gloss = "Low probability for which we don't unroll the stream")
-    public double lowProb = 0.001;
-    @Option (gloss = "Whether to not unroll at test time")
-    public boolean unrollWithMaxSampler = false;
+    public double lowProb = 0.01;
     @Option (gloss = "Whether to simulate the log liklihood objective")
     public boolean simulateNonRlObjective = false;
-    @Option (gloss = "Whether to never unroll")
-    public boolean noUnrolling = false;
+    @Option (gloss = "Whether to always unroll (even at test time)")
+    public boolean alwaysUnroll = false;
   }
   public static Options opts = new Options();
 
@@ -56,7 +54,6 @@ public class ReinforcementParser extends Parser {
 
   public ReinforcementParser(Spec spec) {
     super(spec);
-
     coarseParser = new CoarseParser(grammar);
 
     // generate maps from left to right and vice versa
@@ -89,7 +86,7 @@ public class ReinforcementParser extends Parser {
   @Override
   public ParserState newParserState(Params params, Example ex, boolean computeExpectedCounts) {
     if (computeExpectedCounts) { // if we learn - use sampling, otherwise, use max
-     // if we simulate non RL we just take the max and not do sampling
+      // if we simulate non RL we just take the max and not do sampling
       if (opts.simulateNonRlObjective) {
         return new ReinforcementParserState.StateBuilder()
                 .parser(this)
@@ -128,7 +125,7 @@ public class ReinforcementParser extends Parser {
 // (b) whether an update needs to be done
 final class ReinforcementParserState extends AbstractReinforcementParserState {
 
-  public enum NecessaryDeriv { NECESSARY_DERIV, UNNECESSARY_DERIV, UNKNOWN };
+  public enum NecessaryDeriv { NECESSARY_DERIV, UNNECESSARY_DERIV, UNKNOWN }
   private static final double LOG_SMALL_PROB = Math.log(ReinforcementParser.opts.lowProb);
 
   private final ParserAgenda<PrioritizedDerivationStream> agenda;
@@ -140,7 +137,7 @@ final class ReinforcementParserState extends AbstractReinforcementParserState {
   List<Derivation> correctDerivations = new ArrayList<>();
   private Map<String, Double> stateSequenceExpectedCounts = new HashMap<>();
   Random randGen = new Random(1);
- // backpointers for remembering what derivations on the stream were popped before others
+  // backpointers for remembering what derivations on the stream were popped before others
   private Map<Long, Pair<ArrayList<Derivation>, Integer>> backpointerList;
   private int numItemsSampled = 0;
 
@@ -169,7 +166,7 @@ final class ReinforcementParserState extends AbstractReinforcementParserState {
     super(parser, params, ex, computeExpectedCounts);
     this.samplingStrategy = samplingStrategy;
     backpointerList = new HashMap<>();
-    agenda = samplingStrategy.equals("max") ? new QueueParserAgenda<>() : new ListParserAgenda<>();
+    agenda = samplingStrategy.equals("max") ? new QueueParserAgenda() : new ListParserAgenda();
   }
 
   private void clearState() {
@@ -184,6 +181,7 @@ final class ReinforcementParserState extends AbstractReinforcementParserState {
   }
 
 
+
   protected void addToAgenda(DerivationStream derivationStream) {
     addToAgenda(derivationStream, 0d);
   }
@@ -192,36 +190,31 @@ final class ReinforcementParserState extends AbstractReinforcementParserState {
 
     if (!derivationStream.hasNext()) return;
 
-    if (Parser.opts.unrollStream) {
-      Derivation streamHead = derivationStream.peek();
-      double streamHeadScore = streamHead.score;
-      while (derivationStream.hasNext()) {
-        Derivation deriv = derivationStream.next();
-        featurizeAndScoreDerivation(deriv);
-        if (parser.verbose(1)) {
-          if ((deriv.score - streamHeadScore) > 0.5)
-            LogInfo.logs("Unsorted stream: head=%s, head score=%s, deriv=%s, deriv score=%s",
-                    streamHead, streamHeadScore, deriv, deriv.score);
-        }
-        addToAgendaWithScore(SingleDerivationStream.constant(deriv), deriv.score, probSum);
-      }
-    } else {
+    //if it's less than one we can just add it even if we unroll everything (optimization)
+    if(!ReinforcementParser.opts.alwaysUnroll || derivationStream.estimatedSize() <= 1) {
       Derivation deriv = derivationStream.peek();
       featurizeAndScoreDerivation(deriv);
       addToAgendaWithScore(derivationStream, deriv.score, probSum);
+      if (completeDerivationsPushed % 100 == 0) // sort the agenda
+        agenda.sort();
     }
-    if (completeDerivationsPushed % 100 == 0) // sort the agenda from time to time
-      agenda.sort();
+    else {
+      while(derivationStream.hasNext()) {
+        Derivation deriv = derivationStream.next();
+        featurizeAndScoreDerivation(deriv);
+        DerivationStream newStream = SingleDerivationStream.constant(deriv);
+        addToAgendaWithScore(newStream, deriv.score, probSum);
+        if (completeDerivationsPushed % 100 == 0) // sort the agenda
+          agenda.sort();
+      }
+    }
   }
 
   // we need to override the method because parameters are prefixed with "search_"
   // this means that the score will not be the dot product and features and weights
   protected void featurizeAndScoreDerivation(Derivation deriv) {
-    if (deriv.isFeaturizedAndScored()) {
-      if (parser.verbose(5))
-        LogInfo.logs("Deriv already featurized=%s", deriv);
-      return;
-    }
+    if (deriv.isFeaturizedAndScored()) return;
+
     // Compute features
     parser.extractor.extractLocal(ex, deriv);
 
@@ -240,8 +233,8 @@ final class ReinforcementParserState extends AbstractReinforcementParserState {
   }
 
   private void addToAgendaWithScore(DerivationStream derivationStream, double derivScore, double probSum) {
-    if (derivScore == Double.NEGATIVE_INFINITY) // no need to add bad derivations
-      return;
+    if (derivScore == Double.NEGATIVE_INFINITY) return; // no need to add bad derivations - shouldn't happen
+
     Derivation deriv = derivationStream.peek(); // Score a DerivationStream based on the first item in the stream.
     double priority = derivScore - (completeDerivationsPushed++ * EPSILON);
     agenda.add(new PrioritizedDerivationStream(derivationStream, priority, probSum), priority); // when adding to agenda probsum is 0
@@ -292,31 +285,19 @@ final class ReinforcementParserState extends AbstractReinforcementParserState {
       coarseParserState = coarseParser.getCoarsePrunedChart(ex);
     LogInfo.end_track();
 
-    // draw samples to compute gradient and expected reward
-    int i = 0;
-    for ( ; i < (computeExpectedCounts ? ReinforcementParser.opts.numOfSamplesPerExample : 1); ++i) {
-      LogInfo.begin_track("ReinforcementParserState.infer, sample=%s", i);
-      if (i > 0)
-        clearState();
-      inferBySampling();
-      LogInfo.end_track();
-    }
+    // draw a sample to compute gradient and expected reward
+    LogInfo.begin_track("ReinforcementParserState.inferBySampling");
+    sampleHistoryAndInfer();
+    LogInfo.end_track();
 
     // Compute gradient
     setPredDerivations();
-    if (computeExpectedCounts) {
-      expectedCounts = ReinforcementUtils.multiplyDoubleMap(expectedCounts, 1d / i);
-      if (parser.verbose(3))
-        SempreUtils.logMap(expectedCounts, "averaged gradient");
-    }
-    objectiveValue /= i;
     if (parser.verbose(3))
-      LogInfo.logs("Expected reward (across samples) = %s", objectiveValue);
-
+      LogInfo.logs("Expected reward = %s", objectiveValue);
     visualizeChart();
   }
 
-  private void inferBySampling() {
+  private void sampleHistoryAndInfer() {
 
     // add to chart the token and phrase parts
     for (Derivation deriv : gatherTokenAndPhraseDerivations())
@@ -349,10 +330,12 @@ final class ReinforcementParserState extends AbstractReinforcementParserState {
       }
 
       // handle root derivations - get compatibility and record number of compatible derivations
-      recordRootDerivationStats(ex, numItemsSampled, sampledDerivation);
+      handleRootDerivation(ex, numItemsSampled, sampledDerivation);
+
       if (computeExpectedCounts) {
         Map<String, Double> counts = new HashMap<>();
         // add the feature vector and subtract for the time it was in the agenda unless has negative probability
+        //pretty hacky
         if (pdsAndProbability.getSecond() > -0.0001)
           sampledDerivation.incrementLocalFeatureVector(1 - pdsAndProbability.getFirst().probSum, counts);
         else
@@ -382,23 +365,23 @@ final class ReinforcementParserState extends AbstractReinforcementParserState {
 
   private void unrollHighProbStreams() {
 
-    if (ReinforcementParser.opts.noUnrolling) return;
-    if (samplingStrategy.equals("max") && !ReinforcementParser.opts.unrollWithMaxSampler) return;
+    if (samplingStrategy.equals("max")) return;
 
-    sampler.unroll(); // if multiplicative, then unroll oracle stuff
+    sampler.unroll(); // if multiplicative, then unroll oracle stuff (ignore \beta currently!)
 
     if (parser.verbose(3))
       LogInfo.begin_track("Unrolling high probability streams");
-    // get max agenda score
-    double maxScore = Double.NEGATIVE_INFINITY;
+
+    double lb=Double.NEGATIVE_INFINITY;
+    int numOfHiddenStreams = 0;
     for (PrioritizedDerivationStream pds : agenda) {
-      double agendaScore = pds.getScore();
-      if (maxScore < agendaScore)
-        maxScore = agendaScore;
+      lb = NumUtils.logAdd(lb, pds.getScore());
+      if(pds.derivStream.estimatedSize() > 1)
+        numOfHiddenStreams++;
     }
 
     if (parser.verbose(3))
-      LogInfo.logs("unrollHighProbStreams(): |agenda|=%s, max=%s", agenda.size(), maxScore);
+      LogInfo.logs("unrollHighProbStreams(): |agenda|=%s, lb=%s, |hiddenstreams|=%s", agenda.size(), lb, numOfHiddenStreams);
 
     List<Pair<DerivationStream, Double>> derivsToAdd = new ArrayList<>();
     List<Integer> indicesToRemove = new ArrayList<>();
@@ -406,7 +389,7 @@ final class ReinforcementParserState extends AbstractReinforcementParserState {
       PrioritizedDerivationStream pds = agenda.get(i);
       boolean modified = false;
       while (pds.derivStream.hasNext() && pds.derivStream.estimatedSize() > 1 &&
-              isHighProbStream(pds.derivStream, maxScore, pds.derivStream.estimatedSize())) {
+              illegalStream(pds.derivStream, lb, pds.derivStream.estimatedSize(), numOfHiddenStreams)) {
         modified = true;
         Derivation nextDeriv = pds.derivStream.next();
         updateBackpointers(pds.derivStream, nextDeriv);
@@ -414,12 +397,18 @@ final class ReinforcementParserState extends AbstractReinforcementParserState {
         DerivationStream derivStream = SingleDerivationStream.constant(nextDeriv);
         if (parser.verbose(3) && derivStream.hasNext()) {
           Derivation deriv  = derivStream.peek();
-          LogInfo.logs("unrollHighProbStreams(): add deriv=%s(%s,%s) [%s] score=%s, |stream|=%s",
+          LogInfo.logs("unrollIllegalStreams(): add deriv=%s(%s,%s) [%s] score=%s, |stream|=%s",
                   deriv.cat, deriv.start, deriv.end, deriv.formula, deriv.score, pds.derivStream.estimatedSize());
         }
         derivsToAdd.add(Pair.newPair(derivStream, pds.probSum));
-        if (pds.derivStream.hasNext())
+        //update lb
+        if (pds.derivStream.hasNext()) {
           featurizeAndScoreDerivation(pds.derivStream.peek());
+          lb = NumUtils.logAdd(lb, pds.getScore());
+        }
+        //update num of hidden streams
+        if(pds.derivStream.estimatedSize() <= 1)
+          numOfHiddenStreams--;
       }
       if (modified) {
         indicesToRemove.add(i);
@@ -439,6 +428,18 @@ final class ReinforcementParserState extends AbstractReinforcementParserState {
       LogInfo.logs("unrollHighProbStreams(): |agenda|=%s", agenda.size());
     if (parser.verbose(3))
       LogInfo.end_track();
+  }
+
+  private boolean illegalStream(DerivationStream derivStream, double logSum, int estimatedSize, int numOfHiddenStreams) {
+    Derivation deriv = derivStream.peek();
+    double firstItemLogProb = deriv.score - logSum; //log(exp(s(g_1))/L)
+    double upperBound = Math.log(estimatedSize) + Math.log(numOfHiddenStreams); //log(M(g)|G'|)
+
+    if (parser.verbose(3))
+      LogInfo.logs("IllegalStream(): score=%s, logsum=%s, |stream|=%s, |hiddenstreams|=%s, deriv=%s(%s,%s) %s, sum=%s",
+              deriv.score, logSum, estimatedSize, numOfHiddenStreams, deriv.cat, deriv.start, deriv.end, deriv.formula, firstItemLogProb+upperBound);
+
+    return (firstItemLogProb+upperBound) > LOG_SMALL_PROB;
   }
 
   private boolean isHighProbStream(DerivationStream derivStream, double maxScore, int estimatedSize) {
@@ -492,7 +493,7 @@ final class ReinforcementParserState extends AbstractReinforcementParserState {
   private void computeGradient() {
     if (predDerivations.isEmpty()) return;
 
-    double[] qDist = sampler.getDerivDistribution(predDerivations);
+    double[] qDist = sampler.getDerivDistribution(predDerivations); //uniform over correct things when \beta is high
     double[] piDist = ReinforcementUtils.expNormalize(predDerivations);
     // compute E_q(R(d))
     LogInfo.begin_track("Computing gradient");
@@ -539,7 +540,7 @@ final class ReinforcementParserState extends AbstractReinforcementParserState {
   }
 
   // info for visualizing chart
-  void visualizeChart() {
+  private void visualizeChart() {
     if (parser.chartFillOut != null && Parser.opts.visualizeChartFilling) {
       parser.chartFillOut.println(Json.writeValueAsStringHard(new ChartFillingData(ex.id, chartFillingList,
               ex.utterance, ex.numTokens())));
@@ -564,7 +565,7 @@ final class ReinforcementParserState extends AbstractReinforcementParserState {
     }
   }
 
-  private void recordRootDerivationStats(Example ex, int numItemsSampled, Derivation sampledDerivation) {
+  private void handleRootDerivation(Example ex, int numItemsSampled, Derivation sampledDerivation) {
     if (!sampledDerivation.isRoot(ex.numTokens())) return;
 
     sampledDerivation.ensureExecuted(parser.executor, ex.context);
@@ -681,11 +682,6 @@ final class ReinforcementParserState extends AbstractReinforcementParserState {
         this.firstCorrectDerivNumber = oracleDeriv.creationIndex;
 
         LogInfo.logs("OracleSampler: deriv=%s, comp=%s", oracleDeriv, oracleDeriv.compatibility);
-        if (SemanticFn.opts.trackLocalChoices) {
-          HashMap<String, Integer> choiceDiff = new LinkedHashMap<>();
-          oracleDeriv.incrementAllChoices(+1, choiceDiff);
-          FeatureVector.logChoices("Oracle deriv", choiceDiff);
-        }
         populateCorrectDerivations(oracleDeriv);
 
         if (parser.verbose(2)) {
@@ -804,6 +800,9 @@ final class ReinforcementParserState extends AbstractReinforcementParserState {
       return Pair.newPair(pds, returnProb ? prob : -1d);
     }
 
+    //todo : This unrolls all necessary derivations, and ignore \beta
+    //assumes probability mass on non-necessary things is very very small
+    //might need to be fixed if we anneal \beta to 0
     @Override
     public void unroll() {
 
@@ -869,6 +868,7 @@ final class ReinforcementParserState extends AbstractReinforcementParserState {
     }
   }
 
+  //A heuristic for choosing the oracle derivation. It'd be good to get rid of this or simplify
   public static class CorrectDerivationComparator implements Comparator<Derivation> {
     @Override
     public int compare(Derivation deriv1, Derivation deriv2) {

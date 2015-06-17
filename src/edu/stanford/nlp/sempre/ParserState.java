@@ -20,6 +20,10 @@ public abstract class ParserState {
   public static class Options {
     @Option(gloss = "Use a custom distribution for computing expected counts")
     public CustomExpectedCount customExpectedCounts = CustomExpectedCount.NONE;
+    @Option(gloss = "Whether to prune based on probability difference")
+    public boolean pruneByProbDiff = false;
+    @Option(gloss = "Difference in probability for pruning by prob diff")
+    public double probDiffPruningThresh = 100;
   }
   public static Options opts = new Options();
 
@@ -152,11 +156,22 @@ public abstract class ParserState {
       i++;
     }
 
-    // Keep only the top hypotheses
-    int beamSize = getBeamSize();
-    while (derivations.size() > beamSize) {
-      derivations.remove(derivations.size() - 1);
-      fallOffBeam = true;
+    //prune all d_i s.t  p(d_1) > CONST \cdot p(d_i)
+    if(ChartParserState.opts.pruneByProbDiff) {
+      double highestScore = derivations.get(0).score;
+      while (highestScore - derivations.get(derivations.size()-1).score > Math.log(opts.probDiffPruningThresh)) {
+        derivations.remove(derivations.size() - 1);
+        fallOffBeam = true;
+      }
+    }
+    //prune by beam size
+    else {
+      // Keep only the top hypotheses
+      int beamSize = getBeamSize();
+      while (derivations.size() > beamSize) {
+        derivations.remove(derivations.size() - 1);
+        fallOffBeam = true;
+      }
     }
   }
 

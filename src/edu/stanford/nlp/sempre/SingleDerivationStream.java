@@ -20,7 +20,8 @@ public abstract class SingleDerivationStream implements DerivationStream {
   }
 
   @Override public Derivation peek() {
-    if (nextDeriv == null) throw new RuntimeException("No more derivations!");
+    if (!hasNext()) throw new RuntimeException("No more derivations!");
+    //if (nextDeriv == null) throw new RuntimeException("No more derivations!");
     return nextDeriv;
   }
 

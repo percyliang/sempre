@@ -31,7 +31,8 @@ def header(modules='core', codalabDependencies=nil)
     # Queuing system
     letDefault(:q, 0), sel(:q, l(), l('fig/bin/q', '-shareWorkingPath', o('mem', '5g'), o('memGrace', 10), '-add', '---')),
     # Create execution directory
-    'fig/bin/qcreate',
+    letDefault(:pooldir, 1),
+    sel(:pooldir, l(), 'fig/bin/qcreate'),
     # Run the Java command...
     'java',
     '-ea',
@@ -63,7 +64,7 @@ def balancedTrainDevSplit
   l(o('Dataset.trainFrac', 0.5), o('Dataset.devFrac', 0.5))
 end
 
-def figOpts; l(o('execDir', '_OUTPATH_'), o('overwriteExecDir'), o('addToView', 0)) end
+def figOpts; l(selo(:pooldir, 'execDir', 'exec', '_OUTPATH_'), o('overwriteExecDir'), o('addToView', 0)) end
 
 ############################################################
 # Unit tests
@@ -143,8 +144,11 @@ def freebaseOpts
       o('BinaryLexicon.binaryLexiconFilesPath', 'lib/fb_data/7/binaryInfoStringAndAlignment.txt'),
       o('BinaryLexicon.keyToSortBy', 'Intersection_size_typed'),
     nil),
-    o('UnaryLexicon.unaryLexiconFilePath', 'lib/fb_data/7/unaryInfoStringAndAlignment.txt'), # unary
-    o('EntityLexicon.entityPopularityPath', 'lib/fb_data/7/entityPopularity.txt'), # entity
+    o('UnaryLexicon.unaryLexiconFilePath','lib/fb_data/7/unaryInfoStringAndAlignment.txt'), # unary
+    o('EntityLexicon.entityPopularityPath','lib/fb_data/7/entityPopularity.txt'), # entity
+    #Jonathan - added this 3/5/2015
+    o('TypeInference.typeLookup','freebase.FreebaseTypeLookup'),
+    o('FreebaseSearch.cachePath', '/u/nlp/data/semparse/scr/cache/fbsearch/1.cache'),
   nil)
 end
 
@@ -263,7 +267,7 @@ def webquestions
     letDefault(:entitysearch, 1),
     sel(:entitysearch,  # Used for EMNLP 2013
       l(
-        cachePaths('lucene/0.cache', 'sparql/1.cache'),
+        cachePaths('lucene/0.cache', 'sparql/3.cache'),
         o('EntityLexicon.inexactMatchIndex','lib/lucene/4.4/inexact/'),
         o('LexiconFn.maxEntityEntries',10),
         o('Grammar.tags', 'webquestions', 'bridge', 'join', 'inject','inexact'), # specify also strategy
@@ -285,6 +289,14 @@ addMode('freebase', 'Freebase (for EMNLP 2013, ACL 2014, TACL 2014)', lambda { |
   letDefault(:train, 0),
   letDefault(:interact, 0),
 
+  # nlpsub: for running commands on PBS
+  letDefault(:nlpsub, 0),
+  sel(:nlpsub,
+    l(),
+    l('nlpsub', '-d/scr/yonatan/sandbox/blackhole', '-nyonatan', '-c3'),
+    l('nlpsub', '-d/scr/yonatan/sandbox/blackhole', '-nyonatan', '-qjag', '-c3'),
+    l('nlpsub', '-d/scr/yonatan/sandbox/blackhole', '-nyonatan', '-qjohn', '-c3'),
+  nil),
   sel(:interact, l(), rlwrap),
   freebaseHeader,
   'edu.stanford.nlp.sempre.Main',
@@ -334,7 +346,7 @@ addMode('cacheserver', 'Start the general-purpose cache server that serves files
     letDefault(:port, 4000),
     lambda { |e| o('port', e[:port]) },
 
-    letDefault(:cachetype, 1),
+    letDefault(:cachetype, 0),
     sel(:cachetype,
       l(
         o('FileStringCache.appendMode'),
@@ -479,8 +491,22 @@ nil) })
 
 ############################################################
 # {2014-12-27} [Percy]: Overnight semantic parsing
-addMode('overnight', 'Overnight semantic parsing', lambda { |e| l(
-  'rlwrap',
+def overnightFeatureDomains
+  [
+    'match',
+    'ppdb',
+    'skip-bigram',
+    'root',
+    'alignment',
+    'lexical',
+    'root_lexical',
+    'lf',
+    'simpleworld',
+  nil].compact
+end
+
+addMode('overnight', 'Overnight semantic parsing', l(
+  rlwrap,
   header('core,freebase,overnight'),
   'edu.stanford.nlp.sempre.Main',
   figOpts,
@@ -494,7 +520,6 @@ addMode('overnight', 'Overnight semantic parsing', lambda { |e| l(
   o('Learner.maxTrainIters', 1),
   #o('printAllPredictions'),
   o('Derivation.showUtterance'),
-  letDefault(:domain, 'publications'),
   letDefault(:debug, 0),
 
   selo(1, 'maxExamples', 'train:10', 'train:MAX'),
@@ -521,46 +546,21 @@ addMode('overnight', 'Overnight semantic parsing', lambda { |e| l(
   o('Grammar.inPaths', lambda { |e| 'overnight/' + e[:domain] + '.grammar' }),
   o('SimpleWorld.domain', lambda { |e| e[:domain] }),
   o('PPDBModel.ppdbModelPath', lambda { |e| 'lib/data/overnight/' + e[:domain] + '-ppdb.txt' }),
-  #o('PPDBModel.ppdbModelPath', lambda { |e| 'overnightData/' + e[:domain] + '-ppdb.txt' }), # codalab
   o('Dataset.trainFrac', 0.8), o('Dataset.devFrac', 0.2),
   o('FloatingParser.maxDepth', 11),
   o('Parser.beamSize', 20),
-  letDefault(:alignment,1),
+  letDefault(:alignment, 1),
   sel(:alignment, 
-    o('wordAlignmentPath', 'lib/data/overnight/' + e[:domain] + '.word_alignments.heuristic'), 
-    o('wordAlignmentPath', 'lib/data/overnight/' + e[:domain] + '.word_alignments.berkeley'),
-    #o('wordAlignmentPath', 'overnightData/' + e[:domain] + '.word_alignments.heuristic'), # codalab
-    #o('wordAlignmentPath', 'overnightData/' + e[:domain] + '.word_alignments.berkeley'),
+    o('wordAlignmentPath', lambda { |e| 'lib/data/overnight/' + e[:domain] + '.word_alignments.heuristic' }), 
+    o('wordAlignmentPath', lambda { |e| 'lib/data/overnight/' + e[:domain] + '.word_alignments.berkeley' }),
   nil),
-  o('phraseAlignmentPath', 'lib/data/overnight/' + e[:domain] + '.phrase_alignments'), 
-  o('PPDBModel.ppdbModelPath', 'lib/data/overnight/' + e[:domain] + '-ppdb.txt'),
-  #o('phraseAlignmentPath', 'overnightData/' + e[:domain] + '.phrase_alignments'), # codalab
-  #o('PPDBModel.ppdbModelPath', 'overnightData/' + e[:domain] + '-ppdb.txt'),
+  o('phraseAlignmentPath', lambda { |e| 'lib/data/overnight/' + e[:domain] + '.phrase_alignments' }),
+  o('PPDBModel.ppdbModelPath', lambda { |e| 'lib/data/overnight/' + e[:domain] + '-ppdb.txt' }),
   o('DerivationPruner.pruningComputers', ['overnight.OvernightDerivationPruningComputer']),
   o('Dataset.inPaths', 
-    'train:lib/data/overnight/' + e[:domain] + '.paraphrases.train.examples',
-    'test:lib/data/overnight/' + e[:domain] + '.paraphrases.test.examples'),
-    #'train:overnightData/' + e[:domain] + '.paraphrases.train.examples', # codalab
-    #'test:overnightData/' + e[:domain] + '.paraphrases.test.examples'),
+    lambda { |e| 'train:lib/data/overnight/' + e[:domain] + '.paraphrases.train.examples' },
+    lambda { |e| 'test:lib/data/overnight/' + e[:domain] + '.paraphrases.test.examples' }),
   sel(:domain, {
-    'regex' => l(
-      letDefault(:data,0),
-      sel(:data,
-        l(o('Dataset.inPaths', 'train:lib/data/overnight/regex.paraphrases.train.examples')),
-        l(o('Dataset.inPaths', 'train:lib/data/overnight/regex.paraphrases.train.examples', 'test:lib/data/overnight/regex.examples.train.json')),
-        l(o('Dataset.inPaths', 'train:lib/data/overnight/regex.paraphrases.train.examples', 'test:lib/data/overnight/regex.examples.test.json')),
-      nil),
-      # selo(:debug, 'Dataset.inPaths', 'train:lib/data/overnight/regex.paraphrases.train.examples', 'train:regex/regex-debug.examples'),
-      o('executor', 'JavaExecutor'),
-      o('Builder.valueEvaluator', 'regex.RegexValueEvaluator'),
-      o('OvernightFeatureComputer.approxEmptyDenotation', 'true'),
-      # o('OvernightFeatureComputer.featureDomains', *regexFeatureDomains),
-      o('JavaExecutor.convertNumberValues', true),
-      o('Grammar.tags','generate','regex'),
-      o('lowerCaseTokens', false),  # case sensitivity is important for correctness of regular expressions
-      o('initialization', 'paraphrase :: match,1', 'paraphrase :: size,-0.1', 'paraphrase :: ppdb,0.3',
-        'paraphrase :: skip-bigram,0.8', 'paraphrase :: skip-ppdb,0.2','denotation :: error,-1000'),
-    nil),
     'geo880' => l(
       letDefault(:data,0),
       sel(:data,
@@ -577,8 +577,6 @@ addMode('overnight', 'Overnight semantic parsing', lambda { |e| l(
       o('FloatingParser.maxDepth', 11),
       o('Grammar.tags','generate','general', 'geo880'),
       o('SimpleLexicon.inPaths', 'lib/data/overnight/geo880.lexicon'),
-      #o('Params.l1Reg','lazy'),
-      #o('Params.l1RegCoeff',0.00001),
       o('OvernightDerivationPruningComputer.usePredicateDict'),
       o('OvernightDerivationPruningComputer.predicateDictPath','lib/data/overnight/geo880.predicate.dict'),
     nil),
@@ -612,21 +610,7 @@ addMode('overnight', 'Overnight semantic parsing', lambda { |e| l(
       o('Grammar.tags','generate','general'),
     nil),
   }),
-nil) })
-
-def overnightFeatureDomains
-  [
-    'match',
-    'ppdb',
-    'skip-bigram',
-    'root',
-    'alignment',
-    'lexical',
-    'root_lexical',
-    'lf',
-    'simpleworld',
-  nil].compact
-end
+nil))
 
 ############################################################
 # {5/27/15} [Ice]
@@ -854,6 +838,69 @@ def tablesPruningStrategies
 end
 
 
+
+# {2015-01-18} Generate utterances [Percy]
+addMode('genovernight', 'Generate utterances for overnight semantic parsing', lambda { |e| l(
+  'fig/bin/qcreate',
+  letDefault(:gen, 0),
+  sel(:gen, rlwrap, l()),
+  'java', '-Dmodules=core,overnight', '-Xmx10g', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.overnight.GenerationMain',
+  figOpts,
+  o('JoinFn.typeInference', true),
+  o('JoinFn.specializedTypeCheck', false),
+
+  o('JavaExecutor.convertNumberValues', false),
+  o('JavaExecutor.printStackTrace', false),
+
+  # These domains are all based on SimpleWorld
+  required(:domain),
+  o('Grammar.inPaths', lambda { |e| 'overnight/' + e[:domain] + '.grammar' }),
+  o('SimpleWorld.domain', lambda { |e| e[:domain] }),
+  o('initialization', 'denotation :: error,-1000', 'denotation :: empty,-100', 'paraphrase :: size,+0.01', 'denotation :: value_in_formula,-100'),
+  o('FeatureExtractor.featureComputers','overnight.OvernightFeatureComputer'),
+  o('OvernightFeatureComputer.featureDomains', ''),
+  o('OvernightFeatureComputer.itemAnalysis',false),
+  sel(:gen,
+    l( # For debugging the grammar
+      o('FeatureExtractor.featureDomains', 'denotation'),
+      o('Dataset.inPaths', lambda { |e| 'train:overnight/' + e[:domain] + '-unittest.examples'}),
+      selo(:parse, 'Grammar.tags', 'generate', 'parse'),
+      o('interactive'),
+    nil),
+    l( # For generating utterances
+      o('parser', 'FloatingParser'),
+      o('maxDepth', 30), o('beamSize', 10000),
+      o('derivationScoreNoise', 1),
+      o('Dataset.inPaths', 'train:overnight/null.examples'),
+      o('Derivation.showUtterance'),
+      o('FeatureExtractor.featureDomains', 'denotation'),
+      o('printAllPredictions'),
+      o('printPredictedUtterances'),
+      o('executeAllDerivations'),
+      o('Parser.pruneErrorValues', true),
+      o('Grammar.tags', 'generate'),
+    nil),
+  nil),
+  a('Grammar.tags', 'general'),
+nil) })
+
+# Generate for all the domains
+addMode('genovernight-wrapper', 'Generate utterances for overnight semantic parsing', lambda { |e| l(
+  './run', '@mode=genovernight', '@gen=1',
+  sel(nil, {
+    'calendar' => let(:domain, 'calendar'),
+    'blocks' => let(:domain, 'blocks'),
+    'housing' => let(:domain, 'housing'),
+    'restaurants' => let(:domain, 'restaurants'),
+    'publications' => let(:domain, 'publications'),
+    'socialnetwork' => let(:domain, 'socialnetwork'),
+    'basketball' => let(:domain, 'basketball'),
+    'geo880' => let(:domain, 'geo880'),
+    'recipes' => let(:domain, 'recipes'),
+  }),
+  lambda { |e| '@domain=' + e[:domain] },
+  lambda { |e| system 'mkdir -p genovernight.out'; o('execDir', 'genovernight.out/' + e[:domain]) },
+nil) })
 
 
 ############################################################

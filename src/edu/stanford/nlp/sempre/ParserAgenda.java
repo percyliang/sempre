@@ -12,19 +12,19 @@ import java.util.List;
  * Data structure for agenda in reinforcement parser
  * Created by joberant on 10/20/14.
  */
-public interface ParserAgenda<E extends Comparable> extends Iterable<E> {
+public interface ParserAgenda<PrioritizedDerivationStream> extends Iterable<PrioritizedDerivationStream> {
   void sort();
-  boolean add(E item, double priority);
+  boolean add(PrioritizedDerivationStream item, double priority);
   int size();
   void clear();
-  E pop();
-  E get(int i);
-  void remove(E pds, int index);
+  PrioritizedDerivationStream pop();
+  PrioritizedDerivationStream get(int i);
+  void remove(PrioritizedDerivationStream pds, int index);
 }
 
-class ListParserAgenda<E extends Comparable> implements ParserAgenda<E> {
+class ListParserAgenda implements ParserAgenda<PrioritizedDerivationStream> {
 
-  private List<E> agenda = new ArrayList<>();
+  private List<PrioritizedDerivationStream> agenda = new ArrayList<>();
 
   @Override
   public void sort() {
@@ -32,7 +32,7 @@ class ListParserAgenda<E extends Comparable> implements ParserAgenda<E> {
   }
 
   @Override
-  public boolean add(E item, double priority) {
+  public boolean add(PrioritizedDerivationStream item, double priority) {
     return agenda.add(item);
   }
 
@@ -47,41 +47,41 @@ class ListParserAgenda<E extends Comparable> implements ParserAgenda<E> {
   }
 
   @Override
-  public E pop() {
-   // todo - replace sort with finding max
+  public PrioritizedDerivationStream pop() {
+   // todo - replace sort with finding max (check if makes it faster)
     sort();
-    E pds = agenda.get(0);
+    PrioritizedDerivationStream pds = agenda.get(0);
     remove(pds, 0);
     return pds;
   }
 
   @Override
-  public E get(int i) {
+  public PrioritizedDerivationStream get(int i) {
     return agenda.get(i);
   }
 
   @Override
-  public void remove(E pds, int index) {
-    E last = agenda.remove(agenda.size() - 1);
+  public void remove(PrioritizedDerivationStream pds, int index) {
+    PrioritizedDerivationStream last = agenda.remove(agenda.size() - 1);
     if (last != pds)
       agenda.set(index, last);
   }
 
   @Override
-  public Iterator<E> iterator() {
+  public Iterator<PrioritizedDerivationStream> iterator() {
     return agenda.iterator();
   }
 }
 
-class QueueParserAgenda<E extends Comparable> implements ParserAgenda<E> {
+class QueueParserAgenda implements ParserAgenda<PrioritizedDerivationStream> {
 
-  private PriorityQueue<E> agenda = new PriorityQueue<>();
+  private PriorityQueue<PrioritizedDerivationStream> agenda = new PriorityQueue<>();
 
   @Override
   public void sort() {  }
 
   @Override
-  public boolean add(E item, double priority) {
+  public boolean add(PrioritizedDerivationStream item, double priority) {
     return agenda.add(item, priority);
   }
 
@@ -99,22 +99,22 @@ class QueueParserAgenda<E extends Comparable> implements ParserAgenda<E> {
   }
 
   @Override
-  public E pop() {
+  public PrioritizedDerivationStream pop() {
     return agenda.next();
   }
 
   @Override
-  public E get(int i) {
+  public PrioritizedDerivationStream get(int i) {
     throw new RuntimeException("Not supported");
   }
 
   @Override
-  public void remove(E pds, int index) {
+  public void remove(PrioritizedDerivationStream pds, int index) {
     throw new RuntimeException("Not supported");
   }
 
   @Override
-  public Iterator<E> iterator() {
+  public Iterator<PrioritizedDerivationStream> iterator() {
     throw new RuntimeException("Not supported");
   }
 }

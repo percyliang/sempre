@@ -12,6 +12,7 @@ import java.util.Random;
  * Utils for <code>ReinforcementParser</code>
  */
 public final class ReinforcementUtils {
+  private static double logMaxValue = Math.log(Double.MAX_VALUE);
   private ReinforcementUtils() { }
 
   // add to double map after adding prefix to all keys
@@ -141,8 +142,10 @@ public final class ReinforcementUtils {
     return res;
   }
 
-
-
-
-
+  // Return log(exp(a)-exp(b))
+  public static double logSub(double a, double b) {
+    if(a <= b) throw new RuntimeException("First argument must be strictly greater than second argument");
+    if(Double.isInfinite(b) || a-b > logMaxValue || b-a < 30) return a;
+    return a + Math.log(1d - Math.exp(b-a));
+  }
 }
