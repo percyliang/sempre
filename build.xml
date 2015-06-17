@@ -69,7 +69,7 @@
   </target>
 
   <!-- Compile tables -->
-  <target name="tables" depends="init,core">
+  <target name="tables" depends="init,core,corenlp">
     <echo message="Compiling ${ant.project.name}: tables"/>
     <mkdir dir="${classes}/tables"/>
     <javac srcdir="${src}" destdir="${classes}/tables" classpathref="lib.path" debug="true" includeantruntime="false" source="${source}" target="${target}">
