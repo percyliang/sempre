@@ -9,28 +9,29 @@ This README file describes the `tables` mode which accompanies the paper:
 
 Further descriptions and experiments can be viewed on the CodaLab website:
 
-  https://www.codalab.org/worksheets/0xf26cd79d4d734287868923ad1067cf4c/
+https://www.codalab.org/worksheets/0xf26cd79d4d734287868923ad1067cf4c/
 
 Running the code
 ----------------
 
 1. Download the dependencies and the dataset:
 
-    ./pull-dependencies corenlp
-    ./pull-dependencies tables
-    ./pull-dependencies tables-data
+        ./pull-dependencies core
+        ./pull-dependencies corenlp
+        ./pull-dependencies tables
+        ./pull-dependencies tables-data
 
   The dataset lives in `lib/data/tables/`
 
 2. Compile the source:
 
-    ant
+        ant tables
 
   This will produce JAR files in the `libsempre` directory as usual.
 
 3. The following command train and test on 100 development examples:
 
-    ./run @mode=tables @data=u-1 @feat=all @train=1 -maxex train,100 dev,100
+        ./run @mode=tables @data=u-1 @feat=all @train=1 -maxex train,100 dev,100
 
   The command should take less than an hour.
 
@@ -45,19 +46,19 @@ Other usages
 
 To launch the interactive shell, use:
 
-  ./run @mode=tables -interactive
+    ./run @mode=tables -interactive
 
 Apart from the usual shell commands, the additional command `context`
 can load the context graph for execution. For example, use:
 
-  (context (graph tables.TableKnowledgeGraph csv/204-csv/590.csv))
+    (context (graph tables.TableKnowledgeGraph csv/204-csv/590.csv))
 
-to load lib/data/tables/csv/204-csv/590.csv
+to load `lib/data/tables/csv/204-csv/590.csv`
 
 The table can also be viewed in pretty-printed format by calling
 
-  ./tables/view 204 590
+    ./tables/view 204 590
 
 or
 
-  ./tables/view csv/204-csv/590.csv
+    ./tables/view csv/204-csv/590.csv
