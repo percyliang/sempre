@@ -1,0 +1,6 @@
+{"lexeme": "california", "formula": "fb:en.california"}
+{"lexeme": "the golden state", "formula": "fb:en.california"}
+{"lexeme": "cities", "formula": "(fb:type.object.type fb:location.citytown)"}
+{"lexeme": "towns", "formula": "(fb:type.object.type fb:location.citytown)"}
+{"lexeme": "in", "formula": "fb:location.location.containedby"}
+{"lexeme": "located in", "formula": "fb:location.location.containedby"}
