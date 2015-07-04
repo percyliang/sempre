@@ -23,7 +23,7 @@ public final class ExampleUtils {
   }
 
   public static void writeJson(List<Example> examples, String outPath) throws IOException {
-    PrintWriter out = edu.stanford.nlp.io.IOUtils.getPrintWriter(outPath);
+    PrintWriter out = IOUtils.openOutHard(outPath);
     out.println("[");
     for (int i = 0; i < examples.size(); ++i) {
       Example ex = examples.get(i);
