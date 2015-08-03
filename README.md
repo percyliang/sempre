@@ -24,7 +24,7 @@ A virtual travel agent task:
 - Denotation: `(list ...)`
 
 By parsing utterances into logical forms, we obtain a rich representation that
-enables mucher deeper, context-aware understanding beyond the words.  With the
+enables much deeper, context-aware understanding beyond the words.  With the
 rise of natural language interfaces, semantic parsers are becoming increasingly
 more powerful and useful.
 
