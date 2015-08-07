@@ -264,7 +264,7 @@ def webquestions
     o('Parser.beamSize', 200), # {07/03/13}: WebQuestions is too slow to run with default 500, so set to 200 for now...
 
     # Caching
-    letDefault(:entitysearch, 1),
+    letDefault(:entitysearch, 0),
     sel(:entitysearch,  # Used for EMNLP 2013
       l(
         cachePaths('lucene/0.cache', 'sparql/3.cache'),
@@ -308,11 +308,6 @@ addMode('freebase', 'Freebase (for EMNLP 2013, ACL 2014, TACL 2014)', lambda { |
     'free917' => free917,
   }),
 
-  # Training
-  sel(:train, l(), l(
-    letDefault(:agenda, 0),
-    sel(:agenda, l(), agendaExperiments, agendaFree917Experiments),
-  nil)),
 
   sel(:interact, l(), l(
     # After training, run interact, which loads up a set of parameters and
