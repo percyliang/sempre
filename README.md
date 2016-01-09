@@ -150,11 +150,3 @@ Changes from SEMPRE 2.0 to SEMPRE 2.1:
 
 - Added the `tables` package for the paper *Compositional semantic parsing on semi-structured tables* (ACL 2015).
 - Add and `overnight` package for the paper *Building a semantic parser overnight* (ACL 2015).
-
-# License
-
-SEMPRE is licensed under the [GNU General Public
-License](http://www.gnu.org/licenses/gpl-2.0.html) (v2 or later).
-Note that this is the /full/ GPL, which allows many free uses, but not
-its use in distributed [proprietary
-software](http://www.gnu.org/licenses/gpl-faq.html#GPLInProprietarySystem).
