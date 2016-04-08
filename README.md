@@ -136,6 +136,17 @@ has done this for you):
     make install
     cd ..
 
+# Contribute
+
+To contribute code or resource to SEMPRE:
+
+- Create a fork of the repository. If you already have a fork,
+  it is a good idea to sync with the upstream repository first.
+- Push your changes to a new branch in your fork.
+- Start a pull request: go to your branch on the GitHub website,
+  then click "New pull request". Please specify the `develop` branch
+  of the upstream repository.
+
 # ChangeLog
 
 Changes from SEMPRE 1.0 to SEMPRE 2.0:
