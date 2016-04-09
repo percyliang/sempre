@@ -56,6 +56,9 @@ public abstract class Parser {
 
     @Option(gloss = "Dump all features (for debugging)")
     public boolean dumpAllFeatures = false;
+
+    @Option(gloss = "Whether rules are marked as floating by default")
+    public boolean defaultIsFloating = true;
   }
 
   public static final Options opts = new Options();

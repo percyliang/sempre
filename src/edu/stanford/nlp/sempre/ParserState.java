@@ -227,6 +227,58 @@ public abstract class ParserState {
     return derivs;
   }
 
+  public List<Derivation> gatherTokenAndPhraseDerivations(int spanStart, int spanEnd) {
+    List<Derivation> derivs = new ArrayList<>();
+
+    // All tokens (length 1)
+    for (int i = spanStart; i < spanEnd; i++) {
+      derivs.add(
+              new Derivation.Builder()
+                      .cat(Rule.tokenCat).start(i).end(i + 1)
+                      .rule(Rule.nullRule)
+                      .children(Derivation.emptyList)
+                      .withStringFormulaFrom(ex.token(i))
+                      .canonicalUtterance(ex.token(i))
+                      .createDerivation());
+
+      // Lemmatized version
+      derivs.add(
+              new Derivation.Builder()
+                      .cat(Rule.lemmaTokenCat).start(i).end(i + 1)
+                      .rule(Rule.nullRule)
+                      .children(Derivation.emptyList)
+                      .withStringFormulaFrom(ex.lemmaToken(i))
+                      .canonicalUtterance(ex.token(i))
+                      .createDerivation());
+    }
+
+    // All phrases (any length)
+    for (int i = spanStart; i < spanEnd; i++) {
+      for (int j = i + 1; j <= spanEnd; j++) {
+        derivs.add(
+                new Derivation.Builder()
+                        .cat(Rule.phraseCat).start(i).end(j)
+                        .rule(Rule.nullRule)
+                        .children(Derivation.emptyList)
+                        .withStringFormulaFrom(ex.phrase(i, j))
+                        .canonicalUtterance(ex.phrase(i, j))
+                        .createDerivation());
+
+        // Lemmatized version
+        derivs.add(
+                new Derivation.Builder()
+                        .cat(Rule.lemmaPhraseCat).start(i).end(j)
+                        .rule(Rule.nullRule)
+                        .children(Derivation.emptyList)
+                        .withStringFormulaFrom(ex.lemmaPhrase(i, j))
+                        .canonicalUtterance(ex.phrase(i, j))
+                        .createDerivation());
+      }
+    }
+    return derivs;
+  }
+
+
   // Ensure that all the logical forms are executed and compatibilities are computed.
   protected void ensureExecuted() {
     LogInfo.begin_track("Parser.ensureExecuted");

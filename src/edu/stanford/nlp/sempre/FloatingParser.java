@@ -45,7 +45,6 @@ import static fig.basic.LogInfo.logs;
 public class FloatingParser extends Parser {
   public static class Options {
     @Option public int maxDepth = 10;
-    @Option public boolean defaultIsFloating = true;
     @Option (gloss = "Flag specifying whether anchored spans/tokens can only be used once in a derivation")
     public boolean useAnchorsOnce = false;
     @Option (gloss = "Flag specifying whether floating rules are allowed to be applied consecutively")
