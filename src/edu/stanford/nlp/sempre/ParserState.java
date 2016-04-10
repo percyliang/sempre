@@ -1,14 +1,7 @@
 package edu.stanford.nlp.sempre;
 
-import fig.basic.Fmt;
-import fig.basic.LogInfo;
-import fig.basic.NumUtils;
-import fig.basic.Evaluation;
-import fig.basic.Option;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import fig.basic.*;
 
 /**
  * Actually does the parsing.  Main method is infer(), whose job is to fill in

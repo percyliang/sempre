@@ -2,6 +2,7 @@ package edu.stanford.nlp.sempre;
 
 import fig.basic.LispTree;
 import fig.basic.Option;
+import fig.basic.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +34,12 @@ public abstract class SemanticFn {
   // Override this function and call super.init(tree);
   public void init(LispTree tree) {
     this.tree = tree;
+  }
+
+  public SemanticFn copy() {
+    SemanticFn fn = (SemanticFn) Utils.newInstanceHard(this.getClass().getCanonicalName());
+    fn.init(tree);
+    return fn;
   }
 
   public interface Callable {

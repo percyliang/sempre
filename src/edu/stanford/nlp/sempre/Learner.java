@@ -108,6 +108,9 @@ public class Learner {
       for (String group : dataset.groups()) {
         boolean lastIter = (iter == numIters);
         boolean updateWeights = opts.updateWeights && group.equals("train") && !lastIter;  // Don't train on last iteration
+        if (parser instanceof MutatingParser) {
+          ((MutatingParser) parser).mutate(iter, numIters, group);
+        }
         Evaluation eval = processExamples(
                 iter,
                 group,
@@ -211,6 +214,7 @@ public class Learner {
 
     LogInfo.end_track();
     logEvaluationStats(evaluation, prefix);
+    evaluation.putOutput(prefix.replace('.', '-'));
     printLearnerEventsSummary(evaluation, iter, group);
     ExampleUtils.writeEvaluationSDF(iter, group, evaluation, examples.size());
     LogInfo.end_track();
