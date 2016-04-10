@@ -12,7 +12,7 @@ import fig.basic.Option;
  *
  * @author ppasupat
  */
-public class IncrementalParser extends Parser implements MutatingParser {
+public class IncrementalParser extends Parser {
   public static class Options {
     @Option(gloss = "Verbosity") public int verbosity = 0;
     @Option(gloss = "Grammar to use in each iteration")
