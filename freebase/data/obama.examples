@@ -1,0 +1,4 @@
+(example
+  (utterance "where was obama born")
+  (targetValue (list (name fb:en.honolulu)))
+)

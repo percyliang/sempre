@@ -1,0 +1,250 @@
+(example
+  (utterance "district of Sri Lanka")
+  (targetFormula (and (fb:type.object.type fb:location.citytown) (fb:location.location.containedby fb:en.sri_lanka)))
+)
+
+(example
+  (utterance "Spanish-speaking country in North America")
+  (targetFormula (and (fb:type.object.type fb:location.country) (and (fb:location.location.containedby fb:en.north_america) (fb:location.country.official_language fb:en.spanish))))
+)
+
+(example
+  (utterance "native of Houston , Texas")
+  (targetFormula (fb:people.person.place_of_birth fb:en.houston))
+)
+
+(example
+  (utterance "town in Malaysia")
+  (targetFormula (and (fb:type.object.type fb:location.citytown) (fb:location.location.containedby fb:en.malaysia)))
+)
+
+(example
+  (utterance "author of Dogs Misbehaving")
+  (targetFormula (fb:book.author.works_written fb:en.dogs_misbehaving))
+)
+
+(example
+  (utterance "languages of China")
+  (targetFormula (!fb:location.country.languages_spoken fb:en.china))
+)
+
+(example
+  (utterance "currency in Finland")
+  (targetFormula (!fb:location.country.currency_used fb:en.finland))
+)
+
+(example
+  (utterance "currency in Denmark")
+  (targetFormula (!fb:location.country.currency_used fb:en.denmark))
+)
+
+(example
+  (utterance "son of Nate Saint")
+  (targetFormula (and (fb:people.person.gender fb:en.male) (!fb:people.person.children fb:en.nate_saint)))
+)
+
+(example
+  (utterance "country in Europe")
+  (targetFormula (and (fb:type.object.type fb:location.country) (fb:location.location.containedby fb:en.europe)))
+)
+
+(example
+  (utterance "square in Bologna , Italy")
+  (targetFormula (and (fb:type.object.type fb:travel.tourist_attraction) (fb:location.location.containedby fb:en.bologna)))
+)
+
+(example
+  (utterance "home to Skybus Airlines")
+  (targetFormula (!fb:location.mailing_address.citytown (!fb:organization.organization.headquarters fb:en.skybus_airlines)))
+)
+
+(example
+  (utterance "city in Scotland")
+  (targetFormula (and (fb:type.object.type fb:location.citytown) (fb:location.location.containedby fb:en.scotland)))
+)
+
+(example
+  (utterance "capital of Indiana")
+  (targetFormula (!fb:location.administrative_division_capital_relationship.capital  (!fb:location.administrative_division.capital fb:en.indiana)))
+)
+
+(example
+  (utterance "capital of Russia")
+  (targetFormula (!fb:location.country.capital fb:en.russia))
+)
+
+(example
+  (utterance "resident of Dimondale , Michigan")
+  (targetFormula (fb:people.person.places_lived (fb:people.place_lived.location fb:en.dimondale)))
+)
+
+(example
+  (utterance "school in Searcy")
+  (targetFormula (and (fb:type.object.type fb:education.school) (fb:organization.organization.headquarters (fb:location.mailing_address.citytown fb:en.searcy))))
+)
+
+(example
+  (utterance "point in Finland")
+  (targetFormula (fb:location.location.containedby fb:en.finland))
+)
+
+(example
+  (utterance "city in Canada")
+  (targetFormula (and (fb:type.object.type fb:location.citytown) (fb:location.location.containedby fb:en.canada)))
+)
+
+(example
+  (utterance "home to Fairfield University")
+  (targetFormula (and (fb:type.object.type fb:location.citytown) (!fb:location.location.containedby fb:en.fairfield_university)))
+)
+
+(example
+  (utterance "country in Africa")
+  (targetFormula (and (fb:type.object.type fb:location.country) (fb:location.location.containedby fb:en.africa)))
+)
+
+(example
+  (utterance "city in South Dakota")
+  (targetFormula (and (fb:type.object.type fb:location.citytown) (fb:location.location.containedby fb:en.south_dakota)))
+)
+
+(example
+  (utterance "vocalist from London , England")
+  (targetFormula (and (fb:people.person.profession fb:en.singer) (fb:people.person.place_of_birth fb:en.london)))
+)
+
+(example
+  (utterance "capital of Peru")
+  (targetFormula (!fb:location.country.capital fb:en.peru))
+)
+
+(example
+  (utterance "alumni of Regis University in Denver")
+  (targetFormula (fb:people.person.education (fb:education.education.institution fb:en.regis_university)))
+)
+
+(example
+  (utterance "part of North Carolina")
+  (targetFormula (fb:location.location.containedby fb:en.north_carolina))
+)
+
+(example
+  (utterance "spot in Central America")
+  (targetFormula (fb:location.location.containedby fb:en.central_america))
+)
+
+(example
+  (utterance "city of Rembrandt")
+  (targetFormula (and (fb:type.object.type fb:location.citytown) (!fb:people.person.place_of_birth fb:en.rembrandt)))
+)
+
+(example
+  (utterance "capital of Jamaica")
+  (targetFormula (!fb:location.country.capital fb:en.jamaica))
+)
+
+(example
+  (utterance "native of Buenos Aires")
+  (targetFormula (fb:people.person.place_of_birth fb:en.buenos_aires))
+)
+
+(example
+  (utterance "shrine in Texas")
+  (targetFormula (and (fb:type.object.type fb:religion.place_of_worship) (fb:location.location.containedby fb:en.texas)))
+)
+
+(example
+  (utterance "native of Johnson City , Tennessee")
+  (targetFormula (fb:people.person.place_of_birth fb:en.johnson_city))
+)
+
+(example
+  (utterance "capital of Nigeria")
+  (targetFormula (!fb:location.country.capital fb:en.nigeria))
+)
+
+(example
+  (utterance "capital city of Venezuela")
+  (targetFormula (!fb:location.country.capital fb:en.venezuela))
+)
+
+(example
+  (utterance "capital of Denmark")
+  (targetFormula (!fb:location.country.capital fb:en.denmark))
+)
+
+(example
+  (utterance "currency in Tunisia")
+  (targetFormula (!fb:location.country.currency_used fb:en.tunisia))
+)
+
+(example
+  (utterance "son of Abraham and Hagar")
+  (targetFormula (and (fb:people.person.gender fb:en.male) (and (!fb:people.person.children fb:en.abraham) (!fb:people.person.children fb:en.hagar))))
+)
+
+(example
+  (utterance "capital of England")
+  (targetFormula (!fb:location.country.capital fb:en.england))
+)
+
+(example
+  (utterance "stadium in Fullerton , California")
+  (targetFormula (and (fb:type.object.type fb:sports.sports_facility) (fb:location.location.containedby fb:en.fullerton)))
+)
+
+(example
+  (utterance "cities in Indonesia")
+  (targetFormula (and (fb:type.object.type fb:location.citytown) (fb:location.location.containedby fb:en.indonesia)))
+)
+
+(example
+  (utterance "town near Koblenz , Germany")
+  (targetFormula (and (fb:type.object.type fb:location.citytown) (fb:location.location.containedby fb:en.koblenz)))
+)
+
+(example
+  (utterance "home to company called Microsoft")
+  (targetFormula (!fb:location.mailing_address.citytown (!fb:organization.organization.headquarters fb:en.microsoft_corporation)))
+)
+
+(example
+  (utterance "currency for Finland")
+  (targetFormula (!fb:location.country.currency_used fb:en.finland))
+)
+
+(example
+  (utterance "skyscrapers in Houston")
+  (targetFormula (and (fb:type.object.type fb:architecture.skyscraper) (fb:location.location.containedby fb:en.houston)))
+)
+
+(example
+  (utterance "attraction of Rajahmundry")
+  (targetFormula (and (fb:type.object.type fb:travel.tourist_attraction) (fb:location.location.containedby fb:en.rajahmundry)))
+)
+
+(example
+  (utterance "wife of Abraham")
+  (targetFormula (and (fb:people.person.gender fb:en.female) (fb:people.person.spouse_s (fb:people.marriage.spouse fb:en.abraham))))
+)
+
+(example
+  (utterance "native of Indianapolis , Indiana")
+  (targetFormula (fb:people.person.place_of_birth fb:en.indianapolis))
+)
+
+(example
+  (utterance "member of Barcelona")
+  (targetFormula (fb:soccer.football_player.current_team (fb:soccer.football_roster_position.team fb:en.fc_barcelona)))
+)
+
+(example
+  (utterance "city of Nepal")
+  (targetFormula (and (fb:type.object.type fb:location.citytown) (fb:location.location.containedby fb:en.nepal)))
+)
+
+(example
+  (utterance "home of ConocoPhillips in Canada")
+  (targetFormula (and (fb:location.location.containedby fb:en.canada) (!fb:location.mailing_address.citytown (!fb:organization.organization.headquarters fb:en.conocophillips_canada_ltd))))
+)
+

@@ -1,0 +1,30 @@
+# For debugging
+
+#Entities
+(rule $Entity (barack obama) (ConstantFn fb:en.barack_obama fb:people.person))
+(rule $Entity (michelle obama) (ConstantFn fb:en.michelle_obama fb:people.person))
+(rule $Entity (tom cruise) (ConstantFn fb:en.tom_cruise fb:people.person))
+(rule $Entity (michael jordan) (ConstantFn fb:en.michael_jordan fb:people.person))
+(rule $Entity (michael jackson) (ConstantFn fb:en.michael_jackson fb:people.person))
+(rule $Entity (thomas edison) (ConstantFn fb:en.thomas_edison fb:people.person))
+(rule $Entity (albert einstein) (ConstantFn fb:en.albert_einstein fb:people.person))
+(rule $Entity (edgar allan poe) (ConstantFn fb:en.edgar_allan_poe fb:people.person))
+(rule $Entity (lionel messi) (ConstantFn fb:en.lionel_messi fb:people.person))
+(rule $Entity (alan turing) (ConstantFn fb:en.alan_turing fb:people.person))
+(rule $Entity (abraham lincoln) (ConstantFn fb:en.abraham_lincoln fb:people.person))
+(rule $Entity (steve jobs) (ConstantFn fb:en.steve_jobs fb:people.person))
+
+#Binaries
+(rule $Binary (born) (ConstantFn fb:people.person.place_of_birth (-> fb:location.location fb:people.person))) 
+(rule $Binary (profession) (ConstantFn fb:people.person.profession (-> fb:people.profession fb:people.person)))
+(rule $Binary (lived) (ConstantFn (lambda x (fb:people.person.places_lived (fb:people.place_lived.location (var x)))) (-> fb:location.location fb:people.person))) 
+(rule $Binary (studied) (ConstantFn (lambda x (fb:people.person.education (fb:education.education.institution (var x)))) (-> fb:education.educational_institution fb:people.person)))
+(rule $Binary (worked) (ConstantFn (lambda x (fb:people.person.employment_history (fb:business.employment_tenure.company (var x)))) (-> fb:business_employer fb:people.person)))
+(rule $Binary (nationality) (ConstantFn fb:people.person.nationality (-> fb:location.country fb:people.person)))
+(rule $Binary (language) (ConstantFn fb:people.person.languages (-> fb:language.human_language fb:people.person))) 
+(rule $Binary (birthplace) (ConstantFn fb:people.person.place_of_birth (-> fb:location.location fb:people.person))) 
+(rule $Binary (parents) (ConstantFn fb:people.person.parents (-> fb:people.person fb:people.person)))
+(rule $Binary (children) (ConstantFn fb:people.person.children (-> fb:people.person fb:people.person)))
+
+#Combine
+(rule $ROOT ($Entity $Binary) (JoinFn unary,binary unaryCanBeArg0))

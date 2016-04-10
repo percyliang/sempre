@@ -1,0 +1,21 @@
+#!/bin/bash
+# Creating unary and binary lexicons given five arguments 
+# (1) Freebase file
+# (2) Freebase schema file
+# (3) linked unary open IE file
+# (4) linked binary open IE file
+# (5) work directory where all files are stored
+
+FREEBASE_FILE=$1
+SCHEMA_FILE=$2
+LINKED_UNARY_FILE=$3
+LINKED_BINARY_FILE=$4
+WORK_DIR=$5
+
+echo "Creating working directory"
+mkdir -p $WORK_DIR
+./scripts/generate-files-for-lexicon.sh $FREEBASE_FILE $SCHEMA_FILE $WORK_DIR
+echo "Generating unary lexicon..."
+./scripts/lexicon @task=align_unary @linkedUnaryFile=$LINKED_UNARY_FILE @freebaseFile=$FREEBASE_FILE @workDir=$WORK_DIR
+echo "Generating binary lexicon..."
+./scripts/lexicon @task=align_binary @linkedBinaryFile=$LINKED_BINARY_FILE @freebaseFile=$FREEBASE_FILE @workDir=$WORK_DIR

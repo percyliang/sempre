@@ -1,0 +1,250 @@
+(example
+  (utterance "capital of Uzbekistan")
+  (targetFormula (!fb:location.country.capital fb:en.uzbekistan_russia))
+)
+
+(example
+  (utterance "capital of Serbia")
+  (targetFormula (!fb:location.country.capital fb:en.serbia))
+)
+
+(example
+  (utterance "city of Arizona")
+  (targetFormula (and (fb:type.object.type fb:location.citytown) (fb:location.location.containedby fb:en.arizona)))
+)
+
+(example
+  (utterance "home to North Dakota State University")
+  (targetFormula (and (fb:type.object.type fb:location.citytown) (!fb:location.location.containedby fb:en.north_dakota_state_university)))
+)
+
+(example
+  (utterance "country in Asia")
+  (targetFormula (and (fb:type.object.type fb:location.country) (fb:location.location.containedby fb:en.asia)))
+)
+
+(example
+  (utterance "part of California")
+  (targetFormula (fb:location.location.containedby fb:en.california))
+)
+
+(example
+  (utterance "city in Indonesia")
+  (targetFormula (and (fb:type.object.type fb:location.citytown) (fb:location.location.containedby fb:en.indonesia)))
+)
+
+(example
+  (utterance "resident of Morehead , Kentucky")
+  (targetFormula (fb:people.person.places_lived (fb:people.place_lived.location fb:en.morehead_kentucky)))
+)
+
+(example
+  (utterance "singer of Evanescence")
+  (targetFormula (and (fb:people.person.profession fb:en.singer) (fb:music.group_member.membership (fb:music.group_membership.group fb:en.evanescence))))
+)
+
+(example
+  (utterance "capital of the Republic of Croatia")
+  (targetFormula (!fb:location.country.capital fb:en.croatia))
+)
+
+(example
+  (utterance "town in Austria")
+  (targetFormula (and (fb:type.object.type fb:location.citytown) (fb:location.location.containedby fb:en.austria)))
+)
+
+(example
+  (utterance "city in North Rhine-Westphalia , Germany")
+  (targetFormula (and (fb:type.object.type fb:location.citytown) (fb:location.location.containedby fb:en.north_rhine-westphalia)))
+)
+
+(example
+  (utterance "part of Iraq")
+  (targetFormula (fb:location.location.containedby fb:en.iraq))
+)
+
+(example
+  (utterance "state in Mexico")
+  (targetFormula (and (fb:type.object.type fb:location.administrative_division) (fb:location.location.containedby fb:en.mexico)))
+)
+
+(example
+  (utterance "composer from Havana , Cuba")
+  (targetFormula (and (fb:type.object.type fb:music.composer) (fb:people.person.place_of_birth fb:en.havana)))
+)
+
+(example
+  (utterance "city in Lombardy , Italy")
+  (targetFormula (and (fb:type.object.type fb:location.citytown) (fb:location.location.containedby fb:en.lombardy)))
+)
+
+(example
+  (utterance "search engine")
+  (targetFormula (and (fb:type.object.type fb:business.business_operation) (fb:business.business_operation.industry fb:en.search_engine)))
+)
+
+(example
+  (utterance "woman in Japan")
+  (targetFormula (and (fb:people.person.gender fb:en.female) (fb:people.person.places_lived (fb:people.place_lived.location fb:en.japan))))
+)
+
+(example
+  (utterance "capital of Indonesia")
+  (targetFormula (!fb:location.country.capital fb:en.indonesia))
+)
+
+(example
+  (utterance "novel by Joanne Harris")
+  (targetFormula (!fb:book.author.works_written fb:en.joanne_harris))
+)
+
+(example
+  (utterance "Spanish-speaking country in South America")
+  (targetFormula (and (fb:type.object.type fb:location.country) (and (fb:location.location.containedby fb:en.south_america) (fb:location.country.official_language fb:en.spanish))))
+)
+
+(example
+  (utterance "capital city of Romania")
+  (targetFormula (!fb:location.country.capital fb:en.romania))
+)
+
+(example
+  (utterance "home of Michigan Technological University")
+  (targetFormula (and (fb:type.object.type fb:location.citytown) (!fb:location.location.containedby fb:en.michigan_technological_university)))
+)
+
+(example
+  (utterance "congressman from Oklahoma")
+  (targetFormula (and (fb:type.object.type fb:government.u_s_congressperson) (fb:government.politician.government_positions_held (fb:government.government_position_held.district_represented fb:en.oklahoma))))
+)
+
+(example
+  (utterance "capital of Jordan")
+  (targetFormula (!fb:location.country.capital fb:en.jordan))
+)
+
+(example
+  (utterance "capital of the Republic of Serbia")
+  (targetFormula (!fb:location.country.capital fb:en.serbia))
+)
+
+(example
+  (utterance "capital city of Iceland")
+  (targetFormula (!fb:location.country.capital fb:en.iceland))
+)
+
+(example
+  (utterance "port of Italy")
+  (targetFormula (and (fb:type.object.type fb:location.citytown) (fb:location.location.containedby fb:en.italy)))
+)
+
+(example
+  (utterance "capital of Romania")
+  (targetFormula (!fb:location.country.capital fb:en.romania))
+)
+
+(example
+  (utterance "native of Marrero , Louisiana")
+  (targetFormula (fb:people.person.place_of_birth fb:en.marrero))
+)
+
+(example
+  (utterance "city in Jordan")
+  (targetFormula (and (fb:type.object.type fb:location.citytown) (fb:location.location.containedby fb:en.jordan)))
+)
+
+(example
+  (utterance "capital of Belarus")
+  (targetFormula (!fb:location.country.capital fb:en.belarus))
+)
+
+(example
+  (utterance "native of Miami , Florida")
+  (targetFormula (fb:people.person.place_of_birth fb:en.miami))
+)
+
+(example
+  (utterance "landmark of London")
+  (targetFormula (and (fb:type.object.type fb:travel.tourist_attraction) (fb:location.location.containedby fb:en.london)))
+)
+
+(example
+  (utterance "book by Barbara Matthiessen")
+  (targetFormula (!fb:book.author.works_written fb:en.barbara_matthiessen))
+)
+
+(example
+  (utterance "city of Australia")
+  (targetFormula (and (fb:type.object.type fb:location.citytown) (fb:location.location.containedby fb:en.australia)))
+)
+
+(example
+  (utterance "town in South Ayrshire , Scotland")
+  (targetFormula (and (fb:type.object.type fb:location.citytown) (fb:location.location.containedby fb:en.south_ayrshire)))
+)
+
+(example
+  (utterance "capital city of Turkey")
+  (targetFormula (!fb:location.country.capital fb:en.turkey))
+)
+
+(example
+  (utterance "singer from Tashkent , Uzbekistan")
+  (targetFormula (and (fb:people.person.profession fb:en.singer) (fb:people.person.place_of_birth fb:en.tashkent)))
+)
+
+(example
+  (utterance "writer in Kawaguchi , Japan")
+  (targetFormula (and (fb:type.object.type fb:book.author) (fb:people.person.places_lived (fb:people.place_lived.location fb:en.kawaguchi))))
+)
+
+(example
+  (utterance "native of Tuscon , Arizona")
+  (targetFormula (fb:people.person.place_of_birth fb:en.tucson))
+)
+
+(example
+  (utterance "city in Scotland")
+  (targetFormula (and (fb:type.object.type fb:location.citytown) (fb:location.location.containedby fb:en.scotland)))
+)
+
+(example
+  (utterance "center of Kazakhstan")
+  (targetFormula (and (fb:type.object.type fb:location.citytown) (fb:location.location.containedby fb:en.kazakhstan)))
+)
+
+(example
+  (utterance "river in Japan")
+  (targetFormula (and (fb:type.object.type fb:geography.river) (fb:location.location.containedby fb:en.japan)))
+)
+
+(example
+  (utterance "market in Australia")
+  (targetFormula (and (fb:type.object.type fb:travel.tourist_attraction) (fb:location.location.containedby fb:en.australia)))
+)
+
+(example
+  (utterance "capital of Guyana")
+  (targetFormula (!fb:location.country.capital fb:en.guyana))
+)
+
+(example
+  (utterance "son of Baltimore")
+  (targetFormula (fb:people.person.place_of_birth fb:en.baltimore))
+)
+
+(example
+  (utterance "ex-guitarist for Paramore")
+  (targetFormula (and (fb:people.person.profession fb:en.guitarist) (fb:music.group_member.membership (fb:music.group_membership.group fb:en.paramore))))
+)
+
+(example
+  (utterance "town in Okinawa , Japan")
+  (targetFormula (and (fb:type.object.type fb:location.citytown) (fb:location.location.containedby fb:en.okinawa_prefecture)))
+)
+
+(example
+  (utterance "capital of Tanzania")
+  (targetFormula (!fb:location.country.capital fb:en.tanzania))
+)
+

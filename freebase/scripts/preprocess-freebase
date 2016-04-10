@@ -1,0 +1,33 @@
+# These are the steps to take the raw Freebase dump, canonicalize ids, build a
+# SPARQL index, convert examples to use the canonical ids.
+# NOTE: do not run this script because it will overwrite a lot of things.
+
+exit 1
+
+# 1) Build a map from ids to canonical ids (based on the raw Freebase dump). 8GB
+java -cp classes:lib/* edu.stanford.nlp.sempre.freebase.BuildCanonicalIdMap -rawPath /u/nlp/data/semparse/scr/freebase/freebase-rdf-2013-06-09-00-00.gz -canonicalIdMapPath /u/nlp/data/semparse/scr/freebase/freebase-rdf-2013-06-09-00-00.canonical-id-map
+
+# 2a) Replace ids with canonical ids (and do minor filtering) in the Freebase graph.
+java -cp classes:lib/* edu.stanford.nlp.sempre.freebase.CanonicalizeIds -canonicalIdMapPath /u/nlp/data/semparse/scr/freebase/freebase-rdf-2013-06-09-00-00.canonical-id-map -rawPath /u/nlp/data/semparse/scr/freebase/freebase-rdf-2013-06-09-00-00.gz -canonicalizedPath /u/nlp/data/semparse/scr/freebase/freebase-rdf-2013-06-09-00-00.canonicalized
+
+# 2b) Replace ids with canonical ids in the examples files.
+java -cp classes:lib/* edu.stanford.nlp.sempre.CanonicalizeExamples -canonicalIdMapPath /u/nlp/data/semparse/scr/freebase/freebase-rdf-2013-06-09-00-00.canonical-id-map -examplePaths data/yates.examples /u/nlp/data/semparse/google/dataset_8/bfs_8_good_checked.examples3
+
+# 3) Filter the Freebase graph using properties that occur in examples files and Tom Lin alignments.
+fig/bin/qcreate -statePath /u/nlp/data/semparse/rdf/scr/`hostname | cut -f 1 -d .`/state java -cp classes:lib/* edu.stanford.nlp.sempre.freebase.FilterFreebase \
+  -examplesPath data/yates.examples.canonicalized /u/nlp/data/semparse/google/dataset_8/bfs_8_good_checked.examples3.canonicalized \
+  -keepProperties <(awk '{print $2}' lib/binaryInfoStringMatch.txt | grep ^fb:) \
+  -inPath /u/nlp/data/semparse/scr/freebase/freebase-rdf-2013-06-09-00-00.canonicalized -execDir _OUTPATH_ -overwriteExecDir
+
+# ...or keep everything
+time fig/bin/qcreate -statePath /u/nlp/data/semparse/rdf/scr/`hostname | cut -f 1 -d .`/state java -cp classes:lib/* edu.stanford.nlp.sempre.freebase.FilterFreebase -inPath /u/nlp/data/semparse/scr/freebase/freebase-rdf-2013-06-09-00-00.canonicalized -keepAllProperties -execDir _OUTPATH_ -overwriteExecDir
+
+# 4) Index the appropriate subset of the Freebase graph.
+./run @mode=indexfreebase @exec=90 @backend=virtuoso
+
+# 5) Extract a schema file
+scripts/extract-freebase-schema.rb http://jackson:3090/sparql /u/nlp/data/semparse/rdf/scr/`hostname | cut -f 1 -d .`/state/execs/90.exec/schema-2.ttl
+
+# 6) Execute formulas in examples files to check if everything is okay.
+java -cp classes:lib/* edu.stanford.nlp.sempre.ExecuteExamples -examplesPath data/yates.examples.canonicalized /u/nlp/data/semparse/google/dataset_8/bfs_8_good_checked.examples3.canonicalized -SparqlExecutor.endpointUrl http://jackson:3090/sparql | tee log
+java -cp classes:lib/* edu.stanford.nlp.sempre.ExecuteExamples -examplesPath data/yates.examples.canonicalized -SparqlExecutor.endpointUrl http://jackson:3090/sparql | tee log

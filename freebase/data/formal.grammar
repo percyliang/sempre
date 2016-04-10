@@ -1,0 +1,52 @@
+# Grammar that combines formal language (for composition) with natural language
+# (for lexical triggering).  Primarily used to debug and to build queries
+# semi-automatically.
+# 
+# Examples:
+#   [[b birthplace] [e obama]]
+#   [[e obama] [b born]]
+#   [[[e spanish] [b speak]] [u country]]
+#   [number of [[u lake] [[b in] [e united states]]]]
+#   [br [e tom cruise] [u movies]]
+#   [most [b height] [u president]]
+#   [[u president] [[b height] [at least 1.9]]]
+
+### Primitives
+
+(rule $Entity ([ e $PHRASE ]) (LexiconFn entity))
+(rule $Unary ([ u $LEMMA_PHRASE ]) (LexiconFn unary))
+(rule $Binary ([ b $LEMMA_PHRASE ]) (LexiconFn binary))
+
+(rule $Binary (more) (ConstantFn > (union (-> fb:type.int fb:type.int) (-> fb:type.float fb:type.float))))
+(rule $Binary (less) (ConstantFn < (union (-> fb:type.int fb:type.int) (-> fb:type.float fb:type.float))))
+(rule $Binary (at least) (ConstantFn >= (union (-> fb:type.int fb:type.int) (-> fb:type.float fb:type.float))))
+(rule $Binary (at most) (ConstantFn <= (union (-> fb:type.int fb:type.int) (-> fb:type.float fb:type.float))))
+
+(rule $Set ($PHRASE) (NumberFn))
+(rule $Set ($Entity) (IdentityFn))
+(rule $Set ($Unary) (IdentityFn))
+
+### Operators 
+
+# Aggregation
+(rule $Operator (count) (ConstantFn (lambda x (count (var x)))))
+
+# Superlative
+(rule $ArgmaxStr (most) (ConstantFn null null))
+(rule $Operator2 ($ArgmaxStr) (ConstantFn (lambda degree (lambda head (argmax 1 1 (var head) (var degree))))
+                                          (-> (-> fb:common.topic fb:type.number) fb:common.topic fb:common.topic)))
+(rule $Operator ($Operator2 $Binary) (JoinFn binary,unary unaryCanBeArg1))
+
+(rule $Set ([ $Operator $Set ]) (JoinFn binary,unary unaryCanBeArg1))
+
+### Composition
+
+(rule $Set ([ $Binary $Set ]) (JoinFn binary,unary unaryCanBeArg0 unaryCanBeArg1))
+(rule $Set ([ $Set $Binary ]) (JoinFn unary,binary unaryCanBeArg0 unaryCanBeArg1))
+(rule $Set ([ $Set $Set ]) (MergeFn and))
+(rule $Set ([ br $Set $Set ]) (BridgeFn unary headFirst))
+(rule $Set ([ br $Set $Set ]) (BridgeFn unary headLast))
+
+(rule $ROOT ($Set) (IdentityFn))
+(rule $ROOT ($Binary) (IdentityFn))
+(rule $ROOT ($Operator) (IdentityFn))
