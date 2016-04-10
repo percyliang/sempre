@@ -4,7 +4,6 @@ import java.io.*;
 import java.util.*;
 
 import edu.stanford.nlp.sempre.*;
-import edu.stanford.nlp.sempre.tables.TableTypeSystem;
 import fig.basic.*;
 import fig.exec.*;
 
@@ -15,8 +14,9 @@ import fig.exec.*;
  */
 public class SerializedDumper implements Runnable {
   public static class Options {
-    @Option(gloss = "do not print obviously bad denotations")
-    public boolean pruneBadDenotations = true;
+    @Option(gloss = "Verbosity") public int verbosity = 0;
+    @Option(gloss = "Randomly shuffle dumped derivations")
+    public Random shuffleDerivsRandom = new Random(9);
   }
   public static Options opts = new Options();
 
@@ -26,7 +26,6 @@ public class SerializedDumper implements Runnable {
 
   Builder builder;
   Dataset dataset;
-  Params params;
   PrintWriter out;
 
   @Override
@@ -35,7 +34,6 @@ public class SerializedDumper implements Runnable {
     builder.build();
     dataset = new Dataset();
     dataset.read();
-    params = new Params();
     for (String group : dataset.groups()) {
       String filename = Execution.getFile("dumped-" + group + ".gz");
       out = IOUtils.openOutHard(filename);
@@ -64,7 +62,7 @@ public class SerializedDumper implements Runnable {
       ex.log();
       Execution.putOutput("example", e);
       StopWatchSet.begin("Parser.parse");
-      ParserState state = builder.parser.parse(params, ex, false);
+      ParserState state = builder.parser.parse(builder.params, ex, false);
       StopWatchSet.end();
       out.printf("########## Example %s ##########\n", ex.id);
       dumpExample(exampleToLispTree(state));
@@ -127,29 +125,29 @@ public class SerializedDumper implements Runnable {
     }
 
     // Derivations
-    LispTree derivations = LispTree.proto.newList();
-    derivations.addChild("derivations");
+    List<LispTree> derivations = new ArrayList<>();
     List<Derivation> preds = state.predDerivations;
     for (int i = 0; i < preds.size(); i++) {
       Derivation deriv = preds.get(i);
       if (!isPruned(deriv)) {
-        derivations.addChild(deriv.toLispTree());
+        derivations.add(deriv.toLispTree());
       }
     }
-    tree.addChild(derivations);
-
+    Collections.shuffle(derivations, opts.shuffleDerivsRandom);
+    LispTree derivationsTree = LispTree.proto.newList();
+    derivationsTree.addChild("derivations");
+    for (LispTree derivation : derivations)
+      derivationsTree.addChild(derivation);
+    tree.addChild(derivationsTree);
     return tree;
   }
 
   // Decide whether we should skip the derivation
   private boolean isPruned(Derivation derivation) {
+    if (!(derivation.value instanceof ListValue)) return true;
+    ListValue list = (ListValue) derivation.value;
     // Check if there is at least one answer
-    if (derivation.value instanceof ListValue) {
-      ListValue list = (ListValue) derivation.value;
-      if (list.values.isEmpty()) return true;
-    } else return true;
-    // Check if the type is not row
-    if (derivation.type.meet(TableTypeSystem.ROW_SEMTYPE).isValid()) return true;
+    if (list.values.isEmpty()) return true;
     return false;
   }
 

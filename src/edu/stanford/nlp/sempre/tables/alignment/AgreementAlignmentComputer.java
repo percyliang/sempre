@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import edu.stanford.nlp.sempre.tables.alignment.IBMAligner.NullWordHandling;
+import edu.stanford.nlp.sempre.tables.alignment.AlignerMain.NullWordHandling;
 import fig.basic.LogInfo;
 import fig.basic.MapUtils;
 import fig.basic.Pair;
@@ -25,7 +25,7 @@ class AgreementAlignmentComputer implements AlignmentComputer {
     Set<String> allWords, allPreds;
     allWords = data.allWords();
     allPreds = data.allPreds();
-    if (IBMAligner.opts.nullWordHandling == NullWordHandling.trained) {
+    if (AlignerMain.opts.nullWordHandling == NullWordHandling.trained) {
       allWords.add(null);
       allPreds.add(null);
     }
@@ -38,7 +38,7 @@ class AgreementAlignmentComputer implements AlignmentComputer {
     LogInfo.end_track();
 
     // EM
-    for (int iter = 0; iter < IBMAligner.opts.maxIters; iter++) {
+    for (int iter = 0; iter < AlignerMain.opts.maxIters; iter++) {
       LogInfo.begin_track("EM Iteration %d", iter);
       // (word, pred) => soft count
       DoubleMap softCounts = new DoubleMap();
@@ -47,7 +47,7 @@ class AgreementAlignmentComputer implements AlignmentComputer {
         for (BitextDatum datum : group.groupData) {
           double weight = 1.0 / group.count;
           List<String> words = datum.words, preds = datum.preds;
-          if (IBMAligner.opts.nullWordHandling == NullWordHandling.trained) {
+          if (AlignerMain.opts.nullWordHandling == NullWordHandling.trained) {
             // Add a null word in front
             words = new ArrayList<>(words);
             words.add(0, null);
@@ -64,9 +64,9 @@ class AgreementAlignmentComputer implements AlignmentComputer {
               String word = words.get(i);
               normalizer += (probsWordToPred[i][j] = predGivenWord.get(word, pred));
             }
-            if (IBMAligner.opts.nullWordHandling == NullWordHandling.fixed) {
-              normalizer += IBMAligner.opts.nullWordProb;
-            } else if (IBMAligner.opts.nullWordHandling == NullWordHandling.varied) {
+            if (AlignerMain.opts.nullWordHandling == NullWordHandling.fixed) {
+              normalizer += AlignerMain.opts.nullWordProb;
+            } else if (AlignerMain.opts.nullWordHandling == NullWordHandling.varied) {
               normalizer += 1.0 / (words.size() + 1);
             }
             for (int i = 0; i < words.size(); i++) {
@@ -81,9 +81,9 @@ class AgreementAlignmentComputer implements AlignmentComputer {
               String pred = preds.get(j);
               normalizer += (probsPredToWord[i][j] = wordGivenPred.get(word, pred));
             }
-            if (IBMAligner.opts.nullWordHandling == NullWordHandling.fixed) {
-              normalizer += IBMAligner.opts.nullWordProb;
-            } else if (IBMAligner.opts.nullWordHandling == NullWordHandling.varied) {
+            if (AlignerMain.opts.nullWordHandling == NullWordHandling.fixed) {
+              normalizer += AlignerMain.opts.nullWordProb;
+            } else if (AlignerMain.opts.nullWordHandling == NullWordHandling.varied) {
               normalizer += 1.0 / (preds.size() + 1);
             }
             for (int j = 0; j < preds.size(); j++) {
@@ -108,10 +108,10 @@ class AgreementAlignmentComputer implements AlignmentComputer {
       for (Map.Entry<Pair<String, String>, Double> entry : softCounts.entrySet()) {
         if (entry.getValue() <= 0) continue;
         double prob = entry.getValue() / wordToMarginalized.get(entry.getKey().getFirst());
-        if (prob > IBMAligner.epsilon)
+        if (prob > AlignerMain.epsilon)
           predGivenWord.put(entry.getKey(), prob);
         prob = entry.getValue() / predToMarginalized.get(entry.getKey().getSecond());
-        if (prob > IBMAligner.epsilon)
+        if (prob > AlignerMain.epsilon)
           wordGivenPred.put(entry.getKey(), prob);
       }
       LogInfo.end_track();

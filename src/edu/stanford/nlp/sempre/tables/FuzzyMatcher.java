@@ -3,8 +3,6 @@ package edu.stanford.nlp.sempre.tables;
 import java.util.*;
 
 import edu.stanford.nlp.sempre.*;
-import edu.stanford.nlp.sempre.tables.TableKnowledgeGraph.TableCell;
-import edu.stanford.nlp.sempre.tables.TableKnowledgeGraph.TableColumn;
 import fig.basic.MapUtils;
 import fig.basic.Option;
 
@@ -18,10 +16,8 @@ public class FuzzyMatcher {
     // This would prevent "canada ?" from fuzzy matching: we already fuzzy match "canada"
     @Option(gloss = "Ignore query strings where a boundary word is a punctuation (prevent overgeneration)")
     public boolean ignorePunctuationBoundedQueries = true;
-    @Option(gloss = "Allow token subsequence match (can overgenerate a lot)")
-    public boolean allowTokenSubsequenceMatch = false;
-    @Option(gloss = "Do not fuzzy match if the query matches more than this number of formulas (prevent overgeneration)")
-    public int maxFuzzyMatchCandidates = Integer.MAX_VALUE;
+    @Option(gloss = "Maximum edit distance ratio")
+    public double fuzzyMatchMaxEditDistanceRatio = 0;
   }
   public static Options opts = new Options();
 
@@ -37,22 +33,35 @@ public class FuzzyMatcher {
     collapsedForms.add(StringNormalizationUtils.collapseNormalize(original));
     String normalized = StringNormalizationUtils.aggressiveNormalize(original);
     collapsedForms.add(StringNormalizationUtils.collapseNormalize(normalized));
-    if (opts.allowTokenSubsequenceMatch) {
-      String[] tokens = normalized.trim().split("\\s+");
-      for (int i = 0; i < tokens.length; i++) {
-        StringBuilder sb = new StringBuilder();
-        for (int j = i; j < tokens.length; j++) {
-          sb.append(tokens[j]);
-          collapsedForms.add(StringNormalizationUtils.collapseNormalize(sb.toString()));
-        }
-      }
-    }
     collapsedForms.remove("");
     return collapsedForms;
   }
 
   private static String getCanonicalCollapsedForm(String original) {
     return StringNormalizationUtils.collapseNormalize(original);
+  }
+
+  private static int editDistance(String a, String b) {
+    // TODO: Make this less naive
+    int m = a.length() + 1, n = b.length() + 1;
+    int[] dists = new int[m], newDists = new int[m];
+    for (int i = 0; i < m; i++) dists[i] = i;
+    for (int j = 1; j < n; j++) {
+      newDists[0] = j;
+      for (int i = 1; i < m; i++) {
+        newDists[i] = Math.min(Math.min(
+            dists[i] + 1,   // Insert
+            newDists[i-1] + 1),   // Delete
+            dists[i-1] + (a.charAt(i-1) == b.charAt(j-1) ? 0 : 1));   // Replace
+      }
+      int[] swap = dists; dists = newDists; newDists = swap;
+    }
+    return dists[m-1];
+  }
+
+  private static double editDistanceRatio(String a, String b) {
+    if (a.isEmpty() && b.isEmpty()) return 0.0;
+    return editDistance(a, b) * 2.0 / (a.length() + b.length());
   }
 
   // Map normalized strings to Values
@@ -106,13 +115,24 @@ public class FuzzyMatcher {
     if (opts.ignorePunctuationBoundedQueries && !checkPunctuationBoundaries(term)) return Collections.emptySet();
     String normalized = getCanonicalCollapsedForm(term);
     Set<Formula> answer;
+    Map<String, Set<Formula>> target;
     switch (mode) {
-      case ENTITY: answer = phraseToEntityFormulas.get(normalized); break;
-      case UNARY:  answer = phraseToUnaryFormulas.get(normalized);  break;
-      case BINARY: answer = phraseToBinaryFormulas.get(normalized); break;
+      case ENTITY: target = phraseToEntityFormulas; break;
+      case UNARY:  target = phraseToUnaryFormulas;  break;
+      case BINARY: target = phraseToBinaryFormulas; break;
       default: throw new RuntimeException("Unknown FuzzyMatchMode " + mode);
     }
-    return (answer == null || answer.size() > opts.maxFuzzyMatchCandidates) ? Collections.emptySet() : answer;
+    if (opts.fuzzyMatchMaxEditDistanceRatio == 0) {
+      answer = target.get(normalized);
+    } else {
+      answer = new HashSet<>();
+      for (String key : target.keySet()) {
+        if (editDistanceRatio(key, normalized) < opts.fuzzyMatchMaxEditDistanceRatio) {
+          answer.addAll(target.get(key));
+        }
+      }
+    }
+    return answer == null ? Collections.emptySet() : answer;
   }
 
   public Collection<Formula> getAllFormulas(FuzzyMatchFn.FuzzyMatchFnMode mode) {
@@ -124,4 +144,11 @@ public class FuzzyMatcher {
     }
   }
 
+  // ============================================================
+  // Test
+  // ============================================================
+
+  public static void main(String[] args) {
+    System.out.println(editDistance("unionist", "unionists"));
+  }
 }

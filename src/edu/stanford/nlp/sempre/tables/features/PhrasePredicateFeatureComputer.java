@@ -21,7 +21,8 @@ import fig.basic.*;
  */
 public class PhrasePredicateFeatureComputer implements FeatureComputer {
   public static class Options {
-    @Option(gloss = "Verbosity") public int verbose = 0;
+    @Option(gloss = "Verbosity")
+    public int verbose = 0;
     @Option(gloss = "Define features on partial derivations as well")
     public boolean defineOnPartialDerivs = true;
     @Option(gloss = "Also define features on prefix and suffix matches")
@@ -101,17 +102,9 @@ public class PhrasePredicateFeatureComputer implements FeatureComputer {
 
   private void extractMatch(Example ex, Derivation deriv, PhraseInfo phraseInfo, PredicateInfo predicateInfo, double factor) {
     if (predicateInfo.originalString != null) {
-      if (!PhraseInfo.opts.usePhraseLemmaOnly) {
-        extractMatch(ex, deriv, phraseInfo, phraseInfo.text, "(o)",
-            predicateInfo, predicateInfo.originalString, "(o)", factor);
-      }
       extractMatch(ex, deriv, phraseInfo, phraseInfo.lemmaText, "",
           predicateInfo, predicateInfo.originalString, "(o)", factor);
     } else {
-      if (!PhraseInfo.opts.usePhraseLemmaOnly) {
-        extractMatch(ex, deriv, phraseInfo, phraseInfo.text, "(o)",
-            predicateInfo, predicateInfo.predicate, "(i)", factor);
-      }
       extractMatch(ex, deriv, phraseInfo, phraseInfo.lemmaText, "",
           predicateInfo, predicateInfo.predicate, "(i)", factor);
     }
@@ -215,9 +208,6 @@ public class PhrasePredicateFeatureComputer implements FeatureComputer {
     }
     deriv.addFeature("p-f", "" + tree);
     for (PhraseInfo phraseInfo : phraseInfos) {
-      if (!PhraseInfo.opts.usePhraseLemmaOnly) {
-        deriv.addFeature("p-f", phraseInfo.text + "(o);" + tree);
-      }
       deriv.addFeature("p-f", phraseInfo.lemmaText + ";" + tree);
     }
   }

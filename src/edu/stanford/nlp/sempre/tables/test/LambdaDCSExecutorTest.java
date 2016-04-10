@@ -185,6 +185,8 @@ public class LambdaDCSExecutorTest {
         graph, matches("(name fb:en.honolulu)"));
     runFormula(executor, "(and ((reverse (lambda x (fb:people.person.place_of_birth (var x)))) fb:en.barack_obama) (!fb:people.person.place_of_birth *))",
         graph, matches("(name fb:en.honolulu)"));
+    runFormula(executor, "((reverse (lambda x (fb:people.person.place_of_birth (var x)))) fb:en.barack_obama)",
+        graph, matches("(name fb:en.honolulu)"));
   }
 
   @Test(groups = "lambdaCSV") public void lambdaOnGraphCSVTest() {

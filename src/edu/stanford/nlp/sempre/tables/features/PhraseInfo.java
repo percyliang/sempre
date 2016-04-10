@@ -18,8 +18,6 @@ public class PhraseInfo {
   public static class Options {
     @Option(gloss = "Maximum number of tokens in a phrase")
     public int maxPhraseLength = 3;
-    @Option(gloss = "Use lemma form only")
-    public boolean usePhraseLemmaOnly = false;
     @Option(gloss = "Fuzzy match predicates")
     public boolean computeFuzzyMatchPredicates = false;
   }

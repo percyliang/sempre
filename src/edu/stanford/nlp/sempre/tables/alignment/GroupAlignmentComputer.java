@@ -23,7 +23,7 @@ public class GroupAlignmentComputer implements AlignmentComputer {
     LogInfo.end_track();
 
     // EM
-    for (int iter = 0; iter <= IBMAligner.opts.maxIters; iter++) {
+    for (int iter = 0; iter <= AlignerMain.opts.maxIters; iter++) {
       LogInfo.begin_track("EM Iteration %d", iter);
       // count(word|pred)
       DoubleMap softCounts = new DoubleMap();
@@ -71,7 +71,7 @@ public class GroupAlignmentComputer implements AlignmentComputer {
             }
           }
         }
-        if (iter == IBMAligner.opts.maxIters) {
+        if (iter == AlignerMain.opts.maxIters) {
           int rBest = 0;
           double rBestScore = 0;
           for (int r = 0; r < group.groupData.size(); r++) {
@@ -84,13 +84,13 @@ public class GroupAlignmentComputer implements AlignmentComputer {
           LogInfo.logs(">> %s", group.groupData.get(rBest).preds);
         }
       }
-      if (iter < IBMAligner.opts.maxIters) {
+      if (iter < AlignerMain.opts.maxIters) {
         // Update parameters
         alignment = new DoubleMap();
         for (Map.Entry<Pair<String, String>, Double> entry : softCounts.entrySet()) {
           if (entry.getValue() <= 0) continue;
           double prob = entry.getValue() / predToMarginalized.get(entry.getKey().getSecond());
-          if (prob > IBMAligner.epsilon)
+          if (prob > AlignerMain.epsilon)
             alignment.put(entry.getKey(), prob);
         }
       }

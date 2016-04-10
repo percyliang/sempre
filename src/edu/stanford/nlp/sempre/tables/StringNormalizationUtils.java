@@ -15,8 +15,6 @@ import edu.stanford.nlp.sempre.NameValue;
 import edu.stanford.nlp.sempre.NumberValue;
 import edu.stanford.nlp.sempre.StringValue;
 import edu.stanford.nlp.sempre.Value;
-import edu.stanford.nlp.sempre.tables.TableKnowledgeGraph.TableCell;
-import edu.stanford.nlp.sempre.tables.TableKnowledgeGraph.TableColumn;
 import fig.basic.*;
 
 /**
