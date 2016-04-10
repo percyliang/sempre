@@ -1,9 +1,0 @@
-(rule $Entity ($PHRASE) (LexiconFn entity fbsearch))
-(rule $ROOT ($Entity born) (lambda x (!fb:people.person.place_of_birth (var x))))
-
-#(rule $Set ($Entity) (IdentityFn))
-#(rule $VP/NP (wrote) (ConstantFn fb:book.author.works_written))
-#(rule $S (where was $Set born) (lambda x (!fb:people.person.place_of_birth (var x))))
-
-#(rule $ROOT ($S) (IdentityFn))
-#(rule $ROOT (e $Entity) (IdentityFn))

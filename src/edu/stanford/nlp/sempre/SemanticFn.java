@@ -36,12 +36,6 @@ public abstract class SemanticFn {
     this.tree = tree;
   }
 
-  public SemanticFn copy() {
-    SemanticFn fn = (SemanticFn) Utils.newInstanceHard(this.getClass().getCanonicalName());
-    fn.init(tree);
-    return fn;
-  }
-
   public interface Callable {
     String getCat();
     int getStart();

@@ -4,19 +4,12 @@ sfig
 refdb
 virtuoso-opensource
 
+classes
 libsempre
 sempre.jar
 module-classes.txt
 
-pystig
-trans
-
-classes
-libsempre
-
 state
-lex_state
-trans_state
 out
 test-output
 

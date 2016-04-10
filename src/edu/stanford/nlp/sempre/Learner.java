@@ -108,9 +108,8 @@ public class Learner {
       for (String group : dataset.groups()) {
         boolean lastIter = (iter == numIters);
         boolean updateWeights = opts.updateWeights && group.equals("train") && !lastIter;  // Don't train on last iteration
-        if (parser instanceof MutatingParser) {
-          ((MutatingParser) parser).mutate(iter, numIters, group);
-        }
+        // Allow the parser to change behavior based on current group and iteration
+        parser.mutate(iter, numIters, group);
         Evaluation eval = processExamples(
                 iter,
                 group,

@@ -126,7 +126,6 @@ addModule('corenlp', 'Stanford CoreNLP 3.2.0 (for backward reproducibility)', la
    'jollyday.jar' => 'jollyday.jar'}.each { |key, value|
     system "ln -sfv stanford-corenlp-full-2013-06-20/#{key} lib/#{value}" or exit 1
   }
-  pull('/u/nlp/data/semparse/resources/stanford-corenlp-caseless-2013-06-07-models.jar', '', {:symlink => true})
 })
 
 addModule('freebase', 'Freebase: need to construct Freebase schemas', lambda {
