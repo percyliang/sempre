@@ -1,9 +1,13 @@
 lib
 fig
+sfig
+refdb
 virtuoso-opensource
-module-classes.txt
+
 classes
 libsempre
+sempre.jar
+module-classes.txt
 
 state
 out
@@ -21,3 +25,14 @@ semparse.iml
 *.cache
 *.DS_Store
 java.hprof.txt
+
+# Don't put papers here
+/papers
+
+# Symlinks
+/c
+/e
+/t
+/x
+scr
+rdf

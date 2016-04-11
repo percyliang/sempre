@@ -99,7 +99,7 @@ public class Rule {
   }
 
   /* Extract tag info */
-  private double getInfoTag(String infoTag) {
+  public double getInfoTag(String infoTag) {
     if (info != null) {
       for (Pair<String, Double> p : info) {
         if (p.getFirst().equals(infoTag)) return p.getSecond();

@@ -2,6 +2,7 @@ package edu.stanford.nlp.sempre;
 
 import fig.basic.LispTree;
 import fig.basic.Option;
+import fig.basic.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
