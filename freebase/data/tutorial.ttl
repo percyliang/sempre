@@ -1,21 +1,21 @@
 @prefix fb: <http://rdf.freebase.com/ns/> .
 
-fb:en.los_angeles	fb:location.location.containedby	fb:en.california .
-fb:en.san_francisco	fb:location.location.containedby	fb:en.california .
-fb:en.mount_whitney	fb:location.location.containedby	fb:en.california .
+fb:en.los_angeles	fb:location.location.containedby	fb:en.california	.
+fb:en.san_francisco	fb:location.location.containedby	fb:en.california	.
+fb:en.mount_whitney	fb:location.location.containedby	fb:en.california	.
 
-fb:en.seattle	fb:type.object.type	fb:location.citytown .
-fb:en.san_francisco	fb:type.object.type	fb:location.citytown .
-fb:en.los_angeles	fb:type.object.type	fb:location.citytown .
-fb:en.mount_whitney	fb:type.object.type	fb:geography.mountain .
-fb:en.california	fb:type.object.type	fb:location.us_state .
+fb:en.seattle	fb:type.object.type	fb:location.citytown	.
+fb:en.san_francisco	fb:type.object.type	fb:location.citytown	.
+fb:en.los_angeles	fb:type.object.type	fb:location.citytown	.
+fb:en.mount_whitney	fb:type.object.type	fb:geography.mountain	.
+fb:en.california	fb:type.object.type	fb:location.us_state	.
 
-fb:en.seattle	fb:type.object.name	"Seattle"@en .
-fb:en.san_francisco	fb:type.object.name	"San Francisco"@en .
-fb:en.los_angeles	fb:type.object.name	"Los Angeles"@en .
-fb:en.mount_whitney	fb:type.object.name	"Mount Whitney"@en .
-fb:en.california	fb:type.object.name	"California"@en .
+fb:en.seattle	fb:type.object.name	"Seattle"@en	.
+fb:en.san_francisco	fb:type.object.name	"San Francisco"@en	.
+fb:en.los_angeles	fb:type.object.name	"Los Angeles"@en	.
+fb:en.mount_whitney	fb:type.object.name	"Mount Whitney"@en	.
+fb:en.california	fb:type.object.name	"California"@en	.
 
-fb:en.seattle	fb:location.location.area	"369.2"^^xsd:double .
-fb:en.san_francisco	fb:location.location.area	"600.6"@en .
-fb:en.los_angeles	fb:location.location.area	"1301.97"^^xsd:double .
+fb:en.seattle	fb:location.location.area	"369.2"^^xsd:double	.
+fb:en.san_francisco	fb:location.location.area	"600.6"@en	.
+fb:en.los_angeles	fb:location.location.area	"1301.97"^^xsd:double	.

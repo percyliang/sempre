@@ -20,7 +20,7 @@ def codalab(dependencies=nil)
     letDefault(:cl, 0),
     sel(:cl,
       l(),
-      l('cl', 'run', dependencies, '---'),
+      l('cl', 'run', dependencies, '---', 'LC_ALL=C.UTF-8'),
     nil),
   nil)
 end
@@ -621,7 +621,7 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
     'check' => 'edu.stanford.nlp.sempre.tables.test.DPParserChecker',
     'align' => 'edu.stanford.nlp.sempre.tables.alignment.IBMAligner',
     'dump' => 'edu.stanford.nlp.sempre.tables.serialize.SerializedDumper',
-    'load' => 'edu.stanford.nlp.sempre.tables.serialize.SerializedLoader',
+    'load' => l('edu.stanford.nlp.sempre.tables.serialize.SerializedLoader', let(:parser, 'dummy')),
     'stats' => 'edu.stanford.nlp.sempre.tables.test.TableStatsComputer',
   }),
   # Fig parameters
@@ -739,11 +739,7 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
   letDefault(:featOp, 'careful'),
   sel(:featOp, {
     'none' => l(),
-    'base' => l(
-      o('usePredicateLemma'), o('usePhraseLemmaOnly'),
-    nil),
     'careful' => l(
-      o('usePredicateLemma'), o('usePhraseLemmaOnly'),
       o('maxNforLexicalizeAllPairs', 2),
       o('traverseWithFormulaTypes'), o('reverseNameValueConversion', 'allBang'),
       o('lookUnderCellProperty'), o('useGenericCellType'),

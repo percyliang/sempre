@@ -137,8 +137,18 @@ public abstract class Parser {
     done.put(node, true);
   }
 
+  /**
+   * Override this method to change the parser's behavior based on current
+   * group name and iteration number. This method will be called at the
+   * beginning of each data group.
+   */
+  public void onBeginDataGroup(int iter, int numIters, String group) {
+    // DEFAULT: Do nothing.
+  }
+
   // Main thing for parsers to implement.
   public abstract ParserState newParserState(Params params, Example ex, boolean computeExpectedCounts);
+
   public Params getSearchParams(Params params) { return params; }
 
   /**
