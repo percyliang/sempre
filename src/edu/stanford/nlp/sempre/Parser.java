@@ -142,7 +142,7 @@ public abstract class Parser {
    * group name and iteration number. This method will be called at the
    * beginning of each data group.
    */
-  public void mutate(int iter, int numIters, String group) {
+  public void onBeginDataGroup(int iter, int numIters, String group) {
     // DEFAULT: Do nothing.
   }
 
