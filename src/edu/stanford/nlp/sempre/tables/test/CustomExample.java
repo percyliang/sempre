@@ -110,8 +110,8 @@ public class CustomExample extends Example {
     formulaMacros.put("@!p.date", "!" + TableTypeSystem.CELL_DATE_VALUE.id);
     //formulaMacros.put("@p.first", TableTypeSystem.CELL_FIRST_VALUE.id);
     //formulaMacros.put("@!p.first", "!" + TableTypeSystem.CELL_FIRST_VALUE.id);
-    formulaMacros.put("@p.second", TableTypeSystem.CELL_SECOND_VALUE.id);
-    formulaMacros.put("@!p.second", "!" + TableTypeSystem.CELL_SECOND_VALUE.id);
+    formulaMacros.put("@p.num2", TableTypeSystem.CELL_SECOND_VALUE.id);
+    formulaMacros.put("@!p.num2", "!" + TableTypeSystem.CELL_SECOND_VALUE.id);
   }
 
   static final Pattern regexProperty = Pattern.compile("c\\.(.*)");

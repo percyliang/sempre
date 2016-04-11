@@ -1,0 +1,21 @@
+#!/bin/bash
+
+operation=$1
+shift
+queue=
+if [ "$operation" == "up" ]; then
+  cl upload program libsempre module-classes.txt tables/grammars run -L -n stuff
+elif [ "$operation" == "jog" ]; then
+  queue="nlp"
+elif [ "$operation" == "run" ]; then
+  queue="john"
+else
+  echo "Available operation: up jog run"
+fi
+
+if [ "$queue" ]; then
+  name=$(YAY=$(cat .cnt.info || echo 0) && echo $(($YAY + 1)) > .cnt.info && echo -n `hostname`-$YAY.cl)
+  cl run --request_cpus 3 --request_memory 10g --request_queue "$queue" -n "$name" \
+    :fig :lib libsempre:stuff/libsempre module-classes.txt:stuff/module-classes.txt run:stuff/run grammars:stuff/grammars :WikiTableQuestions \
+    "./run @cldir=1 $*"
+fi

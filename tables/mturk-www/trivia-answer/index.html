@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" type="text/css" href="style.css">
+  <script type="text/javascript" src="jquery.min.js"></script>
+  <script type="text/javascript" src="main.js"></script>
+  <title>MTurk</title>
+</head>
+<body>
+  <div id="webpage" class="column">
+  </div>
+  <div id="wrapper" class="column">
+    <div id="instruction">
+      <div id="hidingInstruction" class="hidden">
+        <button type="button" class="floatButton" id="showInstructionButton">Show Instructions</button>
+      </div>
+      <div id="showingInstruction">
+        <h1>Instructions</h1>
+        <button type="button" class="floatButton" id="hideInstructionButton" disabled>Loading ...</button>
+        <p><strong>Answer the questions using the information from the highlighted table</strong> (green borders).</p>
+        <ul>
+          <li>If the answer appears in the table, please <strong>copy and paste</strong> to avoid typos.</li>
+          <li><strong style="color:red;">NEW: Speed copy</strong> Hold the <kbd>Ctrl</kbd> (or <kbd>&#8984;</kbd>) key and click on a table cell to copy the cell content to the answer box.</li>
+          <li>Some questions require calculation. Please <strong>enter the unit(s)</strong> when applicable.</li>
+          <li>If the answer is a <strong>list</strong> or has <strong>multiple parts</strong>, use multiple lines with <strong>one answer per line</strong>. Please include all answers from the list.</li>
+          <li>If the question cannot be answered using the highlighted table, click on the button <span class=button>not answerable by the highlighted table</span>. (Note that we manually review the answers, so please do not try to cheat.)</li>
+          <li>If the answer requires you to perform long <strong>calculation</strong> (e.g., sum or average of more than 5 numbers), you can click on the button <span class=button>requires long calculation</span> to skip the question.</li>
+          <li>If there are multiple ways to answer the question (e.g., <em>Give one example of American birds.</em>), click on the button <span class=button>multiple ways to answer</span> and skip the question.</li>
+        </ul>
+        <p><em>If you have any problems or suggestions, please leave a comment or <a href="mailto:percyliangresearch@gmail.com?subject=%5BMTurk%5D%20web%20page%20extraction%20task" id="email">contact us</a>.</em></p>
+      </div>
+    </div>
+    <div id="warning" class="hidden">
+      Preview Mode.<br>Please accept the HIT to start working.
+    </div>
+    <form id="answerForm">
+      <div id="navbar" class="centerize">
+        <input type="hidden" id="assignmentId" name="assignmentId">
+        <input type="hidden" id="batchIndex" name="batchIndex">
+        <input type="hidden" id="dataIndex" name="dataIndex">
+        <button id="prevButton" type="button">Previous</button>
+        <span id="qNum"></span>
+        <button id="nextButton" type="button">Next</button>
+        <button id="submitButton" type="button" class="hidden" disabled><strong>Submit</strong></button>
+      </div>
+      <input type="hidden" name="title">
+      <input type="hidden" name="url">
+      <input type="hidden" name="hash">
+      <input type="hidden" name="pageid">
+      <input type="hidden" name="tableid">
+      <input type="hidden" name="srcBatchIndex">
+      <input type="hidden" name="srcDataIndex">
+      <div id="questionWrapper">
+      </div>
+      <p id="incompleteWarning" class="hidden">Error: Please fill in all input boxes.</p>
+    </form>
+  </div>
+</body>
+</html>

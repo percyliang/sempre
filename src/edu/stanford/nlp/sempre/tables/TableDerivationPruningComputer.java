@@ -1,6 +1,9 @@
 package edu.stanford.nlp.sempre.tables;
 
+import java.util.*;
+
 import edu.stanford.nlp.sempre.*;
+import fig.basic.LispTree;
 import fig.basic.LogInfo;
 
 public class TableDerivationPruningComputer extends DerivationPruningComputer {
@@ -11,8 +14,12 @@ public class TableDerivationPruningComputer extends DerivationPruningComputer {
 
   @Override
   public boolean isPruned(Derivation deriv) {
-    return pruneJoins(deriv);
+    return pruneJoins(deriv) || pruneSubsetMerge(deriv);
   }
+
+  // ============================================================
+  // Pruning based on Joins
+  // ============================================================
 
   /**
    * Consider strings of joins such as (relation1 (relation2 (...)))
@@ -67,6 +74,45 @@ public class TableDerivationPruningComputer extends DerivationPruningComputer {
       }
     }
     return null;
+  }
+
+  // ============================================================
+  // Merge formulas
+  // ============================================================
+
+  private final Formula TYPE_ROW = Formulas.fromLispTree(
+      LispTree.proto.parseFromString("(fb:type.object.type fb:type.row)"));
+
+  private boolean pruneSubsetMerge(Derivation deriv) {
+    if (!containsStrategy("subsetMerge") && !containsStrategy("typeRowMerge")) return false;
+    if (!(deriv.formula instanceof MergeFormula)) return false;
+    MergeFormula merge = (MergeFormula) deriv.formula;
+    if (containsStrategy("subsetMerge")) {
+      Value d1 = pruner.parser.executor.execute(merge.child1, pruner.ex.context).value;
+      Value d2 = pruner.parser.executor.execute(merge.child2, pruner.ex.context).value;
+      if (d1 instanceof ListValue && d2 instanceof ListValue) {
+        Set<Value> v1 = new HashSet<>(((ListValue) d1).values);
+        Set<Value> v2 = new HashSet<>(((ListValue) d2).values);
+        if (v1.size() >= v2.size() && v1.containsAll(v2)) {
+          if (DerivationPruner.opts.pruningVerbosity >= 2)
+            LogInfo.logs("PRUNED [mergeSubset] %s", deriv.formula);
+          return true;
+        }
+        if (v2.size() > v1.size() && v2.containsAll(v1)) {
+          if (DerivationPruner.opts.pruningVerbosity >= 2)
+            LogInfo.logs("PRUNED [mergeSubset] %s", deriv.formula);
+          return true;
+        }
+      }
+    }
+    if (containsStrategy("typeRowMerge")) {
+      if (TYPE_ROW.equals(merge.child1) || TYPE_ROW.equals(merge.child2)) {
+        if (DerivationPruner.opts.pruningVerbosity >= 2)
+          LogInfo.logs("PRUNED [typeRowMerge] %s", deriv.formula);
+        return true;
+      }
+    }
+    return false;
   }
 
 }

@@ -15,8 +15,6 @@ import fig.basic.*;
  */
 public class PredicateInfo {
   public static class Options {
-    @Option(gloss = "Use lemma form of original strings (need LanguageAnalyzer -- slow)")
-    public boolean usePredicateLemma = false;
     @Option(gloss = "Consider the formula types when generating the predicate list")
     public boolean traverseWithFormulaTypes = false;
     @Option(gloss = "Conversion between (reverse [NameValue]) and ![NameValue]")
@@ -111,7 +109,7 @@ public class PredicateInfo {
   // Helper function: get original string from the table
   public static String getOriginalString(String predicate, TableKnowledgeGraph graph) {
     String s = graph.getOriginalString(predicate);
-    if (opts.usePredicateLemma) s = getLemma(s);
+    s = getLemma(s);
     if (s != null && s.trim().isEmpty()) s = null;
     return s;
   }

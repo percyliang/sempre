@@ -1,0 +1,88 @@
+#header {
+  height: 5em;
+  position: fixed;
+  background-color: #eee;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  padding: 5px;
+  width: 95%;
+}
+
+#header p {
+  margin: 0;
+}
+
+#title {
+  padding: 0;
+  margin: 0;
+}
+
+#subtitle {
+  padding: 0 0 1em;
+}
+
+#webpage {
+  position: absolute;
+  height: 100%;
+  margin-top: 6em;
+}
+
+#webpage .cannot-load {
+  margin: 5em;
+  padding: 2em;
+  border: 1px solid #622;
+  background-color: #FEE;
+  color: black;
+  border-radius: 10px;
+}
+
+#webpage table {
+  border-collapse: collapse;
+}
+
+#webpage table.wikitable, #webpage table.wikitable th, #webpage table.wikitable td {
+  border: 2px solid green;
+  background-color: #FFE;
+}
+
+#webpage img {
+  border: 1px solid #DBB;
+  background-color: #FDD;
+}
+
+#webpage a {
+  text-decoration: underline;
+}
+
+#webpage .reference, #webpage .navbox, #webpage .sortkey {
+  display: none;
+}
+
+/* Fading Effect */
+
+#webpage {
+  color: #888;
+}
+
+#webpage a {
+  color: #AAD;
+}
+
+#webpage table.wikitable {
+  color: black;
+}
+
+#webpage table.wikitable a {
+  color: #22B;
+}
+
+#webpage img {
+  opacity: 0.4;
+  filter: alpha(opacity=40);
+}
+
+#webpage table.wikitable img {
+  opacity: 1.0;
+  filter: alpha(opacity=100);
+}

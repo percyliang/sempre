@@ -39,10 +39,12 @@ public class DPParserChecker implements Runnable {
   static class DPParserCheckerProcessor implements ExampleProcessor {
     int n = 0, annotated = 0, oracle = 0, beamHasCorrectFormula = 0, beamNoCorrectFormula = 0, noBeam = 0;
     final Builder builder;
+    final PrintWriter eventsOut;
 
     public DPParserCheckerProcessor() {
       builder = new Builder();
       builder.build();
+      eventsOut = IOUtils.openOutHard(Execution.getFile("checker.results"));
     }
 
     @Override
@@ -76,6 +78,8 @@ public class DPParserChecker implements Runnable {
           beamFlag = "reach";
         }
         LogInfo.logs("RESULT: %s %s %s", ex.id, formulaFlag, beamFlag);
+        eventsOut.printf("%s\t%s\t%s\n", ex.id.replaceAll("nt-", ""), formulaFlag, beamFlag);
+        eventsOut.flush();
       }
     }
 

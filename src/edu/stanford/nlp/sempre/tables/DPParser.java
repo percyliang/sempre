@@ -31,6 +31,8 @@ public class DPParser extends FloatingParser {
     public boolean collapseFirstPass = false;
     @Option(gloss = "Use all pruners regardless of correctness")
     public boolean useAllPruners = false;
+    @Option(gloss = "Collpase repeated formulas during the 2nd pass (even when the ingredients are different)")
+    public boolean collapseRepeatedFormulas = false;
   }
   public static Options opts = new Options();
 
@@ -245,6 +247,11 @@ class DPParserState extends ParserState {
         if (bp1 != null) backpointers.add(bp1);
         if (bp2 != null) backpointers.add(bp2);
       } else if (currentPass == ParsingPass.SECOND) {
+        if (DPParser.opts.collapseRepeatedFormulas) {
+          for (Derivation d : derivations) {
+            if (d.formula.equals(deriv.formula)) return;
+          }
+        }
         derivations.add(deriv);
       }
     }
