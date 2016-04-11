@@ -36,7 +36,7 @@ public class IncrementalParser extends Parser {
   }
 
   @Override
-  public void mutate(int iter, int numIters, String group) {
+  public void onBeginDataGroup(int iter, int numIters, String group) {
     // Change baseParser according to the new iteration.
     LogInfo.begin_track("Switching to a new parser ...");
     LogInfo.logs("iter = %d/%d | group = %s", iter, numIters, group);
