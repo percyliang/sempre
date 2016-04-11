@@ -108,5 +108,7 @@ public abstract class SemType {
   public static final SemType entityType = new AtomicSemType(CanonicalNames.ENTITY);
   public static final SemType anyType = new AtomicSemType(CanonicalNames.ANY);
 
+  public static final FuncSemType topTopFunc = new FuncSemType(topType, topType);
   public static final FuncSemType anyAnyFunc = new FuncSemType(anyType, anyType);
+  public static final FuncSemType compareFunc = new FuncSemType(numberOrDateType, numberOrDateType);
 }

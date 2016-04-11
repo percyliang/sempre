@@ -32,6 +32,12 @@ public class ArithmeticFormula extends Formula {
     return tree;
   }
 
+  @Override
+  public void recurse(Function<Formula, Boolean> func) {
+    if (!func.apply(this)) { child1.recurse(func); child2.recurse(func); }
+  }
+
+  @Override
   public Formula map(Function<Formula, Formula> func) {
     Formula result = func.apply(this);
     return result == null ? new ArithmeticFormula(mode, child1.map(func), child2.map(func)) : result;

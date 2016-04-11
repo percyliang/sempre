@@ -36,6 +36,12 @@ public class JoinFormula extends Formula {
     return tree;
   }
 
+  @Override
+  public void recurse(Function<Formula, Boolean> func) {
+    if (!func.apply(this)) { relation.recurse(func); child.recurse(func); }
+  }
+
+  @Override
   public Formula map(Function<Formula, Formula> func) {
     Formula result = func.apply(this);
     return result == null ? new JoinFormula(relation.map(func), child.map(func)) : result;

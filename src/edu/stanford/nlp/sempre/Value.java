@@ -21,6 +21,9 @@ public abstract class Value {
   @JsonValue
   public String toString() { return toLispTree().toString(); }
 
+  // (optional) Quick string used for sorting Values
+  public String quickString() { return toString(); }
+
   @JsonCreator
   public static Value fromString(String str) {
     return Values.fromLispTree(LispTree.proto.parseFromString(str));

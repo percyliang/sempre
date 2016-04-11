@@ -35,6 +35,16 @@ public class CallFormula extends Formula {
     return tree;
   }
 
+  @Override
+  public void recurse(Function<Formula, Boolean> func) {
+    if (!func.apply(this)) {
+      this.func.recurse(func);
+      for (Formula arg: args)
+        arg.recurse(func);
+    }
+  }
+
+  @Override
   public Formula map(Function<Formula, Formula> transform) {
     Formula result = transform.apply(this);
     if (result != null) return result;

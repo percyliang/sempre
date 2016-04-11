@@ -11,13 +11,24 @@
 $version = '2.0'
 $isPublic = true
 
+# BEGIN_HIDE
+$isPublic = false
+# Release dependencies if this option is set.
+$release = ARGV.index('release'); ARGV.delete_if { |x| x == 'release' }
+# END_HIDE
 
 def isZip(name)
   # Directories are zipped
   name.end_with?('.exec') or name !~ /\./
 end
 
+# Three ways that this script is used:
+# - Copy or link |sourcePath| into lib/|dir|.
+#   ./pull-dependencies
+# - Deploy the dependencies to the NLP machines's public www.
+#   ./pull-dependencies release
 # - Download the dependencies from the Stanford SEMPRE servers.
+#   ./pull-dependencies (when isPublic is true)
 def pull(sourcePath, dir=nil, opts={})
   puts sourcePath
   destDir = 'lib' + (dir ? '/' + dir : '')
@@ -38,6 +49,40 @@ def pull(sourcePath, dir=nil, opts={})
       system "rm #{localPath}" or exit 1
     end
   else
+    # BEGIN_HIDE
+    rsyncOpts = '-rlptDzi'  # Preserve everything except groups and permissions
+    if $release
+      # Copy sourcePath to cluster
+      baseDeployPath = '/u/apache/htdocs/software/sempre/dependencies-' + $version
+      deployPath = baseDeployPath + sourcePath + ext
+      system "mkdir -p #{File.dirname(deployPath)}" or exit 1
+      if File.exists?(sourcePath)
+        if isZip(name)
+          system "cd #{File.dirname(sourcePath)} && zip -r #{deployPath} #{File.basename(sourcePath)}" or exit 1
+        else
+          if opts[:symlink]
+            system "ln -sf #{File.expand_path(sourcePath)} #{deployPath}" or exit 1
+          else
+            system "rsync #{rsyncOpts} #{sourcePath} #{deployPath}" or exit 1
+          end
+        end
+      else
+        system "rsync #{rsyncOpts} jamie.stanford.edu:#{sourcePath} #{deployPath}" or exit 1
+      end
+      system "chmod -R og=u #{baseDeployPath}" #or exit 1
+    else
+      # Download sourcePath from cluster to destDir
+      if File.exists?(sourcePath)
+        if opts[:symlink]
+          system "ln -sf #{File.expand_path(sourcePath)} #{destDir}" or exit 1
+        else
+          system "rsync #{rsyncOpts} #{sourcePath} #{destDir}" or exit 1
+        end
+      else
+        system "rsync #{rsyncOpts} jamie.stanford.edu:#{sourcePath} #{destDir}" or exit 1
+      end
+    end
+    # END_HIDE
   end
 end
 
