@@ -37,6 +37,7 @@ public class Example {
   // What we should try to predict.
   @JsonProperty public Formula targetFormula;  // Logical form (e.g., database query)
   @JsonProperty public Value targetValue;  // Denotation (e.g., answer)
+  @JsonProperty public Value intermediateTargetValues; // Intermediate denotations
 
   //// Information after preprocessing (e.g., tokenization, POS tagging, NER, syntactic parsing, etc.).
   public LanguageInfo languageInfo = null;
@@ -58,6 +59,7 @@ public class Example {
     private ContextValue context;
     private Formula targetFormula;
     private Value targetValue;
+    private Value intermediateTargetValues;
     private List<Derivation> predDerivations;
     private LanguageInfo languageInfo;
 
@@ -67,6 +69,7 @@ public class Example {
     public Builder setTargetFormula(Formula targetFormula) { this.targetFormula = targetFormula; return this; }
     public Builder setTargetValue(Value targetValue) { this.targetValue = targetValue; return this; }
     public Builder setLanguageInfo(LanguageInfo languageInfo) { this.languageInfo = languageInfo; return this; }
+    public Builder setIntermediateTargetValue(Value intermediateTargetValues) { this.intermediateTargetValues = intermediateTargetValues; return this; } 
     public Builder withExample(Example ex) {
       setId(ex.id);
       setUtterance(ex.utterance);
@@ -76,7 +79,7 @@ public class Example {
       return this;
     }
     public Example createExample() {
-      return new Example(id, utterance, context, targetFormula, targetValue, languageInfo);
+      return new Example(id, utterance, context, targetFormula, targetValue, intermediateTargetValues, languageInfo);
     }
   }
 
@@ -86,12 +89,14 @@ public class Example {
                  @JsonProperty("context") ContextValue context,
                  @JsonProperty("targetFormula") Formula targetFormula,
                  @JsonProperty("targetValue") Value targetValue,
+                 @JsonProperty("intermediateTargetValues") Value intermediateTargetValues,
                  @JsonProperty("languageInfo") LanguageInfo languageInfo) {
     this.id = id;
     this.utterance = utterance;
     this.context = context;
     this.targetFormula = targetFormula;
     this.targetValue = targetValue;
+    this.intermediateTargetValues = intermediateTargetValues;
     this.languageInfo = languageInfo;
   }
 
@@ -104,6 +109,7 @@ public class Example {
   public void setContext(ContextValue context) { this.context = context; }
   public void setTargetFormula(Formula targetFormula) { this.targetFormula = targetFormula; }
   public void setTargetValue(Value targetValue) { this.targetValue = targetValue; }
+  public void setIntermediateTargetValue(Value intermediateTargetValues) { this.intermediateTargetValues = intermediateTargetValues; }
 
   public String spanString(int start, int end) {
     return String.format("%d:%d[%s]", start, end, start != -1 ? phraseString(start, end) : "...");
@@ -144,6 +150,8 @@ public class Example {
         b.setTargetValue(Values.fromLispTree(arg.child(1)));
       } else if ("context".equals(label)) {
         b.setContext(new ContextValue(arg));
+      } else if ("intermediateTargetValues".equals(label)) {
+        b.setIntermediateTargetValue(Values.fromLispTree(arg.child(1)));
       }
     }
     b.setLanguageInfo(new LanguageInfo());
@@ -165,7 +173,7 @@ public class Example {
         ex.predDerivations = new ArrayList<>();
         for (int j = 1; j < arg.children.size(); j++)
           ex.predDerivations.add(derivationFromLispTree(arg.child(j)));
-      } else if (!Sets.newHashSet("id", "utterance", "targetFormula", "targetValue", "targetValues", "context", "original").contains(label)) {
+      } else if (!Sets.newHashSet("id", "utterance", "targetFormula", "targetValue", "targetValues", "context", "original", "intermediateTargetValues").contains(label)) {
         throw new RuntimeException("Invalid example argument: " + arg);
       }
     }

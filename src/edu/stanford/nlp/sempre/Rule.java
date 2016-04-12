@@ -116,7 +116,7 @@ public class Rule {
     else if (f == 0.0)
       return false;
     else
-      return a == 1.0 ? false : FloatingParser.opts.defaultIsFloating;
+      return a == 1.0 ? false : Parser.opts.defaultIsFloating;
   }
 
   public boolean isAnchored() {
@@ -127,6 +127,23 @@ public class Rule {
     else if (a == 0.0)
       return false;
     else
-      return f == 1.0 ? false : !FloatingParser.opts.defaultIsFloating;
+      return f == 1.0 ? false : !Parser.opts.defaultIsFloating;
   }
+
+  public boolean isSegmentRoot() {
+    double a = getInfoTag("segmentRoot");
+    if (a == 1.0)
+      return true;
+    else
+      return false;
+  }
+
+  public boolean isSEGMENT() {
+    double a = getInfoTag("SEGMENT");
+    if (a == 1.0)
+      return true;
+    else
+      return false;
+  }
+
 }
