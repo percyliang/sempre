@@ -68,9 +68,9 @@ public class FuzzyMatchFn extends SemanticFn {
         this.matchable = null;
       this.c = c;
       this.query = (matchAny || c.getChildren().isEmpty()) ? null : c.childStringValue(0);
-      if (c.getRule().rhs.size() == 1 && "$PHRASE".equals(c.getRule().rhs.get(0))) {
+      if (c.getRule().rhs.size() == 1 && Rule.phraseCat.equals(c.getRule().rhs.get(0))) {
         sentence = ex.getTokens();
-      } else if (c.getRule().rhs.size() == 1 && "$LEMMA_PHRASE".equals(c.getRule().rhs.get(0))) {
+      } else if (c.getRule().rhs.size() == 1 && Rule.lemmaPhraseCat.equals(c.getRule().rhs.get(0))) {
         sentence = ex.getLemmaTokens();
       } else {
         sentence = null;

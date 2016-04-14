@@ -31,18 +31,6 @@ public final class FloatingRuleUtils {
    * that spans) [2, 4] then we have an overlap.
    */
   public static boolean derivationAnchorsOverlap(Derivation a, Derivation b) {
-    /*
-     * OLD METHOD
-    List<Derivation> aRoots = getDerivationAnchors(a);
-    List<Derivation> bRoots = getDerivationAnchors(b);
-    for (Derivation aRoot : aRoots) {
-      for (Derivation bRoot : bRoots) {
-        if (aRoot.start < bRoot.end && bRoot.start < aRoot.end)
-          return true;
-      }
-    }
-    return false;
-     */
     boolean[] aAnchors = a.getAnchoredTokens(), bAnchors = b.getAnchoredTokens();
     for (int i = 0; i < aAnchors.length && i < bAnchors.length; i++)
       if (aAnchors[i] && bAnchors[i]) return true;

@@ -36,11 +36,11 @@ public class CallFormula extends Formula {
   }
 
   @Override
-  public void recurse(Function<Formula, Boolean> func) {
+  public void forEach(Function<Formula, Boolean> func) {
     if (!func.apply(this)) {
-      this.func.recurse(func);
+      this.func.forEach(func);
       for (Formula arg: args)
-        arg.recurse(func);
+        arg.forEach(func);
     }
   }
 

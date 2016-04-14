@@ -45,8 +45,8 @@ public class SuperlativeFormula extends Formula {
   }
 
   @Override
-  public void recurse(Function<Formula, Boolean> func) {
-    if (!func.apply(this)) { rank.recurse(func); count.recurse(func); head.recurse(func); relation.recurse(func); }
+  public void forEach(Function<Formula, Boolean> func) {
+    if (!func.apply(this)) { rank.forEach(func); count.forEach(func); head.forEach(func); relation.forEach(func); }
   }
 
   @Override

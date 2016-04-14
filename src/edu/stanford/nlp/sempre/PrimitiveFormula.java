@@ -13,7 +13,7 @@ import java.util.List;
 public abstract class PrimitiveFormula extends Formula {
 
   @Override
-  public void recurse(Function<Formula, Boolean> func) {
+  public void forEach(Function<Formula, Boolean> func) {
     func.apply(this);
   }
 

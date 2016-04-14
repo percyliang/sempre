@@ -41,13 +41,13 @@ public class Learner {
     @Option(gloss = "Initialize with these parameters")
     public List<Pair<String, Double>> initialization;
 
-    @Option(gloss = "whether to update weights")
+    @Option(gloss = "Whether to update weights")
     public boolean updateWeights = true;
-    @Option(gloss = "whether to check gradient")
+    @Option(gloss = "Whether to check gradient")
     public boolean checkGradient = false;
 
-    @Option(gloss = "whether to skip unnecessary iterations")
-    public boolean skipUnnecessaryIterations = false;
+    @Option(gloss = "Whether to skip the 'train' group in the last iteration and non-'train' groups in other iterations")
+    public boolean skipUnnecessaryGroups = false;
 
     @Option(gloss = "Number of threads to parallelize")
     public int numParallelThreads = 1;
@@ -114,7 +114,7 @@ public class Learner {
       for (String group : dataset.groups()) {
         boolean lastIter = (iter == numIters);
         boolean updateWeights = opts.updateWeights && group.equals("train") && !lastIter;  // Don't train on last iteration
-        if (opts.skipUnnecessaryIterations) {
+        if (opts.skipUnnecessaryGroups) {
           if ((group.equals("train") && lastIter) || (!group.equals("train") && !lastIter))
             continue;
         }

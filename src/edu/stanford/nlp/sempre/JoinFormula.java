@@ -37,8 +37,8 @@ public class JoinFormula extends Formula {
   }
 
   @Override
-  public void recurse(Function<Formula, Boolean> func) {
-    if (!func.apply(this)) { relation.recurse(func); child.recurse(func); }
+  public void forEach(Function<Formula, Boolean> func) {
+    if (!func.apply(this)) { relation.forEach(func); child.forEach(func); }
   }
 
   @Override

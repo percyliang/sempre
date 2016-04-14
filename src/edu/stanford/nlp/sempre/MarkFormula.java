@@ -34,8 +34,8 @@ public class MarkFormula extends Formula {
   }
 
   @Override
-  public void recurse(Function<Formula, Boolean> func) {
-    if (!func.apply(this)) body.recurse(func);
+  public void forEach(Function<Formula, Boolean> func) {
+    if (!func.apply(this)) body.forEach(func);
   }
 
   @Override

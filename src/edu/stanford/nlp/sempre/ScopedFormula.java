@@ -30,8 +30,8 @@ public class ScopedFormula extends Formula {
   }
 
   @Override
-  public void recurse(Function<Formula, Boolean> func) {
-    if (!func.apply(this)) { head.recurse(func); relation.recurse(func); }
+  public void forEach(Function<Formula, Boolean> func) {
+    if (!func.apply(this)) { head.forEach(func); relation.forEach(func); }
   }
 
   @Override

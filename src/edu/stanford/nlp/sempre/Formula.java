@@ -25,7 +25,7 @@ public abstract class Formula {
 
   // Recursively perform some operation on each formula.
   // Apply to formulas.  If |func| returns false, then recurse on children.
-  public abstract void recurse(Function<Formula, Boolean> func);
+  public abstract void forEach(Function<Formula, Boolean> func);
 
   // Recursively perform some operation on each formula.
   // Apply to formulas.  If |func| returns null, then recurse on children.

@@ -31,8 +31,8 @@ public class MergeFormula extends Formula {
   }
 
   @Override
-  public void recurse(Function<Formula, Boolean> func) {
-    if (!func.apply(this)) { child1.recurse(func); child2.recurse(func); }
+  public void forEach(Function<Formula, Boolean> func) {
+    if (!func.apply(this)) { child1.forEach(func); child2.forEach(func); }
   }
 
   @Override

@@ -37,8 +37,8 @@ public class AggregateFormula extends Formula {
   }
 
   @Override
-  public void recurse(Function<Formula, Boolean> func) {
-    if (!func.apply(this)) child.recurse(func);
+  public void forEach(Function<Formula, Boolean> func) {
+    if (!func.apply(this)) child.forEach(func);
   }
 
   @Override
