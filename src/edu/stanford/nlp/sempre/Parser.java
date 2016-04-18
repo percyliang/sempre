@@ -81,8 +81,7 @@ public abstract class Parser {
   public final Grammar grammar;
   public final FeatureExtractor extractor;
   public final Executor executor;
-  // private -- use getValueCompatibility(Value, Value) or getCompatibility(Example, Derivation) instead
-  private final ValueEvaluator valueEvaluator;
+  public final ValueEvaluator valueEvaluator;
 
   // Precomputations to make looking up grammar rules faster.
   protected List<Rule> catUnaryRules;  // Unary rules with category on RHS ($A => $B)
@@ -135,25 +134,6 @@ public abstract class Parser {
       catUnaryRules.add(rule);
     }
     done.put(node, true);
-  }
-
-  /**
-   * Compute compatibility on values.
-   */
-  public double getValueCompatibility(Value target, Value pred) {
-    return this.valueEvaluator.getCompatibility(target, pred);
-  }
-
-  /**
-   * Compute compatibility. If valueEvaluator is a FormulaEvaluator, then evaluate on formula.
-   */
-  public double getCompatibility(Example ex, Derivation deriv) {
-    if (valueEvaluator instanceof FormulaEvaluator) {
-      // Get compatibility score based on the formula
-      return ((FormulaEvaluator) valueEvaluator).getCompatibility(ex, deriv);
-    } else {
-      return this.valueEvaluator.getCompatibility(ex.targetValue, deriv.value);
-    }
   }
 
   /**
@@ -227,11 +207,6 @@ public abstract class Parser {
     double maxCompatibility = 0.0;
     double[] compatibilities = null;
 
-    // For FormulaEvaluator, also evaluate on denotations
-    // For normal ValueEvaluator, these will be redundant
-    int denotationCorrectIndex = -1;
-    double[] denotationCompatibilities = null;
-
     if (ex.targetValue != null) {
       compatibilities = new double[numCandidates];
       for (int i = 0; i < numCandidates; i++) {
@@ -249,18 +224,6 @@ public abstract class Parser {
           correctIndexAfterParse = i;
           break;
         }
-      }
-      // For FormulaEvaluator, also report denotation compatibility
-      if (valueEvaluator instanceof FormulaEvaluator) {
-        denotationCompatibilities = new double[numCandidates];
-        for (int i = 0; i < numCandidates; i++) {
-          denotationCompatibilities[i] = getValueCompatibility(ex.targetValue, predDerivations.get(i).value);
-          if (denotationCompatibilities[i] == 1 && denotationCorrectIndex == -1)
-            denotationCorrectIndex = i;
-        }
-      } else {
-        denotationCorrectIndex = correctIndex;
-        denotationCompatibilities = compatibilities;
       }
     }
 
@@ -281,14 +244,12 @@ public abstract class Parser {
         numTop++;
       }
     }
-    double correct = 0, partCorrect = 0, denotationCorrect = 0;
+    double correct = 0, partCorrect = 0;
     if (ex.targetValue != null) {
       for (int i = 0; i < numTop; i++) {
         if (compatibilities[i] == 1) correct += probs[i] / topMass;
         if (compatibilities[i] > 0)
           partCorrect += (compatibilities[i] * probs[i]) / topMass;
-        if (denotationCompatibilities[i] == 1)
-          denotationCorrect += probs[i] / topMass;
       }
     }
 
@@ -358,8 +319,6 @@ public abstract class Parser {
     evaluation.add("oracle", correctIndex != -1);
     evaluation.add("partCorrect", partCorrect);
     evaluation.add("partOracle", maxCompatibility);
-    evaluation.add("denotationCorrect", denotationCorrect);
-    evaluation.add("denotationOracle", denotationCorrectIndex != -1);
     if (correctIndexAfterParse != -1)
       evaluation.add("correctIndexAfterParse", correctIndexAfterParse);
 

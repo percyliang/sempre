@@ -143,7 +143,7 @@ public class Learner {
     LogInfo.begin_track("onlineLearnExample: %s derivations", ex.predDerivations.size());
     HashMap<String, Double> counts = new HashMap<>();
     for (Derivation deriv : ex.predDerivations)
-      deriv.compatibility = parser.getCompatibility(ex, deriv);
+      deriv.compatibility = parser.valueEvaluator.getCompatibility(ex.targetValue, deriv.value);
     ParserState.computeExpectedCounts(ex.predDerivations, counts);
     params.update(counts);
     LogInfo.end_track();

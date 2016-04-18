@@ -570,7 +570,7 @@ final class ReinforcementParserState extends AbstractReinforcementParserState {
 
     sampledDerivation.ensureExecuted(parser.executor, ex.context);
     if (ex.targetValue != null)
-      sampledDerivation.compatibility = parser.getValueCompatibility(ex.targetValue, sampledDerivation.value);
+      sampledDerivation.compatibility = parser.valueEvaluator.getCompatibility(ex.targetValue, sampledDerivation.value);
     if (Parser.opts.partialReward ? (sampledDerivation.compatibility > 0) : (sampledDerivation.compatibility == 1)) {
       if (parser.verbose(2))
         LogInfo.logs("Top-level %s: reward = %s", numItemsSampled, sampledDerivation.compatibility);

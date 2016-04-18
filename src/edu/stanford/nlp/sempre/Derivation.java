@@ -79,9 +79,6 @@ public class Derivation implements SemanticFn.Callable, HasScore {
 
   // Number in [0, 1] denoting how correct the value is.
   public double compatibility = Double.NaN;
-  // Number in [0, 1] denoting how correct the formula is.
-  // Used when trained with formula supervision or evaluated on annotated formulas
-  public double formulaCompatibility = Double.NaN;
 
   // Miscellaneous statistics
   int maxBeamPosition = -1;  // Lowest position that this tree or any of its children is on the beam (after sorting)
