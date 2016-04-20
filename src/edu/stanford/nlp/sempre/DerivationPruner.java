@@ -4,7 +4,6 @@ import java.util.*;
 
 import com.google.common.base.Function;
 
-import edu.stanford.nlp.sempre.tables.ScopedFormula;
 import fig.basic.*;
 
 /**
@@ -134,16 +133,6 @@ public class DerivationPruner {
           if (opts.pruningVerbosity >= 2)
             LogInfo.logs("PRUNED [%s] %s", matchedStrategy, deriv.formula);
           return true;
-        }
-        if (deriv.formula instanceof ScopedFormula) {
-          Formula relation = ((ScopedFormula) deriv.formula).relation;
-          if (relation instanceof LambdaFormula)
-            relation = ((LambdaFormula) relation).body;
-          if ((matchedStrategy = computer.isPrunedRecursive(deriv, relation, new HashMap<>())) != null) {
-            if (opts.pruningVerbosity >= 2)
-              LogInfo.logs("PRUNED [%s] %s", matchedStrategy, relation);
-            return true;
-          }
         }
       }
     } else {
