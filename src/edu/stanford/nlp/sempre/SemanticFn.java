@@ -5,6 +5,7 @@ import fig.basic.Option;
 import fig.basic.Utils;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -80,10 +81,10 @@ public abstract class SemanticFn {
   public LispTree toLispTree() { return tree; }
   @Override public String toString() { return tree.toString(); }
 
- // default does nothing
+  // default does nothing
   public void addFeedback(Example ex) { return; }
 
- // default does nothing
+  // default does nothing
   public void sortOnFeedback(Params params) { return; }
 
 }

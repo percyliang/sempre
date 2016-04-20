@@ -213,8 +213,10 @@ public class Dataset {
     while (examples.size() < maxExamples && trees.hasNext()) {
       // Format: (example (id ...) (utterance ...) (targetFormula ...) (targetValue ...))
       LispTree tree = trees.next();
-      if (tree.children.size() < 2 && !"example".equals(tree.child(0).value))
+      if (tree.children.size() < 2 || !"example".equals(tree.child(0).value)) {
+        if ("metadata".equals(tree.child(0).value)) continue;
         throw new RuntimeException("Invalid example: " + tree);
+      }
 
       Example ex = Example.fromLispTree(tree, path + ":" + n);  // Specify a default id if it doesn't exist
       n++;
@@ -241,7 +243,7 @@ public class Dataset {
     LogInfo.end_track();
   }
 
-  private static int getMaxExamplesForGroup(String group) {
+  public static int getMaxExamplesForGroup(String group) {
     int maxExamples = Integer.MAX_VALUE;
     for (Pair<String, Integer> maxPair : opts.maxExamples)
       if (maxPair.getFirst().equals(group))
