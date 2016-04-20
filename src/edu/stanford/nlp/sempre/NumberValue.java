@@ -39,7 +39,7 @@ public class NumberValue extends Value {
     return tree;
   }
 
-  @Override public String quickString() { return "" + value; }
+  @Override public String sortString() { return "" + value; }
 
   @Override public int hashCode() { return Double.valueOf(value).hashCode(); }
   @Override public boolean equals(Object o) {

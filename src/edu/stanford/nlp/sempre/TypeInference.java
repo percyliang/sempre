@@ -69,7 +69,7 @@ public final class TypeInference {
 
   private static class Env {
     private final TypeLookup typeLookup;
-    private final boolean allowFreeVariable;
+    private final boolean allowFreeVariable;      // Don't throw an error if there is an unbound variable.
     private final ImmutableAssocList<String, Ref<SemType>> list;
     private Env(ImmutableAssocList<String, Ref<SemType>> list, TypeLookup typeLookup, boolean allowFreeVariable) {
       this.list = list;

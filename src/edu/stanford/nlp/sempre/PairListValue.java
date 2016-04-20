@@ -63,6 +63,6 @@ public class PairListValue extends Value {
   }
   private static String getQuickStringOfPair(Pair<Value, Value> pair) {
     Value v1 = pair.getFirst(), v2 = pair.getSecond();
-    return (v1 == null ? "null" : v1.quickString()) + " " + (v2 == null ? "null" : v2.quickString());
+    return (v1 == null ? "null" : v1.sortString()) + " " + (v2 == null ? "null" : v2.sortString());
   }
 }

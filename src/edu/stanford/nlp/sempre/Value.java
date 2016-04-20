@@ -21,8 +21,8 @@ public abstract class Value {
   @JsonValue
   public String toString() { return toLispTree().toString(); }
 
-  // (optional) Quick string used for sorting Values
-  public String quickString() { return toString(); }
+  // (optional) String used for sorting Values. The default is to call toString()
+  public String sortString() { return toString(); }
 
   @JsonCreator
   public static Value fromString(String str) {

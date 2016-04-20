@@ -44,7 +44,7 @@ public class ListValue extends Value {
     List<Value> sorted = new ArrayList<>(values);
     Collections.sort(sorted,
         (Value v1, Value v2) -> (
-            v1 == null ? "null" : v1.quickString()).compareTo(v2 == null ? "null" : v2.quickString()));
+            v1 == null ? "null" : v1.sortString()).compareTo(v2 == null ? "null" : v2.sortString()));
     return new ListValue(sorted);
   }
 
@@ -53,7 +53,7 @@ public class ListValue extends Value {
     List<Value> sorted = new ArrayList<>(new HashSet<>(values));
     Collections.sort(sorted,
         (Value v1, Value v2) -> (
-            v1 == null ? "null" : v1.quickString()).compareTo(v2 == null ? "null" : v2.quickString()));
+            v1 == null ? "null" : v1.sortString()).compareTo(v2 == null ? "null" : v2.sortString()));
     return new ListValue(sorted);
   }
 }

@@ -80,7 +80,7 @@ public class DateValue extends Value {
     return tree;
   }
 
-  @Override public String quickString() { return "" + year + "/" + month + "/" + day; }
+  @Override public String sortString() { return "" + year + "/" + month + "/" + day; }
   public String isoString() {
     return "" + (year == -1 ? "xxxx" : String.format("%04d", year))
         + "-" + (month == -1 ? "xx" : String.format("%02d", month))
