@@ -2,6 +2,9 @@ package edu.stanford.nlp.sempre;
 
 import java.util.*;
 
+import com.google.common.base.Function;
+
+import edu.stanford.nlp.sempre.tables.ScopedFormula;
 import fig.basic.*;
 
 /**
@@ -15,21 +18,33 @@ import fig.basic.*;
 
 public class DerivationPruner {
   public static class Options {
-    @Option public List<String> pruningStrategies = new ArrayList<>();
-    @Option public List<String> pruningComputers = new ArrayList<>();
+    @Option(gloss = "Pruning strategies to use")
+    public List<String> pruningStrategies = new ArrayList<>();
+    @Option(gloss = "DerivationPruningComputer subclasses to look for pruning strategies")
+    public List<String> pruningComputers = new ArrayList<>();
     @Option public int pruningVerbosity = 0;
-    @Option public int maxNumValues = 10;
+    @Option(gloss = "(for tooManyValues) maximum denotation size of the final formula")
+    public int maxNumValues = 10;
+    @Option(gloss = "(for badSummarizerHead) allow count on sets of size 1")
+    public boolean allowCountOne = false;
+    @Option(gloss = "Ensure that deriv.value contains the executed denotation.")
+    public boolean ensureExecuted = true;
+    @Option(gloss = "If false, apply recursive pruning strategies only at the outermost layer of the formula")
+    public boolean recursivePruning = true;
   }
   public static Options opts = new Options();
 
   public final Parser parser;
   public final Example ex;
   private List<DerivationPruningComputer> pruningComputers = new ArrayList<>();
-  private List<String> customAllowedDomains;
+  // If not null, limit the pruning strategies to this list in addition to opts.pruningStrategies.
+  private List<String> customAllowedPruningStrategies;
+  private final Set<String> allStrategyNames;
 
   public DerivationPruner(ParserState parserState) {
     this.parser = parserState.parser;
     this.ex = parserState.ex;
+    this.pruningComputers.add(new DefaultDerivationPruningComputer(this));
     for (String pruningComputer : opts.pruningComputers) {
       try {
         Class<?> pruningComputerClass = Class.forName(SempreUtils.resolveClassName(pruningComputer));
@@ -42,173 +57,139 @@ public class DerivationPruner {
         throw new RuntimeException("Error while instantiating pruning computer: " + pruningComputer);
       }
     }
+    // Compile the list of all strategies
+    allStrategyNames = new HashSet<>();
+    for (DerivationPruningComputer computer : pruningComputers)
+      allStrategyNames.addAll(computer.getAllStrategyNames());
+    for (String strategy : opts.pruningStrategies) {
+      if (!allStrategyNames.contains(strategy))
+        LogInfo.fails("Pruning strategy '%s' not found!", strategy);
+    }
   }
 
-  public void setCustomAllowedDomains(List<String> customAllowedDomains) {
-    this.customAllowedDomains = customAllowedDomains;
+  /**
+   * Set additional restrictions on the pruning strategies.
+   *
+   * If customAllowedPruningStrategies is not null, the pruning strategy must be in both
+   * opts.pruningStrategies and customAllowedPruningStrategies in order to be used.
+   *
+   * Useful when some pruning strategies can break the parsing mechanism.
+   */
+  public void setCustomAllowedPruningStrategies(List<String> customAllowedPruningStrategies) {
+    this.customAllowedPruningStrategies = customAllowedPruningStrategies;
   }
 
   protected boolean containsStrategy(String name) {
-     return opts.pruningStrategies.contains(name) &&
-         (customAllowedDomains == null || customAllowedDomains.contains(name));
+    return opts.pruningStrategies.contains(name) &&
+        (customAllowedPruningStrategies == null || customAllowedPruningStrategies.contains(name));
   }
 
+  /**
+   * Return true if the derivation should be pruned. Otherwise, return false.
+   */
   public boolean isPruned(Derivation deriv) {
     if (opts.pruningStrategies.isEmpty() && pruningComputers.isEmpty()) return false;
-    if (pruneFormula(deriv)) return true;
-    if (pruneDenotation(deriv)) return true;
-    for (DerivationPruningComputer pruningComputer : pruningComputers) {
-      if (pruningComputer.isPruned(deriv)) return true;
+    if (isPrunedWithoutExecution(deriv)) return true;
+    if (isPrunedGeneral(deriv)) return true;
+    if (isPrunedRecursive(deriv)) return true;
+    return false;
+  }
+
+  // Prune without executing the formula
+  boolean isPrunedWithoutExecution(Derivation deriv) {
+    String matchedStrategy;
+    for (DerivationPruningComputer computer : pruningComputers) {
+      if ((matchedStrategy = computer.isPrunedWithoutExecution(deriv)) != null) {
+        if (opts.pruningVerbosity >= 2)
+          LogInfo.logs("PRUNED [%s] %s", matchedStrategy, deriv.formula);
+        return true;
+      }
     }
     return false;
   }
 
-  // ============================================================
-  // Formula-based Pruning
-  // ============================================================
-
-  private boolean pruneFormula(Derivation deriv) {
-    return pruneSingleton(deriv) || pruneSuperlatives(deriv) || pruneMerges(deriv);
+  // Prune based on the denotation (general)
+  boolean isPrunedGeneral(Derivation deriv) {
+    if (!opts.ensureExecuted) return false;
+    deriv.ensureExecuted(parser.executor, ex.context);
+    String matchedStrategy;
+    for (DerivationPruningComputer computer : pruningComputers) {
+      if ((matchedStrategy = computer.isPrunedGeneral(deriv)) != null) {
+        if (opts.pruningVerbosity >= 2)
+          LogInfo.logs("PRUNED [%s] %s", matchedStrategy, deriv.formula);
+        return true;
+      }
+    }
+    return false;
   }
 
-  /**
-   * Prune singleton formula at the root.
-   */
-  private boolean pruneSingleton(Derivation deriv) {
-    if (!containsStrategy("singleton")) return false;
-    return deriv.isRoot(ex.numTokens()) && deriv.formula instanceof ValueFormula;
-  }
-
-  /**
-   * Prune strings of multiple superlatives.
-   */
-  private boolean pruneSuperlatives(Derivation deriv) {
-    if (containsStrategy("doubleSuperlatives")) {
-      // Prune if there is an arg{max|min} whose head has arg{max|min}
-      if (deriv.formula instanceof SuperlativeFormula) {
-        SuperlativeFormula superlative = (SuperlativeFormula) deriv.formula;
-        if (superlative.head instanceof SuperlativeFormula) {
+  // Prune based on subformula
+  boolean isPrunedRecursive(Derivation deriv) {
+    if (!opts.recursivePruning) {
+      if (opts.ensureExecuted)
+        deriv.ensureExecuted(parser.executor, ex.context);
+      String matchedStrategy;
+      for (DerivationPruningComputer computer : pruningComputers) {
+        if ((matchedStrategy = computer.isPrunedRecursive(deriv, deriv.formula, new HashMap<>())) != null) {
           if (opts.pruningVerbosity >= 2)
-            LogInfo.logs("PRUNED [doubleSuperlatives] %s", deriv.formula);
+            LogInfo.logs("PRUNED [%s] %s", matchedStrategy, deriv.formula);
           return true;
         }
-      }
-    }
-    if (containsStrategy("multipleSuperlatives")) {
-      // Prune if there are more than arg{max|min} appearing in the formula (don't need to be adjacent)
-      List<LispTree> stack = new ArrayList<>();
-      int count = 0;
-      stack.add(deriv.formula.toLispTree());
-      while (!stack.isEmpty()) {
-        LispTree tree = stack.remove(stack.size() - 1);
-        if (tree.isLeaf()) {
-          if ("argmax".equals(tree.value) || "argmin".equals(tree.value)) {
-            count++;
-            if (count >= 2) {
-              if (opts.pruningVerbosity >= 2)
-                LogInfo.logs("PRUNED [multipleSuperlatives] %s", deriv.formula);
-              return true;
-            }
+        if (deriv.formula instanceof ScopedFormula) {
+          Formula relation = ((ScopedFormula) deriv.formula).relation;
+          if (relation instanceof LambdaFormula)
+            relation = ((LambdaFormula) relation).body;
+          if ((matchedStrategy = computer.isPrunedRecursive(deriv, relation, new HashMap<>())) != null) {
+            if (opts.pruningVerbosity >= 2)
+              LogInfo.logs("PRUNED [%s] %s", matchedStrategy, relation);
+            return true;
           }
-        } else {
-          for (LispTree subtree : tree.children)
-            stack.add(subtree);
         }
+      }
+    } else {
+      PruningRecurser recurser = new PruningRecurser(deriv);
+      deriv.formula.forEach(recurser);
+      if (recurser.matchedStrategy != null) {
+        if (opts.pruningVerbosity >= 2)
+          LogInfo.logs("PRUNED [%s] %s", recurser.matchedStrategy, deriv.formula);
+        return true;
       }
     }
     return false;
   }
 
   /**
-   * Prune merges.
+   * Helper class for traversing the formula recursively.
    */
-  private boolean pruneMerges(Derivation deriv) {
-    if (!(deriv.formula instanceof MergeFormula)) return false;
-    MergeFormula merge = (MergeFormula) deriv.formula;
-    if (containsStrategy("sameMerge")) {
-      if (merge.child1.equals(merge.child2)) {
-        if (opts.pruningVerbosity >= 2)
-          LogInfo.logs("PRUNED [sameMerge] %s", deriv.formula);
-        return true;
-      }
-    }
-    return false;
-  }
+  class PruningRecurser implements Function<Formula, Boolean> {
+    final Derivation deriv;
+    final Map<String, Object> state = new HashMap<>();
+    String matchedStrategy = null;
 
-  // ============================================================
-  // Denotation-based Pruning
-  // ============================================================
+    public PruningRecurser(Derivation deriv) { this.deriv = deriv; }
+
+    @Override
+    public Boolean apply(Formula f) {
+      if (matchedStrategy != null) return true;     // Don't process further
+      for (DerivationPruningComputer computer : pruningComputers) {
+        if ((matchedStrategy = computer.isPrunedRecursive(deriv, f, state)) != null)
+          return true;   // Don't process further
+      }
+      return false;   // Recurse
+    }
+  }
 
   /**
-   * Pruning based on denotations.
+   * Run isPruned with a (temporary) custom set of allowed pruning strategies.
+   * If customAllowedPruningStrategies is null, all strategies are allowed.
+   * If customAllowedPruningStrategies is empty, no pruning happens.
    */
-  private boolean pruneDenotation(Derivation deriv) {
-    return pruneFinalDenotation(deriv) || prunePartialDenotation(deriv);
+  public boolean isPruned(Derivation deriv, List<String> customAllowedPruningStategies) {
+    List<String> old = this.customAllowedPruningStrategies;
+    this.customAllowedPruningStrategies = customAllowedPruningStategies;
+    boolean answer = isPruned(deriv);
+    this.customAllowedPruningStrategies = old;
+    return answer;
   }
 
-  private boolean pruneFinalDenotation(Derivation deriv) {
-    Formula formula = deriv.formula;
-    // Prune if the denotation is an empty list
-    if (containsStrategy("emptyDenotation")) {
-      deriv.ensureExecuted(parser.executor, ex.context);
-      if (deriv.value instanceof ListValue) {
-        if (((ListValue) deriv.value).values.isEmpty()) {
-          if (opts.pruningVerbosity >= 3)
-            LogInfo.logs("PRUNED [emptyDenotation] %s", formula);
-          return true;
-        }
-      }
-    }
-    // Prune if the denotation is an error and the formula is not a partial formula
-    if (containsStrategy("nonLambdaError") && !(deriv.formula instanceof LambdaFormula)) {
-      deriv.ensureExecuted(parser.executor, ex.context);
-      if (deriv.value instanceof ErrorValue) {
-        if (opts.pruningVerbosity >= 3)
-          LogInfo.logs("PRUNED [nonLambdaError] %s", formula);
-        return true;
-      }
-    }
-    // Prune if the denotation has too many values
-    if (containsStrategy("tooManyValues") && deriv.isRoot(ex.numTokens())) {
-      deriv.ensureExecuted(parser.executor, ex.context);
-      if (deriv.value instanceof ListValue) {
-        if (((ListValue) deriv.value).values.size() > opts.maxNumValues) {
-          if (opts.pruningVerbosity >= 3)
-            LogInfo.logs("PRUNED [tooManyValues] %s", formula);
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
-  private boolean prunePartialDenotation(Derivation deriv) {
-    Formula formula = deriv.formula;
-    if (containsStrategy("badSuperlativeHead")) {
-      Formula head = null;
-      if (formula instanceof AggregateFormula)
-        head = ((AggregateFormula) formula).child;
-      else if (formula instanceof SuperlativeFormula)
-        head = ((SuperlativeFormula) formula).head;
-      if (head != null) {
-        Value headValue = parser.executor.execute(head, ex.context).value;
-        if (headValue instanceof ListValue && ((ListValue) headValue).values.size() < 2) {
-          if (opts.pruningVerbosity >= 3)
-            LogInfo.logs("PRUNED [badSuperlativeHead] %s", formula);
-          return true;
-        }
-      }
-    }
-    if (containsStrategy("mistypedMerge") && formula instanceof MergeFormula) {
-      MergeFormula merge = (MergeFormula) formula;
-      SemType type1 = TypeInference.inferType(merge.child1);
-      SemType type2 = TypeInference.inferType(merge.child2);
-      if (!type1.meet(type2).isValid()) {
-        if (opts.pruningVerbosity >= 2)
-          LogInfo.logs("PRUNED [mistypedMerge] %s", deriv.formula);
-        return true;
-      }
-    }
-    return false;
-  }
 }
