@@ -151,7 +151,7 @@ def add
     # Virtuoso can't handle prefixes in the second argument, so need to expand.
     tmp = "virtuoso-#{port}-#{i}.ttl"
     log "==== Step A: Converting #{ttl} to #{tmp}..."
-    run "time #{chunkCmd} -indices #{i} | sed -r -e 's/\\tfb:([^\\t]*) .$/\\t\\<http:\\/\\/rdf.freebase.com\\/ns\\/\\1\\>./' > #{tmp}"
+    run "time #{chunkCmd} -indices #{i} | sed -r -e 's/\\tfb:([^\\t ]*)[\\t ]*\\.$/\\t\\<http:\\/\\/rdf.freebase.com\\/ns\\/\\1\\>./' > #{tmp}"
 
     # Index the ttl file
     log "==== Step B: Indexing #{tmp}..."
