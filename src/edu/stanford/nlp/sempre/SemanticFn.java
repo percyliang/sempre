@@ -94,7 +94,7 @@ public abstract class SemanticFn {
    * See an example in tables.grow.ApplyFn
    */
   public boolean supportFilteringOnTypeData() { return false; }
-  public Collection<DerivationGroup> getFilteredDerivations(
+  public Collection<ChildDerivationsGroup> getFilteredDerivations(
       List<Derivation> derivations1, List<Derivation> derivations2) {
     throw new UnsupportedOperationException();
   }

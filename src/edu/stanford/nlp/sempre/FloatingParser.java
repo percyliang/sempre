@@ -81,7 +81,7 @@ public class FloatingParser extends Parser {
     public int trainBeamSize = -1;
     @Option(gloss = "Whether to beta reduce the formula")
     public boolean betaReduce = false;
-    @Option(gloss = "DEBUG: Print amounts of time spent on each rule")
+    @Option(gloss = "DEBUG: Print amount of time spent on each rule")
     public boolean summarizeRuleTime = false;
     @Option(gloss = "Stop the parser if it has used more than this amount of time (in seconds)")
     public int maxFloatingParsingTime = 600;
@@ -276,18 +276,18 @@ class FloatingParserState extends ParserState {
    *
    * The rule should be applied on all derivations (or all pairs of derivations) in each DerivationGroup.
    */
-  private Collection<DerivationGroup> getFilteredDerivations(Rule rule, Object cell1, Object cell2) {
+  private Collection<ChildDerivationsGroup> getFilteredDerivations(Rule rule, Object cell1, Object cell2) {
     List<Derivation> derivations1 = getDerivations(cell1),
         derivations2 = (cell2 == null) ? null : getDerivations(cell2);
     if (!FloatingParser.opts.filterChildDerivations)
-      return Collections.singleton(new DerivationGroup(derivations1, derivations2));
+      return Collections.singleton(new ChildDerivationsGroup(derivations1, derivations2));
     // Try to filter down the number of partial logical forms
     if (rule.getSem().supportFilteringOnTypeData())
       return rule.getSem().getFilteredDerivations(derivations1, derivations2);
-    return Collections.singleton(new DerivationGroup(derivations1, derivations2));
+    return Collections.singleton(new ChildDerivationsGroup(derivations1, derivations2));
   }
 
-  private Collection<DerivationGroup> getFilteredDerivations(Rule rule, Object cell) {
+  private Collection<ChildDerivationsGroup> getFilteredDerivations(Rule rule, Object cell) {
     return getFilteredDerivations(rule, cell, null);
   }
 
@@ -386,7 +386,7 @@ class FloatingParserState extends ParserState {
         derivLoop:
           for (int depth1 = 0; depth1 < depth; depth1++) {  // sizes must add up to depth-1 (actually size-1)
             int depth2 = depth - 1 - depth1;
-            for (DerivationGroup group : getFilteredDerivations(rule, floatingCell(rhs1, depth1), floatingCell(rhs2, depth2)))
+            for (ChildDerivationsGroup group : getFilteredDerivations(rule, floatingCell(rhs1, depth1), floatingCell(rhs2, depth2)))
               for (Derivation deriv1 : group.derivations1)
                 for (Derivation deriv2 : group.derivations2)
                   if (!applyFloatingRule(rule, depth, deriv1, deriv2, deriv1.canonicalUtterance + " " + deriv2.canonicalUtterance))
@@ -396,7 +396,7 @@ class FloatingParserState extends ParserState {
         {
           derivLoop:
             for (int subDepth = 0; subDepth < depth; subDepth++) {  // depth-1 <=depth-1
-              for (DerivationGroup group : getFilteredDerivations(rule, floatingCell(rhs1, depth - 1), floatingCell(rhs2, subDepth)))
+              for (ChildDerivationsGroup group : getFilteredDerivations(rule, floatingCell(rhs1, depth - 1), floatingCell(rhs2, subDepth)))
                 for (Derivation deriv1 : group.derivations1)
                   for (Derivation deriv2 : group.derivations2)
                     if (!applyFloatingRule(rule, depth, deriv1, deriv2, deriv1.canonicalUtterance + " " + deriv2.canonicalUtterance))
@@ -406,7 +406,7 @@ class FloatingParserState extends ParserState {
         {
           derivLoop:
             for (int subDepth = 0; subDepth < depth - 1; subDepth++) {  // <depth-1 depth-1
-              for (DerivationGroup group : getFilteredDerivations(rule, floatingCell(rhs1, subDepth), floatingCell(rhs2, depth - 1)))
+              for (ChildDerivationsGroup group : getFilteredDerivations(rule, floatingCell(rhs1, subDepth), floatingCell(rhs2, depth - 1)))
                 for (Derivation deriv1 : group.derivations1)
                   for (Derivation deriv2 : group.derivations2)
                     if (!applyFloatingRule(rule, depth, deriv1, deriv2, deriv1.canonicalUtterance + " " + deriv2.canonicalUtterance))
@@ -424,7 +424,7 @@ class FloatingParserState extends ParserState {
       if (catSizeBound.getBound(rule.lhs) < depth) continue;
       StopWatch stopWatch = new StopWatch().start();
       derivLoop:
-        for (DerivationGroup group : getFilteredDerivations(rule, floatingCell(rule.rhs.get(0), depth - 1)))
+        for (ChildDerivationsGroup group : getFilteredDerivations(rule, floatingCell(rule.rhs.get(0), depth - 1)))
           for (Derivation deriv : group.derivations1)
             if (!applyFloatingRule(rule, depth, deriv, null, deriv.canonicalUtterance))
               break derivLoop;

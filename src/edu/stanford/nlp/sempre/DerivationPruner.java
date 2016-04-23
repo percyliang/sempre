@@ -125,6 +125,7 @@ public class DerivationPruner {
   // Prune based on subformula
   boolean isPrunedRecursive(Derivation deriv) {
     if (!opts.recursivePruning) {
+      // If recursivePruning flag is turned off, only look at the outermost layer.
       if (opts.ensureExecuted)
         deriv.ensureExecuted(parser.executor, ex.context);
       String matchedStrategy;

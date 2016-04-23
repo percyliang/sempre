@@ -17,7 +17,7 @@ public class DefaultDerivationPruningComputer extends DerivationPruningComputer 
     super(pruner);
   }
 
-  public static final String singleton = "singleton";
+  public static final String atomic = "atomic";
   public static final String emptyDenotation = "emptyDenotation";
   public static final String nonLambdaError = "nonLambdaError";
   public static final String tooManyValues = "tooManyValues";
@@ -30,7 +30,7 @@ public class DefaultDerivationPruningComputer extends DerivationPruningComputer 
   @Override
   public Collection<String> getAllStrategyNames() {
     return Arrays.asList(
-        singleton,
+        atomic,
         emptyDenotation, nonLambdaError, tooManyValues,
         doubleSummarizers, sameMerge, mistypedMerge, unsortedMerge, badSummarizerHead);
   }
@@ -41,10 +41,11 @@ public class DefaultDerivationPruningComputer extends DerivationPruningComputer 
 
   @Override
   public String isPrunedWithoutExecution(Derivation deriv) {
-    // singleton: Prune singleton formula at root.
-    if (containsStrategy(singleton)) {
+    // atomic: Prune atomic formula at root.
+    //   e.g., Prevent "Who was taller, Lincoln or Obama" --> fb:en.lincoln generated from lexicon without any computation   
+    if (containsStrategy(atomic)) {
       if (deriv.isRoot(pruner.ex.numTokens()) && deriv.formula instanceof ValueFormula)
-        return singleton;
+        return atomic;
     }
     return null;
   }
