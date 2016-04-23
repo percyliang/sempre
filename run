@@ -814,7 +814,7 @@ end
 def tablesPruningStrategies
   [
     # Formula
-    "singleton",
+    "atomic",
     "multipleSuperlatives",
     "sameMerge",
     "forwardBackward",

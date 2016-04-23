@@ -87,4 +87,16 @@ public abstract class SemanticFn {
   // default does nothing
   public void sortOnFeedback(Params params) { return; }
 
+  /*
+   * Filter on type data to save time.
+   * Return a collection of DerivationGroup. The rule will be applied on each DerivationGroup.
+   *
+   * See an example in tables.grow.ApplyFn
+   */
+  public boolean supportFilteringOnTypeData() { return false; }
+  public Collection<ChildDerivationsGroup> getFilteredDerivations(
+      List<Derivation> derivations1, List<Derivation> derivations2) {
+    throw new UnsupportedOperationException();
+  }
+
 }
