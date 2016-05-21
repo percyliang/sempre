@@ -14,7 +14,7 @@ To generate each individual domain:
 
 ## Training
 
-After generating the paraphrases via AMT and setting up the approprate example
+After generating the paraphrases via AMT and setting up the appropriate example
 files, we train a model.
 
 Run the following to train with all the features:
