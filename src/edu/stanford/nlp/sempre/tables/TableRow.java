@@ -16,17 +16,17 @@ public class TableRow {
   public final List<TableCell> children;
   public final int index;
   public final NumberValue indexValue;
-  public final NameValue entityNameValue;
+  public final NameValue nameValue;
 
   public TableRow(int index) {
     this.children = new ArrayList<>();
     this.index = index;
     this.indexValue = new NumberValue(index);
-    this.entityNameValue = new NameValue(TableTypeSystem.getRowName(index), "" + index);
+    this.nameValue = new NameValue(TableTypeSystem.getRowName(index), "" + index);
   }
 
   @Override
   public String toString() {
-    return entityNameValue.toString();
+    return nameValue.toString();
   }
 }

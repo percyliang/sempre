@@ -14,27 +14,27 @@ import edu.stanford.nlp.sempre.*;
 public class TableColumn {
   public final List<TableCell> children;
   public final String originalString;
-  public final String fieldName;
+  public final String columnName;
   public final int index;
-  // Property Name
-  public final NameValue propertyNameValue;
-  // Property Type (FuncSemType)
-  public final SemType propertySemType;
-  // Children Cell's Type (EntitySemType)
-  public final String cellTypeString;
-  public final NameValue cellTypeValue;
-  public final SemType cellSemType;
+  public final NameValue relationNameValue, relationConsecutiveNameValue;
 
-  public TableColumn(String originalString, String fieldName, int index) {
+  public TableColumn(String originalString, String columnName, int index) {
     this.children = new ArrayList<>();
     this.originalString = originalString;
-    this.fieldName = fieldName;
+    this.columnName = columnName;
     this.index = index;
-    this.propertyNameValue = new NameValue(TableTypeSystem.getPropertyName(fieldName), originalString);
-    this.propertySemType = TableTypeSystem.getPropertySemType(fieldName);
-    this.cellTypeString = TableTypeSystem.getCellType(fieldName);
-    this.cellTypeValue = new NameValue(this.cellTypeString, originalString);
-    this.cellSemType = SemType.newAtomicSemType(this.cellTypeString);
+    this.relationNameValue = new NameValue(TableTypeSystem.getRowPropertyName(columnName), originalString);
+    this.relationConsecutiveNameValue = new NameValue(TableTypeSystem.getRowConsecutivePropertyName(columnName), originalString);
+  }
+
+  /** Create a copy without the children field. */
+  public TableColumn(TableColumn old) {
+    this.children = new ArrayList<>();
+    this.originalString = old.originalString;
+    this.columnName = old.columnName;
+    this.index = old.index;
+    this.relationNameValue = old.relationNameValue;
+    this.relationConsecutiveNameValue = old.relationConsecutiveNameValue;
   }
 
   public static Set<String> getReservedFieldNames() {
@@ -46,6 +46,23 @@ public class TableColumn {
 
   @Override
   public String toString() {
-    return propertyNameValue.toString();
+    return relationNameValue.toString();
+  }
+
+  public boolean hasConsecutive() {
+    NameValue previousCell = null;
+    for (TableCell child : children) {
+      if (child.properties.nameValue.equals(previousCell)) return true;
+      previousCell = child.properties.nameValue;
+    }
+    return false;
+  }
+
+  public Collection<Value> getAllNormalization() {
+    Set<Value> normalizations = new HashSet<>();
+    for (TableCell cell : children) {
+      normalizations.addAll(cell.properties.metadata.keySet());
+    }
+    return normalizations;
   }
 }

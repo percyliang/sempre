@@ -1,11 +1,10 @@
-package edu.stanford.nlp.sempre.tables.test;
+package edu.stanford.nlp.sempre.tables.lambdadcs;
 
 import java.util.*;
 
 import fig.basic.*;
 import edu.stanford.nlp.sempre.*;
 import edu.stanford.nlp.sempre.tables.TableKnowledgeGraph;
-import edu.stanford.nlp.sempre.tables.lambdadcs.LambdaDCSExecutor;
 
 import org.testng.annotations.Test;
 
@@ -20,24 +19,47 @@ public class LambdaDCSExecutorTest {
   // Value Checker (copied from SparqlExectutorTest)
   // ============================================================
 
-  interface ValuesChecker {
-    void checkValues(List<Value> values);
+  public static abstract class ValuesChecker {
+    void checkValue(Value value) {
+      if (value instanceof ListValue)
+        checkList(new HashSet<>(((ListValue) value).values));
+      else if (value instanceof PairListValue)
+        checkPairList(new HashSet<>(((PairListValue) value).pairs));
+      else
+        throw new RuntimeException("The answer is not a ListValue or a PairListValue.");
+    }
+    void checkList(Collection<Value> values) {
+      // Override this
+      throw new RuntimeException("Got a ListValue; expected something else: " + values);
+    }
+    void checkPairList(Collection<Pair<Value, Value>> pairs) {
+      // Override this
+      throw new RuntimeException("Got a PairListValue; expected something else: " + pairs);
+    }
   }
 
   public static ValuesChecker size(final int expectedNumResults) {
     return new ValuesChecker() {
-      public void checkValues(List<Value> values) {
+      public void checkList(Collection<Value> values) {
         if (values.size() != expectedNumResults)
           throw new RuntimeException("Expected " + expectedNumResults + " results, but got " + values.size() + ": " + values);
+      }
+      public void checkPairList(Collection<Pair<Value, Value>> pairs) {
+        if (pairs.size() != expectedNumResults)
+          throw new RuntimeException("Expected " + expectedNumResults + " results, but got " + pairs.size() + ": " + pairs);
       }
     };
   }
 
   public static ValuesChecker sizeAtLeast(final int expectedNumResults) {
     return new ValuesChecker() {
-      public void checkValues(List<Value> values) {
+      public void checkList(Collection<Value> values) {
         if (values.size() < expectedNumResults)
           throw new RuntimeException("Expected at least " + expectedNumResults + " results, but got " + values.size() + ": " + values);
+      }
+      public void checkPairList(Collection<Pair<Value, Value>> pairs) {
+        if (pairs.size() < expectedNumResults)
+          throw new RuntimeException("Expected at least " + expectedNumResults + " results, but got " + pairs.size() + ": " + pairs);
       }
     };
   }
@@ -45,8 +67,8 @@ public class LambdaDCSExecutorTest {
   public static ValuesChecker matches(String expected) {
     final Value expectedValue = Value.fromString(expected);
     return new ValuesChecker() {
-      public void checkValues(List<Value> values) {
-        if (values.size() != 1 || !values.get(0).equals(expectedValue))
+      public void checkList(Collection<Value> values) {
+        if (values.size() != 1 || !(new ArrayList<>(values)).get(0).equals(expectedValue))
           throw new RuntimeException("Expected " + expectedValue + ", but got " + values);
       }
     };
@@ -56,7 +78,7 @@ public class LambdaDCSExecutorTest {
     final List<Value> expectedValues = new ArrayList<>();
     for (String x : expected) expectedValues.add(Value.fromString(x));
     return new ValuesChecker() {
-      public void checkValues(List<Value> values) {
+      public void checkList(Collection<Value> values) {
         if (values.size() != expectedValues.size() || !expectedValues.containsAll(values))
           throw new RuntimeException("Expected " + new ListValue(expectedValues) + ", but got " + values);
       }
@@ -65,8 +87,8 @@ public class LambdaDCSExecutorTest {
 
   public static ValuesChecker regexMatches(final String expectedPattern) {
     return new ValuesChecker() {
-      public void checkValues(List<Value> values) {
-        if (values.size() != 1 || !values.get(0).toString().matches(expectedPattern))
+      public void checkList(Collection<Value> values) {
+        if (values.size() != 1 || !(new ArrayList<>(values)).get(0).toString().matches(expectedPattern))
           throw new RuntimeException("Expected " + expectedPattern + ", but got " + values);
       }
     };
@@ -85,9 +107,13 @@ public class LambdaDCSExecutorTest {
   protected static void runFormula(LambdaDCSExecutor executor, String formula, KnowledgeGraph graph, ValuesChecker checker) {
     ContextValue context = new ContextValue(graph);
     LambdaDCSExecutor.opts.verbose = 5;
+    LambdaDCSExecutor.opts.executeBinary = true;
+    LogInfo.begin_track("formula: %s", formula);
     Executor.Response response = executor.execute(Formulas.fromLispTree(LispTree.proto.parseFromString(formula)), context);
     LogInfo.logs("RESULT: %s", response.value);
-    checker.checkValues(((ListValue) response.value).values);
+    LogInfo.end_track();
+    if (checker != null)
+      checker.checkValue(response.value);
   }
 
   protected static KnowledgeGraph getKnowledgeGraph(String name) {
@@ -97,33 +123,35 @@ public class LambdaDCSExecutorTest {
     } else if ("prez".equals(name)) {
       return KnowledgeGraph.fromLispTree(LispTree.proto.parseFromString(
           "(graph NaiveKnowledgeGraph " +
-          "(fb:en.barack_obama fb:people.person.place_of_birth fb:en.honolulu)" +
-          "(fb:en.barack_obama fb:people.person.profession fb:en.politician)" +
-          "(fb:en.barack_obama fb:people.person.weight_kg (number 82))" +
-          "(fb:en.george_w_bush fb:people.person.place_of_birth fb:en.new_haven)" +
-          "(fb:en.george_w_bush fb:people.person.profession fb:en.politician)" +
-          "(fb:en.george_w_bush fb:people.person.weight_kg (number 86))" +
-          "(fb:en.bill_clinton fb:people.person.place_of_birth fb:en.hope_arkansas)" +
-          "(fb:en.bill_clinton fb:people.person.profession fb:en.lawyer)" +
-          "(fb:en.bill_clinton fb:people.person.profession fb:en.politician)" +
-          "(fb:en.bill_clinton fb:people.person.weight_kg (number 100))" +
-          "(fb:en.nicole_kidman fb:people.person.place_of_birth fb:en.honolulu)" +
-          "(fb:en.nicole_kidman fb:people.person.profession fb:en.actor)" +
-          "(fb:en.nicole_kidman fb:people.person.weight_kg (number 58))" +
-          "(fb:en.morgan_freeman fb:people.person.place_of_birth fb:en.memphis)" +
-          "(fb:en.morgan_freeman fb:people.person.profession fb:en.actor)" +
-          "(fb:en.morgan_freeman fb:people.person.weight_kg (number 91))" +
-          "(fb:en.ronald_reagan fb:people.person.place_of_birth fb:en.tampico)" +
-          "(fb:en.ronald_reagan fb:people.person.profession fb:en.politician)" +
-          "(fb:en.ronald_reagan fb:people.person.weight_kg (number 82))" +
-          "(fb:en.honolulu fb:location.location.containedby fb:en.hawaii)" +
-          "(fb:en.memphis fb:location.location.containedby fb:en.tennessee)" +
-          "(fb:en.new_haven fb:location.location.containedby fb:en.connecticut)" +
-          "(fb:en.hope_arkansas fb:location.location.containedby fb:en.arkansas)" +
-          "(fb:en.tampico fb:location.location.containedby fb:en.illinois)" +
+              "(fb:en.barack_obama fb:people.person.place_of_birth fb:en.honolulu)" +
+              "(fb:en.barack_obama fb:people.person.profession fb:en.politician)" +
+              "(fb:en.barack_obama fb:people.person.weight_kg (number 82))" +
+              "(fb:en.george_w_bush fb:people.person.place_of_birth fb:en.new_haven)" +
+              "(fb:en.george_w_bush fb:people.person.profession fb:en.politician)" +
+              "(fb:en.george_w_bush fb:people.person.weight_kg (number 86))" +
+              "(fb:en.bill_clinton fb:people.person.place_of_birth fb:en.hope_arkansas)" +
+              "(fb:en.bill_clinton fb:people.person.profession fb:en.lawyer)" +
+              "(fb:en.bill_clinton fb:people.person.profession fb:en.politician)" +
+              "(fb:en.bill_clinton fb:people.person.weight_kg (number 100))" +
+              "(fb:en.nicole_kidman fb:people.person.place_of_birth fb:en.honolulu)" +
+              "(fb:en.nicole_kidman fb:people.person.profession fb:en.actor)" +
+              "(fb:en.nicole_kidman fb:people.person.weight_kg (number 58))" +
+              "(fb:en.morgan_freeman fb:people.person.place_of_birth fb:en.memphis)" +
+              "(fb:en.morgan_freeman fb:people.person.profession fb:en.actor)" +
+              "(fb:en.morgan_freeman fb:people.person.weight_kg (number 91))" +
+              "(fb:en.ronald_reagan fb:people.person.place_of_birth fb:en.tampico)" +
+              "(fb:en.ronald_reagan fb:people.person.profession fb:en.politician)" +
+              "(fb:en.ronald_reagan fb:people.person.weight_kg (number 82))" +
+              "(fb:en.honolulu fb:location.location.containedby fb:en.hawaii)" +
+              "(fb:en.memphis fb:location.location.containedby fb:en.tennessee)" +
+              "(fb:en.new_haven fb:location.location.containedby fb:en.connecticut)" +
+              "(fb:en.hope_arkansas fb:location.location.containedby fb:en.arkansas)" +
+              "(fb:en.tampico fb:location.location.containedby fb:en.illinois)" +
           ")"));
     } else if ("csv".equals(name)) {
       return TableKnowledgeGraph.fromFilename("tables/toy-examples/random/nikos_machlas.csv");
+    } else if ("csv2".equals(name)) {
+      return TableKnowledgeGraph.fromFilename("lib/data/tables/csv/204-csv/495.tsv");
     }
     throw new RuntimeException("Unknown graph name: " + name);
   }
@@ -189,12 +217,19 @@ public class LambdaDCSExecutorTest {
         graph, matches("(name fb:en.honolulu)"));
   }
 
+  @Test(groups = "floating") public void lambdaOnGraphFloatingLambdaTest() {
+    KnowledgeGraph graph = getKnowledgeGraph("prez");
+    runFormula(executor, "(lambda x (fb:people.person.place_of_birth (var x)))", graph);
+    runFormula(executor, "(lambda x ((reverse fb:people.person.place_of_birth) (var x)))", graph);
+    runFormula(executor, "(lambda x (count ((reverse fb:people.person.place_of_birth) (var x))))", graph);
+  }
+
   @Test(groups = "lambdaCSV") public void lambdaOnGraphCSVTest() {
     KnowledgeGraph graph = getKnowledgeGraph("csv");
     runFormula(executor, "(number 3)", graph, matches("(number 3)"));
-    runFormula(executor, "(!fb:row.row.score (fb:row.row.opponent fb:cell_opponent.austria))",
-        graph, matches("(name fb:cell_score.1_2)"));
-    runFormula(executor, "(count (fb:row.row.result fb:cell_result.win))",
+    runFormula(executor, "(!fb:row.row.score (fb:row.row.opponent fb:cell.austria))",
+        graph, matches("(name fb:cell.1_2)"));
+    runFormula(executor, "(count (fb:row.row.result fb:cell.win))",
         graph, matches("(number 16)"));
     // Depending on tie-breaking, one of these will be correct
     try {
@@ -208,6 +243,18 @@ public class LambdaDCSExecutorTest {
           + "(reverse (lambda x (count (fb:row.row.opponent (var x))))))))",
           graph, matches("(number 2)"));
     }
+  }
+  
+  @Test(groups = "lambdaCSV2") public void lambdaOnGraphCSV2Test() {
+    KnowledgeGraph graph = getKnowledgeGraph("csv2");
+    // fb:cell.away', 'fb:row.row.venue', '!fb:row.row.result',
+    // '!fb:cell.cell.num2', 'avg', 'fb:row.row.index', 'fb:row.row.next', '!fb:row.row.opponent'
+    //runFormula(executor,
+    //    "(!fb:row.row.opponent (fb:row.row.next (fb:row.row.index (avg (!fb:cell.cell.num2 (!fb:row.row.result (fb:row.row.venue fb:cell.away)))))))",
+    //    graph, matches("(name fb:cell.derby_county)"));
+    runFormula(executor,
+        "(and (!= (and (!= fb:cell.away) fb:cell.home)) ((reverse fb:row.row.opponent) (fb:row.row.index (- (number 1) (number 1)))))",
+        graph, matches("(name fb:cell.derby_county)"));
   }
 
 }

@@ -27,6 +27,6 @@ public final class TableCell {
 
   @Override
   public String toString() {
-    return properties.entityNameValue.toString();
+    return properties.nameValue.toString();
   }
 }

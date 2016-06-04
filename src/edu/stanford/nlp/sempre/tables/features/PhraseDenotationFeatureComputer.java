@@ -62,10 +62,11 @@ public class PhraseDenotationFeatureComputer implements FeatureComputer {
     } else {
       for (LispTree subtree : tree.children) {
         if (!subtree.isLeaf()) continue;
-        if (subtree.value.startsWith(TableTypeSystem.CELL_SPECIFIC_TYPE_PREFIX)) {
+        // TODO: not sure if this is correct
+        if (subtree.value.startsWith(TableTypeSystem.CELL_TYPE)) {
           denotationTypes.add(prefix + subtree.value);
           if (opts.useGenericCellType)
-            denotationTypes.add(prefix + TableTypeSystem.CELL_GENERIC_TYPE);
+            denotationTypes.add(prefix + TableTypeSystem.CELL_TYPE);
         }
       }
     }

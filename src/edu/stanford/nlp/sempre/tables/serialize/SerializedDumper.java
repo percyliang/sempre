@@ -4,11 +4,15 @@ import java.io.*;
 import java.util.*;
 
 import edu.stanford.nlp.sempre.*;
+import edu.stanford.nlp.sempre.tables.TableKnowledgeGraph;
 import fig.basic.*;
 import fig.exec.*;
 
 /**
  * Dump examples and parsed derivations.
+ *
+ * This class can be run on its own, in which case the parser in Builder.parser will be used.
+ * Or it can be supplied the examples to dump in a streaming fashion.
  *
  * @author ppasupat
  */
@@ -17,43 +21,104 @@ public class SerializedDumper implements Runnable {
     @Option(gloss = "Verbosity") public int verbosity = 0;
     @Option(gloss = "Randomly shuffle dumped derivations")
     public Random shuffleDerivsRandom = new Random(9);
+    @Option(gloss = "Skip if the table has more than this number of rows")
+    public int maxNumRowsToDump = 60;
+    @Option(gloss = "Number of examples per gzip file (0 = single file)")
+    public int numExamplesPerFile = 0;
   }
   public static Options opts = new Options();
+
+  String group;
+  String filename;
+  PrintWriter out;
+  int numExamples = -1, currentIndex = 0;
+
+  public SerializedDumper(String group, int numExamples) {
+    reset(group, numExamples);
+  }
+
+  public void reset(String group, int numExamples) {
+    closeFile();
+    this.currentIndex = 0;
+    this.group = group;
+    this.numExamples = numExamples;
+  }
+
+  public void openFile(String filenameSuffix) {
+    if (out != null) closeFile();
+    filename = Execution.getFile("dumped-" + filenameSuffix + ".gz");
+    LogInfo.logs("Opening %s", filename);
+    if (new File(filename).exists())
+      LogInfo.warnings("File %s exists; will overwrite!", filename);
+    out = IOUtils.openOutHard(filename);
+  }
+
+  public void closeFile() {
+    if (out != null) {
+      out.close();
+      LogInfo.logs("Finished dumping to %s", filename);
+      out = null;
+    }
+  }
+
+  public void dumpExample(Example ex) {
+    dumpExample(ex, ex.predDerivations);
+  }
+
+  public void dumpExample(Example ex, List<Derivation> derivations) {
+    if (numExamples < 0)
+      throw new RuntimeException("numExamples must be specified via reset(group, numExamples)");
+    if (currentIndex >= numExamples)
+      throw new RuntimeException("current example index exceeds numExamples");
+    if (opts.numExamplesPerFile == 0) {
+      if (currentIndex == 0) {
+        openFile(group);
+        actuallyDumpMetadata(-1, numExamples);
+      }
+    } else {
+      if (currentIndex % opts.numExamplesPerFile == 0) {
+        openFile(String.format("%s-%06d", group, currentIndex));
+        actuallyDumpMetadata(currentIndex, Math.min(opts.numExamplesPerFile, numExamples - currentIndex));
+      }
+    }
+    out.printf("########## Example %s ##########\n", ex.id);
+    actuallyDumpExample(exampleToLispTree(ex, derivations));
+    out.flush();
+    currentIndex++;
+    if (currentIndex == numExamples || (opts.numExamplesPerFile > 0 && currentIndex % opts.numExamplesPerFile == 0))
+      closeFile();
+  }
+
+  // ============================================================
+  // Stand-alone mode
+  // ============================================================
+
+  private SerializedDumper() { }
 
   public static void main(String[] args) {
     Execution.run(args, "SerializedDumperMain", new SerializedDumper(), Master.getOptionsParser());
   }
 
-  Builder builder;
-  Dataset dataset;
-  PrintWriter out;
-
   @Override
   public void run() {
-    builder = new Builder();
+    Builder builder = new Builder();
     builder.build();
-    dataset = new Dataset();
+    Dataset dataset = new Dataset();
     dataset.read();
     for (String group : dataset.groups()) {
-      String filename = Execution.getFile("dumped-" + group + ".gz");
-      out = IOUtils.openOutHard(filename);
-      processExamples(group, dataset.examples(group));
-      out.close();
-      LogInfo.logs("Finished dumping to %s", filename);
+      reset(group, dataset.examples(group).size());
+      processExamples(dataset.examples(group), builder);
       StopWatchSet.logStats();
     }
   }
 
-  private void processExamples(String group, List<Example> examples) {
+  private void processExamples(List<Example> examples, Builder builder) {
     Evaluation evaluation = new Evaluation();
     if (examples.isEmpty()) return;
 
     final String prefix = "iter=0." + group;
     Execution.putOutput("group", group);
     LogInfo.begin_track_printAll("Processing %s: %s examples", prefix, examples.size());
-    LogInfo.begin_track("Dumping metadata");
-    dumpMetadata(group, examples);
-    LogInfo.end_track();
     LogInfo.begin_track("Examples");
 
     for (int e = 0; e < examples.size(); e++) {
@@ -62,15 +127,24 @@ public class SerializedDumper implements Runnable {
       ex.log();
       Execution.putOutput("example", e);
       StopWatchSet.begin("Parser.parse");
-      ParserState state = builder.parser.parse(builder.params, ex, false);
+      if (((TableKnowledgeGraph) ex.context.graph).numRows() > opts.maxNumRowsToDump) {
+        LogInfo.logs("SKIPPING Example %s (number of rows = %d > %d)",
+            ex.id, ((TableKnowledgeGraph) ex.context.graph).numRows(), opts.maxNumRowsToDump);
+        new DummyParserState(builder.parser, builder.params, ex, false);
+      } else {
+        builder.parser.parse(builder.params, ex, false);
+      }
       StopWatchSet.end();
-      out.printf("########## Example %s ##########\n", ex.id);
-      dumpExample(exampleToLispTree(state));
+      dumpExample(ex);
       LogInfo.logs("Current: %s", ex.evaluation.summary());
       evaluation.add(ex.evaluation);
       LogInfo.logs("Cumulative(%s): %s", prefix, evaluation.summary());
       LogInfo.end_track();
-      ex.predDerivations.clear();  // To save memory
+      // Save memory
+      if (ex.predDerivations != null) {
+        ex.predDerivations.clear();
+        System.gc();
+      }
     }
 
     LogInfo.end_track();
@@ -80,25 +154,27 @@ public class SerializedDumper implements Runnable {
     LogInfo.end_track();
   }
 
-  private void dumpMetadata(String group, List<Example> examples) {
-    LispTree tree = LispTree.proto.newList();
-    tree.addChild("metadata");
-    tree.addChild(LispTree.proto.newList("group", group));
-    tree.addChild(LispTree.proto.newList("size", "" + examples.size()));
-    tree.print(out);
-    out.println();
+  public static class DummyParserState extends ParserState {
+
+    public DummyParserState(Parser parser, Params params, Example ex, boolean computeExpectedCounts) {
+      super(parser, params, ex, computeExpectedCounts);
+      ex.predDerivations = new ArrayList<>();
+      ex.evaluation = new Evaluation();
+    }
+
+    @Override public void infer() { }    // Unused.
+
   }
 
   // ============================================================
   // Conversion to LispTree
   // ============================================================
 
-  private LispTree exampleToLispTree(ParserState state) {
+  private LispTree exampleToLispTree(Example ex, List<Derivation> preds) {
     LispTree tree = LispTree.proto.newList();
     tree.addChild("example");
 
     // Basic information
-    Example ex = state.ex;
     if (ex.id != null)
       tree.addChild(LispTree.proto.newList("id", ex.id));
     if (ex.utterance != null)
@@ -126,7 +202,6 @@ public class SerializedDumper implements Runnable {
 
     // Derivations
     List<LispTree> derivations = new ArrayList<>();
-    List<Derivation> preds = state.predDerivations;
     for (int i = 0; i < preds.size(); i++) {
       Derivation deriv = preds.get(i);
       if (!isPruned(deriv)) {
@@ -155,7 +230,19 @@ public class SerializedDumper implements Runnable {
   // Dumping LispTree
   // ============================================================
 
-  private void dumpExample(LispTree tree) {
+  private void actuallyDumpMetadata(int offset, int size) {
+    LispTree tree = LispTree.proto.newList();
+    tree.addChild("metadata");
+    tree.addChild(LispTree.proto.newList("group", group));
+    if (offset >= 0)
+      tree.addChild(LispTree.proto.newList("offset", "" + offset));
+    tree.addChild(LispTree.proto.newList("size", "" + size));
+    tree.print(out);
+    out.println();
+    out.flush();
+  }
+
+  private void actuallyDumpExample(LispTree tree) {
     out.println("(example");
     for (LispTree subtree : tree.children.subList(1, tree.children.size())) {
       if (!subtree.isLeaf() && "derivations".equals(subtree.children.get(0).value)) {
@@ -177,5 +264,6 @@ public class SerializedDumper implements Runnable {
       }
     }
     out.println(")");
+    out.flush();
   }
 }

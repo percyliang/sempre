@@ -8,13 +8,10 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-import edu.stanford.nlp.sempre.DateValue;
-import edu.stanford.nlp.sempre.LanguageAnalyzer;
-import edu.stanford.nlp.sempre.LanguageInfo;
-import edu.stanford.nlp.sempre.NameValue;
-import edu.stanford.nlp.sempre.NumberValue;
-import edu.stanford.nlp.sempre.StringValue;
-import edu.stanford.nlp.sempre.Value;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+
+import edu.stanford.nlp.sempre.*;
 import fig.basic.*;
 
 /**
@@ -24,8 +21,13 @@ import fig.basic.*;
  */
 public final class StringNormalizationUtils {
   public static class Options {
-    @Option(gloss = "Use language analyzer") public boolean useLanguageAnalyzer = true;
     @Option(gloss = "Verbosity") public int verbose = 0;
+    @Option(gloss = "Use language analyzer")
+    public boolean useLanguageAnalyzer = true;
+    @Option(gloss = "NUMBER does not have to be at the beginning of the string")
+    public boolean numberCanStartAnywhere = false;
+    @Option(gloss = "NUM2 does not have to follow the pattern NUMBER DASH NUM2")
+    public boolean num2CanStartAnywhere = false;
   }
   public static Options opts = new Options();
 
@@ -37,10 +39,17 @@ public final class StringNormalizationUtils {
    *
    * TODO(ice): Take the homogeneity of the cells into account.
    */
-  public static void analyzeColumn(TableColumn column) {
+  public static void analyzeColumn(TableColumn column, Map<String, String> originalStringToPartId) {
+    // Check if any cell contains a comma-separated list
+    int numLists = 0;
+    for (TableCell cell : column.children) {
+      String[] splitted = COMMA.split(cell.properties.originalString);
+      if (splitted.length > 1) numLists++;
+    }
     for (TableCell cell : column.children) {
       if (!cell.properties.metadata.isEmpty()) continue;  // Already analyzed.
-      analyzeString(cell.properties.originalString, cell.properties.metadata);
+      analyzeString(cell.properties.originalString, cell.properties.metadata,
+          originalStringToPartId, numLists > 0);
     }
   }
 
@@ -49,42 +58,49 @@ public final class StringNormalizationUtils {
   // ============================================================
 
   public static final Pattern DASH = Pattern.compile("\\s*[-‐‑⁃‒–—―/,:;]\\s*");
+  public static final Pattern COMMA = Pattern.compile("\\s*(,\\s|\\n|/)\\s*");
   public static final Pattern SPACE = Pattern.compile("\\s+");
 
-  public static void analyzeString(String o, Map<Value, Value> metadata) {
+  public static void analyzeString(String o, Multimap<Value, Value> metadata,
+      Map<String, String> originalStringToPartId, boolean alwaysGenerateParts) {
     metadata.clear();
     Value value;
     LanguageAnalyzer analyzer = LanguageAnalyzer.getSingleton();
     LanguageInfo languageInfo = analyzer.analyze(o);
-    // ===== Number: Also handle "2,000 ft." --> (number 2000)
+    // ===== Number: Also handle "2,000 ft." --> (number 2000) =====
     value = parseNumberLenient(o);
     if (value == null && opts.useLanguageAnalyzer)
       value = parseNumberWithLanguageAnalyzer(languageInfo);
     if (value != null) metadata.put(TableTypeSystem.CELL_NUMBER_VALUE, value);
-    // ===== Date and Time
+    // ===== Date and Time =====
     value = parseDate(o);
     if (value == null && opts.useLanguageAnalyzer)
       value = parseDateWithLanguageAnalyzer(languageInfo);
     if (value != null) metadata.put(TableTypeSystem.CELL_DATE_VALUE, value);
-    // ===== First and Second: "2-1" --> first = (number 2), second = (number 1)
-    // TODO(ice): Do we want non-numeric stuff?
-    String[] dashSplitted = DASH.split(o);
-    if (dashSplitted.length == 2) {
-      NumberValue first = parseNumberStrict(dashSplitted[0]), second = parseNumberStrict(dashSplitted[1]);
-      if (first != null && second != null) {
-        //metadata.put(TableTypeSystem.CELL_FIRST_VALUE, first);
-        metadata.put(TableTypeSystem.CELL_SECOND_VALUE, second);
+    // ===== First and Second: "2-1" --> first = (number 2), second = (number 1) =====
+    if (opts.num2CanStartAnywhere) {
+      value = parseNum2Lenient(o);
+      if (value != null)
+        metadata.put(TableTypeSystem.CELL_NUM2_VALUE, value);
+    } else {
+      String[] splitted = DASH.split(o);
+      if (splitted.length != 2) splitted = SPACE.split(o);
+      if (splitted.length == 2) {
+        NumberValue first = parseNumberStrict(splitted[0]), second = parseNumberStrict(splitted[1]);
+        if (first != null && second != null) {
+          metadata.put(TableTypeSystem.CELL_NUM2_VALUE, second);
+        }
       }
     }
-    // ===== Unit: "2,000 ft." --> "ft."
-    // TODO(ice): This is very crude
-    String[] spaceSplitted = SPACE.split(o);
-    if (spaceSplitted.length == 2) {
-      if (parseNumberStrict(spaceSplitted[0]) != null)
-        metadata.put(TableTypeSystem.CELL_UNIT_VALUE, new StringValue(spaceSplitted[1]));
+    // ===== List: "apple, banana, carrot" --> fb:part.apple, etc. =====
+    String[] splitted = COMMA.split(o);
+    if (splitted.length > 1 || alwaysGenerateParts) {
+      for (String x : splitted) {
+        String id = TableTypeSystem.getOrCreateName(x, originalStringToPartId,
+            (String canonicalName) -> TableTypeSystem.getPartName(canonicalName));
+        metadata.put(TableTypeSystem.CELL_PART_VALUE, new NameValue(id, x));
+      }
     }
-    // ===== Normalize
-    metadata.put(TableTypeSystem.CELL_NORMALIZED_VALUE, new StringValue(aggressiveNormalize(o)));
   }
 
   // ============================================================
@@ -99,11 +115,32 @@ public final class StringNormalizationUtils {
    */
   public static NumberValue parseNumberLenient(String s) {
     try {
+      if (opts.numberCanStartAnywhere)
+        s = s.replaceAll("^[^0-9.]*", "");
       Number parsed = numberFormat.parse(s.replace(" ", ""));
       return new NumberValue(parsed.doubleValue());
     } catch (ParseException e) {
       return null;
     }
+  }
+
+  /**
+   * Get the second number
+   * Partial match is allowed: "9,000 cakes from 120 bakeries" --> 120
+   */
+  public static NumberValue parseNum2Lenient(String s) {
+    s = s.replace(" ", "");
+    if (opts.numberCanStartAnywhere)
+      s = s.replaceAll("^[^0-9.]*", "");
+    ParsePosition parsePosition = new ParsePosition(0);
+    Number parsed = numberFormat.parse(s, parsePosition);
+    if (parsed == null) return null;
+    s = s.substring(parsePosition.getIndex());
+    s = s.replaceAll("^[^0-9.]*", "");
+    parsePosition.setIndex(0);
+    parsed = numberFormat.parse(s, parsePosition);
+    if (parsed == null) return null;
+    return new NumberValue(parsed.doubleValue());
   }
 
   /**
@@ -198,10 +235,14 @@ public final class StringNormalizationUtils {
   // ============================================================
 
   /**
-   * Convert escaped characters to actual values
+   * newline (=> `\n`), backslash (`\` => `\\`), and pipe (`|` => `\p`)
    */
-  public static String unescape(String x) {
-    return x.replaceAll("\\\\n", "\n");
+  public static String escapeTSV(String x) {
+    return x.replace("\\", "\\\\").replace("\n", "\\n").replace("|", "\\p").replaceAll("\\s", " ").trim();
+  }
+
+  public static String unescapeTSV(String x) {
+    return x.replace("\\n", "\n").replace("\\p", "|").replace("\\\\", "\\");
   }
 
   /**
@@ -222,14 +263,26 @@ public final class StringNormalizationUtils {
   /**
    * String to number
    */
-  public static NumberValue nameValueToNumberValue(NameValue v) {
-    if (v.description == null) return null;
+  public static NumberValue toNumberValue(String description) {
+    if (description == null) return null;
     try {
-      Number result = numberFormat.parse(v.description);
+      Number result = numberFormat.parse(description);
       return new NumberValue(result.doubleValue());
     } catch (ParseException e) {
       return null;
     }
+  }
+
+  public static NumberValue toNumberValue(Value value) {
+    if (value instanceof NumberValue) return (NumberValue) value;
+    if (value instanceof DateValue) {
+      DateValue date = (DateValue) value;
+      if (date.month == -1 && date.day == -1)
+        return new NumberValue(date.year);
+    }
+    if (value instanceof NameValue) return toNumberValue(((NameValue) value).description);
+    if (value instanceof DescriptionValue) return toNumberValue(((DescriptionValue) value).value);
+    return null;
   }
 
   /**
@@ -292,16 +345,20 @@ public final class StringNormalizationUtils {
   // ============================================================
 
   private static void unitTest(String o) {
-    Map<Value, Value> metadata = new HashMap<>();
-    analyzeString(o, metadata);
+    Multimap<Value, Value> metadata = ArrayListMultimap.create();
+    analyzeString(o, metadata, new HashMap<>(), false);
     LogInfo.logs("%s %s", o, metadata);
   }
 
   public static void main(String[] args) {
     LanguageAnalyzer.opts.languageAnalyzer = "corenlp.CoreNLPAnalyzer";
     opts.verbose = 2;
+    opts.numberCanStartAnywhere = true;
+    opts.num2CanStartAnywhere = true;
     unitTest("2");
     unitTest("twenty three");
+    unitTest("apple, banana, banana, BANANA");
+    unitTest("apple\nbanana\norange");
     unitTest("21st");
     unitTest("2001st");
     unitTest("2,000,000 ft.");
@@ -312,6 +369,7 @@ public final class StringNormalizationUtils {
     unitTest("$30");
     unitTest("1 104");
     unitTest("United States of America (USA)");
+    unitTest("320 bhp diesel, 10 knots (19 km/h)");
     unitTest("January 3, 1993");
     unitTest("July 2008");
     // normalized-annotated-200.examples
@@ -326,6 +384,9 @@ public final class StringNormalizationUtils {
     unitTest("January 2, 7am");
     unitTest("morning");
     unitTest("1993-95");
+    unitTest("Jan 2-5");
+    unitTest("Jan 2 - 5");
+    unitTest("Jan 2 - Feb 5");
     unitTest("from dawn to dusk");
     unitTest("January 4 - February 10");
     unitTest("July 500");
