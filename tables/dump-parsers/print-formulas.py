@@ -1,14 +1,23 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""Take in lines of derivations
+and print the abbreviated formulas."""
 
 import sys, os, shutil, re, argparse, json
 from codecs import open
 from itertools import izip
 from collections import defaultdict
 
+import gzip
+
 def process(line):
+    line = line.strip()
+    if line.startswith('Processing'):
+        print '#' * 20, line[:-1], '#' * 20
+    if not line.startswith('(derivation '):
+        return
     # Extract only formula
-    line = re.sub(r'^ *True@\d+: \(derivation \(formula ', '', line)
+    line = re.sub(r'^\(derivation \(formula ', '', line)
     num_open = 0
     stuff = []
     for char in line:
@@ -31,29 +40,21 @@ def process(line):
     line = line.replace('fb:cell.cell.', '@p.')
     line = line.replace('@p.number', '@p.num')
     line = line.replace('fb:cell.', 'c.')
-    return line
-
-def dump(formulas):
-    formulas.sort()
-    for x in formulas:
-        print x
+    print line
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('infile')
     args = parser.parse_args()
-    formulas = []
 
-    with open(args.infile, 'r', 'utf8') as fin:
-        for line in fin:
-            if line.strip().startswith('Example: '):
-                if formulas:
-                    dump(formulas)
-                print '#', re.sub('^Example: ', '', line.strip())
-            elif line.strip().startswith('True@'):
-                formulas.append(process(line))
-        if formulas:
-            dump(formulas)
+    if args.infile != '-':
+        opener = gzip.open if args.infile.endswith('.gz') else open 
+        with opener(args.infile, 'r', 'utf8') as fin:
+            for line in fin:
+                process(line)
+    else:
+        for line in sys.stdin:
+            process(line)
 
 if __name__ == '__main__':
     main()

@@ -1,14 +1,15 @@
 // Codalab schema for SEMPRE runs
 % schema sempre
+% add uuid uuid [0:8]
 % add name
 % add state state
 % add date created date
-% add host remote s/\..*/
+% add host remote s/[.].*/
 % add disk data_size size
 % add mem memory size
 % add time time duration
 % add |
-% add data /options.map:Dataset.inPaths "s/WikiTableQuestions\/compiled\// | s/\.examples/ | s/unnormalized/U | s/normalized/N | s/unseen-(train|dev)-seed/u"
+% add data /options.map:Dataset.inPaths "s/WikiTableQuestions\/compiled\// | s/\.examples/ | s/unnormalized/U | s/normalized/N | s/unseen-(train|dev)-seed/u | s/random-split/u"
 % add maxex /options.map:Dataset.maxExamples
 % add parser /options.map:Builder.parser
 % add beam /options.map:Parser.beamSize %d
