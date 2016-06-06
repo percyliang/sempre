@@ -19,7 +19,7 @@ public class MixParser extends Parser {
 
     /**
      * Syntax: [className]:[options]
-     * - className also includes the package name (BeamParser, FloatingParser, tables.DPParser, ...)
+     * - className also includes the package name (BeamParser, FloatingParser, tables.dpd.DPDParser, ...)
      * - options is a comma-separated list of [group] or [group]-[iter1]-[iter2]-...
      *   [iter1], [iter2], ... are iteration indices (0-based), "xc" (computing expected counts),
      *   "nxc" (not computing expected counts), index + "xc", or index + "nxc"

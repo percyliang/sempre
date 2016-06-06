@@ -1,0 +1,5 @@
+#!/bin/bash
+minify main.js
+minify style.css
+rsync -avzuL data main.min.js cookies.min.js jquery.min.js style.min.css jamie:~/www/mturk/tables-alter-v5/ $@
+rsync -avzuL index.min.html jamie:~/www/mturk/tables-alter-v5/index.html $@

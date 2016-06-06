@@ -1,10 +1,11 @@
 package edu.stanford.nlp.sempre.tables;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
-import edu.stanford.nlp.sempre.NameValue;
-import edu.stanford.nlp.sempre.Value;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+
+import edu.stanford.nlp.sempre.*;
 
 /**
  * Store various properties of a cell.
@@ -16,14 +17,25 @@ import edu.stanford.nlp.sempre.Value;
 public class TableCellProperties {
   public final String id;
   public final String originalString;
-  public final NameValue entityNameValue;
-  public final Map<Value, Value> metadata;
+  public final NameValue nameValue;
+  public final Multimap<Value, Value> metadata;
+  public final Set<TableColumn> columns;
 
   public TableCellProperties(String id, String originalString) {
     this.id = id;
     this.originalString = originalString;
-    this.entityNameValue = new NameValue(id, originalString);
-    this.metadata = new HashMap<>();
+    this.nameValue = new NameValue(id, originalString);
+    this.metadata = ArrayListMultimap.create();
+    this.columns = new HashSet<>();
+  }
+
+  /** Create a copy without the columns field. */
+  public TableCellProperties(TableCellProperties old) {
+    this.id = old.id;
+    this.originalString = old.originalString;
+    this.nameValue = old.nameValue;
+    this.metadata = ArrayListMultimap.create(old.metadata);
+    this.columns = new HashSet<>();
   }
 
   @Override

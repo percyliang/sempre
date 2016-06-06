@@ -1,26 +1,17 @@
 package edu.stanford.nlp.sempre.tables.serialize;
 
-import java.io.*;
-import java.util.*;
-
 import edu.stanford.nlp.sempre.*;
-import fig.basic.*;
 import fig.exec.Execution;
 
 /**
- * Load the examples and derivations from SerealizeDumper.
+ * Load the examples and derivations from SerializedDumper, and then run the learner.
  */
 public class SerializedLoader implements Runnable {
-  public static class Options {
-    @Option(gloss = "Base directory for dumped datasets")
-    public String dumpDir = null;
-  }
-  public static Options opts = new Options();
-
   public static void main(String[] args) {
     Execution.run(args, "SerializedLoaderMain", new SerializedLoader(), Master.getOptionsParser());
   }
 
+  @Override
   public void run() {
     Builder builder = new Builder();
     builder.build();
@@ -33,3 +24,4 @@ public class SerializedLoader implements Runnable {
   }
 
 }
+

@@ -1,104 +1,75 @@
 package edu.stanford.nlp.sempre.tables.alignment;
 
-import java.io.*;
+import java.io.PrintWriter;
 import java.util.*;
 
 import edu.stanford.nlp.sempre.*;
+import edu.stanford.nlp.sempre.tables.TableFormulaEvaluator;
+import edu.stanford.nlp.sempre.tables.alignment.BitextData.BitextDataGroup;
 import fig.basic.*;
 import fig.exec.*;
 
 public class AlignerMain implements Runnable {
   public static class Options {
-    @Option public String inputFile;
-    @Option public int maxInputLines = Integer.MAX_VALUE;
-    @Option public int maxIters = 10;
-    @Option public Direction direction = Direction.wordToPred;
-    @Option public NullWordHandling nullWordHandling = NullWordHandling.trained;
-    @Option public double nullWordProb = 0.1;
+    @Option public int verbose = 0;
+    @Option public AlignerName aligner = AlignerName.IBM1_Z_TO_X;
+    @Option(gloss = "probability that the target aligns to null source")
+    public NullWordHandling nullWordHandling = NullWordHandling.UNIFORM;
+    @Option(gloss = "if nullWordHandling == FIXED, use this as the null word probability")
+    public double fixedNullWordProb = 0.1;
   }
   public static Options opts = new Options();
 
-  public static enum Direction {
-    wordToPred, predToWord, product, agreement, group, productGroup
+  public static enum AlignerName {
+    IBM1_X_TO_Z,   // IBM model 1 from x to z
+    IBM1_Z_TO_X,   // IBM model 1 from z to x
   }
-
   public static enum NullWordHandling {
-    fixed, varied, trained, none
+    FIXED,      // Fixed as a constant
+    UNIFORM,    // = 1 / (source length + 1)
+    TRAINED,    // Treat as a word
   }
 
   public static final double epsilon = 1e-6;
 
   public static void main(String[] args) {
-    Execution.run(args, "AlignerMain", new AlignerMain(), Master.getOptionsParser());
+    Execution.run(args, "AlignerMainMain", new AlignerMain(), Master.getOptionsParser());
   }
+
+  protected TableFormulaEvaluator evaluator;
+  protected AlignmentComputer alignmentComputer;
+  protected BitextData bitextData;
 
   @Override
   public void run() {
-    BitextData data = readInput();
-    AlignmentComputer computer = null;
-    switch (opts.direction) {
-      case wordToPred: computer = new IBM1AlignmentComputer(data, false); break;
-      case predToWord: computer = new IBM1AlignmentComputer(data, true); break;
-      case product: computer = new ProductAlignmentComputer(
-          new IBM1AlignmentComputer(data, false), new IBM1AlignmentComputer(data, true)); break;
-      case agreement: computer = new AgreementAlignmentComputer(data); break;
-      case group: computer = new GroupAlignmentComputer(data); break;
-      case productGroup: computer = new ProductAlignmentComputer(
-          new IBM1AlignmentComputer(data, false), new GroupAlignmentComputer(data)); break;
-      default: throw new RuntimeException("Unknown direction " + opts.direction);
+    Builder builder = new Builder();
+    builder.build();
+    evaluator = (TableFormulaEvaluator) builder.valueEvaluator;
+    Dataset dataset = new Dataset();
+    dataset.read();
+    // Train the aligner. Only the "train" group is used.
+    bitextData = new BitextData(dataset.examples("train"));
+    switch (opts.aligner) {
+      case IBM1_X_TO_Z: alignmentComputer = new IBM1XToZAlignmentComputer(); break;
+      case IBM1_Z_TO_X: alignmentComputer = new IBM1ZToXAlignmentComputer(); break;
+      default: throw new RuntimeException("Unknown aligner: " + opts.aligner);
     }
-    writeOutput(computer.align());
+    // Align and dump the results
+    alignmentComputer.align(bitextData);
+    dumpModel();
+    //computeAllScores();
+    evaluate(dataset.examples("dev"), "dev");
+    evaluate(dataset.examples("test"), "test");
   }
 
-  // ============================================================
-  // Read input
-  // ============================================================
-
-  // Each line is: id [tab] count [tab] word word ... [tab] predicate predicate ...
-
-  private BitextData readInput() {
-    LogInfo.begin_track("Reading data from %s", opts.inputFile);
-    BitextData data = new BitextData();
-    int count = 0;
-    try {
-      BufferedReader reader = IOUtils.openInHard(opts.inputFile);
-      String line = null;
-      while ((line = reader.readLine()) != null) {
-        String[] tokens = line.split("\t");
-        data.add(tokens[0], Integer.parseInt(tokens[1]), split(tokens[2]), split(tokens[3]));
-        if (++count >= opts.maxInputLines) break;
-      }
-      reader.close();
-    } catch (Exception e) {
-      e.printStackTrace();
-      LogInfo.fail(e);
-    }
-    LogInfo.logs("Read %d data lines", count);
-    LogInfo.logs("# words = %d | # preds = %d", data.allWords().size(), data.allPreds().size());
-    LogInfo.end_track();
-    return data;
-  }
-
-  private List<String> split(String x) {
-    String[] tokens = x.split(" ");
-    for (int i = 0; i < tokens.length; i++) tokens[i] = tokens[i].intern();
-    return Arrays.asList(tokens);
-  }
-
-  // ============================================================
-  // Write output
-  // ============================================================
-
-  private void writeOutput(DoubleMap alignment) {
+  /**
+   * Dump the model parameters into a file.
+   */
+  protected void dumpModel() {
     String filename = Execution.getFile("alignment");
     LogInfo.begin_track("Writing to %s", filename);
     try (PrintWriter out = new PrintWriter(filename)) {
-      printHeaderComment(out);
-      for (Map.Entry<Pair<String, String>, Double> entry : alignment.entrySet()) {
-        double value = entry.getValue();
-        if (value < epsilon) continue;
-        out.printf("%s\t%s\t%.6f\n", entry.getKey().getFirst(), entry.getKey().getSecond(), value);
-      }
+      alignmentComputer.dump(out);
     } catch (Exception e) {
       e.printStackTrace();
       LogInfo.fail(e);
@@ -106,10 +77,81 @@ public class AlignerMain implements Runnable {
     LogInfo.end_track();
   }
 
-  private void printHeaderComment(PrintWriter out) {
-    if (opts.nullWordHandling != NullWordHandling.fixed)
-      out.printf("# input=%s direction=%s nullProb=%s\n", opts.inputFile, opts.direction, opts.nullWordHandling);
-    else
-      out.printf("# input=%s direction=%s nullProb=%s\n", opts.inputFile, opts.direction, opts.nullWordProb);
+  /**
+   * Compute the candidate scores for all examples in the dataset.
+   */
+  protected void computeAllScores() {
+    PrintWriter out = IOUtils.openOutHard(Execution.getFile("aligned-formulas.gz"));
+    for (BitextDataGroup group : bitextData.bitextDataGroups) {
+      List<Pair<Formula, Double>> scores = alignmentComputer.score(group);
+      Collections.sort(scores, new Pair.ReverseSecondComparator<Formula, Double>());
+      // Log to stdout
+      LogInfo.begin_track("%s", group.id);
+      LogInfo.logs("Tokens: %s", group.tokens);
+      for (Pair<Formula, Double> pair : scores)
+        LogInfo.logs("%10.3f : %s", pair.getSecond(), pair.getFirst());
+      LogInfo.end_track();
+      // Dump to gzip file
+      out.printf("########## Example %s ##########\n", group.id);
+      out.println("(example");
+      out.println("  " + LispTree.proto.newList("id", group.id));
+      out.println("  " + LispTree.proto.newList("utterance", group.ex.utterance));
+      out.println("  " + LispTree.proto.newList("targetValue", group.ex.targetValue.toLispTree()));
+      out.println("  " + group.ex.context.toLispTree());
+      out.println("  (derivations");
+      for (Pair<Formula, Double> pair : scores) {
+        if (pair.getSecond().isInfinite()) continue;
+        LispTree tree = LispTree.proto.newList();
+        tree.addChild(LispTree.proto.newLeaf("derivation"));
+        tree.addChild(LispTree.proto.newList("formula", pair.getFirst().toLispTree()));
+        tree.addChild(LispTree.proto.newList("score", String.format("%.3f", pair.getSecond())));
+        out.println("    " + tree);
+      }
+      out.println("  )");
+      out.println(")");
+    }
+    out.close();
   }
+
+  protected void evaluate(List<Example> examples, String group) {
+    if (examples == null || examples.isEmpty()) return;
+    LogInfo.begin_track("AlignerMain.evaluate(%s)", group);
+    Evaluation totalEvaluation = new Evaluation();
+    for (Example ex : examples) {
+      LogInfo.begin_track("%s", ex.id);
+      LogInfo.logs("Utterance: %s", ex.utterance);
+      List<Pair<Formula, Double>> scores = alignmentComputer.score(new BitextDataGroup(ex));
+      Collections.sort(scores, new Pair.ReverseSecondComparator<Formula, Double>());
+      boolean correct = false, oracle = false;
+      if (scores.isEmpty()) {
+        LogInfo.logs("The beam is empty.");
+      } else {
+        Formula bestFormula = scores.get(0).getFirst();
+        evaluator.log(ex, bestFormula);
+        double compatibility = evaluator.getCompatibilityAnnotationStrict(ex, bestFormula);
+        if (compatibility > 0)
+          correct = true;
+        for (Pair<Formula, Double> pair : scores) {
+          if (evaluator.getCompatibilityAnnotationStrict(ex, pair.getFirst()) > 0) {
+            oracle = true;
+            break;
+          }
+        }
+      }
+      Evaluation evaluation = new Evaluation();
+      evaluation.add("correct", correct);
+      evaluation.add("oracle", oracle);
+      evaluation.add("numCandidates", scores.size());
+      if (!scores.isEmpty())
+        evaluation.add("parsedNumCandidates", scores.size());
+      LogInfo.logs("Current: %s", evaluation.summary());
+      totalEvaluation.add(evaluation);
+      LogInfo.logs("Cumulative(%s): %s", group, totalEvaluation.summary());
+      LogInfo.end_track();
+    }
+    totalEvaluation.logStats(group);
+    totalEvaluation.putOutput(group);
+    LogInfo.end_track();
+  }
+
 }

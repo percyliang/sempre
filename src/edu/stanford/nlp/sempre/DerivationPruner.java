@@ -82,6 +82,10 @@ public class DerivationPruner {
     return opts.pruningStrategies.contains(name) &&
         (customAllowedPruningStrategies == null || customAllowedPruningStrategies.contains(name));
   }
+  
+  public List<DerivationPruningComputer> getPruningComputers() {
+    return new ArrayList<>(pruningComputers);
+  }
 
   /**
    * Return true if the derivation should be pruned. Otherwise, return false.
