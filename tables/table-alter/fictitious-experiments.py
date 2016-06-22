@@ -24,8 +24,6 @@ class Data(object):
     def __init__(self):
         self.actual_denotations_files = {}
         self.actual_annodeno_files = {}
-        self.check_denotations_files = {}
-        self.check_annodeno_files = {}
         self.chosen_tables_data = {}
 
     def read_denotation_file(self, ex_id):
@@ -145,10 +143,13 @@ def process(data, ex_id):
                     lf_matched.extend(lf_indices)
             stats[prefix + 'NumECsMatched'] = num_ec_matched
             stats[prefix + 'NumLFsMatched'] = sum(num_lf_matched)
-            stats[prefix + 'PercentECsRuledOut'] = (0 if not equiv_classes else
-                    100 - num_ec_matched * 1. / len(equiv_classes))
-            stats[prefix + 'PercentLFsRuledOut'] = (0 if not n else
-                    100 - sum(num_lf_matched) * 1. / n)
+            if len(equiv_classes) > 1:
+                stats[prefix + 'PercentECsRuledOut'] = (
+                        (len(equiv_classes) - num_ec_matched) * 100. /
+                        (len(equiv_classes) - 1))
+                stats[prefix + 'PercentLFsRuledOut'] = (
+                        (n - sum(num_lf_matched)) * 100. /
+                        (n - stats['numCorrectLFs']))
         analyze_chosen(e_chosen, 'e')
         analyze_chosen(r_chosen, 'r')
         
@@ -175,8 +176,6 @@ def main():
     for dirname, target in (
             ('actual-denotations', data.actual_denotations_files),
             ('actual-annotated-denotations', data.actual_annodeno_files),
-            ('check-denotations', data.check_denotations_files),
-            ('check-annotated-denotations', data.check_annodeno_files),
             ):
         for exec_dir in args.exec_dirs:
             path = os.path.join(exec_dir, dirname)
@@ -218,18 +217,20 @@ def main():
             for s in annotated_stats)
     print 'SD numCorrectLFs:\t%.2f' % sd(s['numCorrectLFs']
             for s in annotated_stats)
-    print 'Avg ePercentECsRuledOut:\t%.2f' % mean(s['ePercentECsRuledOut']
-            for s in annotated_stats)
-    print 'Avg ePercentLFsRuledOut:\t%.2f' % mean(s['ePercentLFsRuledOut']
-            for s in annotated_stats)
-    print 'eNumECsMatched <= 1:\t%.2f' % mean(s['eNumECsMatched'] <= 1
-            for s in annotated_stats)
-    print 'eNumECsMatched <= 3:\t%.2f' % mean(s['eNumECsMatched'] <= 3
-            for s in annotated_stats)
-    print 'rNumECsMatched <= 1:\t%.2f' % mean(s['rNumECsMatched'] <= 1
-            for s in annotated_stats)
-    print 'rNumECsMatched <= 3:\t%.2f' % mean(s['rNumECsMatched'] <= 3
-            for s in annotated_stats)
+    print 'SCHEME: Use the objective function to choose worlds'
+    print 'Avg %% spurious LFs ruled out:\t%.2f' % mean(s['ePercentECsRuledOut']
+            for s in annotated_stats if s['numECs'] > 1)
+    print 'Avg %% spurious ECs ruled out:\t%.2f' % mean(s['ePercentLFsRuledOut']
+            for s in annotated_stats if s['numECs'] > 1)
+    print 'Num ECs Matched <= 1:\t%.2f' % (mean(s['eNumECsMatched'] <= 1
+            for s in annotated_stats) * 100.)
+    print 'Num ECs Matched <= 3:\t%.2f' % (mean(s['eNumECsMatched'] <= 3
+            for s in annotated_stats) * 100.)
+    print 'SCHEME: Pick random worlds to test denotations on'
+    print 'Num ECs Matched <= 1:\t%.2f' % (mean(s['rNumECsMatched'] <= 1
+            for s in annotated_stats) * 100.)
+    print 'Num ECs Matched <= 3:\t%.2f' % (mean(s['rNumECsMatched'] <= 3
+            for s in annotated_stats) * 100.)
 
 if __name__ == '__main__':
     main()
