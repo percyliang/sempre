@@ -10,7 +10,14 @@ operation=$1
 shift
 queue=
 if [ "$operation" == "up" ]; then
-  cl upload libsempre module-classes.txt tables/grammars run -L -n stuff
+  mkdir xxx || exit 1
+  ln -s ../src xxx/
+  ln -s ../libsempre xxx/
+  ln -s ../module-classes.txt xxx/
+  ln -s ../tables/grammars xxx/
+  ln -s ../run xxx/
+  cl upload -L -n stuff xxx
+  rm -rf xxx
   exit 0
 elif [ "$operation" == "walk" ]; then
   queue="--request-memory 11g --request-cpus 2 --request-queue nlp"

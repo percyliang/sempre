@@ -5,6 +5,7 @@ import java.util.*;
 
 import edu.stanford.nlp.sempre.*;
 import edu.stanford.nlp.sempre.tables.TableKnowledgeGraph;
+import edu.stanford.nlp.sempre.tables.test.CustomExample;
 import fig.basic.*;
 import fig.exec.*;
 
@@ -13,6 +14,16 @@ import fig.exec.*;
  *
  * This class can be run on its own, in which case the parser in Builder.parser will be used.
  * Or it can be supplied the examples to dump in a streaming fashion.
+ * 
+ * Syntax of the dumped files:
+ * - Filename: dumped-[prefix]-[numbering].gz
+ * - Content:
+ *   - First line: (metadata (size [number_of_examples]))
+ *   - Each example begins with a comment (########## Example [example_id] ##########),
+ *     followed by an example LispTree with the following fields:
+ *       id, utterance, targetFormula, targetValue, context,
+ *       tokens, lemmaTokens, posTags, nerTags, nerValues,
+ *       derivations (one derivation per line)
  *
  * @author ppasupat
  */
@@ -22,25 +33,27 @@ public class SerializedDumper implements Runnable {
     @Option(gloss = "Randomly shuffle dumped derivations")
     public Random shuffleDerivsRandom = new Random(9);
     @Option(gloss = "Skip if the table has more than this number of rows")
-    public int maxNumRowsToDump = 60;
+    public int maxNumRowsToDump = 200;
     @Option(gloss = "Number of examples per gzip file (0 = single file)")
     public int numExamplesPerFile = 0;
+    @Option(gloss = "Custom dump file prefixes to use in standalone mode")
+    public String dumpedFilePrefix = "";
   }
   public static Options opts = new Options();
 
-  String group;
+  String prefix;
   String filename;
   PrintWriter out;
   int numExamples = -1, currentIndex = 0;
 
-  public SerializedDumper(String group, int numExamples) {
-    reset(group, numExamples);
+  public SerializedDumper(String prefix, int numExamples) {
+    reset(prefix, numExamples);
   }
 
-  public void reset(String group, int numExamples) {
+  public void reset(String prefix, int numExamples) {
     closeFile();
     this.currentIndex = 0;
-    this.group = group;
+    this.prefix = prefix;
     this.numExamples = numExamples;
   }
 
@@ -72,17 +85,17 @@ public class SerializedDumper implements Runnable {
       throw new RuntimeException("current example index exceeds numExamples");
     if (opts.numExamplesPerFile == 0) {
       if (currentIndex == 0) {
-        openFile(group);
-        actuallyDumpMetadata(-1, numExamples);
+        openFile(String.format("%s-%06d", prefix, 0));
+        writeMetadataLispTree(numExamples);
       }
     } else {
       if (currentIndex % opts.numExamplesPerFile == 0) {
-        openFile(String.format("%s-%06d", group, currentIndex));
-        actuallyDumpMetadata(currentIndex, Math.min(opts.numExamplesPerFile, numExamples - currentIndex));
+        openFile(String.format("%s-%06d", prefix, currentIndex));
+        writeMetadataLispTree(Math.min(opts.numExamplesPerFile, numExamples - currentIndex));
       }
     }
     out.printf("########## Example %s ##########\n", ex.id);
-    actuallyDumpExample(exampleToLispTree(ex, derivations));
+    writeExampleLispTree(exampleToLispTree(ex, derivations));
     out.flush();
     currentIndex++;
     if (currentIndex == numExamples || (opts.numExamplesPerFile > 0 && currentIndex % opts.numExamplesPerFile == 0))
@@ -105,8 +118,12 @@ public class SerializedDumper implements Runnable {
     builder.build();
     Dataset dataset = new Dataset();
     dataset.read();
+    if (dataset.groups().size() > 1 && !opts.dumpedFilePrefix.isEmpty()) {
+      LogInfo.warnings("Cannot use dumpedFilePrefix with more than one group; fall back to group names.");
+      opts.dumpedFilePrefix = "";
+    }
     for (String group : dataset.groups()) {
-      reset(group, dataset.examples(group).size());
+      reset(opts.dumpedFilePrefix.isEmpty() ? group : opts.dumpedFilePrefix, dataset.examples(group).size());
       processExamples(dataset.examples(group), builder);
       StopWatchSet.logStats();
     }
@@ -116,14 +133,15 @@ public class SerializedDumper implements Runnable {
     Evaluation evaluation = new Evaluation();
     if (examples.isEmpty()) return;
 
-    final String prefix = "iter=0." + group;
-    Execution.putOutput("group", group);
-    LogInfo.begin_track_printAll("Processing %s: %s examples", prefix, examples.size());
+    final String logPrefix = "iter=0." + prefix;
+    Execution.putOutput("group", logPrefix);
+    LogInfo.begin_track_printAll("Processing %s: %s examples", logPrefix, examples.size());
     LogInfo.begin_track("Examples");
 
     for (int e = 0; e < examples.size(); e++) {
+      if (!CustomExample.checkFilterExamples(e)) continue;
       Example ex = examples.get(e);
-      LogInfo.begin_track_printAll("%s: example %s/%s: %s", prefix, e, examples.size(), ex.id);
+      LogInfo.begin_track_printAll("%s: example %s/%s: %s", logPrefix, e, examples.size(), ex.id);
       ex.log();
       Execution.putOutput("example", e);
       StopWatchSet.begin("Parser.parse");
@@ -138,7 +156,7 @@ public class SerializedDumper implements Runnable {
       dumpExample(ex);
       LogInfo.logs("Current: %s", ex.evaluation.summary());
       evaluation.add(ex.evaluation);
-      LogInfo.logs("Cumulative(%s): %s", prefix, evaluation.summary());
+      LogInfo.logs("Cumulative(%s): %s", logPrefix, evaluation.summary());
       LogInfo.end_track();
       // Save memory
       if (ex.predDerivations != null) {
@@ -148,9 +166,9 @@ public class SerializedDumper implements Runnable {
     }
 
     LogInfo.end_track();
-    LogInfo.logs("Stats for %s: %s", prefix, evaluation.summary());
-    evaluation.logStats(prefix);
-    evaluation.putOutput(prefix);
+    LogInfo.logs("Stats for %s: %s", logPrefix, evaluation.summary());
+    evaluation.logStats(logPrefix);
+    evaluation.putOutput(logPrefix);
     LogInfo.end_track();
   }
 
@@ -227,22 +245,19 @@ public class SerializedDumper implements Runnable {
   }
 
   // ============================================================
-  // Dumping LispTree
+  // Writing LispTree to file
   // ============================================================
 
-  private void actuallyDumpMetadata(int offset, int size) {
+  private void writeMetadataLispTree(int size) {
     LispTree tree = LispTree.proto.newList();
     tree.addChild("metadata");
-    tree.addChild(LispTree.proto.newList("group", group));
-    if (offset >= 0)
-      tree.addChild(LispTree.proto.newList("offset", "" + offset));
     tree.addChild(LispTree.proto.newList("size", "" + size));
     tree.print(out);
     out.println();
     out.flush();
   }
 
-  private void actuallyDumpExample(LispTree tree) {
+  private void writeExampleLispTree(LispTree tree) {
     out.println("(example");
     for (LispTree subtree : tree.children.subList(1, tree.children.size())) {
       if (!subtree.isLeaf() && "derivations".equals(subtree.children.get(0).value)) {

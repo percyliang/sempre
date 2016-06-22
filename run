@@ -629,7 +629,7 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
     'alter-ex' => l('edu.stanford.nlp.sempre.tables.alter.AlteredTablesExecutor', let(:parser, 'serialized')),
   }),
   # Fig parameters
-  selo(:cldir, 'execDir', '_OUTPATH_', 'exec'),
+  selo(:cldir, 'execDir', '_OUTPATH_', 'output'),
   o('overwriteExecDir'), o('addToView', 11), o('jarFiles', 'libsempre/*'),
   sel(:cldir, l(), '>/dev/null'),
   # Set environment for table execution
@@ -661,7 +661,7 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
     nil),
     'serialized' => o('Builder.parser', 'tables.serialize.SerializedParser'),
     # ACL 2016
-    'grow-dp' => l(
+    'grow-dpd' => l(
       o('Builder.parser', 'tables.dpd.DPDParser'),
       o('useSizeInsteadOfDepth'),
       o('FloatingParser.maxDepth', 8),
@@ -709,7 +709,7 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
   }),
   # Dataset
   letDefault(:data, 'none'),
-  tableDataPaths,
+  tablesDataPaths,
   # Verbosity
   o('FeatureVector.ignoreZeroWeight'),
   o('maxPrintedPredictions', 10), o('maxPrintedTrue', 10), o('logFeaturesLimit', 10),
@@ -867,6 +867,9 @@ def tablesDataPaths
           "test,#{baseDir}pristine-unseen-tables.examples"),
         o('Dataset.trainFrac', 1), o('Dataset.devFrac', 0),
       nil),
+      # @data=annotated can be used with @class=check only
+      'annotated' => o('Dataset.inPaths', "train,#{baseDir}annotated-all.examples"),
+      'before300' => o('Dataset.inPaths', "train,#{baseDir}training-before300.examples"),
     }
     # Development sets: 80:20 random split of training data
     ['1', '2', '3', '4', '5'].each do |x|
@@ -892,7 +895,7 @@ def tablesPruningStrategies
     "emptyDenotation",
     "nonLambdaError",
     ### Strategies that do not depend on the children's actual formulas
-    "singleton",
+    "atomic",
     "tooManyValues",
     "badSummarizerHead",
     "mistypedMerge",
