@@ -8,8 +8,13 @@ from collections import defaultdict
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-f', '--field', type=int, default=4)
-    parser.add_argument('infile')    
+    parser.add_argument('-f', '--field', type=int, default=4,
+            help='the field to extract the numbers from')
+    parser.add_argument('-p', '--plot', action='store_true',
+            help='plot the numbers (requires matplotlib)')
+    parser.add_argument('-o', '--plotout',
+            help='output the plot to a file instead of displaying it')
+    parser.add_argument('infile')
     args = parser.parse_args()
 
     firsts = []
@@ -59,29 +64,34 @@ def main():
         return zip(*answer)
     print 'FIRST:'
     answer_first = stat(firsts)
+    if answer_first:
+        print answer_first[1]       # Medians
     print 'SECOND:'
     answer_second = stat(seconds)
+    if answer_second:
+        print answer_second[1]      # Medians
 
     # Plot
-    import matplotlib.pyplot as plt
+    if args.plot:
+        import matplotlib
+        if args.plotout:
+            # Allow matplotlib to run without X server
+            matplotlib.use('Agg')
+        import matplotlib.pyplot as plt
 
-    fig = plt.figure()
-    ax1 = fig.add_subplot(211)
-    if answer_first:
-        for series in answer_first:
-            print series
-            ax1.plot(series)
-    #for stuff in firsts:
-    #    ax1.plot(stuff)
-    ax2 = fig.add_subplot(212)
-    if answer_second:
-        for series in answer_second:
-            print series
-            ax2.plot(series)
-    #for stuff in seconds:
-    #    ax2.plot(stuff)
-    plt.show()
-
+        fig = plt.figure()
+        ax1 = fig.add_subplot(211)
+        if answer_first:
+            for series in answer_first:
+                ax1.plot(series)
+        ax2 = fig.add_subplot(212)
+        if answer_second:
+            for series in answer_second:
+                ax2.plot(series)
+        if args.plotout:
+            plt.savefig(args.plotout)
+        else:
+            plt.show()
 
 if __name__ == '__main__':
     main()

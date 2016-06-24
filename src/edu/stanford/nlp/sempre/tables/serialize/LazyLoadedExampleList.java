@@ -16,16 +16,17 @@ import fig.basic.*;
  */
 public class LazyLoadedExampleList implements List<Example> {
   public static class Options {
-    @Option(gloss = "whether to ensure thread safety")
+    @Option(gloss = "whether to ensure thread safety (makes things slower)")
     public boolean threadSafe = false;
   }
   public static Options opts = new Options();
 
   private final List<String> paths;
   private final List<Integer> sizes;
+  private final List<Integer> offsets;
   private final List<Integer> exampleIndexToPathIndex;
   private final int size;
-  // Whether each file contains only a single example
+  // Whether each file contains only a single example (faster)
   private final boolean single;
 
   private LazyLoadedExampleListIterator defaultIterator;
@@ -43,6 +44,7 @@ public class LazyLoadedExampleList implements List<Example> {
     this.single = single;
     // Combined the number of examples from all files
     this.sizes = new ArrayList<>();
+    this.offsets = new ArrayList<>();
     this.exampleIndexToPathIndex = new ArrayList<>();
     int size = 0;
     for (int pathIndex = 0; pathIndex < paths.size(); pathIndex++) {
@@ -50,13 +52,15 @@ public class LazyLoadedExampleList implements List<Example> {
       if (single) {
         sizes.add(1);
         exampleIndexToPathIndex.add(pathIndex);
+        offsets.add(size);
         size++;
       } else {
-        Metadata metadata = readMetadata(LispTree.proto.parseFromFile(path).next());
-        sizes.add(metadata.size);
-        for (int i = 0; i < metadata.size; i++)
+        int thisSize = readSizeFromMetadata(LispTree.proto.parseFromFile(path).next());
+        sizes.add(thisSize);
+        for (int i = 0; i < thisSize; i++)
           exampleIndexToPathIndex.add(pathIndex);
-        size += metadata.size;
+        offsets.add(size);
+        size += thisSize;
       }
     }
     this.size = Math.min(size, maxSize);
@@ -75,7 +79,6 @@ public class LazyLoadedExampleList implements List<Example> {
 
   public class LazyLoadedExampleListIterator implements Iterator<Example> {
     Iterator<LispTree> trees = null;
-    Metadata metadata = null;
     private int currentPathIndex = -1, currentIndex = -1;
     private Example currentExample = null;
 
@@ -89,7 +92,7 @@ public class LazyLoadedExampleList implements List<Example> {
       currentIndex++;
       while (trees == null || !trees.hasNext()) {
         trees = LispTree.proto.parseFromFile(paths.get(++currentPathIndex));
-        metadata = readMetadata(trees.next());
+        trees.next();     // Skip metadata
       }
       return currentExample = readExample(trees.next());
     }
@@ -101,8 +104,8 @@ public class LazyLoadedExampleList implements List<Example> {
       if (pathIndex != currentPathIndex || currentIndex > index) {
         currentPathIndex = pathIndex;
         trees = LispTree.proto.parseFromFile(paths.get(currentPathIndex));
-        metadata = readMetadata(trees.next());
-        currentIndex = metadata.offset - 1;
+        trees.next();     // Skip metadata
+        currentIndex = offsets.get(pathIndex) - 1;
       }
       while (currentIndex < index) {
         currentIndex++;
@@ -157,39 +160,18 @@ public class LazyLoadedExampleList implements List<Example> {
   }
 
   // ============================================================
-  // LispTree --> Metadata
+  // Read Metadata
   // ============================================================
 
-  static class Metadata {
-    public final String group;
-    public final int offset, size;
-
-    public Metadata(String group, int offset, int size) {
-      this.group = group;
-      this.offset = offset;
-      this.size = size;
-    }
-  }
-
-  private Metadata readMetadata(LispTree tree) {
+  private int readSizeFromMetadata(LispTree tree) {
     if (!"metadata".equals(tree.child(0).value))
       throw new RuntimeException("Not metadata: " + tree);
-    String group = null;
-    int offset = 0, size = -1;
     for (int i = 1; i < tree.children.size(); i++) {
       LispTree arg = tree.child(i);
-      String label = arg.child(0).value;
-      if ("group".equals(label)) {
-        group = arg.child(1).value;
-      } else if ("size".equals(label)) {
-        size = Integer.parseInt(arg.child(1).value);
-      } else if ("offset".equals(label)) {
-        offset = Integer.parseInt(arg.child(1).value);
-      }
+      if ("size".equals(arg.child(0).value))
+        return Integer.parseInt(arg.child(1).value);
     }
-    if (size == -1)
-      throw new RuntimeException("Size not specified: " + tree);
-    return new Metadata(group, offset, size);
+    throw new RuntimeException("Size not specified: " + tree);
   }
 
   // ============================================================

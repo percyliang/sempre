@@ -10,7 +10,7 @@ import edu.stanford.nlp.sempre.tables.TableKnowledgeGraph;
 import fig.basic.*;
 
 /**
- * A Dataset object created from serialized examples.
+ * A Dataset object created from serialized examples created by SerializedDumper.
  *
  * @author ppasupat
  */
@@ -112,7 +112,7 @@ public class SerializedDataset extends Dataset {
   public static void main(String[] args) {
     TableKnowledgeGraph.opts.baseCSVDir = "lib/data/tables/";
     SerializedDataset dataset = new SerializedDataset();
-    dataset.readDir("out/yay-reps/representative-00-training-sliced-00000-00299/");
+    dataset.readDir("out/sliced-dump-8-reps/representative-00-training-sliced-00000-00299/");
     LazyLoadedExampleList examples = dataset.examples("representative");
     for (int i : new int[]{
         25, 20, 20, 20, 21, 31, 29, 45, 35, 36, 37, 31, 99, 99, 100, 100, 99, 1, 3, 10, 23, 499

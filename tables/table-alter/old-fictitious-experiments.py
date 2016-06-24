@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""Perform experiments on the dumped denotations."""
+"""DEPRECATED. Use fictitious-experiments.py instead."""
 
 import sys, os, shutil, re, argparse, json, gzip
 from codecs import open
