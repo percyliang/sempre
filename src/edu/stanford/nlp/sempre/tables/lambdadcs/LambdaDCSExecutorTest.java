@@ -152,6 +152,8 @@ public class LambdaDCSExecutorTest {
       return TableKnowledgeGraph.fromFilename("tables/toy-examples/random/nikos_machlas.csv");
     } else if ("csv2".equals(name)) {
       return TableKnowledgeGraph.fromFilename("lib/data/tables/csv/204-csv/495.tsv");
+    } else if ("csv3".equals(name)) {
+      return TableKnowledgeGraph.fromFilename("lib/data/tables/csv/203-csv/839.tsv");
     }
     throw new RuntimeException("Unknown graph name: " + name);
   }
@@ -247,14 +249,18 @@ public class LambdaDCSExecutorTest {
   
   @Test(groups = "lambdaCSV2") public void lambdaOnGraphCSV2Test() {
     KnowledgeGraph graph = getKnowledgeGraph("csv2");
-    // fb:cell.away', 'fb:row.row.venue', '!fb:row.row.result',
-    // '!fb:cell.cell.num2', 'avg', 'fb:row.row.index', 'fb:row.row.next', '!fb:row.row.opponent'
-    //runFormula(executor,
-    //    "(!fb:row.row.opponent (fb:row.row.next (fb:row.row.index (avg (!fb:cell.cell.num2 (!fb:row.row.result (fb:row.row.venue fb:cell.away)))))))",
-    //    graph, matches("(name fb:cell.derby_county)"));
     runFormula(executor,
         "(and (!= (and (!= fb:cell.away) fb:cell.home)) ((reverse fb:row.row.opponent) (fb:row.row.index (- (number 1) (number 1)))))",
         graph, matches("(name fb:cell.derby_county)"));
   }
-
+  
+  @Test(groups = "lambdaCSV3") public void lambdaOnGraphCSV3Test() {
+    KnowledgeGraph graph = getKnowledgeGraph("csv3");
+    runFormula(executor,
+        "(count (fb:type.object.type fb:type.row))",
+        graph, matches("(number 21)"));
+    runFormula(executor,
+        "(count (fb:row.row.opened (fb:cell.cell.date (< (date 1926 -1 -1)))))",
+        graph, matches("(number 6)"));
+  }
 }
