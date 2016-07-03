@@ -899,6 +899,114 @@ nil) })
 
 
 ############################################################
+# {2016-07-02} [Sida Wang]: interactive semantic parsing
+addMode('interactive', 'interactive semantic parsing in blocks', l(
+  rlwrap,
+  header('core,interactive'),
+  'edu.stanford.nlp.sempre.Main',
+  figOpts,
+  o('JavaExecutor.convertNumberValues', false),
+  o('JoinFn.typeInference', true),
+  o('Builder.parser', 'FloatingParser'),
+  o('FloatingParser.executeAllDerivations', 'true'),
+  o('LanguageAnalyzer', 'corenlp.CoreNLPAnalyzer'),
+  o('Learner.maxTrainIters', 1),
+  #o('printAllPredictions'),
+  o('Derivation.showUtterance'),
+  letDefault(:debug, 0),
+
+  selo(1, 'maxExamples', 'train:10', 'train:MAX'),
+
+  # Exact matching is needed on most simple domains
+  # o('executor', 'FormulaMatchExecutor'),
+  # o('Builder.valueEvaluator', 'ExactValueEvaluator'),
+
+  # Features
+  o('FeatureExtractor.featureDomains', 'denotation'), # denotation features from general feature extractor
+  o('FeatureExtractor.featureComputers', 'overnight.OvernightFeatureComputer'), # 
+  o('OvernightFeatureComputer.featureDomains', *overnightFeatureDomains),
+  #o('initialization', 'paraphrase :: match,1', 'paraphrase :: size,-0.1', 'paraphrase :: ppdb,0.3',
+  #  'paraphrase :: skip-bigram,0.8', 'paraphrase :: skip-ppdb,0.2','denotation :: error,-1000'),
+  o('coarsePrune'),
+  o('OvernightDerivationPruningComputer.applyHardConstraints'),
+  sel(2,
+    l(), # no reg
+    l(o('Params.l1Reg','lazy'),o('Params.l1RegCoeff',0)),
+    l(o('Params.l1Reg','lazy'),o('Params.l1RegCoeff',0.001)),
+  nil),
+  # Set up the domain
+  required(:domain),
+  o('Grammar.inPaths', lambda { |e| 'overnight/' + e[:domain] + '.grammar' }),
+  o('SimpleWorld.domain', lambda { |e| e[:domain] }),
+  o('PPDBModel.ppdbModelPath', lambda { |e| 'lib/data/overnight/' + e[:domain] + '-ppdb.txt' }),
+  o('Dataset.trainFrac', 0.8), o('Dataset.devFrac', 0.2),
+  o('FloatingParser.maxDepth', 11),
+  o('Parser.beamSize', 20),
+  letDefault(:alignment, 1),
+  sel(:alignment, 
+    o('wordAlignmentPath', lambda { |e| 'lib/data/overnight/' + e[:domain] + '.word_alignments.heuristic' }), 
+    o('wordAlignmentPath', lambda { |e| 'lib/data/overnight/' + e[:domain] + '.word_alignments.berkeley' }),
+  nil),
+  o('phraseAlignmentPath', lambda { |e| 'lib/data/overnight/' + e[:domain] + '.phrase_alignments' }),
+  o('PPDBModel.ppdbModelPath', lambda { |e| 'lib/data/overnight/' + e[:domain] + '-ppdb.txt' }),
+  o('DerivationPruner.pruningComputers', ['overnight.OvernightDerivationPruningComputer']),
+  o('Dataset.inPaths', 
+    lambda { |e| 'train:lib/data/overnight/' + e[:domain] + '.paraphrases.train.examples' },
+    lambda { |e| 'test:lib/data/overnight/' + e[:domain] + '.paraphrases.test.examples' }),
+  sel(:domain, {
+    'geo880' => l(
+      letDefault(:data,0),
+      sel(:data,
+        l(o('Dataset.inPaths', 'train:lib/data/overnight/geo880.paraphrases.train.superlatives.examples')),
+        l(o('Dataset.inPaths', 'train:lib/data/overnight/geo880.paraphrases.train.superlatives.examples', 'test:lib/data/overnight/geo880-train.examples')),
+        l(o('Dataset.inPaths', 'train:lib/data/overnight/geo880.paraphrases.train.superlatives2.examples', 'test:lib/data/overnight/geo880-train.examples')),
+        l(o('Dataset.inPaths', 'train:lib/data/overnight/geo880.paraphrases.train.superlatives.examples', 'test:lib/data/overnight/geo880-test.examples')),
+        l(o('Dataset.inPaths', 'train:lib/data/overnight/geo880.paraphrases.train.superlatives2.examples', 'test:lib/data/overnight/geo880-test.examples')),
+      nil),
+      o('Parser.beamSize', 20),
+      o('initialization', 'paraphrase :: match,1', 'paraphrase :: size,-0.1', 'paraphrase :: ppdb,0.3',
+          'lf :: edu.stanford.nlp.sempre.SimpleWorld.superlative& superlative,10',
+          'root :: pos0=WRB&returnType=class edu.stanford.nlp.sempre.NumberValue,10'),
+      o('FloatingParser.maxDepth', 11),
+      o('Grammar.tags','generate','general', 'geo880'),
+      o('SimpleLexicon.inPaths', 'lib/data/overnight/geo880.lexicon'),
+      o('OvernightDerivationPruningComputer.usePredicateDict'),
+      o('OvernightDerivationPruningComputer.predicateDictPath','lib/data/overnight/geo880.predicate.dict'),
+    nil),
+    'calendar' => l(
+      o('Grammar.tags','generate','general'),
+    nil),
+    'calendarplus' => l(
+      o('Grammar.tags','generate','general','geo440'),
+      o('Grammar.inPaths','overnight/calendar.grammar'),
+      o('SimpleWorld.domain', 'calendar'),
+    nil),
+    'blocks' => l(
+      o('Grammar.tags','generate','general'),
+    nil),
+    'restaurants' => l(
+      o('Grammar.tags','generate','general'),
+    nil),
+    'housing' => l(
+      o('Grammar.tags','generate','general'),
+    nil),
+    'socialnetwork' => l(
+      o('Grammar.tags','generate','general'),
+    nil),
+    'publications' => l(
+      o('Grammar.tags','generate','general'),
+    nil),
+    'basketball' => l(
+      o('Grammar.tags','generate','general'),
+    nil),
+    'recipes' => l(
+      o('Grammar.tags','generate','general'),
+    nil),
+  }),
+nil))
+
+
+############################################################
 
 if ARGV.size == 0
   puts "#{$0} @mode=<mode> [options]"

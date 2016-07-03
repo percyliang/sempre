@@ -35,7 +35,7 @@ public class Grammar {
     public List<String> tags = new ArrayList<>();
     @Option public boolean binarizeRules = true;
     @Option(gloss = "use multi-argument ApplyFn by default")
-    public boolean useApplyFn = false;
+    public String useApplyFn = null;
   }
 
   public static Options opts = new Options();
@@ -454,7 +454,7 @@ public class Grammar {
     String name = tree.child(0).value;
 
     // Syntactic sugar: (lambda x (var x)) => (JoinFn betaReduce forward (arg0 (lambda x (var x))))
-    if (name.equals("lambda") && !Grammar.opts.useApplyFn) {
+    if (name.equals("lambda") && Grammar.opts.useApplyFn == null) {
       LispTree newTree = LispTree.proto.newList();
       newTree.addChild("JoinFn");
       newTree.addChild("betaReduce");
@@ -464,9 +464,9 @@ public class Grammar {
       name = tree.child(0).value;
     }
     // Syntactic sugar: (lambda x (var x)) => (cubeworld.ApplyFn (arg0 (lambda x (var x))))
-    if (name.equals("lambda") && Grammar.opts.useApplyFn) {
+    if (name.equals("lambda") && Grammar.opts.useApplyFn != null) {
       LispTree newTree = LispTree.proto.newList();
-      newTree.addChild("cubeworld.ApplyFn");
+      newTree.addChild(Grammar.opts.useApplyFn);
       newTree.addChild(tree);
       tree = newTree;
       name = tree.child(0).value;

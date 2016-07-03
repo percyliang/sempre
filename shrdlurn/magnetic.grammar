@@ -1,0 +1,135 @@
+# contextful top level functions
+(def @root context:root)
+
+# basic actions
+(def @add add)
+(def @remove remove)
+(def @move move)
+(def @addname addName)
+(def @removename removeName)
+
+# action combinators
+(def @seq seq)
+(def @repeat repeat)
+
+# binary set operations
+(def @setop setop)
+
+# get property
+(def @get get)
+# properties
+(def @equals equals)
+
+# numbers on cubes
+(def @compare compare)
+(def @constant constant)
+(def @negative negative)
+(def @arith arith)
+
+# higher order functions
+(def @argmin argmin)
+(def @argmax argmax)
+
+# select
+(def @addname addName)
+(def @removename removeName)
+(def @named named)
+
+# sugar
+(def @selected (call @filter (call @named (string SEL))))
+(def @select (lambda c (call @addname (string SEL) (var c))))
+(def @unselect (lambda c (call @removename (string SEL) (var c))))
+
+# typed lambdas
+% Action a, CubesSet s, CubePredicate p, CubeNumber n, CubeProperty r, Direction d, Color c $CubeNumberProp q
+
+# This grammar should have Rule.defaultIsFloating false
+# (set JavaExecutor.printStackTrace true)
+####### Start of the actual grammar
+(rule $ROOT ($ActionSeq) (lambda a (call @root (var a))) (anchored 1)) # process for better
+
+# control flow
+(rule $ActionSeq ($ActionSeq ; $Action) (lambda a1 (lambda a2 (call @seq (var a1) (var a2)))) (anchored 1))
+(rule $Action (repeat $NumberSeq [ $ActionSeq ] ) (lambda n (lambda a (call @repeat (var n) (var a)))) (anchored 1))
+
+(rule $ActionSeq ($Action) (IdentityFn) (anchored 1))
+(rule $Action ([ $ActionSeq ]) (IdentityFn) (anchored 1))
+
+# basic actions
+(rule $Action (remove $Direction) (lambda d (call @remove (var d) (call @selected))) (anchored 1))
+(rule $Action (add $Color $Direction) (lambda c (lambda d (call @add (var c) (var d) (call @selected))) (anchored 1)))
+(rule $Action (move $Direction) (lambda d (call @move (var d) (call @selected))) (anchored 1))
+
+(rule $Action (select $CubesSeq) (lambda s (call @select (var s))) (anchored 1))
+(rule $Action (unselect $CubesSeq) (lambda s (call @unselect (var s))) (anchored 1))
+
+(for @name (X Y Z)
+(rule $Action (select $CubesSeq as @name) (lambda cs (call @addname (var cs) (string @name))) (anchored 1))
+(rule $Action (unselect $CubesSeq as @name) (lambda cs (call @removename (var cs) (string @name))) (anchored 1))
+)
+
+########### basic set operations
+# just use or and filter, which does and
+(for @op (or)
+(rule $CubesSeq ($CubesSeq @op $Cubes) (lambda s1 (lambda s2
+					(call @setop (string @op) (var s1) (var s2)))) (anchored 1))
+)
+(rule $Cubes (not $CubesSeq) (lambda s (call @not (var s))) (anchored 1))
+
+(rule $CubesSeq ($Cubes) (IdentityFn) (anchored 1))
+(rule $Cubes ([ $CubesSeq ]) (IdentityFn) (anchored 1))
+
+########### the where statement
+(rule $Cubes ($CubesSeq where $CubePred) (lambda p (lambda s
+			   (call @filter (var s) (var p)))) (anchored 1))
+(rule $Cubes ($CubesSeq where $CubePred) (lambda p (lambda s
+			   (call @filter (var s) (var p)))) (anchored 1))
+(for @property (col row height)
+(rule $Cubes ($CubesSeq where $CubeNumberProp is largest) (lambda s (lambda q (call @argmax (var s) (var q)))) (anchored 1))
+(rule $Cubes ($CubesSeq where $CubeNumberProp is smallest) (lambda s (lambda q (call @argmin (var s) (var q)))) (anchored 1))
+)
+
+# generating cube predicates
+(for @rel (> >= = < <=)
+(rule $CubePred ($NumberSeq @rel $NumberSeq) (lambda n1 (lambda n2
+(call @compare (string @rel) (var n1) (var n2)))) (anchored 1))
+)
+(rule $CubePred (color = $CubePropVal) (lambda p (lambda s
+(call @equals (var p) (var s)))) (anchored 1))
+(for @property (color name)
+     (rule $CubeProp (@property) (ConstantFn (call @get (string @property))) (anchored 1))
+)
+(rule $CubePropVal $Color (IdentityFn) (anchored 1))
+(rule $CubePropVal $Color (IdentityFn) (anchored 1))
+
+########### arithmetics and etc
+(for @num (0 1 2 3 4 5 6 7 8 9)
+(rule $CubeNumberProp (@num) (ConstantFn (call @constant (number @num))) (anchored 1))
+)
+(rule $Number (many) (ConstantFn (call @constant (number 10 infty))) (anchored 1))
+(for @property (col row height color name)
+     (rule $CubeNumberProp (@property) (ConstantFn (call @get (string @property))) (anchored 1))
+)
+
+(for @op (+ - %)
+(rule $NumberSeq ($NumberSeq @op $Number) (lambda n1 (lambda n2
+(call @arith (string @op)  (var n1) (var n2)))) (anchored 1))
+)
+(rule $Number ([ $NumberSeq ]) (IdentityFn) (anchored 1))
+(rule $NumberSeq ( $Number ) (IdentityFn) (anchored 1))
+
+
+
+####### Constants
+(rule $Color (red) (ConstantFn (string red)) (anchored 1))
+(rule $Color (orange) (ConstantFn (string orange)) (anchored 1))
+(rule $Color (yellow) (ConstantFn (string yellow)) (anchored 1))
+(rule $Color (green) (ConstantFn (string green)) (anchored 1))
+(rule $Color (blue) (ConstantFn (string blue)) (anchored 1))
+(rule $Color (purple) (ConstantFn (string purple)) (anchored 1))
+(rule $Color (brown) (ConstantFn (string brown)) (anchored 1))
+(rule $Color (cyan) (ConstantFn (string cyan)) (anchored 1))
+(rule $Color (trans) (ConstantFn (string trans)) (anchored 1))
+
+
+

@@ -72,8 +72,8 @@ public final class RicherStacksWorld {
   }
 
   // wallString consists of [[1,2,3],[2,1,2],[2,3,4]]
-  public static List<Stack> getWallFromContext(Ref<ContextValue> context) {
-    NaiveKnowledgeGraph graph = (NaiveKnowledgeGraph)context.value.graph;
+  public static List<Stack> getWallFromContext(ContextValue context) {
+    NaiveKnowledgeGraph graph = (NaiveKnowledgeGraph)context.graph;
     String wallString = ((StringValue)graph.triples.get(0).e1).value;
     return stringToWall(wallString);
   }
@@ -126,7 +126,7 @@ public final class RicherStacksWorld {
     return Json.writeValueAsStringHard(intwall);
   }
   
-  public static String root(Function<Stack, Stack> mapfunc, Ref<ContextValue> context) {
+  public static String root(Function<Stack, Stack> mapfunc, ContextValue context) {
     List<Stack> stacks = getWallFromContext(context);
     for (Stack s : stacks) {
         mapfunc.apply(s);
@@ -349,7 +349,7 @@ public final class RicherStacksWorld {
     };
   }
   
-  public static Function<Stack, Boolean> rect(Function<Stack, Boolean> cond, Ref<ContextValue> context) {
+  public static Function<Stack, Boolean> rect(Function<Stack, Boolean> cond, ContextValue context) {
     List<Stack> stacks = getWallFromContext(context);
     int minr = stacks.stream().filter((Stack s) -> cond.apply(s))
         .min(Comparator.comparingInt((Stack s) -> s.row))
@@ -370,7 +370,7 @@ public final class RicherStacksWorld {
       }
     };
   }
-  public static Function<Stack, Boolean> shift(Function<Stack, Boolean> cond, Function<Stack, NumberValue> fr, Function<Stack, NumberValue> fc, Ref<ContextValue> context) {
+  public static Function<Stack, Boolean> shift(Function<Stack, Boolean> cond, Function<Stack, NumberValue> fr, Function<Stack, NumberValue> fc, ContextValue context) {
     int worldsize = RicherStacksWorld.opts.worldSize;
     List<Stack> stacks = getWallFromContext(context);
     boolean[][] stacksByPosition = new boolean[worldsize][worldsize];
@@ -391,12 +391,12 @@ public final class RicherStacksWorld {
  
   
   public static Function<Stack, Boolean> argmin(Function<Stack, Boolean> cond,
-      Function<Stack, NumberValue> f, Ref<ContextValue> context) {
+      Function<Stack, NumberValue> f, ContextValue context) {
     return argmax(cond, negative(f), context);
   }
   
   public static Function<Stack, Boolean> argmax(Function<Stack, Boolean> cond,
-      Function<Stack, NumberValue> f, Ref<ContextValue> context) {
+      Function<Stack, NumberValue> f, ContextValue context) {
     List<Stack> stacks = getWallFromContext(context);
     int maxvalue = Integer.MIN_VALUE;
     for (Stack s : stacks) {
@@ -416,20 +416,20 @@ public final class RicherStacksWorld {
   }
  
   
-  public static Function<Stack, Boolean> shift(Function<Stack, NumberValue> fr, Function<Stack, NumberValue> fc, Ref<ContextValue> context) {
+  public static Function<Stack, Boolean> shift(Function<Stack, NumberValue> fr, Function<Stack, NumberValue> fc, ContextValue context) {
     return shift(marked(), fr, fc, context);
   }
   
-  public static Function<Stack, Boolean> argmin(Function<Stack, NumberValue> f, Ref<ContextValue> context) {
+  public static Function<Stack, Boolean> argmin(Function<Stack, NumberValue> f, ContextValue context) {
     return argmin(marked(), f, context);
   }
   
-  public static Function<Stack, Boolean> argmax(Function<Stack, NumberValue> f, Ref<ContextValue> context) {
+  public static Function<Stack, Boolean> argmax(Function<Stack, NumberValue> f, ContextValue context) {
     return argmax(marked(), f, context);
   }
   
   // performs some side effects on the context value
-  public static Function<Stack, Stack> mark(Function<Stack, Boolean> cond, Ref<ContextValue> context) {
+  public static Function<Stack, Stack> mark(Function<Stack, Boolean> cond, ContextValue context) {
     return new Function<Stack, Stack>() {
       public Stack apply(Stack s) {
         List<Stack> stacks = getWallFromContext(context);
@@ -438,14 +438,13 @@ public final class RicherStacksWorld {
             sc.mark = true;
           }
         }
-        context.value = getContextFromWall(stacks);
         s.mark = true;
         return s;
       }
     };
   }
   
-  public static Function<Stack, Stack> unmark(Function<Stack, Boolean> cond, Ref<ContextValue> context) {
+  public static Function<Stack, Stack> unmark(Function<Stack, Boolean> cond, ContextValue context) {
     return new Function<Stack, Stack>() {
       public Stack apply(Stack s) {
         List<Stack> stacks = getWallFromContext(context);
@@ -454,7 +453,6 @@ public final class RicherStacksWorld {
             sc.mark = false;
           }
         }
-        context.value = getContextFromWall(stacks);
         s.mark = false;
         return s;
       }
