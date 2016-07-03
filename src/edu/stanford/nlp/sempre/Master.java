@@ -3,12 +3,18 @@ package edu.stanford.nlp.sempre;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+
+import edu.stanford.nlp.sempre.interactive.GrammarInducer;
 import fig.basic.*;
+import fig.exec.Execution;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -37,8 +43,19 @@ public class Master {
     @Option(gloss = "Write out new parameters to this directory")
     public String newParamsPath;
 
+    // Interactive stuff
     @Option(gloss = "Write out new grammar rules")
     public String newGrammarPath;
+    @Option(gloss = "Do pragmatic inference")
+    public boolean bePragmatic = false;
+    @Option(gloss = "make sessions independent")
+    public boolean independentSessions = false;
+    @Option(gloss = "use independent parameters for each session")
+    public boolean independentParams = false;
+    @Option(gloss = "Stores chart when no complete parse can be generated")
+    public boolean supportPartial = false;
+    @Option(gloss = "number of utterances to return for autocomplete")
+    public int autocompleteCount = 5;
   }
 
   public static Options opts = new Options();
@@ -52,6 +69,12 @@ public class Master {
 
     // Detailed information
     List<String> lines = new ArrayList<>();
+
+    // for interactive stuff
+    public String commandResponse = "";
+    public List<List<String>> taggedCover;
+    public List<String> autocompletes; 
+    public int[] coverage;
 
     public String getFormulaAnswer() {
       if (ex.getPredDerivations().size() == 0)
@@ -96,6 +119,11 @@ public class Master {
     Session session = sessions.get(id);
     if (session == null) {
       session = new Session(id);
+
+      if (opts.independentSessions) {
+        session.useIndependentLearner(builder);
+      }
+
       for (String path : opts.scriptPaths)
         processScript(session, path);
       for (String command : opts.commands)
@@ -103,6 +131,8 @@ public class Master {
       if (id != null)
         sessions.put(id, session);
     }
+    if (opts.independentSessions)
+      builder.params = session.params;
     return session;
   }
 
@@ -123,6 +153,9 @@ public class Master {
     LogInfo.log("  (execute |logical form|): execute the logical form (e.g., (execute (call + (number 3) (number 4))))");
     LogInfo.log("  (def |key| |value|): define a macro to replace |key| with |value| in all commands (e.g., (def type fb:type.object type)))");
     LogInfo.log("  (context [(user |user|) (date |date|) (exchange |exchange|) (graph |graph|)]): prints out or set the context");
+    LogInfo.log("  (uttdef (def |alternative|) [(original |original|)]): provide a definition for the original utterance");
+    LogInfo.log("  (autocomplete |prefix|): provide a definition for the original utterance");
+
     LogInfo.log("Press Ctrl-D to exit.");
   }
 
@@ -189,7 +222,10 @@ public class Master {
 
     // Log interaction to disk
     if (!Strings.isNullOrEmpty(opts.logPath)) {
-      PrintWriter out = IOUtils.openOutAppendHard(opts.logPath);
+      PrintWriter out;
+
+      out = IOUtils.openOutAppendHard(
+          Paths.get(opts.logPath, session.id + ".log").toString());
       out.println(
           Joiner.on("\t").join(
               Lists.newArrayList(
@@ -226,9 +262,18 @@ public class Master {
     ex.preprocess();
 
     // Parse!
-    builder.parser.parse(builder.params, ex, false);
+    ParserState state;
+    state = builder.parser.parse(builder.params, ex, false);
+    Learner.addToAutocomplete(ex, builder.params);
 
+    // for supporting definitions
+    if (state instanceof BeamParserState) {
+      response.coverage = ((BeamParserState)state).getCoverage();
+      response.taggedCover = ((BeamParserState)state).getTaggedCoverage();
+      ex.chart = ((BeamParserState)state).getChart().clone();
+    }
     response.ex = ex;
+
     ex.log();
     if (ex.predDerivations.size() > 0) {
       response.candidateIndex = 0;
@@ -241,7 +286,7 @@ public class Master {
     // Print features
     HashMap<String, Double> featureVector = new HashMap<>();
     deriv.incrementAllFeatureVector(1, featureVector);
-    FeatureVector.logFeatureWeights("Pred", featureVector, builder.params);
+    FeatureVector.logFeatureWeights("Pred", featureVector, builder.params); 
 
     // Print choices
     Map<String, Integer> choices = new LinkedHashMap<>();
@@ -278,6 +323,23 @@ public class Master {
     } else if (command.equals("grammar")) {
       for (Rule rule : builder.grammar.rules)
         LogInfo.logs("%s", rule.toLispTree());
+      if (opts.newGrammarPath != null) {
+        Set<Rule> deduper = new HashSet<>();
+        String fileName = "grammar-" + LocalDateTime.now() + ".grammar"; 
+        LogInfo.logs("Printing rules to %s", fileName);
+        PrintWriter out = IOUtils.openOutHard(Paths.get(opts.newGrammarPath, fileName).toString());
+        for (Rule rule : builder.grammar.rules) {
+          if(!deduper.contains(rule)) {
+            out.println(rule.toLispTree().toString());
+            deduper.add(rule);
+            LogInfo.logs("Printed rule %s", rule.toString());
+          } else {
+            LogInfo.logs("Skipped rule %s", rule.toString());
+          }
+        }
+        out.flush();
+        out.close();
+      }
     } else if (command.equals("params")) {
       if (tree.children.size() == 1) {
         builder.params.write(LogInfo.stdout);
@@ -303,7 +365,7 @@ public class Master {
       if (!getOptionsParser().parse(new String[] {"-" + option, value}))
         LogInfo.log("Unknown option: " + option);
     } else if (command.equals("select") || command.equals("accept") ||
-               command.equals("s") || command.equals("a")) {
+        command.equals("s") || command.equals("a")) {
       // Select an answer
       if (tree.children.size() != 2) {
         LogInfo.logs("Invalid usage: (%s |candidate index|)", command);
@@ -339,7 +401,8 @@ public class Master {
         ex.setTargetFormula(response.getDerivation().getFormula());
         ex.setTargetValue(response.getDerivation().getValue());
         ex.setContext(session.getContextExcludingLast());
-        addNewExample(ex);
+        ex.setNBestInd(index);
+        addNewExample(ex, session);
       }
     } else if (command.equals("answer")) {
       if (tree.children.size() != 2) {
@@ -353,7 +416,7 @@ public class Master {
         return;
       }
       ex.setTargetValue(Values.fromLispTree(tree.child(1)));
-      addNewExample(ex);
+      addNewExample(ex, session);
     } else if (command.equals("rule")) {
       int n = builder.grammar.rules.size();
       builder.grammar.addStatement(tree.toString());
@@ -368,6 +431,7 @@ public class Master {
       Example ex = session.getLastExample();
       ContextValue context = (ex != null ? ex.context : session.context);
       Executor.Response execResponse = builder.executor.execute(Formulas.fromLispTree(tree.child(1)), context);
+      response.commandResponse = ((StringValue)execResponse.value).value;
       LogInfo.logs("%s", execResponse.value);
     } else if (command.equals("def")) {
       builder.grammar.interpretMacroDef(tree);
@@ -377,12 +441,109 @@ public class Master {
       } else {
         session.context = new ContextValue(tree);
       }
-    } else {
+    } else if (command.equals("uttdef")) {
+      if (tree.children.size() == 3) {
+        String currentUtterance = tree.children.get(1).value;
+        Example ex = session.getLastExample();
+        int index = Integer.parseInt(tree.child(2).value);
+        // storing here for convenience,
+        // but note that this index is for the definition, and not the original example
+        LogInfo.logs("Provided definition (%s) for definiendum (%s) with index %d", tree.children.get(1).value, ex.utterance, index);
+        induceGrammar(ex, currentUtterance, index, session, response);
+      } else {
+        LogInfo.logs("Invalid format for uttdef");
+      }
+    } else if (command.equals("autocomplete")) {
+      if (tree.children.size() == 2) {
+        String prefix = tree.children.get(1).value;
+        LogInfo.logs("Getting autocomplete for prefix: %s", prefix);
+        List<String> prefixTokens = LanguageAnalyzer.getSingleton().analyze(prefix).tokens;
+        PrefixTrie trieMatch = builder.params.autocompleteTrie.traverse(prefixTokens);
+        if (trieMatch != null)
+          response.autocompletes = trieMatch.getRandomMatches(opts.autocompleteCount);
+        else
+          response.autocompletes = Lists.newArrayList();
+        LogInfo.logs("%d options are %s", opts.autocompleteCount, response.autocompletes);
+      } else {
+        LogInfo.logs("autocomplete just takes a prefix");
+      }
+    }  
+    else {
       LogInfo.log("Invalid command: " + tree);
     }
   }
 
-  void addNewExample(Example origEx) {
+
+  // parse the definition, match with the chart of origEx, and add new rules to grammar
+  void induceGrammar(Example origEx, String def, int nbestInd, Session session, Response response) {
+    boolean trying = nbestInd == -1;
+    session.updateContext();
+    Example.Builder b = new Example.Builder();
+    b.setId("session:" + session.id);
+    b.setUtterance(def);
+    b.setContext(session.context);
+    b.setNBestInd(nbestInd);
+    Example ex = b.createExample();
+    ex.preprocess();
+    
+    GrammarInducer.ParseStatus origStatus = GrammarInducer.getParseStatus(origEx);
+
+    // Parse!
+    ParserState state;
+    state = builder.parser.parse(builder.params, ex, false);
+    Learner.addToAutocomplete(ex, builder.params);
+
+    if (state instanceof BeamParserState) {
+      response.coverage = ((BeamParserState)state).getCoverage();
+      response.taggedCover = ((BeamParserState)state).getTaggedCoverage();
+    }
+    response.ex = ex; // respond with the parse of the definition
+    
+    if (ex.predDerivations.size() > 0)
+      if (response.candidateIndex == -1)
+        response.candidateIndex = 0;
+
+    GrammarInducer grammarInducer = new GrammarInducer(origEx, ex);
+    response.commandResponse =  String.format("[%s,%s]", grammarInducer.defStatus.toString(), origStatus.toString());
+    
+    // write the actual definitions, write these anyways even if rule failed
+    PrintWriter out = IOUtils.openOutAppendHard(Paths.get(opts.newGrammarPath, session.id + ".definition").toString());
+    // deftree.addChild(oldEx.utterance);
+    LispTree deftree = LispTree.proto.newList("definition", def);
+    Example oldEx = new Example.Builder()
+        .setId(origEx.id)
+        .setUtterance(origEx.utterance)
+        .createExample();
+    LispTree treewithdef = oldEx.toLispTree(false).addChild(deftree);
+    treewithdef.addChild(LispTree.proto.newList("defStatus", grammarInducer.defStatus.toString()));
+    treewithdef.addChild(LispTree.proto.newList("origStatus", origStatus.toString()));
+    out.println(treewithdef.toString());
+    out.flush();
+    out.close();
+
+    List<Rule> inducedRules = grammarInducer.getRules();
+    if (inducedRules.size() > 0 && !trying) {
+      for (Rule rule : inducedRules) {
+        LogInfo.logs("adding induced rule %s", rule);
+        builder.parser.grammar.addRule(rule);
+        // well, hacky, because BeamParser stores rules in a trie
+        // and subtlely reject redefining of core, and no cover at all
+        if (builder.parser instanceof BeamParser && origStatus != GrammarInducer.ParseStatus.Core) {
+          builder.parser.addRule(rule);
+        }
+      }
+      // write out the grammar
+      out = IOUtils.openOutAppendHard(Paths.get(opts.newGrammarPath, session.id + ".grammar").toString());
+      for (Rule rule : inducedRules) {
+        out.println(rule.toLispTree().toStringWrap());
+      }
+      out.flush();
+      out.close();
+    }
+  }
+
+
+  void addNewExample(Example origEx, Session session) {
     // Create the new example, but only add relevant information.
     Example ex = new Example.Builder()
         .setId(origEx.id)
@@ -390,11 +551,15 @@ public class Master {
         .setContext(origEx.context)
         .setTargetFormula(origEx.targetFormula)
         .setTargetValue(origEx.targetValue)
+        .setNBestInd(origEx.NBestInd)
         .createExample();
 
     if (!Strings.isNullOrEmpty(opts.newExamplesPath)) {
       LogInfo.begin_track("Adding new example");
-      Dataset.appendExampleToFile(opts.newExamplesPath, ex);
+      if (opts.newExamplesPath.endsWith(".json") || opts.newExamplesPath.endsWith(".lisp"))
+        Dataset.appendExampleToFile(opts.newExamplesPath, ex);
+      else
+        Dataset.appendExampleToFile( Paths.get(opts.newExamplesPath, session.id + ".lisp").toString(), ex);
       LogInfo.end_track();
     }
 
@@ -403,6 +568,16 @@ public class Master {
       learner.onlineLearnExample(origEx);
       if (!Strings.isNullOrEmpty(opts.newParamsPath))
         builder.params.write(opts.newParamsPath);
+      LogInfo.end_track();
+    }
+
+    if (opts.independentSessions) {
+      if (opts.onlineLearnExamples) { 
+        LogInfo.warning("Both independentSessions and onlineLearnExamples are on");
+      } else {
+        LogInfo.begin_track("Updating parameters (independent)");
+        session.learner.onlineLearnExample(origEx);
+      }
       LogInfo.end_track();
     }
   }

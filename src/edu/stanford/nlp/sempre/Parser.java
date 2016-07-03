@@ -56,6 +56,9 @@ public abstract class Parser {
 
     @Option(gloss = "Dump all features (for debugging)")
     public boolean dumpAllFeatures = false;
+    
+    @Option(gloss = "keep tracks of these categories")
+    public List<String> trackedCats = null;
   }
 
   public static final Options opts = new Options();
@@ -163,8 +166,19 @@ public abstract class Parser {
     state.setEvaluation();
 
     ex.predDerivations = state.predDerivations;
-    Derivation.sortByScore(ex.predDerivations);
-
+    
+    if (Master.opts.bePragmatic) {
+      // Compute probabilities
+      double[] probs = Derivation.getProbs(ex.predDerivations, 1);
+      for (int i = 0; i < ex.predDerivations.size(); i++) {
+        Derivation deriv = ex.predDerivations.get(i);
+        deriv.prob = probs[i];
+      }
+      params.pragmaticListener.inferPragmatically(ex);
+      Derivation.sortByPragmaticScore(ex.predDerivations);
+    } else {
+      Derivation.sortByScore(ex.predDerivations);
+    }
     // Evaluate
     ex.evaluation = new Evaluation();
     addToEvaluation(state, ex.evaluation);
@@ -197,6 +211,7 @@ public abstract class Parser {
     // Did we get the answer correct?
     int correctIndex = -1;  // Index of first correct derivation
     int correctIndexAfterParse = -1;
+    int correctIndexAfterParsePrag = -1;
     double maxCompatibility = 0.0;
     double[] compatibilities = null;
     if (ex.targetValue != null) {
@@ -212,6 +227,7 @@ public abstract class Parser {
         maxCompatibility = Math.max(compatibilities[i], maxCompatibility);
       }
       // What if we only had parsed bottom up?
+      Derivation.sortByScore(predDerivations);
       for (int i = 0; i < numCandidates; i++) {
         Derivation deriv = predDerivations.get(i);
         if (deriv.compatibility == 1) {
@@ -219,14 +235,20 @@ public abstract class Parser {
           break;
         }
       }
-    }
+      if (Master.opts.bePragmatic) {
+        Derivation.sortByPragmaticScore(predDerivations);
 
+        for (int i = 0; i < numCandidates; i++) {
+          Derivation deriv = predDerivations.get(i);
+          if (deriv.compatibility == 1) {
+            correctIndexAfterParsePrag = i;
+            break;
+          }
+        }
+      }
+    }
     // Compute probabilities
     double[] probs = Derivation.getProbs(predDerivations, 1);
-    for (int i = 0; i < numCandidates; i++) {
-      Derivation deriv = predDerivations.get(i);
-      deriv.prob = probs[i];
-    }
 
     // Number of derivations which have the same top score
     int numTop = 0;
@@ -314,8 +336,20 @@ public abstract class Parser {
     evaluation.add("oracle", correctIndex != -1);
     evaluation.add("partCorrect", partCorrect);
     evaluation.add("partOracle", maxCompatibility);
-    if (correctIndexAfterParse != -1)
+    if (correctIndexAfterParse != -1) {
       evaluation.add("correctIndexAfterParse", correctIndexAfterParse);
+    
+      evaluation.add("correctIndexAfterParsePrag", correctIndexAfterParsePrag);
+      evaluation.add("correctBaseline", correctIndexAfterParse == 0? 1:0);
+      evaluation.add("pragBetter", correctIndexAfterParsePrag <= correctIndexAfterParse? 1: 0);
+      evaluation.add("pragWorse",  correctIndexAfterParsePrag >= correctIndexAfterParse? 1: 0);
+      
+      evaluation.add("Top3Prag", correctIndexAfterParsePrag < 3?  1: 0);
+      evaluation.add("Top3Normal",  correctIndexAfterParse < 3? 1: 0);
+      
+      evaluation.add("Top5Prag", correctIndexAfterParsePrag < 5?  1: 0);
+      evaluation.add("Top5Normal",  correctIndexAfterParse < 5? 1: 0);
+    }
 
     if (correctIndex != -1) {
       evaluation.add("correctMaxBeamPosition", predDerivations.get(correctIndex).maxBeamPosition);

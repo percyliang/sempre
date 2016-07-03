@@ -2,14 +2,21 @@ package edu.stanford.nlp.sempre;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Maps;
+
+import edu.stanford.nlp.sempre.Master.Response;
+import edu.stanford.nlp.sempre.interactive.GrammarInducer;
+import edu.stanford.nlp.sempre.interactive.PragmaticListener;
 import fig.basic.*;
 import fig.exec.Execution;
 
 import java.io.PrintWriter;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * The main learning loop.  Goes over a dataset multiple times, calling the
@@ -45,6 +52,10 @@ public class Learner {
     public boolean updateWeights = true;
     @Option(gloss = "whether to check gradient")
     public boolean checkGradient = false;
+    
+    @Option(gloss = "count correct examples in an online fashion")
+    public boolean onlineEvaluation = false;
+    public boolean skipSeen = false;
   }
   public static Options opts = new Options();
 
@@ -92,22 +103,28 @@ public class Learner {
       sortOnFeedback();
     // For each iteration, go through the groups and parse (updating if train).
     for (int iter = 0; iter <= numIters; iter++) {
-
+      if (opts.onlineEvaluation && iter==numIters) break;
+      
       LogInfo.begin_track("Iteration %s/%s", iter, numIters);
       Execution.putOutput("iter", iter);
 
       // Averaged over all iterations
       // Group -> evaluation for that group.
       Map<String, Evaluation> meanEvaluations = Maps.newHashMap();
-
       // Clear
       for (String group : dataset.groups())
         meanEvaluations.put(group, new Evaluation());
 
       // Test and train
       for (String group : dataset.groups()) {
+        // boolean isDef = group.startsWith("def");
         boolean lastIter = (iter == numIters);
-        boolean updateWeights = opts.updateWeights && group.equals("train") && !lastIter;  // Don't train on last iteration
+        // Don't train on last iteration
+        boolean updateWeights = opts.updateWeights && group.startsWith("train") && !lastIter;
+        
+        if (parser instanceof MutatingParser) {
+          ((MutatingParser) parser).mutate(iter, numIters, group);
+        }
         Evaluation eval = processExamples(
                 iter,
                 group,
@@ -117,7 +134,7 @@ public class Learner {
         meanEvaluations.get(group).add(eval);
         StopWatchSet.logStats();
       }
-
+      
       // Write out parameters
       String path = Execution.getFile("params." + iter);
       if (path != null) {
@@ -137,6 +154,10 @@ public class Learner {
       deriv.compatibility = parser.valueEvaluator.getCompatibility(ex.targetValue, deriv.value);
     ParserState.computeExpectedCounts(ex.predDerivations, counts);
     params.update(counts);
+    if (Master.opts.bePragmatic) {
+      parseExample(params, ex, false);
+      this.params.pragmaticListener.addExample(ex);
+    }
     LogInfo.end_track();
   }
 
@@ -144,7 +165,7 @@ public class Learner {
                                      List<Example> examples,
                                      boolean computeExpectedCounts) {
     Evaluation evaluation = new Evaluation();
-
+    Set<String> seen = new HashSet<>();
     if (examples.size() == 0)
       return evaluation;
 
@@ -154,19 +175,30 @@ public class Learner {
     LogInfo.begin_track_printAll(
             "Processing %s: %s examples", prefix, examples.size());
     LogInfo.begin_track("Examples");
-
+    
     Map<String, Double> counts = new HashMap<>();
     int batchSize = 0;
     for (int e = 0; e < examples.size(); e++) {
-
       Example ex = examples.get(e);
-
       LogInfo.begin_track_printAll(
               "%s: example %s/%s: %s", prefix, e, examples.size(), ex.id);
       ex.log();
       Execution.putOutput("example", e);
 
       ParserState state = parseExample(params, ex, computeExpectedCounts);
+      // interactive stuff
+      addToAutocomplete(ex, params);
+      if (ex.definition!=null && ex.definition.length() > 0 && state instanceof BeamParserState) { 
+          ex.chart = ((BeamParserState)state).getChart().clone();
+          
+          List<Rule> newRules = induceGrammar(ex, ex.definition, parser, params);
+          params.inducedRules.addAll(newRules);
+          for (Rule rule : newRules) {
+            parser.grammar.addRule(rule);
+            parser.addRule(rule);
+          }
+      }
+      
       if (computeExpectedCounts) {
         if (opts.checkGradient) {
           LogInfo.begin_track("Checking gradient");
@@ -183,10 +215,14 @@ public class Learner {
           batchSize = 0;
         }
       }
-     // }
+      // }
 
+      
       LogInfo.logs("Current: %s", ex.evaluation.summary());
-      evaluation.add(ex.evaluation);
+      if (!(opts.skipSeen && seen.contains(ex.utterance))) {
+        evaluation.add(ex.evaluation);
+        seen.add(ex.utterance);
+      }
       LogInfo.logs("Cumulative(%s): %s", prefix, evaluation.summary());
 
       printLearnerEventsIter(ex, iter, group);
@@ -197,6 +233,12 @@ public class Learner {
       // Write out examples and predictions
       if (opts.outputPredDerivations && Builder.opts.parser.equals("FloatingParser")) {
         ExampleUtils.writeParaphraseSDF(iter, group, ex, opts.outputPredDerivations);
+      }
+      
+      if (Master.opts.bePragmatic) {
+        if (opts.batchSize!=1) throw new RuntimeException("pragmatic batch learning is not supported.");
+        parseExample(params, ex, true);
+        this.params.pragmaticListener.addExample(ex);
       }
 
       // To save memory
@@ -211,6 +253,7 @@ public class Learner {
 
     LogInfo.end_track();
     logEvaluationStats(evaluation, prefix);
+    evaluation.putOutput(prefix.replace('.', '-'));
     printLearnerEventsSummary(evaluation, iter, group);
     ExampleUtils.writeEvaluationSDF(iter, group, evaluation, examples.size());
     LogInfo.end_track();
@@ -317,8 +360,9 @@ public class Learner {
   private void printLearnerEventsSummary(Evaluation evaluation,
                                          int iter,
                                          String group) {
-    if (eventsOut == null)
+    if (eventsOut == null) {
       return;
+    }
     List<String> fields = new ArrayList<>();
     fields.add("iter=" + iter);
     fields.add("group=" + group);
@@ -326,4 +370,35 @@ public class Learner {
     eventsOut.println(Joiner.on('\t').join(fields));
     eventsOut.flush();
   }
+  
+  public static boolean addToAutocomplete(Example ex, Params params) {
+    int num = ex.predDerivations.size();
+    // i guess or if it's in core
+    if (num > 0) {
+      params.autocompleteTrie.add(ex.getTokens());
+      LogInfo.logs("added %s to trie %s", ex.getTokens(), params.autocompleteTrie.toLispTree(1));
+      return true;
+    }
+    return false;
+  }
+  
+  static List<Rule> induceGrammar(Example origEx, String def, Parser parser, Params params) {
+    Example.Builder b = new Example.Builder();
+    b.setUtterance(def);
+    b.setNBestInd(0);
+    LogInfo.logs("Currrent definition is %s", def);
+    
+    Example ex = b.createExample();
+    ex.preprocess();
+    
+    // Parse!
+    parser.parse(params, ex, false);
+    addToAutocomplete(ex, params);
+    GrammarInducer grammarInducer = new GrammarInducer(origEx, ex);
+    List<Rule> inducedRules = grammarInducer.getRules();
+    
+    return inducedRules;
+  }
+  
+  
 }

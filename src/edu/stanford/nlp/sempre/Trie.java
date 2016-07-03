@@ -22,7 +22,8 @@ public class Trie {
     cats.add(rule.lhs);
 
     if (i == rule.rhs.size()) {
-      rules.add(rule);
+      if (!rules.contains(rule)) // filter exact match
+        rules.add(rule);
       return;
     }
 

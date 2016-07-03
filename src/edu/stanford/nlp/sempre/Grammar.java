@@ -3,6 +3,7 @@ package edu.stanford.nlp.sempre;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+
 import fig.basic.*;
 import fig.exec.Execution;
 
@@ -33,6 +34,8 @@ public class Grammar {
     @Option(gloss = "Variables which are used to interpret the grammar file")
     public List<String> tags = new ArrayList<>();
     @Option public boolean binarizeRules = true;
+    @Option(gloss = "use multi-argument ApplyFn by default")
+    public boolean useApplyFn = false;
   }
 
   public static Options opts = new Options();
@@ -279,7 +282,8 @@ public class Grammar {
 
   // Add a rule to the grammar.
   public synchronized boolean addRule(Rule rule, List<Boolean> isOptionals) {
-    rules.addAll(binarizeRule(rule, isOptionals));
+    // rules.addAll(binarizeRule(rule, isOptionals));
+    rules.add(rule);
     return true;
   }
 
@@ -316,6 +320,7 @@ public class Grammar {
       while (j < rule.rhs.size() && !(Rule.isCat(rule.rhs.get(j)) && !isOptionals.get(j)))
         j++;
       // If one exists, then we have to invoke special binarization
+      
       if (j < rule.rhs.size()) {
         // Create an intermediate category
         String intCat = generateFreshCat();
@@ -449,12 +454,20 @@ public class Grammar {
     String name = tree.child(0).value;
 
     // Syntactic sugar: (lambda x (var x)) => (JoinFn betaReduce forward (arg0 (lambda x (var x))))
-    if (name.equals("lambda")) {
+    if (name.equals("lambda") && !Grammar.opts.useApplyFn) {
       LispTree newTree = LispTree.proto.newList();
       newTree.addChild("JoinFn");
       newTree.addChild("betaReduce");
       newTree.addChild("forward");
       newTree.addChild(LispTree.proto.newList("arg0", tree));
+      tree = newTree;
+      name = tree.child(0).value;
+    }
+    // Syntactic sugar: (lambda x (var x)) => (cubeworld.ApplyFn (arg0 (lambda x (var x))))
+    if (name.equals("lambda") && Grammar.opts.useApplyFn) {
+      LispTree newTree = LispTree.proto.newList();
+      newTree.addChild("cubeworld.ApplyFn");
+      newTree.addChild(tree);
       tree = newTree;
       name = tree.child(0).value;
     }

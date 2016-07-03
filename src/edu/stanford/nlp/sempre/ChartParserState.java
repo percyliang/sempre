@@ -90,6 +90,10 @@ public abstract class ChartParserState extends ParserState {
     }
   }
 
+  public Map<String, List<Derivation>>[][] getChart() {
+    return chart;
+  }
+
   // TODO(joberant): move to visualization utility class
   public static class CatSpan {
     @JsonProperty
@@ -99,7 +103,7 @@ public abstract class ChartParserState extends ParserState {
 
     @JsonCreator
     public CatSpan(@JsonProperty("start") int start, @JsonProperty("end") int end,
-                   @JsonProperty("cat") String cat) {
+        @JsonProperty("cat") String cat) {
       this.start = start;
       this.end = end;
       this.cat = cat;
@@ -114,7 +118,7 @@ public abstract class ChartParserState extends ParserState {
 
     @JsonCreator
     public ChartFillingData(@JsonProperty("id") String id, @JsonProperty("catspans") List<CatSpan> catSpans,
-                            @JsonProperty("utterance") String utterance, @JsonProperty("numOfTokens") int numOfTokens) {
+        @JsonProperty("utterance") String utterance, @JsonProperty("numOfTokens") int numOfTokens) {
       this.id = id;
       this.utterance = utterance;
       this.numOfTokens = numOfTokens;

@@ -1,14 +1,7 @@
 package edu.stanford.nlp.sempre;
 
-import fig.basic.Fmt;
-import fig.basic.LogInfo;
-import fig.basic.NumUtils;
-import fig.basic.Evaluation;
-import fig.basic.Option;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import fig.basic.*;
 
 /**
  * Actually does the parsing.  Main method is infer(), whose job is to fill in
@@ -139,8 +132,6 @@ public abstract class ParserState {
         LogInfo.logs("%s(%s,%s): %s %s, [score=%s]", deriv.cat, deriv.start, deriv.end, deriv.formula,
                 deriv.canonicalUtterance, deriv.score);
       }
-
-
       LogInfo.end_track();
     }
 
@@ -271,7 +262,7 @@ public abstract class ParserState {
 
     trueScores = new double[n];
     predScores = new double[n];
-    // For update schemas that choose one good and one bad candidate to update
+    // Experimental (ice): For update schemas that choose one good and one bad candidate to update
     int[] goodAndBad = null;
     if (opts.customExpectedCounts == CustomExpectedCount.TOP) {
       goodAndBad = getTopDerivations(derivations);

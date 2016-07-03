@@ -1,5 +1,6 @@
 package edu.stanford.nlp.sempre;
 
+import com.beust.jcommander.internal.Lists;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 
@@ -107,7 +108,10 @@ class BeamParserState extends ChartParserState {
     }
 
     setPredDerivations();
-
+    for (Derivation deriv : predDerivations) {
+      deriv.getAnchoredTokens();
+    }
+    
     if (mode == Mode.full) {
       // Compute gradient with respect to the predicted derivations
       ensureExecuted();
@@ -248,7 +252,7 @@ class BeamParserState extends ChartParserState {
       }
     }
   }
-
+  
   // -- Coarse state pruning --
 
   // Remove any (cat, start, end) which isn't reachable from the
@@ -312,4 +316,69 @@ class BeamParserState extends ChartParserState {
     if (coarseState == null) return true;
     return coarseState.chart[start][end].containsKey(cat);
   }
+  
+  // count the number of times each token is used
+  public int[] getCoverage() {
+    int[] cover = new int[numTokens];
+    for (int start = 0; start < numTokens; start++) {
+      for (int end = start + 1; end <= numTokens; end++) {
+        for (String cat : chart[start][end].keySet()) {
+          // LogInfo.log(cat);
+          if (Parser.opts.trackedCats!=null && Parser.opts.trackedCats.contains(cat)) {
+            List<Derivation> derivations = chart[start][end].get(cat);
+            if (derivations != null)
+              for (int i = start; i < end; i++)
+                cover[i] += derivations.size();
+          }
+        }
+      }
+    }
+    return cover;
+  }
+  
+ // get tagged cover, e.g.. [[$UNK, remove], [$COLOR, yellow], [$UNK, if], [$COND, row, =, 1]]
+ public List<List<String>> getTaggedCoverage() {
+   List<List<String>> taggedCovers = new ArrayList<>();
+   int currentMax = 0;
+   
+   List<String> skips = Lists.newArrayList("$UNK");
+   boolean skipped = false;
+   
+   for (int start = 0; start < numTokens;) {
+     boolean matched = false;
+     for (int end = numTokens; end > start; end--) {
+       if (matched) break;
+       for (String cat : chart[start][end].keySet()) {
+         if (!Parser.opts.trackedCats.contains(cat) && !cat.equals("$Keyword")) { continue; }
+         // so got a match
+         if (skipped) { // first, add anything we have skipped
+           taggedCovers.add(skips);
+           skips = Lists.newArrayList("$UNK");
+           skipped = false;
+         }
+
+         List<String> span = Lists.newArrayList(cat);
+         span.addAll(ex.getTokens().subList(start, end));
+         taggedCovers.add(span);
+         matched = true;
+         currentMax = end;
+
+         break;
+       }
+     }
+     if (matched) {
+       start = currentMax;
+     } else {
+       skipped = true;
+       skips.add(ex.getTokens().get(start));
+       start++;
+     }
+   }
+   // add everything when nothing got matched
+   if (skipped) {
+     taggedCovers.add(skips);
+   }
+   LogInfo.log(taggedCovers);
+   return taggedCovers;
+ }
 }

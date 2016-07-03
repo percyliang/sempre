@@ -100,8 +100,6 @@ class FloatingParserState extends ParserState {
     return Parser.opts.beamSize;
   }
 
-
-
   // Construct state names.
   private Object floatingCell(String cat, int depth) {
     return cat + ":" + depth;

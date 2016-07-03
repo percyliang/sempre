@@ -99,7 +99,7 @@ public class Rule {
   }
 
   /* Extract tag info */
-  private double getInfoTag(String infoTag) {
+  public double getInfoTag(String infoTag) {
     if (info != null) {
       for (Pair<String, Double> p : info) {
         if (p.getFirst().equals(infoTag)) return p.getSecond();
@@ -128,5 +128,15 @@ public class Rule {
       return false;
     else
       return f == 1.0 ? false : !FloatingParser.opts.defaultIsFloating;
+  }
+  
+  @Override
+  public boolean equals(Object o) {
+    if (!(o instanceof Rule)) return false;
+    return ((Rule)o).toString().equals(this.toString());
+  }
+  @Override
+  public int hashCode() {
+    return this.toString().hashCode();
   }
 }
