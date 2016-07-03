@@ -5,6 +5,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 
 import edu.stanford.nlp.sempre.interactive.GrammarInducer;
+import edu.stanford.nlp.sempre.interactive.PrefixTrie;
 import fig.basic.*;
 import fig.exec.Execution;
 

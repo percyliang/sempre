@@ -42,7 +42,7 @@ public class PrefixTrie {
     }
   };
 
-  PrefixTrie traverse(List<String> items) 
+  public PrefixTrie traverse(List<String> items) 
   {
     if (items == null || items.size() == 0) return this;
     String next = tokenMap.apply(items.get(0));

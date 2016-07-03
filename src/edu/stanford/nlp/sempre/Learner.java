@@ -122,9 +122,6 @@ public class Learner {
         // Don't train on last iteration
         boolean updateWeights = opts.updateWeights && group.startsWith("train") && !lastIter;
         
-        if (parser instanceof MutatingParser) {
-          ((MutatingParser) parser).mutate(iter, numIters, group);
-        }
         Evaluation eval = processExamples(
                 iter,
                 group,

@@ -4,6 +4,7 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 
 import edu.stanford.nlp.sempre.interactive.PragmaticListener;
+import edu.stanford.nlp.sempre.interactive.PrefixTrie;
 import fig.basic.*;
 
 import java.io.BufferedReader;
