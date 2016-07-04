@@ -694,8 +694,8 @@ public final class SimpleWorld {
       List<Value> housingTypes = makeValues(HOUSING_TYPES);
       List<Value> neighborhoods = makeValues(NEIGHBORHOODS);
       for (Value e : units) {
-        insertDB(e, "rent", new NumberValue(sampleMultinomial(L(1500, sampleInt(1000, 3000))), "en.dollar"));
-        insertDB(e, "size", new NumberValue(sampleMultinomial(L(800, sampleInt(500, 1500))), "en.square_feet"));
+        insertDB(e, "rent", new NumberValue((double) sampleMultinomial(L(1500, sampleInt(1000, 3000))), "en.dollar"));
+        insertDB(e, "size", new NumberValue((double) sampleMultinomial(L(800, sampleInt(500, 1500))), "en.square_feet"));
         insertDB(e, "posting_date", sampleDate());
         insertDB(e, "neighborhood", sampleMultinomial(neighborhoods));
         insertDB(e, "housing_type", sampleMultinomial(housingTypes));

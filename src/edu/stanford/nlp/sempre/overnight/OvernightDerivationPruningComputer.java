@@ -1,33 +1,28 @@
 package edu.stanford.nlp.sempre.overnight;
 
 import java.util.*;
-import java.util.regex.Pattern;
 
 import edu.stanford.nlp.sempre.*;
-import fig.basic.Option;
-import fig.basic.MapUtils;
 
 /**
  * Hard-coded hacks for pruning derivations in floating parser for overnight domains.
- *
  */
 
 public class OvernightDerivationPruningComputer extends DerivationPruningComputer {
-  public static class Options {
-    @Option (gloss = "Whether filter derivations using hard constraints")
-    public boolean applyHardConstraints = false;
-  }
-  public static Options opts = new Options();
-
   
   public OvernightDerivationPruningComputer(DerivationPruner pruner) {
     super(pruner);
   }
 
   @Override
-  public boolean isPruned(Derivation deriv) {
-    if (opts.applyHardConstraints && violateHardConstraints(deriv)) return true;
-    return false;
+  public Collection<String> getAllStrategyNames() {
+    return Arrays.asList("violateHardConstraints");
+  }
+
+  @Override
+  public String isPrunedGeneral(Derivation deriv) {
+    if (containsStrategy("violateHardConstraints") && violateHardConstraints(deriv)) return "violateHardConstraints";
+    return null;
   }
 
   // Check a few hard constraints on each derivation
@@ -47,8 +42,8 @@ public class OvernightDerivationPruningComputer extends DerivationPruningCompute
         }
         // If we are supposed to get a number but we get a string (some sparql weirdness)
         if (deriv.type.equals(SemType.numberType) &&
-                values.size() == 1 &&
-                !(values.get(0) instanceof NumberValue)) return true;
+            values.size() == 1 &&
+            !(values.get(0) instanceof NumberValue)) return true;
       }
     }
     return false;

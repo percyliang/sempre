@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" type="text/css" href="style.css">
+  <script type="text/javascript" src="jquery.min.js"></script>
+  <script type="text/javascript" src="templates.js"></script>
+  <script type="text/javascript" src="main.js"></script>
+  <script type="text/javascript" src="view.js"></script>
+  <title>MTurk Result Viewer</title>
+</head>
+<body>
+  <div id="webpage" class="column">
+    
+  </div>
+  <div id="wrapper" class="column">
+    <div id="instruction">
+      <div id="hidingInstruction" class="hidden">
+        <button type="button" class="floatButton" id="showInstructionButton">Show Instructions</button>
+      </div>
+      <div id="showingInstruction">
+        <h1>Instructions</h1>
+        <button type="button" class="floatButton" id="hideInstructionButton" disabled>Loading ...</button>
+      </div>
+    </div>
+    <div id="warning" class="hidden">
+      Preview Mode.<br>Please accept the HIT to start working.
+    </div>
+    <form id="answerForm">
+      <input type="hidden" name="title">
+      <input type="hidden" name="url">
+      <input type="hidden" name="hash">
+      <input type="input" name="pageid">
+      <input type="input" name="tableid">
+      <div id="questionWrapper">
+        <h2>Trivia Questions</h2>
+        <div id="showAnswer"></div>
+      </div>
+      <div id="navbar" class="centerize">
+        <input type="hidden" id="assignmentId" name="assignmentId">
+        <input type="hidden" id="batchIndex" name="batchIndex">
+        <input type="hidden" id="dataIndex" name="dataIndex">
+        <button id="submitButton" type="button" disabled><strong>Submit</strong></button>
+        <p id="incompleteWarning" class="hidden">Error: Please fill in all input boxes.</p>
+      </div>
+    </form>
+  </div>
+</body>
+</html>

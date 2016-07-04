@@ -20,7 +20,7 @@ def codalab(dependencies=nil)
     letDefault(:cl, 0),
     sel(:cl,
       l(),
-      l('cl', 'run', dependencies, '---'),
+      l('cl', 'run', dependencies, '---', 'LC_ALL=C.UTF-8'),
     nil),
   nil)
 end
@@ -618,58 +618,115 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
   letDefault(:class, 'main'),
   sel(:class, {
     'main' => 'edu.stanford.nlp.sempre.Main',
-    'check' => 'edu.stanford.nlp.sempre.tables.test.DPParserChecker',
-    'align' => 'edu.stanford.nlp.sempre.tables.alignment.IBMAligner',
+    'check' => 'edu.stanford.nlp.sempre.tables.test.DPDParserChecker',
+    'align' => l('edu.stanford.nlp.sempre.tables.alignment.AlignerMain', o('maxTrainIters', 11)),
     'dump' => 'edu.stanford.nlp.sempre.tables.serialize.SerializedDumper',
-    'load' => 'edu.stanford.nlp.sempre.tables.serialize.SerializedLoader',
+    'load' => l('edu.stanford.nlp.sempre.tables.serialize.SerializedLoader', let(:parser, 'serialized')),
     'stats' => 'edu.stanford.nlp.sempre.tables.test.TableStatsComputer',
+    'ann-data' => 'edu.stanford.nlp.sempre.tables.serialize.AnnotatedDatasetGenerator',
+    'ann-table' => 'edu.stanford.nlp.sempre.tables.serialize.AnnotatedTableGenerator',
+    'alter' => l('edu.stanford.nlp.sempre.tables.alter.BatchTableAlterer', let(:parser, 'serialized')),
+    'alter-ex' => l('edu.stanford.nlp.sempre.tables.alter.AlteredTablesExecutor', let(:parser, 'serialized')),
   }),
   # Fig parameters
-  selo(:cldir, 'execDir', '_OUTPATH_', '.'),
-  o('overwriteExecDir'), o('addToView', 0), o('jarFiles', 'libsempre/*'),
+  selo(:cldir, 'execDir', '_OUTPATH_', 'output'),
+  o('overwriteExecDir'), o('addToView', 11), o('jarFiles', 'libsempre/*'),
   sel(:cldir, l(), '>/dev/null'),
   # Set environment for table execution
   o('executor', 'tables.lambdadcs.LambdaDCSExecutor'),
-  o('Builder.valueEvaluator', 'tables.TableValueEvaluator'),
-  o('TargetValuePreprocessor.targetValuePreprocessor', 'tables.TableValuePreprocessor'),
+  o('targetValuePreprocessor', 'tables.TableValuePreprocessor'),
   o('NumberFn.unitless'), o('NumberFn.alsoTestByConversion'),
   o('TypeInference.typeLookup', 'tables.TableTypeLookup'),
   o('JoinFn.specializedTypeCheck', false), o('JoinFn.typeInference', true),
+  # Value Evaluator
+  letDefault(:eval, 'value'),
+  sel(:eval, {
+    'value' => o('Builder.valueEvaluator', 'tables.TableValueEvaluator'),
+    'denotation' => o('Builder.valueEvaluator', 'tables.TableValueEvaluator'),  # alias of 'value'
+    'formula' => l(
+      o('Builder.valueEvaluator', 'tables.TableFormulaEvaluator'),
+      o('fallBackToValueEvaluator', false),
+    nil),
+  }),
   # Parser
   letDefault(:parser, 'floatsize'),
   sel(:parser, {
-    'floatsize' => l(
+    'old-floatsize' => l(
       o('Builder.parser', 'FloatingParser'),
       o('useSizeInsteadOfDepth'),
       o('FloatingParser.maxDepth', 15),
     nil),
-    'baseline' => l(
+    'old-baseline' => l(
       o('Builder.parser', 'tables.baseline.TableBaselineParser'),
     nil),
-    'dummy' => o('Builder.parser', 'tables.serialize.DummyParser'),
+    'serialized' => o('Builder.parser', 'tables.serialize.SerializedParser'),
+    # ACL 2016
+    'grow-dpd' => l(
+      o('Builder.parser', 'tables.dpd.DPDParser'),
+      o('useSizeInsteadOfDepth'),
+      o('FloatingParser.maxDepth', 8),
+    nil),
+    'grow-float' => l(
+      o('Builder.parser', 'FloatingParser'),
+      o('useSizeInsteadOfDepth'),
+      o('FloatingParser.maxDepth', 8),
+      o('FloatingParser.betaReduce'), o('initialFloatingHasZeroDepth'),
+    nil),
+    'grow-mix' => l(
+      o('Builder.parser', 'MixParser'),
+      o('MixParser.parsers', 'FloatingParser', 'tables.serialize.SerializedParser:train-0xc'),
+      o('useSizeInsteadOfDepth'),
+      o('FloatingParser.maxDepth', 8),
+      o('FloatingParser.betaReduce'), o('initialFloatingHasZeroDepth'),
+    nil),
   }),
-  o('FloatingParser.useAnchorsOnce', true),
+  o('Parser.verbose', 1),
   letDefault(:pruning, 1),
   sel(:pruning,
     l(),
     l(
       o('DerivationPruner.pruningStrategies', *tablesPruningStrategies),
       o('DerivationPruner.pruningComputers', 'tables.TableDerivationPruningComputer'),
+      o('recursivePruning', false),
     nil),
   nil),
   # Grammar
   tablesGrammarPaths,
+  letDefault(:fuzzy, 1),
+  sel(:fuzzy,
+    l(),
+    l(o('fuzzyMatchSubstring'), o('fuzzyMatchMaxEditDistanceRatio', 0.3), o('alsoReturnUnion'), o('alsoMatchPart')),
+  nil),
+  letDefault(:normalize, 1),
+  sel(:normalize,
+    l(),
+    l(o('genericDateValue'), o('numberCanStartAnywhere'), o('num2CanStartAnywhere'), o('NumberFn.alsoTestByIsolatedNER')),
+  nil),
+  letDefault(:anchor, 1),
+  sel(:anchor, {
+    1 => o('FloatingParser.useAnchorsOnce', true),
+    2 => l(o('FloatingParser.useAnchorsOnce', false), o('FloatingParser.useMaxAnchors', 2)),
+  }),
   # Dataset
   letDefault(:data, 'none'),
-  letDefault(:unseen, 0),
   tablesDataPaths,
   # Verbosity
   o('FeatureVector.ignoreZeroWeight'),
   o('maxPrintedPredictions', 10), o('maxPrintedTrue', 10), o('logFeaturesLimit', 10),
-  letDefault(:verbose, 0),
+  o('LambdaDCSException.noErrorMessage'),
+  letDefault(:verbose, 2),
   sel(:verbose,
     l(),
     l(
+      o('putCellNameInCanonicalUtterance'), o('showUtterance'),
+    nil),
+    l(
+      o('putCellNameInCanonicalUtterance'), o('showUtterance'),
+      o('summarizeRuleTime'), o('summarizeDenotations'),
+    nil),
+    l(
+      o('putCellNameInCanonicalUtterance'), o('showUtterance'),
+      o('summarizeRuleTime'), o('summarizeDenotations'),
       o('showRules'),
       o('Parser.verbose', 2),
       o('JoinFn.verbose', 3),
@@ -686,25 +743,25 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
   # Training
   letDefault(:train, 0),
   sel(:train,
-    l(),
+    l(
+      let(:l1, 0),
+    nil),
     l(
       o('combineFromFloatingParser'),
-      sel(:unseen, unbalancedTrainDevSplit, l()),
       o('maxTrainIters', 3),
       o('showValues', false), o('showFirstValue'),
     nil),
     l(
       # for dumping derivations (@class=dump)
       # force unbalancedTrainDevSplit + combine from floating parser
-      o('combineFromFloatingParser'), o('DPParser.cheat'),
-      sel(:unseen, unbalancedTrainDevSplit, l()),
+      o('combineFromFloatingParser'), o('DPDParser.cheat'),
     nil),
   nil),
   # Regularization
   letDefault(:l1, 1),
   sel(:l1,
     l(),
-    l(o('Params.l1Reg','lazy'), o('Params.l1RegCoeff', '3e-5')),
+    l(o('Params.l1Reg','lazy'), o('Params.l1RegCoeff', '3e-5')),    # Default
     l(o('Params.l1Reg','lazy'), selo(nil, 'Params.l1RegCoeff', 0, 0.00001, 0.0001, 0.001, 0.01)),
     l(o('Params.l1Reg','lazy'), selo(nil, 'Params.l1RegCoeff', 0.00001, 0.00003, 0.0001, 0.0003)),
     l(o('Params.l1Reg','lazy'), selo(nil, 'Params.l1RegCoeff', 0.00001, 0.00003, 0.0005)),
@@ -719,6 +776,10 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
     'all' => l(      # All features
       o('FeatureExtractor.featureDomains', 'custom-denotation phrase-predicate phrase-denotation headword-denotation missing-predicate'.split),
       o('FeatureExtractor.featureComputers', 'tables.features.PhrasePredicateFeatureComputer tables.features.PhraseDenotationFeatureComputer'.split),
+    nil),
+    'all-fragment' => l(
+      o('FeatureExtractor.featureDomains', 'custom-denotation phrase-denotation headword-denotation phrase-fragment'.split),
+      o('FeatureExtractor.featureComputers', 'tables.features.PhraseDenotationFeatureComputer tables.features.PhraseFragmentFeatureComputer'.split),
     nil),
     'baseline' => l( # For the baseline classifier
       o('FeatureExtractor.featureDomains', 'custom-denotation phrase-denotation headword-denotation table-baseline'.split),
@@ -739,13 +800,8 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
   letDefault(:featOp, 'careful'),
   sel(:featOp, {
     'none' => l(),
-    'base' => l(
-      o('usePredicateLemma'), o('usePhraseLemmaOnly'),
-    nil),
     'careful' => l(
-      o('usePredicateLemma'), o('usePhraseLemmaOnly'),
       o('maxNforLexicalizeAllPairs', 2),
-      o('traverseWithFormulaTypes'), o('reverseNameValueConversion', 'allBang'),
       o('lookUnderCellProperty'), o('useGenericCellType'),
       o('computeFuzzyMatchPredicates'),
     nil),
@@ -758,6 +814,7 @@ def tablesGrammarPaths
     l(
       letDefault(:grammar, 'combined-all'),
       sel(:grammar, {
+        'custom' => l(),
         'restrict' => o('Grammar.inPaths', "#{baseDir}restrict.grammar"),
         'simple' => o('Grammar.inPaths', "#{baseDir}simple.grammar"),
         'combined' => o('Grammar.inPaths', "#{baseDir}combined.grammar"),
@@ -773,9 +830,24 @@ def tablesGrammarPaths
           o('Grammar.inPaths', "#{baseDir}combined.grammar"),
           o('Grammar.tags', *'alternative movement comparison count aggregate superlative arithmetic merge'.split),
         nil),
+        'combined-more' => l(
+          o('Grammar.inPaths', "#{baseDir}combined.grammar"),
+          o('Grammar.tags', *'alternative movement comparison count aggregate superlative arithmetic merge u-superlative neq'.split),
+        nil),
         'combined-trigger' => l(    # Use trigger words for operations
           o('Grammar.inPaths', "#{baseDir}combined.grammar"),
           o('Grammar.tags', *'t-alternative t-movement t-comparison t-count t-aggregate t-superlative t-arithmetic merge'.split),
+        nil),
+        # ACL 2016
+        'grow-custom' => l(
+          o('Grammar.inPaths', "#{baseDir}grow.grammar"),
+          o('Grammar.binarizeRules', false),
+        nil),
+        'grow-default' => l(
+          o('Grammar.inPaths', "#{baseDir}grow.grammar"),
+          o('Grammar.binarizeRules', false),
+          o('Grammar.tags', *'scoped merge-and arithmetic comparison alternative neq yearrange part closedclass scoped-2args-merge-and'.split),
+          let(:anchor, 2),
         nil),
       }),
     nil)
@@ -794,21 +866,23 @@ def tablesDataPaths
           "train,#{baseDir}training.examples",
           "test,#{baseDir}pristine-unseen-tables.examples"),
         o('Dataset.trainFrac', 1), o('Dataset.devFrac', 0),
-        let(:unseen, 1),
       nil),
+      # @data=annotated can be used with @class=check only
+      'annotated' => o('Dataset.inPaths', "train,#{baseDir}annotated-all.examples"),
+      'before300' => o('Dataset.inPaths', "train,#{baseDir}training-before300.examples"),
     }
     # Development sets: 80:20 random split of training data
     ['1', '2', '3', '4', '5'].each do |x|
       datasets['u-' + x] = l(
         o('Dataset.inPaths',
-          "train,#{baseDir}random-split-seed-#{x}-train.examples",
-          "dev,#{baseDir}random-split-seed-#{x}-test.examples",
+          "train,#{baseDir}random-split-#{x}-train.examples",
+          "dev,#{baseDir}random-split-#{x}-dev.examples",
         nil),
-        let(:unseen, 1),
       nil)
     end
     # That's it!
     l(
+      o('splitDevFromTrain', false),
       o('TableKnowledgeGraph.baseCSVDir', csvDir),
       sel(:data, datasets),
     nil)
@@ -817,23 +891,25 @@ end
 
 def tablesPruningStrategies
   [
-    # Formula
-    "singleton",
-    "multipleSuperlatives",
-    "sameMerge",
-    "forwardBackward",
-    "doubleNext",
-    # Denotation
+    ### Critical strategies
     "emptyDenotation",
     "nonLambdaError",
+    ### Strategies that do not depend on the children's actual formulas
+    "atomic",
     "tooManyValues",
-    "badSuperlativeHead",
+    "badSummarizerHead",
     "mistypedMerge",
+    ### Strategies that depend on the children's formulas
+    "doubleNext",
+    "doubleSummarizers",
+    "sameMerge",
+    "unsortedMerge",
+    "typeRowMerge",
   nil].compact
 end
 
 
-
+############################################################
 # {2015-01-18} Generate utterances [Percy]
 addMode('genovernight', 'Generate utterances for overnight semantic parsing', lambda { |e| l(
   'fig/bin/qcreate',

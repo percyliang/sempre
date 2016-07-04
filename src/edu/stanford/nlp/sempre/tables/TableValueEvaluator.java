@@ -30,6 +30,8 @@ public class TableValueEvaluator implements ValueEvaluator {
     List<Value> targetList = ((ListValue) target).values;
     if (!(pred instanceof ListValue)) return 0;
     List<Value> predList = ((ListValue) pred).values;
+    // Make unique
+    predList = new ArrayList<>(new HashSet<>(predList));
 
     if (targetList.size() != predList.size()) return 0;
 
@@ -60,9 +62,9 @@ public class TableValueEvaluator implements ValueEvaluator {
 
     if (target instanceof DescriptionValue) {
       String targetText = ((DescriptionValue) target).value;
-      if (pred instanceof NameValue) {
+      if (pred instanceof NameValue || pred instanceof DescriptionValue) {
         // Just has to match the description
-        String predText = ((NameValue) pred).description;
+        String predText = (pred instanceof NameValue) ? ((NameValue) pred).description : ((DescriptionValue) pred).value;
         if (predText == null) predText = "";
         if (opts.allowNormalizedStringMatch) {
           targetText = StringNormalizationUtils.aggressiveNormalize(targetText);
@@ -84,11 +86,11 @@ public class TableValueEvaluator implements ValueEvaluator {
         // Assume year
         DateValue date = (DateValue) pred;
         return date.year == targetNumber.value && date.month == -1 && date.day == -1;
-      } else if (pred instanceof NameValue) {
+      } else if (pred instanceof NameValue || pred instanceof DescriptionValue) {
         // Try converting NameValue String into NumberValue
         if (opts.allowMismatchedTypes) {
-          NumberValue predNumber = StringNormalizationUtils.nameValueToNumberValue((NameValue) pred);
-          return compareNumberValues(targetNumber, predNumber);
+          NumberValue predNumber = StringNormalizationUtils.toNumberValue(pred);
+          return predNumber != null && compareNumberValues(targetNumber, predNumber);
         }
       }
     } else if (target instanceof DateValue) {

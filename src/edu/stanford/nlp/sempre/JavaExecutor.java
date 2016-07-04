@@ -28,7 +28,7 @@ public class JavaExecutor extends Executor {
     // the actual function will be called with the current ContextValue as its last argument if marked by contextPrefix
     @Option(gloss = "Formula in the grammar whose name startsWith contextPrefix is context sensitive") 
     public String contextPrefix = "context:";
-    @Option(gloss = "Reduce verbosity by appending, for example, edu.stanford.nlp.sempre to java calls")
+    @Option(gloss = "Reduce verbosity by automatically appending, for example, edu.stanford.nlp.sempre to java calls")
     public String classPathPrefix = "edu.stanford.nlp.sempre";
   }
   public static Options opts = new Options();
@@ -161,7 +161,7 @@ public class JavaExecutor extends Executor {
   public Response execute(Formula formula, ContextValue context) {
     // We can do beta reduction here since macro substitution preserves the
     // denotation (unlike for lambda DCS).
-    formula = Formulas.betaReduction(formula);    
+    formula = Formulas.betaReduction(formula);
     try {
       return new Response(toValue(processFormula(formula, context)));
     } catch (Exception e) {
@@ -171,28 +171,28 @@ public class JavaExecutor extends Executor {
     }
   }
 
-  private Object processFormula(Formula formula,ContextValue contexValue) {
+
+  private Object processFormula(Formula formula, ContextValue context) {
     if (formula instanceof ValueFormula)  // Unpack value and convert to object (e.g., for ints)
       return toObject(((ValueFormula) formula).value);
 
     if (formula instanceof CallFormula) {  // Invoke the function.
       // Recurse
       CallFormula call = (CallFormula) formula;
-      Object func = processFormula(call.func, contexValue);
+      Object func = processFormula(call.func, context);
       List<Object> args = Lists.newArrayList();
       for (Formula arg : call.args) {
-        args.add(processFormula(arg, contexValue));
+        args.add(processFormula(arg, context));
       }
 
       if (!(func instanceof NameValue))
         throw new RuntimeException("Invalid func: " + call.func + " => " + func);
 
       String id = ((NameValue) func).id;
-      if (id.startsWith(opts.contextPrefix)) {
-        args.add(contexValue);
-        id = id.substring(opts.contextPrefix.length());
+      if (id.indexOf(opts.contextPrefix) != -1) {
+        args.add(context);
+        id = id.replace(opts.contextPrefix, "");
       }
-      
       id = MapUtils.get(shortcuts, id, id);
       
       // classPathPrefix, like edu.stanford.nlp.sempre.interactive

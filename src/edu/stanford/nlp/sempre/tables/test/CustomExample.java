@@ -4,12 +4,7 @@ import java.io.*;
 import java.util.*;
 import java.util.regex.*;
 
-import edu.stanford.nlp.sempre.CanonicalNames;
-import edu.stanford.nlp.sempre.ContextValue;
-import edu.stanford.nlp.sempre.Example;
-import edu.stanford.nlp.sempre.Formulas;
-import edu.stanford.nlp.sempre.LanguageInfo;
-import edu.stanford.nlp.sempre.Values;
+import edu.stanford.nlp.sempre.*;
 import edu.stanford.nlp.sempre.tables.StringNormalizationUtils;
 import edu.stanford.nlp.sempre.tables.TableTypeSystem;
 import fig.basic.*;
@@ -26,6 +21,7 @@ import fig.exec.Execution;
 public class CustomExample extends Example {
   public static class Options {
     // Format: "3-5,10,12-20"
+    @Option(gloss = "Verbosity") public int verbose = 2;
     @Option(gloss = "Filter only these examples") public String filterExamples = null;
     @Option public boolean allowNoAnnotation = false;
   }
@@ -33,6 +29,7 @@ public class CustomExample extends Example {
 
   public List<String> warnings = new ArrayList<>();
   public List<String> errors = new ArrayList<>();
+  public List<Formula> alternativeFormulas = new ArrayList<>();
 
   public CustomExample(Example ex) {
     // Copy everything from ex
@@ -80,7 +77,8 @@ public class CustomExample extends Example {
         error = true;
         ex.errors.add(arg.child(1).value);
       } else if ("alternativeFormula".equals(label)) {
-        // Do nothing for now
+        LispTree canonicalized = canonicalizeFormula(arg.child(1));
+        ex.alternativeFormulas.add(Formulas.fromLispTree(canonicalized));
       } else if (!usefulTags.contains(label)) {
         throw new RuntimeException("Invalid example argument: " + arg);
       }
@@ -108,15 +106,20 @@ public class CustomExample extends Example {
     formulaMacros.put("@!p.num", "!" + TableTypeSystem.CELL_NUMBER_VALUE.id);
     formulaMacros.put("@p.date", TableTypeSystem.CELL_DATE_VALUE.id);
     formulaMacros.put("@!p.date", "!" + TableTypeSystem.CELL_DATE_VALUE.id);
-    //formulaMacros.put("@p.first", TableTypeSystem.CELL_FIRST_VALUE.id);
-    //formulaMacros.put("@!p.first", "!" + TableTypeSystem.CELL_FIRST_VALUE.id);
-    formulaMacros.put("@p.second", TableTypeSystem.CELL_SECOND_VALUE.id);
-    formulaMacros.put("@!p.second", "!" + TableTypeSystem.CELL_SECOND_VALUE.id);
+    formulaMacros.put("@p.num2", TableTypeSystem.CELL_NUM2_VALUE.id);
+    formulaMacros.put("@!p.num2", "!" + TableTypeSystem.CELL_NUM2_VALUE.id);
+    formulaMacros.put("@p.str1", TableTypeSystem.CELL_STR1_VALUE.id);
+    formulaMacros.put("@!p.str1", "!" + TableTypeSystem.CELL_STR1_VALUE.id);
+    formulaMacros.put("@p.str2", TableTypeSystem.CELL_STR2_VALUE.id);
+    formulaMacros.put("@!p.str2", "!" + TableTypeSystem.CELL_STR2_VALUE.id);
+    formulaMacros.put("@p.part", TableTypeSystem.CELL_PART_VALUE.id);
+    formulaMacros.put("@!p.part", "!" + TableTypeSystem.CELL_PART_VALUE.id);
   }
 
-  static final Pattern regexProperty = Pattern.compile("c\\.(.*)");
-  static final Pattern regexReversedProperty = Pattern.compile("!c\\.(.*)");
-  static final Pattern regexEntity = Pattern.compile("c_(.*)\\.(.*)");
+  static final Pattern regexProperty = Pattern.compile("r\\.(.*)");
+  static final Pattern regexReversedProperty = Pattern.compile("!r\\.(.*)");
+  static final Pattern regexEntity = Pattern.compile("c\\.(.*)");
+  static final Pattern regexPart = Pattern.compile("q\\.(.*)");
 
   /**
    * Return a new LispTree representing the canonicalized version of the original formula
@@ -137,12 +140,14 @@ public class CustomExample extends Example {
       // c.xxx or c_xxx.yyy --> canonicalized name
       Matcher match;
       if ((match = regexProperty.matcher(value)).matches())
-        return LispTree.proto.newLeaf(TableTypeSystem.getPropertyName(match.group(1)));
+        return LispTree.proto.newLeaf(TableTypeSystem.getRowPropertyName(match.group(1)));
       if ((match = regexReversedProperty.matcher(value)).matches())
-        return LispTree.proto.newLeaf("!" + TableTypeSystem.getPropertyName(match.group(1)));
+        return LispTree.proto.newLeaf("!" + TableTypeSystem.getRowPropertyName(match.group(1)));
       if ((match = regexEntity.matcher(value)).matches())
-        return LispTree.proto.newLeaf(TableTypeSystem.getCellName(match.group(2), match.group(1)));
-      if (value.contains("."))
+        return LispTree.proto.newLeaf(TableTypeSystem.getCellName(match.group(1)));
+      if ((match = regexPart.matcher(value)).matches())
+        return LispTree.proto.newLeaf(TableTypeSystem.getPartName(match.group(1)));
+      if (value.contains(".") && !(value.startsWith("fb:") || value.startsWith("!fb:")))
         throw new RuntimeException("Unhandled '.': " + value);
       return orig;
     } else {
@@ -166,11 +171,11 @@ public class CustomExample extends Example {
   // Read dataset
   // ============================================================
 
-  interface ExampleProcessor {
+  public interface ExampleProcessor {
     void run(CustomExample ex);
   }
 
-  private static boolean checkFilterExamples(int n) {
+  public static boolean checkFilterExamples(int n) {
     if (opts.filterExamples == null || opts.filterExamples.isEmpty()) return true;
     for (String range : opts.filterExamples.split(",")) {
       String[] tokens = range.split("-");
@@ -191,7 +196,6 @@ public class CustomExample extends Example {
     for (Pair<String, String> pathPair : pathPairs) {
       String group = pathPair.getFirst();
       String path = pathPair.getSecond();
-      if (!group.equals("train")) continue;
       Execution.putOutput("group", group);
 
       LogInfo.begin_track("Reading %s", path);
@@ -200,11 +204,13 @@ public class CustomExample extends Example {
       while (trees.hasNext()) {
         // Format: (example (id ...) (utterance ...) (targetFormula ...) (targetValue ...))
         LispTree tree = trees.next();
+        if ("metadata".equals(tree.child(0).value)) continue;
         if (!checkFilterExamples(examples.size())) { // Skip -- for debugging
           examples.add(null);
           continue;
         }
-        LogInfo.begin_track("Reading Example %s", examples.size());
+        if (opts.verbose >= 2)
+          LogInfo.begin_track("Reading Example %s", examples.size());
         if (tree.children.size() < 2 && !"example".equals(tree.child(0).value))
           throw new RuntimeException("Invalid example: " + tree);
         CustomExample ex = null;
@@ -212,17 +218,25 @@ public class CustomExample extends Example {
         try {
           ex = CustomExample.fromLispTree(tree, path + ":" + examples.size());  // Specify a default id if it doesn't exist
           ex.preprocess();
-          ex.log();
         } catch (Exception e) {
           StringWriter sw = new StringWriter();
           e.printStackTrace(new PrintWriter(sw));
           LogInfo.warnings("Example %s: CONTAINS ERROR! %s:\n%s", ex == null ? ex : ex.id, e, sw);
         }
+        if (opts.verbose >= 2) {
+          ex.log();
+        } else if (opts.verbose >= 1) {
+          LogInfo.logs("Example %s (%d): %s => %s",
+              ex.id, examples.size(), ex.getTokens(), ex.targetValue);
+        }
         examples.add(ex);
-        for (String warning : ex.warnings) LogInfo.logs("WARNING: %s", warning);
-        for (String error : ex.errors) LogInfo.logs("ERROR: %s", error);
+        if (opts.verbose >= 2) {
+          for (String warning : ex.warnings) LogInfo.logs("WARNING: %s", warning);
+          for (String error : ex.errors) LogInfo.logs("ERROR: %s", error);
+        }
         if (processor != null) processor.run(ex);
-        LogInfo.end_track();
+        if (opts.verbose >= 2)
+          LogInfo.end_track();
         if (ex != null && ex.evaluation != null) {
           LogInfo.logs("Current: %s", ex.evaluation.summary());
           evaluation.add(ex.evaluation);
@@ -240,6 +254,10 @@ public class CustomExample extends Example {
 
   public static List<CustomExample> getDataset(List<Pair<String, String>> pathPairs) {
     return getDataset(pathPairs, null);
+  }
+
+  public static List<CustomExample> getDataset(String path) {
+    return getDataset(Collections.singletonList(new Pair<>("train", path)), null);
   }
 
 }

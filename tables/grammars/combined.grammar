@@ -17,8 +17,8 @@
 (def @!p.num !fb:cell.cell.number)
 (def @p.date fb:cell.cell.date)
 (def @!p.date !fb:cell.cell.date)
-(def @p.second fb:cell.cell.second)
-(def @!p.second !fb:cell.cell.second)
+(def @p.num2 fb:cell.cell.num2)
+(def @!p.num2 !fb:cell.cell.num2)
 
 ################################################################
 # Lexicon
@@ -32,6 +32,7 @@
 
 ################################
 # Create binary from thin air
+#(rule $Entity (nothing) (ConstantFn fb:cell.null))
 (rule $Binary (nothing) (FuzzyMatchFn any binary))
 (rule $Unary (nothing) (FuzzyMatchFn any unary))
 
@@ -42,7 +43,7 @@
   (rule $Property (nothing) (ConstantFn @property))
 )
 (when second
-  (rule $Property (nothing) (ConstantFn @p.second))
+  (rule $Property (nothing) (ConstantFn @p.num2))
 )
 
 ################################################################
@@ -97,8 +98,7 @@
 (when movement
   # (@next (...[rows]...)) --> ...[rows]...
   (for @movement (@next @!next)
-    # HACK: Added 'nothing' to prevent unary cycle
-    (rule $RowSet (nothing $RowSet) (lambda r (@movement (var r))))
+    (rule $RowSet ($RowSet) (lambda r (@movement (var r))))
   )
 )
 
@@ -228,7 +228,7 @@
 (when superlative
   (for @argm (argmax argmin)
     # "first", "last"
-    (rule $RowSet (nothing $RowSet) (lambda r (@argm 1 1 (var r) @index)))
+    (rule $RowSet ($RowSet) (lambda r (@argm 1 1 (var r) @index)))
     # Generic argmax / argmin on rows or values
     (rule $RowSet ($RowSet $FnOnRow) (lambda r (lambda f (@argm 1 1 (var r) (@R (var f))))))
     (when u-superlative

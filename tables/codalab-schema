@@ -1,0 +1,38 @@
+// Codalab schema for SEMPRE runs
+% schema sempre
+% add uuid uuid [0:8]
+% add name
+% add state state
+% add date created date
+% add host remote s/[.].*/
+% add disk data_size size
+% add mem memory size
+% add time time duration
+% add |
+% add data /options.map:Dataset.inPaths "s/WikiTableQuestions\/compiled\// | s/\.examples/ | s/unnormalized/U | s/normalized/N | s/unseen-(train|dev)-seed/u | s/random-split/u"
+% add maxex /options.map:Dataset.maxExamples
+% add parser /options.map:Builder.parser
+% add beam /options.map:Parser.beamSize %d
+% add depth /options.map:FloatingParser.maxDepth %d
+% add useSize /options.map:FloatingParser.useSizeInsteadOfDepth "s/true/O | s/false/"
+% add cheat /options.map:DPParser.cheat "s/true/O | s/false/"
+% add grammar /options.map:Grammar.inPaths "s/grammars\// | s/\.grammar/"
+% add tags /options.map:Grammar.tags "s/alternative/| | s/movement/n | s/comparison/< | s/count/c | s/aggregate/a | s/superlative/s | s/arithmetic/+ | s/merge/&"
+% add feats /options.map:FeatureExtractor.featureDomains "s/phrase/p | s/predicate/p | s/denotation/d | s/missing/m | s/headword/h | s/custom-/"
+% add l1reg /options.map:Params.l1Reg
+% add l1coeff /options.map:Params.l1RegCoeff
+% add |
+% add itr /output.map:iter %d
+% add maxItr /options.map:Learner.maxTrainIters %d
+% add group /output.map:group
+% add ex /output.map:example %d
+% add tr.n /output.map:train.correct.count %d
+% add dv.n /output.map:dev.correct.count %d
+% add ts.n /output.map:test.correct.count %d
+% add |
+% add tr.cor /output.map:train.correct.mean %.3f
+% add tr.ora /output.map:train.oracle.mean %.3f
+% add dv.cor /output.map:dev.correct.mean %.3f
+% add dv.ora /output.map:dev.oracle.mean %.3f
+% add ts.cor /output.map:test.correct.mean %.3f
+% add ts.ora /output.map:test.oracle.mean %.3f

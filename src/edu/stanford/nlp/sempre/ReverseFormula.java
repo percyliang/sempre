@@ -26,6 +26,12 @@ public class ReverseFormula extends Formula {
     return tree;
   }
 
+  @Override
+  public void forEach(Function<Formula, Boolean> func) {
+    if (!func.apply(this)) child.forEach(func);
+  }
+
+  @Override
   public Formula map(Function<Formula, Formula> func) {
     Formula result = func.apply(this);
     return result == null ? new ReverseFormula(child.map(func)) : result;

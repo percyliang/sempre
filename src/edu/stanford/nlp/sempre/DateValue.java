@@ -80,6 +80,13 @@ public class DateValue extends Value {
     return tree;
   }
 
+  @Override public String sortString() { return "" + year + "/" + month + "/" + day; }
+  public String isoString() {
+    return "" + (year == -1 ? "xxxx" : String.format("%04d", year))
+        + "-" + (month == -1 ? "xx" : String.format("%02d", month))
+        + "-" + (day == -1 ? "xx" : String.format("%02d", day));
+  }
+
   @Override public int hashCode() {
     int hash = 0x7ed55d16;
     hash = hash * 0xd3a2646c + year;

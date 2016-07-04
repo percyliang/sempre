@@ -1,0 +1,8 @@
+#!/bin/bash
+# Convert all markups in the `raw` directory to HTML using pandoc
+for x in raw/*.markup; do
+  y="${x%.markup}.html"
+  echo "$x -> $y"
+  trap 'break' SIGINT
+  pandoc -f mediawiki -t html5 -s -o "$y" "$x" #|| break
+done

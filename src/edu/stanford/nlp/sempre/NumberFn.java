@@ -14,6 +14,8 @@ public class NumberFn extends SemanticFn {
     @Option(gloss = "Omit units") public boolean unitless = false;
     @Option(gloss = "Also test numbers by try converting to float (instead of using NER tags)")
     public boolean alsoTestByConversion = false;
+    @Option(gloss = "Also test numbers by applying NER on just the phrase")
+    public boolean alsoTestByIsolatedNER = false;
   }
   public static Options opts = new Options();
 
@@ -36,9 +38,44 @@ public class NumberFn extends SemanticFn {
   public DerivationStream call(final Example ex, final Callable c) {
     return new SingleDerivationStream() {
       public Derivation createDerivation() {
+        // Test using NER span
+        Derivation deriv = check(ex.languageInfo, c.getStart(), c.getEnd());
+        if (deriv != null) return deriv;
+
+        // Test by converting string to number directly (don't look at NER)
+        if (opts.alsoTestByConversion && request("NUMBER") & c.getEnd() - c.getStart() == 1) {
+          String value = ex.languageInfo.tokens.get(c.getStart());
+          if (value != null) {
+            try {
+              NumberValue numberValue = new NumberValue(Double.parseDouble(value));
+              SemType type = numberValue.value == (int) numberValue.value ? SemType.intType : SemType.floatType;
+              return new Derivation.Builder()
+              .withCallable(c)
+              .formula(new ValueFormula<>(numberValue))
+              .type(type)
+              .createDerivation();
+            } catch (NumberFormatException e) {
+              // Don't issue warnings; most spans are not numbers
+            }
+          }
+        }
+
+        // Test by applying NER on just the phrase
+        if (opts.alsoTestByIsolatedNER) {
+          String phrase = ex.phraseString(c.getStart(), c.getEnd());
+          LanguageInfo languageInfo = LanguageAnalyzer.getSingleton().analyze(phrase);
+          deriv = check(languageInfo, 0, languageInfo.numTokens());
+          if (deriv != null)
+            return deriv;
+        }
+
+        return null;
+      }
+
+      public Derivation check(LanguageInfo languageInfo, int start, int end) {
         // Numbers: If it is an integer, set its type to integer.  Otherwise, use float.
         if (request("NUMBER")) {
-          String value = ex.languageInfo.getNormalizedNerSpan("NUMBER", c.getStart(), c.getEnd());
+          String value = languageInfo.getNormalizedNerSpan("NUMBER", start, end);
           if (value != null) {
             try {
               NumberValue numberValue = new NumberValue(Double.parseDouble(value));
@@ -56,7 +93,7 @@ public class NumberFn extends SemanticFn {
 
         // Ordinals
         if (request("ORDINAL")) {
-          String value = ex.languageInfo.getNormalizedNerSpan("ORDINAL", c.getStart(), c.getEnd());
+          String value = languageInfo.getNormalizedNerSpan("ORDINAL", start, end);
           if (value != null) {
             try {
               NumberValue numberValue = (opts.unitless ?
@@ -76,7 +113,7 @@ public class NumberFn extends SemanticFn {
 
         // Percents
         if (request("PERCENT")) {
-          String value = ex.languageInfo.getNormalizedNerSpan("PERCENT", c.getStart(), c.getEnd());
+          String value = languageInfo.getNormalizedNerSpan("PERCENT", start, end);
           if (value != null) {
             try {
               NumberValue numberValue = (opts.unitless ?
@@ -96,7 +133,7 @@ public class NumberFn extends SemanticFn {
 
         // Money
         if (request("MONEY")) {
-          String value = ex.languageInfo.getNormalizedNerSpan("MONEY", c.getStart(), c.getEnd());
+          String value = languageInfo.getNormalizedNerSpan("MONEY", start, end);
           if (value != null) {
             try {
               NumberValue numberValue = (opts.unitless ?
@@ -110,24 +147,6 @@ public class NumberFn extends SemanticFn {
                       .createDerivation();
             } catch (NumberFormatException e) {
               LogInfo.warnings("NumberFn: Cannot convert NerSpan \"%s\" to a number", value);
-            }
-          }
-        }
-
-        // Test by converting string to number directly (don't look at NER)
-        if (opts.alsoTestByConversion && request("NUMBER") & c.getEnd() - c.getStart() == 1) {
-          String value = ex.languageInfo.tokens.get(c.getStart());
-          if (value != null) {
-            try {
-              NumberValue numberValue = new NumberValue(Double.parseDouble(value));
-              SemType type = numberValue.value == (int) numberValue.value ? SemType.intType : SemType.floatType;
-              return new Derivation.Builder()
-                      .withCallable(c)
-                      .formula(new ValueFormula<>(numberValue))
-                      .type(type)
-                      .createDerivation();
-            } catch (NumberFormatException e) {
-              // Don't issue warnings; most spans are not numbers
             }
           }
         }

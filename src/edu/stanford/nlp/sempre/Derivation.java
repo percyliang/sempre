@@ -1,8 +1,8 @@
 package edu.stanford.nlp.sempre;
 
-import fig.basic.*;
-
 import java.util.*;
+
+import fig.basic.*;
 
 /**
  * A Derivation corresponds to the production of a (partial) logical form
@@ -56,6 +56,8 @@ public class Derivation implements SemanticFn.Callable, HasScore {
   public String canonicalUtterance;
   private boolean[] anchoredTokens;   // Tokens which anchored rules are defined on
   public boolean allAnchored = true;
+  private int[] numAnchors;     // Number of times each token was anchored
+
 
   // If this derivation is composed of other derivations
   public final Rule rule;  // Which rule was used to produce this derivation?  Set to nullRule if not.
@@ -79,6 +81,7 @@ public class Derivation implements SemanticFn.Callable, HasScore {
   private final FeatureVector localFeatureVector;  // Features
   double score = Double.NaN;  // Weighted combination of features
 
+
   // Used during parsing (by FeatureExtractor, SemanticFn) to cache arbitrary
   // computation across different sub-Derivations.
   // Convention:
@@ -93,10 +96,12 @@ public class Derivation implements SemanticFn.Callable, HasScore {
 
   // Number in [0, 1] denoting how correct the value is.
   public double compatibility = Double.NaN;
+  
   // Probability (normalized exp of score).
   public double prob = Double.NaN;
-  //Probability (normalized exp of score).
+  // Probability after pragmatics
   public double pragmatic_prob = Double.NaN;
+
 
   // Miscellaneous statistics
   int maxBeamPosition = -1;  // Lowest position that this tree or any of its children is on the beam (after sorting)
@@ -167,6 +172,24 @@ public class Derivation implements SemanticFn.Callable, HasScore {
       this.end = c.getEnd();
       this.rule = c.getRule();
       this.children = c.getChildren();
+      return this;
+    }
+
+    public Builder withAllFrom(Derivation deriv) {
+      this.cat = deriv.cat;
+      this.start = deriv.start;
+      this.end = deriv.end;
+      this.rule = deriv.rule;
+      this.children = deriv.children == null ? null : new ArrayList<>(deriv.children);
+      this.formula = deriv.formula;
+      this.type = deriv.type;
+      this.localFeatureVector = deriv.localFeatureVector;
+      this.score = deriv.score;
+      this.value = deriv.value;
+      this.executorStats = deriv.executorStats;
+      this.compatibility = deriv.compatibility;
+      this.prob = deriv.prob;
+      this.canonicalUtterance = deriv.canonicalUtterance;
       return this;
     }
 
@@ -243,6 +266,11 @@ public class Derivation implements SemanticFn.Callable, HasScore {
 
   public double localScore(Params params) {
     return localFeatureVector.dotProduct(params);
+  }
+
+  // SHOULD NOT BE USED except during test time if the memory is desperately needed.
+  public void clearFeatures() {
+    localFeatureVector.clear();
   }
 
   /**
@@ -473,29 +501,52 @@ public class Derivation implements SemanticFn.Callable, HasScore {
         child.clearTempState();
   }
 
-  // Compute anchoredTokens and return the result
-  // anchoredTokens[>= anchoredTokens.length] are False by default
-  public boolean[] getAnchoredTokens() {
-
-    if (anchoredTokens == null) {
+  /**
+   * Return an int array numAnchors where numAnchors[i] is
+   * the number of times we anchored on token i.
+   *
+   * numAnchors[>= numAnchors.length] are 0 by default.
+   */
+  public int[] getNumAnchors() {
+    if (numAnchors == null) {
       if (rule.isAnchored()) {
-        anchoredTokens = new boolean[end];
-        for (int i = start; i < end; i++) anchoredTokens[i] = true;
+        numAnchors = new int[end];
+        for (int i = start; i < end; i++) numAnchors[i] = 1;
       } else {
-        anchoredTokens = new boolean[0];
+        numAnchors = new int[0];
         for (Derivation child : children) {
-          boolean[] childAnchoredTokens = child.getAnchoredTokens();
-          if (anchoredTokens.length < childAnchoredTokens.length) {
-            boolean[] newAnchoredTokens = new boolean[childAnchoredTokens.length];
-            for (int i = 0; i < anchoredTokens.length; i++) newAnchoredTokens[i] = anchoredTokens[i];
-            anchoredTokens = newAnchoredTokens;
+          int[] childNumAnchors = child.getNumAnchors();
+          if (numAnchors.length < childNumAnchors.length) {
+            int[] newNumAnchors = new int[childNumAnchors.length];
+            for (int i = 0; i < numAnchors.length; i++)
+              newNumAnchors[i] = numAnchors[i];
+            numAnchors = newNumAnchors;
           }
-          for (int i = 0; i < childAnchoredTokens.length; i++)
-            anchoredTokens[i] = anchoredTokens[i] || childAnchoredTokens[i];
+          for (int i = 0; i < childNumAnchors.length; i++)
+            numAnchors[i] += childNumAnchors[i];
         }
       }
     }
-    return anchoredTokens.clone();
+    return numAnchors;
+  }
+
+  /**
+   * Return a boolean array anchoredTokens where anchoredTokens[i]
+   * indicates whether we have anchored on token i.
+   *
+   * anchoredTokens[>= anchoredTokens.length] are False by default
+   */
+  public boolean[] getAnchoredTokens() {
+    int[] numAnchors = getNumAnchors();
+    boolean[] anchoredTokens = new boolean[numAnchors.length];
+    for (int i = 0; i < numAnchors.length; i++)
+      anchoredTokens[i] = (numAnchors[i] > 0);
+    return anchoredTokens;
+  }
+
+  public Derivation betaReduction() {
+    Formula reduced = Formulas.betaReduction(formula);
+    return new Builder().withAllFrom(this).formula(reduced).createDerivation();
   }
   
   public boolean allAnchored() {

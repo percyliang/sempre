@@ -44,6 +44,12 @@ public class SuperlativeFormula extends Formula {
     return tree;
   }
 
+  @Override
+  public void forEach(Function<Formula, Boolean> func) {
+    if (!func.apply(this)) { rank.forEach(func); count.forEach(func); head.forEach(func); relation.forEach(func); }
+  }
+
+  @Override
   public Formula map(Function<Formula, Formula> func) {
     Formula result = func.apply(this);
     return result == null ? new SuperlativeFormula(mode, rank.map(func), count.map(func), head.map(func), relation.map(func)) : result;

@@ -35,6 +35,16 @@ public class CallFormula extends Formula {
     return tree;
   }
 
+  @Override
+  public void forEach(Function<Formula, Boolean> func) {
+    if (!func.apply(this)) {
+      this.func.forEach(func);
+      for (Formula arg: args)
+        arg.forEach(func);
+    }
+  }
+
+  @Override
   public Formula map(Function<Formula, Formula> transform) {
     Formula result = transform.apply(this);
     if (result != null) return result;
