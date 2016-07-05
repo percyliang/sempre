@@ -261,6 +261,12 @@ public final class MagnetWorld {
       }
     };
   }
+  public static Function<Cube, Boolean> compare(String comp, NumberValue g1, Function<Cube, NumberValue> g2) {
+    return compare(comp, constant(g1), g2);
+  }
+  public static Function<Cube, Boolean> compare(String comp, Function<Cube, NumberValue> g1, NumberValue g2) {
+    return compare(comp, g1, constant(g2));
+  }
 
   public static Function<Cube, NumberValue> negative(Function<Cube, NumberValue> getf) {
     return new Function<Cube, NumberValue>() {
@@ -356,7 +362,7 @@ public final class MagnetWorld {
   }
 
   // domain specific set to set functions, like, all stacks, inside, leftof, rightof, topmost, botmost etc.
-  public static Function<World, Set<Cube>> domainf(Function<World, Set<Cube>> cubesf, String fname) {
+  public static Function<World, Set<Cube>> setf(Function<World, Set<Cube>> cubesf, String fname) {
     return new Function<World, Set<Cube>>() {
       @Override
       public Set<Cube> apply(World w) {
@@ -365,11 +371,11 @@ public final class MagnetWorld {
     };
   }
   
-  public static Function<World, Set<Cube>> constset(String fname) {
+  public static Function<World, Set<Cube>> sets(String fname) {
     return new Function<World, Set<Cube>>() {
       @Override
       public Set<Cube> apply(World w) {
-        return null;
+        return w.worldlist.stream().collect(Collectors.toSet());
       }
     };
   }

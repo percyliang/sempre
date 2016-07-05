@@ -34,9 +34,12 @@
 (def @name name)
 (def @named named)
 
+# special values
+(def @sets sets) # constant sets
+(def @setf setf) # set functions
+
 # sugar
 (def @selected (call @filter (call @named (string S))))
-(def @select (lambda c (call @name (var c) (string S) )))
 
 # typed lambdas
 # Action a, CubesSet s, CubePredicate p, CubeNumber n, CubeProperty r, Direction d, Color c $CubeNumberProp q
@@ -58,16 +61,23 @@
 (rule $Action (remove $Direction) (lambda d (call @remove (var d) (call @selected))) (anchored 1))
 (rule $Action (add $Color $Direction) (lambda c (lambda d (call @add (var c) (var d) (call @selected))) (anchored 1)))
 (rule $Action (move $Direction) (lambda d (call @move (var d) (call @selected))) (anchored 1))
-
-(rule $Action (select $CubesSeq) (lambda s (call @select (var s))) (anchored 1))
+(rule $Action (select $CubesSeq) (lambda s (call @name (var s) (string S))) (anchored 1))
 
 # names
-(for @name (X Y Z)
-(rule $Action ( @name = $CubesSeq) (lambda cs (call @name (var cs) (string @name))) (anchored 1))
+(for @varname (x y z)
+(rule $Action ( @varname = $CubesSeq) (lambda cs (call @name (var cs) (string @name))) (anchored 1))
 )
+
+(for @varname (x y z)
+(rule $Cubes ( cubes @varname ) (ConstantFn (call @named (call @sets (string all)) (string @name))) (anchored 1))
+)
+
+########### basic sets
+(rule $Cubes (all cubes) (ConstantFn (call @sets (string all))) (anchored 1))
 
 ########### basic set operations
 # just use or and filter, which does and
+
 (for @op (or and sub)
 (rule $CubesSeq ($CubesSeq @op $Cubes) (lambda s1 (lambda s2
 					(call @setop (string @op) (var s1) (var s2)))) (anchored 1))
@@ -77,12 +87,11 @@
 (rule $Cubes ([ $CubesSeq ]) (IdentityFn) (anchored 1))
 
 ########### unary cube operations, filtering with a predicate
-(rule $Cubes ($CubesSeq where $CubePred) (lambda p (lambda s
+(rule $Cubes ($CubesSeq where $CubePred) (lambda s (lambda p
 			   (call @filter (var s) (var p)))) (anchored 1))
-(for @property (col row height)
+
 (rule $Cubes ($CubesSeq where $CubeNumberProp is largest) (lambda s (lambda q (call @argmax (var s) (var q)))) (anchored 1))
 (rule $Cubes ($CubesSeq where $CubeNumberProp is smallest) (lambda s (lambda q (call @argmin (var s) (var q)))) (anchored 1))
-)
 
 # generating cube predicates, note there is no logical binaries
 (for @rel (> >= = < <=)
@@ -112,6 +121,10 @@
 )
 (rule $Number ([ $NumberSeq ]) (IdentityFn) (anchored 1))
 (rule $NumberSeq ( $Number ) (IdentityFn) (anchored 1))
+
+(for @dir (top bot left right front back)
+(rule $Direction (@dir) (ConstantFn (string @dir)) (anchored 1))
+)
 
 ####### Constants
 (rule $Color (red) (ConstantFn (string red)) (anchored 1))
