@@ -1021,6 +1021,8 @@ o('Master.independentSessions', false),
 o('Dataset.inPaths', 'def:./shrdlurn/sidaw.lisp'),
 o('Learner.maxTrainIters', 1),
 
+o('server', true),
+o('Server.numThreads', 8),
 nil) })
 
 

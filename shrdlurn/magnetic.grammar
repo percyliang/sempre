@@ -10,9 +10,11 @@
 # action combinators
 (def @seq seq)
 (def @repeat repeat)
+(def @scope scope)
 
 # binary set operations
 (def @setop setop)
+(def @filter filter)
 
 # get property
 (def @get get)
@@ -37,7 +39,7 @@
 (def @select (lambda c (call @name (var c) (string S) )))
 
 # typed lambdas
-% Action a, CubesSet s, CubePredicate p, CubeNumber n, CubeProperty r, Direction d, Color c $CubeNumberProp q
+# Action a, CubesSet s, CubePredicate p, CubeNumber n, CubeProperty r, Direction d, Color c $CubeNumberProp q
 
 # This grammar should have Rule.defaultIsFloating false
 # (set JavaExecutor.printStackTrace true)
@@ -58,7 +60,8 @@
 (rule $Action (move $Direction) (lambda d (call @move (var d) (call @selected))) (anchored 1))
 
 (rule $Action (select $CubesSeq) (lambda s (call @select (var s))) (anchored 1))
-// names
+
+# names
 (for @name (X Y Z)
 (rule $Action ( @name = $CubesSeq) (lambda cs (call @name (var cs) (string @name))) (anchored 1))
 )
@@ -69,7 +72,6 @@
 (rule $CubesSeq ($CubesSeq @op $Cubes) (lambda s1 (lambda s2
 					(call @setop (string @op) (var s1) (var s2)))) (anchored 1))
 )
-(rule $Cubes (not $CubesSeq) (lambda s (call @not (var s))) (anchored 1))
 
 (rule $CubesSeq ($Cubes) (IdentityFn) (anchored 1))
 (rule $Cubes ([ $CubesSeq ]) (IdentityFn) (anchored 1))
@@ -92,13 +94,13 @@
 (for @property (color name)
      (rule $CubeProp (@property) (ConstantFn (call @get (string @property))) (anchored 1))
 )
-(rule $CubePropVal $Color (IdentityFn) (anchored 1))
+(rule $CubePropVal ($Color) (IdentityFn) (anchored 1))
 
 ########### arithmetics and etc
 (for @num (0 1 2 3 4 5 6 7 8 9)
-(rule $Number (@num) (number @num) (anchored 1))
+(rule $Number (@num) (ConstantFn (number @num)) (anchored 1))
 )
-(rule $Number (many) (number 10 infty) (anchored 1))
+(rule $Number (many) (ConstantFn (number 10 infty)) (anchored 1))
 
 (for @property (col row height color name)
      (rule $Number (@property) (ConstantFn (call @get (string @property))) (anchored 1))

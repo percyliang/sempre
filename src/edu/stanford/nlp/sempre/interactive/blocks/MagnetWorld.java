@@ -364,6 +364,15 @@ public final class MagnetWorld {
       }
     };
   }
+  
+  public static Function<World, Set<Cube>> constset(String fname) {
+    return new Function<World, Set<Cube>>() {
+      @Override
+      public Set<Cube> apply(World w) {
+        return null;
+      }
+    };
+  }
 }
 
 // the world of stacks
