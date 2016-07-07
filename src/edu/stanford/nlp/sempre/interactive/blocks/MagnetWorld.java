@@ -11,6 +11,8 @@ import java.util.Set;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
+import org.testng.collections.Lists;
+
 import com.google.common.base.Function;
 
 import edu.stanford.nlp.sempre.ContextValue;
@@ -48,12 +50,12 @@ enum Color {
   }
 }
 enum Direction {
-  Up, Down, Left, Right, Front, Back, None;
+  Top, Bot, Left, Right, Front, Back, None;
   public static Direction fromString(String dir) {
-    if (dir.equalsIgnoreCase("up"))
-      return Direction.Up;
-    if (dir.equalsIgnoreCase("down"))
-      return Direction.Down;
+    if (dir.equalsIgnoreCase("up") || dir.equalsIgnoreCase("top"))
+      return Direction.Top;
+    if (dir.equalsIgnoreCase("down") || dir.equalsIgnoreCase("bot"))
+      return Direction.Bot;
     if (dir.equalsIgnoreCase("left"))
       return Direction.Left;
     if (dir.equalsIgnoreCase("right"))
@@ -89,6 +91,15 @@ public final class MagnetWorld {
     world = action.apply(world);
     return world.toJSON();
   }
+  
+  public static String worlds(String name) {
+    Cube c1 = new Cube(5,5,0,Color.Blue.toString());
+    Cube c2 = new Cube(5,5,0,Color.Red.toString());
+    Cube c3 = new Cube(5,4,0,Color.Green.toString());
+    
+    World world = new World(Lists.newArrayList(c1, c2, c3));
+    return world.toJSON();
+  }
 
   // Control flow
   public static Function<World, World> repeat(NumberValue times, 
@@ -100,6 +111,14 @@ public final class MagnetWorld {
           snew = action.apply(snew);
         }
         return snew;
+      }
+    };
+  }
+  public static Function<World, World> seq(Function<World, World> s1, 
+      Function<World, World> s2) {
+    return new Function<World, World>() {
+      public World apply(World w) {
+        return s2.apply(s1.apply(w));
       }
     };
   }
@@ -121,11 +140,11 @@ public final class MagnetWorld {
     };
   }
 
-  public static Function<World, World> remove(String direction, Function<World, Set<Cube>> cubesf) {
+  public static Function<World, World> remove(Function<World, Set<Cube>> cubesf) {
     return new Function<World, World>() {
       public World apply(World w) {
         Set<Cube> cubes = cubesf.apply(w);
-        w.remove(cubes);
+        w.worldlist.removeAll(cubes);
         return w;
       }
     };
@@ -135,7 +154,9 @@ public final class MagnetWorld {
     return new Function<World, World>() {
       public World apply(World w) {
         Set<Cube> cubes = cubesf.apply(w);
-        w.move(Direction.fromString(dir), cubes);
+        for (Cube c : w.worldlist) {
+          if (cubes.contains(c)) c.move(Direction.fromString(dir));
+        }
         return w;
       }
     };
@@ -145,7 +166,10 @@ public final class MagnetWorld {
     return new Function<World, World>() {
       public World apply(World w) {
         Set<Cube> cubes = cubesf.apply(w);
-        w.add(color, Direction.fromString(dir), cubes);
+        w.worldlist.addAll( cubes.stream().map(
+            c -> {Cube d = c.clone(); d.move(Direction.fromString(dir)); d.color = Color.fromString(color); return d;}
+            )
+            .collect(Collectors.toList()) );
         return w;
       }
     };
@@ -156,9 +180,12 @@ public final class MagnetWorld {
     return new Function<World, World>() {
       public World apply(World w) {
         String namestack = w.stackName(name);
-        w.worldlist.stream().map(c -> {c.names.remove(namestack); return c;});
         Set<Cube> cubes = cubesf.apply(w);
-        cubes.stream().map(c -> {c.names.add(namestack); return c;});
+        
+        for (Cube c : w.worldlist) {
+          if (cubes.contains(c)) c.names.add(namestack);
+          else c.names.remove(namestack);
+        }
         return w;
       }
     };
@@ -245,19 +272,19 @@ public final class MagnetWorld {
         double propval = g1.apply(s).value;
         NumberValue val = g2.apply(s);
         if (comp.equals(">") && propval > val.value)
-          return new Boolean(true);
+          return true;
         else if (comp.equals(">=") && propval >= val.value)
-          return new Boolean(true);
-        else if (comp.equals("=") && (int)propval == (int)val.value)
-          return new Boolean(true);
+          return true;
+        else if ((comp.equals("=") || comp.equals("==") ) && (int)propval == (int)val.value)
+          return true;
         else if (comp.equals("<=") && propval <= val.value)
-          return new Boolean(true);
+          return true;
         else if (comp.equals("<") && propval < val.value)
-          return new Boolean(true);
+          return true;
         else if (comp.equals("!=") && propval != val.value)
-          return new Boolean(true);
+          return true;
         else
-          return new Boolean(false);
+          return false;
       }
     };
   }
@@ -395,11 +422,21 @@ class World {
 
   @SuppressWarnings("unchecked")
   private void updateWorldArray() {
-    this.stacks = (List<Cube>[][]) new Object[worldSize][worldSize];
+    this.stacks = new ArrayList[worldSize][worldSize];
     for (Cube c : worldlist) {
-      stacks[c.row][c.col].set(c.height, c); // basic dedup, by coverage
+      int irow = c.row - 1, icol = c.col - 1;
+      int iheight = c.height - 1;
+      if (stacks[irow][icol] == null) stacks[irow][icol] = nullCubeList();
+      stacks[irow][icol].set(iheight, c); // basic dedup, by coverage
     }
   }
+  private static List<Cube> nullCubeList() {
+    List<Cube> cubes = new ArrayList<>(worldSize);
+    for (int i = 0; i < worldSize; i++)
+      cubes.add(null);
+    return cubes;
+  }
+  
   private void updateWorldList() {
     this.worldlist = new ArrayList<>();
     for (int r = 0; r < worldSize; r++) {
@@ -410,8 +447,9 @@ class World {
     }
   }
 
+  @SuppressWarnings("unchecked")
   public World(List<Cube> worldlist) {
-    this.stacks = (List<Cube>[][]) new Object[worldSize][worldSize];
+    this.stacks = new ArrayList[worldSize][worldSize];
     this.worldlist = worldlist;
   }
 
@@ -426,38 +464,24 @@ class World {
     else return name;
   }
 
-  public void remove(Set<Cube> cubes) {
-    this.worldlist.removeAll(cubes);
-  }
-  public void add(String color, Direction dir, Set<Cube> cubes) {
-    add(Color.fromString(color), dir, cubes);
-  }
-  public void add(Color color, Direction dir, Set<Cube> cubes) {
-    this.worldlist.addAll( cubes.stream().map(
-        c -> {Cube d = c.move(dir).clone(); d.color = color; return d;}
-        )
-        .collect(Collectors.toList()) );
-  }
-  public void move(Direction dir, Set<Cube> cubes) {
-    this.worldlist.stream().filter(c -> cubes.contains(c)).map( c -> c.move(dir));
-  }
   public String toJSON() {
-    updateWorldArray();
-    updateWorldList();
-    return Json.writeValueAsStringHard(this.worldlist.stream().map(c -> c.toJSON()).collect(Collectors.toList()), List.class);
+    // updateWorldArray();
+    // updateWorldList();
+    // return "testtest";
+    return Json.writeValueAsStringHard(this.worldlist.stream().map(c -> c.toJSON()).collect(Collectors.toList()));
     // return this.worldlist.stream().map(c -> c.toJSON()).reduce("", (o, n) -> o+","+n);
   }
 
   public static World fromContext(ContextValue context) {
     NaiveKnowledgeGraph graph = (NaiveKnowledgeGraph)context.graph;
     String wallString = ((StringValue)graph.triples.get(0).e1).value;
-    return stringToWorld(wallString);
+    return fromJSON(wallString);
   }
 
-  private static World stringToWorld(String wallString) {
+  private static World fromJSON(String wallString) {
     @SuppressWarnings("unchecked")
-    List<String> cubestr = Json.readValueHard(wallString, List.class);
-    List<Cube> cubes = cubestr.stream().map(c -> {return Cube.fromJSON(c);})
+    List<List<Object>> cubestr = Json.readValueHard(wallString, List.class);
+    List<Cube> cubes = cubestr.stream().map(c -> {return Cube.fromJSONObject(c);})
         .collect(Collectors.toList());
     //throw new RuntimeException(a.toString()+a.get(1).toString());
     return new World(cubes);
@@ -469,11 +493,15 @@ class Cube {
   public Color color;
   public int row, col, height;
   public Set<String> names;
+  
+  private boolean supported;
 
   public Cube(int row, int col, int height, String color) {
     this.row = row; this.col = col; this.height = height;
     this.color = Color.fromString(color);
     this.names = new HashSet<>();
+    if (height == 0) supported = true;
+    else supported = false;
   }
   public Cube() {
     this.row = -1; this.col = -1; this.height = -1;
@@ -486,8 +514,9 @@ class Cube {
     case Front: this.col -= 1; break;
     case Left: this.row += 1; break;
     case Right: this.row -= 1; break;
-    case Up: this.height = 1; break;
-    case Down: this.height -= 1; break;
+    case Top: this.height += 1; break;
+    case Bot: this.height -= 1; break;
+    case None: break;
     }
     return this;
   }
@@ -495,18 +524,22 @@ class Cube {
   @SuppressWarnings("unchecked")
   public static Cube fromJSON(String json) {
     List<Object> props = Json.readValueHard(json, List.class);
-    
+    return fromJSONObject(props);
+  }
+  @SuppressWarnings("unchecked")
+  public static Cube fromJSONObject(List<Object> props) {
     Cube retcube = new Cube();
     retcube.row = ((Integer)props.get(0));
     retcube.col = ((Integer)props.get(1));
     retcube.height = ((Integer)props.get(2));
     retcube.color = Color.fromString(((String)props.get(3)));
-    retcube.names.addAll( Json.readValueHard(props.get(4).toString(), List.class) );
+    retcube.names.addAll((List<String>)props.get(4));
     return retcube;
   }
-  public String toJSON() {
-    String globalNames = names.stream().filter(n -> !n.startsWith("_")).collect(Collectors.joining(","));
-    return String.format("[%d,%d,%d,%s,[%s]]", row, col, height, color.toString(), globalNames);
+  public Object toJSON() {
+    List<String> globalNames = names.stream().collect(Collectors.toList());
+    List<Object> cube = Lists.newArrayList(row, col, height, color.toString(), globalNames);
+    return cube;
   }
   
   @Override

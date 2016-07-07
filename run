@@ -981,7 +981,7 @@ addMode('interactive', 'interactive semantic parsing in blocks', lambda { |e| l(
   header('core,interactive'),
   'edu.stanford.nlp.sempre.Main',
   figOpts,
-
+  o('JavaExecutor.printStackTrace', true),
   o('JavaExecutor.convertNumberValues', false),
   o('JavaExecutor.classPathPrefix', 'edu.stanford.nlp.sempre.interactive.blocks.MagnetWorld'),
   o('Params.initWeightsRandomly', false),
