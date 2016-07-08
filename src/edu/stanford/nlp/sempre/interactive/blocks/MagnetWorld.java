@@ -10,10 +10,10 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.function.*;
 
 import org.testng.collections.Lists;
-
-import com.google.common.base.Function;
 
 import edu.stanford.nlp.sempre.ContextValue;
 import edu.stanford.nlp.sempre.Json;
@@ -89,14 +89,15 @@ public final class MagnetWorld {
   public static String root(Function<World, World> action, ContextValue context) {
     World world = World.fromContext(context);
     world = action.apply(world);
+    world.applyPhysics();
     return world.toJSON();
   }
-  
+
   public static String worlds(String name) {
     Cube c1 = new Cube(5,5,0,Color.Blue.toString());
     Cube c2 = new Cube(5,5,0,Color.Red.toString());
     Cube c3 = new Cube(5,4,0,Color.Green.toString());
-    
+
     World world = new World(Lists.newArrayList(c1, c2, c3));
     return world.toJSON();
   }
@@ -104,14 +105,11 @@ public final class MagnetWorld {
   // Control flow
   public static Function<World, World> repeat(NumberValue times, 
       Function<World, World> action) {
-    return new Function<World, World>() {
-      public World apply(World w) {
-        World snew = w;
-        for (int i = 0; i < times.value ; i++) {
-          snew = action.apply(snew);
-        }
-        return snew;
+    return w -> {
+      for (int i = 0; i < times.value ; i++) {
+        w = action.apply(w);
       }
+      return w;
     };
   }
   public static Function<World, World> seq(Function<World, World> s1, 
@@ -140,7 +138,7 @@ public final class MagnetWorld {
     };
   }
 
-  public static Function<World, World> remove(Function<World, Set<Cube>> cubesf) {
+  public static Function<World, World> remove(Function<World, Set<Cube>> cubesf) {    
     return new Function<World, World>() {
       public World apply(World w) {
         Set<Cube> cubes = cubesf.apply(w);
@@ -165,9 +163,9 @@ public final class MagnetWorld {
   public static Function<World, World> add(String color, String dir, Function<World, Set<Cube>> cubesf) {
     return new Function<World, World>() {
       public World apply(World w) {
-        Set<Cube> cubes = cubesf.apply(w);
+        Set<Cube> cubes = extreme(dir, cubesf).apply(w);
         w.worldlist.addAll( cubes.stream().map(
-            c -> {Cube d = c.clone(); d.move(Direction.fromString(dir)); d.color = Color.fromString(color); return d;}
+            c -> {Cube d = c.copy(Direction.fromString(dir)); d.color = Color.fromString(color); return d;}
             )
             .collect(Collectors.toList()) );
         return w;
@@ -181,7 +179,7 @@ public final class MagnetWorld {
       public World apply(World w) {
         String namestack = w.stackName(name);
         Set<Cube> cubes = cubesf.apply(w);
-        
+
         for (Cube c : w.worldlist) {
           if (cubes.contains(c)) c.names.add(namestack);
           else c.names.remove(namestack);
@@ -388,16 +386,32 @@ public final class MagnetWorld {
     };
   }
 
-  // domain specific set to set functions, like, all stacks, inside, leftof, rightof, topmost, botmost etc.
-  public static Function<World, Set<Cube>> setf(Function<World, Set<Cube>> cubesf, String fname) {
-    return new Function<World, Set<Cube>>() {
-      @Override
-      public Set<Cube> apply(World w) {
-        return null;
-      }
+  // get neighbors in a particular direction.
+  public static Function<World, Set<Cube>> at(String dirstr, Function<World, Set<Cube>> cubesf) {
+    return w -> {
+      Direction dir = Direction.fromString(dirstr);
+      Set<Cube> cubes = cubesf.apply(w);
+      Set<Cube> allcubes = w.worldlist.stream().collect(Collectors.toSet());
+      return cubes.stream().map(c -> c.move(dir)).filter(c -> allcubes.contains(c))
+          .collect(Collectors.toSet());
     };
   }
-  
+
+  // get cubes at extreme positions
+  public static Function<World, Set<Cube>> extreme(String dirstr, Function<World, Set<Cube>> cubesf) {
+    return w -> {
+      Direction dir = Direction.fromString(dirstr);
+      Set<Cube> cubes = cubesf.apply(w);
+      Set<Cube> allcubes = w.worldlist.stream().collect(Collectors.toSet());
+      return cubes.stream().map(c -> {
+        while(allcubes.contains(c.copy(dir)))
+          c = c.copy(dir);
+        
+        return c;
+      }).collect(Collectors.toSet());
+    };
+  }
+
   public static Function<World, Set<Cube>> sets(String fname) {
     return new Function<World, Set<Cube>>() {
       @Override
@@ -425,7 +439,7 @@ class World {
     this.stacks = new ArrayList[worldSize][worldSize];
     for (Cube c : worldlist) {
       int irow = c.row - 1, icol = c.col - 1;
-      int iheight = c.height - 1;
+      int iheight = c.height;
       if (stacks[irow][icol] == null) stacks[irow][icol] = nullCubeList();
       stacks[irow][icol].set(iheight, c); // basic dedup, by coverage
     }
@@ -436,7 +450,7 @@ class World {
       cubes.add(null);
     return cubes;
   }
-  
+
   private void updateWorldList() {
     this.worldlist = new ArrayList<>();
     for (int r = 0; r < worldSize; r++) {
@@ -445,6 +459,11 @@ class World {
           worldlist.addAll(stacks[r][c].stream().filter(cu -> cu != null).collect(Collectors.toList()));
       }
     }
+  }
+
+  public void applyPhysics() {
+    updateWorldArray();
+    updateWorldList();
   }
 
   @SuppressWarnings("unchecked")
@@ -493,7 +512,7 @@ class Cube {
   public Color color;
   public int row, col, height;
   public Set<String> names;
-  
+
   private boolean supported;
 
   public Cube(int row, int col, int height, String color) {
@@ -510,17 +529,30 @@ class Cube {
   }
   public Cube move(Direction dir) {
     switch (dir) {
-    case Back: this.col += 1; break;
-    case Front: this.col -= 1; break;
-    case Left: this.row += 1; break;
-    case Right: this.row -= 1; break;
+    case Back: this.row += 1; break;
+    case Front: this.row -= 1; break;
+    case Left: this.col += 1; break;
+    case Right: this.col -= 1; break;
     case Top: this.height += 1; break;
     case Bot: this.height -= 1; break;
     case None: break;
     }
     return this;
   }
-  
+  public Cube copy(Direction dir) {
+    Cube c = this.clone();
+    switch (dir) {
+    case Back: c.row += 1; break;
+    case Front: c.row -= 1; break;
+    case Left: c.col += 1; break;
+    case Right: c.col -= 1; break;
+    case Top: c.height += 1; break;
+    case Bot: c.height -= 1; break;
+    case None: break;
+    }
+    return c;
+  }
+
   @SuppressWarnings("unchecked")
   public static Cube fromJSON(String json) {
     List<Object> props = Json.readValueHard(json, List.class);
@@ -541,7 +573,7 @@ class Cube {
     List<Object> cube = Lists.newArrayList(row, col, height, color.toString(), globalNames);
     return cube;
   }
-  
+
   @Override
   public Cube clone() {
     Cube c = new Cube(this.row, this.col, this.height, this.color.toString());
@@ -552,7 +584,6 @@ class Cube {
     final int prime = 31;
     int result = 1;
     result = prime * result + col;
-    result = prime * result + ((color == null) ? 0 : color.hashCode());
     result = prime * result + height;
     result = prime * result + row;
     return result;
@@ -567,8 +598,6 @@ class Cube {
       return false;
     Cube other = (Cube) obj;
     if (col != other.col)
-      return false;
-    if (color != other.color)
       return false;
     if (height != other.height)
       return false;
