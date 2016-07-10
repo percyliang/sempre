@@ -1,0 +1,159 @@
+# contextful top level functions
+# command:
+(def @root context:root)
+
+# basic actions
+(def @add add)
+(def @remove remove)
+(def @move move)
+(def @name name)
+
+# action combinators
+(def @seq seq)
+(def @repeat repeat)
+(def @scope scope)
+
+# binary set operations
+(def @setopv setops)
+(def @setops setops)
+(def @filter filter)
+
+# get property
+(def @ofv ofv)
+(def @ofs ofs)
+(def @has has)
+(def @val val)
+(def @single single)
+
+# numbers
+(def @compare compare)
+(def @constant constant)
+(def @arith arith)
+
+# higher order functions
+(def @veryx veryx)
+
+# select
+(def @name name)
+(def @named named)
+
+# special values
+(def @sets sets) # constant sets
+(def @setf setf) # set functions
+(def @worlds worlds) # set functions
+# sugar
+(def @selected (call @filter (call @named (string s))))
+
+# typed lambdas
+# Action a, CubesSet s, CubePredicate p, CubeNumber n, CubeProperty r, Direction d, Color c $CubeNumberProp q
+
+# This grammar should have Rule.defaultIsFloating false
+# (set JavaExecutor.printStackTrace true)
+# utilities
+(rule $ROOT (_worlds) (ConstantFn (call @worlds (string simple))) (anchored 1))
+(rule $ROOT (_contextcmd) (ConstantFn (string "(context (graph NaiveKnowledgeGraph ((string [[1,3,1,\"Green\",[]],[2,2,1,\"Blue\",[]],[1,3,2,\"Red\",[]]]) (name b) (name c))))")) (anchored 1))
+
+
+####### Start of the actual grammar
+(rule $ROOT ($ActionSeq) (lambda a (call @root (var a))) (anchored 1)) # process for better
+(rule $Action ({ $ActionSeq }) (lambda a (call @scope (var a))) (anchored 1)) # scope variables inside this
+
+# control flow
+(rule $ActionSeq ($ActionSeq ; $Action) (lambda a1 (lambda a2 (call @seq (var a1) (var a2)))) (anchored 1))
+(rule $Action (repeat $NumberSeq [ $ActionSeq ] ) (lambda n (lambda a (call @repeat (var n) (var a)))) (anchored 1))
+
+(rule $ActionSeq ($Action) (IdentityFn) (anchored 1))
+(rule $Action ([ $ActionSeq ]) (IdentityFn) (anchored 1))
+
+# basic actions
+(rule $Action (remove $SetCube2) (lambda s (call @remove (var s))) (anchored 1))
+
+(rule $Action (add $Color $SetCube2) (lambda c (lambda s (call @add (var c) (string top) (var s)))) (anchored 1))
+(rule $Action (add $Color $Direction $SetCube2) (lambda c (lambda d (lambda s (call @add (var c) (var d) (var s))))) (anchored 1))
+(rule $Action (move $SetCube2 $Direction) (lambda s (lambda d (call @move (var d) (var s)))) (anchored 1))
+
+(rule $Action (select $SetCube2) (lambda s (call @name (var s) (string s))) (anchored 1))
+
+
+# names
+(for @varname (x y z)
+(rule $Action (tag $SetCube2 @varname) (lambda cs (call @name (var cs) (string @varname))) (anchored 1))
+)
+
+(rule $SetCube (selected) (ConstantFn (call @named (call @sets (string all)) (string s))) (anchored 1))
+(rule $SetCube (this) (ConstantFn (call @named (call @sets (string all)) (string s))) (anchored 1))
+
+########### basic sets
+(rule $SetCube (all) (ConstantFn (call @sets (string all))) (anchored 1))
+
+########### basic set operations
+# just use or and filter, which does and
+
+(for @op (or and except)
+(rule $SetCube2 ($SetCube2 @op $SetCube) (lambda s1 (lambda s2
+					(call @setopv (string @op) (var s1) (var s2)))) (anchored 1))
+(rule $SetValue ($SetValue @op $SetValue) (lambda s1 (lambda s2
+					(call @setops (string @op) (var s1) (var s2)))) (anchored 1))
+)
+
+(rule $SetCube2 ($SetCube) (IdentityFn) (anchored 1))
+(rule $SetCube ([ $SetCube2 ]) (IdentityFn) (anchored 1))
+
+########### cube to cube relations
+(rule $SetCube ($Direction of $SetCube2) (lambda d (lambda s
+			   (call @ofs (var d) (var s)))) (anchored 1))
+
+(rule $SetCube (very $Direction of $SetCube2) (lambda d (lambda s
+			   (call @ofs (var d) (var s)))) (anchored 1))
+
+############# Set of values, like color of, name of
+(rule $SetValue ($Rel of $SetCube2) (lambda r (lambda s
+			   (call @ofv (var r) (var s)))) (anchored 1))
+			   
+(rule $SetCube (has $Rel $SetValue) (lambda r (lambda s
+			   (call @has (var r) (var s)))) (anchored 1))
+
+(for @property (col row height color tag)
+     (rule $Rel (@property) (ConstantFn (string @property)) (anchored 1))
+)
+(rule $SetValue ($Color) (lambda c (call @val (var c))) (anchored 1))
+(rule $SetValue ($Number) (lambda n (call @single (var n))) (anchored 1))
+
+########### arithmetics and etc
+
+(for @num (0 1 2 3 4 5 6 7 8 9)
+(rule $Number (@num) (ConstantFn (number @num)) (anchored 1))
+)
+(rule $Number (many) (ConstantFn (number 10 infty)) (anchored 1))
+
+(for @op (+ - %)
+(rule $NumberSeq ($NumberSeq @op $Number) (lambda n1 (lambda n2
+(call @arith (string @op)  (var n1) (var n2)))) (anchored 1))
+)
+(rule $Number ([ $NumberSeq ]) (IdentityFn) (anchored 1))
+(rule $NumberSeq ( $Number ) (IdentityFn) (anchored 1))
+(for @rel (> >= = < <= ==)
+(rule $Pred ($NumberSeq @rel $NumberSeq) (lambda n1 (lambda n2
+(call @compare (string @rel) (var n1) (var n2)))) (anchored 1))
+)
+####### Constants
+(for @dir (top bot left right front back)
+(rule $Direction (@dir) (ConstantFn (string @dir)) (anchored 1))
+)
+
+(for @varname (x y z)
+(rule $Name (@varname) (ConstantFn (string @varname)) (anchored 1))
+)
+
+(rule $Color (red) (ConstantFn (string red)) (anchored 1))
+(rule $Color (orange) (ConstantFn (string orange)) (anchored 1))
+(rule $Color (yellow) (ConstantFn (string yellow)) (anchored 1))
+(rule $Color (green) (ConstantFn (string green)) (anchored 1))
+(rule $Color (blue) (ConstantFn (string blue)) (anchored 1))
+(rule $Color (purple) (ConstantFn (string purple)) (anchored 1))
+(rule $Color (brown) (ConstantFn (string brown)) (anchored 1))
+(rule $Color (cyan) (ConstantFn (string cyan)) (anchored 1))
+(rule $Color (trans) (ConstantFn (string trans)) (anchored 1))
+
+
+
