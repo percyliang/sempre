@@ -30,19 +30,20 @@
 (def @constant constant)
 (def @arith arith)
 
-# higher order functions
+# set function
 (def @veryx veryx)
 
 # select
 (def @name name)
 (def @named named)
+# sugar
+(def @selected marked)
+(def @select mark)
 
 # special values
 (def @sets sets) # constant sets
 (def @setf setf) # set functions
-(def @worlds worlds) # set functions
-# sugar
-(def @selected (call @filter (call @named (string s))))
+(def @reset reset) # reset the world
 
 # typed lambdas
 # Action a, CubesSet s, CubePredicate p, CubeNumber n, CubeProperty r, Direction d, Color c $CubeNumberProp q
@@ -50,12 +51,15 @@
 # This grammar should have Rule.defaultIsFloating false
 # (set JavaExecutor.printStackTrace true)
 # utilities
-(rule $ROOT (_worlds) (ConstantFn (call @worlds (string simple))) (anchored 1))
+(rule $ROOT (reset) (ConstantFn (call @reset (string simple))) (anchored 1))
 (rule $ROOT (_contextcmd) (ConstantFn (string "(context (graph NaiveKnowledgeGraph ((string [[1,3,1,\"Green\",[]],[2,2,1,\"Blue\",[]],[1,3,2,\"Red\",[]]]) (name b) (name c))))")) (anchored 1))
 
 
 ####### Start of the actual grammar
 (rule $ROOT ($ActionSeq) (lambda a (call @root (var a))) (anchored 1)) # process for better
+(rule $ROOT ($SetCube2) (lambda a (call @root (call @select (var a)))) (anchored 1)) # process for better
+
+
 (rule $Action ({ $ActionSeq }) (lambda a (call @scope (var a))) (anchored 1)) # scope variables inside this
 
 # control flow
@@ -70,9 +74,9 @@
 
 (rule $Action (add $Color $SetCube2) (lambda c (lambda s (call @add (var c) (string top) (var s)))) (anchored 1))
 (rule $Action (add $Color $Direction $SetCube2) (lambda c (lambda d (lambda s (call @add (var c) (var d) (var s))))) (anchored 1))
-(rule $Action (move $SetCube2 $Direction) (lambda s (lambda d (call @move (var d) (var s)))) (anchored 1))
+(rule $Action (move $Direction $SetCube2 ) (lambda d (lambda s (call @move (var d) (var s)))) (anchored 1))
 
-(rule $Action (select $SetCube2) (lambda s (call @name (var s) (string s))) (anchored 1))
+(rule $Action (select $SetCube2) (lambda s (call @select (var s))) (anchored 1))
 
 
 # names
@@ -80,8 +84,8 @@
 (rule $Action (tag $SetCube2 @varname) (lambda cs (call @name (var cs) (string @varname))) (anchored 1))
 )
 
-(rule $SetCube (selected) (ConstantFn (call @named (call @sets (string all)) (string s))) (anchored 1))
-(rule $SetCube (this) (ConstantFn (call @named (call @sets (string all)) (string s))) (anchored 1))
+(rule $SetCube (selected) (ConstantFn (call @selected)) (anchored 1))
+(rule $SetCube (this) (ConstantFn (call @selected)) (anchored 1))
 
 ########### basic sets
 (rule $SetCube (all) (ConstantFn (call @sets (string all))) (anchored 1))
@@ -104,7 +108,7 @@
 			   (call @ofs (var d) (var s)))) (anchored 1))
 
 (rule $SetCube (very $Direction of $SetCube2) (lambda d (lambda s
-			   (call @ofs (var d) (var s)))) (anchored 1))
+			   (call @veryx (var d) (var s)))) (anchored 1))
 
 ############# Set of values, like color of, name of
 (rule $SetValue ($Rel of $SetCube2) (lambda r (lambda s

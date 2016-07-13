@@ -1,4 +1,4 @@
-package edu.stanford.nlp.sempre.interactive.blocks;
+package edu.stanford.nlp.sempre.interactive.other;
 
 import java.util.ArrayList;
 import java.util.Collection;
