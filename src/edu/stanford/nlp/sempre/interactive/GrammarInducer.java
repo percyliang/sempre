@@ -79,6 +79,7 @@ public class GrammarInducer {
     
     while (deriv.rule.isCatUnary()) deriv = deriv.child(0);
     List<Derivation> covers = getGreedyCover(deriv);
+
     if (covers.size() == 0) {
       defStatus = DefStatus.NoCover;
     } else {

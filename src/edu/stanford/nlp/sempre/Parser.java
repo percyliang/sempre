@@ -5,6 +5,8 @@ import fig.basic.*;
 import java.io.PrintWriter;
 import java.util.*;
 
+import com.beust.jcommander.internal.Lists;
+
 ////////////////////////////////////////////////////////////
 
 /**
@@ -58,7 +60,7 @@ public abstract class Parser {
     public boolean dumpAllFeatures = false;
     
     @Option(gloss = "keep tracks of these categories")
-    public List<String> trackedCats = null;
+    public List<String> trackedCats;
   }
 
   public static final Options opts = new Options();

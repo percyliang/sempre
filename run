@@ -994,7 +994,7 @@ addMode('interactive', 'interactive semantic parsing in blocks', lambda { |e| l(
 
   o('Parser.pruneErrorValues', true),
   o('Parser', 'BeamParser'),
-  o('Parser.trackedCats', '$Color', '$Number', '$NumberSeq', '$Cond', '$CondSeq', '$Action', '$ActionSeq'),
+  o('Parser.trackedCats', 'Color', 'Number', 'NumberSeq', 'SetCube', 'SetCube2', 'Action', 'ActionSeq'),
   o('FloatingParser.defaultIsFloating', true),
   
 o('ParserState.customExpectedCounts', 'UNIFORM'),
@@ -1007,7 +1007,7 @@ o('Params.adaptiveStepSize', true),
 o('FeatureExtractor.featureComputers', 'interactive.blocks.RicherStacksWorldFeatureComputer'),
 o('FeatureExtractor.featureDomains', 'rule', 'subtree'),
 o('RicherStacksWorldFeatureComputer.ngramN', 2),
-o('RicherStacksWorldFeatureComputer.parameterizeCats', '$Number','$Color'),
+o('RicherStacksWorldFeatureComputer.parameterizeCats', 'Number','Color'),
 
 lambda { |e| system 'mkdir -p ./shrdlurn_output/examples/'},
 lambda { |e| system 'mkdir -p ./shrdlurn_output/logs/'},

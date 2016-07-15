@@ -24,6 +24,7 @@ import edu.stanford.nlp.sempre.NaiveKnowledgeGraph;
 import edu.stanford.nlp.sempre.NumberValue;
 import edu.stanford.nlp.sempre.StringValue;
 import edu.stanford.nlp.sempre.Value;
+import edu.stanford.nlp.sempre.interactive.blocks.StacksWorld.Color;
 import edu.stanford.nlp.util.CollectionUtils;
 import fig.basic.Option;
 /**
@@ -32,7 +33,7 @@ import fig.basic.Option;
  */
 
 enum CubeColor {
-  Red(0), Orange(1), Yellow (2), Green(3), Blue(4), White(6), Gray(7), Black(8), None(20);
+  Red(0), Orange(1), Yellow (2), Green(3), Blue(4), White(6), Black(7), Pink(8), Brown(9), None(-5);
   private final int value;
   private static final int MAXCOLOR = 7;
   CubeColor(int value) { this.value = value; }
@@ -41,7 +42,8 @@ enum CubeColor {
   public static CubeColor fromInt(int intc) {
     for(CubeColor c : CubeColor.values())
     {
-      if (c.value == intc) return c;
+      if (intc < 0) return CubeColor.None;
+      if (c.value == intc % (CubeColor.values().length-1)) return c;
     }
     return CubeColor.None;
   }
@@ -95,16 +97,41 @@ public final class ActionLDCSWorld {
   }
 
   public static String reset(String name) {
-    
     World world = new World(Lists.newArrayList());
-    world.worldList.add(new Cube(1,1,0,CubeColor.Red.toString()));
-    world.worldList.add(new Cube(2,2,0,CubeColor.Orange.toString()));
-    world.worldList.add(new Cube(2,2,1,CubeColor.Orange.toString()));
-    world.worldList.add(new Cube(3,3,0,CubeColor.Yellow.toString()));
-    world.worldList.add(new Cube(1,3,0,CubeColor.Green.toString()));
-    world.worldList.add(new Cube(3,1,0,CubeColor.Blue.toString()));
+    int randint = random.nextInt(5);
+    if (name.equals("simple")) {
+      world.worldList.add(new Cube(1,1,0,CubeColor.Red.toString()));
+      world.worldList.add(new Cube(2,2,1,CubeColor.Orange.toString()));
+      world.worldList.add(new Cube(2,2,0,CubeColor.Orange.toString()));
+      world.worldList.add(new Cube(3,3,0,CubeColor.Yellow.toString()));
+      world.worldList.add(new Cube(1,3,0,CubeColor.Green.toString()));
+      world.worldList.add(new Cube(3,1,0,CubeColor.Blue.toString()));
+      return world.toJSON();
+    }
+    if (name.equals("checker")) {
+      for (int i = 3 ; i < 8; i++)
+        for (int j = 3 ; j < 8; j++)
+          if ((i + j) % 2 == 0)
+          world.worldList.add(new Cube(i,j,0, CubeColor.fromInt(randint).toString()));
+      return world.toJSON();
+    }
+    if (name.equals("stick")) {
+      for (int i = 0 ; i < 5; i++)
+        world.worldList.add(new Cube(4,4,i,CubeColor.fromInt(randint).toString()));
+      return world.toJSON();
+    }
     
+    if (name.equals("corner")) {
+      world.worldList.add(new Cube(3,3,0,CubeColor.fromInt(randint).toString()));
+      world.worldList.add(new Cube(7,7,0,CubeColor.fromInt(randint).toString()));
+      world.worldList.add(new Cube(7,3,0,CubeColor.fromInt(randint).toString()));
+      world.worldList.add(new Cube(3,7,0,CubeColor.fromInt(randint).toString()));
+      return world.toJSON();
+    }
+    
+    world.worldList.add(new Cube(4,4,0,CubeColor.fromInt(randint).toString()));
     return world.toJSON();
+    
   }
 
   // Control flow
@@ -183,7 +210,7 @@ public final class ActionLDCSWorld {
     return name(cubesf, "S");
   }
   public static Function<World, Set<Cube>> marked() {
-    return named(sets("all"), "S");
+    return named("S");
   }
   public static Function<World, World> name(Function<World, Set<Cube>> cubesf, String name) {
     return new Function<World, World>() {
@@ -388,12 +415,11 @@ public final class ActionLDCSWorld {
     };
   }
 
-  public static Function<World, Set<Cube>> named(Function<World, Set<Cube>> cubesf, String name) {
+  public static Function<World, Set<Cube>> named(String name) {
     return new Function<World, Set<Cube>>() {
       @Override
       public Set<Cube> apply(World w) {
-        Set<Cube> cubes = cubesf.apply(w);
-        return cubes.stream().filter(c -> c.names.contains(w.stackName(name))).collect(Collectors.toSet());
+        return w.worldList.stream().filter(c -> c.names.contains(w.stackName(name))).collect(Collectors.toSet());
       }
     };
   }

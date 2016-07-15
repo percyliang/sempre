@@ -533,7 +533,10 @@ public class Server {
         for (Derivation deriv : response.getExample().getPredDerivations()) {
           Map<String, Object> item = new HashMap<String, Object>();
           Value value = deriv.getValue();
-          item.put("value", ((StringValue)value).value);
+          if (value instanceof StringValue)
+            item.put("value", ((StringValue)value).value);
+          if (value instanceof ErrorValue)
+            item.put("value", ((ErrorValue)value).sortString());
           item.put("score", deriv.score);
           item.put("prob", deriv.prob);
           item.put("anchored", deriv.allAnchored); // used only anchored rules
