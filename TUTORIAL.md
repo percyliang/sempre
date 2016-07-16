@@ -552,7 +552,7 @@ where $s$ and $o$ are entities and $p$ is a property.  For example:
 is one triple.  If we think of the entities as nodes in a directed graph, the
 each triple is a directed edge between two nodes labeled with the property.
 
-See `data/tutorial.ttl` for an example of a tiny subset of the Freebase graph
+See `freebase/data/tutorial.ttl` for an example of a tiny subset of the Freebase graph
 pertaining to geography about California.
 
 First, pull the dependencies needed for Freebase:
