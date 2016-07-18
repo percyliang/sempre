@@ -156,6 +156,7 @@ public class Master {
     LogInfo.log("  (context [(user |user|) (date |date|) (exchange |exchange|) (graph |graph|)]): prints out or set the context");
     LogInfo.log("  (uttdef (def |alternative|) [(original |original|)]): provide a definition for the original utterance");
     LogInfo.log("  (autocomplete |prefix|): provide a definition for the original utterance");
+    LogInfo.log("  (concept (name |alternative|) (actions |action|) (utts |utterances|) (denotation |denotation|)): submit the structure");
 
     LogInfo.log("Press Ctrl-D to exit.");
   }
@@ -468,7 +469,19 @@ public class Master {
       } else {
         LogInfo.logs("autocomplete just takes a prefix");
       }
-    }  
+    } else if (command.equals("concept")) {
+      if (tree.children.size() == 3) {
+        String currentUtterance = tree.children.get(1).value;
+        Example ex = session.getLastExample();
+        int index = Integer.parseInt(tree.child(2).value);
+        // storing here for convenience,
+        // but note that this index is for the definition, and not the original example
+        LogInfo.logs("Provided definition (%s) for definiendum (%s) with index %d", tree.children.get(1).value, ex.utterance, index);
+        induceGrammar(ex, currentUtterance, index, session, response);
+      } else {
+        LogInfo.logs("Invalid format for uttdef");
+      }
+    }
     else {
       LogInfo.log("Invalid command: " + tree);
     }

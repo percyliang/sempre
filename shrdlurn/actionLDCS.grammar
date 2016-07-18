@@ -1,6 +1,8 @@
 # contextful top level functions
 # command:
 (def @root context:root)
+(def @put put)
+(def @base base)
 
 # basic actions
 (def @add add)
@@ -52,9 +54,9 @@
 # utilities
 (rule $ROOT (reset) (ConstantFn (call @reset (string simple))) (anchored 1))
 (rule $ROOT (reset $TOKEN) (lambda n (call @reset (var n))) (anchored 1))
-
+(rule $ROOT (put $Color $Number $Number) (lambda c (lambda x (lambda y (call @put (var c) (var x) (var y))))) (anchored 1))
+(rule $ROOT (base $Number $Number) (lambda x (lambda y (call @base (var x) (var y)))) (anchored 1))
 (rule $ROOT (_contextcmd) (ConstantFn (string "(context (graph NaiveKnowledgeGraph ((string [[1,3,1,\"Green\",[]],[2,2,1,\"Blue\",[]],[1,3,2,\"Red\",[]]]) (name b) (name c))))")) (anchored 1))
-
 
 ####### Start of the actual grammar
 (rule $ROOT ($ActionSeq) (lambda a (call @root (var a))) (anchored 1)) # process for better

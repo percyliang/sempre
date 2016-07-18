@@ -33,7 +33,7 @@ import fig.basic.Option;
  */
 
 enum CubeColor {
-  Red(0), Orange(1), Yellow (2), Green(3), Blue(4), White(6), Black(7), Pink(8), Brown(9), None(-5);
+  Red(0), Orange(1), Yellow (2), Green(3), Blue(4), White(6), Black(7), Pink(8), Brown(9), Gray(10), None(-5);
   private final int value;
   private static final int MAXCOLOR = 7;
   CubeColor(int value) { this.value = value; }
@@ -131,7 +131,20 @@ public final class ActionLDCSWorld {
     
     world.worldList.add(new Cube(4,4,0,CubeColor.fromInt(randint).toString()));
     return world.toJSON();
-    
+  }
+  
+  public static Function<World, World> put(String color, NumberValue x, NumberValue y) {
+    return w -> {
+      w.worldList.add(new Cube((int)x.value, (int)y.value, 0, color));
+      return w;
+    };
+  }
+  
+  public static Function<World, World> base(NumberValue x, NumberValue y) {
+    return w -> {
+      w.worldList.add(new Cube((int)x.value, (int)y.value, -1, CubeColor.Black.toString()));
+      return w;
+    };
   }
 
   // Control flow
