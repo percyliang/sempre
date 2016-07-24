@@ -981,12 +981,14 @@ addMode('interactive', 'interactive semantic parsing in blocks', lambda { |e| l(
   header('core,interactive'),
   'edu.stanford.nlp.sempre.Main',
   figOpts,
-  o('JavaExecutor.printStackTrace', true),
-  o('JavaExecutor.convertNumberValues', false),
-  selo(1, 'JavaExecutor.classPathPrefix', 'edu.stanford.nlp.sempre.interactive.blocks.MagnetWorld',
-   'edu.stanford.nlp.sempre.interactive.blocks.ActionLDCSWorld'),
+  
+  o('Executor', 'interactive.actions.ActionExecutor'),
+  o('ActionExecutor.convertNumberValues', false),
+  o('ActionExecutor.printStackTrace', true),
+  selo(0, 'ActionExecutor.FlatWorldType', 'BlocksWorld', 'CalendarWorld'),
+  selo(0, 'Grammar.inPaths', './shrdlurn/blocksworld.grammar', './shrdlurn/calendar.grammar'),
+  
   o('Params.initWeightsRandomly', false),
-  selo(1, 'Grammar.inPaths', './shrdlurn/magnetic.grammar', './shrdlurn/actionLDCS.grammar'),
   o('Grammar.binarizeRules', false),
   o('Grammar.useApplyFn', 'interactive.ApplyFn'),
   o('LanguageAnalyzer.lowerCaseTokens', true),
@@ -994,7 +996,7 @@ addMode('interactive', 'interactive semantic parsing in blocks', lambda { |e| l(
 
   o('Parser.pruneErrorValues', true),
   o('Parser', 'BeamParser'),
-  o('Parser.trackedCats', 'Color', 'Number', 'NumberSeq', 'SetCube', 'SetCube2', 'Action', 'ActionSeq'),
+  o('Parser.trackedCats', 'Color', 'Numbers', 'Direction', 'Set', 'Set2', 'Action', 'Actions'),
   o('FloatingParser.defaultIsFloating', true),
   
 o('ParserState.customExpectedCounts', 'UNIFORM'),
@@ -1004,8 +1006,8 @@ o('Parser.beamSize', 50),
 o('Params.initStepSize', 0.1),
 o('Params.adaptiveStepSize', true),
 
-o('FeatureExtractor.featureComputers', 'interactive.blocks.RicherStacksWorldFeatureComputer'),
-o('FeatureExtractor.featureDomains', 'rule', 'subtree'),
+# o('FeatureExtractor.featureComputers', 'interactive.blocks.RicherStacksWorldFeatureComputer'),
+# o('FeatureExtractor.featureDomains', 'rule', 'subtree'),
 o('RicherStacksWorldFeatureComputer.ngramN', 2),
 o('RicherStacksWorldFeatureComputer.parameterizeCats', 'Number','Color'),
 

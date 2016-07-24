@@ -540,7 +540,7 @@ public class Grammar {
       tree = newTree;
       name = tree.child(0).value;
     }
-    // Syntactic sugar: (lambda x (var x)) => (cubeworld.ApplyFn (arg0 (lambda x (var x))))
+    // Syntactic sugar: (lambda x (var x)) => (interactive.ApplyFn (arg0 (lambda x (var x))))
     if (name.equals("lambda") && Grammar.opts.useApplyFn != null) {
       LispTree newTree = LispTree.proto.newList();
       newTree.addChild(Grammar.opts.useApplyFn);

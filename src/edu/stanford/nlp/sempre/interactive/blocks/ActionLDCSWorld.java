@@ -91,6 +91,7 @@ public final class ActionLDCSWorld {
 
   public static String root(Function<World, World> action, ContextValue context) {
     World world = World.fromContext(context);
+    world.worldList = world.worldList.stream().map(c -> {c.age++; return c; }).collect(Collectors.toList());
     world = action.apply(world);
     world.applyPhysics();
     return world.toJSON();
@@ -112,7 +113,7 @@ public final class ActionLDCSWorld {
       for (int i = 3 ; i < 8; i++)
         for (int j = 3 ; j < 8; j++)
           if ((i + j) % 2 == 0)
-          world.worldList.add(new Cube(i,j,0, CubeColor.fromInt(randint).toString()));
+            world.worldList.add(new Cube(i,j,0, CubeColor.fromInt(randint).toString()));
       return world.toJSON();
     }
     if (name.equals("stick")) {
@@ -120,7 +121,7 @@ public final class ActionLDCSWorld {
         world.worldList.add(new Cube(4,4,i,CubeColor.fromInt(randint).toString()));
       return world.toJSON();
     }
-    
+
     if (name.equals("corner")) {
       world.worldList.add(new Cube(3,3,0,CubeColor.fromInt(randint).toString()));
       world.worldList.add(new Cube(7,7,0,CubeColor.fromInt(randint).toString()));
@@ -128,21 +129,17 @@ public final class ActionLDCSWorld {
       world.worldList.add(new Cube(3,7,0,CubeColor.fromInt(randint).toString()));
       return world.toJSON();
     }
-    
-    world.worldList.add(new Cube(4,4,0,CubeColor.fromInt(randint).toString()));
+
+    world = base(new NumberValue(4), new NumberValue(4)).apply(world);
     return world.toJSON();
   }
-  
-  public static Function<World, World> put(String color, NumberValue x, NumberValue y) {
-    return w -> {
-      w.worldList.add(new Cube((int)x.value, (int)y.value, 0, color));
-      return w;
-    };
-  }
-  
+
   public static Function<World, World> base(NumberValue x, NumberValue y) {
     return w -> {
-      w.worldList.add(new Cube((int)x.value, (int)y.value, -1, CubeColor.Black.toString()));
+      Cube basecube = new Cube((int)x.value, (int)y.value, 0, CubeColor.Gray.toString());
+      basecube.names.add("base");
+      basecube.names.add("S");
+      w.worldList.add(basecube);
       return w;
     };
   }
@@ -218,6 +215,18 @@ public final class ActionLDCSWorld {
     };
   }
 
+  // set some value
+  public static Function<World, World> change(String rel, Function<World, Set<Object>> valuesf, Function<World, Set<Cube>> cubesf) {
+    return w -> {
+
+      Set<Object> val = valuesf.apply(w);
+      Set<Cube> cubes = cubesf.apply(w);
+
+      // we just take the first value
+      cubes.forEach(c -> c.set(rel, val.iterator().next()));
+      return w;
+    };
+  }
   // X = cubes [];
   public static Function<World, World> mark(Function<World, Set<Cube>> cubesf) {
     return name(cubesf, "S");
@@ -225,6 +234,10 @@ public final class ActionLDCSWorld {
   public static Function<World, Set<Cube>> marked() {
     return named("S");
   }
+  public static Function<World, Set<Cube>> base() {
+    return named("base");
+  }
+
   public static Function<World, World> name(Function<World, Set<Cube>> cubesf, String name) {
     return new Function<World, World>() {
       public World apply(World w) {
@@ -250,7 +263,7 @@ public final class ActionLDCSWorld {
       Function<World, Set<Value>>  f2) {
     return setop(op, f1, f2);
   }
-  
+
   // Set operations, union, intersection, diff
   public static <T> Function<World, Set<T>> setop(String op,
       Function<World, Set<T>>  f1,
@@ -274,40 +287,6 @@ public final class ActionLDCSWorld {
     };
   }
 
-  // convert simple cube filters
-  public static Function<World, Set<Cube>> filter(Function<World, Set<Cube>> cubesf, Function<Cube, Boolean> simplef) {
-    return new Function<World, Set<Cube>>() {
-      public Set<Cube> apply(World w) {
-        Set<Cube> cubes = cubesf.apply(w);
-        return cubes.stream().filter( c -> simplef.apply(c) ).collect(Collectors.toSet());
-      }
-    };
-  }
-
-  public static Function<World, Set<Cube>> filter(Function<Cube, Boolean> simplef) {
-    return new Function<World, Set<Cube>>() {
-      public Set<Cube> apply(World w) {
-        return w.worldList.stream().filter( c -> simplef.apply(c) ).collect(Collectors.toSet());
-      }
-    };
-  }
-
-  public static Function<Cube, Boolean> colored(CubeColor color) {
-    return new Function<Cube, Boolean>() {
-      public Boolean apply(Cube c) {
-        return c.color == color;
-      }
-    };
-  }
-
-  public static Function<Cube, Boolean> truef() {
-    return new Function<Cube, Boolean>() {
-      public Boolean apply(Cube s) {
-        return true;
-      }
-    };
-  }
-
 
   // handles color and name
   public static Function<Cube, Boolean> equals(Function<Cube, Object> propf, String value) {
@@ -325,39 +304,6 @@ public final class ActionLDCSWorld {
     };
   }
 
-
-  public static Function<Cube, Boolean> compare(String comp, Function<Cube, NumberValue> g1, Function<Cube, NumberValue> g2) {
-    return new Function<Cube, Boolean>() {
-      public Boolean apply(Cube s) {
-        double propval = g1.apply(s).value;
-        NumberValue val = g2.apply(s);
-        if (comp.equals(">") && propval > val.value)
-          return true;
-        else if (comp.equals(">=") && propval >= val.value)
-          return true;
-        else if ((comp.equals("=") || comp.equals("==") ) && (int)propval == (int)val.value)
-          return true;
-        else if (comp.equals("<=") && propval <= val.value)
-          return true;
-        else if (comp.equals("<") && propval < val.value)
-          return true;
-        else if (comp.equals("!=") && propval != val.value)
-          return true;
-        else
-          return false;
-      }
-    };
-  }
-  public static Function<Cube, Boolean> compare(String comp, NumberValue g1, Function<Cube, NumberValue> g2) {
-    return compare(comp, constant(g1), g2);
-  }
-  public static Function<Cube, Boolean> compare(String comp, Function<Cube, NumberValue> g1, NumberValue g2) {
-    return compare(comp, g1, constant(g2));
-  }
-  public static Function<Cube, Boolean> compare(String comp, NumberValue g1, NumberValue g2) {
-    return compare(comp, constant(g1), constant(g2));
-  }
-
   public static Function<Cube, NumberValue> negative(Function<Cube, NumberValue> getf) {
     return new Function<Cube, NumberValue>() {
       public NumberValue apply(Cube s) {
@@ -371,14 +317,6 @@ public final class ActionLDCSWorld {
     return new Function<Cube, Object>() {
       public Object apply(Cube s) {
         return s.get(property);
-      }
-    };
-  }
-
-  public static Function<Cube, NumberValue> constant(NumberValue constant) {
-    return new Function<Cube, NumberValue>() {
-      public NumberValue apply(Cube s) {
-        return constant;
       }
     };
   }
@@ -399,12 +337,6 @@ public final class ActionLDCSWorld {
           throw new RuntimeException("operator " + op + " is not supported.");
       }
     };
-  }
-  public static Function<Cube, NumberValue> arith(String op, Function<Cube, NumberValue> f, NumberValue n) {
-    return arith(op, f, constant(n));
-  }
-  public static Function<Cube, NumberValue> arith(String op, NumberValue n, Function<Cube, NumberValue> f) {
-    return arith(op, constant(n), f);
   }
 
   public static Function<World, Set<Cube>> argmin(Function<World, Set<Cube>> cubesf,
@@ -457,7 +389,6 @@ public final class ActionLDCSWorld {
     };
   }
 
-  // the has function, which always refers to Cubes, cant say has left 
   public static Function<World, Set<Cube>> has(String rel, Function<World, Set<Object>> valuef) {
     return w -> {
       Set<Object> values = valuef.apply(w);
@@ -466,13 +397,13 @@ public final class ActionLDCSWorld {
           .collect(Collectors.toSet());
     };
   }
-  
+
   public static Function<World, Set<Object>> val(String oneValue) {
-     CubeColor color = CubeColor.fromString(oneValue);
-     if (color != CubeColor.None) return single(color);
-     else return single(oneValue);
+    CubeColor color = CubeColor.fromString(oneValue);
+    if (color != CubeColor.None) return single(color);
+    else throw new RuntimeException("not a color: " + oneValue);
   }
-  
+
   public static Function<World, Set<Object>> single(Object oneValue) {
     return w -> Sets.newHashSet(oneValue);
   }
@@ -490,7 +421,7 @@ public final class ActionLDCSWorld {
       }).collect(Collectors.toSet());
     };
   }
-  
+
   //get cubes at extreme positions
   public static Function<World, Set<Cube>> veryx(String dirstr, Function<World, Set<Cube>> cubesf) {
     Direction dir = Direction.fromString(dirstr);
@@ -504,27 +435,34 @@ public final class ActionLDCSWorld {
     default: throw new RuntimeException("invalid direction");
     }
   }
-    
+
   public static Function<World, Set<Cube>> sets(String fname) {
-    return new Function<World, Set<Cube>>() {
-      @Override
-      public Set<Cube> apply(World w) {
-        return w.worldList.stream().collect(Collectors.toSet());
-      }
-    };
+    if (fname.equals("all"))
+      return (w -> w.worldList.stream().collect(Collectors.toSet()));
+    if (fname.equals("none"))
+      return (w -> new HashSet<Cube>());
+    return w -> (w.worldList.stream().collect(Collectors.toSet()));
+  }
+
+  public static Function<World, Object> lift(Object constant) {
+    return w -> constant;
+  }
+  public static Function<World, NumberValue> lift(NumberValue constant) {
+    return w -> constant;
+  }
+  public static Function<World, Set<Object>> lift(Set<Object> constant) {
+    return w -> constant;
   }
 }
 
 // the world of stacks
 class World {
   public static final int worldSize = ActionLDCSWorld.opts.worldSize;
-  // alternative representation
-  // row, col, basically 
+
+  // two representations: set for dedup, list potentially for copying
   public Set<Cube> worldSet;
-  //world list is always up to date,
-  // with world array used only when needed
   public List<Cube> worldList;
-  
+
   public Map<String,Set<Cube>> vars;
   // this is probably the place to deal with disconnected stuff
   private int stackLevel = 0;
@@ -588,8 +526,9 @@ class World {
 class Cube {
   public CubeColor color;
   int row, col, height;
+  int age;
   public Set<String> names;
-  
+
   public Cube(int row, int col, int height, String color) {
     this(row, col, height);
     this.color = CubeColor.fromString(color);
@@ -598,13 +537,14 @@ class Cube {
     this.row = Integer.MAX_VALUE; this.col = Integer.MAX_VALUE; this.height = Integer.MAX_VALUE;
     this.color = CubeColor.fromString("None");
     this.names = new HashSet<>();
+    this.age = 0;
   }
   // used as a key
   public Cube(int row, int col, int height) {
     this();
     this.row = row; this.col = col; this.height = height;
   }
-  
+
   public Cube move(Direction dir) {
     switch (dir) {
     case Back: this.row +=1; break;
@@ -638,14 +578,30 @@ class Cube {
       propval = new NumberValue(this.row);
     else if (property.equals("col"))
       propval = new NumberValue(this.col);
+    else if (property.equals("age"))
+      propval = new NumberValue(this.age);
     else if (property.equals("color"))
       propval = this.color;
     else if (property.equals("name"))
       propval = this.names;
     else
-      throw new RuntimeException("property " + property + " is not supported.");
+      throw new RuntimeException("getting property " + property + " is not supported.");
     return propval;
   }
+
+  public void set(String property, Object value) {
+    if (property.equals("height") && value instanceof NumberValue)
+      this.height = (int)((NumberValue)value).value;
+    else if (property.equals("row") && value instanceof NumberValue)
+      this.row = (int)((NumberValue)value).value;
+    else if (property.equals("col") && value instanceof NumberValue)
+      this.height = (int)((NumberValue)value).value;
+    else if (property.equals("color") && value instanceof String)
+      this.color = CubeColor.fromString(value.toString());
+    else
+      throw new RuntimeException("setting property " + property + " is not supported.");
+  }
+
   @SuppressWarnings("unchecked")
   public static Cube fromJSON(String json) {
     List<Object> props = Json.readValueHard(json, List.class);
@@ -658,7 +614,7 @@ class Cube {
     retcube.col = ((Integer)props.get(1));
     retcube.height = ((Integer)props.get(2));
     retcube.color = CubeColor.fromString(((String)props.get(3)));
-    
+
     retcube.names.addAll((List<String>)props.get(4));
     return retcube;
   }

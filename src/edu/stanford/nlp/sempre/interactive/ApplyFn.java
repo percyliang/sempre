@@ -42,7 +42,7 @@ public class ApplyFn extends SemanticFn {
         for (Derivation arg : args) {
           if (!(f instanceof LambdaFormula))
             throw new RuntimeException("Expected LambdaFormula, but got " + formula);
-            f = Formulas.lambdaApply((LambdaFormula)f, arg.getFormula());
+          f = Formulas.lambdaApply((LambdaFormula)f, arg.getFormula());
         }
         Derivation res = new Derivation.Builder()
                 .withCallable(c)

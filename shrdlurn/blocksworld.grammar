@@ -1,0 +1,85 @@
+(include flatworld.grammar)
+
+# contextful top level functions
+# command:
+(def @put put)
+(def @base base)
+# basic actions
+(def @add add)
+(def @move move)
+
+# extended set ops
+(def @veryx veryx)
+# commands
+(def @reset reset) # reset the world
+
+# typed lambdas
+# Action a, ItemSet i, ValueSet v, Rel r, Direction d, Color c, Number n
+# This grammar should have Rule.defaultIsFloating false
+
+
+########### start of domain specific stuff
+# utilities
+(rule $ROOT (reset) (ConstantFn (call @reset (string default))) (anchored 1))
+(rule $ROOT (reset $TOKEN) (lambda n (call @reset (var n))) (anchored 1))
+
+(rule $Action (put $Color $Number $Number) (lambda c (lambda x (lambda y (call @put (var c) (var x) (var y))))) (anchored 1))
+(rule $Action (base $Number $Number) (lambda x (lambda y (call @base (var x) (var y)))) (anchored 1))
+
+(rule $ROOT (_contextcmd) (ConstantFn (string "(context (graph NaiveKnowledgeGraph ((string [[1,3,1,\"Green\",[]],[2,2,1,\"Blue\",[]],[1,3,2,\"Red\",[]]]) (name b) (name c))))")) (anchored 1))
+
+# primitive actions
+
+(rule $Action (add $Color) (lambda c (: @add (var c) (string top))) (anchored 1))
+(rule $Action (add $Color $Direction) (lambda c (lambda d (: @add (var c) (var d)))) (anchored 1))
+(rule $Action (move $Direction) (lambda d (: @move (var d) selected)) (anchored 1))
+
+# cube to cube relations
+(rule $Set ($Direction of $Sets) (lambda d (lambda s
+			   ((var d) (var s)))) (anchored 1))
+(rule $Set ($Extreme of $Sets) (lambda d (lambda s
+			   ((var d) (var s)))) (anchored 1))
+
+(for @dir (top bot left right front back)
+(rule $Direction (@dir) @dir (anchored 1))
+)
+(for @dir (very_top very_bot very_left very_right very_front very_back)
+(rule $Extreme (@dir) @dir (anchored 1))
+)
+
+(rule $ValueSet ($Color) (IdentityFn) (anchored 1))
+(rule $ValueSet ($Number) (IdentityFn) (anchored 1))			 
+
+(for @num (0 1 2 3 4 5 6 7 8 9)
+(rule $Number (@num) (ConstantFn (number @num)) (anchored 1))
+)
+(rule $Number (many) (ConstantFn (number 10)) (anchored 1))
+
+(rule $Color (red) red (anchored 1))
+(rule $Color (orange) orange (anchored 1))
+(rule $Color (yellow) yellow (anchored 1))
+(rule $Color (green) green (anchored 1))
+(rule $Color (blue) blue (anchored 1))
+(rule $Color (white) white (anchored 1))
+(rule $Color (black) black (anchored 1))
+(rule $Color (pink) pink (anchored 1))
+(rule $Color (brown) brown (anchored 1))
+
+###### Keywords 
+(rule $Keyword (add) (ConstantFn (string keyword)))
+(rule $Keyword (remove) (ConstantFn (string keyword)))
+(rule $Keyword (repeat) (ConstantFn (string keyword)))
+(rule $Keyword (has) (ConstantFn (string keyword)))
+(rule $Keyword (of) (ConstantFn (string keyword)))
+(rule $Keyword (col) (ConstantFn (string keyword)))
+(rule $Keyword (row) (ConstantFn (string keyword)))
+(rule $Keyword (height) (ConstantFn (string keyword)))
+(rule $Keyword (color) (ConstantFn (string keyword)))
+(rule $Keyword (top) (ConstantFn (string keyword)))
+(rule $Keyword (bot) (ConstantFn (string keyword)))
+(rule $Keyword (left) (ConstantFn (string keyword)))
+(rule $Keyword (right) (ConstantFn (string keyword)))
+(rule $Keyword (front) (ConstantFn (string keyword)))
+(rule $Keyword (back) (ConstantFn (string keyword)))
+(rule $Keyword (and) (ConstantFn (string keyword)))
+(rule $Keyword (or) (ConstantFn (string keyword)))

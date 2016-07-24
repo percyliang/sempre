@@ -38,9 +38,11 @@
 # select
 (def @name name)
 (def @named named)
+
 # sugar
 (def @selected marked)
 (def @select mark)
+(def @base base)
 
 # special values
 (def @sets sets) # constant sets
@@ -52,10 +54,12 @@
 
 # This grammar should have Rule.defaultIsFloating false
 # utilities
-(rule $ROOT (reset) (ConstantFn (call @reset (string simple))) (anchored 1))
+(rule $ROOT (reset) (ConstantFn (call @reset (string default))) (anchored 1))
 (rule $ROOT (reset $TOKEN) (lambda n (call @reset (var n))) (anchored 1))
-(rule $ROOT (put $Color $Number $Number) (lambda c (lambda x (lambda y (call @put (var c) (var x) (var y))))) (anchored 1))
-(rule $ROOT (base $Number $Number) (lambda x (lambda y (call @base (var x) (var y)))) (anchored 1))
+
+(rule $Action (put $Color $Number $Number) (lambda c (lambda x (lambda y (call @put (var c) (var x) (var y))))) (anchored 1))
+(rule $Action (base $Number $Number) (lambda x (lambda y (call @base (var x) (var y)))) (anchored 1))
+
 (rule $ROOT (_contextcmd) (ConstantFn (string "(context (graph NaiveKnowledgeGraph ((string [[1,3,1,\"Green\",[]],[2,2,1,\"Blue\",[]],[1,3,2,\"Red\",[]]]) (name b) (name c))))")) (anchored 1))
 
 ####### Start of the actual grammar
@@ -71,24 +75,32 @@
 (rule $ActionSeq ($Action) (IdentityFn) (anchored 1))
 (rule $Action ([ $ActionSeq ]) (IdentityFn) (anchored 1))
 
-# basic actions
-(rule $Action (remove $SetCube2) (lambda s (call @remove (var s))) (anchored 1))
+# basic actions, faking local scope
+(rule $Action (for $SetCube2 remove) (lambda s (call @remove (var s))) (anchored 1))
+(rule $Action (for $SetCube2 add $Color)   (lambda s (lambda c (call @add (var c) (string top) (var s)))) (anchored 1))
+(rule $Action (for $SetCube2 add $Color $Direction) (lambda s (lambda c (lambda d (call @add (var c) (var d) (var s))))) (anchored 1))
+(rule $Action (for $SetCube2 move $Direction) (lambda s (lambda d (call @move (var d) (var s)))) (anchored 1))
+(rule $Action (for $SetCube2 change $Rel to $SetValue) (lambda s (lambda r (lambda c (call @change (var r) (var v) (var s))))) (anchored 1))
 
-(rule $Action (add $Color $SetCube2) (lambda c (lambda s (call @add (var c) (string top) (var s)))) (anchored 1))
-(rule $Action (add $Color $Direction $SetCube2) (lambda c (lambda d (lambda s (call @add (var c) (var d) (var s))))) (anchored 1))
-(rule $Action (move $Direction $SetCube2 ) (lambda d (lambda s (call @move (var d) (var s)))) (anchored 1))
+# basic actions with implicit arguments
+(rule $Action (remove) (ConstantFn (call @remove (call @selected))) (anchored 1))
+(rule $Action (add $Color) (lambda c (call @add (var c) (string top) (call @selected))) (anchored 1))
+(rule $Action (add $Color $Direction) (lambda c (lambda d (call @add (var c) (var d) (call @selected)))) (anchored 1))
+(rule $Action (move $Direction) (lambda d (call @move (var d) (call @selected))) (anchored 1))
+(rule $Action (change $Rel to $SetValue) (lambda r (lambda v (call @change (var r) (var v) (call @selected)))) (anchored 1))
+
+# global scope
 (rule $Action (select $SetCube2) (lambda s (call @select (var s))) (anchored 1))
-
 
 # names
 (for @varname (x y z)
-(rule $Action (@varname =  $SetCube2) (lambda s (call @name (var s) (string @varname))) (anchored 1))
+(rule $Action (name $SetCube2 @varname) (lambda s (call @name (var s) (string @varname))) (anchored 1))
 (rule $SetCube (@varname) (ConstantFn (call @named (string @varname))) (anchored 1))
 )
 
 (rule $SetCube (selected) (ConstantFn (call @selected)) (anchored 1))
 (rule $SetCube (this) (ConstantFn (call @selected)) (anchored 1))
-(rule $SetCube (this) (ConstantFn (call @selected)) (anchored 1))
+(rule $SetCube (base) (ConstantFn (call @base)) (anchored 1))
 
 ########### basic sets
 (rule $SetCube (all) (ConstantFn (call @sets (string all))) (anchored 1))
@@ -120,7 +132,7 @@
 (rule $SetCube (has $Rel $SetValue) (lambda r (lambda s
 			   (call @has (var r) (var s)))) (anchored 1))
 
-(for @property (col row height color tag)
+(for @property (col row height color name age)
      (rule $Rel (@property) (ConstantFn (string @property)) (anchored 1))
 )
 (rule $SetValue ($Color) (lambda c (call @val (var c))) (anchored 1))

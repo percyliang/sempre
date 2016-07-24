@@ -2,6 +2,8 @@ package edu.stanford.nlp.sempre;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
+
+import edu.stanford.nlp.sempre.interactive.actions.ActionFormula;
 import fig.basic.LispTree;
 
 import java.util.HashSet;
@@ -73,6 +75,16 @@ public abstract class Formulas {
       ArithmeticFormula.Mode mode = ArithmeticFormula.parseMode(func);
       if (mode != null)
         return new ArithmeticFormula(mode, fromLispTree(tree.child(1)), fromLispTree(tree.child(2)));
+    }
+    
+    { // ActionFormula
+      ActionFormula.Mode mode = ActionFormula.parseMode(func);
+      if (mode != null) {
+        List<Formula> args = Lists.newArrayList();
+        for (int i = 1; i < tree.children.size(); i++)
+          args.add(fromLispTree(tree.child(i)));
+        return new ActionFormula(mode, args);
+      }
     }
 
     // Default is join: (fb:type.object.type fb:people.person)

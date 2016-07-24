@@ -4,6 +4,8 @@ import fig.basic.*;
 
 import java.util.*;
 
+import edu.stanford.nlp.sempre.interactive.actions.ActionFormula;
+
 /**
  * Performs type inference: given a Formula, return a SemType.
  *
@@ -270,6 +272,9 @@ public final class TypeInference {
       for (int i = 0; i < info.argTypes.size(); i++)
         inferType(call.args.get(i), env, info.argTypes.get(i));
       return check(type.meet(info.retType));
+    } else if (formula instanceof ActionFormula) {
+      initCallTypeInfo();
+      return SemType.anyType;
     } else {
       throw new RuntimeException("Can't infer type of formula: " + formula);
     }
