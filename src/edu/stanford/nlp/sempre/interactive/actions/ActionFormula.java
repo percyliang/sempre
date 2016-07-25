@@ -19,7 +19,7 @@ import java.util.List;
  */
 public class ActionFormula extends Formula {
   public enum Mode {
-    primitive(":"), sequential(":s"), repeat(":rep"), conditional(":if"), scope(":scope");
+    primitive(":"), sequential(":s"), repeat(":rep"), conditional(":if"), scope(":scope"), each(":each"), all(":all");
     private final String value;
     Mode(String value) {this.value = value;}
     @Override

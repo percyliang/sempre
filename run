@@ -983,7 +983,7 @@ addMode('interactive', 'interactive semantic parsing in blocks', lambda { |e| l(
   figOpts,
   
   o('Executor', 'interactive.actions.ActionExecutor'),
-  o('ActionExecutor.convertNumberValues', false),
+  o('ActionExecutor.convertNumberValues', true),
   o('ActionExecutor.printStackTrace', true),
   selo(0, 'ActionExecutor.FlatWorldType', 'BlocksWorld', 'CalendarWorld'),
   selo(0, 'Grammar.inPaths', './shrdlurn/blocksworld.grammar', './shrdlurn/calendar.grammar'),

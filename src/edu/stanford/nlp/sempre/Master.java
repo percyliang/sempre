@@ -157,7 +157,7 @@ public class Master {
     LogInfo.log("  (uttdef (def |alternative|) [(original |original|)]): provide a definition for the original utterance");
     LogInfo.log("  (autocomplete |prefix|): provide a definition for the original utterance");
     LogInfo.log("  (concept (name |alternative|) (actions |action|) (utts |utterances|) (denotation |denotation|)): submit the structure");
-
+    LogInfo.log("  (action |utternace|): commandline utility for performing an action on the wrold");
     LogInfo.log("Press Ctrl-D to exit.");
   }
 
@@ -469,18 +469,14 @@ public class Master {
       } else {
         LogInfo.logs("autocomplete just takes a prefix");
       }
-    } else if (command.equals("concept")) {
-      if (tree.children.size() == 3) {
-        String currentUtterance = tree.children.get(1).value;
-        Example ex = session.getLastExample();
-        int index = Integer.parseInt(tree.child(2).value);
-        // storing here for convenience,
-        // but note that this index is for the definition, and not the original example
-        LogInfo.logs("Provided definition (%s) for definiendum (%s) with index %d", tree.children.get(1).value, ex.utterance, index);
-        induceGrammar(ex, currentUtterance, index, session, response);
-      } else {
-        LogInfo.logs("Invalid format for uttdef");
-      }
+    } else if (command.equals("action")) {
+      // test code for mutating worlds, updates the context
+      String query = tree.children.get(1).value;
+      this.handleUtterance(session, query, response);
+      LogInfo.logs("%s : %s", query, response.getAnswer());
+      String blocks = ((StringValue)Values.fromString(response.getAnswer())).value;
+      String strigify2 = Json.writeValueAsStringHard(blocks); // some parsing issue inside lisptree parser
+      session.context = ContextValue.fromString(String.format("(context (graph NaiveKnowledgeGraph ((string \"%s\") (name b) (name c))))", strigify2));
     }
     else {
       LogInfo.log("Invalid command: " + tree);

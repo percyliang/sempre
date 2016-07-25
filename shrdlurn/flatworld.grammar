@@ -65,3 +65,8 @@
 
 (rule $Number ([ $Numbers ]) (IdentityFn) (anchored 1))
 (rule $Numbers ( $Number ) (IdentityFn) (anchored 1))
+
+# couple of floating rules for testing
+(rule $Action ($Numbers $Actions) (lambda n (lambda a (:rep (var n) (var a)))) (floating 1))
+(rule $Action ($Sets $Actions) (lambda s (lambda a (:scope (var s) (var a)))) (floating 1))
+

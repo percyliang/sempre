@@ -82,7 +82,6 @@ public class ActionExecutor extends Executor {
       boolean cond = toSet(processSetFormula(f.args.get(0), world)).iterator().hasNext();
       if (cond) performActions((ActionFormula)f.args.get(1), world);
     } else if (f.mode == ActionFormula.Mode.scope) {
-      // using the empty set to represent false
       Set<Object> currentscope = toSet(processSetFormula(f.args.get(0), world));
       world.push();
       world.select(toItemSet(currentscope));
@@ -165,9 +164,15 @@ public class ActionExecutor extends Executor {
     }
     
     if (formula instanceof CallFormula)  {
+      CallFormula callFormula = (CallFormula)formula;
+      Value method  = ((ValueFormula)callFormula.func).value;
+      String id = ((NameValue)method).id;
+      // all actions takes a fixed set as argument
+      invoke(id, world, callFormula.args.stream().map(x -> processSetFormula(x, world)).toArray());
     }
     
     if (formula instanceof SuperlativeFormula)  {
+      
     }
     
     throw new RuntimeException("Should never get here");

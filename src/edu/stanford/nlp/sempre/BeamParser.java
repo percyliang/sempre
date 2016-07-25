@@ -27,7 +27,7 @@ public class BeamParser extends Parser {
   public static Options opts = new Options();
 
   Trie trie;  // For non-cat-unary rules
-
+  
   public BeamParser(Spec spec) {
     super(spec);
     
@@ -43,8 +43,9 @@ public class BeamParser extends Parser {
   }
 
   public synchronized void addRule(Rule rule) {
-    if (!rule.isCatUnary())
+    if (!rule.isCatUnary() && rule.isAnchored()) {
       trie.add(rule);
+    }
   }
 
   public ParserState newParserState(Params params, Example ex, boolean computeExpectedCounts) {
@@ -101,7 +102,7 @@ class BeamParserState extends ChartParserState {
     for (int len = 1; len <= numTokens; len++)
       for (int i = 0; i + len <= numTokens; i++)
         build(i, i + len);
-
+    
     if (parser.verbose(2)) LogInfo.end_track();
 
     // Visualize

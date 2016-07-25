@@ -86,6 +86,8 @@ public class ActionExecutorTest {
        context, x -> x.allitems.size() == 9);
     runFormula(executor, "(:scope (or (color red) (color blue)) (:rep (number 5) (:s (: move left) (: move right) (: move left))))",
         context, null);
+    runFormula(executor, "(:scope (or (color red) (color blue)) (: update color red))",
+        context, null);
     LogInfo.end_track();
   }
   
