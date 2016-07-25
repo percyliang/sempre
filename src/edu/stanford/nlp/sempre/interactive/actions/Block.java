@@ -5,9 +5,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.testng.collections.Lists;
-
 import edu.stanford.nlp.sempre.Json;
-import edu.stanford.nlp.sempre.NumberValue;
 
 //individual stacks
 public class  Block extends Item {
@@ -63,17 +61,17 @@ public class  Block extends Item {
   public Object get(String property) {
     Object propval;
     if (property.equals("height"))
-      propval = new NumberValue(this.height);
+      propval = new Integer(this.height);
     else if (property.equals("row"))
-      propval = new NumberValue(this.row);
+      propval = new Integer(this.row);
     else if (property.equals("col"))
-      propval = new NumberValue(this.col);
+      propval = new Integer(this.col);
     else if (property.equals("age"))
-      propval = new NumberValue(this.age);
+      propval = new Integer(this.age);
     else if (property.equals("color"))
       propval = this.color.toString().toLowerCase();
-    else if (property.equals("name"))
-      propval = this.names;
+    // else if (property.equals("name"))
+    //  propval = this.names;
     else
       throw new RuntimeException("getting property " + property + " is not supported.");
     return propval;
@@ -81,12 +79,12 @@ public class  Block extends Item {
   
   @Override
   public void update(String property, Object value) {
-    if (property.equals("height") && value instanceof NumberValue)
-      this.height = (int)((NumberValue)value).value;
-    else if (property.equals("row") && value instanceof NumberValue)
-      this.row = (int)((NumberValue)value).value;
-    else if (property.equals("col") && value instanceof NumberValue)
-      this.height = (int)((NumberValue)value).value;
+    if (property.equals("height") && value instanceof Integer)
+      this.height = (Integer)value;
+    else if (property.equals("row") && value instanceof Integer)
+      this.row = (Integer)value;
+    else if (property.equals("col") && value instanceof Integer)
+      this.height = (Integer)value;
     else if (property.equals("color") && value instanceof String)
       this.color = CubeColor.fromString(value.toString());
     else

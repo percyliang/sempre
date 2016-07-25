@@ -1,14 +1,16 @@
 package edu.stanford.nlp.sempre.interactive.actions;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.testng.collections.Sets;
-
-import edu.stanford.nlp.sempre.*;
+import edu.stanford.nlp.sempre.ContextValue;
+import edu.stanford.nlp.sempre.Json;
+import edu.stanford.nlp.sempre.NaiveKnowledgeGraph;
+import edu.stanford.nlp.sempre.StringValue;
+import fig.basic.LogInfo;
 
 enum CubeColor {
   Red(0), Orange(1), Yellow (2), Green(3), Blue(4), White(6), Black(7), Pink(8), Brown(9), Gray(10), None(-5);
@@ -27,26 +29,25 @@ enum CubeColor {
   }
   public static CubeColor fromString(String color) {
     for(CubeColor c : CubeColor.values())
-    {
       if (c.name().equalsIgnoreCase(color)) return c;
-    }
     return CubeColor.None;
   }
 }
 enum Direction {
   Top, Bot, Left, Right, Front, Back, None;
   public static Direction fromString(String dir) {
-    if (dir.equalsIgnoreCase("up") || dir.equalsIgnoreCase("top"))
+    dir = dir.toLowerCase();
+    if (dir.equals("up") || dir.equals("top"))
       return Direction.Top;
-    if (dir.equalsIgnoreCase("down") || dir.equalsIgnoreCase("bot"))
+    if (dir.equals("down") || dir.equals("bot"))
       return Direction.Bot;
-    if (dir.equalsIgnoreCase("left"))
+    if (dir.equals("left"))
       return Direction.Left;
-    if (dir.equalsIgnoreCase("right"))
+    if (dir.equals("right"))
       return Direction.Right;
-    if (dir.equalsIgnoreCase("front"))
+    if (dir.equals("front"))
       return Direction.Front;
-    if (dir.equalsIgnoreCase("back"))
+    if (dir.equals("back"))
       return Direction.Back;
     return Direction.None;
   }
@@ -54,25 +55,8 @@ enum Direction {
 
 // the world of stacks
 public class BlocksWorld extends FlatWorld {
-
   public Map<String,Set<Block>> vars;
-  // this is probably the place to deal with disconnected stuff
-  private int stackLevel = 0;
   
-  @SuppressWarnings("unchecked")
-  public BlocksWorld(Set<Item> blockset) {
-    super();
-    this.allitems = blockset;
-  }
-
-  public String toJSON() {
-    // updateWorldArray();
-    // updateWorldList();
-    // return "testtest";
-    return Json.writeValueAsStringHard(this.allitems.stream().map(c -> ((Block)c).toJSON()).collect(Collectors.toList()));
-    // return this.worldlist.stream().map(c -> c.toJSON()).reduce("", (o, n) -> o+","+n);
-  }
-
   public static BlocksWorld fromContext(ContextValue context) {
     if (context == null || context.graph == null) {
       return fromJSON("[[3,3,1,\"Gray\",[\"S\"]],[4,4,1,\"Blue\",[]]]");
@@ -80,6 +64,20 @@ public class BlocksWorld extends FlatWorld {
     NaiveKnowledgeGraph graph = (NaiveKnowledgeGraph)context.graph;
     String wallString = ((StringValue)graph.triples.get(0).e1).value;
     return fromJSON(wallString);
+  }
+  
+  @SuppressWarnings("unchecked")
+  public BlocksWorld(Set<Item> blockset) {
+    super();
+    this.allitems = blockset;
+    this.selected = blockset.stream().filter(b -> ((Block)b).names.contains("S")).collect(Collectors.toSet());
+  }
+
+  public String toJSON() {
+    // return "testtest";
+    this.selected().forEach(b -> ((Block)b).names.add("S"));
+    return Json.writeValueAsStringHard(this.allitems.stream().map(c -> ((Block)c).toJSON()).collect(Collectors.toList()));
+    // return this.worldlist.stream().map(c -> c.toJSON()).reduce("", (o, n) -> o+","+n);
   }
 
   private static BlocksWorld fromJSON(String wallString) {
@@ -93,6 +91,7 @@ public class BlocksWorld extends FlatWorld {
 
   @Override
   public Set<Item> has(String rel, Set<Object> values) {
+    LogInfo.log(values);
     return this.allitems.stream().filter(i -> values.contains(i.get(rel)))
         .collect(Collectors.toSet());
   }
@@ -108,4 +107,50 @@ public class BlocksWorld extends FlatWorld {
     this.selected.forEach(i -> i.update(rel, value));
   }
   
+  // block world specific actions
+  public void move(String dir) {
+    this.selected.forEach(b -> ((Block)b).move(Direction.fromString(dir)));
+  }
+
+  public void add(String color, String dir) {
+    Set<Item> extremeCubes = extremeCubes(dir);
+    this.allitems.addAll( extremeCubes.stream().map(
+        c -> {Block d = ((Block)c).copy(Direction.fromString(dir)); d.color = CubeColor.fromString(color); return d;}
+        )
+        .collect(Collectors.toList()) );
+  }
+  // get cubes at extreme positions
+  private Set<Item> extremeCubes(String dirstr) {
+    Direction dir = Direction.fromString(dirstr);
+    return selected.stream().map(c -> {
+      Block d = (Block)c;
+      while(allitems.contains(d.copy(dir)))
+        d = d.copy(dir);
+      return d;
+    }).collect(Collectors.toSet());
+  }
+
+  //get cubes at extreme positions
+  public Set<Item> veryx(String dirstr, Set<Item> items) {
+    Direction dir = Direction.fromString(dirstr);
+    switch (dir) {
+    case Back: return argmax(items, c -> c.row);
+    case Front: return argmax(items, c -> -c.row);
+    case Left: return argmax(items, c -> c.col);
+    case Right: return argmax(items, c -> -c.col);
+    case Top: return argmax(items, c -> c.height);
+    case Bot: return argmax(items, c -> -c.height);
+    default: throw new RuntimeException("invalid direction");
+    }
+  }
+  
+  public static Set<Item> argmax(Set<Item> items, Function<Block, Integer> f) {
+    int maxvalue = Integer.MIN_VALUE;
+    for (Item i : items) {
+      int cvalue = f.apply((Block)i);
+      if (cvalue > maxvalue) maxvalue = cvalue;
+    }
+    final int maxValue = maxvalue;
+    return items.stream().filter(c -> f.apply((Block)c) >= maxValue).collect(Collectors.toSet());
+  }
 }

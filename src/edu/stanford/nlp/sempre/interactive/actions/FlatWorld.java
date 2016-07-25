@@ -1,12 +1,10 @@
 package edu.stanford.nlp.sempre.interactive.actions;
-import java.util.Set;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+
 import edu.stanford.nlp.sempre.ContextValue;
 
 // flat world is just a list of allitems where actions can be performed on them
@@ -43,6 +41,7 @@ public abstract class FlatWorld {
   
   // selections
   public void select(Set<Item> set) {
+    selected.clear();
     selected.addAll(set);
   }
   public void push() {
@@ -54,7 +53,8 @@ public abstract class FlatWorld {
   
   // basic sets
   public Set<Item> selected() {
-    return Sets.intersection(selected, allitems);
+    return selected;
+    //return Sets.intersection(selected, allitems);
   }
   public Set<Item> all() {
     return allitems;

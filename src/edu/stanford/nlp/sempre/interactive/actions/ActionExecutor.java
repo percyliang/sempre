@@ -22,6 +22,8 @@ import fig.basic.Option;
 public class ActionExecutor extends Executor {
   public static class Options {
     @Option(gloss = "Whether to convert NumberValue to int/double") public boolean convertNumberValues = true;
+    @Option(gloss = "Whether to convert name values to string literal") public boolean convertNameValues = true;
+
     @Option(gloss = "Print stack trace on exception") public boolean printStackTrace = false;
     // the actual function will be called with the current ContextValue as its last argument if marked by contextPrefix
     @Option(gloss = "Reduce verbosity by automatically appending, for example, edu.stanford.nlp.sempre to java calls")
@@ -33,7 +35,9 @@ public class ActionExecutor extends Executor {
   public static Options opts = new Options();
   
   public static final String STAR = "*";
+  public static final String SELECTED = "this";
 
+  
   public Response execute(Formula formula, ContextValue context) {
     // We can do beta reduction here since macro substitution preserves the
     // denotation (unlike for lambda DCS).
@@ -64,7 +68,13 @@ public class ActionExecutor extends Executor {
     } else if (f.mode == ActionFormula.Mode.repeat) {
       Set<Object> arg = toSet(processSetFormula(f.args.get(0), world));
       if (arg.size() > 1) throw new RuntimeException("repeat has to take a single number");
-      int times = (int) arg.iterator().next();
+      
+      int times;
+      if (!opts.convertNumberValues)
+        times = (int)((NumberValue)arg.iterator().next()).value;
+      else 
+        times = (int)arg.iterator().next();
+
       for (int i = 0; i < times; i++)
         performActions((ActionFormula)f.args.get(1), world);
     } else if (f.mode == ActionFormula.Mode.conditional) {
@@ -99,8 +109,12 @@ public class ActionExecutor extends Executor {
     if (formula instanceof ValueFormula<?>) {
       Value v = ((ValueFormula<?>) formula).value;
       // special unary
-      if (v instanceof NameValue && ((NameValue) v).id.equals(ActionExecutor.STAR)) {
-        return world.all();
+      if (v instanceof NameValue) {
+        String id = ((NameValue) v).id;
+        if (id.equals(ActionExecutor.STAR))
+          return world.all();
+        if (id.equals(ActionExecutor.SELECTED))
+          return world.selected();
       } 
       return toObject(((ValueFormula<?>) formula).value);
     }
@@ -117,7 +131,7 @@ public class ActionExecutor extends Executor {
         Set<Object> unary = toSet(processSetFormula(joinFormula.child, world));
         return world.get(rel, toItemSet(unary));
       } else {
-        throw new RuntimeException("relation can either be a value, or a reverse");
+        throw new RuntimeException("relation can either be a value, or its reverse");
       }
     }
 
@@ -125,11 +139,17 @@ public class ActionExecutor extends Executor {
       MergeFormula mergeFormula = (MergeFormula)formula;
       MergeFormula.Mode mode = mergeFormula.mode;
       Set<Object> set1 = toSet(processSetFormula(mergeFormula.child1, world)); 
-      Set<Object> set2 = toSet((Set<Object>)processSetFormula(mergeFormula.child1, world));
-      if (mode == MergeFormula.Mode.and)
-        return Sets.union(set1, set2);
+      Set<Object> set2 = toSet(processSetFormula(mergeFormula.child2, world));
       if (mode == MergeFormula.Mode.or)
+        return Sets.union(set1, set2);
+      if (mode == MergeFormula.Mode.and)
         return Sets.intersection(set1, set2);
+    }
+    
+    if (formula instanceof NotFormula)  {
+      NotFormula notFormula = (NotFormula)formula;
+      Set<Object> set1 = toSet(processSetFormula(notFormula.child, world)); 
+      return Sets.difference(world.allitems, set1);
     }
 
     if (formula instanceof AggregateFormula)  {
@@ -143,7 +163,13 @@ public class ActionExecutor extends Executor {
       if (mode == AggregateFormula.Mode.min)
         return Sets.newHashSet(set.stream().max((s,t) -> ((NumberValue)s).value < ((NumberValue)t).value ? 1 : -1));
     }
-
+    
+    if (formula instanceof CallFormula)  {
+    }
+    
+    if (formula instanceof SuperlativeFormula)  {
+    }
+    
     throw new RuntimeException("Should never get here");
   }
 
@@ -230,6 +256,9 @@ public class ActionExecutor extends Executor {
       double x = ((NumberValue) value).value;
       if (x == (int) x) return new Integer((int) x);
       return new Double(x);
+    } else if (value instanceof NameValue && opts.convertNameValues) {
+      String id = ((NameValue) value).id;
+      return id;
     } else if (value instanceof BooleanValue) {
       return ((BooleanValue) value).value;
     } else if (value instanceof StringValue) {
