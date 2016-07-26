@@ -21,10 +21,10 @@ public abstract class FlatWorld {
     throw new RuntimeException("World does not exist: " + worldname);
   }
   
-  // special relations cannot really be implemented as triple
+  public abstract String toJSON();
   public abstract Set<Item> has(String rel, Set<Object> values);
   public abstract Set<Object> get(String rel, Set<Item> subset);
-  public abstract void update(String rel, Object value);
+  public abstract void update(String rel, Object value, Set<Item> selected);
 
   public FlatWorld() {
     this.allitems = Sets.newHashSet();
@@ -33,15 +33,14 @@ public abstract class FlatWorld {
   }
   
   // general actions, flatness means these actions can be performed on all allitems
-  public void remove() {
+  public void remove(Set<Item> selected) {
     allitems.removeAll(selected);
     selected.clear();
   }
-  // dd more actions that are called by 
   
   // selections
   public void select(Set<Item> set) {
-    selected.clear();
+    selected = Sets.newHashSet();
     selected.addAll(set);
   }
   public void push() {
@@ -59,12 +58,8 @@ public abstract class FlatWorld {
   public Set<Item> all() {
     return allitems;
   }
-  public Set<Item> nothing() {
+  public Set<Item> empty() {
     return Sets.newHashSet();
   }
 
-  public String toJSON() {
-    // TODO Auto-generated method stub
-    return null;
-  } 
 }

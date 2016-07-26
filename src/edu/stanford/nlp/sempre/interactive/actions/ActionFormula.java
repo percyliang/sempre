@@ -19,7 +19,13 @@ import java.util.List;
  */
 public class ActionFormula extends Formula {
   public enum Mode {
-    primitive(":"), sequential(":s"), repeat(":rep"), conditional(":if"), scope(":scope"), each(":each"), all(":all");
+    primitive(":"), // (: remove *)
+    sequential(":s"), // (:s (: add red top) (: remove this))
+    repeat(":loop"), // (:loop (count (has color green)) (: add red top))
+    conditional(":if"), // (:if (count (has color green)) (: add red top))
+    forset(":for"), // (:for (and this (color red)) (:s (: add red top) (: add yellow top) (: remove)))
+    foreach(":foreach"), // (:foreach * (add ((reverse color) this) top))
+    assignment(":let"); // (:let * @x)
     private final String value;
     Mode(String value) {this.value = value;}
     @Override
@@ -37,7 +43,7 @@ public class ActionFormula extends Formula {
 
   public static Mode parseMode(String mode) {
     for (Mode m : Mode.values()) {
-      // LogInfo.logs("mode string %s , %s", m.toString(), m.name());
+      // LogInfo.logs("mode string %s \t== %s \t!= %s", m.toString(), mode, m.name());
       if (m.toString().equals(mode))
         return m;
     }

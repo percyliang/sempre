@@ -3,20 +3,27 @@ package edu.stanford.nlp.sempre.interactive.actions;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.sql.Types;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.common.collect.ObjectArrays;
 
 import edu.stanford.nlp.sempre.*;
+import fig.basic.LogInfo;
 import fig.basic.Option;
 
 /**
  * Handles action lambda DCS
  * where the world has a flat structure, i.e. a list of allitems all supporting the same operations
+ * supports ActionFormula here, and does conversions of singleton sets
  * @author Sida Wang
  */
 public class ActionExecutor extends Executor {
@@ -33,9 +40,7 @@ public class ActionExecutor extends Executor {
     public String FlatWorldType = "BlocksWorld";
   }
   public static Options opts = new Options();
-  
-  public static final String STAR = "*";
-  public static final String SELECTED = "this";
+ 
 
   
   public Response execute(Formula formula, ContextValue context) {
@@ -81,28 +86,50 @@ public class ActionExecutor extends Executor {
       // using the empty set to represent false
       boolean cond = toSet(processSetFormula(f.args.get(0), world)).iterator().hasNext();
       if (cond) performActions((ActionFormula)f.args.get(1), world);
-    } else if (f.mode == ActionFormula.Mode.scope) {
-      Set<Object> currentscope = toSet(processSetFormula(f.args.get(0), world));
+    } else if (f.mode == ActionFormula.Mode.forset) {
+      Set<Object> selected = toSet(processSetFormula(f.args.get(0), world));
       world.push();
-      world.select(toItemSet(currentscope));
-      world.pop();
+      world.select(toItemSet(selected));
       performActions((ActionFormula)f.args.get(1), world);
+      world.pop();
+      
+    } else if (f.mode == ActionFormula.Mode.foreach) {
+      Set<Object> selected = toSet(processSetFormula(f.args.get(0), world));
+      world.push();
+      CopyOnWriteArraySet<Object> fixedset = Sets.newCopyOnWriteArraySet(selected);
+      for (Object item : fixedset) {
+        world.select(toItemSet(toSet(item)));
+        performActions((ActionFormula)f.args.get(1), world);
+      }
+
+      world.pop();
     }
   }
-
-
+  
   private Set<Object> toSet(Object maybeSet) {
-    if (maybeSet instanceof Set) return (Set) maybeSet;
+    if (maybeSet instanceof Set) return (Set<Object>) maybeSet;
     else return Sets.newHashSet(maybeSet);
   }
+  private Object toNotSet(Set<Object> set) {
+    if (set.size() == 1) {
+      return set.iterator().next();
+    }
+    return set;
+  }
+  
   private Set<Item> toItemSet(Set<Object> maybeItems) {
     Set<Item> itemset = maybeItems.stream().map(i -> (Item)i)
         .collect(Collectors.toSet());
     return itemset;
   }
 
-  // a subset of lambda dcs. no types, and no marks. actually implemented with predicates...
-  // if this gets any more complicated, then should just use LambdaDCSExecutor
+  static class SpecialSets {
+    static String All = "*";
+    static String EmptySet = "nothing";
+    static String Selected = "this";
+  };
+  // a subset of lambda dcs. no types, and no marks
+  // if this gets any more complicated, you should consider the LambdaDCSExecutor
   @SuppressWarnings("unchecked")
   private Object processSetFormula(Formula formula, final FlatWorld world) {
     if (formula instanceof ValueFormula<?>) {
@@ -110,10 +137,13 @@ public class ActionExecutor extends Executor {
       // special unary
       if (v instanceof NameValue) {
         String id = ((NameValue) v).id;
-        if (id.equals(ActionExecutor.STAR))
+        // LogInfo.logs("%s : this %s, all: %s", id, world.selected().toString(), world.allitems.toString());
+        if (id.equals(SpecialSets.All))
           return world.all();
-        if (id.equals(ActionExecutor.SELECTED))
+        if (id.equals(SpecialSets.Selected))
           return world.selected();
+        if (id.equals(SpecialSets.EmptySet))
+          return world.empty();
       } 
       return toObject(((ValueFormula<?>) formula).value);
     }
@@ -165,22 +195,24 @@ public class ActionExecutor extends Executor {
     
     if (formula instanceof CallFormula)  {
       CallFormula callFormula = (CallFormula)formula;
+      @SuppressWarnings("rawtypes")
       Value method  = ((ValueFormula)callFormula.func).value;
       String id = ((NameValue)method).id;
       // all actions takes a fixed set as argument
-      invoke(id, world, callFormula.args.stream().map(x -> processSetFormula(x, world)).toArray());
-    }
-    
-    if (formula instanceof SuperlativeFormula)  {
+      return toItemSet(toSet(invoke(id, world, callFormula.args.stream().map(x -> processSetFormula(x, world)).toArray())));
       
     }
     
-    throw new RuntimeException("Should never get here");
+    if (formula instanceof SuperlativeFormula)  {
+      throw new RuntimeException("SuperlativeFormula is not implemented");
+    }
+    
+    throw new RuntimeException("We do not recognize this formula type: " + formula.getClass());
   }
 
   // Example: id = "Math.cos". similar to JavaExecutor's invoke,
   // but matches arg by building singleton set as needed
-  private Object invoke(String id, Object thisObj, Object ... args) {
+  private Object invoke(String id, FlatWorld thisObj, Object ... args) {
     Method[] methods;
     Class<?> cls;
     String methodName;
@@ -216,6 +248,13 @@ public class ActionExecutor extends Executor {
       nameMatches.add(m);
       if (isStatic != Modifier.isStatic(m.getModifiers())) continue;
       int cost = typeCastCost(m.getParameterTypes(), args);
+      
+      // append optional selected parameter when needed:
+      if (cost == INVALID_TYPE_COST && args.length + 1 == m.getParameterCount()) {
+        args = ObjectArrays.concat(args, thisObj.selected);
+        cost = typeCastCost(m.getParameterTypes(), args);
+      }
+      
       if (cost < bestCost) {
         bestCost = cost;
         bestMethod = m;
@@ -242,9 +281,13 @@ public class ActionExecutor extends Executor {
     int cost = 0;
     for (int i = 0; i < types.length; i++) {
 
+      // deal with singleton sets
       if (types[i] == Set.class)
         args[i] = toSet(args[i]);
-
+      if (types[i] != Set.class && args[i].getClass() == Set.class) {
+        args[i] = toNotSet((Set<Object>)args[i]);
+      }
+        
       cost += typeCastCost(types[i], args[i]);
       if (cost >= INVALID_TYPE_COST) {
         // LogInfo.dbgs("NOT COMPATIBLE: want %s, got %s with type %s", types[i], args[i], args[i].getClass());

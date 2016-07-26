@@ -2,6 +2,7 @@
 
 # contextful top level functions
 # command:
+
 (def @put put)
 (def @base base)
 # basic actions
@@ -18,7 +19,8 @@
 # This grammar should have Rule.defaultIsFloating false
 
 
-########### start of domain specific stuff
+########### domain specific grammar
+
 # utilities
 (rule $Action (reset) (ConstantFn (: reset (string default))) (anchored 1))
 (rule $Action (reset $TOKEN) (lambda n (: reset (var n))) (anchored 1))
@@ -34,14 +36,18 @@
 # cube to cube relations
 (rule $Set ($Direction of $Sets) (lambda d (lambda s
 			   ((var d) (var s)))) (anchored 1))
-(rule $Set ($Extreme of $Sets) (lambda d (lambda s
-			   ((var d) (var s)))) (anchored 1))
+(rule $Set ($Extreme of $Sets) (lambda e (lambda s
+			   (call @veryx (var e) (var s)))) (anchored 1))
 
 (for @dir (top bot left right front back)
 (rule $Direction (@dir) @dir (anchored 1))
 )
-(for @dir (very_top very_bot very_left very_right very_front very_back)
-(rule $Extreme (@dir) @dir (anchored 1))
+(for @dir (top bot left right front back)
+(rule $Extreme (very @dir) @dir (anchored 1))
+)
+
+(for @rel (col row height color name age)
+     (rule $Rel (@rel) (ConstantFn @rel) (anchored 1))
 )
 
 (rule $ValueSet ($Color) (IdentityFn) (anchored 1))
@@ -51,6 +57,7 @@
 (rule $Number (@num) (ConstantFn (number @num)) (anchored 1))
 )
 (rule $Number (many) (ConstantFn (number 10)) (anchored 1))
+# (rule $Number ($TOKEN) (NumberFn) (anchored 1)) # dont want this yet, since large loops can hang
 
 (rule $Color (red) red (anchored 1))
 (rule $Color (orange) orange (anchored 1))

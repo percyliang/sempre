@@ -21,9 +21,10 @@
 (rule $Action (remove) (ConstantFn (: @remove)) (anchored 1))
 
 ########### unary sets
-(rule $Set (selected) selected (anchored 1))
-(rule $Set (this) selected (anchored 1))
+(rule $Set (selected) this (anchored 1))
+(rule $Set (this) this (anchored 1))
 (rule $Set (all) * (anchored 1))
+(rule $Set (nothing) nothing (anchored 1))
 
 ########### basic set operations
 # just use or and filter, which does and
@@ -37,13 +38,11 @@
 (rule $ValueSet (not $ValueSet) (lambda s (not (var s))) (anchored 1))
 (rule $Set (not $Sets) (lambda s (not (var s))) (anchored 1))
 
-
 (rule $ValueSets ($ValueSet) (IdentityFn) (anchored 1))
 (rule $ValueSet ([ $ValueSets ]) (IdentityFn) (anchored 1))
 
 (rule $Sets ($Set) (IdentityFn) (anchored 1))
 (rule $Set ([ $Sets ]) (IdentityFn) (anchored 1))
-
 
 ############# Set of values
 (rule $ValueSet ($Rel of $Sets) (lambda r (lambda s
@@ -51,10 +50,6 @@
 			   
 (rule $Set (has $Rel $ValueSets) (lambda r (lambda s
 			   ((var r) (var s)))) (anchored 1))
-
-(for @rel (col row height color name age)
-     (rule $Rel (@rel) (ConstantFn @rel) (anchored 1))
-)
 
 
 ############### arithmetics
