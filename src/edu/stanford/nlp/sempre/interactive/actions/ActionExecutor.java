@@ -147,7 +147,7 @@ public class ActionExecutor extends Executor {
       } 
       return toObject(((ValueFormula<?>) formula).value);
     }
-
+    
     if (formula instanceof JoinFormula) {
       JoinFormula joinFormula = (JoinFormula)formula;
       if (joinFormula.relation instanceof ValueFormula) {
@@ -163,7 +163,7 @@ public class ActionExecutor extends Executor {
         throw new RuntimeException("relation can either be a value, or its reverse");
       }
     }
-
+    
     if (formula instanceof MergeFormula)  {
       MergeFormula mergeFormula = (MergeFormula)formula;
       MergeFormula.Mode mode = mergeFormula.mode;
@@ -200,13 +200,10 @@ public class ActionExecutor extends Executor {
       String id = ((NameValue)method).id;
       // all actions takes a fixed set as argument
       return toItemSet(toSet(invoke(id, world, callFormula.args.stream().map(x -> processSetFormula(x, world)).toArray())));
-      
     }
-    
     if (formula instanceof SuperlativeFormula)  {
       throw new RuntimeException("SuperlativeFormula is not implemented");
     }
-    
     throw new RuntimeException("We do not recognize this formula type: " + formula.getClass());
   }
 

@@ -1,7 +1,6 @@
 (def @select select)
 (def @change change)
 (def @remove remove)
-
 (def @R reverse)
 
 (rule $ROOT ($Actions) (IdentityFn) (anchored 1)) # process for better
@@ -9,24 +8,28 @@
 (rule $Actions ($Actions ; $Action) (lambda a1 (lambda a2 (:s (var a1) (var a2)))) (anchored 1))
 (rule $Actions ($Action) (IdentityFn) (anchored 1))
 (rule $Action ([ $Actions ]) (IdentityFn) (anchored 1))
-(rule $Action (repeat $Numbers [ $Actions ]) (lambda n (lambda a (:rep (var n) (var a)))) (anchored 1))
+(rule $Action (repeat $Numbers [ $Actions ]) (lambda n (lambda a (:loop (var n) (var a)))) (anchored 1))
 (rule $Action (if $ValueSet [ $Actions ]) (lambda b (lambda a (:if (var b) (var a)))) (anchored 1))
 
 # basic actions, local scope "for has color red [add red left; add red top]" 
-(rule $Action (select $Sets [ $Actions ] ) (lambda s (lambda a (:scope (var s) (var a)))) (anchored 1))
+(rule $Action (for $Sets [ $Actions ] ) (lambda s (lambda a (:for (var s) (var a)))) (anchored 1))
+(rule $Action (foreach $Sets [ $Actions ] ) (lambda s (lambda a (:foreach (var s) (var a)))) (anchored 1))
+
 
 # global actions
 (rule $Action (select $Sets) (lambda s (: @select (var s))) (anchored 1))
+
+(rule $Action (select) (ConstantFn (: @select)) (anchored 1))
 (rule $Action (change $Rel to $SetValues) (lambda r (lambda v (: @change (var r) (var v)))) (anchored 1))
 (rule $Action (remove) (ConstantFn (: @remove)) (anchored 1))
 
-########### unary sets
+############### unary sets
 (rule $Set (selected) this (anchored 1))
 (rule $Set (this) this (anchored 1))
 (rule $Set (all) * (anchored 1))
 (rule $Set (nothing) nothing (anchored 1))
 
-########### basic set operations
+############### basic set operations
 # just use or and filter, which does and
 
 (for @op (or and)
@@ -35,7 +38,10 @@
 (rule $ValueSets ($ValueSets @op $ValueSet) (lambda s1 (lambda s2
 					(@op (var s1) (var s2)))) (anchored 1))
 )
-(rule $ValueSet (not $ValueSet) (lambda s (not (var s))) (anchored 1))
+
+# this would require universe of each type
+# (rule $ValueSet (not $ValueSet) (lambda s (not (var s))) (anchored 1))
+
 (rule $Set (not $Sets) (lambda s (not (var s))) (anchored 1))
 
 (rule $ValueSets ($ValueSet) (IdentityFn) (anchored 1))
@@ -44,13 +50,12 @@
 (rule $Sets ($Set) (IdentityFn) (anchored 1))
 (rule $Set ([ $Sets ]) (IdentityFn) (anchored 1))
 
-############# Set of values
+############### Joins
 (rule $ValueSet ($Rel of $Sets) (lambda r (lambda s
 			   ((@R (var r)) (var s)))) (anchored 1))
 			   
 (rule $Set (has $Rel $ValueSets) (lambda r (lambda s
 			   ((var r) (var s)))) (anchored 1))
-
 
 ############### arithmetics
 (for @op (+ -)
@@ -61,7 +66,18 @@
 (rule $Number ([ $Numbers ]) (IdentityFn) (anchored 1))
 (rule $Numbers ( $Number ) (IdentityFn) (anchored 1))
 
-# couple of floating rules for testing
-(rule $Action ($Numbers $Actions) (lambda n (lambda a (:rep (var n) (var a)))) (floating 1))
-(rule $Action ($Sets $Actions) (lambda s (lambda a (:scope (var s) (var a)))) (floating 1))
+
+#############################
+# Floating rules
+#############################
+
+# do add red top 3 times
+(rule $Action ($Numbers $Actions) (lambda n (lambda a (:loop (var n) (var a)))) (floating 1))
+
+# add red top to has color re
+(rule $Action ($Sets $Actions) (lambda s (lambda a (:for (var s) (var a)))) (floating 1))
+(rule $Action ($Sets $Actions) (lambda s (lambda a (:foreach (var s) (var a)))) (floating 1))
+
+# add red top then remove them
+(rule $Action ($Actions $Actions) (lambda a1 (lambda a2 (:s (var a1) (var a2)))) (floating 1))
 
