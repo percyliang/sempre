@@ -136,7 +136,7 @@ public class GrammarInducer {
     }
     SemanticFn applyFn = new ApplyFn();
     LispTree newTree = LispTree.proto.newList();
-    newTree.addChild("cubeworld.ApplyFn");
+    newTree.addChild("interactive.ApplyFn");
     newTree.addChild(baseFormula.toLispTree());
     applyFn.init(newTree);
     return applyFn;

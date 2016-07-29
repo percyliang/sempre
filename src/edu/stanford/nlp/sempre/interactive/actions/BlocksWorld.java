@@ -162,8 +162,11 @@ public class BlocksWorld extends FlatWorld {
           Block d = ((Block)c).copy(Direction.fromString(dir));
           
           // a bit of a hack to deal with special anchor points, where adding to its top behaves differently
-          if (d.color == CubeColor.Anchor && d.height == 1)
+          if (d.color.equals(CubeColor.Anchor) && d.height == 1) {
             d.height = d.height - 1;
+            ((Block)c).color = CubeColor.fromString(color);
+            return c;
+          }
 
           d.color = CubeColor.fromString(color);
           return d;}

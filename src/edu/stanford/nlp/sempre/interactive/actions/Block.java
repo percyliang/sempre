@@ -125,11 +125,13 @@ public class  Block extends Item {
   }
   @Override
   public int hashCode() {
-    final int prime = 53;
+    final int prime = 19;
     int result = 1;
     result = prime * result + col;
     result = prime * result + height;
     result = prime * result + row;
+    result = prime * result + (this.color == (CubeColor.Anchor)? 1 : 0);
+
     return result;
   }
   @Override
@@ -150,8 +152,7 @@ public class  Block extends Item {
       return false;
     
     // only anchored colors need to be the same.
-    if (this.color == CubeColor.Anchor || other.color == CubeColor.Anchor)
-      if ((this.height !=0 || other.height!= 0) && this.color != other.color)
+    if (this.color == CubeColor.Anchor ^ other.color == CubeColor.Anchor && this.height == 0)
         return false;
     return true;
   }
