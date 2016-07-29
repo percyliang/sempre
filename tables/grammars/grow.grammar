@@ -195,7 +195,6 @@
   (when set
     (rule $Set ($Map) (tables.grow.EndGrowFn (lambda s (lambda r (and (var s) (mark x (: ((var r) (var x)))))))))
   )
-
 )
 
 ################################################################

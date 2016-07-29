@@ -141,12 +141,18 @@ public class  Block extends Item {
     if (getClass() != obj.getClass())
       return false;
     Block other = (Block) obj;
+    
     if (col != other.col)
       return false;
     if (height != other.height)
       return false;
     if (row != other.row)
       return false;
+    
+    // only anchored colors need to be the same.
+    if (this.color == CubeColor.Anchor || other.color == CubeColor.Anchor)
+      if ((this.height !=0 || other.height!= 0) && this.color != other.color)
+        return false;
     return true;
   }
 }

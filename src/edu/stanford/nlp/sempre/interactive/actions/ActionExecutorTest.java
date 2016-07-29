@@ -20,6 +20,7 @@ public class ActionExecutorTest {
 
   protected static void runFormula(ActionExecutor executor, String formula, ContextValue context, Predicate<FlatWorld> checker) {
     LogInfo.begin_track("formula: %s", formula);
+    executor.opts.FlatWorldType = "BlocksWorld";
     Executor.Response response = executor.execute(Formulas.fromLispTree(LispTree.proto.parseFromString(formula)), context);
     
     NaiveKnowledgeGraph graph = (NaiveKnowledgeGraph)context.graph;

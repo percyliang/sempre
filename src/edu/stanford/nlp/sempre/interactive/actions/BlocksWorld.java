@@ -14,7 +14,8 @@ import edu.stanford.nlp.sempre.StringValue;
 import fig.basic.LogInfo;
 
 enum CubeColor {
-  Red(0), Orange(1), Yellow (2), Green(3), Blue(4), White(6), Black(7), Pink(8), Brown(9), Gray(10), None(-5);
+  Red(0), Orange(1), Yellow (2), Green(3), Blue(4), White(6), Black(7),
+  Pink(8), Brown(9), Gray(10), Anchor(11), None(-5);
   private final int value;
   private static final int MAXCOLOR = 7;
   CubeColor(int value) { this.value = value; }
@@ -99,7 +100,7 @@ public class BlocksWorld extends FlatWorld {
   }
 
   public void base(int x, int y) {
-    Block basecube = new Block(x, y, 0, CubeColor.Gray.toString());
+    Block basecube = new Block(x, y, 0, CubeColor.Anchor.toString());
     this.allitems.add(basecube);
     this.selected.add(basecube);
   }
@@ -157,7 +158,15 @@ public class BlocksWorld extends FlatWorld {
   public void add(String color, String dir, Set<Item> selected) {
     Set<Item> extremeCubes = extremeCubes(dir, selected);
     this.allitems.addAll( extremeCubes.stream().map(
-        c -> {Block d = ((Block)c).copy(Direction.fromString(dir)); d.color = CubeColor.fromString(color); return d;}
+        c -> {
+          Block d = ((Block)c).copy(Direction.fromString(dir));
+          
+          // a bit of a hack to deal with special anchor points, where adding to its top behaves differently
+          if (d.color == CubeColor.Anchor && d.height == 1)
+            d.height = d.height - 1;
+
+          d.color = CubeColor.fromString(color);
+          return d;}
         )
         .collect(Collectors.toList()) );
   }

@@ -18,7 +18,6 @@
 
 # global actions
 (rule $Action (select $Sets) (lambda s (: @select (var s))) (anchored 1))
-
 (rule $Action (select) (ConstantFn (: @select)) (anchored 1))
 (rule $Action (change $Rel to $SetValues) (lambda r (lambda v (: @change (var r) (var v)))) (anchored 1))
 (rule $Action (remove) (ConstantFn (: @remove)) (anchored 1))
@@ -66,6 +65,14 @@
 (rule $Number ([ $Numbers ]) (IdentityFn) (anchored 1))
 (rule $Numbers ( $Number ) (IdentityFn) (anchored 1))
 
+###### Keywords 
+(rule $Keyword (add) (ConstantFn (string keyword)))
+(rule $Keyword (remove) (ConstantFn (string keyword)))
+(rule $Keyword (repeat) (ConstantFn (string keyword)))
+(rule $Keyword (has) (ConstantFn (string keyword)))
+(rule $Keyword (of) (ConstantFn (string keyword)))
+(rule $Keyword (and) (ConstantFn (string keyword)))
+(rule $Keyword (or) (ConstantFn (string keyword)))
 
 #############################
 # Floating rules
@@ -74,10 +81,21 @@
 # do add red top 3 times
 (rule $Action ($Numbers $Actions) (lambda n (lambda a (:loop (var n) (var a)))) (floating 1))
 
-# add red top to has color re
+# add red top to has color red
 (rule $Action ($Sets $Actions) (lambda s (lambda a (:for (var s) (var a)))) (floating 1))
 (rule $Action ($Sets $Actions) (lambda s (lambda a (:foreach (var s) (var a)))) (floating 1))
 
 # add red top then remove them
 (rule $Action ($Actions $Actions) (lambda a1 (lambda a2 (:s (var a1) (var a2)))) (floating 1))
 
+(rule $Set ($Rel $ValueSets) (lambda r (lambda s
+			   ((var r) (var s)))) (floating 1))
+
+(rule $ValueSets ($Rel $Sets) (lambda r (lambda s
+			   ((reverse (var r)) (var s)))) (floating 1))
+			   
+(rule $Action ($Actions $Actions) (lambda a1 (lambda a2 (:s (var a1) (var a2)))) (floating 1))
+
+(rule $Action ($Sets) (lambda s (: @select (var s))) (floating 1))
+(rule $Action ($Rel $SetValues) (lambda r (lambda v (: @change (var r) (var v)))) (floating 1))
+(rule $Action (nothing) (ConstantFn (: @remove)) (floating 1))
