@@ -540,7 +540,7 @@ public class Server {
           item.put("score", deriv.score);
           item.put("prob", deriv.prob);
           item.put("anchored", deriv.allAnchored); // used only anchored rules
-          item.put("formula", convertLispToList(deriv.formula.toLispTree()));
+          item.put("formula", deriv.formula.toLispTree().toString());
           items.add(item);
         }
       }

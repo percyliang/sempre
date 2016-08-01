@@ -11,7 +11,6 @@ import edu.stanford.nlp.sempre.ContextValue;
 import edu.stanford.nlp.sempre.Json;
 import edu.stanford.nlp.sempre.NaiveKnowledgeGraph;
 import edu.stanford.nlp.sempre.StringValue;
-import fig.basic.LogInfo;
 
 enum CubeColor {
   Red(0), Orange(1), Yellow (2), Green(3), Blue(4), White(6), Black(7),
@@ -58,7 +57,7 @@ enum Direction {
 // the world of stacks
 public class BlocksWorld extends FlatWorld {
   public Map<String,Set<Block>> vars;
-  
+
   public static BlocksWorld fromContext(ContextValue context) {
     if (context == null || context.graph == null) {
       return fromJSON("[[3,3,1,\"Gray\",[\"S\"]],[4,4,1,\"Blue\",[]]]");
@@ -67,7 +66,7 @@ public class BlocksWorld extends FlatWorld {
     String wallString = ((StringValue)graph.triples.get(0).e1).value;
     return fromJSON(wallString);
   }
-  
+
   public void reset(String name) {
     this.allitems.clear();
     this.selected.clear();
@@ -104,7 +103,7 @@ public class BlocksWorld extends FlatWorld {
     this.allitems.add(basecube);
     this.selected.add(basecube);
   }
-  
+
   @SuppressWarnings("unchecked")
   public BlocksWorld(Set<Item> blockset) {
     super();
@@ -147,12 +146,16 @@ public class BlocksWorld extends FlatWorld {
 
   @Override
   public void update(String rel, Object value, Set<Item> selected) {
+    allitems.removeAll(selected);
     selected.forEach(i -> i.update(rel, value));
+    allitems.addAll(selected);
   }
-  
+
   // block world specific actions
   public void move(String dir, Set<Item> selected) {
+    allitems.removeAll(selected);
     selected.forEach(b -> ((Block)b).move(Direction.fromString(dir)));
+    allitems.addAll(selected);
   }
 
   public void add(String color, String dir, Set<Item> selected) {
@@ -160,7 +163,7 @@ public class BlocksWorld extends FlatWorld {
     this.allitems.addAll( extremeCubes.stream().map(
         c -> {
           Block d = ((Block)c).copy(Direction.fromString(dir));
-          
+
           // a bit of a hack to deal with special anchor points, where adding to its top behaves differently
           if (d.color.equals(CubeColor.Anchor) && d.height == 1) {
             d.height = d.height - 1;
@@ -199,10 +202,13 @@ public class BlocksWorld extends FlatWorld {
   }
   public Set<Item> adj(String dirstr, Set<Item> selected) {
     Direction dir = Direction.fromString(dirstr);
-    return selected.stream().map(c -> ((Block)c).copy(dir)).filter(c -> allitems.contains(c))
+    Set<Item> allselected = selected.stream().map(c -> ((Block)c).copy(dir)).filter(c -> allitems.contains(c))
         .collect(Collectors.toSet());
+    allitems.removeAll(allselected);
+    allitems.addAll(allselected);
+    return allselected;
   }
-  
+
   public static Set<Item> argmax(Function<Block, Integer> f, Set<Item> items) {
     int maxvalue = Integer.MIN_VALUE;
     for (Item i : items) {

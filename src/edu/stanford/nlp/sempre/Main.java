@@ -1,5 +1,6 @@
 package edu.stanford.nlp.sempre;
 
+import fig.basic.LogInfo;
 import fig.basic.Option;
 import fig.exec.Execution;
 
@@ -29,6 +30,7 @@ public class Main implements Runnable {
     }
 
     if (interactive) {
+      LogInfo.msPerLine = 0;
       Master master = new Master(builder);
       master.runInteractivePrompt();
     }

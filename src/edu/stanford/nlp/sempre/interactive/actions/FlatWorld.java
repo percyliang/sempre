@@ -13,7 +13,6 @@ public abstract class FlatWorld {
   // supports variables, and perhaps scoping
   public Set<Item> selected;
   public Set<Item> allitems;
-  public LinkedList<Set<Item>> stack;
   
   public static FlatWorld fromContext(String worldname, ContextValue context) {
     if (worldname.equals("BlocksWorld"))
@@ -21,6 +20,8 @@ public abstract class FlatWorld {
     throw new RuntimeException("World does not exist: " + worldname);
   }
   
+  // there are some annoying issues with mutable objects.
+  // The current strategy is to keep allitems up to date on each mutable operation
   public abstract String toJSON();
   public abstract Set<Item> has(String rel, Set<Object> values);
   public abstract Set<Object> get(String rel, Set<Item> subset);
@@ -29,27 +30,21 @@ public abstract class FlatWorld {
   public FlatWorld() {
     this.allitems = Sets.newHashSet();
     this.selected = Sets.newHashSet();
-    this.stack = Lists.newLinkedList();
   }
   
   // general actions, flatness means these actions can be performed on all allitems
   public void remove(Set<Item> selected) {
     allitems.removeAll(selected);
-    selected.clear();
   }
   
   // selections
   public void select(Set<Item> set) {
     selected = Sets.newHashSet();
     selected.addAll(set);
-  }
-  public void push() {
-    stack.push(selected);
-  }
-  public void pop() {
-    selected = stack.pop();
-  }
-  
+    selected.retainAll(allitems);
+    // allitems.removeAll(selected);
+    // allitems.addAll(selected);
+  }  
   // basic sets
   public Set<Item> selected() {
     return selected;

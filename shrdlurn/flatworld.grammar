@@ -17,10 +17,12 @@
 
 
 # global actions
-(rule $Action (select $Sets) (lambda s (: @select (var s))) (anchored 1))
+(rule $Action (select $Sets) (lambda s (:for (var s) (: @select))) (anchored 1))
 (rule $Action (select) (ConstantFn (: @select)) (anchored 1))
 (rule $Action (change $Rel to $SetValues) (lambda r (lambda v (: @change (var r) (var v)))) (anchored 1))
+
 (rule $Action (remove) (ConstantFn (: @remove)) (anchored 1))
+(rule $Action (remove $Sets) (lambda s (:for (var s) (: @remove))) (anchored 1))
 
 ############### unary sets
 (rule $Set (selected) this (anchored 1))
@@ -97,5 +99,5 @@
 (rule $Action ($Actions $Actions) (lambda a1 (lambda a2 (:s (var a1) (var a2)))) (floating 1))
 
 (rule $Action ($Sets) (lambda s (: @select (var s))) (floating 1))
-(rule $Action ($Rel $SetValues) (lambda r (lambda v (: @change (var r) (var v)))) (floating 1))
+(rule $Action ($Rel $ValueSets) (lambda r (lambda v (: @change (var r) (var v)))) (floating 1))
 (rule $Action (nothing) (ConstantFn (: @remove)) (floating 1))

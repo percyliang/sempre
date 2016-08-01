@@ -25,7 +25,9 @@ public class ActionFormula extends Formula {
     conditional(":if"), // (:if (count (has color green)) (: add red top))
     forset(":for"), // (:for (and this (color red)) (:s (: add red top) (: add yellow top) (: remove)))
     foreach(":foreach"), // (:foreach * (add ((reverse color) this) top))
-    assignment(":let"); // (:let * @x)
+    assignment(":let"), // (:let * @x)
+    scope(":scope"); // (:scope this (blah))
+
     private final String value;
     Mode(String value) {this.value = value;}
     @Override

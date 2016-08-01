@@ -63,8 +63,7 @@ public class ActionExecutor extends Executor {
       String id = ((NameValue)method).id;
       // all actions takes a fixed set as argument
       invoke(id, world, f.args.subList(1, f.args.size()).stream().map(x -> processSetFormula(x, world)).toArray());
-    }
-    else if (f.mode == ActionFormula.Mode.sequential) {
+    } else if (f.mode == ActionFormula.Mode.sequential) {
       for (Formula child : f.args) {
         performActions((ActionFormula)child, world);
       }
@@ -86,20 +85,26 @@ public class ActionExecutor extends Executor {
       if (cond) performActions((ActionFormula)f.args.get(1), world);
     } else if (f.mode == ActionFormula.Mode.forset) {
       Set<Object> selected = toSet(processSetFormula(f.args.get(0), world));
-      world.push();
+      Set<Item> previous = world.selected;
       world.select(toItemSet(selected));
       performActions((ActionFormula)f.args.get(1), world);
-      world.pop();
+      world.select(previous);
       
     } else if (f.mode == ActionFormula.Mode.foreach) {
       Set<Object> selected = toSet(processSetFormula(f.args.get(0), world));
-      world.push();
+      Set<Item> previous = world.selected;
       CopyOnWriteArraySet<Object> fixedset = Sets.newCopyOnWriteArraySet(selected);
       for (Object item : fixedset) {
         world.select(toItemSet(toSet(item)));
         performActions((ActionFormula)f.args.get(1), world);
       }
-      world.pop();
+      world.select(previous);
+    } else if (f.mode == ActionFormula.Mode.scope) {
+      Set<Item> scope = toItemSet(toSet(processSetFormula(f.args.get(0), world)));
+      Set<Item> previous = world.all();
+      world.allitems = scope;
+      performActions((ActionFormula)f.args.get(1), world);
+      world.allitems = Sets.union(previous, world.allitems);
     }
   }
   
@@ -166,10 +171,15 @@ public class ActionExecutor extends Executor {
       MergeFormula.Mode mode = mergeFormula.mode;
       Set<Object> set1 = toSet(processSetFormula(mergeFormula.child1, world)); 
       Set<Object> set2 = toSet(processSetFormula(mergeFormula.child2, world));
+      LogInfo.logsForce(set1);
+      LogInfo.logsForce(set2);
+      LogInfo.logsForce("the union is " + Sets.union(set1, set2));
+
       if (mode == MergeFormula.Mode.or)
         return Sets.union(set1, set2);
       if (mode == MergeFormula.Mode.and)
         return Sets.intersection(set1, set2);
+      
     }
     
     if (formula instanceof NotFormula)  {
