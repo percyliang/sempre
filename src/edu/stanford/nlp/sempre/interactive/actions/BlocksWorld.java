@@ -7,6 +7,8 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.Sets;
+
 import edu.stanford.nlp.sempre.ContextValue;
 import edu.stanford.nlp.sempre.Json;
 import edu.stanford.nlp.sempre.NaiveKnowledgeGraph;
@@ -58,6 +60,8 @@ enum Direction {
 public class BlocksWorld extends FlatWorld {
   public Map<String,Set<Block>> vars;
 
+  public final String SELECT = "S";
+  
   public static BlocksWorld fromContext(ContextValue context) {
     if (context == null || context.graph == null) {
       return fromJSON("[[3,3,1,\"Gray\",[\"S\"]],[4,4,1,\"Blue\",[]]]");
@@ -108,14 +112,14 @@ public class BlocksWorld extends FlatWorld {
   public BlocksWorld(Set<Item> blockset) {
     super();
     this.allitems = blockset;
-    this.selected = blockset.stream().filter(b -> ((Block)b).names.contains("S")).collect(Collectors.toSet());
-    this.allitems.forEach(b -> ((Block)b).names.clear());
+    // this.selected = blockset.stream().filter(b -> ((Block)b).names.contains("S")).collect(Collectors.toSet());
+    // this.allitems.forEach(b -> ((Block)b).names.clear());
   }
 
   public String toJSON() {
     // return "testtest";
-    this.allitems.forEach(b -> ((Block)b).names.remove("S"));
-    this.selected.forEach(b -> ((Block)b).names.add("S"));
+    // this.allitems.forEach(b -> ((Block)b).names.remove(SELECT));
+    // this.selected.forEach(b -> ((Block)b).names.add(SELECT));
     return Json.writeValueAsStringHard(this.allitems.stream().map(c -> ((Block)c).toJSON()).collect(Collectors.toList()));
     // return this.worldlist.stream().map(c -> c.toJSON()).reduce("", (o, n) -> o+","+n);
   }
@@ -149,6 +153,19 @@ public class BlocksWorld extends FlatWorld {
     allitems.removeAll(selected);
     selected.forEach(i -> i.update(rel, value));
     allitems.addAll(selected);
+  }
+  
+  // optional overrides
+  @Override
+  public void select(Set<Item> set) {
+    this.allitems.forEach(b -> ((Block)b).names.remove(SELECT));
+    allitems.stream().filter(d -> set.contains(d)).collect(Collectors.toSet()).forEach(b -> ((Block)b).names.add(SELECT));
+    this.selected = set;
+  }  
+  
+  @Override
+  public Set<Item> selected() {
+    return allitems.stream().filter(b -> ((Block)b).names.contains(SELECT)).collect(Collectors.toSet());
   }
 
   // block world specific actions
