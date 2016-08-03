@@ -104,6 +104,7 @@ public class ActionExecutorTest {
         context, null);
     runFormula(executor, "(:foreach (or (color red) (color blue)) (: update color ((reverse color) (call adj left))))",
         context, null);
+    
     LogInfo.end_track();
   }
   
