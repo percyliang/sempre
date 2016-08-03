@@ -27,18 +27,20 @@ public class BlocksParsingTest {
   }
   Predicate<Example> hasAll(String...substrings) {
     return new Predicate<Example>() {
+      List<String> required = Lists.newArrayList(substrings);
+      
       @Override
       public boolean test(Example e) {
         int match = 0;
         for (Derivation deriv : e.predDerivations) {
           String formula = deriv.formula.toString();
-          if (Lists.newArrayList(substrings).stream().anyMatch(s -> formula.indexOf(s)!=-1)) {
+          if (required.stream().anyMatch(s -> formula.indexOf(s)!=-1)) {
             match ++;
             LogInfo.log("Got a match: " + formula);
           }
         }
         if (match == 0)
-          throw new RuntimeException("Failed to match " + substrings + " : " + e.utterance);
+          throw new RuntimeException("Failed to match " + required.toString() + " : " + e.utterance);
         return true;
       }
     };
@@ -117,8 +119,8 @@ public class BlocksParsingTest {
     ContextValue context = getContext(defaultBlocks);
     LogInfo.begin_track("testJoin");
 
-    parse("", "add 4 yellow blocks", context, contains("(:for (color red) (: select))"));
-    parse("", "put 4 yellow left of red", context, hasAll(":for", "red", "left"));
+    parse("repeat 4 [add yellow]", "add 4 yellow blocks", context, hasAll("(:loop", "(number 4)", "(color yellow)"));
+    parse("repeat 4 [for has color red [ add yellow left ] ]", "put 4 yellow left of red", context, hasAll(":for", "red", "left"));
     parse("", "put 4 yellow to the left of red", context, hasAll(":for", "red", "left"));
     parse("", "select has color red or has color green",  context, hasAll("(color red)", "(color green)", "(: select)"));
     parse("", "add red then add green and then add yellow",  context, hasAll("(color red)", "(color green)", "(color yellow)"));
