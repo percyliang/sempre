@@ -135,5 +135,17 @@ public class ActionExecutorTest {
     LogInfo.end_track();
   }
   
+  @Test public void testAnchor() {
+    // this is a green stick
+    String defaultBlocks = "[[1,1,0,\"Anchor\",[\"S\"]]]";
+    ContextValue context = getContext(defaultBlocks);
+    LogInfo.begin_track("testMoreActions");
+    runFormula(executor, "(:s (: select *) (: select (or (call veryx bot) (call veryx top))))", context, selectedSize(2));
+    runFormula(executor, " (: select (or (call veryx top (color green)) (call veryx bot (color green))))", context, selectedSize(2));
+    runFormula(executor, " (: select (or (call veryx top (color green)) (call veryx bot (color green))))", context, selectedSize(2));
+    runFormula(executor, " (: select (call adj top this))", context, selectedSize(1));
+    LogInfo.end_track();
+  }
+  
   
 }
