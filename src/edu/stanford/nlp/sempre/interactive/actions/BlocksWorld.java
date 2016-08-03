@@ -104,6 +104,7 @@ public class BlocksWorld extends FlatWorld {
 
   public void base(int x, int y) {
     Block basecube = new Block(x, y, 0, CubeColor.Anchor.toString());
+    basecube.names.add(SELECT);
     this.allitems.add(basecube);
     this.selected.add(basecube);
   }
@@ -112,7 +113,7 @@ public class BlocksWorld extends FlatWorld {
   public BlocksWorld(Set<Item> blockset) {
     super();
     this.allitems = blockset;
-    // this.selected = blockset.stream().filter(b -> ((Block)b).names.contains("S")).collect(Collectors.toSet());
+    this.selected = blockset.stream().filter(b -> ((Block)b).names.contains("S")).collect(Collectors.toSet());
     // this.allitems.forEach(b -> ((Block)b).names.clear());
   }
 

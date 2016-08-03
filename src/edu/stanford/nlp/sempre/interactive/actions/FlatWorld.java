@@ -26,7 +26,8 @@ public abstract class FlatWorld {
   public abstract Set<Item> has(String rel, Set<Object> values);
   public abstract Set<Object> get(String rel, Set<Item> subset);
   public abstract void update(String rel, Object value, Set<Item> selected);
-
+  public abstract void select(Set<Item> set);
+  
   public FlatWorld() {
     this.allitems = Sets.newHashSet();
     this.selected = Sets.newHashSet();
@@ -38,13 +39,13 @@ public abstract class FlatWorld {
   }
   
   // selections
-  public void select(Set<Item> set) {
-    selected = Sets.newHashSet();
-    selected.addAll(set);
-    selected.retainAll(allitems);
-    // allitems.removeAll(selected);
-    // allitems.addAll(selected);
-  }  
+//  public void select(Set<Item> set) {
+//    selected = Sets.newHashSet();
+//    selected.addAll(set);
+//    selected.retainAll(allitems);
+//    // allitems.removeAll(selected);
+//    // allitems.addAll(selected);
+//  }  
   // basic sets
   public Set<Item> selected() {
     return selected;
