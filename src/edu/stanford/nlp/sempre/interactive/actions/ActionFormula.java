@@ -45,13 +45,14 @@ public class ActionFormula extends Formula {
   }
 
   public static Mode parseMode(String mode) {
+    if (mode == null) return null;
     for (Mode m : Mode.values()) {
       // LogInfo.logs("mode string %s \t== %s \t!= %s", m.toString(), mode, m.name());
       if (m.toString().equals(mode))
         return m;
     }
     if (mode.startsWith(":"))
-      throw new RuntimeException("Unsupported ActionFormula mode: " + mode);
+      throw new RuntimeException("Unsupported ActionFormula mode");
     return null;
   }
 
