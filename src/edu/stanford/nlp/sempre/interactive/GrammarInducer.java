@@ -28,13 +28,13 @@ public class GrammarInducer {
   }
 
   public static Options opts = new Options();
-  
+
   public static enum DefStatus {
     Cover, // some (including all) covers in the definiendum is accounted for
     NoCover, // cover is empty after checking with definition, so nothing would generalize
     NoParse, // definition does not parse, should we look for partials?
   }
-  
+
   // this depends on the chart!
   public static enum ParseStatus {
     Nothing, // nothing at all parses in the utterance
@@ -42,20 +42,20 @@ public class GrammarInducer {
     Full, // redefining known utterance
     Core; // define known utterance in core, should reject
   }
-  
+
   public DefStatus defStatus;
   public ParseStatus parseStatus;
-  
+
   List<Rule> inducedRules;
-  
+
   Map<String, List<Derivation>>[][] chart;
   int numTokens;
   List<String> tokens;
   String id;
-  
+
   Derivation defderiv;
-  
-  
+
+
   // induce rule is possible,
   // otherwise set the correct status
   public GrammarInducer(Example origEx, Example defEx) {
@@ -66,17 +66,17 @@ public class GrammarInducer {
     inducedRules = new ArrayList<>();
     defStatus = DefStatus.NoParse;
     parseStatus = getParseStatus(origEx);
-    
+
     if (defEx.predDerivations.size() == 0) {
       return;
     }
-    
+
     Derivation deriv;
     if (defEx.NBestInd == -1) {
       deriv = defEx.predDerivations.get(0);
     } else
       deriv = defEx.predDerivations.get(defEx.NBestInd);
-    
+
     while (deriv.rule.isCatUnary()) deriv = deriv.child(0);
     List<Derivation> covers = getGreedyCover(deriv);
 
@@ -88,14 +88,14 @@ public class GrammarInducer {
 
     inducedRules = induceRules(deriv, covers);
   }
-  
+
   public List<Rule> getRules() {
     return inducedRules;
   }
 
   private List<Rule> induceRules(Derivation deriv, List<Derivation> covers) {
     List<Rule> inducedRules = new ArrayList<>();
-    
+
     List<String> RHS = getRHS(tokens, covers);
     SemanticFn sem = getSemantics(deriv, covers);
     String cat = getTopCat(deriv);
@@ -104,20 +104,22 @@ public class GrammarInducer {
     inducedRule.addInfo(id, 1.0);
     inducedRule.addInfo(defStatus.toString(), 1.0);
     inducedRule.addInfo(parseStatus.toString(), 1.0);
-    if (!inducedRule.isCatUnary()) 
+    inducedRule.addInfo("anchored", 1.0);
+    if (!inducedRule.isCatUnary()) {
       inducedRules.add(inducedRule);
+    }
 
     return inducedRules;
   }
-  
+
   private String getTopCat(Derivation def) {
     return def.getCat();
   }
-  
+
   // replace the sub derivation under each def by just the category
   private SemanticFn getSemantics(final Derivation def, List<Derivation> covers) {
     if (covers == null || covers.size() == 0) return new ConstantFn(def.formula);
-    
+
     Function<Formula, Formula> replaceCover = new Function<Formula, Formula>() {
       @Override
       public Formula apply(Formula formula) {
@@ -141,7 +143,7 @@ public class GrammarInducer {
     applyFn.init(newTree);
     return applyFn;
   }
-  
+
   private List<String> getRHS(List<String> tokens, List<Derivation> covers) {
     List<String> rhs = new ArrayList<>();
     int start = 0;
@@ -149,7 +151,7 @@ public class GrammarInducer {
       if (deriv.start > start) {
         // leftover tokens
         rhs.addAll(tokens.subList(start, deriv.start));
-      } 
+      }
       rhs.add(deriv.getCat());
       start = deriv.end;
     }
@@ -157,7 +159,7 @@ public class GrammarInducer {
       rhs.addAll(tokens.subList(start,tokens.size()));
     return rhs;
   }
-  
+
   // find a list of sub derivation that produces a maximum cover that match the target
   // use dynamic programming
   // For now, just get the maximum cover greedily, from left to right
@@ -171,15 +173,15 @@ public class GrammarInducer {
         boolean matchedCat = false;
         for (String cat : Parser.opts.trackedCats) {
           if (matchedCat) break;
-          
+
           if (chart[start][end] == null || !chart[start][end].keySet().contains(cat))
             continue; // do not match random stuff, and take the first match
-          
+
           for (Derivation deriv : chart[start][end].get(cat)) {
             List<Derivation> matches = new ArrayList<>();
             getMatches(definition, deriv, matches);
             // do nothing when ==0: no match; >=1: too many matches
-            if (matches.size() >= 1) { 
+            if (matches.size() >= 1) {
                 currentMax = end;
                 currentDeriv = deriv;
                 matchedCat = true;
@@ -188,7 +190,7 @@ public class GrammarInducer {
           }
         }
       }
-      
+
       if (currentMax > start) {
         LogInfo.logs("added (%d, %d): %s", currentDeriv.start, currentDeriv.end, currentDeriv.rule.getLhs());
         coveredDerivs.add(currentDeriv);
@@ -197,12 +199,12 @@ public class GrammarInducer {
     }
     return coveredDerivs;
   }
-  
+
   boolean nothingParses() {
-    
+
     return false;
   }
-  
+
   private boolean formulaEqual(Derivation parent, Derivation child) {
     return parent.formula.equals(child.formula);
   }
@@ -213,7 +215,7 @@ public class GrammarInducer {
       return true;
     }
     if (parent.children == null) return false;
-    
+
     boolean matched = false;
     for (Derivation deriv : parent.children) {
       if (getMatches(deriv, child, matches)) {
@@ -222,7 +224,7 @@ public class GrammarInducer {
     }
     return matched;
   }
-  
+
   public static ParseStatus getParseStatus(Example ex) {
     if (ex.predDerivations.size() > 0) {
       for (Derivation deriv : ex.predDerivations) {
@@ -235,5 +237,5 @@ public class GrammarInducer {
     // could check the chart here set partial, but no need for now
     return ParseStatus.Nothing;
   }
-  
+
 }

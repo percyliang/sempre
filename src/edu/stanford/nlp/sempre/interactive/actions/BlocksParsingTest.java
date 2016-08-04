@@ -28,7 +28,7 @@ public class BlocksParsingTest {
   Predicate<Example> hasAll(String...substrings) {
     return new Predicate<Example>() {
       List<String> required = Lists.newArrayList(substrings);
-      
+
       @Override
       public boolean test(Example e) {
         int match = 0;
@@ -45,7 +45,7 @@ public class BlocksParsingTest {
       }
     };
   }
-  
+
   private static Spec defaultSpec() {
     FloatingParser.opts.defaultIsFloating = true;
     ActionExecutor.opts.convertNumberValues  = true;
@@ -54,7 +54,7 @@ public class BlocksParsingTest {
     Grammar.opts.inPaths = Lists.newArrayList("./shrdlurn/blocksworld.grammar");
     Grammar.opts.useApplyFn = "interactive.ApplyFn";
     Grammar.opts.binarizeRules = false;
-    
+
     ActionExecutor executor = new ActionExecutor();
     ActionExecutor.opts.FlatWorldType = "BlocksWorld";
     FeatureExtractor extractor = new FeatureExtractor(executor);
@@ -68,23 +68,23 @@ public class BlocksParsingTest {
 
   protected static void parse(String beamUtt, String floatUtt, ContextValue context, Predicate<Example> checker) {
     LogInfo.begin_track("Cannonical: %s\t Float: %s", beamUtt, floatUtt);
-    
+
     Example.Builder b = new Example.Builder();
     b.setId("session:test");
-    b.setUtterance(beamUtt);
+    b.setUtterance(floatUtt);
     b.setContext(context);
     Example ex = b.createExample();
     ex.preprocess();
-    
+
     Spec defSpec = defaultSpec();
-    Parser parser = new BeamParser(defSpec);
+    Parser parser = new BeamFloatingParser(defSpec);
     ParserState state = parser.parse(new Params(), ex, false);
     LogInfo.end_track();
-    
+
     // Add the floating parser and check?
     if (checker != null) {
       if (!checker.test(ex)) {
-        Assert.fail(beamUtt);
+        Assert.fail(floatUtt);
       }
     }
   }
@@ -94,26 +94,26 @@ public class BlocksParsingTest {
     String strigify2 = Json.writeValueAsStringHard(blocks); // some parsing issue inside lisptree parser
     return ContextValue.fromString(String.format("(context (graph NaiveKnowledgeGraph ((string \"%s\") (name b) (name c))))", strigify2));
   }
-  
+
   @Test public void basicTest() {
     String defaultBlocks = "[[1,1,1,\"Green\",[]],[1,2,1,\"Blue\",[]],[2,2,1,\"Red\",[]],[3,2,2,\"Yellow\",[]]]";
     ContextValue context = getContext(defaultBlocks);
     LogInfo.begin_track("testJoin");
 
     parse("select all", "select all", context, contains("(:for * (: select))"));
-    parse("select has color red", "red blocks", context, contains("(:for (color red) (: select))"));
+    // parse("select has color red", "red blocks", context, contains("(:for (color red) (: select))"));
     parse("select has color red", "red blocks", context, hasAll("(color red)", "(: select)", ":for"));
     parse("add red top", "add some to top of red blocks", context, contains("(: add red top)"));
     parse("for has color red [ remove ]", "remove red blocks", context, contains("(:for (color red) (: remove))"));
     parse("repeat 3 [add red]", "add 3 red", context, contains("(:loop (number 3) (: add red top))"));
     parse("for has color red [ add yellow top ]", "add red to top of yellow", context, moreThan(0));
-    parse("select has row 3", "select row 3", context, moreThan(0));
-    parse("select has color red or has color green", "select red and green", context, contains("(:for (or (color red) (color green)) (: select))"));
-    parse("select has color red or has color green", "select red or green", context, contains("(:for (or (color red) (color green)) (: select))"));
+    // parse("select has row 3", "select row 3", context, moreThan(0));
+    // parse("select has color red or has color green", "select red and green", context, contains("(:for (or (color red) (color green)) (: select))"));
+    // parse("select has color red or has color green", "select red or green", context, contains("(:for (or (color red) (color green)) (: select))"));
     parse("remove has color red ; remove has color blue", "remove red then remove blue", context, moreThan(0));
     LogInfo.end_track();
   }
-  
+
   @Test public void advanced() {
     String defaultBlocks = "[[1,1,1,\"Green\",[]],[1,2,1,\"Blue\",[]],[2,2,1,\"Red\",[]],[3,2,2,\"Yellow\",[]]]";
     ContextValue context = getContext(defaultBlocks);
@@ -125,13 +125,14 @@ public class BlocksParsingTest {
     parse("", "select has color red or has color green",  context, hasAll("(color red)", "(color green)", "(: select)"));
     parse("", "add red then add green and then add yellow",  context, hasAll("(color red)", "(color green)", "(color yellow)"));
     parse("", "add red then add green and then add yellow",  context, hasAll("(: add", "(color red)", "(color green)", "(color yellow)"));
-    //parse("", "remove the very left yellow block", context, moreThan(0));
-    //parse("", "add red top then add yellow then add green", context, moreThan(0));
-    //parse("", "add 4 yellow to red or green", context, moreThan(0));
+    parse("", "remove the very left yellow block", context, moreThan(0));
+    parse("", "add red top then add yellow then add green", context, moreThan(0));
+    parse("", "add 4 yellow to red or green", context, moreThan(0));
     // might be manageable with projectivity
-    // parse("", "add 4 yellow to the left of red or green", context, moreThan(0));
-    // parse("", "repeat 3 [delete top of all]", context, moreThan(0));
-    // parse("", "repeat 3 [delete top of all]", context, moreThan(0));
+    parse("", "add 4 yellow to the left of red or green", context, moreThan(0));
+    parse("", "repeat 3 [delete top of all]", context, moreThan(0));
+    parse("", "repeat 3 [delete top of all]", context, moreThan(0));
+    parse("", "add 3 red to left", context, hasAll("(:loop (number 3) (: add red left))"));
     LogInfo.end_track();
   }
   // things we won't handle

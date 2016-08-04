@@ -74,7 +74,7 @@ public class Master {
     // for interactive stuff
     public String commandResponse = "";
     public List<List<String>> taggedCover;
-    public List<String> autocompletes; 
+    public List<String> autocompletes;
     public int[] coverage;
 
     public String getFormulaAnswer() {
@@ -273,6 +273,10 @@ public class Master {
       response.coverage = ((BeamParserState)state).getCoverage();
       response.taggedCover = ((BeamParserState)state).getTaggedCoverage();
       ex.chart = ((BeamParserState)state).getChart().clone();
+    } else if (state instanceof BeamFloatingParserState) {
+      response.coverage = ((BeamFloatingParserState)state).getCoverage();
+      response.taggedCover = ((BeamFloatingParserState)state).getTaggedCoverage();
+      ex.chart = ((BeamFloatingParserState)state).getChart().clone();
     }
     response.ex = ex;
 
@@ -288,7 +292,7 @@ public class Master {
     // Print features
     HashMap<String, Double> featureVector = new HashMap<>();
     deriv.incrementAllFeatureVector(1, featureVector);
-    FeatureVector.logFeatureWeights("Pred", featureVector, builder.params); 
+    FeatureVector.logFeatureWeights("Pred", featureVector, builder.params);
 
     // Print choices
     Map<String, Integer> choices = new LinkedHashMap<>();
@@ -327,7 +331,7 @@ public class Master {
         LogInfo.logs("%s", rule.toLispTree());
       if (opts.newGrammarPath != null) {
         Set<Rule> deduper = new HashSet<>();
-        String fileName = "grammar-" + LocalDateTime.now() + ".grammar"; 
+        String fileName = "grammar-" + LocalDateTime.now() + ".grammar";
         LogInfo.logs("Printing rules to %s", fileName);
         PrintWriter out = IOUtils.openOutHard(Paths.get(opts.newGrammarPath, fileName).toString());
         for (Rule rule : builder.grammar.rules) {
@@ -495,7 +499,7 @@ public class Master {
     b.setNBestInd(nbestInd);
     Example ex = b.createExample();
     ex.preprocess();
-    
+
     GrammarInducer.ParseStatus origStatus = GrammarInducer.getParseStatus(origEx);
 
     // Parse!
@@ -506,16 +510,19 @@ public class Master {
     if (state instanceof BeamParserState) {
       response.coverage = ((BeamParserState)state).getCoverage();
       response.taggedCover = ((BeamParserState)state).getTaggedCoverage();
+    } else if (state instanceof BeamFloatingParserState) {
+      response.coverage = ((BeamFloatingParserState)state).getCoverage();
+      response.taggedCover = ((BeamFloatingParserState)state).getTaggedCoverage();
     }
     response.ex = ex; // respond with the parse of the definition
-    
+
     if (ex.predDerivations.size() > 0)
       if (response.candidateIndex == -1)
         response.candidateIndex = 0;
 
     GrammarInducer grammarInducer = new GrammarInducer(origEx, ex);
     response.commandResponse =  String.format("[%s,%s]", grammarInducer.defStatus.toString(), origStatus.toString());
-    
+
     // write the actual definitions, write these anyways even if rule failed
     PrintWriter out = IOUtils.openOutAppendHard(Paths.get(opts.newGrammarPath, session.id + ".definition").toString());
     // deftree.addChild(oldEx.utterance);
@@ -534,11 +541,10 @@ public class Master {
     List<Rule> inducedRules = grammarInducer.getRules();
     if (inducedRules.size() > 0 && !trying) {
       for (Rule rule : inducedRules) {
-        LogInfo.logs("adding induced rule %s", rule);
         builder.parser.grammar.addRule(rule);
         // well, hacky, because BeamParser stores rules in a trie
         // and subtlely reject redefining of core, and no cover at all
-        if (builder.parser instanceof BeamParser && origStatus != GrammarInducer.ParseStatus.Core) {
+        if ((builder.parser instanceof BeamParser || builder.parser instanceof BeamFloatingParser) && origStatus != GrammarInducer.ParseStatus.Core) {
           builder.parser.addRule(rule);
         }
       }
@@ -582,7 +588,7 @@ public class Master {
     }
 
     if (opts.independentSessions) {
-      if (opts.onlineLearnExamples) { 
+      if (opts.onlineLearnExamples) {
         LogInfo.warning("Both independentSessions and onlineLearnExamples are on");
       } else {
         LogInfo.begin_track("Updating parameters (independent)");

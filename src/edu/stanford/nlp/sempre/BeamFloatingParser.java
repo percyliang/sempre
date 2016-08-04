@@ -145,8 +145,6 @@ class BeamFloatingParserState extends ChartParserState {
           }
         }
       }
-
-      System.out.println(predDerivations);
     }
 
     if (mode == Mode.full) {
@@ -309,23 +307,11 @@ class BeamFloatingParserState extends ChartParserState {
         /* Apply non-cat unary rules by traversing through the subspans */
         int derivsCreated = 0;
         for (int i = start + 1; i < end; i++) {
-          List<Derivation> derivs1 = chart[start][i].get(rule.rhs.get(0));
-          List<Derivation> derivs2 = chart[i][end].get(rule.rhs.get(1));
-
-          if (derivs1 == null || derivs2 == null) continue;
-
-          for (Derivation deriv1 : derivs1) {
-            for (Derivation deriv2 : derivs2) {
-              List<Derivation> children = new ArrayList<Derivation>();
-              children.add(deriv1);
-              children.add(deriv2);
-              derivsCreated += applyRule(start, end, rule, children);
-              // Collections.reverse(children);
-              // derivsCreated += applyRule(start, end, rule, children);
-            }
-          }
+          derivsCreated += applyFloatingRule(rule, start, end, chart[start][i], chart[i][end]);
+          derivsCreated += applyFloatingRule(rule, start, end, chart[i][end], chart[start][i]);
         }
 
+        /* If no derivs created, propagate up */
         if (derivsCreated == 0) {
           copyDerivs(chart[start][end - 1], chart[start][end]);
           if (start != numTokens - 1)
@@ -333,6 +319,26 @@ class BeamFloatingParserState extends ChartParserState {
         }
       }
     }
+  }
+
+  protected int applyFloatingRule(Rule rule, int start, int end, Map<String, List<Derivation>> first, Map<String, List<Derivation>> second) {
+    List<Derivation> derivs1 = first.get(rule.rhs.get(0));
+    List<Derivation> derivs2 = second.get(rule.rhs.get(1));
+
+    if (derivs1 == null || derivs2 == null) return 0;
+
+    int derivsCreated = 0;
+
+    for (Derivation deriv1 : derivs1) {
+      for (Derivation deriv2 : derivs2) {
+        List<Derivation> children = new ArrayList<Derivation>();
+        children.add(deriv1);
+        children.add(deriv2);
+        derivsCreated += applyRule(start, end, rule, children);
+      }
+    }
+
+    return derivsCreated;
   }
 
   protected void copyDerivs(Map<String,List<Derivation>> source, Map<String,List<Derivation>> dest) {
