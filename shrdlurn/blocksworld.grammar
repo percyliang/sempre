@@ -54,7 +54,7 @@
 )
 
 (rule $ValueSet ($Color) (IdentityFn) (anchored 1))
-(rule $ValueSet ($Number) (IdentityFn) (anchored 1))			 
+(rule $ValueSet ($Number) (IdentityFn) (anchored 1))
 
 (for @num (0 1 2 3 4 5 6 7 8 9)
 (rule $Number (@num) (ConstantFn (number @num)) (anchored 1))
@@ -89,7 +89,7 @@
 (rule $Sets ($Color) (lambda c (color (var c))))
 
 # various actions can be performed without prompt
-(rule $Action ($Color) (lambda c (: @add (var c) (string top))))
+(rule $Action ($Color) (lambda c (: @add (var c) top)))
 (rule $Action ($Color $Direction) (lambda c (lambda d (: @add (var c) (var d)))) )
 (rule $Action ($Direction) (lambda d (: @move (var d))))
 (rule $Set ($Direction $Sets) (lambda d (lambda s

@@ -215,7 +215,7 @@ def free917
 
     # Grammar
     o('Grammar.inPaths', 'freebase/data/emnlp2013.grammar'),
-    o('Parser.beamSize', 500), 
+    o('Parser.beamSize', 500),
 
     emnlp2013AblationExperiments('free917'),
 
@@ -525,7 +525,7 @@ addMode('overnight', 'Overnight semantic parsing', l(
 
   # Features
   o('FeatureExtractor.featureDomains', 'denotation'), # denotation features from general feature extractor
-  o('FeatureExtractor.featureComputers', 'overnight.OvernightFeatureComputer'), # 
+  o('FeatureExtractor.featureComputers', 'overnight.OvernightFeatureComputer'), #
   o('OvernightFeatureComputer.featureDomains', *overnightFeatureDomains),
   #o('initialization', 'paraphrase :: match,1', 'paraphrase :: size,-0.1', 'paraphrase :: ppdb,0.3',
   #  'paraphrase :: skip-bigram,0.8', 'paraphrase :: skip-ppdb,0.2','denotation :: error,-1000'),
@@ -545,14 +545,14 @@ addMode('overnight', 'Overnight semantic parsing', l(
   o('FloatingParser.maxDepth', 11),
   o('Parser.beamSize', 20),
   letDefault(:alignment, 1),
-  sel(:alignment, 
-    o('wordAlignmentPath', lambda { |e| 'lib/data/overnight/' + e[:domain] + '.word_alignments.heuristic' }), 
+  sel(:alignment,
+    o('wordAlignmentPath', lambda { |e| 'lib/data/overnight/' + e[:domain] + '.word_alignments.heuristic' }),
     o('wordAlignmentPath', lambda { |e| 'lib/data/overnight/' + e[:domain] + '.word_alignments.berkeley' }),
   nil),
   o('phraseAlignmentPath', lambda { |e| 'lib/data/overnight/' + e[:domain] + '.phrase_alignments' }),
   o('PPDBModel.ppdbModelPath', lambda { |e| 'lib/data/overnight/' + e[:domain] + '-ppdb.txt' }),
   o('DerivationPruner.pruningComputers', ['overnight.OvernightDerivationPruningComputer']),
-  o('Dataset.inPaths', 
+  o('Dataset.inPaths',
     lambda { |e| 'train:lib/data/overnight/' + e[:domain] + '.paraphrases.train.examples' },
     lambda { |e| 'test:lib/data/overnight/' + e[:domain] + '.paraphrases.test.examples' }),
   sel(:domain, {
@@ -981,13 +981,13 @@ addMode('interactive', 'interactive semantic parsing in blocks', lambda { |e| l(
   header('core,interactive'),
   'edu.stanford.nlp.sempre.Main',
   figOpts,
-  
+
   o('Executor', 'interactive.actions.ActionExecutor'),
   o('ActionExecutor.convertNumberValues', true),
   o('ActionExecutor.printStackTrace', true),
   selo(0, 'ActionExecutor.FlatWorldType', 'BlocksWorld', 'CalendarWorld'),
   selo(0, 'Grammar.inPaths', './shrdlurn/blocksworld.grammar', './shrdlurn/calendar.grammar'),
-  
+
   o('Params.initWeightsRandomly', false),
   o('Grammar.binarizeRules', false),
   o('Grammar.useApplyFn', 'interactive.ApplyFn'),
@@ -995,10 +995,10 @@ addMode('interactive', 'interactive semantic parsing in blocks', lambda { |e| l(
   o('LanguageAnalyzer.useLemmaTokens', false),
 
   o('Parser.pruneErrorValues', true),
-  o('Parser', 'BeamParser'),
+  o('Parser', 'BeamFloatingParser'),
   o('Parser.trackedCats', 'Color', 'Numbers', 'Direction', 'Set', 'Set2', 'Action', 'Actions'),
   o('FloatingParser.defaultIsFloating', true),
-  
+
 o('ParserState.customExpectedCounts', 'UNIFORM'),
 o('Params.l1Reg', 'lazy'),
 o('Params.l1RegCoeff', 0.001),
@@ -1007,7 +1007,7 @@ o('Params.initStepSize', 0.1),
 o('Params.adaptiveStepSize', true),
 
 # o('FeatureExtractor.featureComputers', 'interactive.blocks.RicherStacksWorldFeatureComputer'),
-# o('FeatureExtractor.featureDomains', 'rule', 'subtree'),
+o('FeatureExtractor.featureDomains', 'rule'),
 o('RicherStacksWorldFeatureComputer.ngramN', 2),
 o('RicherStacksWorldFeatureComputer.parameterizeCats', 'Number','Color'),
 
