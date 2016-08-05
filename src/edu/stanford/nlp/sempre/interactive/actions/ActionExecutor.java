@@ -46,12 +46,15 @@ public class ActionExecutor extends Executor {
     // denotation (unlike for lambda DCS).
     FlatWorld world = FlatWorld.fromContext(opts.FlatWorldType, context);
     formula = Formulas.betaReduction(formula);
-    performActions((ActionFormula)formula, world);
     try {
+      performActions((ActionFormula)formula, world);
       return new Response(new StringValue(world.toJSON()));
     } catch (Exception e) {
       // Comment this out if we expect lots of innocuous type checking failures
-      if (opts.printStackTrace) e.printStackTrace();
+      if (opts.printStackTrace) {
+        LogInfo.log("tried to execute: " + formula.toString());
+        e.printStackTrace();
+      }
       return new Response(ErrorValue.badJava(e.toString()));
     }
   }
