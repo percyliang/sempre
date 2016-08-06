@@ -457,6 +457,14 @@ addMode('simple-sparql', 'Simple shell for querying SPARQL', lambda { |e| l(
   o('Main.interactive'),
 nil) })
 
+addMode('simple-lambdadcs', 'Simple shell for querying with the LambdaDCSExecutor', lambda { |e| l(
+  codalab, rlwrap, 'java', '-Dmodules=core,tables,corenlp', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.Main',
+  o('executor', 'tables.lambdadcs.LambdaDCSExecutor'),
+  o('FeatureExtractor.featureDomains', 'denotation lexAlign joinPos skipPos'.split),
+  o('LanguageAnalyzer.languageAnalyzer', 'corenlp.CoreNLPAnalyzer'),
+  o('Main.interactive'),
+nil) })
+
 addMode('simple-freebase', 'Simple shell for using Freebase', lambda { |e| l(
   rlwrap, 'java', '-Dmodules=core,freebase', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.Main',
   o('executor', 'freebase.SparqlExecutor'),

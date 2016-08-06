@@ -189,6 +189,9 @@ addModule('overnight', 'Creating a parser for multiple domains', lambda {
   pull('/u/nlp/data/semparse/overnight/calendar/eval/calendar.test.turk.examples', 'data/overnight/', {:symlink => true})
 })
 
+addModule('esslli_2016', 'Data for ESSLLI 2016 semantic parsing class', lambda {
+  pull('/u/nlp/data/semparse/esslli_2016/', 'data/esslli_2016/', {:symlink => true})
+})
 
 ############################################################
 

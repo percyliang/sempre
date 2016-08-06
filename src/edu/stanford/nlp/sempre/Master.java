@@ -229,7 +229,7 @@ public class Master {
     builder.parser.parse(builder.params, ex, false);
 
     response.ex = ex;
-    ex.log();
+    ex.logWithoutContext();
     if (ex.predDerivations.size() > 0) {
       response.candidateIndex = 0;
       printDerivation(response.getDerivation());
@@ -377,7 +377,14 @@ public class Master {
       } else {
         session.context = new ContextValue(tree);
       }
-    } else {
+    } else if (command.equals("loadgraph")) {
+      if (tree.children.size() != 2 || !tree.child(1).isLeaf())
+        throw new RuntimeException("Invalid argument: argument should be a file path");
+      KnowledgeGraph graph = NaiveKnowledgeGraph.fromFile(tree.child(1).value);
+      session.context = new ContextValue(session.context.user, session.context.date,
+        session.context.exchanges, graph);
+    }
+    else {
       LogInfo.log("Invalid command: " + tree);
     }
   }
