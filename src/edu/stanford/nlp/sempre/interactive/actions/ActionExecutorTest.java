@@ -113,10 +113,10 @@ public class ActionExecutorTest {
     String defaultBlocks = "[[1,1,1,\"Green\",[]],[1,1,2,\"Green\",[]],[1,1,3,\"Green\",[]],[1,1,4,\"Green\",[]]]";
     ContextValue context = getContext(defaultBlocks);
     LogInfo.begin_track("testMoreActions");
-    runFormula(executor, "(:s (:for * (: select)) (: select (call veryx bot)) (: remove) )", context, x -> x.allitems.size() == 3);
-    runFormula(executor, "(:s (:for * (: select)) (:for (call veryx left) (: remove)))", context, x -> x.allitems.size() == 0);
+    runFormula(executor, "(:s (:for * (: select)) (:for (call veryx left this) (: remove)))", context, x -> x.allitems.size() == 0);
     runFormula(executor, "(:for * (:for (call veryx bot) (:loop (number 2) (:s (: add red left) (: select (call adj top))))))", context, 
         x -> x.allitems.size() == 6);
+    runFormula(executor, "(:s (:for * (: select)) (: select (call veryx bot this)) (: remove) )", context, x -> x.allitems.size() == 3);
     // x -> x.selected().iterator().next().get("height") == new Integer(3)
     runFormula(executor, "(:loop (count (color green)) (: add red left *))", context, x -> x.allitems.size() == 20);
 
@@ -127,10 +127,10 @@ public class ActionExecutorTest {
     // this is a green stick
     String defaultBlocks = "[[1,1,1,\"Green\",[\"S\"]],[1,1,2,\"Green\",[]],[1,1,3,\"Green\",[]],[1,1,4,\"Green\",[]]]";
     ContextValue context = getContext(defaultBlocks);
-    LogInfo.begin_track("testMoreActions");
+    LogInfo.begin_track("troubleCases");
     runFormula(executor, "(:s (: select *) (: select (or (call veryx bot) (call veryx top))))", context, selectedSize(2));
     runFormula(executor, " (: select (or (call veryx top (color green)) (call veryx bot (color green))))", context, selectedSize(2));
-    runFormula(executor, " (: select (or (call veryx top (color green)) (call veryx bot (color green))))", context, selectedSize(2));
+    runFormula(executor, " (: select (and (call veryx top (color green)) (call veryx bot (color green))))", context, selectedSize(0));
     runFormula(executor, " (: select (call adj top this))", context, selectedSize(1));
     LogInfo.end_track();
   }
@@ -139,11 +139,11 @@ public class ActionExecutorTest {
     // this is a green stick
     String defaultBlocks = "[[1,1,0,\"Anchor\",[\"S\"]]]";
     ContextValue context = getContext(defaultBlocks);
-    LogInfo.begin_track("testMoreActions");
-    runFormula(executor, "(:s (: select *) (: select (or (call veryx bot) (call veryx top))))", context, selectedSize(2));
-    runFormula(executor, " (: select (or (call veryx top (color green)) (call veryx bot (color green))))", context, selectedSize(2));
-    runFormula(executor, " (: select (or (call veryx top (color green)) (call veryx bot (color green))))", context, selectedSize(2));
-    runFormula(executor, " (: select (call adj top this))", context, selectedSize(1));
+    LogInfo.begin_track("testAnchors");
+    runFormula(executor, "(: add red top)", context, selectedSize(1));
+    runFormula(executor, "(: add red left)", context, selectedSize(1));
+    runFormula(executor, "(:loop (number 3) (: add red left))", context, selectedSize(1));
+    runFormula(executor, "(:loop (number 3) (: add red top))", context, x -> x.allitems.size() == 3);
     LogInfo.end_track();
   }
   

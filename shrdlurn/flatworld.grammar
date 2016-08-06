@@ -68,13 +68,13 @@
 (rule $Numbers ( $Number ) (IdentityFn) (anchored 1))
 
 ###### Keywords 
-(rule $Keyword (add) (ConstantFn (string keyword)))
-(rule $Keyword (remove) (ConstantFn (string keyword)))
-(rule $Keyword (repeat) (ConstantFn (string keyword)))
-(rule $Keyword (has) (ConstantFn (string keyword)))
-(rule $Keyword (of) (ConstantFn (string keyword)))
-(rule $Keyword (and) (ConstantFn (string keyword)))
-(rule $Keyword (or) (ConstantFn (string keyword)))
+(rule $Keyword (add) (ConstantFn (string keyword))  (anchored 1))
+(rule $Keyword (remove) (ConstantFn (string keyword))  (anchored 1))
+(rule $Keyword (repeat) (ConstantFn (string keyword))  (anchored 1))
+(rule $Keyword (has) (ConstantFn (string keyword))  (anchored 1))
+(rule $Keyword (of) (ConstantFn (string keyword))  (anchored 1))
+(rule $Keyword (and) (ConstantFn (string keyword))  (anchored 1))
+(rule $Keyword (or) (ConstantFn (string keyword))  (anchored 1))
 
 #############################
 # Floating rules
@@ -84,7 +84,7 @@
 (rule $Action ($Numbers $Actions) (lambda n (lambda a (:loop (var n) (var a)))) (floating 1))
 
 # add red top to has color red
-(rule $Action ($Sets $Actions) (lambda s (lambda a (:for (var s) (var a)))) (floating 1))
+# (rule $Action ($Sets $Actions) (lambda s (lambda a (:for (var s) (var a)))) (floating 1))
 (rule $Action ($Sets $Actions) (lambda s (lambda a (:foreach (var s) (var a)))) (floating 1))
 
 # add red top then remove them
@@ -96,8 +96,6 @@
 (rule $ValueSets ($Rel $Sets) (lambda r (lambda s
 			   ((reverse (var r)) (var s)))) (floating 1))
 			   
-(rule $Action ($Actions $Actions) (lambda a1 (lambda a2 (:s (var a1) (var a2)))) (floating 1))
-
 (rule $Action ($Sets) (lambda s (: @select (var s))) (floating 1))
 (rule $Action ($Rel $ValueSets) (lambda r (lambda v (: @change (var r) (var v)))) (floating 1))
 (rule $Action (nothing) (ConstantFn (: @remove)) (floating 1))

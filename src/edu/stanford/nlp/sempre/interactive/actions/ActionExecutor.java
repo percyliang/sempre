@@ -313,7 +313,7 @@ public class ActionExecutor extends Executor {
         
       cost += typeCastCost(types[i], args[i]);
       if (cost >= INVALID_TYPE_COST) {
-        // LogInfo.dbgs("NOT COMPATIBLE: want %s, got %s with type %s", types[i], args[i], args[i].getClass());
+        LogInfo.dbgs("NOT COMPATIBLE: want %s, got %s with type %s", types[i], args[i], args[i].getClass());
         break;
       }
     }

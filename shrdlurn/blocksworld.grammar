@@ -72,16 +72,16 @@
 (rule $Color (pink) pink (anchored 1))
 (rule $Color (brown) brown (anchored 1))
 
-(rule $Keyword (col) (ConstantFn (string keyword)))
-(rule $Keyword (row) (ConstantFn (string keyword)))
-(rule $Keyword (height) (ConstantFn (string keyword)))
-(rule $Keyword (color) (ConstantFn (string keyword)))
-(rule $Keyword (top) (ConstantFn (string keyword)))
-(rule $Keyword (bot) (ConstantFn (string keyword)))
-(rule $Keyword (left) (ConstantFn (string keyword)))
-(rule $Keyword (right) (ConstantFn (string keyword)))
-(rule $Keyword (front) (ConstantFn (string keyword)))
-(rule $Keyword (back) (ConstantFn (string keyword)))
+(rule $Keyword (col) (ConstantFn (string keyword)) (anchored 1))
+(rule $Keyword (row) (ConstantFn (string keyword)) (anchored 1))
+(rule $Keyword (height) (ConstantFn (string keyword)) (anchored 1))
+(rule $Keyword (color) (ConstantFn (string keyword)) (anchored 1))
+(rule $Keyword (top) (ConstantFn (string keyword)) (anchored 1))
+(rule $Keyword (bot) (ConstantFn (string keyword)) (anchored 1))
+(rule $Keyword (left) (ConstantFn (string keyword)) (anchored 1))
+(rule $Keyword (right) (ConstantFn (string keyword)) (anchored 1))
+(rule $Keyword (front) (ConstantFn (string keyword)) (anchored 1))
+(rule $Keyword (back) (ConstantFn (string keyword)) (anchored 1))
 
 
 ####### domain specific floating rules
@@ -90,8 +90,9 @@
 
 # various actions can be performed without prompt
 (rule $Action ($Color) (lambda c (: @add (var c) top)))
-(rule $Action ($Color $Direction) (lambda c (lambda d (: @add (var c) (var d)))) )
+(rule $Action ($Color $Direction) (lambda c (lambda d (: @add (var c) (var d)))))
 (rule $Action ($Direction) (lambda d (: @move (var d))))
+
 (rule $Set ($Direction $Sets) (lambda d (lambda s
 			   (call adj (var d) (var s)))))
 (rule $Set ($Extreme $Sets) (lambda e (lambda s
