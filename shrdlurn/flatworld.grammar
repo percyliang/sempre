@@ -11,7 +11,7 @@
 (rule $Action (repeat $Numbers [ $Actions ]) (lambda n (lambda a (:loop (var n) (var a)))) (anchored 1))
 (rule $Action (if $ValueSet [ $Actions ]) (lambda b (lambda a (:if (var b) (var a)))) (anchored 1))
 
-# basic actions, local scope "for has color red [add red left; add red top]" 
+# basic actions, local scope "for has color red [add red left; add red top]"
 (rule $Action (for $Sets [ $Actions ] ) (lambda s (lambda a (:for (var s) (var a)))) (anchored 1))
 (rule $Action (foreach $Sets [ $Actions ] ) (lambda s (lambda a (:foreach (var s) (var a)))) (anchored 1))
 
@@ -54,7 +54,7 @@
 ############### Joins
 (rule $ValueSet ($Rel of $Sets) (lambda r (lambda s
 			   ((@R (var r)) (var s)))) (anchored 1))
-			   
+
 (rule $Set (has $Rel $ValueSets) (lambda r (lambda s
 			   ((var r) (var s)))) (anchored 1))
 
@@ -67,7 +67,7 @@
 (rule $Number ([ $Numbers ]) (IdentityFn) (anchored 1))
 (rule $Numbers ( $Number ) (IdentityFn) (anchored 1))
 
-###### Keywords 
+###### Keywords
 (rule $Keyword (add) (ConstantFn (string keyword))  (anchored 1))
 (rule $Keyword (remove) (ConstantFn (string keyword))  (anchored 1))
 (rule $Keyword (repeat) (ConstantFn (string keyword))  (anchored 1))
@@ -95,7 +95,7 @@
 
 (rule $ValueSets ($Rel $Sets) (lambda r (lambda s
 			   ((reverse (var r)) (var s)))) (floating 1))
-			   
+
 (rule $Action ($Sets) (lambda s (: @select (var s))) (floating 1))
 (rule $Action ($Rel $ValueSets) (lambda r (lambda v (: @change (var r) (var v)))) (floating 1))
-(rule $Action (nothing) (ConstantFn (: @remove)) (floating 1))
+# (rule $Action (nothing) (ConstantFn (: @remove)) (floating 1))

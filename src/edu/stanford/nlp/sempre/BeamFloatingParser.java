@@ -122,6 +122,14 @@ class BeamFloatingParserState extends ChartParserState {
 
     /* If Beam Parser failed to find derivations, try a floating parser */
     if (predDerivations.size() == 0) {
+      /* For every base span of the chart, add the derivations from nothing rules */
+      List<Rule> nothingRules = new ArrayList<Rule>();
+      for (Rule rule : parser.grammar.rules)
+        if (rule.isFloating() && rule.rhs.size() == 1 && rule.isRhsTerminals()) nothingRules.add(rule);
+      for (int i = 0; i < numTokens; i++)
+        for (Rule rule : nothingRules)
+          applyRule(i, i + 1, rule, chart[i][i+1].get("$TOKEN"));
+
       /* Traverse the chart bottom up */
       for (int len = 1; len <= numTokens; len++) {
         for (int i = 0; i + len <= numTokens; i++) {
