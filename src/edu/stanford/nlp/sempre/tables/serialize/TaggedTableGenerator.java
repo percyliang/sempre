@@ -14,7 +14,7 @@ import fig.basic.LogInfo;
 import fig.exec.Execution;
 
 /**
- * Generate TSV files containing CoreNLP annotation of the tables.
+ * Generate TSV files containing CoreNLP tags of the tables.
  *
  * Mandatory fields:
  * - row:         row index (-1 is the header row)
@@ -40,10 +40,10 @@ import fig.exec.Execution;
  *
  * @author ppasupat
  */
-public class AnnotatedTableGenerator extends AnnotatedGenerator implements Runnable {
+public class TaggedTableGenerator extends TSVGenerator implements Runnable {
 
   public static void main(String[] args) {
-    Execution.run(args, "AnnotatedTableGeneratorMain", new AnnotatedTableGenerator(),
+    Execution.run(args, "TaggedTableGeneratorMain", new TaggedTableGenerator(),
         Master.getOptionsParser());
   }
 
@@ -65,8 +65,8 @@ public class AnnotatedTableGenerator extends AnnotatedGenerator implements Runna
             int batchIndex = Integer.parseInt(matcher.group(1)),
                 dataIndex = Integer.parseInt(matcher.group(2));
             TableKnowledgeGraph table = TableKnowledgeGraph.fromFilename(baseDir.relativize(file).toString());
-            String outDir = Execution.getFile("annotated/" + batchIndex + "-annotated/"),
-                outFilename = new File(outDir, dataIndex + ".annotated").getPath();
+            String outDir = Execution.getFile("tagged/" + batchIndex + "-tagged/"),
+                outFilename = new File(outDir, dataIndex + ".tagged").getPath();
             new File(outDir).mkdirs();
             out = IOUtils.openOutHard(outFilename);
             dumpTable(table);

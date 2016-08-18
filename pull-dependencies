@@ -150,7 +150,11 @@ addModule('corenlp', 'Stanford CoreNLP 3.6.0', lambda {
    'stanford-corenlp-3.6.0-models.jar' => 'stanford-corenlp-models.jar',
    'stanford-corenlp-caseless-2015-04-20-models.jar' => 'stanford-corenlp-caseless-models.jar',
    'joda-time.jar' => 'joda-time.jar',
-   'jollyday.jar' => 'jollyday.jar'}.each { |key, value|
+   'jollyday.jar' => 'jollyday.jar',
+   'ejml-0.23.jar' => 'ejml.jar',
+   'slf4j-api.jar' => 'slf4j-api.jar',
+   'slf4j-simple.jar' => 'slf4j-simple.jar',
+  }.each { |key, value|
     system "ln -sfv stanford-corenlp-full-2015-12-09/#{key} lib/#{value}" or exit 1
   }
 })
@@ -170,7 +174,8 @@ addModule('corenlp-3.2.0', 'Stanford CoreNLP 3.2.0 (for backward reproducibility
    'stanford-corenlp-3.2.0-models.jar' => 'stanford-corenlp-models.jar',
    'stanford-corenlp-caseless-2013-06-07-models.jar' => 'stanford-corenlp-caseless-models.jar',
    'joda-time.jar' => 'joda-time.jar',
-   'jollyday.jar' => 'jollyday.jar'}.each { |key, value|
+   'jollyday.jar' => 'jollyday.jar'
+  }.each { |key, value|
     system "ln -sfv stanford-corenlp-full-2013-06-20/#{key} lib/#{value}" or exit 1
   }
 })
@@ -275,6 +280,10 @@ if ARGV.size == 0
   $modules.each { |name,description,func|
     puts "  #{name}: #{description}"
   }
+  puts
+  puts "Internal use (Stanford NLP only):"
+  puts "  #{$0} -l <module-1> ...: Get the files from the local Stanford NLP server instead"
+  puts "  #{$0} -l -r <module-1> ...: Release to the public www directory on the server"
 end
 
 $modules.each { |name,description,func|

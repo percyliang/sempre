@@ -1,6 +1,5 @@
 package edu.stanford.nlp.sempre.tables.serialize;
 
-import java.io.*;
 import java.util.*;
 
 import edu.stanford.nlp.sempre.*;
@@ -9,7 +8,7 @@ import fig.basic.*;
 import fig.exec.Execution;
 
 /**
- * Generate TSV files containing CoreNLP annotation of the datasets.
+ * Generate TSV files containing CoreNLP tags of the datasets.
  *
  * Field descriptions:
  * - id:          unique ID of the example
@@ -23,13 +22,14 @@ import fig.exec.Execution;
  * - nerValues:   if the NER tag is numerical or temporal, the value of that
  *                NER span will be listed here
  * - targetCanon: the answer, canonicalized
+ * - targetCanonType: type of the canonicalized answer (number, date, or string)
  *
  * @author ppasupat
  */
-public class AnnotatedDatasetGenerator extends AnnotatedGenerator implements Runnable {
+public class TaggedDatasetGenerator extends TSVGenerator implements Runnable {
 
   public static void main(String[] args) {
-    Execution.run(args, "AnnotatedDatasetGeneratorMain", new AnnotatedDatasetGenerator(),
+    Execution.run(args, "TaggedDatasetGeneratorMain", new TaggedDatasetGenerator(),
         Master.getOptionsParser());
   }
 
@@ -41,7 +41,7 @@ public class AnnotatedDatasetGenerator extends AnnotatedGenerator implements Run
       String group = pathPair.getFirst();
       String path = pathPair.getSecond();
       // Open output file
-      String filename = Execution.getFile("annotated-" + group + ".tsv");
+      String filename = Execution.getFile("tagged-" + group + ".tsv");
       out = IOUtils.openOutHard(filename);
       dump(FIELDS);
       // Read LispTrees
@@ -73,7 +73,8 @@ public class AnnotatedDatasetGenerator extends AnnotatedGenerator implements Run
 
   private static final String[] FIELDS = new String[] {
     "id", "utterance", "context", "targetValue",
-    "tokens", "lemmaTokens", "posTags", "nerTags", "nerValues", "targetCanon",
+    "tokens", "lemmaTokens", "posTags", "nerTags", "nerValues",
+    "targetCanon", "targetCanonType",
   };
 
   @Override
@@ -99,58 +100,23 @@ public class AnnotatedDatasetGenerator extends AnnotatedGenerator implements Run
       }
     }
     // Other information come from Example
-    fields[2] = serialize(((TableKnowledgeGraph) ex.context.graph).filename);
+    fields[2] = serialize(((TableKnowledgeGraph) ex.context.graph).filename.replace("lib/data/tables/", ""));
     fields[4] = serialize(ex.languageInfo.tokens);
     fields[5] = serialize(ex.languageInfo.lemmaTokens);
     fields[6] = serialize(ex.languageInfo.posTags);
     fields[7] = serialize(ex.languageInfo.nerTags);
     fields[8] = serialize(ex.languageInfo.nerValues);
+    // Information from target value
     fields[9] = serialize(ex.targetValue);
+    Value targetValue = ex.targetValue;
+    if (targetValue instanceof ListValue)
+      targetValue = ((ListValue) targetValue).values.get(0);
+    if (targetValue instanceof NumberValue)
+      fields[10] = "number";
+    else if (targetValue instanceof DateValue)
+      fields[10] = "date";
+    else
+      fields[10] = "string";
     dump(fields);
   }
-
-  // Helper Functions for TSV
-
-  public static void dump(PrintWriter out, String... stuff) {
-    out.println(String.join("\t", stuff));
-  }
-
-  public static String serialize(String x) {
-    if (x == null || x.isEmpty()) return "";
-    StringBuilder sb = new StringBuilder();
-    for (char y : x.toCharArray()) {
-      if (y == '\n') sb.append("\\n");
-      else if (y == '\\') sb.append("\\\\");
-      else if (y == '|') sb.append("\\|");
-      else sb.append(y);
-    }
-    return sb.toString().replaceAll("\\s", " ").trim();
-  }
-
-  public static String serialize(List<String> xs) {
-    List<String> serialized = new ArrayList<>();
-    for (String x : xs) serialized.add(serialize(x));
-    return String.join("|", serialized);
-  }
-
-  public static String serialize(Value value) {
-    if (value instanceof ListValue) {
-      List<String> xs = new ArrayList<>();
-      for (Value v : ((ListValue) value).values) {
-        xs.add(serialize(v));
-      }
-      return String.join("|", xs);
-    } else if (value instanceof DescriptionValue) {
-      return serialize(((DescriptionValue) value).value);
-    } else if (value instanceof NameValue) {
-      return serialize(((NameValue) value).description);
-    } else if (value instanceof NumberValue) {
-      return "" + ((NumberValue) value).value;
-    } else if (value instanceof DateValue) {
-      return ((DateValue) value).isoString();
-    } else {
-      throw new RuntimeException("Unknown value type: " + value);
-    }
-  }
-
 }
