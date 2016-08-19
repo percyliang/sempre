@@ -93,7 +93,7 @@ public class ActionExecutorTest {
     String defaultBlocks = "[[1,1,1,\"Green\",[]],[1,2,1,\"Blue\",[]],[2,2,1,\"Red\",[]],[2,2,3,\"Yellow\",[]]]";
     ContextValue context = getContext(defaultBlocks);
     LogInfo.begin_track("testBasicActions");
-    runFormula(executor, "(:s (: select *) (: remove) (: remove))", context, x -> x.allitems.size() == 0);
+    runFormula(executor, "(:s (: select *) (: remove))", context, x -> x.allitems.size() == 0);
     runFormula(executor, "(:s (: select (row (number 1))) (: add red top) (: add red top))", context, x -> x.allitems.size() == 8);
     runFormula(executor, "(:for * (: remove))", context, x -> x.allitems.size() == 0);
     runFormula(executor, "(:foreach * (: remove))", context, x -> x.allitems.size() == 0);
@@ -101,8 +101,6 @@ public class ActionExecutorTest {
     runFormula(executor, "(:foreach (or (color red) (color orange)) (:loop (number 5) (: add red top)))",
        context, x -> x.allitems.size() == 9);
     runFormula(executor, "(:for (or (color red) (color blue)) (:loop (number 5) (:s (: move left) (: move right) (: move left))))",
-        context, null);
-    runFormula(executor, "(:foreach (or (color red) (color blue)) (: update color ((reverse color) (call adj left))))",
         context, null);
     
     LogInfo.end_track();
@@ -116,7 +114,7 @@ public class ActionExecutorTest {
     runFormula(executor, "(:s (:for * (: select)) (:for (call veryx left this) (: remove)))", context, x -> x.allitems.size() == 0);
     runFormula(executor, "(:for * (:for (call veryx bot) (:loop (number 2) (:s (: add red left) (: select (call adj top))))))", context, 
         x -> x.allitems.size() == 6);
-    runFormula(executor, "(:s (:for * (: select)) (: select (call veryx bot this)) (: remove) )", context, x -> x.allitems.size() == 3);
+    runFormula(executor, "(:s (:for * (: select)) (: select (call veryx bot selected)) (: remove selected) )", context, x -> x.allitems.size() == 3);
     // x -> x.selected().iterator().next().get("height") == new Integer(3)
     runFormula(executor, "(:loop (count (color green)) (: add red left *))", context, x -> x.allitems.size() == 20);
 
@@ -128,7 +126,7 @@ public class ActionExecutorTest {
     String defaultBlocks = "[[1,1,1,\"Green\",[\"S\"]],[1,1,2,\"Green\",[]],[1,1,3,\"Green\",[]],[1,1,4,\"Green\",[]]]";
     ContextValue context = getContext(defaultBlocks);
     LogInfo.begin_track("troubleCases");
-    runFormula(executor, "(:s (: select *) (: select (or (call veryx bot) (call veryx top))))", context, selectedSize(2));
+    runFormula(executor, "(:s (: select *) (: select (or (call veryx top this) (call veryx bot this))))", context, selectedSize(2));
     runFormula(executor, " (: select (or (call veryx top (color green)) (call veryx bot (color green))))", context, selectedSize(2));
     runFormula(executor, " (: select (and (call veryx top (color green)) (call veryx bot (color green))))", context, selectedSize(0));
     runFormula(executor, " (: select (call adj top this))", context, selectedSize(1));
@@ -144,7 +142,30 @@ public class ActionExecutorTest {
     runFormula(executor, "(: add red left)", context, selectedSize(1));
     runFormula(executor, "(:loop (number 3) (: add red left))", context, selectedSize(1));
     runFormula(executor, "(:loop (number 3) (: add red top))", context, x -> x.allitems.size() == 3);
+    runFormula(executor, "(:loop (number 3) (: add red left))", context, x -> x.allitems.size() == 4);
     LogInfo.end_track();
+  }
+  
+  @Test public void testIsolation() {
+    // this is a green stick
+    String defaultBlocks = "[[1,1,1,\"Green\",[\"S\"]],[1,1,2,\"Green\",[]],[1,1,3,\"Green\",[]],[1,1,4,\"Green\",[]]]";
+    ContextValue context = getContext(defaultBlocks);
+    LogInfo.begin_track("testIsolation");
+    runFormula(executor, "(:isolate this (:loop (number 4) (: add red top)))", context, x -> x.allitems.size() == 5);
+    runFormula(executor, "(:isolate this (:loop (number 2) (: add red top)))", context, x -> x.allitems.size() == 4);
+    runFormula(executor, "(:isolate this (:loop (number 5) (: add red top)))", context, x -> x.allitems.size() == 6);
+    runFormula(executor, "(:s (:isolate this (:loop (number 5) (: add red top))) (: select (color red)))", context, selectedSize(5));
+    LogInfo.end_track();
+  }
+  
+  @Test public void testUpdate() {
+    String defaultBlocks = "[[1,1,1,\"Green\",[\"S\"]],[1,1,2,\"Green\",[]],[1,1,3,\"Green\",[]],[1,1,4,\"Green\",[]]]";
+    ContextValue context = getContext(defaultBlocks);
+    LogInfo.begin_track("testUpdate");
+    runFormula(executor, "(: update color red)",
+        context, null);
+    LogInfo.end_track();
+
   }
   
   

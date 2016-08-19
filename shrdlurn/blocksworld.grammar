@@ -7,6 +7,7 @@
 # basic actions
 (def @add add)
 (def @move move)
+(def @copy copy)
 
 # extended set ops
 (def @veryx veryx)
@@ -21,7 +22,7 @@
 
 # utilities
 (rule $Action (reset) (ConstantFn (: reset (string default))) (anchored 1))
-(rule $Action (reset $TOKEN) (lambda n (: reset (var n))) (anchored 1))
+(rule $Action (build $TOKEN) (lambda n (: build (var n))) (anchored 1))
 (rule $Action (base $Number $Number) (lambda x (lambda y (: @base (var x) (var y)))) (anchored 1))
 (rule $ROOT (_contextcmd) (ConstantFn (string "(context (graph NaiveKnowledgeGraph ((string [[1,3,1,\"Green\",[]],[2,2,1,\"Blue\",[]],[1,3,2,\"Red\",[]]]) (name b) (name c))))")) (anchored 1))
 
@@ -29,6 +30,7 @@
 (rule $Action (add $Color) (lambda c (: @add (var c) top)) (anchored 1))
 (rule $Action (add $Color $Direction) (lambda c (lambda d (: @add (var c) (var d)))) (anchored 1))
 (rule $Action (move $Direction) (lambda d (: @move (var d))) (anchored 1))
+
 # primitive actions with arguments
 
 # cube to cube relations

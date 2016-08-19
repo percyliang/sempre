@@ -102,12 +102,12 @@ public class ActionExecutor extends Executor {
         performActions((ActionFormula)f.args.get(1), world);
       }
       world.selected = previous;
-    } else if (f.mode == ActionFormula.Mode.scope) {
+    } else if (f.mode == ActionFormula.Mode.isolate) {
       Set<Item> scope = toItemSet(toSet(processSetFormula(f.args.get(0), world)));
       Set<Item> previous = world.all();
       world.allitems = scope;
       performActions((ActionFormula)f.args.get(1), world);
-      world.allitems = Sets.union(previous, world.allitems);
+      world.allitems.addAll(previous);
     }
   }
   
@@ -131,7 +131,8 @@ public class ActionExecutor extends Executor {
   static class SpecialSets {
     static String All = "*";
     static String EmptySet = "nothing";
-    static String Selected = "this";
+    static String This = "this"; // current scope if it exists, otherwise the globally marked object
+    static String Selected = "selected"; // 
   };
   // a subset of lambda dcs. no types, and no marks
   // if this gets any more complicated, you should consider the LambdaDCSExecutor
@@ -145,6 +146,8 @@ public class ActionExecutor extends Executor {
         // LogInfo.logs("%s : this %s, all: %s", id, world.selected().toString(), world.allitems.toString());
         if (id.equals(SpecialSets.All))
           return world.all();
+        if (id.equals(SpecialSets.This))
+          return world.current();
         if (id.equals(SpecialSets.Selected))
           return world.selected();
         if (id.equals(SpecialSets.EmptySet))
@@ -273,7 +276,7 @@ public class ActionExecutor extends Executor {
       
       // append optional selected parameter when needed:
       if (cost == INVALID_TYPE_COST && args.length + 1 == m.getParameterCount()) {
-        args = ObjectArrays.concat(args, thisObj.selected);
+        args = ObjectArrays.concat(args, thisObj.current());
         cost = typeCastCost(m.getParameterTypes(), args);
       }
       

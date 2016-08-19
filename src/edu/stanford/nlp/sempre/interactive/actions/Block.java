@@ -130,7 +130,7 @@ public class  Block extends Item {
     result = prime * result + col;
     result = prime * result + height;
     result = prime * result + row;
-    result = prime * result + (this.color == (CubeColor.Anchor)? 1 : 0);
+    //result = prime * result + (this.color == (CubeColor.Anchor)? 1 : 0);
 
     return result;
   }
@@ -152,8 +152,19 @@ public class  Block extends Item {
       return false;
     
     // only anchored colors need to be the same.
-    if (this.color == CubeColor.Anchor ^ other.color == CubeColor.Anchor && this.height == 0)
-        return false;
+    //if (this.color == CubeColor.Anchor ^ other.color == CubeColor.Anchor && this.height == 0)
+    //    return false;
     return true;
+  }
+  @Override
+  public boolean selected() {
+     return names.contains("S");
+  }
+  @Override
+  public void select(boolean s) {
+    if (s)
+      names.add("S");
+    else
+      names.remove("S");
   }
 }

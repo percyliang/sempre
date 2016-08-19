@@ -1,6 +1,7 @@
 package edu.stanford.nlp.sempre.interactive.actions;
 import java.util.LinkedList;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -30,7 +31,7 @@ public abstract class FlatWorld {
   
   public FlatWorld() {
     this.allitems = Sets.newHashSet();
-    this.selected = Sets.newHashSet();
+    this.selected = null;
   }
   
   // general actions, flatness means these actions can be performed on all allitems
@@ -38,19 +39,21 @@ public abstract class FlatWorld {
     allitems.removeAll(selected);
   }
   
-  // selections
-  public void select(Set<Item> set) {
-    selected = Sets.newHashSet();
-    selected.addAll(set);
-    selected.retainAll(allitems);
-    // allitems.removeAll(selected);
-    // allitems.addAll(selected);
-  }  
-  // basic sets
-  public Set<Item> selected() {
+  // current standards for "this", which is the current scope if it exists, or selected item if not
+  public Set<Item> current() {
+    if (selected == null)
+      return selected();
     return selected;
-    //return Sets.intersection(selected, allitems);
   }
+  // explicit and global selections
+  public void select(Set<Item> set) {
+    allitems.forEach(i -> i.select(false));
+    set.forEach(i -> i.select(true));
+  }
+  public Set<Item> selected() {
+    return allitems.stream().filter(i -> i.selected()).collect(Collectors.toSet());
+  }
+  
   public Set<Item> all() {
     return allitems;
   }
