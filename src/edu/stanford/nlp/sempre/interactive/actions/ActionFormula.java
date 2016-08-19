@@ -25,7 +25,7 @@ public class ActionFormula extends Formula {
     conditional(":if"), // (:if (count (has color green)) (: add red top))
     forset(":for"), // (:for (and this (color red)) (:s (: add red top) (: add yellow top) (: remove)))
     foreach(":foreach"), // (:foreach * (add ((reverse color) this) top))
-    assignment(":let"), // (:let * @x)
+    assignment(":let"), // (:let * @x), not implemented
     isolate(":isolate"),
     other(":?"); // (:scope this (blah))
 

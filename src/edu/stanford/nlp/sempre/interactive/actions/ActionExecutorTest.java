@@ -165,8 +165,5 @@ public class ActionExecutorTest {
     runFormula(executor, "(: update color red)",
         context, null);
     LogInfo.end_track();
-
   }
-  
-  
 }
