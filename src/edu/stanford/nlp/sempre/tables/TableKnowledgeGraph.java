@@ -608,13 +608,19 @@ public class TableKnowledgeGraph extends KnowledgeGraph implements FuzzyMatchabl
     return null;
   }
 
+  public Value getNameValueWithOriginalString(NameValue value) {
+    if (value.description == null)
+      value = new NameValue(value.id, getOriginalString(value.id));
+    return value;
+  }
+
   public ListValue getListValueWithOriginalStrings(ListValue answers) {
     List<Value> values = new ArrayList<>();
     for (Value value : answers.values) {
       if (value instanceof NameValue) {
         NameValue name = (NameValue) value;
         if (name.description == null)
-          value = new NameValue(name.id, getOriginalString(((NameValue) value).id));
+          value = new NameValue(name.id, getOriginalString(name.id));
       }
       values.add(value);
     }

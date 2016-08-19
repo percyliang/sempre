@@ -50,6 +50,11 @@ public abstract class InfiniteUnaryDenotation extends UnaryDenotation {
   }
 
   @Override
+  public UnaryDenotation aggregate(AggregateFormula.Mode mode) {
+    throw new LambdaDCSException(Type.infiniteList, "Cannot use aggregate mode %s on %s", mode, this);
+  }
+
+  @Override
   public UnaryDenotation filter(UnaryDenotation that) {
     return merge(that, MergeFormula.Mode.and);
   }
@@ -62,9 +67,9 @@ public abstract class InfiniteUnaryDenotation extends UnaryDenotation {
           return (EverythingUnaryDenotation) second;
         } else if (second instanceof GenericDateUnaryDenotation) {
           if ("<".equals(binary) || ">=".equals(binary))
-            return new ComparisonUnaryDenotation(binary, DenotationUtils.getSingleValue(second.aggregate(AggregateFormula.Mode.min)));
+            return new ComparisonUnaryDenotation(binary, ((GenericDateUnaryDenotation) second).getMin());
           if (">".equals(binary) || "<=".equals(binary))
-            return new ComparisonUnaryDenotation(binary, DenotationUtils.getSingleValue(second.aggregate(AggregateFormula.Mode.max)));
+            return new ComparisonUnaryDenotation(binary, ((GenericDateUnaryDenotation) second).getMax());
         }
         return new ComparisonUnaryDenotation(binary, DenotationUtils.getSingleValue(second));
       }
@@ -106,11 +111,6 @@ public abstract class InfiniteUnaryDenotation extends UnaryDenotation {
         case or:  return this;
         default:  throw new LambdaDCSException(Type.invalidFormula, "Unknown merge mode: %s", mode);
       }
-    }
-
-    @Override
-    public UnaryDenotation aggregate(AggregateFormula.Mode mode) {
-      throw new LambdaDCSException(Type.infiniteList, "Cannot use aggregate mode %s on *", mode);
     }
 
   }
@@ -163,11 +163,6 @@ public abstract class InfiniteUnaryDenotation extends UnaryDenotation {
         if (answer != null) return answer;
       }
       throw new LambdaDCSException(Type.infiniteList, "Cannot use merge mode %s on %s and %s", mode, this, that);
-    }
-
-    @Override
-    public UnaryDenotation aggregate(AggregateFormula.Mode mode) {
-      throw new LambdaDCSException(Type.infiniteList, "Cannot use aggregate mode %s on %s", mode, this);
     }
 
     @Override
@@ -319,11 +314,6 @@ public abstract class InfiniteUnaryDenotation extends UnaryDenotation {
     }
 
     @Override
-    public UnaryDenotation aggregate(AggregateFormula.Mode mode) {
-      throw new LambdaDCSException(Type.infiniteList, "Cannot use aggregate mode %s on %s", mode, this);
-    }
-
-    @Override
     public boolean contains(Object o) {
       if (!(o instanceof Value)) return false;
       Value that = ((Value) o);
@@ -381,32 +371,29 @@ public abstract class InfiniteUnaryDenotation extends UnaryDenotation {
         }
       } else if (that instanceof EverythingUnaryDenotation) {
         return that.merge(this, mode);
-      } else {
-        // Handle some more cases?
-      }
+      } 
       throw new LambdaDCSException(Type.infiniteList, "Cannot use merge mode %s on %s and %s", mode, this, that);
     }
-
-    @Override
-    public UnaryDenotation aggregate(AggregateFormula.Mode mode) {
-      // Handle min and max
-      if (mode == AggregateFormula.Mode.min || mode == AggregateFormula.Mode.max) {
-        if (date.day != -1) {             // (... ... xxx)
-          return new ExplicitUnaryDenotation(date);
-        } else if (date.month != -1) {    // (... xxx -1)
-          if (mode == AggregateFormula.Mode.min)
-            return new ExplicitUnaryDenotation(new DateValue(date.year, date.month, 1));
-          else
-            return new ExplicitUnaryDenotation(new DateValue(date.year, date.month,
-                YearMonth.of(date.year == -1 ? 2000 : date.year, date.month).lengthOfMonth()));
-        } else {                          // (xxx -1 -1)
-          if (mode == AggregateFormula.Mode.min)
-            return new ExplicitUnaryDenotation(new DateValue(date.year, 1, 1));
-          else
-            return new ExplicitUnaryDenotation(new DateValue(date.year, 12, 31));
-        }
-      }
-      throw new LambdaDCSException(Type.infiniteList, "Cannot use aggregate mode %s on %s", mode, this);
+    
+    public DateValue getMin() {
+      if (date.day != -1)
+        return date;
+      if (date.month != -1)
+        return new DateValue(date.year, date.month, 1);
+      if (date.year != -1)
+        return new DateValue(date.year, 1, 1);
+      throw new LambdaDCSException(Type.unknown, "Invalid date: (-1 -1 -1).");
+    }
+    
+    public DateValue getMax() {
+      if (date.day != -1)
+        return date;
+      if (date.month != -1)
+        return new DateValue(date.year, date.month,
+            YearMonth.of(date.year == -1 ? 2000 : date.year, date.month).lengthOfMonth());
+      if (date.year != -1)
+        return new DateValue(date.year, 12, 31);
+      throw new LambdaDCSException(Type.unknown, "Invalid date: (-1 -1 -1).");
     }
 
     @Override

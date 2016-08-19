@@ -23,6 +23,8 @@ public class TableValueEvaluator implements ValueEvaluator {
     public boolean allowNormalizedStringMatch = true;
     @Option(gloss = "When comparing number values, only consider the value and not the unit")
     public boolean ignoreNumberValueUnits = true;
+    @Option(gloss = "Strict date evaluation (year, month, and date all have to match)")
+    public boolean strictDateEvaluation = false;
   }
   public static Options opts = new Options();
 
@@ -113,11 +115,15 @@ public class TableValueEvaluator implements ValueEvaluator {
   }
 
   protected boolean compareDateValues(DateValue target, DateValue pred) {
-    // If a field in target is not blank (-1), pred must match target on that field
-    if (target.year != -1 && target.year != pred.year) return false;
-    if (target.month != -1 && target.month != pred.month) return false;
-    if (target.day != -1 && target.day != pred.day) return false;
-    return true;
+    if (opts.strictDateEvaluation) {
+      return target.equals(pred);
+    } else {
+      // If a field in target is not blank (-1), pred must match target on that field
+      if (target.year != -1 && target.year != pred.year) return false;
+      if (target.month != -1 && target.month != pred.month) return false;
+      if (target.day != -1 && target.day != pred.day) return false;
+      return true;
+    }
   }
 
 }
