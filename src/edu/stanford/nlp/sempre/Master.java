@@ -156,7 +156,7 @@ public class Master {
     LogInfo.log("  (context [(user |user|) (date |date|) (exchange |exchange|) (graph |graph|)]): prints out or set the context");
     LogInfo.log("  (uttdef (def |alternative|) [(original |original|)]): provide a definition for the original utterance");
     LogInfo.log("  (autocomplete |prefix|): provide a definition for the original utterance");
-    LogInfo.log("  (concept (name |alternative|) (actions |action|) (utts |utterances|) (denotation |denotation|)): submit the structure");
+    LogInfo.log("  (addrule |rule|): submit the structure");
     LogInfo.log("  (action |utternace|): commandline utility for performing an action on the wrold");
     LogInfo.log("Press Ctrl-D to exit.");
   }
@@ -473,6 +473,17 @@ public class Master {
       } else {
         LogInfo.logs("autocomplete just takes a prefix");
       }
+    } else if (command.equals("submit")) {
+      if (tree.children.size() >= 2) {
+        String name = tree.children.get(1).value;
+        String state = tree.children.get(2).value;
+        ConstantFn semantics = new ConstantFn(new ValueFormula<StringValue>(new StringValue(state)));
+        List<String> rhs = Lists.newArrayList(name.split(" "));
+        Rule rule = new Rule("$OBJECT", rhs, semantics);
+        addRuleInteractive(rule);
+      } else {
+        LogInfo.logs("Invalid format for submit");
+      }
     } else if (command.equals("action")) {
       // test code for mutating worlds, updates the context
       String query = tree.children.get(1).value;
@@ -541,12 +552,8 @@ public class Master {
     List<Rule> inducedRules = grammarInducer.getRules();
     if (inducedRules.size() > 0 && !trying) {
       for (Rule rule : inducedRules) {
-        builder.parser.grammar.addRule(rule);
-        // well, hacky, because BeamParser stores rules in a trie
-        // and subtlely reject redefining of core, and no cover at all
-        if ((builder.parser instanceof BeamParser || builder.parser instanceof BeamFloatingParser) && origStatus != GrammarInducer.ParseStatus.Core) {
-          builder.parser.addRule(rule);
-        }
+        if (origStatus != GrammarInducer.ParseStatus.Core)
+          addRuleInteractive(rule);
       }
       // write out the grammar
       out = IOUtils.openOutAppendHard(Paths.get(opts.newGrammarPath, session.id + ".grammar").toString());
@@ -555,6 +562,16 @@ public class Master {
       }
       out.flush();
       out.close();
+    }
+  }
+ 
+  
+  private void addRuleInteractive(Rule rule) {
+    builder.parser.grammar.addRule(rule);
+    // well, hacky, because BeamParser stores rules in a trie
+    // and subtlely reject redefining of core, and no cover at all
+    if (builder.parser instanceof BeamParser || builder.parser instanceof BeamFloatingParser) {
+      builder.parser.addRule(rule);
     }
   }
 

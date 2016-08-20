@@ -166,4 +166,15 @@ public class ActionExecutorTest {
         context, null);
     LogInfo.end_track();
   }
+  
+  @Test public void testBuild() {
+    String defaultBlocks = "[[1,1,1,\"Green\",[\"S\"]]";
+    ContextValue context = getContext(defaultBlocks);
+    LogInfo.begin_track("testBuild");
+    runFormula(executor, "(: build (string [[1,1,2,\"Green\",[]],[1,1,3,\"Blue\",[]],[1,1,4,\"Red\",[]]]))",
+        context, selectedSize(0));
+    LogInfo.end_track();
+  }
+  
+ 
 }

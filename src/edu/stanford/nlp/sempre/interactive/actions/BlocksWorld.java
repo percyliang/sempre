@@ -106,7 +106,6 @@ public class BlocksWorld extends FlatWorld {
     Block basecube = new Block(x, y, 0, CubeColor.Anchor.toString());
     basecube.select(true);
     this.allitems.add(basecube);
-    this.selected.add(basecube);
   }
 
   @SuppressWarnings("unchecked")
@@ -190,6 +189,34 @@ public class BlocksWorld extends FlatWorld {
       return d;
     }).collect(Collectors.toSet());
   }
+  
+  public void build(String cubejson) {
+    for (Item i : current()) {
+      BlocksWorld world = BlocksWorld.fromJSON(cubejson);
+      shift(((Block)i).clone(), world);
+      this.allitems.remove(i);
+      this.allitems.addAll(world.allitems);
+    }
+  }
+  
+  // make block the anchor of the world
+  private void shift(Block block, BlocksWorld world) {
+    Block anchor = findAnchor(world.allitems).clone();
+    for (Item i  : world.allitems) {
+      Block b = ((Block)i);
+      b.row = b.row - anchor.row + block.row;
+      b.col = b.col - anchor.col + block.col;
+      b.height = b.height - anchor.height + block.height;
+    }
+  }
+  
+  private Block findAnchor(Set<Item> blocks) {
+    Set<Item> botmost = veryx("bot", blocks);
+    Set<Item> rightbotmost = veryx("right", botmost);
+    Set<Item> frontrightbotmost = veryx("front", rightbotmost);
+    Item anchor = frontrightbotmost.iterator().next();
+    return (Block)anchor;
+  }
 
   //get cubes at extreme positions
   public Set<Item> veryx(String dirstr, Set<Item> selected) {
@@ -204,13 +231,14 @@ public class BlocksWorld extends FlatWorld {
     default: throw new RuntimeException("invalid direction");
     }
   }
+  
   public Set<Item> adj(String dirstr, Set<Item> selected) {
     Direction dir = Direction.fromString(dirstr);
-    Set<Item> allselected = selected.stream().map(c -> ((Block)c).copy(dir)).filter(c -> allitems.contains(c))
+    Set<Item> dirofselected = selected.stream().map(c -> ((Block)c).copy(dir)).filter(c -> allitems.contains(c))
         .collect(Collectors.toSet());
-    allitems.removeAll(allselected);
-    allitems.addAll(allselected);
-    return allselected;
+    Set<Item> actualdirofselected = allitems.stream().filter(c -> dirofselected.contains(c))
+        .collect(Collectors.toSet());
+    return actualdirofselected;
   }
 
   public static Set<Item> argmax(Function<Block, Integer> f, Set<Item> items) {
