@@ -567,6 +567,7 @@ public class Master {
  
   
   private void addRuleInteractive(Rule rule) {
+    LogInfo.logs("addRuleInteractive: %s", rule);
     builder.parser.grammar.addRule(rule);
     // well, hacky, because BeamParser stores rules in a trie
     // and subtlely reject redefining of core, and no cover at all

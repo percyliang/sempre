@@ -78,7 +78,7 @@ public class GrammarInducer {
       deriv = defEx.predDerivations.get(defEx.NBestInd);
 
     while (deriv.rule.isCatUnary()) deriv = deriv.child(0);
-    List<Derivation> covers = getGreedyCover(deriv);
+    List<Derivation> covers = getSimpleCover(deriv);
 
     if (covers.size() == 0) {
       defStatus = DefStatus.NoCover;
@@ -172,13 +172,17 @@ public class GrammarInducer {
       for (int end = start + 1; end <= numTokens; end++) {
         boolean matchedCat = false;
         for (String cat : Parser.opts.trackedCats) {
+          LogInfo.dbgs("Checking...%s on %d-%d:%d, matched: %s", cat, start, end, currentMax, matchedCat);
+          
           if (matchedCat) break;
 
           if (chart[start][end] == null || !chart[start][end].keySet().contains(cat))
             continue; // do not match random stuff, and take the first match
 
           for (Derivation deriv : chart[start][end].get(cat)) {
+            LogInfo.dbgs("Real (%d, %d):(%d, %d) : %s", deriv.start, deriv.end, start, end, deriv);
             List<Derivation> matches = new ArrayList<>();
+            LogInfo.dbgs("deriv %s: def %s", deriv, definition);
             getMatches(definition, deriv, matches);
             // do nothing when ==0: no match; >=1: too many matches
             if (matches.size() >= 1) {
@@ -192,16 +196,60 @@ public class GrammarInducer {
       }
 
       if (currentMax > start) {
-        LogInfo.logs("added (%d, %d): %s", currentDeriv.start, currentDeriv.end, currentDeriv.rule.getLhs());
+        LogInfo.dbgs("GrammarInducer.added (%d, %d): %s", currentDeriv.start, currentDeriv.end, currentDeriv.rule.getLhs());
         coveredDerivs.add(currentDeriv);
         start = currentMax;
       } else start++;
     }
+    LogInfo.dbgs("GrammarInducer.coveredDerivs: %s", coveredDerivs);
     return coveredDerivs;
   }
+  
+  private List<Derivation> getSimpleCover(Derivation definition) {
+    List<Derivation> coveredDerivs = new ArrayList<>();
+    int currentMax = 0;
+    for (int start = 0; start < numTokens;) {
+      Derivation currentDeriv = null;
+      boolean matchedCat = false;
+      for (int end = start + 1; end <= numTokens; end++) {
+        if (matchedCat) break;
+        for (String cat : Parser.opts.trackedCats) {
+          if (matchedCat) break;
+          if (chart[start][end] == null || !chart[start][end].keySet().contains(cat))
+            continue; // do not match random stuff, and take the first match
+
+          for (Derivation deriv : chart[start][end].get(cat)) {
+            LogInfo.dbgs("Real (%d, %d):(%d, %d) : %s", deriv.start, deriv.end, start, end, deriv);
+
+            List<Derivation> matches = new ArrayList<>();
+            LogInfo.dbgs("deriv %s: def %s", deriv, definition);
+            getMatches(definition, deriv, matches);
+            // do nothing when ==0: no match; >=1: too many matches
+            if (matches.size() >= 1) {
+                currentMax = end;
+                currentDeriv = deriv;
+                matchedCat = true;
+                break;
+            }
+          }
+        }
+      }
+
+      if (currentMax > start) {
+        LogInfo.dbgs("GrammarInducer.added (%d, %d): %s", currentDeriv.start, currentDeriv.end, currentDeriv.rule.getLhs());
+        coveredDerivs.add(currentDeriv);
+        start = currentMax;
+      } else start++;
+    }
+    LogInfo.dbgs("GrammarInducer.coveredDerivs: %s", coveredDerivs);
+    return coveredDerivs;
+  }
+  
+
+  
+
 
   boolean nothingParses() {
-
     return false;
   }
 

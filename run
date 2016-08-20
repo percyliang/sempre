@@ -996,7 +996,7 @@ addMode('interactive', 'interactive semantic parsing in blocks', lambda { |e| l(
 
   o('Parser.pruneErrorValues', true),
   o('Parser', 'BeamFloatingParser'),
-  o('Parser.trackedCats', 'Color', 'Numbers', 'Direction', 'Set', 'Set2', 'Action', 'Actions'),
+  o('Parser.trackedCats', 'Number', 'Numbers', 'Color',  'Direction', 'Set', 'Sets', 'Action', 'Actions'),
   o('FloatingParser.defaultIsFloating', true),
 
 o('ParserState.customExpectedCounts', 'UNIFORM'),
