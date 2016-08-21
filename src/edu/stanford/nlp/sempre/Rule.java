@@ -130,6 +130,12 @@ public class Rule {
       return f == 1.0 ? false : !FloatingParser.opts.defaultIsFloating;
   }
   
+  public boolean isInduced() {
+    double a = getInfoTag("induced");
+    if (a == 1.0) return true;
+    return false;
+  }
+  
   @Override
   public boolean equals(Object o) {
     if (!(o instanceof Rule)) return false;
@@ -139,4 +145,6 @@ public class Rule {
   public int hashCode() {
     return this.toString().hashCode();
   }
+
+ 
 }

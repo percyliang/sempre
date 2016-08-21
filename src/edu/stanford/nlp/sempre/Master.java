@@ -480,6 +480,7 @@ public class Master {
         ConstantFn semantics = new ConstantFn(new ValueFormula<StringValue>(new StringValue(state)));
         List<String> rhs = Lists.newArrayList(name.split(" "));
         Rule rule = new Rule("$OBJECT", rhs, semantics);
+        rule.addInfo("induced", 1.0);
         addRuleInteractive(rule);
       } else {
         LogInfo.logs("Invalid format for submit");

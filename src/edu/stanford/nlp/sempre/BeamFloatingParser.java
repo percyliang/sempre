@@ -46,8 +46,12 @@ public class BeamFloatingParser extends Parser {
   }
 
   public synchronized void addRule(Rule rule) {
-    if (!rule.isCatUnary() && rule.isAnchored()) {
-      trie.add(rule);
+    if (!rule.isCatUnary()) {
+      if (rule.isAnchored())
+        trie.add(rule);
+      // induced grammar
+      else if (rule.isInduced())
+        trie.add(rule);
     }
   }
 

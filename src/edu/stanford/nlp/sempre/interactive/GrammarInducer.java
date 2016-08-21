@@ -38,8 +38,8 @@ public class GrammarInducer {
   // this depends on the chart!
   public static enum ParseStatus {
     Nothing, // nothing at all parses in the utterance
-    Partial, // something parse
-    Full, // redefining known utterance
+    Float, // something parse
+    Induced, // redefining known utterance
     Core; // define known utterance in core, should reject
   }
 
@@ -100,11 +100,10 @@ public class GrammarInducer {
     SemanticFn sem = getSemantics(deriv, covers);
     String cat = getTopCat(deriv);
     Rule inducedRule = new Rule(cat, RHS, sem);
-    // inducedRule.addInfo("induced", 1.0);
     inducedRule.addInfo(id, 1.0);
     inducedRule.addInfo(defStatus.toString(), 1.0);
     inducedRule.addInfo(parseStatus.toString(), 1.0);
-    inducedRule.addInfo("anchored", 1.0);
+    inducedRule.addInfo("induced", 1.0);
     if (!inducedRule.isCatUnary()) {
       inducedRules.add(inducedRule);
     }
@@ -280,7 +279,7 @@ public class GrammarInducer {
           return ParseStatus.Core;
         }
       }
-      return ParseStatus.Full;
+      return ParseStatus.Induced;
     }
     // could check the chart here set partial, but no need for now
     return ParseStatus.Nothing;
