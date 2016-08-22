@@ -61,7 +61,7 @@ public class BlocksWorld extends FlatWorld {
   public Map<String,Set<Block>> vars;
 
   public final String SELECT = "S";
-  
+
   public static BlocksWorld fromContext(ContextValue context) {
     if (context == null || context.graph == null) {
       return fromJSON("[[3,3,1,\"Gray\",[\"S\"]],[4,4,1,\"Blue\",[]]]");
@@ -152,7 +152,7 @@ public class BlocksWorld extends FlatWorld {
     selected.forEach(i -> i.update(rel, value));
     allitems.addAll(selected);
   }
- 
+
 
   // block world specific actions
   public void move(String dir, Set<Item> selected) {
@@ -189,7 +189,7 @@ public class BlocksWorld extends FlatWorld {
       return d;
     }).collect(Collectors.toSet());
   }
-  
+
   public void build(String dirstr, String cubejson) {
     Direction dir = Direction.fromString(dirstr);
     for (Item i : current()) {
@@ -200,11 +200,11 @@ public class BlocksWorld extends FlatWorld {
         shift(b, world);
       else
         shift(b.copy(dir), world);
-      
+
       this.allitems.addAll(world.allitems);
     }
   }
-  
+
   // make block the anchor of the world
   private void shift(Block block, BlocksWorld world) {
     Block anchor = findAnchor(world.allitems).clone();
@@ -215,7 +215,7 @@ public class BlocksWorld extends FlatWorld {
       b.height = b.height - anchor.height + block.height;
     }
   }
-  
+
   private Block findAnchor(Set<Item> blocks) {
     Set<Item> botmost = veryx("bot", blocks);
     Set<Item> rightbotmost = veryx("right", botmost);
@@ -237,7 +237,7 @@ public class BlocksWorld extends FlatWorld {
     default: throw new RuntimeException("invalid direction");
     }
   }
-  
+
   public Set<Item> adj(String dirstr, Set<Item> selected) {
     Direction dir = Direction.fromString(dirstr);
     Set<Item> dirofselected = selected.stream().map(c -> ((Block)c).copy(dir)).filter(c -> allitems.contains(c))

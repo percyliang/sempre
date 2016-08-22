@@ -133,6 +133,7 @@ public class BlocksParsingTest {
     parse("", "repeat 3 [delete top of all]", context, moreThan(0));
     parse("", "repeat 3 [delete top of all]", context, moreThan(0));
     parse("", "add 3 red to left", context, hasAll("(:loop (number 3) (: add red left))"));
+    parse("repeat 5 [ add red left ]", "add 5 red left", context, hasAll("(:loop (number 5) (: add red left))"));
     LogInfo.end_track();
   }
   // things we won't handle
