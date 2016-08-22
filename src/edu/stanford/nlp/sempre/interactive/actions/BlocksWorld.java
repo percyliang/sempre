@@ -199,7 +199,7 @@ public class BlocksWorld extends FlatWorld {
       if (b.color.equals(CubeColor.Anchor) && dir == Direction.Top)
         shift(b, world);
       else
-        shift(((Block)i).copy(dir), world);
+        shift(b.copy(dir), world);
       
       this.allitems.addAll(world.allitems);
     }
