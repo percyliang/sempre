@@ -41,6 +41,7 @@ final class SecureIdentifiers {
  */
 public class Server {
   public static class Options {
+    
     @Option public int port = 8400;
     @Option public int numThreads = 4;
     @Option public String title = "SEMPRE Demo";
@@ -48,6 +49,7 @@ public class Server {
     @Option public String basePath = "demo-www";
     @Option public int verbose = 1;
     @Option public int htmlVerbose = 1;
+    @Option public int maxCandidates = Integer.MAX_VALUE;
   }
   public static Options opts = new Options();
 
@@ -530,7 +532,12 @@ public class Server {
         json.put("coverage", response.coverage);
         json.put("taggedcover", response.taggedCover);
         json.put("candidates", items);
-        for (Derivation deriv : response.getExample().getPredDerivations()) {
+        List<Derivation> allCandidates = response.getExample().getPredDerivations();
+        
+        if (allCandidates != null && allCandidates.size() >= Server.opts.maxCandidates)
+          allCandidates = allCandidates.subList(0, Server.opts.maxCandidates);
+        
+        for (Derivation deriv : allCandidates) {
           Map<String, Object> item = new HashMap<String, Object>();
           Value value = deriv.getValue();
           if (value instanceof StringValue)

@@ -348,14 +348,14 @@ public abstract class Parser {
     
       evaluation.add("correctIndexAfterParsePrag", correctIndexAfterParsePrag);
       evaluation.add("correctBaseline", correctIndexAfterParse == 0? 1:0);
-      evaluation.add("pragBetter", correctIndexAfterParsePrag <= correctIndexAfterParse? 1: 0);
-      evaluation.add("pragWorse",  correctIndexAfterParsePrag >= correctIndexAfterParse? 1: 0);
-      
-      evaluation.add("Top3Prag", correctIndexAfterParsePrag < 3?  1: 0);
-      evaluation.add("Top3Normal",  correctIndexAfterParse < 3? 1: 0);
-      
-      evaluation.add("Top5Prag", correctIndexAfterParsePrag < 5?  1: 0);
-      evaluation.add("Top5Normal",  correctIndexAfterParse < 5? 1: 0);
+//      evaluation.add("pragBetter", correctIndexAfterParsePrag <= correctIndexAfterParse? 1: 0);
+//      evaluation.add("pragWorse",  correctIndexAfterParsePrag >= correctIndexAfterParse? 1: 0);
+//      
+//      evaluation.add("Top3Prag", correctIndexAfterParsePrag < 3?  1: 0);
+//      evaluation.add("Top3Normal",  correctIndexAfterParse < 3? 1: 0);
+//      
+//      evaluation.add("Top5Prag", correctIndexAfterParsePrag < 5?  1: 0);
+//      evaluation.add("Top5Normal",  correctIndexAfterParse < 5? 1: 0);
     }
 
     if (correctIndex != -1) {
