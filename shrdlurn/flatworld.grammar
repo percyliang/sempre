@@ -81,19 +81,21 @@
 
 (rule $Action ($Numbers $Actions) (lambda n (lambda a (:loop (var n) (var a)))) (floating 1)) # do add red top 3 times
 
-(rule $Action ($Sets $Actions) (lambda s (lambda a (:for (var s) (var a)))) (floating 1)) # add red top to has color red
+# (rule $Action ($Sets $Actions) (lambda s (lambda a (:for (var s) (var a)))) (floating 1)) # add red top to has color red
+
 (rule $Action ($Sets $Actions) (lambda s (lambda a (:foreach (var s) (var a)))) (floating 1))
 
 (rule $Action ($Actions $Actions) (lambda a1 (lambda a2 (:s (var a1) (var a2)))) (floating 1)) # add red top then remove them
-
-(rule $Set ($Rel $ValueSets) (lambda r (lambda s
-			   ((var r) (var s)))) (floating 1))
 
 (rule $ValueSets ($Rel $Sets) (lambda r (lambda s
 			   ((reverse (var r)) (var s)))) (floating 1))
 
 (rule $Action ($Sets) (lambda s (: @select (var s))) (floating 1))
-(rule $Action ($Rel $ValueSets) (lambda r (lambda v (: @update (var r) (var v)))) (floating 1))
 
+(rule $Set ($Rel $ValueSets) (lambda r (lambda s
+			   ((var r) (var s)))) (floating 1))
+(rule $Action ($Rel $ValueSets) (lambda r (lambda v (: @update (var r) (var v)))) (floating 1))
 # (rule $Action (nothing) (ConstantFn (: @remove)) (floating 1))
+
+(rule $ROOT ($Actions) (IdentityFn) (floating 1))
 

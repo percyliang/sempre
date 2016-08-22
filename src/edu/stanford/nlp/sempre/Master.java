@@ -539,7 +539,7 @@ public class Master {
 
     GrammarInducer grammarInducer = new GrammarInducer(origEx, ex);
     response.commandResponse =  String.format("[%s,%s]", grammarInducer.defStatus.toString(), origStatus.toString());
-
+    LogInfo.logs("response.commandResponse: %s", response.commandResponse );
     // write the actual definitions, write these anyways even if rule failed
     PrintWriter out = IOUtils.openOutAppendHard(Paths.get(opts.newGrammarPath, session.id + ".definition").toString());
     // deftree.addChild(oldEx.utterance);
