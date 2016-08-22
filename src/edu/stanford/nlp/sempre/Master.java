@@ -481,6 +481,11 @@ public class Master {
         List<String> rhs = Lists.newArrayList(name.split(" "));
         Rule rule = new Rule("$OBJECT", rhs, semantics);
         rule.addInfo("induced", 1.0);
+        PrintWriter out = IOUtils.openOutAppendHard(Paths.get(opts.newGrammarPath,"SUBMIT_OBJECTS.grammar.objects").toString());
+        out.append(rule.toLispTree().toStringWrap());
+        out.flush();
+        out.close();
+        
         addRuleInteractive(rule);
       } else {
         LogInfo.logs("Invalid format for submit");

@@ -167,7 +167,7 @@ public class BlocksWorld extends FlatWorld {
         c -> {
           Block d = ((Block)c).copy(Direction.fromString(dir));
 
-          // a bit of a hack to deal with special anchor points, where adding to its top behaves differently
+          // a hack to deal with special anchor points, where adding to its top behaves differently
           if (d.color.equals(CubeColor.Anchor) && d.height == 1) {
             d.height = d.height - 1;
             ((Block)c).color = CubeColor.fromString(color);
@@ -190,11 +190,17 @@ public class BlocksWorld extends FlatWorld {
     }).collect(Collectors.toSet());
   }
   
-  public void build(String cubejson) {
+  public void build(String dirstr, String cubejson) {
+    Direction dir = Direction.fromString(dirstr);
     for (Item i : current()) {
       BlocksWorld world = BlocksWorld.fromJSON(cubejson);
-      shift(((Block)i).clone(), world);
-      this.allitems.remove(i);
+      Block b = ((Block)i);
+      // special case for top of anchor
+      if (b.color.equals(CubeColor.Anchor) && dir == Direction.Top)
+        shift(b, world);
+      else
+        shift(((Block)i).copy(dir), world);
+      
       this.allitems.addAll(world.allitems);
     }
   }
