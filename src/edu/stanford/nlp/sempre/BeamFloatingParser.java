@@ -125,7 +125,7 @@ class BeamFloatingParserState extends ChartParserState {
     }
 
     /* If Beam Parser failed to find derivations, try a floating parser */
-    if (predDerivations.size() == 0) {
+    if (predDerivations.size() == 0 || this.ex.definition == null) {
       /* For every base span of the chart, add the derivations from nothing rules */
       List<Rule> nothingRules = new ArrayList<Rule>();
       for (Rule rule : parser.grammar.rules)
