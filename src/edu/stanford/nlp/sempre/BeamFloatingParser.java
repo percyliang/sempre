@@ -361,7 +361,7 @@ class BeamFloatingParserState extends ChartParserState {
         dest.put(cat, derivations = new ArrayList<>());
 
       /* add only if the formula not already present to ensure no duplicates */
-      ArrayList<Formula> formulas = new ArrayList<Formula>();
+      Set<Formula> formulas = new HashSet<Formula>();
       for (Derivation deriv : derivations)
         formulas.add(deriv.formula);
 
