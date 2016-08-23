@@ -96,7 +96,7 @@ public class Derivation implements SemanticFn.Callable, HasScore {
 
   // Number in [0, 1] denoting how correct the value is.
   public double compatibility = Double.NaN;
-  
+
   // Probability (normalized exp of score).
   public double prob = Double.NaN;
   // Probability after pragmatics
@@ -118,7 +118,7 @@ public class Derivation implements SemanticFn.Callable, HasScore {
   public static long numCreated = 0;  // Incremented for each derivation we create.
   public static final Comparator<Derivation> derivScoreComparator = new ScoredDerivationComparator();
   public static final Comparator<Derivation> pragDerivScoreComparator = new PragmaticallyScoredDerivationComparator();
-  
+
   public static final List<Derivation> emptyList = Collections.emptyList();
 
   // A Derivation is built from
@@ -442,18 +442,18 @@ public class Derivation implements SemanticFn.Callable, HasScore {
         return 0;
     }
   }
-  
+
  //Used to compare derivations by pragmatic score.
  public static class PragmaticallyScoredDerivationComparator implements Comparator<Derivation> {
    @Override
    public int compare(Derivation deriv1, Derivation deriv2) {
      if (Double.isNaN(deriv1.pragmatic_prob) || Double.isNaN(deriv2.pragmatic_prob))
        throw new RuntimeException("pragmatic_prob not assigned!");
-     
+
      // adding the small number for stability
      if (deriv1.pragmatic_prob > deriv2.pragmatic_prob + 1e-6) return -1;
      if (deriv1.pragmatic_prob < deriv2.pragmatic_prob - 1e-6) return +1;
-     
+
      if (deriv1.creationIndex < deriv2.creationIndex) return -1;
      if (deriv1.creationIndex > deriv2.creationIndex) return +1;
      return 0;
@@ -548,7 +548,7 @@ public class Derivation implements SemanticFn.Callable, HasScore {
     Formula reduced = Formulas.betaReduction(formula);
     return new Builder().withAllFrom(this).formula(reduced).createDerivation();
   }
-  
+
   public boolean allAnchored() {
     if (!rule.isAnchored()) {
       return false;

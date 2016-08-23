@@ -125,7 +125,7 @@ class BeamFloatingParserState extends ChartParserState {
     }
 
     /* If Beam Parser failed to find derivations, try a floating parser */
-    if (predDerivations.size() == 0) {
+    if (predDerivations.size() == 0 || this.ex.definition == null) {
       /* For every base span of the chart, add the derivations from nothing rules */
       List<Rule> nothingRules = new ArrayList<Rule>();
       for (Rule rule : parser.grammar.rules)
@@ -141,15 +141,14 @@ class BeamFloatingParserState extends ChartParserState {
         }
       }
 
-      /* Add unique actionable derivations to predDerivations! */
-      List<Derivation> actionDerivs = chart[0][numTokens].get("$ROOT");
-      if (actionDerivs == null) actionDerivs = new ArrayList<Derivation>(Derivation.emptyList);
-      addDerivs(chart[0][numTokens].get("$Actions"), actionDerivs);
-      addDerivs(chart[0][numTokens].get("$Action"), actionDerivs);
+      /* Add unique derivations to predDerivations */
+      List<Derivation> rootDerivs = chart[0][numTokens].get("$FROOT");
+      if (rootDerivs == null) rootDerivs = new ArrayList<Derivation>(Derivation.emptyList);
 
+      List<Derivation> actionDerivs = new ArrayList<Derivation>(Derivation.emptyList);
       if (actionDerivs != null) {
         ArrayList<Formula> formulas = new ArrayList<Formula>();
-        for (Derivation d : actionDerivs) {
+        for (Derivation d : rootDerivs) {
           Formula f = d.getFormula();
           if (!formulas.contains(f)) {
             formulas.add(f);

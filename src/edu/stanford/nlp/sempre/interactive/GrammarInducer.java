@@ -172,7 +172,7 @@ public class GrammarInducer {
         boolean matchedCat = false;
         for (String cat : Parser.opts.trackedCats) {
           LogInfo.dbgs("Checking...%s on %d-%d:%d, matched: %s", cat, start, end, currentMax, matchedCat);
-          
+
           if (matchedCat) break;
 
           if (chart[start][end] == null || !chart[start][end].keySet().contains(cat))
@@ -203,7 +203,7 @@ public class GrammarInducer {
     LogInfo.dbgs("GrammarInducer.coveredDerivs: %s", coveredDerivs);
     return coveredDerivs;
   }
-  
+
   private List<Derivation> getSimpleCover(Derivation definition) {
     List<Derivation> coveredDerivs = new ArrayList<>();
     int currentMax = 0;
@@ -243,9 +243,9 @@ public class GrammarInducer {
     LogInfo.dbgs("GrammarInducer.coveredDerivs: %s", coveredDerivs);
     return coveredDerivs;
   }
-  
 
-  
+
+
 
 
   boolean nothingParses() {

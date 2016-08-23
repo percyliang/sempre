@@ -485,7 +485,7 @@ public class Master {
         out.append(rule.toLispTree().toStringWrap());
         out.flush();
         out.close();
-        
+
         addRuleInteractive(rule);
       } else {
         LogInfo.logs("Invalid format for submit");
@@ -515,6 +515,7 @@ public class Master {
     b.setContext(session.context);
     b.setNBestInd(nbestInd);
     Example ex = b.createExample();
+    ex.definition = def;
     ex.preprocess();
 
     GrammarInducer.ParseStatus origStatus = GrammarInducer.getParseStatus(origEx);
@@ -570,8 +571,8 @@ public class Master {
       out.close();
     }
   }
- 
-  
+
+
   private void addRuleInteractive(Rule rule) {
     LogInfo.logs("addRuleInteractive: %s", rule);
     builder.parser.grammar.addRule(rule);

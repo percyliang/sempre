@@ -58,7 +58,7 @@ public abstract class Parser {
 
     @Option(gloss = "Dump all features (for debugging)")
     public boolean dumpAllFeatures = false;
-    
+
     @Option(gloss = "keep tracks of these categories")
     public List<String> trackedCats;
   }
@@ -117,7 +117,7 @@ public abstract class Parser {
     catUnaryRules = new ArrayList<>();
     Map<String, List<Rule>> graph = new HashMap<>();  // Node from LHS to list of rules
     for (Rule rule : grammar.rules)
-      if (rule.isCatUnary())
+      if (rule.isCatUnary() && rule.isAnchored())
         MapUtils.addToList(graph, rule.lhs, rule);
 
     // Topologically sort catUnaryRules so that B->C occurs before A->B
@@ -176,7 +176,7 @@ public abstract class Parser {
     state.setEvaluation();
 
     ex.predDerivations = state.predDerivations;
-    
+
     if (Master.opts.bePragmatic) {
       // Compute probabilities
       double[] probs = Derivation.getProbs(ex.predDerivations, 1);
@@ -345,15 +345,15 @@ public abstract class Parser {
     evaluation.add("partOracle", maxCompatibility);
     if (correctIndexAfterParse != -1) {
       evaluation.add("correctIndexAfterParse", correctIndexAfterParse);
-    
+
       evaluation.add("correctIndexAfterParsePrag", correctIndexAfterParsePrag);
       evaluation.add("correctBaseline", correctIndexAfterParse == 0? 1:0);
 //      evaluation.add("pragBetter", correctIndexAfterParsePrag <= correctIndexAfterParse? 1: 0);
 //      evaluation.add("pragWorse",  correctIndexAfterParsePrag >= correctIndexAfterParse? 1: 0);
-//      
+//
 //      evaluation.add("Top3Prag", correctIndexAfterParsePrag < 3?  1: 0);
 //      evaluation.add("Top3Normal",  correctIndexAfterParse < 3? 1: 0);
-//      
+//
 //      evaluation.add("Top5Prag", correctIndexAfterParsePrag < 5?  1: 0);
 //      evaluation.add("Top5Normal",  correctIndexAfterParse < 5? 1: 0);
     }
