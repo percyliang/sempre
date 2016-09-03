@@ -130,20 +130,4 @@ public class Rule {
       return f == 1.0 ? false : !Parser.opts.defaultIsFloating;
   }
 
-  public boolean isSegmentRoot() {
-    double a = getInfoTag("segmentRoot");
-    if (a == 1.0)
-      return true;
-    else
-      return false;
-  }
-
-  public boolean isSEGMENT() {
-    double a = getInfoTag("SEGMENT");
-    if (a == 1.0)
-      return true;
-    else
-      return false;
-  }
-
 }
