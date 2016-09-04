@@ -57,6 +57,8 @@ public abstract class Parser {
     @Option(gloss = "Dump all features (for debugging)")
     public boolean dumpAllFeatures = false;
 
+    // This option only applies to parsers that use floating rules 
+    // (FloatingParser and ShiftReduceParser). 
     @Option(gloss = "Whether rules are marked as floating by default")
     public boolean defaultIsFloating = true;
   }
