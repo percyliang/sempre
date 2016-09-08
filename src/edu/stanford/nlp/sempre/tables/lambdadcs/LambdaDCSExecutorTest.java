@@ -251,7 +251,7 @@ public class LambdaDCSExecutorTest {
   @Test(groups = "lambdaCSV2") public void lambdaOnGraphCSV2Test() {
     KnowledgeGraph graph = getKnowledgeGraph("csv2");
     runFormula(executor,
-        "(and (!= (and (!= fb:cell.away) fb:cell.home)) ((reverse fb:row.row.opponent) (fb:row.row.index (- (number 1) (number 1)))))",
+        "(and (!= (and (!= fb:cell.away) fb:cell.home)) ((reverse fb:row.row.opponent) (fb:row.row.index (- (number 2) (number 1)))))",
         graph, matches("(name fb:cell.derby_county)"));
   }
 
@@ -267,7 +267,7 @@ public class LambdaDCSExecutorTest {
     runFormula(executor,
         "(sum (- (count ((reverse fb:row.row.index) (fb:type.object.type fb:type.row))) " +
             "((reverse fb:row.row.index) (fb:row.row.latitude ((reverse fb:row.row.longitude) (fb:type.object.type fb:type.row))))))",
-        graph, matches("(number 6)"));
+        graph, matches("(number 3)"));
     runFormula(executor,
         "(- (number 1926) (argmax (number 1) (number 1) ((reverse fb:cell.cell.number) (or (or (or fb:cell.1920 fb:cell.1925) fb:cell.1926) fb:cell.1946)) (reverse (lambda x (sum ((reverse fb:cell.cell.number) (fb:cell.cell.number (var x))))))))",
         graph, matches("(number 6)"));

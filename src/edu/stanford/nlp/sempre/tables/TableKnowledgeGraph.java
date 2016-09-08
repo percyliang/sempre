@@ -38,6 +38,8 @@ public class TableKnowledgeGraph extends KnowledgeGraph implements FuzzyMatchabl
     public boolean forbidNextOnManyRows = true;
     @Option(gloss = "Set up executor cache for each graph (must manually clear, or else will get memory overflow)")
     public boolean individualExecutorCache = false;
+    @Option(gloss = "Have the row index starts at 1 instead of 0")
+    public boolean rowIndexStartsAt1 = true;
   }
   public static Options opts = new Options();
 
@@ -107,7 +109,8 @@ public class TableKnowledgeGraph extends KnowledgeGraph implements FuzzyMatchabl
           LogInfo.warnings("Table has %d columns but row has %d cells: %s | %s", columns.size(),
               record.length, columns, Fmt.D(record));
         }
-        TableRow currentRow = new TableRow(rows.size());
+        int rowIndex = opts.rowIndexStartsAt1 ? rows.size() + 1 : rows.size();
+        TableRow currentRow = new TableRow(rowIndex);
         rowIdToTableRow.put(currentRow.nameValue.id, currentRow);
         rows.add(currentRow);
         for (int i = 0; i < columns.size(); i++) {
@@ -371,7 +374,7 @@ public class TableKnowledgeGraph extends KnowledgeGraph implements FuzzyMatchabl
             if (!(value instanceof NameValue)) continue;
             TableRow row = rowIdToTableRow.get(((NameValue) value).id);
             if (row == null) continue;
-            int i = row.index;
+            int i = opts.rowIndexStartsAt1 ? row.index - 1 : row.index;
             if (i + 1 >= rows.size()) continue;
             answer.add(new Pair<>(rows.get(i + 1).nameValue, row.nameValue));
           }
@@ -487,7 +490,7 @@ public class TableKnowledgeGraph extends KnowledgeGraph implements FuzzyMatchabl
             if (!(value instanceof NameValue)) continue;
             TableRow row = rowIdToTableRow.get(((NameValue) value).id);
             if (row == null) continue;
-            int i = row.index;
+            int i = opts.rowIndexStartsAt1 ? row.index - 1 : row.index;
             if (i - 1 < 0) continue;
             answer.add(new Pair<>(rows.get(i - 1).nameValue, row.nameValue));
           }
@@ -506,6 +509,7 @@ public class TableKnowledgeGraph extends KnowledgeGraph implements FuzzyMatchabl
             double x = ((NumberValue) value).value;
             if (Math.abs(x - Math.round(x)) > 1e-6) continue;    // Ignore non-integers
             int i = (int) x;
+            if (opts.rowIndexStartsAt1) i--;
             if (i < 0 || i >= rows.size()) continue;
             TableRow row = rows.get(i);
             answer.add(new Pair<>(row.nameValue, row.indexValue));

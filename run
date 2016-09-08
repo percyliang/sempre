@@ -652,7 +652,7 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
   }),
   # Fig parameters
   selo(:cldir, 'execDir', '_OUTPATH_', 'output'),
-  o('overwriteExecDir'), o('addToView', 11), o('jarFiles', 'libsempre/*'),
+  o('overwriteExecDir'), o('addToView', 12), o('jarFiles', 'libsempre/*'),
   sel(:cldir, l(), '>/dev/null'),
   # Set environment for table execution
   o('executor', 'tables.lambdadcs.LambdaDCSExecutor'),
@@ -869,6 +869,12 @@ def tablesGrammarPaths
           o('Grammar.inPaths', "#{baseDir}grow.grammar"),
           o('Grammar.binarizeRules', false),
           o('Grammar.tags', *'scoped merge-and arithmetic comparison alternative neq yearrange part closedclass scoped-2args-merge-and'.split),
+          let(:anchor, 2),
+        nil),
+        'grow-strict' => l(
+          o('Grammar.inPaths', "#{baseDir}grow.grammar"),
+          o('Grammar.binarizeRules', false),
+          o('Grammar.tags', *'scoped merge-and arithmetic comparison alternative neq yearrange part closedclass-generic scoped-2args-merge-and'.split),
           let(:anchor, 2),
         nil),
       }),
