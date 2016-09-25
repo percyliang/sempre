@@ -4,6 +4,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import fig.basic.*;
+import jline.console.ConsoleReader;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -131,26 +132,22 @@ public class Master {
 
     if (opts.printHelp)
       printHelp();
-
-    while (true) {
-      LogInfo.stdout.print("> ");
-      LogInfo.stdout.flush();
+    try {
+      ConsoleReader reader = new ConsoleReader();
+      reader.setPrompt("> ");
       String line;
-      try {
-        line = LogInfo.stdin.readLine();
-      } catch (IOException e) {
-        throw new RuntimeException(e);
+      while ((line = reader.readLine()) != null) {
+        int indent = LogInfo.getIndLevel();
+        try {
+          processQuery(session, line);
+        } catch (Throwable t) {
+          while (LogInfo.getIndLevel() > indent)
+            LogInfo.end_track();
+          t.printStackTrace();
+        }
       }
-      if (line == null) break;
-
-      int indent = LogInfo.getIndLevel();
-      try {
-        processQuery(session, line);
-      } catch (Throwable t) {
-        while (LogInfo.getIndLevel() > indent)
-          LogInfo.end_track();
-        t.printStackTrace();
-      }
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
   }
 
