@@ -28,7 +28,11 @@ def pull(sourcePath, dir=nil, opts={})
 
   if $isPublic
     # Download url => localPath
-    url = 'http://nlp.stanford.edu/software/sempre/dependencies-' + $version + sourcePath + ext
+    if sourcePath.start_with?('http://') || sourcePath.start_with?('https://')
+      url = sourcePath
+    else
+      url = 'http://nlp.stanford.edu/software/sempre/dependencies-' + $version + sourcePath + ext
+    end
     localPath = destDir + '/' + name + ext
     system "mkdir -p #{File.dirname(localPath)}" or exit 1
     system "wget -c '#{url}' -O #{localPath}" or exit 1
@@ -86,6 +90,9 @@ addModule('core', 'Core utilities (need to compile)', lambda {
   pull('/u/nlp/data/semparse/resources/jackson-core-2.2.0.jar')
   pull('/u/nlp/data/semparse/resources/jackson-annotations-2.2.0.jar')
   pull('/u/nlp/data/semparse/resources/jackson-databind-2.2.0.jar')
+
+  # jLine from maven central
+  pull('http://central.maven.org/maven2/jline/jline/2.14.2/jline-2.14.2.jar')
 })
 
 addModule('corenlp', 'Stanford CoreNLP (code and modules)', lambda {
