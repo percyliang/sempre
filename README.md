@@ -118,7 +118,8 @@ If you will be using natural language to query databases (e.g., Freebase), then
 you will also need to setup your own Virtuoso database (unless someone already
 has done this for you):
 
-    # For Ubuntu, make sure these dependencies are installed
+For Ubuntu, follow this:
+
     sudo apt-get install -y automake gawk gperf libtool bison flex libssl-dev
 
     # Clone the repository
@@ -135,6 +136,9 @@ has done this for you):
     make
     make install
     cd ..
+
+on OS/X you can install virtuoso using homebrew by following the instructions 
+[here](http://carsten.io/virtuoso-os-on-mac-os/)
 
 # Contribute
 

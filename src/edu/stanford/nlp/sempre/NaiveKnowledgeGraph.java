@@ -170,6 +170,10 @@ public class NaiveKnowledgeGraph extends KnowledgeGraph {
     return new NaiveKnowledgeGraph(triples);
   }
 
+  public static KnowledgeGraph fromFile(String path) {
+    return fromLispTree(LispTree.proto.parseFromFile(path).next());
+  }
+
   @Override
   public LispTree toLispTree() {
     LispTree tree = LispTree.proto.newList();
