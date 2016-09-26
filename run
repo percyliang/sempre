@@ -55,8 +55,6 @@ def header(modules='core', codalabDependencies=nil)
   nil)
 end
 
-def rlwrap; system('which rlwrap') ? 'rlwrap' : nil end
-
 def unbalancedTrainDevSplit
   l(o('Dataset.trainFrac', 0.8), o('Dataset.devFrac', 0.2))
 end
@@ -297,7 +295,7 @@ addMode('freebase', 'Freebase (for EMNLP 2013, ACL 2014, TACL 2014)', lambda { |
     l('nlpsub', '-d/scr/yonatan/sandbox/blackhole', '-nyonatan', '-qjag', '-c3'),
     l('nlpsub', '-d/scr/yonatan/sandbox/blackhole', '-nyonatan', '-qjohn', '-c3'),
   nil),
-  sel(:interact, l(), rlwrap),
+  sel(:interact, l()),
   freebaseHeader,
   'edu.stanford.nlp.sempre.Main',
   freebaseOpts,
@@ -446,19 +444,19 @@ nil) })
 
 # Just start a simple interactive shell to try out SEMPRE commands
 addMode('simple', 'Simple shell', lambda { |e| l(
-  codalab, rlwrap, 'java', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.Main',
+  codalab, 'java', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.Main',
   o('Main.interactive'),
 nil) })
 
 addMode('simple-sparql', 'Simple shell for querying SPARQL', lambda { |e| l(
-  codalab, rlwrap, 'java', '-Dmodules=core,freebase', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.Main',
+  codalab, 'java', '-Dmodules=core,freebase', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.Main',
   o('executor', 'freebase.SparqlExecutor'),
   sparqlOpts,
   o('Main.interactive'),
 nil) })
 
 addMode('simple-lambdadcs', 'Simple shell for querying with the LambdaDCSExecutor', lambda { |e| l(
-  codalab, rlwrap, 'java', '-Dmodules=core,tables,corenlp', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.Main',
+  codalab, 'java', '-Dmodules=core,tables,corenlp', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.Main',
   o('executor', 'tables.lambdadcs.LambdaDCSExecutor'),
   o('FeatureExtractor.featureDomains', 'denotation lexAlign joinPos skipPos'.split),
   o('LanguageAnalyzer.languageAnalyzer', 'corenlp.CoreNLPAnalyzer'),
@@ -466,7 +464,7 @@ addMode('simple-lambdadcs', 'Simple shell for querying with the LambdaDCSExecuto
 nil) })
 
 addMode('simple-freebase', 'Simple shell for using Freebase', lambda { |e| l(
-  rlwrap, 'java', '-Dmodules=core,freebase', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.Main',
+  'java', '-Dmodules=core,freebase', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.Main',
   o('executor', 'freebase.SparqlExecutor'),
   letDefault(:sparqlserver, 'freebase.cloudapp.net:3093'),
   letDefault(:cacheserver, 'freebase.cloudapp.net:4000'),
@@ -509,7 +507,6 @@ def overnightFeatureDomains
 end
 
 addMode('overnight', 'Overnight semantic parsing', l(
-  rlwrap,
   header('core,freebase,overnight'),
   'edu.stanford.nlp.sempre.Main',
   figOpts,
@@ -621,7 +618,7 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
   # Add @cldir=1 to use CodaLab's directory paths
   letDefault(:cldir, 0),
   # Usual header
-  rlwrap, header('core,tables,corenlp'),
+  header('core,tables,corenlp'),
   # Select class
   letDefault(:class, 'main'),
   sel(:class, {
@@ -846,7 +843,7 @@ end
 addMode('genovernight', 'Generate utterances for overnight semantic parsing', lambda { |e| l(
   'fig/bin/qcreate',
   letDefault(:gen, 0),
-  sel(:gen, rlwrap, l()),
+  sel(:gen, l()),
   'java', '-Dmodules=core,overnight', '-Xmx10g', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.overnight.GenerationMain',
   figOpts,
   o('JoinFn.typeInference', true),
