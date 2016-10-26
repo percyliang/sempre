@@ -72,6 +72,7 @@ def process(ex_id, filename, scheme):
     turked_tables = [i for (i,x) in enumerate(check_grid[0]) if x is not None]
     # turk_flags contains only A, B, or X
     turk_flags = ''.join(check_grid[0][i][0] for i in turked_tables)
+    print >> sys.stderr, turked_tables, turk_flags
 
     lf_matched = []
     for i, vector in enumerate(check_grid):
@@ -102,6 +103,7 @@ def get_best_lf(ex_id, filename, indices):
             formula = ''.join(stuff)
             size = int(re.search(r'\$ROOT:(\d+)', line).group(1))
             lfs.append((size, formula))
+    lfs = [lfs[i] for i in indices]
     lfs.sort()
     return lfs[0]
 
