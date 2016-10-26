@@ -85,25 +85,23 @@ def convert(tree, args):
                     recurse(subtree[1])
                     answer.append(opr)
                     if not args.implicit_join:
-                        answer.append('.')
+                        answer.append('join')
         else:   # Join with a complex construct
             assert len(subtree) == 2, str(subtree)
-            if args.implicit_join:
-                # Only allows ((reverse ...) ...)
-                assert subtree[0][0] == 'reverse', str(subtree)
-                assert len(subtree[0]) == 2, str(subtree)
-                recurse(subtree[1])
-                answer.append('!' + subtree[0][1])
-            else:
-                recurse(subtree[1])
-                recurse(subtree[0])
-                answer.append('.')
+            # Only allows ((reverse ...) ...)
+            assert subtree[0][0] == 'reverse', str(subtree)
+            assert len(subtree[0]) == 2, str(subtree)
+            recurse(subtree[1])
+            answer.append('!' + subtree[0][1])
+            if not args.implicit_join:
+                answer.append('join')
     recurse(tree)
     return answer
 
 def process(line, args):
-    line = line[:-1].split('\t')
-    print '\t'.join([' '.join(convert(lisptree.parse(line[0]), args))] + line[1:])
+    line = line.rstrip('\n').split('\t')
+    line[args.field] = ' '.join(convert(lisptree.parse(line[args.field]), args))
+    print '\t'.join(line)
 
 def main():
     parser = argparse.ArgumentParser()
@@ -113,6 +111,8 @@ def main():
             help='Do not output "lambda reverse" for superlatives')
     parser.add_argument('-t', '--collapse-type-row', action='store_true',
             help='Collapse "(type row)" into a single token')
+    parser.add_argument('-f', '--field', type=int, default=0,
+            help='Field index (tab-separated; 0-based) containing the logical form')
     parser.add_argument('infile')
     args = parser.parse_args()
 
