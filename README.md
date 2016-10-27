@@ -140,6 +140,11 @@ For Ubuntu, follow this:
 on OS/X you can install virtuoso using homebrew by following the instructions 
 [here](http://carsten.io/virtuoso-os-on-mac-os/)
 
+To have SEMPRE interact with Virtuoso, the required modules need to be compiled as follow:
+
+    ./pull-dependencies core corenlp freebase
+    ant freebase
+
 # Contribute
 
 To contribute code or resource to SEMPRE:
