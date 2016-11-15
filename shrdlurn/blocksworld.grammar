@@ -1,5 +1,5 @@
 (include flatworld.grammar)
-(include objects.grammar)
+# (include objects.grammar)
 
 # contextful top level functions
 # command:
