@@ -123,16 +123,12 @@ For Ubuntu, follow this:
     sudo apt-get install -y automake gawk gperf libtool bison flex libssl-dev
 
     # Clone the repository
-    git clone https://github.com/openlink/virtuoso-opensource
+    ./pull-dependencies virtuoso
+
+    # Make and install
     cd virtuoso-opensource
-    git checkout tags/v7.0.0
-
-    # Configure
     ./autogen.sh
-    mv INSTALL INSTALL.txt  # Avoid conflict on case-insensitive file systems
     ./configure --prefix=$PWD/install
-
-    # Make (this takes a while)
     make
     make install
     cd ..
