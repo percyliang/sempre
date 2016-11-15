@@ -17,7 +17,8 @@ Recall that in semantic parsing, *natural language utterances* are mapped into
 *logical forms* (think programs), which are executed to produce some
 *denotation* (think return value).
 
-We have assumed you have already downloaded SEMPRE and can open up a shell:
+We have assumed you have already [installed](README.md#installation)
+SEMPRE and can open up a shell:
 
     ./run @mode=simple
 
@@ -32,7 +33,7 @@ shell command and executes it.  To see which command is run, do:
 
 This should print out:
 
-    rlwrap java -cp libsempre/*:lib/* -ea edu.stanford.nlp.sempre.Main -interactive
+    java -cp libsempre/*:lib/* -ea edu.stanford.nlp.sempre.Main -Main.interactive
 
 You can pass in additional options:
 
@@ -586,7 +587,7 @@ To stop the server:
 ### Setting up a copy of Freebase
 
 The best case is someone already installed Freebase for you and handed you a
-host:port.  Otherwise, to run your own copy of the Freebase graph (a
+host:port.  Otherwise, to run your own copy of the entire Freebase graph (a
 2013 snapshot), read on.
 
 Download it (this is really big and takes a LONG time):
@@ -611,12 +612,9 @@ We assume you have started the Virtuoso database:
 
 Then start up a prompt:
 
-    ./run @mode=simple-freebase @sparqlserver=localhost:3001
+    ./run @mode=simple-freebase-nocache @sparqlserver=localhost:3001
 
-The simplest logical formula in lambda DCS is a single entity:
-
-    fb:en.california
-
+The simplest logical formula in lambda DCS is a single entity such as `fb:en.california`.
 To execute this query, simply type the following into the interactive prompt:
 
     (execute fb:en.california)
@@ -753,7 +751,7 @@ is the basis for the overloading.
 
 Now start the interactive prompt:
 
-    ./run @mode=simple-freebase @sparqlserver=localhost:3001 -Grammar.inPaths freebase/data/tutorial-freebase.grammar -SimpleLexicon.inPaths freebase/data/tutorial-freebase.lexicon
+    ./run @mode=simple-freebase-nocache @sparqlserver=localhost:3001 -Grammar.inPaths freebase/data/tutorial-freebase.grammar -SimpleLexicon.inPaths freebase/data/tutorial-freebase.lexicon
 
 We should be able to parse the following utterances:
 

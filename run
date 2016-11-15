@@ -489,6 +489,22 @@ addMode('simple-freebase', 'Simple shell for using Freebase', lambda { |e| l(
   o('Main.interactive'),
 nil) })
 
+addMode('simple-freebase-nocache', 'Simple shell for using Freebase (without a cache server)', lambda { |e| l(
+  'java', '-Dmodules=core,freebase', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.Main',
+  o('executor', 'freebase.SparqlExecutor'),
+  letDefault(:sparqlserver, 'freebase.cloudapp.net:3093'),
+  sparqlOpts,
+  o('FeatureExtractor.featureDomains', 'rule'),
+  o('Parser.coarsePrune'),
+  o('JoinFn.typeInference'),
+  o('UnaryLexicon.unaryLexiconFilePath', '/dev/null'),
+  o('BinaryLexicon.binaryLexiconFilesPath', '/dev/null'),
+  #o('JoinFn.showTypeCheckFailures'),  # Use this to debug
+  o('Grammar.inPaths', 'freebase/data/demo1.grammar'),  # Override with your own custom grammar
+  #o('SparqlExecutor.includeSupportingInfo'),  # Show full information
+  o('Main.interactive'),
+nil) })
+
 
 ############################################################
 # {2014-12-27} [Percy]: Overnight semantic parsing
