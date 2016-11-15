@@ -52,7 +52,7 @@ public class Example {
   public List<Derivation> predDerivations;
   
   // chart status in case we are supporting partial parses for definitions
-  public Map<String, List<Derivation>>[][] chart;
+  public List<Derivation> chartDerivations;
 
   // Temporary state while parsing an Example (see Derivation.java for analogous structure).
   private Map<String, Object> tempState;

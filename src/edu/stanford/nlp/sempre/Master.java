@@ -2,8 +2,10 @@ package edu.stanford.nlp.sempre;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
+import edu.stanford.nlp.sempre.interactive.ApplyFn;
 import edu.stanford.nlp.sempre.interactive.GrammarInducer;
 import edu.stanford.nlp.sempre.interactive.PrefixTrie;
 import fig.basic.*;
@@ -272,11 +274,9 @@ public class Master {
     if (state instanceof BeamParserState) {
       response.coverage = ((BeamParserState)state).getCoverage();
       response.taggedCover = ((BeamParserState)state).getTaggedCoverage();
-      ex.chart = ((BeamParserState)state).getChart().clone();
     } else if (state instanceof BeamFloatingParserState) {
       response.coverage = ((BeamFloatingParserState)state).getCoverage();
       response.taggedCover = ((BeamFloatingParserState)state).getTaggedCoverage();
-      ex.chart = ((BeamFloatingParserState)state).getChart().clone();
     }
     response.ex = ex;
 
@@ -449,13 +449,9 @@ public class Master {
       }
     } else if (command.equals("uttdef")) {
       if (tree.children.size() == 3) {
-        String currentUtterance = tree.children.get(1).value;
-        Example ex = session.getLastExample();
-        int index = Integer.parseInt(tree.child(2).value);
-        // storing here for convenience,
-        // but note that this index is for the definition, and not the original example
-        LogInfo.logs("Provided definition (%s) for definiendum (%s) with index %d", tree.children.get(1).value, ex.utterance, index);
-        induceGrammar(ex, currentUtterance, index, session, response);
+        String head = tree.children.get(1).value;
+        List<Object> body = Json.readValueHard(tree.children.get(2).value, List.class);
+        induceGrammar(head, body, session, response);
       } else {
         LogInfo.logs("Invalid format for uttdef");
       }
@@ -480,9 +476,10 @@ public class Master {
         ConstantFn semantics = new ConstantFn(new ValueFormula<StringValue>(new StringValue(state)));
         List<String> rhs = Lists.newArrayList(name.split(" "));
         Rule rule = new Rule("$OBJECT", rhs, semantics);
-        rule.addInfo("induced", 1.0);
-        PrintWriter out = IOUtils.openOutAppendHard(Paths.get(opts.newGrammarPath,"SUBMIT_OBJECTS.grammar.objects").toString());
-        out.append(rule.toLispTree().toStringWrap());
+        rule.addInfo("anchored", 1.0);
+        rule.addInfo("object", 1.0);
+        PrintWriter out = IOUtils.openOutAppendHard(Paths.get(opts.newGrammarPath,"objects.grammar").toString());
+        out.append(rule.toLispTree().toStringWrap() + "\n");
         out.flush();
         out.close();
 
@@ -506,60 +503,63 @@ public class Master {
 
 
   // parse the definition, match with the chart of origEx, and add new rules to grammar
-  void induceGrammar(Example origEx, String def, int nbestInd, Session session, Response response) {
-    boolean trying = nbestInd == -1;
+  void induceGrammar(String head, List<Object> body, Session session, Response response) {
     session.updateContext();
+    Derivation bodyDeriv =  new Derivation.Builder().createDerivation();
+    
+    // string together the body definition
+    boolean initial = true;
+    for (Object obj : body) {
+      List<String> pair = (List<String>)obj;
+      String utt = pair.get(0);
+      String formula = pair.get(1);
+      
+      Example.Builder b = new Example.Builder();
+      b.setId("session:" + session.id);
+      b.setUtterance(utt);
+      Example ex = b.createExample();
+      ex.preprocess();
+      builder.parser.parse(builder.params, ex, false);
+      
+      for (Derivation d : ex.predDerivations) {
+        if (d.formula.toString().equals(formula)) {
+          if (initial) {
+            bodyDeriv = d;
+            initial = false;
+          }
+          else
+            bodyDeriv = ApplyFn.combine(bodyDeriv, d);
+          break;
+        }
+      }
+    }
+    
     Example.Builder b = new Example.Builder();
     b.setId("session:" + session.id);
-    b.setUtterance(def);
-    b.setContext(session.context);
-    b.setNBestInd(nbestInd);
-    Example ex = b.createExample();
-    ex.definition = def;
-    ex.preprocess();
-
-    GrammarInducer.ParseStatus origStatus = GrammarInducer.getParseStatus(origEx);
-
-    // Parse!
-    ParserState state;
-    state = builder.parser.parse(builder.params, ex, false);
-    Learner.addToAutocomplete(ex, builder.params);
-
-    if (state instanceof BeamParserState) {
-      response.coverage = ((BeamParserState)state).getCoverage();
-      response.taggedCover = ((BeamParserState)state).getTaggedCoverage();
-    } else if (state instanceof BeamFloatingParserState) {
-      response.coverage = ((BeamFloatingParserState)state).getCoverage();
-      response.taggedCover = ((BeamFloatingParserState)state).getTaggedCoverage();
-    }
-    response.ex = ex; // respond with the parse of the definition
-
-    if (ex.predDerivations.size() > 0)
-      if (response.candidateIndex == -1)
-        response.candidateIndex = 0;
-
-    GrammarInducer grammarInducer = new GrammarInducer(origEx, ex);
-    response.commandResponse =  String.format("[%s,%s]", grammarInducer.defStatus.toString(), origStatus.toString());
-    LogInfo.logs("response.commandResponse: %s", response.commandResponse );
-    // write the actual definitions, write these anyways even if rule failed
+    b.setUtterance(head);
+    Example exHead = b.createExample();
+    exHead.preprocess();
+    BeamFloatingParserState state = (BeamFloatingParserState)builder.parser.parse(builder.params, exHead, false);
+    LogInfo.logs("target deriv: %s", bodyDeriv.toLispTree());
+    LogInfo.logs("anchored elements: %s", state.chartList);
+    GrammarInducer grammarInducer = new GrammarInducer(exHead, bodyDeriv, state.chartList);
+    
     PrintWriter out = IOUtils.openOutAppendHard(Paths.get(opts.newGrammarPath, session.id + ".definition").toString());
     // deftree.addChild(oldEx.utterance);
-    LispTree deftree = LispTree.proto.newList("definition", def);
+    LispTree deftree = LispTree.proto.newList("definition", body.toString());
     Example oldEx = new Example.Builder()
-        .setId(origEx.id)
-        .setUtterance(origEx.utterance)
+        .setId(exHead.id)
+        .setUtterance(exHead.utterance)
+        .setTargetFormula(bodyDeriv.formula)
         .createExample();
     LispTree treewithdef = oldEx.toLispTree(false).addChild(deftree);
-    treewithdef.addChild(LispTree.proto.newList("defStatus", grammarInducer.defStatus.toString()));
-    treewithdef.addChild(LispTree.proto.newList("origStatus", origStatus.toString()));
     out.println(treewithdef.toString());
     out.flush();
     out.close();
 
     List<Rule> inducedRules = grammarInducer.getRules();
-    if (inducedRules.size() > 0 && !trying) {
+    if (inducedRules.size() > 0) {
       for (Rule rule : inducedRules) {
-        if (origStatus != GrammarInducer.ParseStatus.Core)
           addRuleInteractive(rule);
       }
       // write out the grammar

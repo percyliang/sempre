@@ -92,7 +92,6 @@ public class ActionExecutor extends Executor {
       world.selected = toItemSet(selected);
       performActions((ActionFormula)f.args.get(1), world);
       world.selected = previous;
-      
     } else if (f.mode == ActionFormula.Mode.foreach) {
       Set<Object> selected = toSet(processSetFormula(f.args.get(0), world));
       Set<Item> previous = world.selected;

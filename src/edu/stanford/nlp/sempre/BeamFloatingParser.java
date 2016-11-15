@@ -10,6 +10,8 @@ import fig.exec.Execution;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import org.testng.collections.Sets;
+
 /**
  * A simple bottom-up chart-based parser that keeps the |BeamFloatingSize| top
  * derivations for each chart cell (cat, start, end).  Also supports fast
@@ -84,6 +86,8 @@ class BeamFloatingParserState extends ChartParserState {
 
   private final BeamFloatingParser parser;
   private final BeamFloatingParserState coarseState;  // Used to prune
+  
+  public List<Derivation> chartList;
 
   public BeamFloatingParserState(BeamFloatingParser parser, Params params, Example ex, boolean computeExpectedCounts,
                          Mode mode, BeamFloatingParserState coarseState) {
@@ -120,9 +124,12 @@ class BeamFloatingParserState extends ChartParserState {
     }
 
     setPredDerivations();
+    
     for (Derivation deriv : predDerivations) {
       deriv.getAnchoredTokens();
     }
+    
+    this.chartList = this.collectChart();
 
     /* If Beam Parser failed to find derivations, try a floating parser */
     if (predDerivations.size() == 0 || this.ex.definition == null) {
@@ -166,6 +173,20 @@ class BeamFloatingParserState extends ChartParserState {
         ParserState.computeExpectedCounts(predDerivations, expectedCounts);
       }
     }
+  }
+  
+  private List<Derivation> collectChart() {
+    List<Derivation> chartList = Lists.newArrayList();
+    List<String> filter = Lists.newArrayList("$ROOT","$TOKEN", "$PHRASE", "$LEM_TOKEN");
+    for (int len = 1; len <= numTokens; ++len) {
+      for (int i = 0; i + len <= numTokens; ++i) {
+        for (String cat : chart[i][i + len].keySet()) {
+          if (filter.contains(cat)) continue;
+          chartList.addAll(chart[i][i + len].get(cat));
+        }
+      }
+    }
+    return chartList;
   }
 
   // Create all the derivations for the span [start, end).

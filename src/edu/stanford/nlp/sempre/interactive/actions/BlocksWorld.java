@@ -127,7 +127,7 @@ public class BlocksWorld extends FlatWorld {
     List<List<Object>> cubestr = Json.readValueHard(wallString, List.class);
     Set<Item> cubes = cubestr.stream().map(c -> {return Block.fromJSONObject(c);})
         .collect(Collectors.toSet());
-    //throw new RuntimeException(a.toString()+a.get(1).toString());
+    // throw new RuntimeException(a.toString()+a.get(1).toString());
     BlocksWorld world = new BlocksWorld(cubes);
     // world.selected.addAll(cubes.stream().filter(b -> ((Block)b).names.contains("S")).collect(Collectors.toSet()));
     return world;
@@ -190,38 +190,29 @@ public class BlocksWorld extends FlatWorld {
     }).collect(Collectors.toSet());
   }
 
-  public void build(String dirstr, String cubejson) {
-    Direction dir = Direction.fromString(dirstr);
-    for (Item i : current()) {
+  public void build(String cubejson, Set<Item> selected) {
+    for (Item i : selected) {
       BlocksWorld world = BlocksWorld.fromJSON(cubejson);
       Block b = ((Block)i);
-      // special case for top of anchor
-      if (b.color.equals(CubeColor.Anchor) && dir == Direction.Top)
-        shift(b, world);
-      else
-        shift(b.copy(dir), world);
-
+      // shifts world to position b
+      shift(b, world);
+      
+     
+      this.allitems.remove(i);
       this.allitems.addAll(world.allitems);
+      if (!this.allitems.contains(i)) this.allitems.add(i);
     }
   }
 
   // make block the anchor of the world
   private void shift(Block block, BlocksWorld world) {
-    Block anchor = findAnchor(world.allitems).clone();
+    Block anchor = new Block(0,0,0,"None");
     for (Item i  : world.allitems) {
       Block b = ((Block)i);
       b.row = b.row - anchor.row + block.row;
       b.col = b.col - anchor.col + block.col;
       b.height = b.height - anchor.height + block.height;
     }
-  }
-
-  private Block findAnchor(Set<Item> blocks) {
-    Set<Item> botmost = veryx("bot", blocks);
-    Set<Item> rightbotmost = veryx("right", botmost);
-    Set<Item> frontrightbotmost = veryx("front", rightbotmost);
-    Item anchor = frontrightbotmost.iterator().next();
-    return (Block)anchor;
   }
 
   //get cubes at extreme positions

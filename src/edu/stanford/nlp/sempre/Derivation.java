@@ -2,6 +2,8 @@ package edu.stanford.nlp.sempre;
 
 import java.util.*;
 
+import com.beust.jcommander.internal.Lists;
+
 import fig.basic.*;
 
 /**
@@ -57,6 +59,15 @@ public class Derivation implements SemanticFn.Callable, HasScore {
   private boolean[] anchoredTokens;   // Tokens which anchored rules are defined on
   public boolean allAnchored = true;
   private int[] numAnchors;     // Number of times each token was anchored
+  
+  // information for grammar induction
+  public class GrammarInfo {
+    public boolean anchored = false;
+    public int start = -1, end = -1;
+    public Formula formula;
+    public List<Derivation> matches = Lists.newArrayList();
+  }
+  public GrammarInfo grammarInfo = new GrammarInfo();
 
 
   // If this derivation is composed of other derivations
@@ -550,7 +561,8 @@ public class Derivation implements SemanticFn.Callable, HasScore {
   }
 
   public boolean allAnchored() {
-    if (!rule.isAnchored()) {
+    if (!rule.isAnchored() || !this.allAnchored) {
+      this.allAnchored = false;
       return false;
     } else {
       for (Derivation child : children) {

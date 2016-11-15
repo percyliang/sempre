@@ -1,4 +1,5 @@
 (include flatworld.grammar)
+(include objects.grammar)
 
 # contextful top level functions
 # command:
@@ -22,13 +23,12 @@
 
 # utilities
 (rule $Action (reset) (ConstantFn (: reset (string default))) (anchored 1))
-(rule $Action (build $OBJECT $Direction) (lambda obj (lambda d (: build (var d) (var obj)))) (anchored 1))
-(rule $Action (build $OBJECT) (lambda obj (: build top (var obj))) (anchored 1))
+(rule $Action (build $OBJECT) (lambda obj (: build (var obj))) (anchored 1))
 
 (rule $Action (base $Number $Number) (lambda x (lambda y (: @base (var x) (var y)))) (anchored 1))
 
-(rule $ROOT (testcontext) (ConstantFn (string "(context (graph NaiveKnowledgeGraph ((string [[1,3,1,\"Green\",[]],[2,2,1,\"Blue\",[]],[1,3,2,\"Red\",[]]]) (name b) (name c))))")) (anchored 1))
-(rule $OBJECT (testobject) (ConstantFn (string [[1,1,2,\"Green\",[]],[1,1,3,\"Blue\",[]],[1,1,4,\"Red\",[]]])) (anchored 1))
+(rule $ROOT (testcontext) (ConstantFn (string "(context (graph NaiveKnowledgeGraph ((string [[0,3,1,\"Green\",[]],[2,2,1,\"Blue\",[]],[1,3,2,\"Red\",[]]]) (name b) (name c))))")) (anchored 1))
+(rule $OBJECT (testobject) (ConstantFn (string [[0,0,0,\"Green\",[]],[0,0,1,\"Blue\",[]],[0,0,2,\"Red\",[]]])) (anchored 1))
 
 # primitive actions
 (rule $Action (add $Color) (lambda c (: @add (var c) top)) (anchored 1))
@@ -62,7 +62,7 @@
 (rule $ValueSet ($Color) (IdentityFn) (anchored 1))
 (rule $ValueSet ($Number) (IdentityFn) (anchored 1))
 
-(for @num (0 1 2 3 4 5 6 7 8 9)
+(for @num (0 1 2 3 4 5 6 7 8 9 10)
 (rule $Number (@num) (ConstantFn (number @num)) (anchored 1))
 )
 (rule $Number (many) (ConstantFn (number 10)) (anchored 1))

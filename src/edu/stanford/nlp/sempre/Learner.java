@@ -208,7 +208,6 @@ public class Learner {
         // training for definitions for interative stuff
         addToAutocomplete(ex, params);
         if (ex.definition!=null && ex.definition.length() > 0 && state instanceof BeamParserState) { 
-            ex.chart = ((BeamParserState)state).getChart().clone();
             
             List<Rule> newRules = induceGrammar(ex, ex.definition, parser, params);
             params.inducedRules.addAll(newRules);
@@ -408,11 +407,9 @@ public class Learner {
     // Parse!
     parser.parse(params, ex, false);
     addToAutocomplete(ex, params);
-    GrammarInducer grammarInducer = new GrammarInducer(origEx, ex);
+    GrammarInducer grammarInducer = new GrammarInducer(ex, null, null);
     List<Rule> inducedRules = grammarInducer.getRules();
     
     return inducedRules;
   }
-  
-  
 }

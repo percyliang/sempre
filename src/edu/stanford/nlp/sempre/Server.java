@@ -542,8 +542,10 @@ public class Server {
           Value value = deriv.getValue();
           if (value instanceof StringValue)
             item.put("value", ((StringValue)value).value);
-          if (value instanceof ErrorValue)
+          else if (value instanceof ErrorValue)
             item.put("value", ((ErrorValue)value).sortString());
+          else
+            item.put("value", value.sortString());
           item.put("score", deriv.score);
           item.put("prob", deriv.prob);
           item.put("anchored", deriv.allAnchored); // used only anchored rules

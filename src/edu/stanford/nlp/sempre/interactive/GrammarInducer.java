@@ -6,10 +6,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.common.base.Function;
+import com.beust.jcommander.internal.Lists;
 
-import edu.stanford.nlp.sempre.*;
-import edu.stanford.nlp.sempre.Grammar.Options;
+import edu.stanford.nlp.sempre.ConstantFn;
+import edu.stanford.nlp.sempre.Derivation;
+import edu.stanford.nlp.sempre.Example;
+import edu.stanford.nlp.sempre.Formula;
+import edu.stanford.nlp.sempre.Formulas;
+import edu.stanford.nlp.sempre.IdentityFn;
+import edu.stanford.nlp.sempre.LambdaFormula;
+import edu.stanford.nlp.sempre.Rule;
+import edu.stanford.nlp.sempre.SemanticFn;
+import edu.stanford.nlp.sempre.VariableFormula;
 import fig.basic.LispTree;
 import fig.basic.LogInfo;
 import fig.basic.Option;
@@ -46,68 +54,78 @@ public class GrammarInducer {
   public DefStatus defStatus;
   public ParseStatus parseStatus;
 
-  List<Rule> inducedRules;
-
   Map<String, List<Derivation>>[][] chart;
+  List<Rule> inducedRules;
   int numTokens;
   List<String> tokens;
   String id;
-
   Derivation defderiv;
-
+  List<Derivation> chartList = Lists.newArrayList();
 
   // induce rule is possible,
   // otherwise set the correct status
-  public GrammarInducer(Example origEx, Example defEx) {
+  public GrammarInducer(Example origEx, Derivation def,  List<Derivation> chartList) {
     id = origEx.id;
-    chart = origEx.chart;
+    
+    this.chartList = chartList;
+    
+    LogInfo.logs("got %d in chartList", this.chartList.size());
     numTokens = origEx.numTokens();
     tokens = origEx.getTokens();
+    
     inducedRules = new ArrayList<>();
-    defStatus = DefStatus.NoParse;
-    parseStatus = getParseStatus(origEx);
 
-    if (defEx.predDerivations.size() == 0) {
-      return;
-    }
+    addMatches(def);
+    buildFormula(def);
 
-    Derivation deriv;
-    if (defEx.NBestInd == -1) {
-      deriv = defEx.predDerivations.get(0);
-    } else
-      deriv = defEx.predDerivations.get(defEx.NBestInd);
-
-    while (deriv.rule.isCatUnary()) deriv = deriv.child(0);
-    List<Derivation> covers = getSimpleCover(deriv);
-
-    if (covers.size() == 0) {
-      defStatus = DefStatus.NoCover;
-    } else {
-      defStatus = DefStatus.Cover;
-    }
-
-    inducedRules = induceRules(deriv, covers);
+    inducedRules.addAll(induceRules(def));
   }
-
+  
+  // label the derivation tree with what it matches in chartList
+  private void addMatches(Derivation deriv) {
+    for (Derivation anchored : chartList) {
+      if (deriv.formula.equals(anchored.formula)) {
+        deriv.grammarInfo.matches.add(anchored);
+        LogInfo.logs("Replaced %s <- %s", anchored, uniqueCoverName(anchored));
+        deriv.grammarInfo.formula = new VariableFormula(uniqueCoverName(anchored));
+        break; // just adding the first match, could do highest scoring
+      }
+    }
+    for (Derivation d : deriv.children) {
+      addMatches(d);
+    }
+  }
+  
+  // covers need to be ordered
+  private void collectCovers(Derivation deriv, List<Derivation> covers) {
+    if (deriv.grammarInfo.matches.size() > 0) {
+      if(!covers.contains(deriv.grammarInfo.matches.get(0)))
+        covers.add(deriv.grammarInfo.matches.get(0));
+    } else {
+      for (Derivation d : deriv.children) {
+        collectCovers(d, covers);
+      }
+    }
+  }
+  
   public List<Rule> getRules() {
     return inducedRules;
   }
-
-  private List<Rule> induceRules(Derivation deriv, List<Derivation> covers) {
+  
+  private List<Rule> induceRules(Derivation defDeriv) {
+    List<Derivation> covers = Lists.newArrayList();
+    collectCovers(defDeriv, covers);
+    LogInfo.logs("covers: %s", covers);
     List<Rule> inducedRules = new ArrayList<>();
-
-    List<String> RHS = getRHS(tokens, covers);
-    SemanticFn sem = getSemantics(deriv, covers);
-    String cat = getTopCat(deriv);
+    List<String> RHS = getRHS(defDeriv, covers);
+    SemanticFn sem = getSemantics(defDeriv, covers);
+    String cat = getTopCat(defDeriv);
     Rule inducedRule = new Rule(cat, RHS, sem);
     inducedRule.addInfo(id, 1.0);
-    inducedRule.addInfo(defStatus.toString(), 1.0);
-    inducedRule.addInfo(parseStatus.toString(), 1.0);
     inducedRule.addInfo("induced", 1.0);
     if (!inducedRule.isCatUnary()) {
       inducedRules.add(inducedRule);
     }
-
     return inducedRules;
   }
 
@@ -115,25 +133,51 @@ public class GrammarInducer {
     return def.getCat();
   }
 
-  // replace the sub derivation under each def by just the category
-  private SemanticFn getSemantics(final Derivation def, List<Derivation> covers) {
-    if (covers == null || covers.size() == 0) return new ConstantFn(def.formula);
-
-    Function<Formula, Formula> replaceCover = new Function<Formula, Formula>() {
-      @Override
-      public Formula apply(Formula formula) {
-        // there is a bias here when we do not go for one to one correspondence.
-        // perhaps replace ones with larger cover first
-        for (int i = 0; i < covers.size(); i++) {
-          if (formula.equals(covers.get(i).formula))
-            return new VariableFormula(covers.get(i).getCat() + i);
-        }
-        return null;
+  // populate grammarInfo.formula, replacing everything that can be replaced
+  private void buildFormula(Derivation deriv){
+    LogInfo.log("building " + deriv.grammarInfo.formula);
+    if (deriv.grammarInfo.formula != null) return;
+    if (deriv.grammarInfo.formula instanceof VariableFormula) return;
+    
+    for (Derivation c : deriv.children) {
+      buildFormula(c);
+    }
+    Rule rule = deriv.rule;
+    List<Derivation> args = deriv.children;
+    if (rule.sem instanceof ApplyFn) {
+      Formula f = Formulas.fromLispTree(((ApplyFn)rule.sem).formula.toLispTree());
+      for (Derivation arg : args) {
+        if (!(f instanceof LambdaFormula))
+          throw new RuntimeException("Expected LambdaFormula, but got " + f);
+        f = Formulas.lambdaApply((LambdaFormula)f, arg.grammarInfo.formula);
       }
-    };
-    Formula baseFormula = Formulas.fromLispTree(def.formula.toLispTree()).map(replaceCover);
+      deriv.grammarInfo.formula = f;
+    } else if (rule.sem instanceof IdentityFn) {
+      deriv.grammarInfo.formula = args.get(0).grammarInfo.formula;
+    } else {
+      deriv.grammarInfo.formula = deriv.formula;
+    }
+    
+    LogInfo.log("built " + deriv.grammarInfo.formula);
+  }
+  
+  private String uniqueCoverName(Derivation anchored) {
+    return anchored.cat + anchored.start + "_" + anchored.end;
+  }
+  
+  private SemanticFn getSemantics(final Derivation def, List<Derivation> covers) {
+    Formula baseFormula = def.grammarInfo.formula;
+    if (covers.size() == 0) {
+      SemanticFn constantFn = new ConstantFn();
+      LispTree newTree = LispTree.proto.newList();
+      newTree.addChild("ConstantFn");
+      newTree.addChild(baseFormula.toLispTree());
+      constantFn.init(newTree);
+      return constantFn;
+    }
+    
     for (int i = covers.size() -1; i >= 0; i--) {
-      baseFormula = new LambdaFormula(covers.get(i).getCat() + i, Formulas.fromLispTree(baseFormula.toLispTree()));
+      baseFormula = new LambdaFormula( uniqueCoverName(covers.get(i)), Formulas.fromLispTree(baseFormula.toLispTree()));
     }
     SemanticFn applyFn = new ApplyFn();
     LispTree newTree = LispTree.proto.newList();
@@ -143,7 +187,7 @@ public class GrammarInducer {
     return applyFn;
   }
 
-  private List<String> getRHS(List<String> tokens, List<Derivation> covers) {
+  private List<String> getRHS(Derivation def, List<Derivation> covers) {
     List<String> rhs = new ArrayList<>();
     int start = 0;
     for (Derivation deriv : covers) {
@@ -155,121 +199,8 @@ public class GrammarInducer {
       start = deriv.end;
     }
     if (start < tokens.size()) // leftover tokens
-      rhs.addAll(tokens.subList(start,tokens.size()));
+      rhs.addAll(tokens.subList(start, tokens.size()));
     return rhs;
-  }
-
-  // find a list of sub derivation that produces a maximum cover that match the target
-  // use dynamic programming
-  // For now, just get the maximum cover greedily, from left to right
-  // Issues: exact match not handled, and numbers went to lemma token
-  private List<Derivation> getGreedyCover(Derivation definition) {
-    List<Derivation> coveredDerivs = new ArrayList<>();
-    int currentMax = 0;
-    for (int start = 0; start < numTokens;) {
-      Derivation currentDeriv = null;
-      for (int end = start + 1; end <= numTokens; end++) {
-        boolean matchedCat = false;
-        for (String cat : Parser.opts.trackedCats) {
-          LogInfo.dbgs("Checking...%s on %d-%d:%d, matched: %s", cat, start, end, currentMax, matchedCat);
-
-          if (matchedCat) break;
-
-          if (chart[start][end] == null || !chart[start][end].keySet().contains(cat))
-            continue; // do not match random stuff, and take the first match
-
-          for (Derivation deriv : chart[start][end].get(cat)) {
-            LogInfo.dbgs("Real (%d, %d):(%d, %d) : %s", deriv.start, deriv.end, start, end, deriv);
-            List<Derivation> matches = new ArrayList<>();
-            LogInfo.dbgs("deriv %s: def %s", deriv, definition);
-            getMatches(definition, deriv, matches);
-            // do nothing when ==0: no match; >=1: too many matches
-            if (matches.size() >= 1) {
-                currentMax = end;
-                currentDeriv = deriv;
-                matchedCat = true;
-                break;
-            }
-          }
-        }
-      }
-
-      if (currentMax > start) {
-        LogInfo.dbgs("GrammarInducer.added (%d, %d): %s", currentDeriv.start, currentDeriv.end, currentDeriv.rule.getLhs());
-        coveredDerivs.add(currentDeriv);
-        start = currentMax;
-      } else start++;
-    }
-    LogInfo.dbgs("GrammarInducer.coveredDerivs: %s", coveredDerivs);
-    return coveredDerivs;
-  }
-
-  private List<Derivation> getSimpleCover(Derivation definition) {
-    List<Derivation> coveredDerivs = new ArrayList<>();
-    int currentMax = 0;
-    for (int start = 0; start < numTokens;) {
-      Derivation currentDeriv = null;
-      boolean matchedCat = false;
-      for (int end = start + 1; end <= numTokens; end++) {
-        if (matchedCat) break;
-        for (String cat : Parser.opts.trackedCats) {
-          if (matchedCat) break;
-          if (chart[start][end] == null || !chart[start][end].keySet().contains(cat))
-            continue; // do not match random stuff, and take the first match
-
-          for (Derivation deriv : chart[start][end].get(cat)) {
-            LogInfo.dbgs("Real (%d, %d):(%d, %d) : %s", deriv.start, deriv.end, start, end, deriv);
-
-            List<Derivation> matches = new ArrayList<>();
-            LogInfo.dbgs("deriv %s: def %s", deriv, definition);
-            getMatches(definition, deriv, matches);
-            // do nothing when ==0: no match; >=1: too many matches
-            if (matches.size() >= 1) {
-                currentMax = end;
-                currentDeriv = deriv;
-                matchedCat = true;
-                break;
-            }
-          }
-        }
-      }
-
-      if (currentMax > start) {
-        LogInfo.dbgs("GrammarInducer.added (%d, %d): %s", currentDeriv.start, currentDeriv.end, currentDeriv.rule.getLhs());
-        coveredDerivs.add(currentDeriv);
-        start = currentMax;
-      } else start++;
-    }
-    LogInfo.dbgs("GrammarInducer.coveredDerivs: %s", coveredDerivs);
-    return coveredDerivs;
-  }
-
-
-
-
-
-  boolean nothingParses() {
-    return false;
-  }
-
-  private boolean formulaEqual(Derivation parent, Derivation child) {
-    return parent.formula.equals(child.formula);
-  }
-  // check if this derivation contains another one
-  public boolean getMatches(Derivation parent, Derivation child, List<Derivation> matches) {
-    if (formulaEqual(parent, child)) {
-      matches.add(parent);
-      return true;
-    }
-    if (parent.children == null) return false;
-
-    boolean matched = false;
-    for (Derivation deriv : parent.children) {
-      if (getMatches(deriv, child, matches)) {
-        matched = true;
-      }
-    }
-    return matched;
   }
 
   public static ParseStatus getParseStatus(Example ex) {
