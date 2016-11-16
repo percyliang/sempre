@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.beust.jcommander.internal.Lists;
 import com.google.common.collect.ImmutableList;
@@ -118,6 +119,7 @@ public class GrammarInducer {
   private List<Rule> induceRules(Derivation defDeriv) {
     List<Derivation> covers = Lists.newArrayList();
     collectCovers(defDeriv, covers);
+    covers.sort((s,t) -> s.start < t.start? -1: 1);
     LogInfo.dbgs("covers: %s", covers);
     List<Rule> inducedRules = new ArrayList<>();
     List<String> RHS = getRHS(defDeriv, covers);
@@ -196,19 +198,16 @@ public class GrammarInducer {
   }
 
   private List<String> getRHS(Derivation def, List<Derivation> covers) {
-    List<String> rhs = new ArrayList<>();
+    List<String> rhs = new ArrayList<>(tokens);
     int start = 0;
     for (Derivation deriv : covers) {
-      if (deriv.start > start) {
-        // leftover tokens
-        rhs.addAll(tokens.subList(start, deriv.start));
+      // LogInfo.logs("got (%d,%d):%s:%s", deriv.start, deriv.end, deriv.formula, deriv.cat);
+      rhs.set(deriv.start, deriv.cat);
+      for (int i = deriv.start + 1; i<deriv.end; i++) {
+        rhs.set(i, null);
       }
-      rhs.add(deriv.getCat());
-      start = deriv.end;
     }
-    if (start < tokens.size()) // leftover tokens
-      rhs.addAll(tokens.subList(start, tokens.size()));
-    return rhs;
+    return rhs.stream().filter(s -> s!=null).collect(Collectors.toList());
   }
 
   public static ParseStatus getParseStatus(Example ex) {

@@ -63,6 +63,8 @@ public class GrammarInducerTest {
     induce("delete card", "[[\"remove has color red\",\"(:foreach (color red) (: remove))\"]]");
     induce("remove the leftmost red block", "[[\"remove very left of has color red\",\"?\"]]");
     induce("add red to both sides", "[[\"add red left\",\"(: add red left)\"],[\"add red right\",\"(: add red right)\"]]");
+    induce("add a yellow block next to brown", 
+        "[[\"select brown\",\"(:foreach (color brown) (: select))\"],[\"add yellow right\",\"(: add yellow right)\"]]");
     LogInfo.end_track();
   }
 
