@@ -60,20 +60,4 @@ public class ApplyFn extends SemanticFn {
       }
     };
   }
-  
-  // utilities for grammar induction
-  public static final Formula combineFormula =  Formulas.fromLispTree(LispTree.proto.parseFromString("(lambda a1 (lambda a2 (:s (var a1) (var a2))))"));
-  public static Rule combineRule() {
-    return new Rule("$Action", Lists.newArrayList("$Action", "$Action"), new ApplyFn(combineFormula));
-  }
-  public static Derivation combine(Derivation d1, Derivation d2) {
-    Formula f = Formulas.lambdaApply((LambdaFormula)combineFormula, d1.getFormula());
-    f = Formulas.lambdaApply((LambdaFormula)f, d2.getFormula());
-    List<Derivation> children = Lists.newArrayList(d1, d2);
-    Derivation res = new Derivation.Builder()
-        .withCallable(new SemanticFn.CallInfo("$Actions", -1, -1, combineRule(), ImmutableList.copyOf(children)))
-        .formula(f)
-        .createDerivation();
-    return res;
-  }
 }

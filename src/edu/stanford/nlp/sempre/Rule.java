@@ -23,7 +23,7 @@ public class Rule {
   public static final String phraseCat = "$PHRASE";  // Sequence of tokens
   public static final String lemmaTokenCat = "$LEMMA_TOKEN";  // Lemmatized version
   public static final String lemmaPhraseCat = "$LEMMA_PHRASE";  // Lemmatized version
-
+  public static final List<String> specialCats = Lists.newArrayList(rootCat, tokenCat, phraseCat, lemmaTokenCat, lemmaPhraseCat);
   public final String lhs;  // Left-hand side: category.
   public final List<String> rhs;  // Right-hand side: sequence of categories (have $ prefix) and tokens.
   public final SemanticFn sem;  // Takes derivations corresponding to RHS categories and produces a set of derivations corresponding to LHS.

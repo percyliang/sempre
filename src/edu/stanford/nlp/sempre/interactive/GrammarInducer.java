@@ -7,9 +7,11 @@ import java.util.Map;
 import java.util.Set;
 
 import com.beust.jcommander.internal.Lists;
+import com.google.common.collect.ImmutableList;
 
 import edu.stanford.nlp.sempre.ConstantFn;
 import edu.stanford.nlp.sempre.Derivation;
+import edu.stanford.nlp.sempre.DerivationStream;
 import edu.stanford.nlp.sempre.Example;
 import edu.stanford.nlp.sempre.Formula;
 import edu.stanford.nlp.sempre.Formulas;
@@ -21,6 +23,7 @@ import edu.stanford.nlp.sempre.VariableFormula;
 import fig.basic.LispTree;
 import fig.basic.LogInfo;
 import fig.basic.Option;
+import fig.basic.StopWatchSet;
 
 /**
  * Takes two examples, and induce some Rules
@@ -84,9 +87,9 @@ public class GrammarInducer {
   // label the derivation tree with what it matches in chartList
   private void addMatches(Derivation deriv) {
     for (Derivation anchored : chartList) {
-      if (deriv.formula.equals(anchored.formula)) {
+      if (deriv.formula.equals(anchored.formula) && deriv.cat.equals(anchored.cat)) {
         deriv.grammarInfo.matches.add(anchored);
-        LogInfo.logs("Replaced %s <- %s", anchored, uniqueCoverName(anchored));
+        LogInfo.dbgs("Replaced %s <- %s", anchored, uniqueCoverName(anchored));
         deriv.grammarInfo.formula = new VariableFormula(uniqueCoverName(anchored));
         break; // just adding the first match, could do highest scoring
       }
@@ -115,7 +118,7 @@ public class GrammarInducer {
   private List<Rule> induceRules(Derivation defDeriv) {
     List<Derivation> covers = Lists.newArrayList();
     collectCovers(defDeriv, covers);
-    LogInfo.logs("covers: %s", covers);
+    LogInfo.dbgs("covers: %s", covers);
     List<Rule> inducedRules = new ArrayList<>();
     List<String> RHS = getRHS(defDeriv, covers);
     SemanticFn sem = getSemantics(defDeriv, covers);
@@ -135,15 +138,20 @@ public class GrammarInducer {
 
   // populate grammarInfo.formula, replacing everything that can be replaced
   private void buildFormula(Derivation deriv){
-    LogInfo.log("building " + deriv.grammarInfo.formula);
+    //LogInfo.log("building " + deriv.grammarInfo.formula);
     if (deriv.grammarInfo.formula != null) return;
     if (deriv.grammarInfo.formula instanceof VariableFormula) return;
+    if (deriv.children.size() == 0) {
+      deriv.grammarInfo.formula = deriv.formula;
+    }
     
     for (Derivation c : deriv.children) {
       buildFormula(c);
     }
     Rule rule = deriv.rule;
     List<Derivation> args = deriv.children;
+    
+    // cant use the standard thing because formula is final mostly
     if (rule.sem instanceof ApplyFn) {
       Formula f = Formulas.fromLispTree(((ApplyFn)rule.sem).formula.toLispTree());
       for (Derivation arg : args) {
@@ -157,8 +165,8 @@ public class GrammarInducer {
     } else {
       deriv.grammarInfo.formula = deriv.formula;
     }
-    
-    LogInfo.log("built " + deriv.grammarInfo.formula);
+
+    //LogInfo.log("built " + deriv.grammarInfo.formula);
   }
   
   private String uniqueCoverName(Derivation anchored) {

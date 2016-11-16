@@ -177,12 +177,11 @@ class BeamFloatingParserState extends ChartParserState {
   
   private List<Derivation> collectChart() {
     List<Derivation> chartList = Lists.newArrayList();
-    List<String> filter = Lists.newArrayList("$ROOT","$TOKEN", "$PHRASE", "$LEM_TOKEN");
     for (int len = 1; len <= numTokens; ++len) {
       for (int i = 0; i + len <= numTokens; ++i) {
         for (String cat : chart[i][i + len].keySet()) {
-          if (filter.contains(cat)) continue;
-          chartList.addAll(chart[i][i + len].get(cat));
+          if (Rule.specialCats.contains(cat)) continue;
+            chartList.addAll(chart[i][i + len].get(cat));
         }
       }
     }

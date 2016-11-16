@@ -451,7 +451,19 @@ public class Master {
       if (tree.children.size() == 3) {
         String head = tree.children.get(1).value;
         List<Object> body = Json.readValueHard(tree.children.get(2).value, List.class);
-        induceGrammar(head, body, session, response);
+        List<Rule> inducedRules = InteractiveUtils.induceGrammar(head, body, session.id, builder.parser, builder.params);
+        if (inducedRules.size() > 0) {
+          for (Rule rule : inducedRules) {
+              InteractiveUtils.addRuleInteractive(rule, builder.parser);
+          }
+          // write out the grammar
+          PrintWriter out = IOUtils.openOutAppendHard(Paths.get(Master.opts.newGrammarPath, session.id + ".grammar").toString());
+          for (Rule rule : inducedRules) {
+            out.println(rule.toLispTree().toStringWrap());
+          }
+          out.flush();
+          out.close();
+        }
       } else {
         LogInfo.logs("Invalid format for uttdef");
       }
@@ -483,7 +495,7 @@ public class Master {
         out.flush();
         out.close();
 
-        addRuleInteractive(rule);
+        InteractiveUtils.addRuleInteractive(rule, builder.parser);
       } else {
         LogInfo.logs("Invalid format for submit");
       }
@@ -502,86 +514,6 @@ public class Master {
   }
 
 
-  // parse the definition, match with the chart of origEx, and add new rules to grammar
-  void induceGrammar(String head, List<Object> body, Session session, Response response) {
-    session.updateContext();
-    Derivation bodyDeriv =  new Derivation.Builder().createDerivation();
-    
-    // string together the body definition
-    boolean initial = true;
-    for (Object obj : body) {
-      List<String> pair = (List<String>)obj;
-      String utt = pair.get(0);
-      String formula = pair.get(1);
-      
-      Example.Builder b = new Example.Builder();
-      b.setId("session:" + session.id);
-      b.setUtterance(utt);
-      Example ex = b.createExample();
-      ex.preprocess();
-      builder.parser.parse(builder.params, ex, false);
-      
-      for (Derivation d : ex.predDerivations) {
-        if (d.formula.toString().equals(formula)) {
-          if (initial) {
-            bodyDeriv = d;
-            initial = false;
-          }
-          else
-            bodyDeriv = ApplyFn.combine(bodyDeriv, d);
-          break;
-        }
-      }
-    }
-    
-    Example.Builder b = new Example.Builder();
-    b.setId("session:" + session.id);
-    b.setUtterance(head);
-    Example exHead = b.createExample();
-    exHead.preprocess();
-    BeamFloatingParserState state = (BeamFloatingParserState)builder.parser.parse(builder.params, exHead, false);
-    LogInfo.logs("target deriv: %s", bodyDeriv.toLispTree());
-    LogInfo.logs("anchored elements: %s", state.chartList);
-    GrammarInducer grammarInducer = new GrammarInducer(exHead, bodyDeriv, state.chartList);
-    
-    PrintWriter out = IOUtils.openOutAppendHard(Paths.get(opts.newGrammarPath, session.id + ".definition").toString());
-    // deftree.addChild(oldEx.utterance);
-    LispTree deftree = LispTree.proto.newList("definition", body.toString());
-    Example oldEx = new Example.Builder()
-        .setId(exHead.id)
-        .setUtterance(exHead.utterance)
-        .setTargetFormula(bodyDeriv.formula)
-        .createExample();
-    LispTree treewithdef = oldEx.toLispTree(false).addChild(deftree);
-    out.println(treewithdef.toString());
-    out.flush();
-    out.close();
-
-    List<Rule> inducedRules = grammarInducer.getRules();
-    if (inducedRules.size() > 0) {
-      for (Rule rule : inducedRules) {
-          addRuleInteractive(rule);
-      }
-      // write out the grammar
-      out = IOUtils.openOutAppendHard(Paths.get(opts.newGrammarPath, session.id + ".grammar").toString());
-      for (Rule rule : inducedRules) {
-        out.println(rule.toLispTree().toStringWrap());
-      }
-      out.flush();
-      out.close();
-    }
-  }
-
-
-  private void addRuleInteractive(Rule rule) {
-    LogInfo.logs("addRuleInteractive: %s", rule);
-    builder.parser.grammar.addRule(rule);
-    // well, hacky, because BeamParser stores rules in a trie
-    // and subtlely reject redefining of core, and no cover at all
-    if (builder.parser instanceof BeamParser || builder.parser instanceof BeamFloatingParser) {
-      builder.parser.addRule(rule);
-    }
-  }
 
 
   void addNewExample(Example origEx, Session session) {
