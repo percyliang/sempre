@@ -63,7 +63,9 @@ public final class InteractiveUtils {
       }
       if (!found) LogInfo.errors("Definition fails, matching formula not found: %s", formula);
       
-      // small cheat to make testing easier
+      // just some hacks to make testing easier
+      if (!found && formula==null && ex.predDerivations.size() > 0)
+        bodyDeriv = stripDerivation(ex.predDerivations.get(0));
       if (!found && formula.equals("?") && ex.predDerivations.size() > 0)
         bodyDeriv = stripDerivation(ex.predDerivations.get(0));
     }
