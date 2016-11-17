@@ -83,6 +83,9 @@ public class BeamFloatingFeatureComputer implements FeatureComputer {
     } else if (f instanceof MergeFormula) {
       MergeFormula mergeFormula = (MergeFormula) f;
       return "(" + mergeFormula.mode + " " + getSubtreeFeature(mergeFormula.child1, depth-1, anchored) + "," + getSubtreeFeature(mergeFormula.child2, depth-1, anchored) + ")";
+    } else if (f instanceof NotFormula) {
+      NotFormula notFormula = (NotFormula) f;
+      return "(not " + getSubtreeFeature(notFormula.child, depth-1, anchored) + ")";
     } else {
       throw new RuntimeException("Unhandled formula type: " + f.getClass().toString());
     }
