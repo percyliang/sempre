@@ -25,6 +25,7 @@ import org.testng.collections.Sets;
 public class BeamFloatingParser extends Parser {
   public static class Options {
     @Option public int maxNewTreesPerSpan = Integer.MAX_VALUE;
+    @Option public boolean alwaysFloat = true;
   }
   public static Options opts = new Options();
 
@@ -132,7 +133,7 @@ class BeamFloatingParserState extends ChartParserState {
     this.chartList = this.collectChart();
 
     /* If Beam Parser failed to find derivations, try a floating parser */
-    if (predDerivations.size() == 0 || this.ex.definition == null) {
+    if (BeamFloatingParser.opts.alwaysFloat) {
       /* For every base span of the chart, add the derivations from nothing rules */
       List<Rule> nothingRules = new ArrayList<Rule>();
       for (Rule rule : parser.grammar.rules)
@@ -154,7 +155,7 @@ class BeamFloatingParserState extends ChartParserState {
 
       List<Derivation> actionDerivs = new ArrayList<Derivation>(Derivation.emptyList);
       if (actionDerivs != null) {
-        ArrayList<Formula> formulas = new ArrayList<Formula>();
+        Set<Formula> formulas = new HashSet<Formula>();
         for (Derivation d : rootDerivs) {
           Formula f = d.getFormula();
           if (!formulas.contains(f)) {
