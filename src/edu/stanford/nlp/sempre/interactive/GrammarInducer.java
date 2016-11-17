@@ -81,6 +81,8 @@ public class GrammarInducer {
 
     addMatches(def);
     buildFormula(def);
+    def.grammarInfo.start = 0;
+    def.grammarInfo.end = tokens.size();
 
     inducedRules.addAll(induceRules(def));
   }
@@ -92,6 +94,8 @@ public class GrammarInducer {
         deriv.grammarInfo.matches.add(anchored);
         LogInfo.dbgs("Replaced %s <- %s", anchored, uniqueCoverName(anchored));
         deriv.grammarInfo.formula = new VariableFormula(uniqueCoverName(anchored));
+        deriv.grammarInfo.start = anchored.start;
+        deriv.grammarInfo.end = anchored.end;
         break; // just adding the first match, could do highest scoring
       }
     }
@@ -142,18 +146,22 @@ public class GrammarInducer {
   private void buildFormula(Derivation deriv){
     //LogInfo.log("building " + deriv.grammarInfo.formula);
     if (deriv.grammarInfo.formula != null) return;
-    if (deriv.grammarInfo.formula instanceof VariableFormula) return;
+    if (deriv.grammarInfo.formula instanceof VariableFormula) {
+      return;
+    }
     if (deriv.children.size() == 0) {
       deriv.grammarInfo.formula = deriv.formula;
     }
     
     for (Derivation c : deriv.children) {
       buildFormula(c);
+      deriv.grammarInfo.start = Math.min(deriv.grammarInfo.start, c.grammarInfo.start);
+      deriv.grammarInfo.end = Math.max(deriv.grammarInfo.end, c.grammarInfo.end);
     }
     Rule rule = deriv.rule;
     List<Derivation> args = deriv.children;
     
-    // cant use the standard thing because formula is final mostly
+    // cant use the standard DerivationStream because formula is final
     if (rule.sem instanceof ApplyFn) {
       Formula f = Formulas.fromLispTree(((ApplyFn)rule.sem).formula.toLispTree());
       for (Derivation arg : args) {
@@ -199,7 +207,6 @@ public class GrammarInducer {
 
   private List<String> getRHS(Derivation def, List<Derivation> covers) {
     List<String> rhs = new ArrayList<>(tokens);
-    int start = 0;
     for (Derivation deriv : covers) {
       // LogInfo.logs("got (%d,%d):%s:%s", deriv.start, deriv.end, deriv.formula, deriv.cat);
       rhs.set(deriv.start, deriv.cat);
@@ -207,7 +214,7 @@ public class GrammarInducer {
         rhs.set(i, null);
       }
     }
-    return rhs.stream().filter(s -> s!=null).collect(Collectors.toList());
+    return rhs.subList(def.grammarInfo.start, def.grammarInfo.end).stream().filter(s -> s!=null).collect(Collectors.toList());
   }
 
   public static ParseStatus getParseStatus(Example ex) {

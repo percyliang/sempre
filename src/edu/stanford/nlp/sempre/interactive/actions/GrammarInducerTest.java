@@ -65,6 +65,8 @@ public class GrammarInducerTest {
     induce("add red to both sides", "[[\"add red left\",\"(: add red left)\"],[\"add red right\",\"(: add red right)\"]]");
     induce("add a yellow block next to brown", 
         "[[\"select brown\",\"(:foreach (color brown) (: select))\"],[\"add yellow right\",\"(: add yellow right)\"]]");
+    induce("select all but yellow", 
+        "[[\"select not has color yellow\",\"?\"]]");
     LogInfo.end_track();
   }
 

@@ -17,12 +17,16 @@
 (rule $Action (isolate $Sets [ $Actions ] ) (lambda s (lambda a (:isolate (var s) (var a)))) (anchored 1))
 
 # global actions
-(rule $Action (select $Sets) (lambda s (:for (var s) (: @select))) (anchored 1))
+(rule $Action ($Action1 $Sets) (lambda a (lambda s (:for (var s) (var a)))) (anchored 1))
 (rule $Action (select) (ConstantFn (: @select)) (anchored 1))
+(rule $Action1 (select) (ConstantFn (: @select)) (anchored 1))
+
 (rule $Action (update $Rel $ValueSets) (lambda r (lambda v (: @update (var r) (var v)))) (anchored 1))
 
 (rule $Action (remove) (ConstantFn (: @remove)) (anchored 1))
-(rule $Action (remove $Sets) (lambda s (:for (var s) (: @remove))) (anchored 1))
+(rule $Action1 (remove) (ConstantFn (: @remove)) (anchored 1))
+
+# (rule $Action (remove $Sets) (lambda s (:for (var s) (: @remove))) (anchored 1))
 
 ############### unary sets
 (rule $Set (selected) selected (anchored 1))
