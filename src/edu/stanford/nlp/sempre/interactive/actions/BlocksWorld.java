@@ -16,7 +16,7 @@ import edu.stanford.nlp.sempre.StringValue;
 
 enum CubeColor {
   Red(0), Orange(1), Yellow (2), Green(3), Blue(4), White(6), Black(7),
-  Pink(8), Brown(9), Gray(10), Anchor(11), None(-5);
+  Pink(8), Brown(9), Gray(10), Fake(11), None(-5);
   private final int value;
   private static final int MAXCOLOR = 7;
   CubeColor(int value) { this.value = value; }
@@ -103,7 +103,7 @@ public class BlocksWorld extends FlatWorld {
   }
 
   public void base(int x, int y) {
-    Block basecube = new Block(x, y, 0, CubeColor.Anchor.toString());
+    Block basecube = new Block(x, y, 0, CubeColor.Fake.toString());
     basecube.select(true);
     this.allitems.add(basecube);
   }
@@ -118,7 +118,10 @@ public class BlocksWorld extends FlatWorld {
 
   public String toJSON() {
     // return "testtest";
-    return Json.writeValueAsStringHard(this.allitems.stream().map(c -> ((Block)c).toJSON()).collect(Collectors.toList()));
+    return Json.writeValueAsStringHard(this.allitems.stream()
+        // do not consider unselected fake blocks
+        .filter(c -> ((Block)c).color != CubeColor.Fake || c.selected())
+        .map(c -> ((Block)c).toJSON()).collect(Collectors.toList()));
     // return this.worldlist.stream().map(c -> c.toJSON()).reduce("", (o, n) -> o+","+n);
   }
 
@@ -154,65 +157,51 @@ public class BlocksWorld extends FlatWorld {
   }
 
 
-  // block world specific actions
+  // block world specific actions, non-overriding move
   public void move(String dir, Set<Item> selected) {
     allitems.removeAll(selected);
-    selected.forEach(b -> ((Block)b).move(Direction.fromString(dir)));
-    allitems.addAll(selected);
+    realBlocks(selected).forEach(b -> ((Block)b).move(Direction.fromString(dir)));
+    allitems.addAll(selected); // this is not overriding
+  }
+  
+  public void add(String colorstr, Set<Item> selected) {
+    CubeColor color = CubeColor.fromString(colorstr);
+    // not allowing real cubes to be "added"
+    Sets.difference(selected, realBlocks(selected))
+      .forEach(b -> ((Block)b).color = color);
   }
 
-  public void add(String color, String dir, Set<Item> selected) {
+  public void add(String colorstr, String dirstr, Set<Item> selected) {
+    Direction dir = Direction.fromString(dirstr);
+    CubeColor color = CubeColor.fromString(colorstr);
     Set<Item> extremeCubes = extremeCubes(dir, selected);
-    this.allitems.addAll( extremeCubes.stream().map(
+    this.allitems.addAll(extremeCubes.stream().map(
         c -> {
-          Block d = ((Block)c).copy(Direction.fromString(dir));
-
-          // a hack to deal with special anchor points, where adding to its top behaves differently
-          if (d.color.equals(CubeColor.Anchor) && d.height == 1) {
-            d.height = d.height - 1;
-            ((Block)c).color = CubeColor.fromString(color);
-            return c;
-          }
-
-          d.color = CubeColor.fromString(color);
+          Block d = ((Block)c).copy(dir);
+          d.color = color;
           return d;}
         )
-        .collect(Collectors.toList()) );
+        .collect(Collectors.toList()));
   }
-  // get cubes at extreme positions
-  private Set<Item> extremeCubes(String dirstr, Set<Item> selected) {
-    Direction dir = Direction.fromString(dirstr);
+  
+  // get cubes at the outer locations
+  private Set<Item> extremeCubes(Direction dir, Set<Item> selected) {
+    Set<Item> realCubes = realBlocks(allitems);
     return selected.stream().map(c -> {
       Block d = (Block)c;
-      while(allitems.contains(d.copy(dir)))
+      while(realCubes.contains(d.copy(dir)))
         d = d.copy(dir);
       return d;
     }).collect(Collectors.toSet());
   }
-
-  public void build(String cubejson, Set<Item> selected) {
-    for (Item i : selected) {
-      BlocksWorld world = BlocksWorld.fromJSON(cubejson);
-      Block b = ((Block)i);
-      // shifts world to position b
-      shift(b, world);
-      
-     
-      this.allitems.remove(i);
-      this.allitems.addAll(world.allitems);
-      if (!this.allitems.contains(i)) this.allitems.add(i);
-    }
+  
+  public Set<Item> allBlocks() {
+    return realBlocks(this.all());
   }
-
-  // make block the anchor of the world
-  private void shift(Block block, BlocksWorld world) {
-    Block anchor = new Block(0,0,0,"None");
-    for (Item i  : world.allitems) {
-      Block b = ((Block)i);
-      b.row = b.row - anchor.row + block.row;
-      b.col = b.col - anchor.col + block.col;
-      b.height = b.height - anchor.height + block.height;
-    }
+  
+  private Set<Item> realBlocks(Set<Item> all) {
+    return all.stream().filter(b-> ((Block)b).color != CubeColor.Fake)
+        .collect(Collectors.toSet());
   }
 
   //get cubes at extreme positions
@@ -229,13 +218,19 @@ public class BlocksWorld extends FlatWorld {
     }
   }
 
+  // return retrived from allitems, along with any potential selectors which are empty.
   public Set<Item> adj(String dirstr, Set<Item> selected) {
     Direction dir = Direction.fromString(dirstr);
-    Set<Item> dirofselected = selected.stream().map(c -> ((Block)c).copy(dir)).filter(c -> allitems.contains(c))
+    Set<Item> selectors = selected.stream()
+        .map(c -> {Item d = ((Block)c).copy(dir); ((Block)d).color = CubeColor.Fake; return d;})
         .collect(Collectors.toSet());
-    Set<Item> actualdirofselected = allitems.stream().filter(c -> dirofselected.contains(c))
+
+    this.allitems.addAll(selectors);
+    
+    Set<Item> actual = allitems.stream().filter(c -> selectors.contains(c))
         .collect(Collectors.toSet());
-    return actualdirofselected;
+    
+    return actual;
   }
 
   public static Set<Item> argmax(Function<Block, Integer> f, Set<Item> items) {
@@ -246,5 +241,29 @@ public class BlocksWorld extends FlatWorld {
     }
     final int maxValue = maxvalue;
     return items.stream().filter(c -> f.apply((Block)c) >= maxValue).collect(Collectors.toSet());
+  }
+  
+  public void build(String cubejson, Set<Item> selected) {
+    for (Item i : selected) {
+      BlocksWorld world = BlocksWorld.fromJSON(cubejson);
+      Block b = ((Block)i);
+      // shifts world to position b
+      shift(b, world);
+      
+      this.allitems.remove(i);
+      this.allitems.addAll(world.allitems);
+      if (!this.allitems.contains(i)) this.allitems.add(i);
+    }
+  }
+
+  // make block the anchor of the world
+  private void shift(Block block, BlocksWorld world) {
+    Block anchor = new Block(0,0,0,"None");
+    for (Item i  : world.allitems) {
+      Block b = ((Block)i);
+      b.row = b.row - anchor.row + block.row;
+      b.col = b.col - anchor.col + block.col;
+      b.height = b.height - anchor.height + block.height;
+    }
   }
 }

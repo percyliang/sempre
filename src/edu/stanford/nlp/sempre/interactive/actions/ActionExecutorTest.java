@@ -133,16 +133,18 @@ public class ActionExecutorTest {
     LogInfo.end_track();
   }
   
-  @Test public void testAnchor() {
+  @Test public void testFake() {
     // this is a green stick
-    String defaultBlocks = "[[1,1,0,\"Anchor\",[\"S\"]]]";
+    String defaultBlocks = "[[1,1,0,\"Fake\",[\"S\"]]]";
     ContextValue context = getContext(defaultBlocks);
     LogInfo.begin_track("testAnchors");
     runFormula(executor, "(: add red top)", context, selectedSize(1));
     runFormula(executor, "(: add red left)", context, selectedSize(1));
+    runFormula(executor, "(: add red)", context, selectedSize(1));
     runFormula(executor, "(:loop (number 3) (: add red left))", context, selectedSize(1));
-    runFormula(executor, "(:loop (number 3) (: add red top))", context, x -> x.allitems.size() == 3);
+    runFormula(executor, "(:loop (number 3) (: add red top))", context, x -> x.allitems.size() == 4);
     runFormula(executor, "(:loop (number 3) (: add red left))", context, x -> x.allitems.size() == 4);
+    runFormula(executor, "(:loop (number 3) (: select (or this (call adj top this))))", context, selectedSize(4));
     LogInfo.end_track();
   }
   
@@ -166,15 +168,6 @@ public class ActionExecutorTest {
         context, null);
     LogInfo.end_track();
   }
-  
-  @Test public void testBuild() {
-    String defaultBlocks = "[[1,1,1,\"Green\",[\"S\"]]";
-    ContextValue context = getContext(defaultBlocks);
-    LogInfo.begin_track("testBuild");
-    runFormula(executor, "(: build (string [[1,1,2,\"Green\",[]],[1,1,3,\"Blue\",[]],[1,1,4,\"Red\",[]]]))",
-        context, selectedSize(0));
-    LogInfo.end_track();
-  }
-  
+ 
  
 }
