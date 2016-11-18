@@ -100,12 +100,12 @@ public class BlocksParsingTest {
     ContextValue context = getContext(defaultBlocks);
     LogInfo.begin_track("testJoin");
 
-    parse("select all", "select all", context, contains("(:for * (: select))"));
+    parse("select all", "select all", context, contains("(:foreach * (: select))"));
     // parse("select has color red", "red blocks", context, contains("(:for (color red) (: select))"));
-    parse("select has color red", "red blocks", context, hasAll("(color red)", "(: select)", ":for"));
+    parse("select has color red", "red blocks", context, hasAll("(color red)", "(: select)", ":foreach"));
     parse("add red top", "add some to top of red blocks", context, contains("(: add red top)"));
-    parse("for has color red [ remove ]", "remove red blocks", context, contains("(:for (color red) (: remove))"));
-    parse("repeat 3 [add red]", "add 3 red", context, contains("(:loop (number 3) (: add red top))"));
+    parse("for has color red [ remove ]", "remove red blocks", context, contains("(:foreach (color red) (: remove))"));
+    parse("repeat 3 [add red]", "add red 3 times", context, contains("(:loop (number 3) (: add red))"));
     parse("for has color red [ add yellow top ]", "add red to top of yellow", context, moreThan(0));
     // parse("select has row 3", "select row 3", context, moreThan(0));
     // parse("select has color red or has color green", "select red and green", context, contains("(:for (or (color red) (color green)) (: select))"));
@@ -121,7 +121,7 @@ public class BlocksParsingTest {
 
     parse("repeat 4 [add yellow]", "add 4 yellow blocks", context, hasAll("(:loop", "(number 4)", "(color yellow)"));
     parse("repeat 4 [for has color red [ add yellow left ] ]", "put 4 yellow left of red", context, hasAll(":for", "red", "left"));
-    parse("", "put 4 yellow to the left of red", context, hasAll(":for", "red", "left"));
+    parse("", "put 4 yellow to the left of red", context, hasAll(":foreach", "red", "left"));
     parse("", "select has color red or has color green",  context, hasAll("(color red)", "(color green)", "(: select)"));
     parse("", "add red then add green and then add yellow",  context, hasAll("(color red)", "(color green)", "(color yellow)"));
     parse("", "add red then add green and then add yellow",  context, hasAll("(: add", "(color red)", "(color green)", "(color yellow)"));
@@ -132,8 +132,8 @@ public class BlocksParsingTest {
     parse("", "add 4 yellow to the left of red or green", context, moreThan(0));
     parse("", "repeat 3 [delete top of all]", context, moreThan(0));
     parse("", "repeat 3 [delete top of all]", context, moreThan(0));
-    parse("", "add 3 red to left", context, hasAll("(:loop (number 3) (: add red left))"));
-    parse("repeat 5 [ add red left ]", "add 5 red left", context, hasAll("(:loop (number 5) (: add red left))"));
+    // parse("", "add 3 red to left", context, hasAll("(:loop (number 3) (: add red left))"));
+    // parse("repeat 5 [ add red left ]", "add 5 red left", context, hasAll("(:loop (number 5) (: add red left))"));
     LogInfo.end_track();
   }
   // things we won't handle

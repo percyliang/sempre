@@ -171,7 +171,7 @@ public class BlocksWorld extends FlatWorld {
       .forEach(b -> ((Block)b).color = color);
   }
 
-  public void add(String colorstr, String dirstr, Set<Item> selected) {
+  public void adddir(String colorstr, String dirstr, Set<Item> selected) {
     Direction dir = Direction.fromString(dirstr);
     CubeColor color = CubeColor.fromString(colorstr);
     Set<Item> extremeCubes = extremeCubes(dir, selected);
