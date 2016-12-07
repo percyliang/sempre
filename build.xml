@@ -88,6 +88,15 @@
     <jar destfile="${libsempre}/sempre-overnight.jar" basedir="${classes}/overnight"/>
   </target>
 
+  <!-- Compile geo880 -->
+  <target name="geo880" depends="init,core,corenlp,tables">
+    <echo message="Compiling ${ant.project.name}: geo880"/>
+    <mkdir dir="${classes}/geo880"/>
+    <javac srcdir="${src}" destdir="${classes}/geo880" classpathref="lib.path" debug="true" includeantruntime="false" source="${source}" target="${target}">
+      <include name="edu/stanford/nlp/sempre/geo880/"/>
+    </javac>
+    <jar destfile="${libsempre}/sempre-geo880.jar" basedir="${classes}/geo880"/>
+  </target>
 
   <!-- Clean up -->
   <target name="clean">
