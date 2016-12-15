@@ -162,26 +162,25 @@ public class BlocksWorld extends FlatWorld {
     allitems.removeAll(selected);
     realBlocks(selected).forEach(b -> ((Block)b).move(Direction.fromString(dir)));
     allitems.addAll(selected); // this is not overriding
+    // allitems = selected.allAll(allitems); // overriding move
   }
   
-  public void add(String colorstr, Set<Item> selected) {
-    CubeColor color = CubeColor.fromString(colorstr);
-    // not allowing real cubes to be "added"
-    Sets.difference(selected, realBlocks(selected))
-      .forEach(b -> ((Block)b).color = color);
-  }
-
-  public void adddir(String colorstr, String dirstr, Set<Item> selected) {
+  public void add(String colorstr, String dirstr, Set<Item> selected) {
     Direction dir = Direction.fromString(dirstr);
     CubeColor color = CubeColor.fromString(colorstr);
-    Set<Item> extremeCubes = extremeCubes(dir, selected);
-    this.allitems.addAll(extremeCubes.stream().map(
-        c -> {
-          Block d = ((Block)c).copy(dir);
-          d.color = color;
-          return d;}
-        )
-        .collect(Collectors.toList()));
+    
+    if (dir == Direction.None) { // add here
+      selected.forEach(b -> ((Block)b).color = color);
+    } else {
+      Set<Item> extremeCubes = extremeCubes(dir, selected);
+      this.allitems.addAll(extremeCubes.stream().map(
+          c -> {
+            Block d = ((Block)c).copy(dir);
+            d.color = color;
+            return d;}
+          )
+          .collect(Collectors.toList()));
+    }
   }
   
   // get cubes at the outer locations

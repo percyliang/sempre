@@ -529,8 +529,6 @@ public class Server {
       
       if (response.getExample()!=null) {
         List<Object> items = new ArrayList<Object>();
-        json.put("coverage", response.coverage);
-        json.put("taggedcover", response.taggedCover);
         json.put("candidates", items);
         List<Derivation> allCandidates = response.getExample().getPredDerivations();
         

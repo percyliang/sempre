@@ -55,10 +55,10 @@
 (rule $Set ([ $Sets ]) (IdentityFn) (anchored 1))
 
 ############### Joins
-(rule $ValueSet ($Rel of $Sets) (lambda r (lambda s
+(rule $ValueSet ($Rel of $Set) (lambda r (lambda s
 			   ((@R (var r)) (var s)))) (anchored 1))
 
-(rule $Set (has $Rel $ValueSets) (lambda r (lambda s
+(rule $Set (has $Rel $ValueSet) (lambda r (lambda s
 			   ((var r) (var s)))) (anchored 1))
 
 ############### arithmetics
@@ -91,6 +91,7 @@
 
 (rule $Action ($Actions $Actions) (lambda a1 (lambda a2 (:s (var a1) (var a2)))) (floating 1)) # add red top then remove them
 
+# let floating rules continue to propagate, and generate a lot of candidates
 # (rule $Actions ($Action) (IdentityFn) (floating 1))
 
 (rule $ValueSets ($Rel $Sets) (lambda r (lambda s

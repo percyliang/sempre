@@ -1,14 +1,17 @@
-package edu.stanford.nlp.sempre;
+package edu.stanford.nlp.sempre.interactive.actions;
 
 import java.util.Arrays;
 
-/**
- * SimpleAnalyzer takes an utterance and applies simple methods to pre-process
- *
- * @author akchou
- */
-public class SimpleAnalyzer extends LanguageAnalyzer {
+import edu.stanford.nlp.sempre.LanguageAnalyzer;
+import edu.stanford.nlp.sempre.LanguageInfo;
 
+/**
+ * supporting the interactive language
+ *
+ * @author sidaw
+ */
+public class ActionLanguageAnalyzer extends LanguageAnalyzer {
+  
   // Stanford tokenizer doesn't break hyphens.
   // Replace hypens with spaces for utterances like
   // "Spanish-speaking countries" but not for "2012-03-28".
@@ -48,8 +51,12 @@ public class SimpleAnalyzer extends LanguageAnalyzer {
       boolean separate;
       if (c == '.') // Break off period if already space around it (to preserve numbers like 3.5)
         separate = boundaryBefore || boundaryAfter;
+      else if (c == '=') // separate all >, =, < except >=, <=
+        separate = (utterance.charAt(i - 1) != '>' && utterance.charAt(i - 1) != '<');
+      else if (c == '>' || c == '<')
+        separate = (utterance.charAt(i + 1) != '=' && utterance.charAt(i + 1) != '=');
       else
-        separate = (",?'\"[]".indexOf(c) != -1);
+        separate = (",?'\"[];".indexOf(c) != -1);
 
       if (separate) buf.append(' ');
       // Convert quotes
@@ -57,7 +64,11 @@ public class SimpleAnalyzer extends LanguageAnalyzer {
         buf.append(boundaryBefore ? "``" : "''");
       else if (c == '\'')
         buf.append(boundaryBefore ? "`" : "'");
-      else
+      else if (c == '>' || c == '<') {
+        buf.append(' '); buf.append(c);
+      } else if (c == '=') {
+        buf.append(c); buf.append(' '); 
+      } else
         buf.append(c);
       if (separate) buf.append(' ');
     }

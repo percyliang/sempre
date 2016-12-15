@@ -75,9 +75,7 @@ public class Master {
 
     // for interactive stuff
     public String commandResponse = "";
-    public List<List<String>> taggedCover;
     public List<String> autocompletes;
-    public int[] coverage;
 
     public String getFormulaAnswer() {
       if (ex.getPredDerivations().size() == 0)
@@ -156,10 +154,10 @@ public class Master {
     LogInfo.log("  (execute |logical form|): execute the logical form (e.g., (execute (call + (number 3) (number 4))))");
     LogInfo.log("  (def |key| |value|): define a macro to replace |key| with |value| in all commands (e.g., (def type fb:type.object type)))");
     LogInfo.log("  (context [(user |user|) (date |date|) (exchange |exchange|) (graph |graph|)]): prints out or set the context");
-    LogInfo.log("  (uttdef (def |alternative|) [(original |original|)]): provide a definition for the original utterance");
-    LogInfo.log("  (autocomplete |prefix|): provide a definition for the original utterance");
-    LogInfo.log("  (addrule |rule|): submit the structure");
-    LogInfo.log("  (action |utternace|): commandline utility for performing an action on the wrold");
+    // interactive commands, starting with the :
+    LogInfo.log("  (:uttdef head [[body,bodyformula],[]]): provide a definition for the original utterance");
+    LogInfo.log("  (:autocomplete |prefix|): provide a definition for the original utterance");
+    LogInfo.log("  (:action |utternace|): commandline utility for performing an action on the world");
     LogInfo.log("Press Ctrl-D to exit.");
   }
 
@@ -270,14 +268,6 @@ public class Master {
     state = builder.parser.parse(builder.params, ex, false);
     Learner.addToAutocomplete(ex, builder.params);
 
-    // for supporting definitions
-    if (state instanceof BeamParserState) {
-      response.coverage = ((BeamParserState)state).getCoverage();
-      response.taggedCover = ((BeamParserState)state).getTaggedCoverage();
-    } else if (state instanceof BeamFloatingParserState) {
-      response.coverage = ((BeamFloatingParserState)state).getCoverage();
-      response.taggedCover = ((BeamFloatingParserState)state).getTaggedCoverage();
-    }
     response.ex = ex;
 
     ex.log();
@@ -447,11 +437,14 @@ public class Master {
       } else {
         session.context = new ContextValue(tree);
       }
-    } else if (command.equals("uttdef")) {
+    } else if (command.equals(":def")) {
       if (tree.children.size() == 3) {
         String head = tree.children.get(1).value;
         List<Object> body = Json.readValueHard(tree.children.get(2).value, List.class);
-        List<Rule> inducedRules = InteractiveUtils.induceGrammar(head, body, session.id, builder.parser, builder.params);
+        GrammarInducer inducer = InteractiveUtils.getInducer(head, body, session.id, builder.parser, builder.params);
+        List<Rule> inducedRules  = inducer.getRules();
+        response.ex = inducer.getHead();
+        
         if (inducedRules.size() > 0) {
           for (Rule rule : inducedRules) {
               InteractiveUtils.addRuleInteractive(rule, builder.parser);
@@ -467,7 +460,9 @@ public class Master {
       } else {
         LogInfo.logs("Invalid format for uttdef");
       }
-    } else if (command.equals("autocomplete")) {
+    } else if (command.equals(":accept")) {
+      
+    } else if (command.equals(":autocomplete")) {
       if (tree.children.size() == 2) {
         String prefix = tree.children.get(1).value;
         LogInfo.logs("Getting autocomplete for prefix: %s", prefix);
@@ -481,7 +476,7 @@ public class Master {
       } else {
         LogInfo.logs("autocomplete just takes a prefix");
       }
-    } else if (command.equals("submit")) {
+    } else if (command.equals(":submit")) {
       if (tree.children.size() >= 2) {
         String name = tree.children.get(1).value;
         String state = tree.children.get(2).value;
@@ -494,12 +489,11 @@ public class Master {
         out.append(rule.toLispTree().toStringWrap() + "\n");
         out.flush();
         out.close();
-
         InteractiveUtils.addRuleInteractive(rule, builder.parser);
       } else {
         LogInfo.logs("Invalid format for submit");
       }
-    } else if (command.equals("action")) {
+    } else if (command.equals(":action")) {
       // test code for mutating worlds, updates the context
       String query = tree.children.get(1).value;
       this.handleUtterance(session, query, response);
@@ -507,13 +501,54 @@ public class Master {
       String blocks = ((StringValue)Values.fromString(response.getAnswer())).value;
       String strigify2 = Json.writeValueAsStringHard(blocks); // some parsing issue inside lisptree parser
       session.context = ContextValue.fromString(String.format("(context (graph NaiveKnowledgeGraph ((string \"%s\") (name b) (name c))))", strigify2));
+    } else if (command.equals(":context")) {
+      if (tree.children.size() == 1) {
+        LogInfo.logs("%s", session.context);
+      } else {
+        session.context = ContextValue.fromString(
+            String.format("(context (graph NaiveKnowledgeGraph ((string \"%s\") (name b) (name c))))",
+                tree.children.get(1).toString()));
+      }
     }
     else {
       LogInfo.log("Invalid command: " + tree);
     }
   }
+  
+  private void defineAccept(Session session, String query, String formula, Response response) {
+    session.updateContext();
 
+    // Create example
+    Example ex = new Example.Builder()
+        .setId("session:" + session.id)
+        .setUtterance(query)
+        .setContext(session.context)
+        .createExample();
+    ex.preprocess();
+    
+    if (!Strings.isNullOrEmpty(opts.newExamplesPath)) {
+      LogInfo.begin_track("Adding new example");
+      if (opts.newExamplesPath.endsWith(".json") || opts.newExamplesPath.endsWith(".lisp"))
+        Dataset.appendExampleToFile(opts.newExamplesPath, ex);
+      else
+        Dataset.appendExampleToFile( Paths.get(opts.newExamplesPath, session.id + ".lisp").toString(), ex);
+      LogInfo.end_track();
+    }
 
+    // Parse!
+    ParserState state;
+    state = builder.parser.parse(builder.params, ex, false);
+    Learner.addToAutocomplete(ex, builder.params);
+
+    response.ex = ex;
+
+    ex.log();
+    if (ex.predDerivations.size() > 0) {
+      response.candidateIndex = 0;
+      printDerivation(response.getDerivation());
+    }
+    session.updateContext(ex, opts.contextMaxExchanges);
+  }
 
 
   void addNewExample(Example origEx, Session session) {
@@ -539,8 +574,6 @@ public class Master {
     if (opts.onlineLearnExamples) {
       LogInfo.begin_track("Updating parameters");
       learner.onlineLearnExample(origEx);
-      if (!Strings.isNullOrEmpty(opts.newParamsPath))
-        builder.params.write(opts.newParamsPath);
       LogInfo.end_track();
     }
 

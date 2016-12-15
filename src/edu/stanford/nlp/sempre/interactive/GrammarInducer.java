@@ -65,11 +65,16 @@ public class GrammarInducer {
   String id;
   Derivation defderiv;
   List<Derivation> chartList = Lists.newArrayList();
+  
+  // really just a return value
+  Example head;
 
   // induce rule is possible,
   // otherwise set the correct status
   public GrammarInducer(Example origEx, Derivation def,  List<Derivation> chartList) {
     id = origEx.id;
+    head = origEx;
+    head.predDerivations = Lists.newArrayList(def);
     
     this.chartList = chartList;
     
@@ -83,7 +88,7 @@ public class GrammarInducer {
     buildFormula(def);
     def.grammarInfo.start = 0;
     def.grammarInfo.end = tokens.size();
-
+    
     inducedRules.addAll(induceRules(def));
   }
   
@@ -229,6 +234,10 @@ public class GrammarInducer {
     }
     // could check the chart here set partial, but no need for now
     return ParseStatus.Nothing;
+  }
+
+  public Example getHead() {
+    return head;
   }
 
 }

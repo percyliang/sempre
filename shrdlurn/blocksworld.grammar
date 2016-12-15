@@ -7,7 +7,6 @@
 (def @base base)
 # basic actions
 (def @add add)
-(def @add2 adddir)
 (def @move move)
 (def @copy copy)
 
@@ -32,8 +31,8 @@
 (rule $OBJECT (testobject) (ConstantFn (string [[0,0,0,\"Green\",[]],[0,0,1,\"Blue\",[]],[0,0,2,\"Red\",[]]])) (anchored 1))
 
 # primitive actions
-(rule $Action (add $Color) (lambda c (: @add (var c))) (anchored 1))
-(rule $Action (add $Color $Direction) (lambda c (lambda d (: @add2 (var c) (var d)))) (anchored 1))
+(rule $Action (add $Color) (lambda c (: @add (var c) here)) (anchored 1))
+(rule $Action (add $Color $Direction) (lambda c (lambda d (: @add (var c) (var d)))) (anchored 1))
 (rule $Action (move $Direction) (lambda d (: @move (var d))) (anchored 1))
 
 # primitive actions with arguments
@@ -107,9 +106,8 @@
 (rule $Sets ($Color) (lambda c (color (var c))))
 
 # various actions can be performed without prompt
-(rule $Action ($Color) (lambda c (: @add2 (var c) top)))
-(rule $Action ($Color) (lambda c (: @add (var c))))
-(rule $Action ($Color $Direction) (lambda c (lambda d (: @add2 (var c) (var d)))))
+(rule $Action ($Color) (lambda c (: @add (var c) here)))
+(rule $Action ($Color $Direction) (lambda c (lambda d (: @add (var c) (var d)))))
 (rule $Action ($Direction) (lambda d (: @move (var d))))
 
 (rule $Set ($Direction $Sets) (lambda d (lambda s

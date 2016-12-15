@@ -160,10 +160,6 @@ public class Learner {
       deriv.compatibility = parser.valueEvaluator.getCompatibility(ex.targetValue, deriv.value);
     ParserState.computeExpectedCounts(ex.predDerivations, counts);
     params.update(counts);
-    if (Master.opts.bePragmatic) {
-      parseExample(params, ex, false);
-      this.params.pragmaticListener.addExample(ex);
-    }
     LogInfo.end_track();
   }
 

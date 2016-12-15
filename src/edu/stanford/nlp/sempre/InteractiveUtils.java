@@ -31,7 +31,7 @@ public final class InteractiveUtils {
   }
  
   // parse the definition, match with the chart of origEx, and add new rules to grammar
-  public static List<Rule> induceGrammar(String head, List<Object> body, String sessionId, Parser parser, Params params) {
+  public static GrammarInducer getInducer(String head, List<Object> body, String sessionId, Parser parser, Params params) {
     Derivation bodyDeriv =  new Derivation.Builder().createDerivation();
     
     // string together the body definition
@@ -46,10 +46,13 @@ public final class InteractiveUtils {
       b.setUtterance(utt);
       Example ex = b.createExample();
       ex.preprocess();
+
+      LogInfo.logs("Parsing definition: %s", ex.utterance);
       parser.parse(params, ex, false);
       
       boolean found = false;
       for (Derivation d : ex.predDerivations) {
+        LogInfo.logs("considering: %s", d.formula.toString());
         if (d.formula.toString().equals(formula)) {
           found = true;
           if (initial) {
@@ -75,11 +78,13 @@ public final class InteractiveUtils {
     b.setUtterance(head);
     Example exHead = b.createExample();
     exHead.preprocess();
+    
+    LogInfo.logs("Parsing head: %s", exHead.utterance);
     BeamFloatingParserState state = (BeamFloatingParserState)parser.parse(params, exHead, false);
     LogInfo.logs("target deriv: %s", bodyDeriv.toLispTree());
     LogInfo.logs("anchored elements: %s", state.chartList);
     GrammarInducer grammarInducer = new GrammarInducer(exHead, bodyDeriv, state.chartList);
-    
+    return grammarInducer;
 //    PrintWriter out = IOUtils.openOutAppendHard(Paths.get(opts.newGrammarPath, sessionId + ".definition").toString());
 //    // deftree.addChild(oldEx.utterance);
 //    LispTree deftree = LispTree.proto.newList("definition", body.toString());
@@ -92,8 +97,6 @@ public final class InteractiveUtils {
 //    out.println(treewithdef.toString());
 //    out.flush();
 //    out.close();
-
-    return grammarInducer.getRules();
   }
 
 

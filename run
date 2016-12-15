@@ -983,6 +983,7 @@ addMode('interactive', 'interactive semantic parsing in blocks', lambda { |e| l(
   figOpts,
 
   o('Executor', 'interactive.actions.ActionExecutor'),
+  o('LanguageAnalyzer', 'interactive.actions.ActionLanguageAnalyzer'),
   o('ActionExecutor.convertNumberValues', true),
   o('ActionExecutor.printStackTrace', true),
   selo(0, 'ActionExecutor.FlatWorldType', 'BlocksWorld', 'CalendarWorld'),
@@ -991,6 +992,7 @@ addMode('interactive', 'interactive semantic parsing in blocks', lambda { |e| l(
   o('Params.initWeightsRandomly', false),
   o('Grammar.binarizeRules', false),
   o('Grammar.useApplyFn', 'interactive.ApplyFn'),
+
   o('LanguageAnalyzer.lowerCaseTokens', true),
   o('LanguageAnalyzer.useLemmaTokens', false),
 

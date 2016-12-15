@@ -44,7 +44,7 @@ public class GrammarInducerTest {
     Spec defSpec = defaultSpec();
     Parser parser = new BeamFloatingParser(defSpec);
     
-    List<Rule> induced = InteractiveUtils.induceGrammar(head, body, "test",  parser, new Params());
+    List<Rule> induced = InteractiveUtils.getInducer(head, body, "test",  parser, new Params()).getRules();
     for (Rule rule : induced)
       LogInfo.logs("Induced: %s", rule);
   }
@@ -69,5 +69,20 @@ public class GrammarInducerTest {
         "[[\"select not has color yellow\",\"?\"]]");
     LogInfo.end_track();
   }
-
+  
+  @Test public void learnSets() {
+    LogInfo.begin_track("test Grammar");
+    induce("remove those red blocks", "[[\"remove has color red\",\"(:foreach (color red) (: remove))\"]]");
+    induce("select card", "[[\"remove has color red\",\"(:foreach (color red) (: remove))\"]]");
+    induce("remove the leftmost red block", "[[\"remove very left of has color red\",\"?\"]]");
+    induce("add a red column of size 3",
+        "[[\"repeat 3 [ add red; select top of this]\",\"(:loop (number 3) (:s (: add red here) (:for (call adj top this) (: select))))\"]]");
+    LogInfo.end_track();
+  }
+  @Test public void learnLoop() {
+    LogInfo.begin_track("test Grammar");
+    induce("add a red column of size 3",
+        "[[\"repeat 3 [ add red; select top of this]\",\"(:loop (number 3) (:s (: add red here) (:for (call adj top this) (: select))))\"]]");
+    LogInfo.end_track();
+  }
 }
