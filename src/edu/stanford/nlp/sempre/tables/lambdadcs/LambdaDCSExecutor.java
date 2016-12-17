@@ -190,12 +190,6 @@ class LambdaDCSCoreLogic {
         }
       }
 
-    } else if (formula instanceof NotFormula) {
-      // ============================================================
-      // Not
-      // ============================================================
-      // TODO(ice): (Low priority)
-
     } else if (formula instanceof AggregateFormula) {
       // ============================================================
       // Aggregate
@@ -225,12 +219,6 @@ class LambdaDCSCoreLogic {
       UnaryDenotation child2D = computeUnary(arithmetic.child2, typeHint.newUnrestrictedUnary());
       return typeHint.applyBound(DenotationUtils.arithmetic(child1D, child2D, arithmetic.mode));
 
-    } else if (formula instanceof CallFormula) {
-      // ============================================================
-      // Call
-      // ============================================================
-      // TODO(ice): (Low priority)
-
     } else if (formula instanceof VariableFormula) {
       // ============================================================
       // Variable
@@ -255,6 +243,17 @@ class LambdaDCSCoreLogic {
       }
       return typeHint.applyBound(new ExplicitUnaryDenotation(values));
 
+    } else if (formula instanceof FilterFormula) {
+      // ============================================================
+      // Filter
+      // ============================================================
+      FilterFormula filter = (FilterFormula) formula;
+      UnaryDenotation domainD = computeUnary(filter.domain, typeHint);
+      BinaryDenotation conditionD = computeBinary(filter.condition, typeHint.newRestrictedBinary(null, domainD));
+      ExplicitBinaryDenotation table = conditionD.explicitlyFilterSecond(domainD, graph);
+      LogInfo.logs("%s %s", typeHint, table.getSeconds());
+      return typeHint.applyBound(table.getSeconds());
+      
     } else {
       throw new LambdaDCSException(Type.notUnary, "[Unary] Not a unary " + formula);
     }
