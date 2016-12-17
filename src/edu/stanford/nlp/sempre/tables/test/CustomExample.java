@@ -114,8 +114,8 @@ public class CustomExample extends Example {
     formulaMacros.put("@!p.second", "!" + TableTypeSystem.CELL_SECOND_VALUE.id);
   }
 
-  static final Pattern regexProperty = Pattern.compile("c\\.(.*)");
-  static final Pattern regexReversedProperty = Pattern.compile("!c\\.(.*)");
+  static final Pattern regexProperty = Pattern.compile("r\\.(.*)");
+  static final Pattern regexReversedProperty = Pattern.compile("!r\\.(.*)");
   static final Pattern regexEntity = Pattern.compile("c_(.*)\\.(.*)");
 
   /**

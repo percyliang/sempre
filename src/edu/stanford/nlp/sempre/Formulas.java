@@ -41,6 +41,8 @@ public abstract class Formulas {
           args.add(fromLispTree(tree.child(i)));
         return new CallFormula(callFunc, args);
       }
+      if (func.equals("filter"))
+        return new FilterFormula(fromLispTree(tree.child(1)), fromLispTree(tree.child(2)));
     }
 
     { // Merge: (and (fb:type.object.type fb:people.person) (fb:people.person.children fb:en.barack_obama))
@@ -183,6 +185,10 @@ public abstract class Formulas {
     if (formula instanceof NotFormula) {
       NotFormula notForm = (NotFormula) formula;
       return containsFreeVar(notForm.child, var);
+    }
+    if (formula instanceof FilterFormula) {
+      FilterFormula filter = (FilterFormula) formula;
+      return containsFreeVar(filter.domain, var) || containsFreeVar(filter.condition, var);
     }
     throw new RuntimeException("Unhandled: " + formula);
   }
