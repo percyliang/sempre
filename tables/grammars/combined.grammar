@@ -296,6 +296,25 @@
 )
 
 ################################
+# EXPERIMENTAL: Filter
+
+# [TAG] filter: "players with more wins than losses"
+(when filter
+  # Equal: Find rows r where f1(r) = f2(r)
+  # "Players with equal wins as losses"
+  (rule $RowSet ($RowSet $FnOnRow $FnOnRow)
+    (lambda r (lambda f1 (lambda f2 (filter (var r) (lambda x (and ((var f1) (var x)) ((var f2) (var x))))))))
+  )
+  # Compare: Similar to above but with different comparators
+  # "Players with more wins than losses"
+  (for @comparison (< > <= >=)
+    (rule $RowSet ($RowSet $FnOnRow $FnOnRow)
+      (lambda r (lambda f1 (lambda f2 (filter (var r) (lambda x (and ((var f1) (var x)) (@comparison ((var f2) (var x)))))))))
+    )
+  )
+)
+
+################################
 # ROOT
 (rule $ROOT ($ValueSet) (IdentityFn))
 (rule $ROOT ($SingleValue) (IdentityFn))

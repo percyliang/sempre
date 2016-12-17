@@ -251,7 +251,6 @@ class LambdaDCSCoreLogic {
       UnaryDenotation domainD = computeUnary(filter.domain, typeHint);
       BinaryDenotation conditionD = computeBinary(filter.condition, typeHint.newRestrictedBinary(null, domainD));
       ExplicitBinaryDenotation table = conditionD.explicitlyFilterSecond(domainD, graph);
-      LogInfo.logs("%s %s", typeHint, table.getSeconds());
       return typeHint.applyBound(table.getSeconds());
       
     } else {
