@@ -62,6 +62,15 @@ public abstract class ParserState {
     this.numTokens = ex.numTokens();
   }
 
+  public ParserState(Parser parser, ComputationGraphWrapper cgWrapper,
+                     Example ex, boolean computeExpectedCounts) {
+    this.parser = parser;
+    this.ex = ex;
+    this.computeExpectedCounts = computeExpectedCounts;
+    this.numTokens = ex.numTokens();
+    this.params = new Params();
+  }
+
   protected int getBeamSize() { return Parser.opts.beamSize; }
 
   // Main entry point.  Should set all the output variables.
