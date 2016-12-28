@@ -80,7 +80,6 @@ class NeuralBeamParserState extends NeuralParserState {
     this.coarseState = coarseState;
   }
 
-  // Call this method in infer()
   private void setPredDerivations() {
     predDerivations.clear();
     predDerivations.addAll(MapUtils.get(chart[0][numTokens], Rule.rootCat, Derivation.emptyList));

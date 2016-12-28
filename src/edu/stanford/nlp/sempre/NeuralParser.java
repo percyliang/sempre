@@ -74,13 +74,11 @@ public abstract class NeuralParser extends Parser {
       return;
     }
 
-    // Compute features
+    // Compute features.
     parser.extractor.extractLocal(ex, deriv);
 
-    // Compute score
-    // deriv.computeScoreLocal(params);
-    // cgWrapper.scoreDerivation();
-    // todo(joberant): compute the score of a derivation with the cgWrapper.
+    // Compute score with the computation graph.
+    deriv.score = cgWrapper.scoreDerivation(deriv);
 
     if (parser.verbose(5)) {
       LogInfo.logs("featurizeAndScoreDerivation(score=%s) %s %s: %s [rule: %s]",
@@ -88,6 +86,5 @@ public abstract class NeuralParser extends Parser {
     }
     numOfFeaturizedDerivs++;
   }
-
 }
 

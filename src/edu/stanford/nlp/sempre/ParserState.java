@@ -38,7 +38,7 @@ public abstract class ParserState {
 
   //// Output
 
-  public final List<Derivation> predDerivations = new ArrayList<Derivation>();
+  public final List<Derivation> predDerivations = new ArrayList<>();
   public final Evaluation evaluation = new Evaluation();
 
   // If computeExpectedCounts is true (for learning), then fill this out.
