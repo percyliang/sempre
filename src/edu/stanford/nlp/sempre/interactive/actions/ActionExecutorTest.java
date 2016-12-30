@@ -168,6 +168,15 @@ public class ActionExecutorTest {
         context, null);
     LogInfo.end_track();
   }
+  
+  @Test public void testVariables() {
+    String defaultBlocks = "[[1,1,1,\"Green\",[\"S\"]],[1,1,2,\"Red\",[\"_X\",\"_Y\"]],[1,1,3,\"Yellow\",[\"_X\"]],[1,1,4,\"Green\",[\"_Y\"]]]";
+    ContextValue context = getContext(defaultBlocks);
+    LogInfo.begin_track("testUpdate");
+    runFormula(executor, "(: update color red)",
+        context, null);
+    LogInfo.end_track();
+  }
  
  
 }

@@ -1,10 +1,8 @@
 package edu.stanford.nlp.sempre.interactive.actions;
-import java.util.LinkedList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 import edu.stanford.nlp.sempre.ContextValue;
 
@@ -12,8 +10,10 @@ import edu.stanford.nlp.sempre.ContextValue;
 
 public abstract class FlatWorld {
   // supports variables, and perhaps scoping
-  public Set<Item> selected;
   public Set<Item> allitems;
+  
+  public HashMap<String, Set<Item>> localVariables;
+  public HashMap<String, Set<Item>> globalVariables;
   
   public static FlatWorld fromContext(String worldname, ContextValue context) {
     if (worldname.equals("BlocksWorld"))
@@ -30,20 +30,23 @@ public abstract class FlatWorld {
   // public abstract void select(Set<Item> set);
   
   public FlatWorld() {
-    this.allitems = Sets.newHashSet();
-    this.selected = null;
+    this.allitems = new HashSet<>();
+    this.localVariables = new HashMap<>();
+    this.globalVariables = new HashMap<>();
   }
-  
   // general actions, flatness means these actions can be performed on all allitems
   public void remove(Set<Item> selected) {
     allitems.removeAll(selected);
   }
-  
   // current standards for "this", which is the current scope if it exists, or selected item if not
+  // the local variable this
   public Set<Item> current() {
     if (selected == null)
       return selected();
     return selected;
+  }
+  public Set<Item> get(String varname) {
+    return allitems.stream().filter(i -> i.selected()).collect(Collectors.toSet());
   }
   // explicit and global selections
   public void select(Set<Item> set) {
@@ -53,12 +56,10 @@ public abstract class FlatWorld {
   public Set<Item> selected() {
     return allitems.stream().filter(i -> i.selected()).collect(Collectors.toSet());
   }
-  
   public Set<Item> all() {
     return allitems;
   }
   public Set<Item> empty() {
-    return Sets.newHashSet();
+    return new HashSet<>();
   }
-
 }

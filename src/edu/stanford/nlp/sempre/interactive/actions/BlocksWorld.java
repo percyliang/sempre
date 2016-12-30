@@ -71,37 +71,6 @@ public class BlocksWorld extends FlatWorld {
     return fromJSON(wallString);
   }
 
-  public void reset(String name) {
-    this.allitems.clear();
-    this.selected.clear();
-    final Random random = new Random(1);
-    int randint = random.nextInt(5);
-    if (name.equals("simple")) {
-      this.allitems.add(new Block(1,1,0,CubeColor.Red.toString()));
-      this.allitems.add(new Block(2,2,1,CubeColor.Orange.toString()));
-      this.allitems.add(new Block(2,2,0,CubeColor.Orange.toString()));
-      this.allitems.add(new Block(3,3,0,CubeColor.Yellow.toString()));
-      this.allitems.add(new Block(1,3,0,CubeColor.Green.toString()));
-      this.allitems.add(new Block(3,1,0,CubeColor.Blue.toString()));
-    }
-    if (name.equals("checker")) {
-      for (int i = 3 ; i < 8; i++)
-        for (int j = 3 ; j < 8; j++)
-          if ((i + j) % 2 == 0)
-            this.allitems.add(new Block(i,j,0, CubeColor.fromInt(randint).toString()));
-    }
-    if (name.equals("stick")) {
-      for (int i = 0 ; i < 5; i++)
-        this.allitems.add(new Block(4,4,i,CubeColor.fromInt(randint).toString()));
-    }
-    if (name.equals("corner")) {
-      this.allitems.add(new Block(3,3,0,CubeColor.fromInt(randint).toString()));
-      this.allitems.add(new Block(7,7,0,CubeColor.fromInt(randint).toString()));
-      this.allitems.add(new Block(7,3,0,CubeColor.fromInt(randint).toString()));
-      this.allitems.add(new Block(3,7,0,CubeColor.fromInt(randint).toString()));
-    }
-  }
-
   public void base(int x, int y) {
     Block basecube = new Block(x, y, 0, CubeColor.Fake.toString());
     basecube.select(true);
@@ -242,6 +211,7 @@ public class BlocksWorld extends FlatWorld {
     return items.stream().filter(c -> f.apply((Block)c) >= maxValue).collect(Collectors.toSet());
   }
   
+  // deprecated
   public void build(String cubejson, Set<Item> selected) {
     for (Item i : selected) {
       BlocksWorld world = BlocksWorld.fromJSON(cubejson);

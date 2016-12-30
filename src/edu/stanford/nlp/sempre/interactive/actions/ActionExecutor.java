@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.sql.Types;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -13,6 +14,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.collect.ObjectArrays;
 
@@ -58,7 +60,37 @@ public class ActionExecutor extends Executor {
       return new Response(ErrorValue.badJava(e.toString()));
     }
   }
+  
+/*
+ we use a simple stack for scoping the single variable being reference
+ This has to behave well when composed with :def, which is just :s
+ Goal: do a bunch of things, and remember the previous set
+ Best without variable binding, and while being natural
+ 
+ * selected: globally selected set of blocks at any point
+ * this: selected block in the current scope
+    * can only refer to selected or this: for left of this [add red]
+    * generalization: prev n refers the nth previous scope
+    * generatization2: named variable binding, let b = this, a = left of this [select a; remove b]
+ * use case, draw a line and back
+   * for selected [ repeat 3 [add red;  left of this] ]
 
+ Proposal 1: restore after [action ...], isolate this [action ...]
+ push reference to stack, perform action, and pop back
+ -- cannot refer to previous states, and cannot refer to global and cannot modify global
+ -- has color red, refers to global?
+ Proposal 2: refer to and modify focus and global
+ Proposal 3: variable binding, with block structured scopes. potentially restricted identifier names
+     let X = this; repeat 3 [let X = left of X; add red]
+ Idea: block selected X, consider selected; repeat 3 [consider left of considered; add red] ] 
+ 
+ TODO: see if proposal 1 is sufficient for our purposes, probably not, but why not?
+ Allows the setting of the entire world and the concept of this locally, and then merge backwards?
+
+*/   
+
+
+  @SuppressWarnings("rawtypes")
   private void performActions(ActionFormula f, FlatWorld world) {
     if (f.mode == ActionFormula.Mode.primitive) {
       // use reflection to call primitive stuff
@@ -107,6 +139,28 @@ public class ActionExecutor extends Executor {
       world.allitems = scope;
       performActions((ActionFormula)f.args.get(1), world);
       world.allitems.addAll(previous);
+    } else if (f.mode == ActionFormula.Mode.let) {
+    // let declares a new local variable
+    // set access and reassigns the value of some variable
+    // block determines what is considered local scope
+    // for now the use case is just (:blk (:let x this) (:blah) (:set this x))
+      Set<Item> varset = toItemSet(toSet(processSetFormula(f.args.get(1), world)));
+      Value method  = ((ValueFormula)f.args.get(0)).value;
+      String varname = ((NameValue)method).id;
+      world.localVariables.put(varname, varset);
+    } else if (f.mode == ActionFormula.Mode.set) {
+      Set<Item> varset = toItemSet(toSet(processSetFormula(f.args.get(1), world)));
+      Value method  = ((ValueFormula)f.args.get(0)).value;
+      String varname = ((NameValue)method).id;
+      world.localVariables.get(varname).clear();
+      world.localVariables.get(varname).addAll(varset);
+    } else if (f.mode == ActionFormula.Mode.block) {
+      // HashMap<String,Set<Item>> previous = Maps.newHashMap(world.vars);
+      HashMap<String,Set<Item>> previous = new HashMap<>(world.localVariables);
+      for (Formula child : f.args) {
+        performActions((ActionFormula)child, world);
+      }
+      world.localVariables = previous;
     }
   }
   
@@ -131,7 +185,8 @@ public class ActionExecutor extends Executor {
     static String All = "*";
     static String EmptySet = "nothing";
     static String This = "this"; // current scope if it exists, otherwise the globally marked object
-    static String Selected = "selected"; // 
+    static String Selected = "selected"; //
+    static String var = "_"; // 
   };
   // a subset of lambda dcs. no types, and no marks
   // if this gets any more complicated, you should consider the LambdaDCSExecutor
@@ -151,6 +206,8 @@ public class ActionExecutor extends Executor {
           return world.selected();
         if (id.equals(SpecialSets.EmptySet))
           return world.empty();
+        if (id.startsWith(SpecialSets.var))
+          return world.localVariables.get(id);
       } 
       return toObject(((ValueFormula<?>) formula).value);
     }
