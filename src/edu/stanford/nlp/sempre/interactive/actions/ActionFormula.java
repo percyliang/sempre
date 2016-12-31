@@ -28,13 +28,12 @@ public class ActionFormula extends Formula {
     foreach(":foreach"), // (:foreach * (add ((reverse color) this) top))
     
     // primitives to handle variable scoping
-    let(":let"), // (:let X *), 
-    set(":set"), // (:set X *)
+    //let(":let"), // (:let X *), 
+    //set(":set"), // (:set X *)
     block(":block"),
-   
     isolate(":isolate"),
-    other(":?"),  // (:scope this (blah))
-
+    other(":?");  // (:scope this (blah))
+    
     private final String value;
     Mode(String value) {this.value = value;}
     @Override

@@ -7,14 +7,16 @@
 
 (rule $Actions ($Actions ; $Action) (lambda a1 (lambda a2 (:s (var a1) (var a2)))) (anchored 1))
 (rule $Actions ($Action) (IdentityFn) (anchored 1))
+(rule $Action ({ $Actions }) (lambda a (:blk (var a))) (anchored 1))
 (rule $Action ([ $Actions ]) (IdentityFn) (anchored 1))
-(rule $Action (repeat $Numbers [ $Actions ]) (lambda n (lambda a (:loop (var n) (var a)))) (anchored 1))
-(rule $Action (if $ValueSet [ $Actions ]) (lambda b (lambda a (:if (var b) (var a)))) (anchored 1))
+
+(rule $Action (repeat $Numbers $Action) (lambda n (lambda a (:loop (var n) (var a)))) (anchored 1))
+(rule $Action (if $ValueSet $Action) (lambda b (lambda a (:if (var b) (var a)))) (anchored 1))
 
 # basic actions, local scope "for has color red [add red left; add red top]"
-(rule $Action (for $Sets [ $Actions ] ) (lambda s (lambda a (:for (var s) (var a)))) (anchored 1))
-(rule $Action (foreach $Sets [ $Actions ] ) (lambda s (lambda a (:foreach (var s) (var a)))) (anchored 1))
-(rule $Action (isolate $Sets [ $Actions ] ) (lambda s (lambda a (:isolate (var s) (var a)))) (anchored 1))
+(rule $Action (for $Sets $Actions ) (lambda s (lambda a (:for (var s) (var a)))) (anchored 1))
+(rule $Action (foreach $Sets $Action ) (lambda s (lambda a (:foreach (var s) (var a)))) (anchored 1))
+(rule $Action (isolate $Sets $Action) (lambda s (lambda a (:isolate (var s) (var a)))) (anchored 1))
 
 # global actions
 (rule $Action ($Action1 $Sets) (lambda a (lambda s (:for (var s) (var a)))) (anchored 1))
@@ -84,11 +86,7 @@
 #############################
 
 (rule $Action ($Numbers $Actions) (lambda n (lambda a (:loop (var n) (var a)))) (floating 1)) # do add red top 3 times
-
-# (rule $Action ($Sets $Actions) (lambda s (lambda a (:for (var s) (var a)))) (floating 1)) # add red top to has color red
-
 (rule $Action ($Sets $Actions) (lambda s (lambda a (:foreach (var s) (var a)))) (floating 1))
-
 (rule $Action ($Actions $Actions) (lambda a1 (lambda a2 (:s (var a1) (var a2)))) (floating 1)) # add red top then remove them
 
 # let floating rules continue to propagate, and generate a lot of candidates

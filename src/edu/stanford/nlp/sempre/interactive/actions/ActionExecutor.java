@@ -105,7 +105,6 @@ public class ActionExecutor extends Executor {
     } else if (f.mode == ActionFormula.Mode.repeat) {
       Set<Object> arg = toSet(processSetFormula(f.args.get(0), world));
       if (arg.size() > 1) throw new RuntimeException("repeat has to take a single number");
-      
       int times;
       if (!opts.convertNumberValues)
         times = (int)((NumberValue)arg.iterator().next()).value;
@@ -120,48 +119,47 @@ public class ActionExecutor extends Executor {
       if (cond) performActions((ActionFormula)f.args.get(1), world);
     } else if (f.mode == ActionFormula.Mode.forset) {
       Set<Object> selected = toSet(processSetFormula(f.args.get(0), world));
-      Set<Item> previous = world.selected;
       world.selected = toItemSet(selected);
       performActions((ActionFormula)f.args.get(1), world);
-      world.selected = previous;
     } else if (f.mode == ActionFormula.Mode.foreach) {
       Set<Object> selected = toSet(processSetFormula(f.args.get(0), world));
-      Set<Item> previous = world.selected;
+      //Set<Item> previous = world.selected;
       CopyOnWriteArraySet<Object> fixedset = Sets.newCopyOnWriteArraySet(selected);
       for (Object item : fixedset) {
         world.selected = (toItemSet(toSet(item)));
         performActions((ActionFormula)f.args.get(1), world);
       }
-      world.selected = previous;
+      //world.selected = previous;
     } else if (f.mode == ActionFormula.Mode.isolate) {
       Set<Item> scope = toItemSet(toSet(processSetFormula(f.args.get(0), world)));
       Set<Item> previous = world.all();
       world.allitems = scope;
       performActions((ActionFormula)f.args.get(1), world);
-      world.allitems.addAll(previous);
-    } else if (f.mode == ActionFormula.Mode.let) {
-    // let declares a new local variable
-    // set access and reassigns the value of some variable
-    // block determines what is considered local scope
-    // for now the use case is just (:blk (:let x this) (:blah) (:set this x))
-      Set<Item> varset = toItemSet(toSet(processSetFormula(f.args.get(1), world)));
-      Value method  = ((ValueFormula)f.args.get(0)).value;
-      String varname = ((NameValue)method).id;
-      world.localVariables.put(varname, varset);
-    } else if (f.mode == ActionFormula.Mode.set) {
-      Set<Item> varset = toItemSet(toSet(processSetFormula(f.args.get(1), world)));
-      Value method  = ((ValueFormula)f.args.get(0)).value;
-      String varname = ((NameValue)method).id;
-      world.localVariables.get(varname).clear();
-      world.localVariables.get(varname).addAll(varset);
+      world.allitems.addAll(previous); // merge, weak
     } else if (f.mode == ActionFormula.Mode.block) {
-      // HashMap<String,Set<Item>> previous = Maps.newHashMap(world.vars);
-      HashMap<String,Set<Item>> previous = new HashMap<>(world.localVariables);
+      Set<Item> previous = world.selected;
       for (Formula child : f.args) {
         performActions((ActionFormula)child, world);
       }
-      world.localVariables = previous;
+      world.selected = previous;
     }
+//    } else if (f.mode == ActionFormula.Mode.let) {
+//    // let declares a new local variable
+//    // set access and reassigns the value of some variable
+//    // block determines what is considered local scope
+//    // for now the use case is just (:blk (:let x this) (:blah) (:set this x))
+//      Set<Item> varset = toItemSet(toSet(processSetFormula(f.args.get(1), world)));
+//      Value method  = ((ValueFormula)f.args.get(0)).value;
+//      String varname = ((NameValue)method).id;
+//      world.variables.put(varname, varset);
+//    } else if (f.mode == ActionFormula.Mode.set) {
+//      Set<Item> varset = toItemSet(toSet(processSetFormula(f.args.get(1), world)));
+//      Value method  = ((ValueFormula)f.args.get(0)).value;
+//      String varname = ((NameValue)method).id;
+//      world.variables.get(varname).clear();
+//      world.variables.get(varname).addAll(varset);
+//    }
+      
   }
   
   private Set<Object> toSet(Object maybeSet) {
@@ -185,8 +183,7 @@ public class ActionExecutor extends Executor {
     static String All = "*";
     static String EmptySet = "nothing";
     static String This = "this"; // current scope if it exists, otherwise the globally marked object
-    static String Selected = "selected"; //
-    static String var = "_"; // 
+    static String Selected = "selected"; // global variable for selected
   };
   // a subset of lambda dcs. no types, and no marks
   // if this gets any more complicated, you should consider the LambdaDCSExecutor
@@ -206,8 +203,8 @@ public class ActionExecutor extends Executor {
           return world.selected();
         if (id.equals(SpecialSets.EmptySet))
           return world.empty();
-        if (id.startsWith(SpecialSets.var))
-          return world.localVariables.get(id);
+        else
+          return world.variables.get(id);
       } 
       return toObject(((ValueFormula<?>) formula).value);
     }

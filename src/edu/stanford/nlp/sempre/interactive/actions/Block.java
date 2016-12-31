@@ -8,11 +8,10 @@ import org.testng.collections.Lists;
 import edu.stanford.nlp.sempre.Json;
 
 //individual stacks
-public class  Block extends Item {
+public class Block extends Item {
   public CubeColor color;
   int row, col, height;
   int age;
-  public Set<String> names;
 
   public Block(int row, int col, int height, String color) {
     this(row, col, height);
@@ -156,11 +155,11 @@ public class  Block extends Item {
     //    return false;
     return true;
   }
-  @Override
+  
   public boolean selected() {
      return names.contains("S");
   }
-  @Override
+  
   public void select(boolean s) {
     if (s)
       names.add("S");

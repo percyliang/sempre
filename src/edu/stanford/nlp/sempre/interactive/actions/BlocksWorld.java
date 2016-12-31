@@ -58,9 +58,7 @@ enum Direction {
 
 // the world of stacks
 public class BlocksWorld extends FlatWorld {
-  public Map<String,Set<Block>> vars;
-
-  public final String SELECT = "S";
+  public final static String SELECT = "S";
 
   public static BlocksWorld fromContext(ContextValue context) {
     if (context == null || context.graph == null) {
@@ -73,23 +71,31 @@ public class BlocksWorld extends FlatWorld {
 
   public void base(int x, int y) {
     Block basecube = new Block(x, y, 0, CubeColor.Fake.toString());
-    basecube.select(true);
     this.allitems.add(basecube);
+    this.selected.add(basecube);
   }
 
   @SuppressWarnings("unchecked")
   public BlocksWorld(Set<Item> blockset) {
     super();
     this.allitems = blockset;
-    // this.selected = blockset.stream().filter(b -> ((Block)b).names.contains("S")).collect(Collectors.toSet());
-    // this.allitems.forEach(b -> ((Block)b).names.clear());
+    this.selected = blockset.stream().filter(b -> ((Block)b).names.contains(SELECT)).collect(Collectors.toSet());
   }
 
   public String toJSON() {
-    // return "testtest";
-    return Json.writeValueAsStringHard(this.allitems.stream()
-        // do not consider unselected fake blocks
-        .filter(c -> ((Block)c).color != CubeColor.Fake || c.selected())
+    // selected thats no longer in the world gets fake color
+    Set<Item> outset = Sets.difference(selected, allitems);
+    for (Item i : outset) {
+       Block c = (Block)i;
+       c.color = CubeColor.Fake;
+    }
+    outset.addAll(selected);
+    for (Item i : outset) {
+      i.names.add(SELECT);
+    }
+    outset.addAll(allitems);
+    
+    return Json.writeValueAsStringHard(outset.stream()
         .map(c -> ((Block)c).toJSON()).collect(Collectors.toList()));
     // return this.worldlist.stream().map(c -> c.toJSON()).reduce("", (o, n) -> o+","+n);
   }
@@ -101,7 +107,7 @@ public class BlocksWorld extends FlatWorld {
         .collect(Collectors.toSet());
     // throw new RuntimeException(a.toString()+a.get(1).toString());
     BlocksWorld world = new BlocksWorld(cubes);
-    // world.selected.addAll(cubes.stream().filter(b -> ((Block)b).names.contains("S")).collect(Collectors.toSet()));
+    world.selected.addAll(cubes.stream().filter(b -> ((Block)b).names.contains(SELECT)).collect(Collectors.toSet()));
     return world;
   }
 
@@ -186,7 +192,7 @@ public class BlocksWorld extends FlatWorld {
     }
   }
 
-  // return retrived from allitems, along with any potential selectors which are empty.
+  // return retrieved from allitems, along with any potential selectors which are empty.
   public Set<Item> adj(String dirstr, Set<Item> selected) {
     Direction dir = Direction.fromString(dirstr);
     Set<Item> selectors = selected.stream()
