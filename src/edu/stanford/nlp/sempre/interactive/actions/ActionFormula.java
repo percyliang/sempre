@@ -30,7 +30,7 @@ public class ActionFormula extends Formula {
     // primitives to handle variable scoping
     //let(":let"), // (:let X *), 
     //set(":set"), // (:set X *)
-    block(":block"),
+    block(":blk"),
     isolate(":isolate"),
     other(":?");  // (:scope this (blah))
     

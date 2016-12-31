@@ -1,5 +1,6 @@
 package edu.stanford.nlp.sempre.interactive.actions;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -83,13 +84,11 @@ public class BlocksWorld extends FlatWorld {
   }
 
   public String toJSON() {
-    // selected thats no longer in the world gets fake color
-    Set<Item> outset = Sets.difference(selected, allitems);
-    for (Item i : outset) {
-       Block c = (Block)i;
-       c.color = CubeColor.Fake;
+    // selected thats no longer in the world gets nothing
+    Set<Item> outset = new HashSet<>(selected);
+    for (Item i : allitems) {
+      i.names.remove(SELECT);
     }
-    outset.addAll(selected);
     for (Item i : outset) {
       i.names.add(SELECT);
     }

@@ -198,13 +198,11 @@ public class ActionExecutor extends Executor {
         if (id.equals(SpecialSets.All))
           return world.all();
         if (id.equals(SpecialSets.This))
-          return world.current();
+          return world.selected();
         if (id.equals(SpecialSets.Selected))
           return world.selected();
         if (id.equals(SpecialSets.EmptySet))
           return world.empty();
-        else
-          return world.variables.get(id);
       } 
       return toObject(((ValueFormula<?>) formula).value);
     }
@@ -329,7 +327,7 @@ public class ActionExecutor extends Executor {
       
       // append optional selected parameter when needed:
       if (cost == INVALID_TYPE_COST && args.length + 1 == m.getParameterCount()) {
-        args = ObjectArrays.concat(args, thisObj.current());
+        args = ObjectArrays.concat(args, thisObj.selected);
         cost = typeCastCost(m.getParameterTypes(), args);
       }
       

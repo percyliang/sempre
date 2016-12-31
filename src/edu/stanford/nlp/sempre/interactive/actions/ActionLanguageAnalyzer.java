@@ -56,7 +56,7 @@ public class ActionLanguageAnalyzer extends LanguageAnalyzer {
       else if (c == '>' || c == '<')
         separate = (utterance.charAt(i + 1) != '=' && utterance.charAt(i + 1) != '=');
       else
-        separate = (",?'\"[];".indexOf(c) != -1);
+        separate = (",?'\"[];{}".indexOf(c) != -1);
 
       if (separate) buf.append(' ');
       // Convert quotes

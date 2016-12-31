@@ -32,6 +32,7 @@ public class ActionExecutorTest {
     
     if (checker != null) {
       if (!checker.test(FlatWorld.fromContext("BlocksWorld", getContext(jsonStr)))) {
+        LogInfo.end_track();
         Assert.fail(jsonStr);
       }
     }
@@ -74,7 +75,7 @@ public class ActionExecutorTest {
       runFormula(executor, "(: select (and this nothing))", context, selectedSize(0));
       runFormula(executor, "(: select (not this))", context, selectedSize(1));
 
-      LogInfo.begin_track("testSpecial");;
+      LogInfo.end_track();
   }
   
   @Test public void testMerge() {
@@ -111,7 +112,7 @@ public class ActionExecutorTest {
     String defaultBlocks = "[[1,1,1,\"Green\",[]],[1,1,2,\"Green\",[]],[1,1,3,\"Green\",[]],[1,1,4,\"Green\",[]]]";
     ContextValue context = getContext(defaultBlocks);
     LogInfo.begin_track("testMoreActions");
-    runFormula(executor, "(:s (:for * (: select)) (:for (call veryx left this) (: remove)))", context, x -> x.allitems.size() == 0);
+    runFormula(executor, "(:s (: select *) (:for (call veryx left this) (: remove)))", context, x -> x.allitems.size() == 0);
     runFormula(executor, "(:for * (:for (call veryx bot) (:loop (number 2) (:s (: add red left) (: select (call adj top))))))", context, 
         x -> x.allitems.size() == 6);
     runFormula(executor, "(:s (:for * (: select)) (: select (call veryx bot selected)) (: remove selected) )", context, x -> x.allitems.size() == 3);
@@ -169,14 +170,18 @@ public class ActionExecutorTest {
     LogInfo.end_track();
   }
   
-  @Test public void testVariables() {
-    String defaultBlocks = "[[1,1,1,\"Green\",[\"S\"]],[1,1,2,\"Red\",[\"_X\",\"_Y\"]],[1,1,3,\"Yellow\",[\"_X\"]],[1,1,4,\"Green\",[\"_Y\"]]]";
+  @Test public void testScoping() {
+    // this is a green stick
+    String defaultBlocks = "[[1,1,1,\"Green\",[\"S\"]],[1,1,2,\"Green\",[]],[1,1,3,\"Green\",[]],[1,1,4,\"Green\",[]]]";
     ContextValue context = getContext(defaultBlocks);
-    LogInfo.begin_track("testUpdate");
-    runFormula(executor, "(: update color red)",
-        context, null);
+    LogInfo.begin_track("testIsolation");
+    runFormula(executor, "(:blk (:loop (number 2) (: select (call veryx top this))))", context,
+        x -> (Integer)x.selected.iterator().next().get("height")==1);
+    runFormula(executor, "(:s (:loop (number 2) (: select (call veryx top this))))", context,
+        x -> {LogInfo.log(x.selected.iterator().next().get("height")); return true;});
     LogInfo.end_track();
   }
- 
+  
+
  
 }
