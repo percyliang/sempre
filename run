@@ -1000,6 +1000,7 @@ addMode('interactive', 'interactive semantic parsing in blocks', lambda { |e| l(
   o('Parser', 'BeamFloatingParser'),
   o('Parser.trackedCats', 'Number', 'Numbers', 'Color',  'Direction', 'Set', 'Sets', 'Action', 'Actions'),
   o('FloatingParser.defaultIsFloating', true),
+  o('BeamFloatingParser.alwaysFloat', false),
 
 o('ParserState.customExpectedCounts', 'UNIFORM'),
 o('Params.l1Reg', 'lazy'),

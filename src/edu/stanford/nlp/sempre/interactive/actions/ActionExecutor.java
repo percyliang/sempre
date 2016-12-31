@@ -118,6 +118,7 @@ public class ActionExecutor extends Executor {
       boolean cond = toSet(processSetFormula(f.args.get(0), world)).iterator().hasNext();
       if (cond) performActions((ActionFormula)f.args.get(1), world);
     } else if (f.mode == ActionFormula.Mode.forset) {
+      // mostly deprecated
       Set<Object> selected = toSet(processSetFormula(f.args.get(0), world));
       world.selected = toItemSet(selected);
       performActions((ActionFormula)f.args.get(1), world);
@@ -138,10 +139,15 @@ public class ActionExecutor extends Executor {
       world.allitems.addAll(previous); // merge, weak
     } else if (f.mode == ActionFormula.Mode.block) {
       Set<Item> previous = world.selected;
+      Set<Item> prevprevious = world.previous;
+      world.previous = world.selected;
+      
       for (Formula child : f.args) {
         performActions((ActionFormula)child, world);
       }
-      world.selected = previous;
+      // world.selected = previous;
+      // select previous if this effect is wanted.
+      world.previous = prevprevious;
     }
 //    } else if (f.mode == ActionFormula.Mode.let) {
 //    // let declares a new local variable
@@ -183,6 +189,7 @@ public class ActionExecutor extends Executor {
     static String All = "*";
     static String EmptySet = "nothing";
     static String This = "this"; // current scope if it exists, otherwise the globally marked object
+    static String Previous = "prev"; // global variable for selected
     static String Selected = "selected"; // global variable for selected
   };
   // a subset of lambda dcs. no types, and no marks
@@ -203,6 +210,8 @@ public class ActionExecutor extends Executor {
           return world.selected();
         if (id.equals(SpecialSets.EmptySet))
           return world.empty();
+        if (id.equals(SpecialSets.Previous))
+          return world.previous();
       } 
       return toObject(((ValueFormula<?>) formula).value);
     }

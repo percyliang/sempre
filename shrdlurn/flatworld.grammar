@@ -11,12 +11,13 @@
 (rule $Action ([ $Actions ]) (IdentityFn) (anchored 1))
 
 (rule $Action (repeat $Numbers $Action) (lambda n (lambda a (:loop (var n) (var a)))) (anchored 1))
-(rule $Action (if $ValueSet $Action) (lambda b (lambda a (:if (var b) (var a)))) (anchored 1))
+(rule $Action (if $ValueSets $Action) (lambda b (lambda a (:if (var b) (var a)))) (anchored 1))
+(rule $Action (if $Sets $Action) (lambda b (lambda a (:if (var b) (var a)))) (anchored 1))
 
 # basic actions, local scope "for has color red [add red left; add red top]"
-(rule $Action (for $Sets $Actions ) (lambda s (lambda a (:for (var s) (var a)))) (anchored 1))
+# (rule $Action (for $Sets $Action ) (lambda s (lambda a (:for (var s) (var a)))) (anchored 1))
 (rule $Action (foreach $Sets $Action ) (lambda s (lambda a (:foreach (var s) (var a)))) (anchored 1))
-(rule $Action (isolate $Sets $Action) (lambda s (lambda a (:isolate (var s) (var a)))) (anchored 1))
+(rule $Action (isolate $Sets $Action ) (lambda s (lambda a (:isolate (var s) (var a)))) (anchored 1))
 
 # global actions
 (rule $Action ($Action1 $Sets) (lambda a (lambda s (:for (var s) (var a)))) (anchored 1))
@@ -31,7 +32,8 @@
 # (rule $Action (remove $Sets) (lambda s (:for (var s) (: @remove))) (anchored 1))
 
 ############### unary sets
-(rule $Set (selected) selected (anchored 1))
+(rule $Set (selected) this (anchored 1))
+(rule $Set (previous) prev (anchored 1))
 (rule $Set (this) this (anchored 1))
 (rule $Set (all) * (anchored 1))
 (rule $Set (nothing) nothing (anchored 1))

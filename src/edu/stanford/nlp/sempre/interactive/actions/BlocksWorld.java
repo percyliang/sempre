@@ -107,6 +107,8 @@ public class BlocksWorld extends FlatWorld {
     // throw new RuntimeException(a.toString()+a.get(1).toString());
     BlocksWorld world = new BlocksWorld(cubes);
     world.selected.addAll(cubes.stream().filter(b -> ((Block)b).names.contains(SELECT)).collect(Collectors.toSet()));
+    // world.previous.addAll(world.selected);
+    // we can only use previous within a block;
     return world;
   }
 

@@ -12,6 +12,7 @@ public abstract class FlatWorld {
   // supports variables, and perhaps scoping
   public Set<Item> allitems;
   public Set<Item> selected;
+  public Set<Item> previous;
   
   public static FlatWorld fromContext(String worldname, ContextValue context) {
     if (worldname.equals("BlocksWorld"))
@@ -29,8 +30,9 @@ public abstract class FlatWorld {
   
   public FlatWorld() {
     this.allitems = new HashSet<>();
-    
-    this.selected = null;  }
+    this.selected = new HashSet<>();
+    this.previous = new HashSet<>();
+  }
   // general actions, flatness means these actions can be performed on allitems
   public void remove(Set<Item> selected) {
     allitems.removeAll(selected);
@@ -44,6 +46,9 @@ public abstract class FlatWorld {
   }
   public Set<Item> selected() {
     return this.selected;
+  }
+  public Set<Item> previous() {
+    return this.previous;
   }
   public Set<Item> all() {
     return allitems;
