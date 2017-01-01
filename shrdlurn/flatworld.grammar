@@ -38,6 +38,7 @@
 (rule $Set (this) this (anchored 1))
 (rule $Set (all) * (anchored 1))
 (rule $Set (nothing) nothing (anchored 1))
+(rule $Set (none) nothing (anchored 1))
 
 ############### basic set operations
 # just use or and filter, which does and
