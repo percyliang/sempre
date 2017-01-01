@@ -78,8 +78,10 @@ public class Master {
     public List<String> autocompletes;
 
     public String getFormulaAnswer() {
-      if (ex.getPredDerivations().size() == 0)
+      if (ex.getPredDerivations().size() == 0 )
         return "(no answer)";
+      else if (candidateIndex == -1)
+        return "(not selected)";
       else {
         Derivation deriv = getDerivation();
         return deriv.getFormula() + " => " + deriv.getValue();
@@ -88,6 +90,8 @@ public class Master {
     public String getAnswer() {
       if (ex.getPredDerivations().size() == 0)
         return "(no answer)";
+      else if (candidateIndex == -1)
+        return "(not selected)";
       else {
         Derivation deriv = getDerivation();
         deriv.ensureExecuted(builder.executor, ex.context);
@@ -475,23 +479,6 @@ public class Master {
         LogInfo.logs("%d options are %s", opts.autocompleteCount, response.autocompletes);
       } else {
         LogInfo.logs("autocomplete just takes a prefix");
-      }
-    } else if (command.equals(":submit")) {
-      if (tree.children.size() >= 2) {
-        String name = tree.children.get(1).value;
-        String state = tree.children.get(2).value;
-        ConstantFn semantics = new ConstantFn(new ValueFormula<StringValue>(new StringValue(state)));
-        List<String> rhs = Lists.newArrayList(name.split(" "));
-        Rule rule = new Rule("$OBJECT", rhs, semantics);
-        rule.addInfo("anchored", 1.0);
-        rule.addInfo("object", 1.0);
-        PrintWriter out = IOUtils.openOutAppendHard(Paths.get(opts.newGrammarPath,"objects.grammar").toString());
-        out.append(rule.toLispTree().toStringWrap() + "\n");
-        out.flush();
-        out.close();
-        InteractiveUtils.addRuleInteractive(rule, builder.parser);
-      } else {
-        LogInfo.logs("Invalid format for submit");
       }
     } else if (command.equals(":action")) {
       // test code for mutating worlds, updates the context

@@ -133,7 +133,7 @@ class BeamFloatingParserState extends ChartParserState {
     this.chartList = this.collectChart();
 
     /* If Beam Parser failed to find derivations, try a floating parser */
-    if (BeamFloatingParser.opts.alwaysFloat) {
+    if (BeamFloatingParser.opts.alwaysFloat || predDerivations.size() == 0) {
       /* For every base span of the chart, add the derivations from nothing rules */
       List<Rule> nothingRules = new ArrayList<Rule>();
       for (Rule rule : parser.grammar.rules)

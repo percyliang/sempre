@@ -1,9 +1,8 @@
 package edu.stanford.nlp.sempre.interactive.actions;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -14,6 +13,7 @@ import edu.stanford.nlp.sempre.ContextValue;
 import edu.stanford.nlp.sempre.Json;
 import edu.stanford.nlp.sempre.NaiveKnowledgeGraph;
 import edu.stanford.nlp.sempre.StringValue;
+import fig.basic.Option;
 
 enum CubeColor {
   Red(0), Orange(1), Yellow (2), Green(3), Blue(4), White(6), Black(7),
@@ -59,6 +59,12 @@ enum Direction {
 
 // the world of stacks
 public class BlocksWorld extends FlatWorld {
+  public static class Options {
+    @Option(gloss = "maximum number of cubes to convert")
+    public int maxBlocks = Integer.MAX_VALUE;
+  }
+  public static Options opts = new Options();
+  
   public final static String SELECT = "S";
 
   public static BlocksWorld fromContext(ContextValue context) {
@@ -81,20 +87,19 @@ public class BlocksWorld extends FlatWorld {
     super();
     this.allitems = blockset;
     this.selected = blockset.stream().filter(b -> ((Block)b).names.contains(SELECT)).collect(Collectors.toSet());
+    this.selected.forEach(i -> i.names.remove(SELECT));
   }
 
+  // we only use names S to communicate with the client, internally its just the select variable
   public String toJSON() {
     // selected thats no longer in the world gets nothing
-    Set<Item> outset = new HashSet<>(selected);
-    for (Item i : allitems) {
-      i.names.remove(SELECT);
-    }
-    for (Item i : outset) {
-      i.names.add(SELECT);
-    }
-    outset.addAll(allitems);
-    
-    return Json.writeValueAsStringHard(outset.stream()
+    allitems.removeIf(c -> ((Block)c).color == CubeColor.Fake && !this.selected.contains(c));
+    selected.forEach(i -> i.names.add(SELECT));
+
+    if (allitems.size() > opts.maxBlocks)
+      allitems = new HashSet<>(new ArrayList<>(allitems).subList(0, opts.maxBlocks));
+     
+    return Json.writeValueAsStringHard(allitems.stream()
         .map(c -> ((Block)c).toJSON()).collect(Collectors.toList()));
     // return this.worldlist.stream().map(c -> c.toJSON()).reduce("", (o, n) -> o+","+n);
   }
@@ -106,7 +111,6 @@ public class BlocksWorld extends FlatWorld {
         .collect(Collectors.toSet());
     // throw new RuntimeException(a.toString()+a.get(1).toString());
     BlocksWorld world = new BlocksWorld(cubes);
-    world.selected.addAll(cubes.stream().filter(b -> ((Block)b).names.contains(SELECT)).collect(Collectors.toSet()));
     // world.previous.addAll(world.selected);
     // we can only use previous within a block;
     return world;
@@ -131,14 +135,36 @@ public class BlocksWorld extends FlatWorld {
     selected.forEach(i -> i.update(rel, value));
     allitems.addAll(selected);
   }
-
+  
+  // if selected is no longer in all, make it fake colored, and add to all;
+  @Override
+  public void reconcile() {
+    Sets.difference(selected, allitems).forEach(i -> ((Block)i).color = CubeColor.Fake);
+    allitems.addAll(selected);
+  }
+  
+//  @Override
+//  public void remove(Set<Item> set) {
+//    allitems.removeIf(i -> set.contains(i) && !selected.contains(i));
+//    Sets.intersection(set, selected).forEach(i -> ((Block)i).color = CubeColor.Fake);
+//    // allitems.removeIf(c -> ((Block)c).color == CubeColor.Fake && !this.selected.contains(c)); 
+//  }
+//  @Override
+//  public void select(Set<Item> set) {
+//    this.selected = set;
+//    // allitems.removeIf(c -> ((Block)c).color == CubeColor.Fake && !this.selected.contains(c)); 
+//  }
+//  @Override
+//  public Set<Item> all() {
+//    return realBlocks(this.all());
+//  }
 
   // block world specific actions, non-overriding move
   public void move(String dir, Set<Item> selected) {
     allitems.removeAll(selected);
     realBlocks(selected).forEach(b -> ((Block)b).move(Direction.fromString(dir)));
-    allitems.addAll(selected); // this is not overriding
-    // allitems = selected.allAll(allitems); // overriding move
+    //allitems.addAll(selected); // this is not overriding
+    selected.addAll(allitems); allitems = selected; // overriding move
   }
   
   public void add(String colorstr, String dirstr, Set<Item> selected) {
@@ -170,9 +196,7 @@ public class BlocksWorld extends FlatWorld {
     }).collect(Collectors.toSet());
   }
   
-  public Set<Item> allBlocks() {
-    return realBlocks(this.all());
-  }
+  
   
   private Set<Item> realBlocks(Set<Item> all) {
     return all.stream().filter(b-> ((Block)b).color != CubeColor.Fake)
@@ -216,30 +240,5 @@ public class BlocksWorld extends FlatWorld {
     }
     final int maxValue = maxvalue;
     return items.stream().filter(c -> f.apply((Block)c) >= maxValue).collect(Collectors.toSet());
-  }
-  
-  // deprecated
-  public void build(String cubejson, Set<Item> selected) {
-    for (Item i : selected) {
-      BlocksWorld world = BlocksWorld.fromJSON(cubejson);
-      Block b = ((Block)i);
-      // shifts world to position b
-      shift(b, world);
-      
-      this.allitems.remove(i);
-      this.allitems.addAll(world.allitems);
-      if (!this.allitems.contains(i)) this.allitems.add(i);
-    }
-  }
-
-  // make block the anchor of the world
-  private void shift(Block block, BlocksWorld world) {
-    Block anchor = new Block(0,0,0,"None");
-    for (Item i  : world.allitems) {
-      Block b = ((Block)i);
-      b.row = b.row - anchor.row + block.row;
-      b.col = b.col - anchor.col + block.col;
-      b.height = b.height - anchor.height + block.height;
-    }
   }
 }

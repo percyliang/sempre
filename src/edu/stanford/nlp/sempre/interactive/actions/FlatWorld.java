@@ -26,6 +26,7 @@ public abstract class FlatWorld {
   public abstract Set<Item> has(String rel, Set<Object> values);
   public abstract Set<Object> get(String rel, Set<Item> subset);
   public abstract void update(String rel, Object value, Set<Item> selected);
+  public abstract void reconcile();
   // public abstract void select(Set<Item> set);
   
   public FlatWorld() {
@@ -36,6 +37,7 @@ public abstract class FlatWorld {
   // general actions, flatness means these actions can be performed on allitems
   public void remove(Set<Item> selected) {
     allitems.removeAll(selected);
+    // this.selected.removeAll(selected);
   }
   // current standards for "this", which is the current scope if it exists,
   // or selected item if this does not exist
@@ -56,4 +58,6 @@ public abstract class FlatWorld {
   public Set<Item> empty() {
     return new HashSet<>();
   }
+
+  
 }

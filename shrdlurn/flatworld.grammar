@@ -8,6 +8,7 @@
 (rule $Actions ($Actions ; $Action) (lambda a1 (lambda a2 (:s (var a1) (var a2)))) (anchored 1))
 (rule $Actions ($Action) (IdentityFn) (anchored 1))
 (rule $Action ({ $Actions }) (lambda a (:blk (var a))) (anchored 1))
+(rule $Action (return { $Actions }) (lambda a (:blkr (var a))) (anchored 1))
 (rule $Action ([ $Actions ]) (IdentityFn) (anchored 1))
 
 (rule $Action (repeat $Numbers $Action) (lambda n (lambda a (:loop (var n) (var a)))) (anchored 1))

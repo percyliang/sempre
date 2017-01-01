@@ -31,6 +31,7 @@ public class ActionFormula extends Formula {
     //let(":let"), // (:let X *), 
     //set(":set"), // (:set X *)
     block(":blk"),
+    blockr(":blkr"),
     isolate(":isolate"),
     other(":?");  // (:scope this (blah))
     

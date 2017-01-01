@@ -542,8 +542,10 @@ public class Server {
             item.put("value", ((StringValue)value).value);
           else if (value instanceof ErrorValue)
             item.put("value", ((ErrorValue)value).sortString());
-          else
+          else if (value != null)
             item.put("value", value.sortString());
+          else
+            item.put("value", "[[]]");
           item.put("score", deriv.score);
           item.put("prob", deriv.prob);
           item.put("anchored", deriv.allAnchored); // used only anchored rules

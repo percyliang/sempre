@@ -986,6 +986,7 @@ addMode('interactive', 'interactive semantic parsing in blocks', lambda { |e| l(
   o('LanguageAnalyzer', 'interactive.actions.ActionLanguageAnalyzer'),
   o('ActionExecutor.convertNumberValues', true),
   o('ActionExecutor.printStackTrace', true),
+  o('BlocksWorld.maxBlocks', 200),
   selo(0, 'ActionExecutor.FlatWorldType', 'BlocksWorld', 'CalendarWorld'),
   selo(0, 'Grammar.inPaths', './shrdlurn/blocksworld.grammar', './shrdlurn/calendar.grammar'),
 
@@ -1029,6 +1030,7 @@ o('Learner.maxTrainIters', 1),
 
 o('server', true),
 o('Server.numThreads', 8),
+o('Server.maxCandidates', 50),
 nil) })
 
 

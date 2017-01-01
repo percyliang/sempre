@@ -21,6 +21,7 @@ import edu.stanford.nlp.sempre.LambdaFormula;
 import edu.stanford.nlp.sempre.Rule;
 import edu.stanford.nlp.sempre.SemanticFn;
 import edu.stanford.nlp.sempre.VariableFormula;
+import edu.stanford.nlp.sempre.interactive.actions.ActionFormula;
 import fig.basic.LispTree;
 import fig.basic.LogInfo;
 import fig.basic.Option;
@@ -178,6 +179,9 @@ public class GrammarInducer {
       deriv.grammarInfo.formula = f;
     } else if (rule.sem instanceof IdentityFn) {
       deriv.grammarInfo.formula = args.get(0).grammarInfo.formula;
+    } else if (rule.sem instanceof BlockFn) {
+      deriv.grammarInfo.formula = new ActionFormula(((BlockFn)rule.sem).mode, 
+          args.stream().map(d -> d.grammarInfo.formula).collect(Collectors.toList()));
     } else {
       deriv.grammarInfo.formula = deriv.formula;
     }
