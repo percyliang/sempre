@@ -141,7 +141,7 @@ public class ActionExecutorTest {
     LogInfo.begin_track("testAnchors");
     runFormula(executor, "(: add red top)", context, selectedSize(1));
     runFormula(executor, "(: add red left)", context, selectedSize(1));
-    runFormula(executor, "(: add red)", context, selectedSize(1));
+    runFormula(executor, "(: add red here)", context, selectedSize(1));
     runFormula(executor, "(:loop (number 3) (: add red left))", context, selectedSize(1));
     runFormula(executor, "(:loop (number 3) (: add red top))", context, x -> x.allitems.size() == 4);
     runFormula(executor, "(:loop (number 3) (: add red left))", context, x -> x.allitems.size() == 4);
@@ -162,11 +162,13 @@ public class ActionExecutorTest {
   }
   
   @Test public void testUpdate() {
-    String defaultBlocks = "[[1,1,1,\"Green\",[\"S\"]],[1,1,2,\"Green\",[]],[1,1,3,\"Green\",[]],[1,1,4,\"Green\",[]]]";
+    String defaultBlocks = "[[1,1,1,\"Green\",[\"S\"]],[1,1,2,\"Red\",[]],[1,1,3,\"Green\",[]],[1,1,4,\"Green\",[]]]";
     ContextValue context = getContext(defaultBlocks);
     LogInfo.begin_track("testUpdate");
-    runFormula(executor, "(: update color red)",
-        context, null);
+    runFormula(executor, "(:s (: update color red) (: select (color red)))",
+        context, selectedSize(2));
+    runFormula(executor, "(:s (: update height (number 0)) (: select (height  (number 0))))",
+        context, selectedSize(1));
     LogInfo.end_track();
   }
   
@@ -175,10 +177,16 @@ public class ActionExecutorTest {
     String defaultBlocks = "[[1,1,1,\"Green\",[\"S\"]],[1,1,2,\"Green\",[]],[1,1,3,\"Green\",[]],[1,1,4,\"Green\",[]]]";
     ContextValue context = getContext(defaultBlocks);
     LogInfo.begin_track("testIsolation");
-    runFormula(executor, "(:blk (:loop (number 2) (: select (call veryx top this))))", context,
+    runFormula(executor, "(:blk (: select (call veryx top this)))", context,
         x -> (Integer)x.selected.iterator().next().get("height")==1);
-    runFormula(executor, "(:s (:loop (number 2) (: select (call veryx top this))))", context,
-        x -> {LogInfo.log(x.selected.iterator().next().get("height")); return true;});
+    runFormula(executor, "(:blkr (: select (call adj top this)))", context,
+        x -> (Integer)x.selected.iterator().next().get("height")==2);
+
+    
+    runFormula(executor, "(:s (:blk (: add red here ) (: select (call adj top this)) (: add red here )) (: select (color red)))", context,
+        x -> (Integer)x.selected.size()==2);
+    runFormula(executor, "(:s (:blkr (: add red here ) (: select (call adj top this)) (: add red here )) (: select (color red)))", context,
+        x -> (Integer)x.selected.size()==2);
     LogInfo.end_track();
   }
   

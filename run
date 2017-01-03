@@ -1006,7 +1006,7 @@ addMode('interactive', 'interactive semantic parsing in blocks', lambda { |e| l(
 o('ParserState.customExpectedCounts', 'UNIFORM'),
 o('Params.l1Reg', 'lazy'),
 o('Params.l1RegCoeff', 0.001),
-o('Parser.beamSize', 50),
+o('Parser.beamSize', 10),
 o('Params.initStepSize', 0.1),
 o('Params.adaptiveStepSize', true),
 
