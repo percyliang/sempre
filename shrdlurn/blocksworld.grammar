@@ -24,9 +24,7 @@
 # utilities
 (rule $Action (reset) (ConstantFn (: reset (string default))) (anchored 1))
 (rule $Action (base $Number $Number) (lambda x (lambda y (: @base (var x) (var y)))) (anchored 1))
-
-(rule $ROOT (testcontext) (ConstantFn (string "(context (graph NaiveKnowledgeGraph ((string [[0,3,1,\"Green\",[]],[2,2,1,\"Blue\",[]],[1,3,2,\"Red\",[]]]) (name b) (name c))))")) (anchored 1))
-(rule $OBJECT (testobject) (ConstantFn (string [[0,0,0,\"Green\",[]],[0,0,1,\"Blue\",[]],[0,0,2,\"Red\",[]]])) (anchored 1))
+(rule $Set (origin) (ConstantFn (call origin)) (anchored 1))
 
 # primitive actions
 (rule $Action (add $Color) (lambda c (: @add (var c) here)) (anchored 1))

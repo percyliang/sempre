@@ -1,6 +1,7 @@
 package edu.stanford.nlp.sempre.interactive.actions;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -81,7 +82,17 @@ public class BlocksWorld extends FlatWorld {
     this.allitems.add(basecube);
     this.selected.add(basecube);
   }
-
+  
+  public Set<Item> origin() {
+    for (Item i : allitems) {
+      Block b = (Block)i;
+      if (b.col==0 && b.row==0 & b.height==0)
+        return Sets.newHashSet(b);
+    }
+    Block basecube = new Block(0, 0, 0, CubeColor.Fake.toString());
+    return Sets.newHashSet(basecube);
+  }
+ 
   @SuppressWarnings("unchecked")
   public BlocksWorld(Set<Item> blockset) {
     super();
@@ -162,9 +173,13 @@ public class BlocksWorld extends FlatWorld {
   // block world specific actions, non-overriding move
   public void move(String dir, Set<Item> selected) {
     allitems.removeAll(selected);
-    realBlocks(selected).forEach(b -> ((Block)b).move(Direction.fromString(dir)));
-    //allitems.addAll(selected); // this is not overriding
-    selected.addAll(allitems); allitems = selected; // overriding move
+    selected.forEach(b -> ((Block)b).move(Direction.fromString(dir)));
+    
+    HashSet<Item> temp = new HashSet<>(selected);
+    temp.addAll(allitems);  // overriding move
+    allitems.clear();
+    allitems.addAll(temp);
+    // allitems.addAll(selected); // this is not overriding
   }
   
   public void add(String colorstr, String dirstr, Set<Item> selected) {
@@ -196,7 +211,11 @@ public class BlocksWorld extends FlatWorld {
     }).collect(Collectors.toSet());
   }
   
-  
+  private void refreshSet(Set<Item> set) {
+    HashSet<Item> s = new HashSet<>(set);
+    set.clear();
+    set.addAll(s);
+  }
   
   private Set<Item> realBlocks(Set<Item> all) {
     return all.stream().filter(b-> ((Block)b).color != CubeColor.Fake)
