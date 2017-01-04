@@ -9,11 +9,19 @@ extern "C" {
 #endif
 /*
  * Class:     edu_stanford_nlp_sempre_ComputationGraphWrapper
- * Method:    test
- * Signature: ()D
+ * Method:    InitDynet
+ * Signature: ()V
  */
-JNIEXPORT jdouble JNICALL Java_edu_stanford_nlp_sempre_ComputationGraphWrapper_test
+JNIEXPORT void JNICALL Java_edu_stanford_nlp_sempre_ComputationGraphWrapper_InitDynet
   (JNIEnv *, jobject);
+
+/*
+ * Class:     edu_stanford_nlp_sempre_ComputationGraphWrapper
+ * Method:    scoreWithNetwork
+ * Signature: ([D)D
+ */
+JNIEXPORT jdouble JNICALL Java_edu_stanford_nlp_sempre_ComputationGraphWrapper_scoreWithNetwork
+  (JNIEnv *, jobject, jdoubleArray);
 
 #ifdef __cplusplus
 }
