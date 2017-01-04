@@ -46,6 +46,8 @@ public abstract class FlatWorld {
   public void select(Set<Item> set) {
     this.selected = set;
   }
+  public void noop() {
+  }
   public Set<Item> selected() {
     return this.selected;
   }

@@ -104,7 +104,7 @@ public class ActionExecutor extends Executor {
       //world.selected = previous;
     } else if (f.mode == ActionFormula.Mode.isolate) {
       Set<Item> scope = toItemSet(toSet(processSetFormula(f.args.get(0), world)));
-      Set<Item> previous = world.all();
+      Set<Item> previous = world.allitems;
       world.allitems = scope;
       performActions((ActionFormula)f.args.get(1), world);
       world.allitems.addAll(previous); // merge, weak

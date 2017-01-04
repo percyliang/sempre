@@ -351,6 +351,10 @@ class BeamFloatingParserState extends ChartParserState {
         }
       }
     }
+    // test prune
+    Set<String> cellsPruned = new HashSet<>();
+    for (Map.Entry<String, List<Derivation>> entry : chart[start][end].entrySet())
+      pruneCell(cellsPruned, entry.getKey(), start, end, entry.getValue());
   }
 
   protected int applyFloatingRule(Rule rule, int start, int end, Map<String, List<Derivation>> first, Map<String, List<Derivation>> second) {

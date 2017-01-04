@@ -24,6 +24,8 @@
 # utilities
 (rule $Action (reset) (ConstantFn (: reset (string default))) (anchored 1))
 (rule $Action (base $Number $Number) (lambda x (lambda y (: @base (var x) (var y)))) (anchored 1))
+(rule $Action (noop) (ConstantFn (: noop)) (anchored 1))
+
 (rule $Set (origin) (ConstantFn (call origin)) (anchored 1))
 
 # primitive actions
@@ -34,9 +36,9 @@
 # primitive actions with arguments
 
 # cube to cube relations
-(rule $Set ($Direction of $Sets) (lambda d (lambda s
+(rule $Set ($Direction of $Set) (lambda d (lambda s
 			   (call adj (var d) (var s)))) (anchored 1))
-(rule $Set ($Extreme of $Sets) (lambda e (lambda s
+(rule $Set ($Extreme of $Set) (lambda e (lambda s
 			   (call @veryx (var e) (var s)))) (anchored 1))
 (rule $Set ($Direction) (lambda d
 			   (call adj (var d))) (anchored 1))

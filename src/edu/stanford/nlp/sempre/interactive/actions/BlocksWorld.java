@@ -173,8 +173,8 @@ public class BlocksWorld extends FlatWorld {
   // block world specific actions, non-overriding move
   public void move(String dir, Set<Item> selected) {
     allitems.removeAll(selected);
-    selected.forEach(b -> ((Block)b).move(Direction.fromString(dir)));
-    
+    selected.forEach(b -> {if (((Block)b).color != CubeColor.Fake) ((Block)b).move(Direction.fromString(dir)); });
+    //refreshSet(selected);
     HashSet<Item> temp = new HashSet<>(selected);
     temp.addAll(allitems);  // overriding move
     allitems.clear();
@@ -259,5 +259,11 @@ public class BlocksWorld extends FlatWorld {
     }
     final int maxValue = maxvalue;
     return items.stream().filter(c -> f.apply((Block)c) >= maxValue).collect(Collectors.toSet());
+  }
+  
+  @Override
+  public void noop() {
+    refreshSet(this.selected);
+    refreshSet(this.allitems);
   }
 }
