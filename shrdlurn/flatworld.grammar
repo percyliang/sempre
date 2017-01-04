@@ -69,8 +69,8 @@
 
 ############### arithmetics
 (for @op (+ -)
-(rule $Numbers ($Numbers @op $Number) (lambda n1 (lambda op (lambda n2
-(@op (var n1) (var n2))))) (anchored 1))
+(rule $Numbers ($Numbers @op $Number) (lambda n1  (lambda n2
+(@op (var n1) (var n2)))) (anchored 1))
 )
 
 (rule $Number ([ $Numbers ]) (IdentityFn) (anchored 1))

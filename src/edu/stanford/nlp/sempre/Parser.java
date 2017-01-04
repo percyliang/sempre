@@ -177,18 +177,8 @@ public abstract class Parser {
 
     ex.predDerivations = state.predDerivations;
 
-    if (Master.opts.bePragmatic) {
-      // Compute probabilities
-      double[] probs = Derivation.getProbs(ex.predDerivations, 1);
-      for (int i = 0; i < ex.predDerivations.size(); i++) {
-        Derivation deriv = ex.predDerivations.get(i);
-        deriv.prob = probs[i];
-      }
-      params.pragmaticListener.inferPragmatically(ex);
-      Derivation.sortByPragmaticScore(ex.predDerivations);
-    } else {
-      Derivation.sortByScore(ex.predDerivations);
-    }
+    Derivation.sortByScore(ex.predDerivations);
+    
     // Evaluate
     ex.evaluation = new Evaluation();
     addToEvaluation(state, ex.evaluation);

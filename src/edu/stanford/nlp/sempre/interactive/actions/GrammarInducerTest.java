@@ -40,7 +40,7 @@ public class GrammarInducerTest {
     return new Parser.Spec(grammar, extractor, executor, valueEvaluator);
   }
 
-  protected static void induceHelper(String head, List<Object> body) {
+  protected static void induceHelper(String head, String body) {
     Spec defSpec = defaultSpec();
     Parser parser = new BeamFloatingParser(defSpec);
     
@@ -50,8 +50,7 @@ public class GrammarInducerTest {
   }
   
   protected static void induce(String head, String jsonDef) {
-     List<Object> body = Json.readValueHard(jsonDef, List.class);
-     induceHelper(head, body);
+     induceHelper(head, jsonDef);
   }
   
   @Test public void basicTest() {

@@ -3,7 +3,7 @@ fig
 sfig
 refdb
 virtuoso-opensource
-shrdlurn_output
+
 
 classes
 libsempre
@@ -13,6 +13,7 @@ module-classes.txt
 state
 out
 test-output
+int-output*
 
 .project
 .classpath

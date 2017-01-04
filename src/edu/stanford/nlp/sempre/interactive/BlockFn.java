@@ -1,17 +1,16 @@
 package edu.stanford.nlp.sempre.interactive;
 
-import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
-import org.testng.collections.Lists;
-
-import com.google.common.collect.ImmutableList;
-
-import edu.stanford.nlp.sempre.*;
-import edu.stanford.nlp.sempre.SemanticFn.Callable;
+import edu.stanford.nlp.sempre.Derivation;
+import edu.stanford.nlp.sempre.DerivationStream;
+import edu.stanford.nlp.sempre.Example;
+import edu.stanford.nlp.sempre.Formula;
+import edu.stanford.nlp.sempre.SemanticFn;
+import edu.stanford.nlp.sempre.SingleDerivationStream;
 import edu.stanford.nlp.sempre.interactive.actions.ActionFormula;
 import fig.basic.LispTree;
-import fig.basic.MapUtils;
 import fig.basic.Option;
 
 /**
@@ -34,6 +33,7 @@ public class BlockFn extends SemanticFn {
   }
 
   public BlockFn() {}
+  public BlockFn(ActionFormula.Mode mode) { this.mode = mode;}
 
   public DerivationStream call(final Example ex, final Callable c) {
     return new SingleDerivationStream() {

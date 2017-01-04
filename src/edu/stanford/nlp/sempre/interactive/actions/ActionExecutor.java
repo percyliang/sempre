@@ -243,8 +243,8 @@ public class ActionExecutor extends Executor {
     
     if (formula instanceof ArithmeticFormula)  {
       ArithmeticFormula arithmeticFormula = (ArithmeticFormula)formula;
-      Double arg1 = (Double)processSetFormula(arithmeticFormula.child1, world);
-      Double arg2 = (Double)processSetFormula(arithmeticFormula.child2, world);
+      Integer arg1 = (Integer)processSetFormula(arithmeticFormula.child1, world);
+      Integer arg2 = (Integer)processSetFormula(arithmeticFormula.child2, world);
       ArithmeticFormula.Mode mode = arithmeticFormula.mode;
       if (mode == ArithmeticFormula.Mode.add)
         return arg1 + arg2;

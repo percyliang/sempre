@@ -265,12 +265,6 @@ public class Example {
       tree.addChild(LispTree.proto.newList("id", id));
     if (context != null)
       tree.addChild(context.toLispTree());
-    
-    // interactive stuff
-    tree.addChild(LispTree.proto.newList("timeStamp", LocalDateTime.now().toString()));
-    tree.addChild(LispTree.proto.newList("NBestInd", Integer.toString(NBestInd)));
-    if (definition != null)
-      tree.addChild(LispTree.proto.newList("definition", definition));
      
     if (utterance != null)
       tree.addChild(LispTree.proto.newList("utterance", utterance));
@@ -298,6 +292,12 @@ public class Example {
         list.addChild(derivationToLispTree(deriv));
       tree.addChild(list);
     }
+    
+    // interactive stuff
+    if (definition != null)
+      tree.addChild(LispTree.proto.newList("definition", definition));
+    tree.addChild(LispTree.proto.newList("timeStamp", LocalDateTime.now().toString()));
+    tree.addChild(LispTree.proto.newList("NBestInd", Integer.toString(NBestInd)));
     
 
     return tree;

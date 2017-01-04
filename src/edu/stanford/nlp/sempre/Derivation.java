@@ -337,7 +337,6 @@ public class Derivation implements SemanticFn.Callable, HasScore {
           tree.addChild(values.size() + " values");
         }
       }
-
     }
     if (type != null && opts.showTypes)
       tree.addChild(LispTree.proto.newList("type", type.toLispTree()));

@@ -8,6 +8,7 @@ import com.google.common.collect.Lists;
 import edu.stanford.nlp.sempre.interactive.ApplyFn;
 import edu.stanford.nlp.sempre.interactive.GrammarInducer;
 import edu.stanford.nlp.sempre.interactive.PrefixTrie;
+import edu.stanford.nlp.sempre.interactive.actions.ActionFormula;
 import fig.basic.*;
 import fig.exec.Execution;
 
@@ -441,13 +442,17 @@ public class Master {
       } else {
         session.context = new ContextValue(tree);
       }
-    } else if (command.equals(":def")) {
+    } else if (command.equals(":def") || command.equals(":def_ret")) {
       if (tree.children.size() == 3) {
         String head = tree.children.get(1).value;
-        List<Object> body = Json.readValueHard(tree.children.get(2).value, List.class);
-        GrammarInducer inducer = InteractiveUtils.getInducer(head, body, session.id, builder.parser, builder.params);
+       
+        ActionFormula.Mode blockmode = command.equals(":def")? ActionFormula.Mode.block : ActionFormula.Mode.blockr;
+          
+        GrammarInducer inducer = InteractiveUtils.getInducer(head, tree.children.get(2).value, session.id, builder.parser, builder.params, blockmode);
+          
         List<Rule> inducedRules  = inducer.getRules();
         response.ex = inducer.getHead();
+        response.candidateIndex = response.ex.predDerivations.size() > 0 ? 0 : -1;
         
         if (inducedRules.size() > 0) {
           for (Rule rule : inducedRules) {
@@ -462,7 +467,7 @@ public class Master {
           out.close();
         }
       } else {
-        LogInfo.logs("Invalid format for uttdef");
+        LogInfo.logs("Invalid format for def");
       }
     } else if (command.equals(":accept")) {
       

@@ -87,7 +87,9 @@ public class BeamFloatingFeatureComputer implements FeatureComputer {
       NotFormula notFormula = (NotFormula) f;
       return "(not " + getSubtreeFeature(notFormula.child, depth-1, anchored) + ")";
     } else {
-      throw new RuntimeException("Unhandled formula type: " + f.getClass().toString());
+      // throw new RuntimeException("Unhandled formula type: " + f.getClass().toString());
+      LogInfo.warning("Unhandled formula type: " + f.getClass().toString());
+      return f.toString();
     }
   }
 

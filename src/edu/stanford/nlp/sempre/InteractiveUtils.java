@@ -1,5 +1,7 @@
 package edu.stanford.nlp.sempre;
 
+import java.io.PrintWriter;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -11,6 +13,8 @@ import com.google.common.collect.ImmutableList;
 import edu.stanford.nlp.sempre.interactive.BlockFn;
 import edu.stanford.nlp.sempre.interactive.GrammarInducer;
 import edu.stanford.nlp.sempre.interactive.actions.ActionFormula;
+import fig.basic.IOUtils;
+import fig.basic.LispTree;
 import fig.basic.LogInfo;
 
 /**
@@ -27,9 +31,15 @@ public final class InteractiveUtils {
     return deriv;
   }
  
+  public static GrammarInducer getInducer(String head, String jsonDef, String sessionId, Parser parser, Params params) {
+    return getInducer(head, jsonDef, sessionId, parser, params, ActionFormula.Mode.block);
+  }
   // parse the definition, match with the chart of origEx, and add new rules to grammar
-  public static GrammarInducer getInducer(String head, List<Object> body, String sessionId, Parser parser, Params params) {
+  public static GrammarInducer getInducer(String head, String jsonDef, String sessionId, Parser parser, Params params, ActionFormula.Mode mode) {
+    logRawDef(head, jsonDef, sessionId);
     
+    @SuppressWarnings("unchecked")
+    List<Object> body = Json.readValueHard(jsonDef, List.class);
     // string together the body definition
     List<Derivation> allDerivs = new ArrayList<>();
     
@@ -39,59 +49,80 @@ public final class InteractiveUtils {
       String utt = pair.get(0);
       String formula = pair.get(1);
       
+      if (formula.equals("()")) {
+        LogInfo.error("Got empty formula");
+        continue;
+      }
+      
       Example.Builder b = new Example.Builder();
       b.setId("session:" + sessionId);
       b.setUtterance(utt);
       Example ex = b.createExample();
       ex.preprocess();
 
-      LogInfo.logs("Parsing definition: %s", ex.utterance);
+      // LogInfo.logs("Parsing definition: %s", ex.utterance);
       parser.parse(params, ex, false);
       
       boolean found = false;
       for (Derivation d : ex.predDerivations) {
-        LogInfo.logs("considering: %s", d.formula.toString());
+        // LogInfo.logs("considering: %s", d.formula.toString());
         if (d.formula.toString().equals(formula)) {
           found = true;
           allDerivs.add(stripDerivation(d));
         }
       }
-      if (!found) LogInfo.errors("Definition fails, matching formula not found: %s", formula);
+      if (!found) LogInfo.errors("Matching formula not found: %s", formula);
       
       // just some hacks to make testing easier, use top derivation when we formula is not given
       if (!found && (formula.equals("?") || formula==null) && ex.predDerivations.size() > 0)
         allDerivs.add(stripDerivation(ex.predDerivations.get(0)));
     }
+    
     Derivation bodyDeriv;
-    if (allDerivs.size() > 1)
-      bodyDeriv = combineList(allDerivs, ActionFormula.Mode.block);
-    else
-      bodyDeriv = allDerivs.get(0);
+//    if (allDerivs.size() > 1)
+//      bodyDeriv = combineList(allDerivs, ActionFormula.Mode.block);
+//    else
+//      bodyDeriv = allDerivs.get(0);
+//    
+    bodyDeriv = combineList(allDerivs, mode);
     
     Example.Builder b = new Example.Builder();
     b.setId("session:" + sessionId);
     b.setUtterance(head);
     Example exHead = b.createExample();
     exHead.preprocess();
-    
-    LogInfo.logs("Parsing head: %s", exHead.utterance);
+
+    LogInfo.begin_track("Definition");
+    LogInfo.logs("mode: %s", mode);
+    LogInfo.logs("head: %s", exHead.utterance);
     BeamFloatingParserState state = (BeamFloatingParserState)parser.parse(params, exHead, false);
-    LogInfo.logs("target deriv: %s", bodyDeriv.toLispTree());
-    LogInfo.logs("anchored elements: %s", state.chartList);
+    LogInfo.logs("defderiv: %s", bodyDeriv.toLispTree());
+    LogInfo.logs("anchored: %s", state.chartList);
+
     GrammarInducer grammarInducer = new GrammarInducer(exHead, bodyDeriv, state.chartList);
+// updates the value that the derivation is modified.
+//    for (Derivation d : grammarInducer.getHead().predDerivations) {
+//      d.value = null; // cuz ensureExecuted checks.
+//      d.ensureExecuted(parser.executor, exHead.context);
+//    }
+//    parser.parse(params, exHead, false);
+    LogInfo.end_track();;
     return grammarInducer;
-//    PrintWriter out = IOUtils.openOutAppendHard(Paths.get(opts.newGrammarPath, sessionId + ".definition").toString());
-//    // deftree.addChild(oldEx.utterance);
-//    LispTree deftree = LispTree.proto.newList("definition", body.toString());
-//    Example oldEx = new Example.Builder()
-//        .setId(exHead.id)
-//        .setUtterance(exHead.utterance)
-//        .setTargetFormula(bodyDeriv.formula)
-//        .createExample();
-//    LispTree treewithdef = oldEx.toLispTree(false).addChild(deftree);
-//    out.println(treewithdef.toString());
-//    out.flush();
-//    out.close();
+  }
+  
+  public static void logRawDef(String utt, String jsonDef, String sessionId) {
+    PrintWriter out = IOUtils.openOutAppendHard(Paths.get(Master.opts.newGrammarPath, sessionId + ".def").toString());
+    // deftree.addChild(oldEx.utterance);
+    LispTree deftree = LispTree.proto.newList(":def", utt);
+    deftree.addChild(jsonDef);
+    Example oldEx = new Example.Builder()
+        .setId(sessionId)
+        .setUtterance(utt)
+        .createExample();
+    LispTree treewithdef = oldEx.toLispTree(false).addChild(deftree);
+    out.println(treewithdef.toString());
+    out.flush();
+    out.close();
   }
   
   public static synchronized void addRuleInteractive(Rule rule, Parser parser) {
@@ -103,15 +134,15 @@ public final class InteractiveUtils {
     }
   }
   
-  static Rule blockRule() {
-    return new Rule("$Action", Lists.newArrayList("$Action", "$Action"), new BlockFn());
+  static Rule blockRule(ActionFormula.Mode mode) {
+    return new Rule("$Action", Lists.newArrayList("$Action", "$Action"), new BlockFn(mode));
   }  
   static Derivation combineList(List<Derivation> children, ActionFormula.Mode mode) {
     Formula f = new ActionFormula(mode, 
         children.stream().map(d -> d.formula).collect(Collectors.toList()));
     Derivation res = new Derivation.Builder()
         .formula(f)
-        .withCallable(new SemanticFn.CallInfo("$Action", -1, -1, blockRule(), ImmutableList.copyOf(children)))
+        .withCallable(new SemanticFn.CallInfo("$Action", -1, -1, blockRule(mode), ImmutableList.copyOf(children)))
         .createDerivation();
     return res;
   }

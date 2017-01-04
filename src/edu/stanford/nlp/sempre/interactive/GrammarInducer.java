@@ -18,6 +18,7 @@ import edu.stanford.nlp.sempre.Formula;
 import edu.stanford.nlp.sempre.Formulas;
 import edu.stanford.nlp.sempre.IdentityFn;
 import edu.stanford.nlp.sempre.LambdaFormula;
+import edu.stanford.nlp.sempre.Master;
 import edu.stanford.nlp.sempre.Rule;
 import edu.stanford.nlp.sempre.SemanticFn;
 import edu.stanford.nlp.sempre.VariableFormula;
