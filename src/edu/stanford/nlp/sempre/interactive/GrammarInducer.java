@@ -1,11 +1,14 @@
 package edu.stanford.nlp.sempre.interactive;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import org.testng.collections.Sets;
 
 import com.beust.jcommander.internal.Lists;
 import com.google.common.collect.ImmutableList;
@@ -43,29 +46,12 @@ public class GrammarInducer {
 
   public static Options opts = new Options();
 
-  public static enum DefStatus {
-    Cover, // some (including all) covers in the definiendum is accounted for
-    NoCover, // cover is empty after checking with definition, so nothing would generalize
-    NoParse, // definition does not parse, should we look for partials?
-  }
-
-  // this depends on the chart!
-  public static enum ParseStatus {
-    Nothing, // nothing at all parses in the utterance
-    Float, // something parse
-    Induced, // redefining known utterance
-    Core; // define known utterance in core, should reject
-  }
-
-  public DefStatus defStatus;
-  public ParseStatus parseStatus;
 
   Map<String, List<Derivation>>[][] chart;
-  List<Rule> inducedRules;
+  List<Rule> inducedRules = null;
   int numTokens;
   List<String> tokens;
   String id;
-  Derivation defderiv;
   List<Derivation> chartList = Lists.newArrayList();
   
   // really just a return value
@@ -84,14 +70,12 @@ public class GrammarInducer {
     numTokens = origEx.numTokens();
     tokens = origEx.getTokens();
     
-    inducedRules = new ArrayList<>();
-
     addMatches(def);
     buildFormula(def);
     def.grammarInfo.start = 0;
     def.grammarInfo.end = tokens.size();
     
-    inducedRules.addAll(induceRules(def));
+    inducedRules = new ArrayList<>(induceRules(def));
   }
   
   // label the derivation tree with what it matches in chartList
@@ -111,11 +95,13 @@ public class GrammarInducer {
     }
   }
   
-  // covers need to be ordered
-  private void collectCovers(Derivation deriv, List<Derivation> covers) {
+  // covers are Derivations in the chartList that also appeared in the definition
+  private void collectCovers(Derivation deriv, Map<Integer, Derivation> covers) {
     if (deriv.grammarInfo.matches.size() > 0) {
-      if(!covers.contains(deriv.grammarInfo.matches.get(0)))
-        covers.add(deriv.grammarInfo.matches.get(0));
+      Derivation candidateCover = deriv.grammarInfo.matches.get(0);
+      Integer coverKey = candidateCover.start;
+      if(!covers.containsKey(coverKey))
+        covers.put(coverKey, candidateCover);
     } else {
       for (Derivation d : deriv.children) {
         collectCovers(d, covers);
@@ -128,9 +114,12 @@ public class GrammarInducer {
   }
   
   private List<Rule> induceRules(Derivation defDeriv) {
-    List<Derivation> covers = Lists.newArrayList();
-    collectCovers(defDeriv, covers);
+    Map<Integer, Derivation> coverMap = new HashMap<>();
+    collectCovers(defDeriv, coverMap);
+    List<Derivation> covers = new ArrayList<>(coverMap.values());
+    
     covers.sort((s,t) -> s.start < t.start? -1: 1);
+    
     LogInfo.dbgs("covers: %s", covers);
     List<Rule> inducedRules = new ArrayList<>();
     List<String> RHS = getRHS(defDeriv, covers);
@@ -221,11 +210,18 @@ public class GrammarInducer {
     for (Derivation deriv : covers) {
       // LogInfo.logs("got (%d,%d):%s:%s", deriv.start, deriv.end, deriv.formula, deriv.cat);
       rhs.set(deriv.start, deriv.cat);
-      for (int i = deriv.start + 1; i<deriv.end; i++) {
+      for (int i = deriv.start + 1; i < deriv.end; i++) {
         rhs.set(i, null);
       }
     }
     return rhs.subList(def.grammarInfo.start, def.grammarInfo.end).stream().filter(s -> s!=null).collect(Collectors.toList());
+  }
+
+  public static enum ParseStatus {
+    Nothing, // nothing at all parses in the utterance
+    Float, // something parse
+    Induced, // redefining known utterance
+    Core; // define known utterance in core, should reject
   }
 
   public static ParseStatus getParseStatus(Example ex) {

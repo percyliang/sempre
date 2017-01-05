@@ -30,7 +30,7 @@ public final class InteractiveUtils {
     }
     return deriv;
   }
- 
+  
   public static GrammarInducer getInducer(String head, String jsonDef, String sessionId, Parser parser, Params params) {
     return getInducer(head, jsonDef, sessionId, parser, params, ActionFormula.Mode.block);
   }
@@ -66,7 +66,7 @@ public final class InteractiveUtils {
       boolean found = false;
       for (Derivation d : ex.predDerivations) {
         // LogInfo.logs("considering: %s", d.formula.toString());
-        if (d.formula.toString().equals(formula)) {
+        if (d.formula.equals(Formulas.fromLispTree(LispTree.proto.parseFromString(formula)))) {
           found = true;
           allDerivs.add(stripDerivation(d));
         }
