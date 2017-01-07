@@ -8,20 +8,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.testng.collections.Sets;
-
 import com.beust.jcommander.internal.Lists;
-import com.google.common.collect.ImmutableList;
 
 import edu.stanford.nlp.sempre.ConstantFn;
 import edu.stanford.nlp.sempre.Derivation;
-import edu.stanford.nlp.sempre.DerivationStream;
 import edu.stanford.nlp.sempre.Example;
 import edu.stanford.nlp.sempre.Formula;
 import edu.stanford.nlp.sempre.Formulas;
 import edu.stanford.nlp.sempre.IdentityFn;
 import edu.stanford.nlp.sempre.LambdaFormula;
-import edu.stanford.nlp.sempre.Master;
 import edu.stanford.nlp.sempre.Rule;
 import edu.stanford.nlp.sempre.SemanticFn;
 import edu.stanford.nlp.sempre.VariableFormula;
@@ -29,7 +24,6 @@ import edu.stanford.nlp.sempre.interactive.actions.ActionFormula;
 import fig.basic.LispTree;
 import fig.basic.LogInfo;
 import fig.basic.Option;
-import fig.basic.StopWatchSet;
 
 /**
  * Takes two examples, and induce some Rules
@@ -41,18 +35,18 @@ public class GrammarInducer {
   public static class Options {
     @Option(gloss = "categories that can serve as rules")
     public Set<String> filteredCats = new HashSet<String>();
-    public int maxRulesPerExample = 3;
+    @Option(gloss = "add bias")
+    public int addBias = 1;
   }
 
   public static Options opts = new Options();
 
-
-  Map<String, List<Derivation>>[][] chart;
-  List<Rule> inducedRules = null;
-  int numTokens;
+  private List<Rule> inducedRules = null;
+  
   List<String> tokens;
   String id;
-  List<Derivation> chartList = Lists.newArrayList();
+  
+  private Set<Derivation> matches = new HashSet<>();
   
   // really just a return value
   Example head;
@@ -63,68 +57,130 @@ public class GrammarInducer {
     id = origEx.id;
     head = origEx;
     head.predDerivations = Lists.newArrayList(def);
+    LogInfo.logs("chartList.size = %d", chartList.size());
     
-    this.chartList = chartList;
-    
-    LogInfo.logs("got %d in chartList", this.chartList.size());
-    numTokens = origEx.numTokens();
     tokens = origEx.getTokens();
+    int numTokens = origEx.numTokens();
+
+    addMatches(def, makeChartMap(chartList));
+    List<Derivation> bestPacking = bestPackingDP(this.matches, numTokens);
+    LogInfo.logs("BestPacking: %s", bestPacking);
     
-    addMatches(def);
-    buildFormula(def);
+    HashMap<String, String> formulaToCat = new HashMap<>();
+    bestPacking.forEach(d -> formulaToCat.put(catFormulaKey(d), varName(d)));
+    
+    buildFormula(def, formulaToCat);
     def.grammarInfo.start = 0;
     def.grammarInfo.end = tokens.size();
-    
-    inducedRules = new ArrayList<>(induceRules(def));
+
+    inducedRules = new ArrayList<>(induceRules(bestPacking, def));
   }
   
-  // label the derivation tree with what it matches in chartList
-  private void addMatches(Derivation deriv) {
-    for (Derivation anchored : chartList) {
-      if (deriv.formula.equals(anchored.formula) && deriv.cat.equals(anchored.cat)) {
-        deriv.grammarInfo.matches.add(anchored);
-        LogInfo.dbgs("Replaced %s <- %s", anchored, uniquePackingName(anchored));
-        deriv.grammarInfo.formula = new VariableFormula(uniquePackingName(anchored));
-        deriv.grammarInfo.start = anchored.start;
-        deriv.grammarInfo.end = anchored.end;
-        break; // just adding the first match, could do highest scoring
-      }
+  private Map<String, List<Derivation>> makeChartMap(List<Derivation> chartList) {
+    Map<String, List<Derivation>> chartMap = new HashMap<>();
+    for (Derivation d : chartList) {
+      List<Derivation> derivs = chartMap.get(catFormulaKey(d));
+      derivs = derivs!=null? derivs : new ArrayList<>();
+      derivs.add(d);
+      chartMap.put(catFormulaKey(d), derivs);
+    }
+    return chartMap;
+  }
+  
+  // this is used to test for matches, same cat, same formula
+  // maybe cat needs to be more flexible
+  private String catFormulaKey(Derivation d) {
+    return getNormalCat(d) + "::" + d.formula.toString();
+  }
+  private String varName(Derivation anchored) {
+    return getNormalCat(anchored) + anchored.start + "_" + anchored.end;
+  }
+  private String getNormalCat(Derivation def) {
+    return def.getCat();
+//    if (cat.endsWith("s"))
+//      return cat.substring(0, cat.length()-1);
+//    else return cat;
+  }
+  
+  //label the derivation tree with what it matches in chartList
+  private void addMatches(Derivation deriv, Map<String, List<Derivation>> chartMap) {
+    String key = catFormulaKey(deriv);
+    if (chartMap.containsKey(key)) {
+      deriv.grammarInfo.matches.addAll(chartMap.get(key));
+      deriv.grammarInfo.matched = true;
+      matches.addAll(chartMap.get(key));
     }
     for (Derivation d : deriv.children) {
-      addMatches(d);
+      addMatches(d, chartMap);
+    }
+  }
+
+  class Packing {
+    List<Derivation> packing;
+    double score;
+
+    public Packing(double score, List<Derivation> packing) {
+      this.score = score;
+      this.packing = packing;
+    }
+    
+    public String toString() {
+      return this.score + ": " + this.packing.toString();
     }
   }
   
-  // packings are Derivations in the chartList that also appeared in the definition
-  private void collectPacking(Derivation deriv, Map<Integer, Derivation> packings) {
-    if (deriv.grammarInfo.matches.size() > 0) {
-      Derivation candidatePacking = deriv.grammarInfo.matches.get(0);
-      Integer packingKey = candidatePacking.start;
-      if(!packings.containsKey(packingKey))
-        packings.put(packingKey, candidatePacking);
-    } else {
-      for (Derivation d : deriv.children) {
-        collectPacking(d, packings);
+  
+  // start inclusive, end exclusive
+  private List<Derivation> bestPackingDP(Set<Derivation> matches, int length) {
+    List<Packing> bestEndsAtI = new ArrayList<>(length + 1);
+    bestEndsAtI.add(new Packing(0, new ArrayList<Derivation>()));
+    
+    @SuppressWarnings("unchecked")
+    List<Derivation>[] endsAtI = new ArrayList[length + 1];
+    
+    for (Derivation d : matches) {
+      List<Derivation> derivs = endsAtI[d.end];
+      derivs = derivs!=null? derivs : new ArrayList<>();
+      derivs.add(d);
+      endsAtI[d.end] = derivs;
+    }
+    
+    for (int i = 1; i<=length; i++) {
+      Packing prev = bestEndsAtI.get(i-1);
+      double bestscore = prev.score;
+      Derivation bestDeriv = null;
+      if (endsAtI[i] != null) {
+        for (Derivation d : endsAtI[i]) {
+          double score = d.getScore() + bestEndsAtI.get(d.start).score;
+          if (score >= bestscore) {
+            bestscore = score;
+            bestDeriv = d;
+          }
+        }
+      }
+      if (bestDeriv == null) bestEndsAtI.add(prev);
+      else {
+        List<Derivation> bestpacking = new ArrayList<>(bestEndsAtI.get(bestDeriv.start).packing);
+        bestpacking.add(bestDeriv);
+        Packing newPack = new Packing(bestscore, bestpacking);
+        bestEndsAtI.add(newPack);
       }
     }
+    
+    return bestEndsAtI.get(length).packing;
   }
+
   
   public List<Rule> getRules() {
     return inducedRules;
   }
-  
-  private List<Rule> induceRules(Derivation defDeriv) {
-    Map<Integer, Derivation> packingMap = new HashMap<>();
-    collectPacking(defDeriv, packingMap);
-    List<Derivation> packings = new ArrayList<>(packingMap.values());
-    
-    packings.sort((s,t) -> s.start < t.start? -1: 1);
-    
+
+  private List<Rule> induceRules(List<Derivation> packings, Derivation defDeriv) {
     LogInfo.dbgs("packings: %s", packings);
     List<Rule> inducedRules = new ArrayList<>();
     List<String> RHS = getRHS(defDeriv, packings);
     SemanticFn sem = getSemantics(defDeriv, packings);
-    String cat = getTopCat(defDeriv);
+    String cat = getNormalCat(defDeriv);
     Rule inducedRule = new Rule(cat, RHS, sem);
     inducedRule.addInfo(id, 1.0);
     inducedRule.addInfo("induced", 1.0);
@@ -135,29 +191,28 @@ public class GrammarInducer {
     return inducedRules;
   }
 
-  private String getTopCat(Derivation def) {
-    return def.getCat();
-  }
+
 
   // populate grammarInfo.formula, replacing everything that can be replaced
-  private void buildFormula(Derivation deriv){
+  private void buildFormula(Derivation deriv, Map<String, String> replaceMap){
     //LogInfo.log("building " + deriv.grammarInfo.formula);
     if (deriv.grammarInfo.formula != null) return;
-    if (deriv.grammarInfo.formula instanceof VariableFormula) {
+    if (replaceMap.containsKey(catFormulaKey(deriv))) {
+      deriv.grammarInfo.formula = new VariableFormula(replaceMap.get(catFormulaKey(deriv)));
       return;
     }
     if (deriv.children.size() == 0) {
       deriv.grammarInfo.formula = deriv.formula;
     }
-    
+
     for (Derivation c : deriv.children) {
-      buildFormula(c);
+      buildFormula(c, replaceMap);
       deriv.grammarInfo.start = Math.min(deriv.grammarInfo.start, c.grammarInfo.start);
       deriv.grammarInfo.end = Math.max(deriv.grammarInfo.end, c.grammarInfo.end);
     }
     Rule rule = deriv.rule;
     List<Derivation> args = deriv.children;
-    
+
     // cant use the standard DerivationStream because formula is final
     if (rule.sem instanceof ApplyFn) {
       Formula f = Formulas.fromLispTree(((ApplyFn)rule.sem).formula.toLispTree());
@@ -178,11 +233,7 @@ public class GrammarInducer {
 
     //LogInfo.log("built " + deriv.grammarInfo.formula);
   }
-  
-  private String uniquePackingName(Derivation anchored) {
-    return anchored.cat + anchored.start + "_" + anchored.end;
-  }
-  
+
   private SemanticFn getSemantics(final Derivation def, List<Derivation> packings) {
     Formula baseFormula = def.grammarInfo.formula;
     if (packings.size() == 0) {
@@ -193,9 +244,9 @@ public class GrammarInducer {
       constantFn.init(newTree);
       return constantFn;
     }
-    
+
     for (int i = packings.size() -1; i >= 0; i--) {
-      baseFormula = new LambdaFormula( uniquePackingName(packings.get(i)), Formulas.fromLispTree(baseFormula.toLispTree()));
+      baseFormula = new LambdaFormula( varName(packings.get(i)), Formulas.fromLispTree(baseFormula.toLispTree()));
     }
     SemanticFn applyFn = new ApplyFn();
     LispTree newTree = LispTree.proto.newList();

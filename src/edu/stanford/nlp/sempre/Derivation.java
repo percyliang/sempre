@@ -63,6 +63,7 @@ public class Derivation implements SemanticFn.Callable, HasScore {
   // information for grammar induction
   public class GrammarInfo {
     public boolean anchored = false;
+    public boolean matched = false;
     public int start = -1, end = -1;
     public Formula formula;
     public List<Derivation> matches = Lists.newArrayList();

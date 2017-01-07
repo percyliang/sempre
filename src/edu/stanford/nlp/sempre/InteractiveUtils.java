@@ -134,7 +134,9 @@ public final class InteractiveUtils {
   }
   
   static Rule blockRule(ActionFormula.Mode mode) {
-    return new Rule("$Action", Lists.newArrayList("$Action", "$Action"), new BlockFn(mode));
+    BlockFn b = new BlockFn(mode);
+    b.init(LispTree.proto.parseFromString("(a block)"));
+    return new Rule("$Action", Lists.newArrayList("$Action", "$Action"), b);
   }  
   static Derivation combineList(List<Derivation> children, ActionFormula.Mode mode) {
     Formula f = new ActionFormula(mode, 

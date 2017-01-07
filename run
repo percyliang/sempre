@@ -52,6 +52,8 @@ def header(modules='core', codalabDependencies=nil)
     '-cp', 'libsempre/*:lib/*',
     # Profiling
     letDefault(:prof, 0), sel(:prof, l(), '-Xrunhprof:cpu=samples,depth=100,file=_OUTPATH_/java.hprof.txt'),
+    # debugging
+    letDefault(:debug, 0), sel(:debug, l(), l('-Xdebug', '-Xrunjdwp:server=y,transport=dt_socket,suspend=y,address=8898')),
   nil)
 end
 
