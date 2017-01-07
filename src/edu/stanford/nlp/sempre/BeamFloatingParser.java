@@ -25,8 +25,9 @@ import org.testng.collections.Sets;
 public class BeamFloatingParser extends Parser {
   public static class Options {
     @Option public int maxNewTreesPerSpan = Integer.MAX_VALUE;
-    @Option public boolean alwaysFloat = true;
+    @Option public FloatStrategy floatStrategy = FloatStrategy.Never;
   }
+  public enum FloatStrategy {Always, Never, NoParse};
   public static Options opts = new Options();
 
   Trie trie;  // For non-cat-unary rules
@@ -132,8 +133,16 @@ class BeamFloatingParserState extends ChartParserState {
     
     this.chartList = this.collectChart();
 
+    boolean parseFloat;
+    if (BeamFloatingParser.opts.floatStrategy != BeamFloatingParser.FloatStrategy.Always)
+      parseFloat = true;
+    else if (BeamFloatingParser.opts.floatStrategy == BeamFloatingParser.FloatStrategy.NoParse)
+      parseFloat = predDerivations.size() == 0;
+    else
+      parseFloat = false;
+    
     /* If Beam Parser failed to find derivations, try a floating parser */
-    if (BeamFloatingParser.opts.alwaysFloat || predDerivations.size() == 0) {
+    if (parseFloat) {
       /* For every base span of the chart, add the derivations from nothing rules */
       List<Rule> nothingRules = new ArrayList<Rule>();
       for (Rule rule : parser.grammar.rules)

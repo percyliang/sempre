@@ -34,9 +34,8 @@ public final class InteractiveUtils {
   public static GrammarInducer getInducer(String head, String jsonDef, String sessionId, Parser parser, Params params) {
     return getInducer(head, jsonDef, sessionId, parser, params, ActionFormula.Mode.block);
   }
-  // parse the definition, match with the chart of origEx, and add new rules to grammar
-  public static GrammarInducer getInducer(String head, String jsonDef, String sessionId, Parser parser, Params params, ActionFormula.Mode mode) {
-    
+  
+  public static List<Derivation> derivsfromJson(String jsonDef, Parser parser, Params params) {
     @SuppressWarnings("unchecked")
     List<Object> body = Json.readValueHard(jsonDef, List.class);
     // string together the body definition
@@ -54,7 +53,7 @@ public final class InteractiveUtils {
       }
       
       Example.Builder b = new Example.Builder();
-      b.setId("session:" + sessionId);
+      // b.setId("session:" + sessionId);
       b.setUtterance(utt);
       Example ex = b.createExample();
       ex.preprocess();
@@ -70,20 +69,17 @@ public final class InteractiveUtils {
           allDerivs.add(stripDerivation(d));
         }
       }
-      if (!found) LogInfo.errors("Matching formula not found: %s", formula);
+      if (!found && !formula.equals("?")) LogInfo.errors("matching formula not found: %s", formula);
       
-      // just some hacks to make testing easier, use top derivation when we formula is not given
+      // just making testing easier, use top derivation when we formula is not given
       if (!found && (formula.equals("?") || formula==null) && ex.predDerivations.size() > 0)
         allDerivs.add(stripDerivation(ex.predDerivations.get(0)));
     }
-    
-    Derivation bodyDeriv;
-//    if (allDerivs.size() > 1)
-//      bodyDeriv = combineList(allDerivs, ActionFormula.Mode.block);
-//    else
-//      bodyDeriv = allDerivs.get(0);
-//    
-    bodyDeriv = combineList(allDerivs, mode);
+    return allDerivs;
+  }
+  // parse the definition, match with the chart of origEx, and add new rules to grammar
+  public static GrammarInducer getInducer(String head, String jsonDef, String sessionId, Parser parser, Params params, ActionFormula.Mode mode) {
+    Derivation bodyDeriv = combine(derivsfromJson(jsonDef, parser, params), mode);
     
     Example.Builder b = new Example.Builder();
     b.setId("session:" + sessionId);
@@ -99,7 +95,7 @@ public final class InteractiveUtils {
     LogInfo.logs("anchored: %s", state.chartList);
 
     GrammarInducer grammarInducer = new GrammarInducer(exHead, bodyDeriv, state.chartList);
-// updates the value that the derivation is modified.
+//  updates the value that the derivation is modified.
 //    for (Derivation d : grammarInducer.getHead().predDerivations) {
 //      d.value = null; // cuz ensureExecuted checks.
 //      d.ensureExecuted(parser.executor, exHead.context);
@@ -138,7 +134,7 @@ public final class InteractiveUtils {
     b.init(LispTree.proto.parseFromString("(a block)"));
     return new Rule("$Action", Lists.newArrayList("$Action", "$Action"), b);
   }  
-  static Derivation combineList(List<Derivation> children, ActionFormula.Mode mode) {
+  public static Derivation combine(List<Derivation> children, ActionFormula.Mode mode) {
     Formula f = new ActionFormula(mode, 
         children.stream().map(d -> d.formula).collect(Collectors.toList()));
     Derivation res = new Derivation.Builder()
