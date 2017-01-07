@@ -447,7 +447,8 @@ public class Master {
         String head = tree.children.get(1).value;
        
         ActionFormula.Mode blockmode = command.equals(":def")? ActionFormula.Mode.block : ActionFormula.Mode.blockr;
-          
+        
+        InteractiveUtils.logRawDef(head, tree.children.get(2).value, session.id);
         GrammarInducer inducer = InteractiveUtils.getInducer(head, tree.children.get(2).value, session.id, builder.parser, builder.params, blockmode);
           
         List<Rule> inducedRules  = inducer.getRules();

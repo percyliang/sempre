@@ -104,15 +104,15 @@
 (rule $Sets ($Color) (lambda c (color (var c))))
 
 # various actions can be performed
-(rule $Action ($Color) (lambda c (: @add (var c) here)))
-(rule $Action ($Color $Direction) (lambda c (lambda d (: @add (var c) (var d)))))
-(rule $Action ($Direction) (lambda d (: @move (var d))))
+# (rule $Action ($Color) (lambda c (: @add (var c) here)))
+# (rule $Action ($Color $Direction) (lambda c (lambda d (: @add (var c) (var d)))))
+# (rule $Action ($Direction) (lambda d (: @move (var d))))
 
-(rule $Set ($Direction $Sets) (lambda d (lambda s
-			   (call adj (var d) (var s)))))
-(rule $Set ($Extreme $Sets) (lambda e (lambda s
-			   (call @veryx (var e) (var s)))))
-(rule $Set ($Direction) (lambda d
-			   (call adj (var d))))
-(rule $Set ($Extreme) (lambda e
-			   (call @veryx (var e))))
+# (rule $Set ($Direction $Sets) (lambda d (lambda s
+#			   (call adj (var d) (var s)))))
+# (rule $Set ($Extreme $Sets) (lambda e (lambda s
+#			   (call @veryx (var e) (var s)))))
+# (rule $Set ($Direction) (lambda d
+#			   (call adj (var d))))
+# (rule $Set ($Extreme) (lambda e
+#			   (call @veryx (var e))))

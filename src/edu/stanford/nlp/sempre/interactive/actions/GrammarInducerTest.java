@@ -53,6 +53,15 @@ public class GrammarInducerTest {
      induceHelper(head, jsonDef);
   }
   
+  
+  protected static void test(String head, String def, String head2, String def2) {
+    Spec defSpec = defaultSpec();
+    Parser parser = new BeamFloatingParser(defSpec);
+    
+    List<Rule> induced = InteractiveUtils.getInducer(head, def, "testsession",  parser, new Params()).getRules();
+    induced.forEach(r -> InteractiveUtils.addRuleInteractive(r, parser));
+  }
+  
   @Test public void basicTest() {
     LogInfo.begin_track("test Grammar");
     induce("add red twice","[[\"add red top\",\"(: add red top)\"],[\"add red top\",\"(: add red top)\"]]");

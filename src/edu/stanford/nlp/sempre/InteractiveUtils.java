@@ -36,7 +36,6 @@ public final class InteractiveUtils {
   }
   // parse the definition, match with the chart of origEx, and add new rules to grammar
   public static GrammarInducer getInducer(String head, String jsonDef, String sessionId, Parser parser, Params params, ActionFormula.Mode mode) {
-    logRawDef(head, jsonDef, sessionId);
     
     @SuppressWarnings("unchecked")
     List<Object> body = Json.readValueHard(jsonDef, List.class);

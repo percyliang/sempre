@@ -83,8 +83,8 @@ public class GrammarInducer {
     for (Derivation anchored : chartList) {
       if (deriv.formula.equals(anchored.formula) && deriv.cat.equals(anchored.cat)) {
         deriv.grammarInfo.matches.add(anchored);
-        LogInfo.dbgs("Replaced %s <- %s", anchored, uniqueCoverName(anchored));
-        deriv.grammarInfo.formula = new VariableFormula(uniqueCoverName(anchored));
+        LogInfo.dbgs("Replaced %s <- %s", anchored, uniquePackingName(anchored));
+        deriv.grammarInfo.formula = new VariableFormula(uniquePackingName(anchored));
         deriv.grammarInfo.start = anchored.start;
         deriv.grammarInfo.end = anchored.end;
         break; // just adding the first match, could do highest scoring
@@ -95,16 +95,16 @@ public class GrammarInducer {
     }
   }
   
-  // covers are Derivations in the chartList that also appeared in the definition
-  private void collectCovers(Derivation deriv, Map<Integer, Derivation> covers) {
+  // packings are Derivations in the chartList that also appeared in the definition
+  private void collectPacking(Derivation deriv, Map<Integer, Derivation> packings) {
     if (deriv.grammarInfo.matches.size() > 0) {
-      Derivation candidateCover = deriv.grammarInfo.matches.get(0);
-      Integer coverKey = candidateCover.start;
-      if(!covers.containsKey(coverKey))
-        covers.put(coverKey, candidateCover);
+      Derivation candidatePacking = deriv.grammarInfo.matches.get(0);
+      Integer packingKey = candidatePacking.start;
+      if(!packings.containsKey(packingKey))
+        packings.put(packingKey, candidatePacking);
     } else {
       for (Derivation d : deriv.children) {
-        collectCovers(d, covers);
+        collectPacking(d, packings);
       }
     }
   }
@@ -114,16 +114,16 @@ public class GrammarInducer {
   }
   
   private List<Rule> induceRules(Derivation defDeriv) {
-    Map<Integer, Derivation> coverMap = new HashMap<>();
-    collectCovers(defDeriv, coverMap);
-    List<Derivation> covers = new ArrayList<>(coverMap.values());
+    Map<Integer, Derivation> packingMap = new HashMap<>();
+    collectPacking(defDeriv, packingMap);
+    List<Derivation> packings = new ArrayList<>(packingMap.values());
     
-    covers.sort((s,t) -> s.start < t.start? -1: 1);
+    packings.sort((s,t) -> s.start < t.start? -1: 1);
     
-    LogInfo.dbgs("covers: %s", covers);
+    LogInfo.dbgs("packings: %s", packings);
     List<Rule> inducedRules = new ArrayList<>();
-    List<String> RHS = getRHS(defDeriv, covers);
-    SemanticFn sem = getSemantics(defDeriv, covers);
+    List<String> RHS = getRHS(defDeriv, packings);
+    SemanticFn sem = getSemantics(defDeriv, packings);
     String cat = getTopCat(defDeriv);
     Rule inducedRule = new Rule(cat, RHS, sem);
     inducedRule.addInfo(id, 1.0);
@@ -179,13 +179,13 @@ public class GrammarInducer {
     //LogInfo.log("built " + deriv.grammarInfo.formula);
   }
   
-  private String uniqueCoverName(Derivation anchored) {
+  private String uniquePackingName(Derivation anchored) {
     return anchored.cat + anchored.start + "_" + anchored.end;
   }
   
-  private SemanticFn getSemantics(final Derivation def, List<Derivation> covers) {
+  private SemanticFn getSemantics(final Derivation def, List<Derivation> packings) {
     Formula baseFormula = def.grammarInfo.formula;
-    if (covers.size() == 0) {
+    if (packings.size() == 0) {
       SemanticFn constantFn = new ConstantFn();
       LispTree newTree = LispTree.proto.newList();
       newTree.addChild("ConstantFn");
@@ -194,8 +194,8 @@ public class GrammarInducer {
       return constantFn;
     }
     
-    for (int i = covers.size() -1; i >= 0; i--) {
-      baseFormula = new LambdaFormula( uniqueCoverName(covers.get(i)), Formulas.fromLispTree(baseFormula.toLispTree()));
+    for (int i = packings.size() -1; i >= 0; i--) {
+      baseFormula = new LambdaFormula( uniquePackingName(packings.get(i)), Formulas.fromLispTree(baseFormula.toLispTree()));
     }
     SemanticFn applyFn = new ApplyFn();
     LispTree newTree = LispTree.proto.newList();
@@ -205,9 +205,9 @@ public class GrammarInducer {
     return applyFn;
   }
 
-  private List<String> getRHS(Derivation def, List<Derivation> covers) {
+  private List<String> getRHS(Derivation def, List<Derivation> packings) {
     List<String> rhs = new ArrayList<>(tokens);
-    for (Derivation deriv : covers) {
+    for (Derivation deriv : packings) {
       // LogInfo.logs("got (%d,%d):%s:%s", deriv.start, deriv.end, deriv.formula, deriv.cat);
       rhs.set(deriv.start, deriv.cat);
       for (int i = deriv.start + 1; i < deriv.end; i++) {
