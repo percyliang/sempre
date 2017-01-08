@@ -135,7 +135,7 @@ public class GrammarInducerTest {
     A.assertFalse(T.match("add green to both sides", d("add green left", "add green back")));
     
     T.def("select all but yellow", d("select not has color yellow"));
-    A.assertTrue(T.match("select all but yellow", d("select not has color yellow")));
+    A.assertTrue(T.match("select all but blue", d("select not has color blue")));
     
     T.def("add a yellow block on top of red blocks", d("select has color red", "add yellow top"));
     A.assertTrue(T.match("add a green block on top of blue blocks", d("select has color blue", "add green top")));
@@ -233,20 +233,22 @@ public class GrammarInducerTest {
     LogInfo.end_track();
   }
   
-
-//  @Test public void learnSets() {
-//    LogInfo.begin_track("test Grammar");
-//    induce("remove those red blocks", "[[\"remove has color red\",\"(:foreach (color red) (: remove))\"]]");
-//    induce("select card", "[[\"remove has color red\",\"(:foreach (color red) (: remove))\"]]");
-//    induce("remove the leftmost red block", "[[\"remove very left of has color red\",\"?\"]]");
-//    induce("add a red column of size 3",
-//        "[[\"repeat 3 [ add red; select top of this]\",\"(:loop (number 3) (:s (: add red here) (:for (call adj top this) (: select))))\"]]");
-//    LogInfo.end_track();
-//  }
-//  @Test public void learnLoop() {
-//    LogInfo.begin_track("test Grammar");
-//    induce("add a red column of size 3",
-//        "[[\"repeat 3 [ add red; select top of this]\",\"(:loop (number 3) (:s (: add red here) (:for (call adj top this) (: select))))\"]]");
-//    LogInfo.end_track();
-//  }
+  @Test public void testSets() {
+    LogInfo.begin_track("testSets");
+    ParseTester T = new ParseTester();
+    Assertion A = soft;
+    
+    T.def("remove those red blocks", d("remove has color red"));
+    A.assertTrue(T.match("select those red blocks", d("select has color red")));
+    
+    T.def("remove the leftmost red block", d("remove very left of has color red"));
+    A.assertTrue(T.match("select the leftmost red block", d("select very left of has color red")));
+    
+    //T.printAllRules();
+    //A.assertAll();
+   
+    LogInfo.end_track();
+  }
+  
+  
 }
