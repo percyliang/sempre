@@ -8,7 +8,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.testng.collections.Sets;
+
 import com.beust.jcommander.internal.Lists;
+import com.google.common.base.Function;
 
 import edu.stanford.nlp.sempre.ConstantFn;
 import edu.stanford.nlp.sempre.Derivation;
@@ -57,23 +60,28 @@ public class GrammarInducer {
     id = origEx.id;
     head = origEx;
     head.predDerivations = Lists.newArrayList(def);
-    LogInfo.logs("chartList.size = %d", chartList.size());
     
     tokens = origEx.getTokens();
     int numTokens = origEx.numTokens();
 
     addMatches(def, makeChartMap(chartList));
     List<Derivation> bestPacking = bestPackingDP(this.matches, numTokens);
-    LogInfo.logs("BestPacking: %s", bestPacking);
     
     HashMap<String, String> formulaToCat = new HashMap<>();
     bestPacking.forEach(d -> formulaToCat.put(catFormulaKey(d), varName(d)));
+    
+    LogInfo.logs("chartList.size = %d", chartList.size());
+    LogInfo.logs("BestPacking: %s", bestPacking);
+    LogInfo.logs("Matches: %s", this.matches);
+    LogInfo.logs("formulaToCat: %s", formulaToCat);
     
     buildFormula(def, formulaToCat);
     def.grammarInfo.start = 0;
     def.grammarInfo.end = tokens.size();
 
     inducedRules = new ArrayList<>(induceRules(bestPacking, def));
+    
+    
   }
   
   private Map<String, List<Derivation>> makeChartMap(List<Derivation> chartList) {
@@ -90,16 +98,18 @@ public class GrammarInducer {
   // this is used to test for matches, same cat, same formula
   // maybe cat needs to be more flexible
   private String catFormulaKey(Derivation d) {
+    // return d.formula.toString();
     return getNormalCat(d) + "::" + d.formula.toString();
   }
   private String varName(Derivation anchored) {
     return getNormalCat(anchored) + anchored.start + "_" + anchored.end;
   }
   private String getNormalCat(Derivation def) {
-    return def.getCat();
-//    if (cat.endsWith("s"))
-//      return cat.substring(0, cat.length()-1);
-//    else return cat;
+    // return def.cat;
+    String cat = def.getCat();
+    if (cat.endsWith("s"))
+      return cat.substring(0, cat.length()-1);
+    else return cat;
   }
   
   //label the derivation tree with what it matches in chartList
@@ -176,7 +186,7 @@ public class GrammarInducer {
   }
 
   private List<Rule> induceRules(List<Derivation> packings, Derivation defDeriv) {
-    LogInfo.dbgs("packings: %s", packings);
+    
     List<Rule> inducedRules = new ArrayList<>();
     List<String> RHS = getRHS(defDeriv, packings);
     SemanticFn sem = getSemantics(defDeriv, packings);
@@ -195,9 +205,9 @@ public class GrammarInducer {
 
   // populate grammarInfo.formula, replacing everything that can be replaced
   private void buildFormula(Derivation deriv, Map<String, String> replaceMap){
-    //LogInfo.log("building " + deriv.grammarInfo.formula);
-    if (deriv.grammarInfo.formula != null) return;
+    // LogInfo.logs("BUILDING %s at (%d,%d) %s", deriv, deriv.start, deriv.end, catFormulaKey(deriv));
     if (replaceMap.containsKey(catFormulaKey(deriv))) {
+      // LogInfo.logs("Found match %s, %s, %s", catFormulaKey(deriv), replaceMap, deriv);
       deriv.grammarInfo.formula = new VariableFormula(replaceMap.get(catFormulaKey(deriv)));
       return;
     }
@@ -219,7 +229,10 @@ public class GrammarInducer {
       for (Derivation arg : args) {
         if (!(f instanceof LambdaFormula))
           throw new RuntimeException("Expected LambdaFormula, but got " + f);
-        f = Formulas.lambdaApply((LambdaFormula)f, arg.grammarInfo.formula);
+        Formula after = renameBoundVars(f, new HashSet<>());
+        // LogInfo.logs("renameBoundVar %s === %s", after, f);
+
+        f = Formulas.lambdaApply((LambdaFormula)after, arg.grammarInfo.formula);
       }
       deriv.grammarInfo.formula = f;
     } else if (rule.sem instanceof IdentityFn) {
@@ -230,10 +243,33 @@ public class GrammarInducer {
     } else {
       deriv.grammarInfo.formula = deriv.formula;
     }
-
-    //LogInfo.log("built " + deriv.grammarInfo.formula);
+    
+    // LogInfo.logs("BUILT %s for %s", deriv.grammarInfo.formula, deriv.formula);
+    // LogInfo.log("built " + deriv.grammarInfo.formula);
   }
 
+  private String newName(String s) {return s.endsWith("_")? s : s + "_";}
+  private Formula renameBoundVars(Formula formula, Set<String> boundvars) {
+    if (formula instanceof LambdaFormula) {
+      LambdaFormula f = (LambdaFormula)formula;
+      boundvars.add(f.var);
+      return new LambdaFormula(newName(f.var), renameBoundVars(f.body, boundvars));
+    } else {
+      Formula after = formula.map(
+          new Function<Formula, Formula>() {
+            public Formula apply(Formula formula) {
+              if (formula instanceof VariableFormula) {  // Replace variable
+                String name = ((VariableFormula) formula).name;
+                if (boundvars.contains(name)) return new VariableFormula(newName(name));
+                else return formula;
+              }
+              return null;
+            }
+          });
+      return after;
+    }
+  }
+ 
   private SemanticFn getSemantics(final Derivation def, List<Derivation> packings) {
     Formula baseFormula = def.grammarInfo.formula;
     if (packings.size() == 0) {
@@ -260,7 +296,7 @@ public class GrammarInducer {
     List<String> rhs = new ArrayList<>(tokens);
     for (Derivation deriv : packings) {
       // LogInfo.logs("got (%d,%d):%s:%s", deriv.start, deriv.end, deriv.formula, deriv.cat);
-      rhs.set(deriv.start, deriv.cat);
+      rhs.set(deriv.start, getNormalCat(deriv));
       for (int i = deriv.start + 1; i < deriv.end; i++) {
         rhs.set(i, null);
       }

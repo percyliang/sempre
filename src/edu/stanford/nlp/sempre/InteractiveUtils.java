@@ -135,6 +135,13 @@ public final class InteractiveUtils {
     return new Rule("$Action", Lists.newArrayList("$Action", "$Action"), b);
   }  
   public static Derivation combine(List<Derivation> children, ActionFormula.Mode mode) {
+    // stop double blocking
+    if (children.size() == 1) {
+      ActionFormula.Mode cmode = ((ActionFormula)children.get(0).formula).mode;
+      if (cmode == mode) {
+        return children.get(0);
+      }
+    }
     Formula f = new ActionFormula(mode, 
         children.stream().map(d -> d.formula).collect(Collectors.toList()));
     Derivation res = new Derivation.Builder()

@@ -101,7 +101,7 @@
 
 ####### domain specific floating rules
 # red means has color red
-(rule $Sets ($Color) (lambda c (color (var c))))
+# (rule $Sets ($Color) (lambda c (color (var c))))
 
 # various actions can be performed
 # (rule $Action ($Color) (lambda c (: @add (var c) here)))

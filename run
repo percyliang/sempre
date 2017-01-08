@@ -1034,6 +1034,7 @@ o('Learner.maxTrainIters', 1),
 o('server', true),
 o('Server.numThreads', 8),
 o('Server.maxCandidates', 50),
+o('Derivation.showTypes', false),
 nil) })
 
 

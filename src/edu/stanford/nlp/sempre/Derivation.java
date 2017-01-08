@@ -38,6 +38,8 @@ public class Derivation implements SemanticFn.Callable, HasScore {
     public boolean showRules = false;
     @Option(gloss = "When printing derivations, to show canonical utterance")
     public boolean showUtterance = false;
+    @Option(gloss = "When printing derivations, show the category")
+    public boolean showCat = false;
     @Option(gloss = "When executing, show formulae (for debugging)")
     public boolean showExecutions = false;
     @Option(gloss = "changes ScoredDerivationComparator to use pragmatic_score instead")
@@ -346,6 +348,9 @@ public class Derivation implements SemanticFn.Callable, HasScore {
     }
     if (opts.showUtterance && canonicalUtterance != null) {
       tree.addChild(LispTree.proto.newList("canonicalUtterance", canonicalUtterance));
+    }
+    if (opts.showCat && cat != null) {
+      tree.addChild(LispTree.proto.newList("cat", cat));
     }
     return tree;
   }

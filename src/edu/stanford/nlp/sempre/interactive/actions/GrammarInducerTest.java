@@ -22,14 +22,19 @@ import org.testng.collections.Lists;
  * @author Sida Wang
  */
 public class GrammarInducerTest {
-  static Assertion A = new Assertion();
-  // static Assertion A = new SoftAssert();
+  Assertion hard = new Assertion();
+  Assertion soft = new SoftAssert();
   
   private static Spec defaultSpec() {
     FloatingParser.opts.defaultIsFloating = true;
     ActionExecutor.opts.convertNumberValues  = true;
     ActionExecutor.opts.printStackTrace = true;
     ActionExecutor.opts.FlatWorldType = "BlocksWorld";
+    
+    Derivation.opts.showTypes = false;
+    Derivation.opts.showRules = false;
+    Derivation.opts.showCat = true;
+    
     LanguageAnalyzer.opts.languageAnalyzer = "interactive.actions.ActionLanguageAnalyzer";
     Grammar.opts.inPaths = Lists.newArrayList("./shrdlurn/blocksworld.grammar");
     Grammar.opts.useApplyFn = "interactive.ApplyFn";
@@ -68,7 +73,7 @@ public class GrammarInducerTest {
       induced.forEach(r -> InteractiveUtils.addRuleInteractive(r, parser));
       LogInfo.logs("Defining %s := %s, added %s", head, def, induced);
     }
-    public boolean found(String head, String def) {
+    public boolean match(String head, String def) {
       Example.Builder b = new Example.Builder();
       b.setUtterance(head);
       Example exHead = b.createExample();
@@ -89,6 +94,10 @@ public class GrammarInducerTest {
         ind++;
       }
       printAllRules();
+      if (!found) {
+        LogInfo.logs("Did not find %s", defDeriv.formula);
+        LogInfo.log(exHead.predDerivations);
+      }
       return found;
     }
     
@@ -102,56 +111,129 @@ public class GrammarInducerTest {
   @Test public void simpleTest() {
     LogInfo.begin_track("test simple substitutions");
     ParseTester T = new ParseTester();
+    Assertion A = hard;
     
     T.def("add red twice", d("add red top","add red top"));
-    A.assertTrue(T.found("add blue twice", d("add blue top","add blue top")));
+    A.assertTrue(T.match("add blue twice", d("add blue top","add blue top")));
     
-    T.def("add red 3 times", d("repeat 3 [add red top]"));
-    A.assertTrue(T.found("add yellow 5 times", d("repeat 5 [add yellow top]")));
+    T.def("add red 3 times", d("repeat 3 [add red]"));
+    A.assertTrue(T.match("add yellow 5 times", d("repeat 5 [add yellow]")));
+    
+    T.def("add red 3 ^ 2 times", d("repeat 3 {[repeat 3 [add red]]}"));
+    A.assertTrue(T.match("add blue 2 ^ 2 times", d("repeat 2 {[repeat 2 [add blue]]}")));
     
     T.def("add a red block to the left", d("add red left"));
-    A.assertTrue(T.found("add a yellow block to the right", d("add yellow right")));
+    A.assertTrue(T.match("add a yellow block to the right", d("add yellow right")));
     
     T.def("remove the leftmost red block", d("remove very left of has color red"));
-    A.assertTrue(T.found("remove the leftmost yellow block", d("remove very left of has color yellow")));
+    A.assertTrue(T.match("remove the leftmost yellow block", d("remove very left of has color yellow")));
     
     T.def("add red to both sides", d("add red left", "add red right"));
     T.def("add red to both sides", d("add red back", "add red front"));
-    A.assertTrue(T.found("add green to both sides", d("add green left", "add green right")));
-    A.assertTrue(T.found("add green to both sides", d("add green back", "add green front")));
-    A.assertFalse(T.found("add green to both sides", d("add green left", "add green back")));
+    A.assertTrue(T.match("add green to both sides", d("add green left", "add green right")));
+    A.assertTrue(T.match("add green to both sides", d("add green back", "add green front")));
+    A.assertFalse(T.match("add green to both sides", d("add green left", "add green back")));
     
     T.def("select all but yellow", d("select not has color yellow"));
-    A.assertTrue(T.found("select all but yellow", d("select not has color yellow")));
+    A.assertTrue(T.match("select all but yellow", d("select not has color yellow")));
     
     T.def("add a yellow block on top of red blocks", d("select has color red", "add yellow top"));
-    A.assertTrue(T.found("add a green block on top of blue blocks", d("select has color blue", "add green top")));
+    A.assertTrue(T.match("add a green block on top of blue blocks", d("select has color blue", "add green top")));
     
     T.def("add a yellow block on top of red blocks", d("select has color red; add yellow top"));
-    A.assertTrue(T.found("add a green block on top of blue blocks", d("select has color blue ; add green top")));
+    A.assertTrue(T.match("add a green block on top of blue blocks", d("select has color blue ; add green top")));
     
     //T.printAllRules();
     //A.assertAll();
    
     LogInfo.end_track();
   }
-//  
-//  @Test public void basicTest() {
-//    LogInfo.begin_track("test Grammar");
-//    induce("add red twice","[[\"add red top\",\"(: add red top)\"],[\"add red top\",\"(: add red top)\"]]");
-//    induce("add red thrice", "[[\"[add red top] 3 times\",\"(:loop (number 3) (: add red top))\"]]");
-//    induce("add a red block to the left", "[[\"add red left\",\"(: add red left)\"]]");
-//    induce("remove card", "[[\"remove has color red\",\"(:foreach (color red) (: remove))\"]]");
-//    induce("delete card", "[[\"remove has color red\",\"(:foreach (color red) (: remove))\"]]");
-//    induce("remove the leftmost red block", "[[\"remove very left of has color red\",\"?\"]]");
-//    induce("add red to both sides", "[[\"add red left\",\"(: add red left)\"],[\"add red right\",\"(: add red right)\"]]");
-//    induce("add a yellow block next to brown", 
-//        "[[\"select brown\",\"(:foreach (color brown) (: select))\"],[\"add yellow right\",\"(: add yellow right)\"]]");
-//    induce("select all but yellow", 
-//        "[[\"select not has color yellow\",\"?\"]]");
-//    LogInfo.end_track();
-//  }
-//  
+  
+  @Test public void actionTest() {
+    LogInfo.begin_track("test some action substitutions");
+    ParseTester T = new ParseTester();
+    Assertion A = soft;
+    
+    T.def("add red twice", d("repeat 2 [add red]"));
+    A.assertTrue(T.match("add blue top twice", d("repeat 2 [add blue top]")));
+    
+    T.def("add red 3 times", d("repeat 3 [add red]"));
+    A.assertTrue(T.match("add yellow top 5 times", d("repeat 5 [add yellow top]")));
+    
+    T.def("add red twice", d("add red; add red top"));
+    A.assertTrue(T.match("add yellow twice", d("add yellow; add yellow top")));
+    
+    T.def("add red then add yellow left", d("add red; add yellow left"));
+    A.assertTrue(T.match("remove red then add brown top", d("remove red; add brown top")));
+    
+    //T.printAllRules();
+    //A.assertAll();
+   
+    LogInfo.end_track();
+  }
+  
+  @Test public void learnCatTest() {
+    LogInfo.begin_track("test the learning via alignment");
+    ParseTester T = new ParseTester();
+    Assertion A = soft;
+    
+    T.def("add cardinal", d("add red"));
+    A.assertTrue(T.match("select has color cardinal", d("select has color red")));
+    
+    T.def("move up", d("move top"));
+    A.assertTrue(T.match("select up", d("select top")));
+    A.assertTrue(T.match("add red up", d("add red top")));
+    
+    T.def("select the highest of has color red", d("select very top of has color red"));
+    A.assertTrue(T.match("remove the highest of all", d("remove very top of all")));
+    
+    T.def("select the top most of has color red", d("select very top of has color red"));
+    A.assertTrue(T.match("select the bot most of all", d("select the very bot most of all")));
+
+    //T.printAllRules();
+    //A.assertAll();
+   
+    LogInfo.end_track();
+  }
+  
+  @Test public void cubeTest() {
+    LogInfo.begin_track("cubeTest");
+    ParseTester T = new ParseTester();
+    Assertion A = hard;
+    
+    T.def("red stick of size 3", d("{repeat 3 [add red; select top]}"));
+    T.def("red plate of size 3", d("{repeat 3 [red stick of size 3; select left]}"));
+    T.def("red cube of size 3", d("{repeat 3 [red plate of size 3; select back]}"));
+    
+    A.assertTrue(T.match("blue stick of size 4", d("{repeat 4 [add blue; select top]}")));
+    A.assertTrue(T.match("blue plate of size 4", d("{repeat 4 [blue stick of size 4; select left]}")));
+    A.assertTrue(T.match("blue cube of size 5", d("{repeat 5 [blue plate of size 5; select back]}")));
+    
+    //T.printAllRules();
+    //A.assertAll();
+   
+    LogInfo.end_track();
+  }
+  
+  @Test public void rectTest() {
+    LogInfo.begin_track("rectTest");
+    ParseTester T = new ParseTester();
+    Assertion A = hard;
+    
+    T.def("red stick of size 4", d("{repeat 4 [add red; select top]}"));
+    T.def("red plate of size 3 by 4", d("{repeat 3 [red stick of size 4; select left]}"));
+    T.def("red cube of size 2 by 3 by 4", d("{repeat 2 [red plate of size 3 by 4; select back]}"));
+
+    A.assertTrue(T.match("red plate of size 1 by 2", d("{repeat 1 [red stick of size 2; select left]}")));
+    A.assertTrue(T.match("red cube of size 1 by 2 by 3", d("{repeat 1 [red plate of size 2 by 3; select back]}")));
+    
+    //T.printAllRules();
+    //A.assertAll();
+   
+    LogInfo.end_track();
+  }
+  
+
 //  @Test public void learnSets() {
 //    LogInfo.begin_track("test Grammar");
 //    induce("remove those red blocks", "[[\"remove has color red\",\"(:foreach (color red) (: remove))\"]]");
