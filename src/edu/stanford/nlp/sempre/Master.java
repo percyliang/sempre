@@ -442,6 +442,61 @@ public class Master {
       } else {
         session.context = new ContextValue(tree);
       }
+    }
+    
+    // Start of interactive commands
+    else if (command.equals(":q")) {
+      // Create example
+      String utt = tree.children.get(1).value;
+      
+      Example.Builder b = new Example.Builder();
+      b.setId("session:" + session.id);
+      b.setUtterance(utt);
+      b.setContext(session.context);
+      Example ex = b.createExample();
+
+      ex.preprocess();
+
+      // Parse!
+      ParserState state;
+      state = builder.parser.parse(builder.params, ex, false);
+      Learner.addToAutocomplete(ex, builder.params);
+
+      response.ex = ex;
+
+      if (ex.predDerivations.size() > 0) response.candidateIndex = 0;
+
+    } else if (command.equals(":accept")) {
+      String utt = tree.children.get(1).value;
+      String formula = tree.children.get(2).value;
+      
+      Example.Builder b = new Example.Builder();
+      b.setId("session:" + session.id);
+      b.setUtterance(utt);
+      b.setContext(session.context);
+      Example ex = b.createExample();
+      ex.preprocess();
+      
+      response.ex = ex;
+      
+      // Parse!
+      ParserState state;
+      state = builder.parser.parse(builder.params, ex, false);
+      state.ensureExecuted();
+      
+      Formula targetFormula = Formulas.fromLispTree(LispTree.proto.parseFromString(formula));
+      
+      Derivation match = ex.predDerivations.stream()
+          .filter(d -> d.formula.equals(targetFormula)).findFirst().orElse(null);
+      ex.setTargetFormula(targetFormula);
+      if (match != null) {
+        LogInfo.logs("Matched: %s", match);
+        ex.setTargetValue(match.value);
+        LogInfo.begin_track("Updating parameters");
+        learner.onlineLearnExample(ex);
+        LogInfo.end_track();
+      }
+
     } else if (command.equals(":def") || command.equals(":def_ret")) {
       if (tree.children.size() == 3) {
         String head = tree.children.get(1).value;
@@ -470,8 +525,6 @@ public class Master {
       } else {
         LogInfo.logs("Invalid format for def");
       }
-    } else if (command.equals(":accept")) {
-      
     } else if (command.equals(":autocomplete")) {
       if (tree.children.size() == 2) {
         String prefix = tree.children.get(1).value;

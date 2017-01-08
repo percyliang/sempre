@@ -283,6 +283,7 @@ public abstract class ParserState {
       if (goodAndBad == null) return;
     }
 
+    boolean hasPostive = opts.customExpectedCounts != CustomExpectedCount.NONE;
     for (int i = 0; i < n; i++) {
       Derivation deriv = derivations.get(i);
       double logReward = Math.log(compatibilityToReward(deriv.compatibility));
@@ -291,6 +292,7 @@ public abstract class ParserState {
         case NONE:
           trueScores[i] = deriv.score + logReward;
           predScores[i] = deriv.score;
+          if (logReward > Double.NEGATIVE_INFINITY) hasPostive = true;
           break;
         case UNIFORM:
           trueScores[i] = logReward;
@@ -306,7 +308,13 @@ public abstract class ParserState {
     }
 
     // Usually this happens when there are no derivations.
-    if (!NumUtils.expNormalize(trueScores)) return;
+    // sidaw: allow rejection updates of everything
+    if (hasPostive) {
+      if(!NumUtils.expNormalize(trueScores)) return;
+    } else {
+      for (int i = 0; i < n; i++) trueScores[i] = 0;
+    }
+      
     if (!NumUtils.expNormalize(predScores)) return;
 
     // Update parameters

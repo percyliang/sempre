@@ -101,6 +101,24 @@ public class GrammarInducerTest {
       return found;
     }
     
+    public void accept(String head, String def) {
+      Example.Builder b = new Example.Builder();
+      b.setUtterance(head);
+      Example exHead = b.createExample();
+      exHead.preprocess();
+      
+      Derivation defDeriv = InteractiveUtils.combine(InteractiveUtils.derivsfromJson(def, parser, params), ActionFormula.Mode.block);
+      
+      // LogInfo.logs("Parsing definition: %s", ex.utterance);
+      parser.parse(params, exHead, false);
+      
+      HashMap<String, Double> counts = new HashMap<>();
+      for (Derivation deriv : exHead.predDerivations)
+        deriv.compatibility = defDeriv.formula.equals(deriv.formula)? 1 : 0;
+      ParserState.computeExpectedCounts(exHead.predDerivations, counts);
+      params.update(counts);
+    }
+    
     public void printAllRules() {
       LogInfo.begin_track("Rules induced");
       allRules.forEach(r -> LogInfo.log(r));
@@ -109,7 +127,7 @@ public class GrammarInducerTest {
   }
   // tests simple substitutions
   @Test public void simpleTest() {
-    LogInfo.begin_track("test simple substitutions");
+    LogInfo.begin_track("simpleTest");
     ParseTester T = new ParseTester();
     Assertion A = hard;
     
@@ -150,22 +168,39 @@ public class GrammarInducerTest {
   }
   
   @Test public void actionTest() {
-    LogInfo.begin_track("test some action substitutions");
+    LogInfo.begin_track("actionTest");
     ParseTester T = new ParseTester();
-    Assertion A = soft;
+    Assertion A = hard;
     
+    // by default, we prefer higher level abstractions
     T.def("add red twice", d("repeat 2 [add red]"));
+    // T.def("select has color red twice", d("repeat 2 [select has color red]"));
     A.assertTrue(T.match("add blue top twice", d("repeat 2 [add blue top]")));
     
     T.def("add red 3 times", d("repeat 3 [add red]"));
     A.assertTrue(T.match("add yellow top 5 times", d("repeat 5 [add yellow top]")));
     
-    T.def("add red twice", d("add red; add red top"));
-    A.assertTrue(T.match("add yellow twice", d("add yellow; add yellow top")));
-    
     T.def("add red then add yellow left", d("add red; add yellow left"));
-    A.assertTrue(T.match("remove red then add brown top", d("remove red; add brown top")));
+    A.assertTrue(T.match("remove has color red then add brown", d("remove has color red; add brown")));
     
+    //T.printAllRules();
+    //A.assertAll();
+   
+    LogInfo.end_track();
+  }
+  
+  @Test public void notActionTest() {
+    LogInfo.begin_track("notActionTest");
+    ParseTester T = new ParseTester();
+    Assertion A = hard;
+    
+    T.def("add red top twice", d("add red; add red top"));
+    T.accept("add yellow top twice", d("add yellow; add yellow top"));
+    T.accept("add yellow bot twice", d("add yellow; add yellow bot"));
+    T.accept("add brown bot twice", d("add brown; add brown left"));
+    T.def("add red top twice", d("add red; add red top"));
+    A.assertTrue(T.match("add blue right twice", d("add blue; add blue right")));
+       
     //T.printAllRules();
     //A.assertAll();
    
@@ -233,7 +268,7 @@ public class GrammarInducerTest {
     LogInfo.end_track();
   }
   
-  @Test public void testSets() {
+  @Test public void setsTest() {
     LogInfo.begin_track("testSets");
     ParseTester T = new ParseTester();
     Assertion A = soft;

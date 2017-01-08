@@ -1,6 +1,7 @@
 package edu.stanford.nlp.sempre.interactive;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -49,7 +50,7 @@ public class GrammarInducer {
   List<String> tokens;
   String id;
   
-  private Set<Derivation> matches = new HashSet<>();
+  private List<Derivation> matches;
   
   // really just a return value
   Example head;
@@ -64,7 +65,9 @@ public class GrammarInducer {
     tokens = origEx.getTokens();
     int numTokens = origEx.numTokens();
 
+    this.matches = new ArrayList<>();
     addMatches(def, makeChartMap(chartList));
+    Collections.reverse(this.matches);
     List<Derivation> bestPacking = bestPackingDP(this.matches, numTokens);
     
     HashMap<String, String> formulaToCat = new HashMap<>();
@@ -80,8 +83,6 @@ public class GrammarInducer {
     def.grammarInfo.end = tokens.size();
 
     inducedRules = new ArrayList<>(induceRules(bestPacking, def));
-    
-    
   }
   
   private Map<String, List<Derivation>> makeChartMap(List<Derivation> chartList) {
@@ -141,7 +142,7 @@ public class GrammarInducer {
   
   
   // start inclusive, end exclusive
-  private List<Derivation> bestPackingDP(Set<Derivation> matches, int length) {
+  private List<Derivation> bestPackingDP(List<Derivation> matches, int length) {
     List<Packing> bestEndsAtI = new ArrayList<>(length + 1);
     bestEndsAtI.add(new Packing(0, new ArrayList<Derivation>()));
     

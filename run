@@ -984,7 +984,7 @@ addMode('interactive', 'interactive semantic parsing in blocks', lambda { |e| l(
   'edu.stanford.nlp.sempre.Main',
   figOpts,
 
-  o('Executor', 'tions.ActionExecutor'),
+  o('Executor', 'interactive.actions.ActionExecutor'),
   o('LanguageAnalyzer', 'interactive.actions.ActionLanguageAnalyzer'),
   o('ActionExecutor.convertNumberValues', true),
   o('ActionExecutor.printStackTrace', true),
@@ -1003,10 +1003,9 @@ addMode('interactive', 'interactive semantic parsing in blocks', lambda { |e| l(
   o('Parser', 'BeamFloatingParser'),
   o('Parser.trackedCats', 'Number', 'Numbers', 'Color',  'Direction', 'Set', 'Sets', 'Action', 'Actions'),
   o('FloatingParser.defaultIsFloating', true),
-  selo(0, 'BeamFloatingParser.floatStrategy', 'BeamFloatingParser.FloatStrategy.Never',
-  'BeamFloatingParser.FloatStrategy.NoParse', 'BeamFloatingParser.FloatStrategy.Always'),
+  selo(0, 'BeamFloatingParser.floatStrategy', 'Never', 'NoParse', 'Always'),
 
-o('ParserState.customExpectedCounts', 'UNIFORM'),
+o('ParserState.customExpectedCounts', 'None'),
 o('Params.l1Reg', 'lazy'),
 o('Params.l1RegCoeff', 0.001),
 o('Parser.beamSize', 10),
