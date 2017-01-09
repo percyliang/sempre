@@ -1012,8 +1012,8 @@ o('Parser.beamSize', 10),
 o('Params.initStepSize', 0.1),
 o('Params.adaptiveStepSize', true),
 
-o('FeatureExtractor.featureComputers', 'interactive.actions.BeamFloatingFeatureComputer'),
-o('FeatureExtractor.featureDomains', 'rule', 'bff', 'stats'),
+o('FeatureExtractor.featureComputers', 'interactive.actions.ActionFeatureComputer'),
+o('FeatureExtractor.featureDomains', 'rule', 'window', 'stats'),
 o('RicherStacksWorldFeatureComputer.ngramN', 2),
 o('RicherStacksWorldFeatureComputer.parameterizeCats', 'Number','Color'),
 

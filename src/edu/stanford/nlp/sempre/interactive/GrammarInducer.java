@@ -175,6 +175,7 @@ public class GrammarInducer {
         bestpacking.add(bestDeriv);
         Packing newPack = new Packing(bestscore, bestpacking);
         bestEndsAtI.add(newPack);
+        LogInfo.logs("Adding Packing %d: %s", newPack.score, newPack.packing);
       }
     }
     
