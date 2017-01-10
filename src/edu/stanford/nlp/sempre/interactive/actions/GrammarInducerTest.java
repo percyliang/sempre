@@ -213,6 +213,10 @@ public class GrammarInducerTest {
     T.accept("add yellow bot twice", d("add yellow; add yellow bot"));
     T.accept("add brown left twice", d("add brown; add brown left"));
     T.def("add red top twice", d("add red; add red top"));
+//    T.accept("add yellow top twice", d("add yellow; add yellow top"));
+//    T.accept("add yellow bot twice", d("add yellow; add yellow bot"));
+//    T.accept("add brown left twice", d("add brown; add brown left"));
+//    T.def("add red top twice", d("add red; add red top"));
     A.assertTrue(T.match("add blue right twice", d("add blue; add blue right")));
        
     //T.printAllRules();

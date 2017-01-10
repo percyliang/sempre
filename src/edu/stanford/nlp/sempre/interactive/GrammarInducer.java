@@ -146,10 +146,30 @@ public class GrammarInducer {
   }
   
   
+  private int shortestLength(List<Derivation> derivs) {
+    if (derivs == null) return 0;
+    if (derivs.size() == 0) return 0;
+    int shortest = Integer.MAX_VALUE;
+    for (Derivation d : derivs) {
+      int l = d.end - d.start;
+      if (l < shortest)
+        shortest = l;
+    }
+    return shortest;
+  }
+  
+  // the maximum starting index of every match that ends on or before end
+  private int blockingIndex(List<Derivation> matches, int end) {
+    return matches.stream().filter(d -> d.end <= end).map(d -> d.start)
+        .max( (s1, s2) -> s1.compareTo(s2)).orElse(Integer.MAX_VALUE/2);
+  }
+  
   // start inclusive, end exclusive
   private List<Derivation> bestPackingDP(List<Derivation> matches, int length) {
     List<Packing> bestEndsAtI = new ArrayList<>(length + 1);
+    List<Packing> maximalAtI = new ArrayList<>(length + 1);
     bestEndsAtI.add(new Packing(Double.NEGATIVE_INFINITY, new ArrayList<Derivation>()));
+    maximalAtI.add(new Packing(0.0, new ArrayList<Derivation>()));
     
     @SuppressWarnings("unchecked")
     List<Derivation>[] endsAtI = new ArrayList[length + 1];
@@ -162,29 +182,38 @@ public class GrammarInducer {
     }
     
     for (int i = 1; i<=length; i++) {
-      Packing prev = bestEndsAtI.get(i-1);
-      double bestscore = prev.score;
-      Derivation bestDeriv = null;
+      // the new maximal either uses a derivation that ends at i, plus a previous maximal
+      Packing bestOverall = new Packing(Double.NEGATIVE_INFINITY, new ArrayList<>());
+      Derivation bestDerivI = null;
       if (endsAtI[i] != null) {
         for (Derivation d : endsAtI[i]) {
-          double score = Math.max(d.getScore() + bestEndsAtI.get(d.start).score, d.getScore());
-          if (score >= bestscore) {
-            bestscore = score;
-            bestDeriv = d;
+          double score = d.getScore() + maximalAtI.get(d.start).score;
+          if (score >= bestOverall.score) {
+            bestOverall.score = score;
+            bestDerivI = d;
           }
         }
+        List<Derivation> bestpacking = new ArrayList<>(maximalAtI.get(bestDerivI.start).packing);
+        bestpacking.add(bestDerivI);
+        bestOverall.packing = bestpacking;
       }
-      if (bestDeriv == null) bestEndsAtI.add(prev);
+      bestEndsAtI.add(i, bestOverall);
+      
+      // or it's a previous bestEndsAtI[j] for  i-minLength+1 <= j < i        
+      for (int j = blockingIndex(matches, i) + 1; j<i; j++) {
+        // LogInfo.dbgs("BlockingIndex: %d, j=%d, i=%d", blockingIndex(matches, i), j, i);
+        if (bestEndsAtI.get(j).score >= bestOverall.score)
+          bestOverall = bestEndsAtI.get(j);
+      }
+      LogInfo.dbgs("maximalAtI[%d] = %f: %s, BlockingIndex: %d", i, bestOverall.score, bestOverall.packing, blockingIndex(matches, i));
+      if (bestOverall.score > Double.NEGATIVE_INFINITY)
+        maximalAtI.add(i, bestOverall);
       else {
-        List<Derivation> bestpacking = new ArrayList<>(bestEndsAtI.get(bestDeriv.start).packing);
-        bestpacking.add(bestDeriv);
-        Packing newPack = new Packing(bestscore, bestpacking);
-        bestEndsAtI.add(newPack);
-        LogInfo.dbgs("Adding Packing %e: %s", newPack.score, newPack.packing);
+        maximalAtI.add(i, new Packing(0, new ArrayList<>()));
       }
     }
     
-    return bestEndsAtI.get(length).packing;
+    return maximalAtI.get(length).packing;
   }
 
   
