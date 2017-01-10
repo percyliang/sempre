@@ -17,6 +17,8 @@ import org.testng.asserts.Assertion;
 import org.testng.annotations.Test;
 import org.testng.collections.Lists;
 
+import com.google.common.collect.Sets;
+
 /**
  * Test the grammar induction
  * @author Sida Wang
@@ -39,10 +41,14 @@ public class GrammarInducerTest {
     Grammar.opts.inPaths = Lists.newArrayList("./shrdlurn/blocksworld.grammar");
     Grammar.opts.useApplyFn = "interactive.ApplyFn";
     Grammar.opts.binarizeRules = false;
+    
+    FeatureExtractor.opts.featureComputers = Sets.newHashSet("interactive.actions.ActionFeatureComputer");
+    FeatureExtractor.opts.featureDomains =  Sets.newHashSet("rule", "stats", "window");
 
     ActionExecutor executor = new ActionExecutor();
+    
     FeatureExtractor extractor = new FeatureExtractor(executor);
-    FeatureExtractor.opts.featureDomains.add("rule");
+    
     ValueEvaluator valueEvaluator = new ExactValueEvaluator();
     Grammar grammar = new Grammar();
     grammar.read();
@@ -68,7 +74,7 @@ public class GrammarInducerTest {
       allRules = new ArrayList<>();
     }
     public void def(String head, String def) {
-      List<Rule> induced = InteractiveUtils.getInducer(head, def, "testsession",  parser, new Params()).getRules();
+      List<Rule> induced = InteractiveUtils.getInducer(head, def, "testsession",  parser, params).getRules();
       allRules.addAll(induced);
       induced.forEach(r -> InteractiveUtils.addRuleInteractive(r, parser));
       LogInfo.logs("Defining %s := %s, added %s", head, def, induced);
@@ -80,7 +86,7 @@ public class GrammarInducerTest {
       exHead.preprocess();
       
       // LogInfo.logs("Parsing definition: %s", ex.utterance);
-      parser.parse(params, exHead, false);
+      parser.parse(params, exHead, true);
       
       Derivation defDeriv = InteractiveUtils.combine(InteractiveUtils.derivsfromJson(def, parser, params), ActionFormula.Mode.block);
       boolean found = false; 
@@ -102,6 +108,7 @@ public class GrammarInducerTest {
     }
     
     public void accept(String head, String def) {
+      LogInfo.begin_track("Accepting");
       Example.Builder b = new Example.Builder();
       b.setUtterance(head);
       Example exHead = b.createExample();
@@ -110,13 +117,20 @@ public class GrammarInducerTest {
       Derivation defDeriv = InteractiveUtils.combine(InteractiveUtils.derivsfromJson(def, parser, params), ActionFormula.Mode.block);
       
       // LogInfo.logs("Parsing definition: %s", ex.utterance);
-      parser.parse(params, exHead, false);
+      parser.parse(params, exHead, true);
+      
+      for (Derivation deriv : exHead.predDerivations) {
+        deriv.compatibility = defDeriv.formula.equals(deriv.formula)? 1 : 0;
+      }
+      exHead.predDerivations.forEach(d -> LogInfo.logs("Compatibility %s : %f", d.formula, d.compatibility));
       
       HashMap<String, Double> counts = new HashMap<>();
-      for (Derivation deriv : exHead.predDerivations)
-        deriv.compatibility = defDeriv.formula.equals(deriv.formula)? 1 : 0;
       ParserState.computeExpectedCounts(exHead.predDerivations, counts);
+      LogInfo.logs("Gradients: %s", counts);
+      // LogInfo.logs("paramsbefore: %s", params.getWeights());
       params.update(counts);
+      // LogInfo.logs("paramsafter: %s", params.getWeights());
+      LogInfo.end_track();
     }
     
     public void printAllRules() {
@@ -197,7 +211,7 @@ public class GrammarInducerTest {
     T.def("add red top twice", d("add red; add red top"));
     T.accept("add yellow top twice", d("add yellow; add yellow top"));
     T.accept("add yellow bot twice", d("add yellow; add yellow bot"));
-    T.accept("add brown bot twice", d("add brown; add brown left"));
+    T.accept("add brown left twice", d("add brown; add brown left"));
     T.def("add red top twice", d("add red; add red top"));
     A.assertTrue(T.match("add blue right twice", d("add blue; add blue right")));
        

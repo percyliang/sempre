@@ -90,7 +90,7 @@ public final class InteractiveUtils {
     LogInfo.begin_track("Definition");
     LogInfo.logs("mode: %s", mode);
     LogInfo.logs("head: %s", exHead.utterance);
-    BeamFloatingParserState state = (BeamFloatingParserState)parser.parse(params, exHead, false);
+    BeamFloatingParserState state = (BeamFloatingParserState)parser.parse(params, exHead, true);
     LogInfo.logs("defderiv: %s", bodyDeriv.toLispTree());
     LogInfo.logs("anchored: %s", state.chartList);
 

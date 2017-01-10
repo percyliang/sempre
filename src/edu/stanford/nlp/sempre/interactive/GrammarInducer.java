@@ -54,12 +54,14 @@ public class GrammarInducer {
   
   // really just a return value
   Example head;
+  Derivation def;
 
   // induce rule is possible,
   // otherwise set the correct status
   public GrammarInducer(Example origEx, Derivation def,  List<Derivation> chartList) {
     id = origEx.id;
     head = origEx;
+    this.def = def;
     head.predDerivations = Lists.newArrayList(def);
     
     tokens = origEx.getTokens();
@@ -68,14 +70,17 @@ public class GrammarInducer {
     this.matches = new ArrayList<>();
     addMatches(def, makeChartMap(chartList));
     Collections.reverse(this.matches);
+    
     List<Derivation> bestPacking = bestPackingDP(this.matches, numTokens);
     
     HashMap<String, String> formulaToCat = new HashMap<>();
     bestPacking.forEach(d -> formulaToCat.put(catFormulaKey(d), varName(d)));
     
     LogInfo.logs("chartList.size = %d", chartList.size());
+    LogInfo.log("Potential packings: " );
+    this.matches.forEach(d -> LogInfo.logs("%f: %s\t", d.getScore(), d.formula));
     LogInfo.logs("BestPacking: %s", bestPacking);
-    LogInfo.logs("Matches: %s", this.matches);
+    
     LogInfo.logs("formulaToCat: %s", formulaToCat);
     
     buildFormula(def, formulaToCat);
@@ -144,7 +149,7 @@ public class GrammarInducer {
   // start inclusive, end exclusive
   private List<Derivation> bestPackingDP(List<Derivation> matches, int length) {
     List<Packing> bestEndsAtI = new ArrayList<>(length + 1);
-    bestEndsAtI.add(new Packing(0, new ArrayList<Derivation>()));
+    bestEndsAtI.add(new Packing(Double.NEGATIVE_INFINITY, new ArrayList<Derivation>()));
     
     @SuppressWarnings("unchecked")
     List<Derivation>[] endsAtI = new ArrayList[length + 1];
@@ -162,7 +167,7 @@ public class GrammarInducer {
       Derivation bestDeriv = null;
       if (endsAtI[i] != null) {
         for (Derivation d : endsAtI[i]) {
-          double score = d.getScore() + bestEndsAtI.get(d.start).score;
+          double score = Math.max(d.getScore() + bestEndsAtI.get(d.start).score, d.getScore());
           if (score >= bestscore) {
             bestscore = score;
             bestDeriv = d;
@@ -175,7 +180,7 @@ public class GrammarInducer {
         bestpacking.add(bestDeriv);
         Packing newPack = new Packing(bestscore, bestpacking);
         bestEndsAtI.add(newPack);
-        LogInfo.logs("Adding Packing %d: %s", newPack.score, newPack.packing);
+        LogInfo.dbgs("Adding Packing %e: %s", newPack.score, newPack.packing);
       }
     }
     

@@ -491,7 +491,7 @@ public class Master {
       ex.setTargetFormula(targetFormula);
       if (match != null) {
         LogInfo.logs("Matched: %s", match);
-        ex.setTargetValue(match.value);
+        ex.setTargetValue(match.value); // this is just for logging, not actually used for learning
         LogInfo.begin_track("Updating parameters");
         learner.onlineLearnExample(ex);
         LogInfo.end_track();

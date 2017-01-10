@@ -77,6 +77,7 @@ addMode('test', 'Run unit tests', lambda { |e|
     lambda { |e|
       e.key?(:sparqlserver) ? "-Dsparqlserver=http://#{e[:sparqlserver]}/sparql" : l()
     },
+    letDefault(:debug, 0), sel(:debug, l(), l('-Xdebug', '-Xrunjdwp:server=y,transport=dt_socket,suspend=y,address=8898')),
     'org.testng.TestNG',
     lambda { |e|
       if e[:class]
@@ -85,6 +86,7 @@ addMode('test', 'Run unit tests', lambda { |e|
         'testng.xml'
       end
     },
+
     lambda { |e|
       if e[:fast]
         o('excludegroups', 'sparql,corenlp')
@@ -1013,9 +1015,7 @@ o('Params.initStepSize', 0.1),
 o('Params.adaptiveStepSize', true),
 
 o('FeatureExtractor.featureComputers', 'interactive.actions.ActionFeatureComputer'),
-o('FeatureExtractor.featureDomains', 'rule', 'window', 'stats'),
-o('RicherStacksWorldFeatureComputer.ngramN', 2),
-o('RicherStacksWorldFeatureComputer.parameterizeCats', 'Number','Color'),
+o('FeatureExtractor.featureDomains', 'rule', 'stats'),
 
 lambda { |e| system 'mkdir -p ./int-output/examples/'},
 lambda { |e| system 'mkdir -p ./int-output/logs/'},
