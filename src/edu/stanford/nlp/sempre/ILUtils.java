@@ -2,30 +2,42 @@ package edu.stanford.nlp.sempre;
 
 import java.io.PrintWriter;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.testng.collections.Lists;
 
 import com.google.common.collect.ImmutableList;
 
+import edu.stanford.nlp.sempre.Master.Options;
 import edu.stanford.nlp.sempre.interactive.BlockFn;
 import edu.stanford.nlp.sempre.interactive.DefinitionAligner;
 import edu.stanford.nlp.sempre.interactive.DefinitionAligner.Match;
 import edu.stanford.nlp.sempre.interactive.GrammarInducer;
 import edu.stanford.nlp.sempre.interactive.actions.ActionFormula;
+import edu.stanford.nlp.sempre.interactive.actions.FlatWorld;
 import fig.basic.IOUtils;
 import fig.basic.LispTree;
 import fig.basic.LogInfo;
+import fig.basic.Option;
 import fig.basic.Ref;
 
 /**
  * Utilities for grammar induction
  * @author sidaw
  */
-public final class InteractiveUtils {
-  private InteractiveUtils() { }
+public final class ILUtils {
+  public static class Options {
+    @Option(gloss = "Execute these commands before starting")
+    public String JSONLogPath = "./int-output/json/";
+  }
+
+  public static Options opts = new Options();
+  private ILUtils() { }
 
   public static Derivation stripDerivation(Derivation deriv) {
     while (deriv.rule.sem instanceof IdentityFn) {
@@ -123,8 +135,8 @@ public final class InteractiveUtils {
       Parser parser, Params params, String sessionId, Ref<Example> refEx) {
     ActionFormula.Mode blockmode = command.equals(":def")? ActionFormula.Mode.block : ActionFormula.Mode.blockr;
     
-    Derivation bodyDeriv = InteractiveUtils.combine(
-        InteractiveUtils.derivsfromJson(jsonDef, parser, params), blockmode);
+    Derivation bodyDeriv = ILUtils.combine(
+        ILUtils.derivsfromJson(jsonDef, parser, params), blockmode);
     
     Example.Builder b = new Example.Builder();
     b.setId("session:" + sessionId);
@@ -138,14 +150,14 @@ public final class InteractiveUtils {
     LogInfo.begin_track("Definition");
     LogInfo.logs("mode: %s", blockmode);
     LogInfo.logs("head: %s", exHead.getTokens());
-    LogInfo.logs("body: %s", InteractiveUtils.utterancefromJson(jsonDef));
+    LogInfo.logs("body: %s", ILUtils.utterancefromJson(jsonDef));
     LogInfo.logs("defderiv: %s", bodyDeriv.toLispTree());
     
     BeamFloatingParserState state = (BeamFloatingParserState)parser.parse(params, exHead, true);
     LogInfo.logs("anchored: %s", state.chartList);
     LogInfo.logs("exHead: %s", exHead.getTokens());
-    return InteractiveUtils.induceRules(exHead.getTokens(), 
-        InteractiveUtils.utterancefromJson(jsonDef), bodyDeriv, state.chartList);
+    return ILUtils.induceRules(exHead.getTokens(), 
+        ILUtils.utterancefromJson(jsonDef), bodyDeriv, state.chartList);
   }
   
   public static void logRawDef(String utt, String jsonDef, String sessionId) {
@@ -161,6 +173,31 @@ public final class InteractiveUtils {
     out.println(treewithdef.toString());
     out.flush();
     out.close();
+  }
+  
+  public static void logJSONExample(Example ex, String sessionId, String command) {
+    
+    Map<String, Object> jsonMap = new HashMap<>();
+    jsonMap.put("time", LocalDateTime.now().toString());
+    try {
+      jsonMap.put("cmd", command);
+      jsonMap.put("sessionId", sessionId);
+      jsonMap.put("utterance", ex.utterance);
+      jsonMap.put("targetFormula", ex.targetFormula);
+      jsonMap.put("context", FlatWorld.fromContext("BlocksWorld", ex.context).toJSON());
+      if (ex.targetValue instanceof StringValue)
+        jsonMap.put("targetValue", ((StringValue)ex.targetValue).toString());
+      else
+        jsonMap.put("targetValue", ex.targetValue);
+      
+    } catch (Exception e) {
+      jsonMap.put("exception", e.toString());
+    } finally {
+      PrintWriter out = IOUtils.openOutAppendHard(Paths.get(ILUtils.opts.JSONLogPath, sessionId + ".json").toString());
+      String jsonStr = Json.prettyWriteValueAsStringHard(jsonMap) + "\n";
+      out.write(jsonStr);
+      out.close();
+    }
   }
   
   public static synchronized void addRuleInteractive(Rule rule, Parser parser) {

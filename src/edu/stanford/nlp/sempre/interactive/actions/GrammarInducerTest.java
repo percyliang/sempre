@@ -74,10 +74,10 @@ public class GrammarInducerTest {
       allRules = new ArrayList<>();
     }
     public void def(String head, String def) {
-      List<Rule> induced = InteractiveUtils.induceRulesHelper(":def", head, def, parser, params, "testsession", null);
+      List<Rule> induced = ILUtils.induceRulesHelper(":def", head, def, parser, params, "testsession", null);
       allRules.addAll(induced);
       LogInfo.logs("Defining %s := %s, added %s", head, def, induced);
-      induced.forEach(r -> InteractiveUtils.addRuleInteractive(r, parser));
+      induced.forEach(r -> ILUtils.addRuleInteractive(r, parser));
     }
     public boolean match(String head, String def) {
       Example.Builder b = new Example.Builder();
@@ -88,14 +88,14 @@ public class GrammarInducerTest {
       // LogInfo.logs("Parsing definition: %s", ex.utterance);
       parser.parse(params, exHead, true);
       
-      Derivation defDeriv = InteractiveUtils.combine(InteractiveUtils.derivsfromJson(def, parser, params), ActionFormula.Mode.block);
+      Derivation defDeriv = ILUtils.combine(ILUtils.derivsfromJson(def, parser, params), ActionFormula.Mode.block);
       
       boolean found = false; 
       int ind = 0;
       for (Derivation d : exHead.predDerivations) {
         //LogInfo.logs("considering: %s", d.formula.toString());
-        LogInfo.logs("Comparing %s vs %s", InteractiveUtils.stripBlock(d).formula.toString(), InteractiveUtils.stripBlock(defDeriv).formula.toString());
-        if (InteractiveUtils.stripBlock(d).formula.toString().equals(InteractiveUtils.stripBlock(defDeriv).formula.toString())) {
+        LogInfo.logs("Comparing %s vs %s", ILUtils.stripBlock(d).formula.toString(), ILUtils.stripBlock(defDeriv).formula.toString());
+        if (ILUtils.stripBlock(d).formula.toString().equals(ILUtils.stripBlock(defDeriv).formula.toString())) {
           found = true;
           LogInfo.logs("found %s at %d", d.formula, ind);
         }
@@ -115,7 +115,7 @@ public class GrammarInducerTest {
       Example exHead = b.createExample();
       exHead.preprocess();
       
-      Derivation defDeriv = InteractiveUtils.combine(InteractiveUtils.derivsfromJson(def, parser, params), ActionFormula.Mode.block);
+      Derivation defDeriv = ILUtils.combine(ILUtils.derivsfromJson(def, parser, params), ActionFormula.Mode.block);
       
       // LogInfo.logs("Parsing definition: %s", ex.utterance);
       parser.parse(params, exHead, true);

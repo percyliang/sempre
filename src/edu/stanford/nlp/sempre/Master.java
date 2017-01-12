@@ -457,13 +457,18 @@ public class Master {
       ex.preprocess();
 
       // Parse!
-      ParserState state;
-      state = builder.parser.parse(builder.params, ex, false);
-      Learner.addToAutocomplete(ex, builder.params);
 
+      builder.parser.parse(builder.params, ex, false);
+      Learner.addToAutocomplete(ex, builder.params);
+      
       response.ex = ex;
 
-      if (ex.predDerivations.size() > 0) response.candidateIndex = 0;
+      if (response.ex.predDerivations.size() > 0) {
+        response.candidateIndex =  0;
+        response.ex.setTargetFormula(response.ex.predDerivations.get(0).formula);
+        response.ex.setTargetValue(response.ex.predDerivations.get(0).value);
+      }
+      ILUtils.logJSONExample(response.ex, session.id, line);
 
     } else if (command.equals(":accept")) {
       String utt = tree.children.get(1).value;
@@ -495,35 +500,47 @@ public class Master {
         learner.onlineLearnExample(ex);
         LogInfo.end_track();
       }
+      
+      if (response.ex.predDerivations.size() > 0) {
+        response.candidateIndex =  0;
+        response.ex.setTargetFormula(response.ex.predDerivations.get(0).formula);
+        response.ex.setTargetValue(response.ex.predDerivations.get(0).value);
+      }
+      ILUtils.logJSONExample(response.ex, session.id, line);
 
     } else if (command.equals(":def") || command.equals(":def_ret")) {
       if (tree.children.size() == 3) {
         String head = tree.children.get(1).value;
         String jsonDef = tree.children.get(2).value;
         
-        InteractiveUtils.logRawDef(head, jsonDef, session.id);
+        ILUtils.logRawDef(head, jsonDef, session.id);
          
         Ref<Example> refExHead = new Ref<>();
-        List<Rule> inducedRules = InteractiveUtils.induceRulesHelper(command, head, jsonDef, 
+        List<Rule> inducedRules = ILUtils.induceRulesHelper(command, head, jsonDef, 
             builder.parser, builder.params, session.id, refExHead);
-       
-      
+        
         if (inducedRules.size() > 0) {
           for (Rule rule : inducedRules) {
-              InteractiveUtils.addRuleInteractive(rule, builder.parser);
+              ILUtils.addRuleInteractive(rule, builder.parser);
           }
-          
+          // TODO : should not have to parse again, I guess just set the formula or something
           builder.parser.parse(builder.params, refExHead.value, false);
           response.ex = refExHead.value;
-          response.candidateIndex = response.ex.predDerivations.size() > 0 ? 0 : -1;
+          
           // write out the grammar
           PrintWriter out = IOUtils.openOutAppendHard(Paths.get(Master.opts.newGrammarPath, session.id + ".grammar").toString());
           for (Rule rule : inducedRules) {
             out.println(rule.toLispTree().toStringWrap());
           }
-          out.flush();
           out.close();
         }
+        
+        if (response.ex.predDerivations.size() > 0) {
+          response.candidateIndex =  0;
+          response.ex.setTargetFormula(response.ex.predDerivations.get(0).formula);
+          response.ex.setTargetValue(response.ex.predDerivations.get(0).value);
+        }
+        ILUtils.logJSONExample(response.ex, session.id, line);
       } else {
         LogInfo.logs("Invalid format for def");
       }
@@ -561,6 +578,7 @@ public class Master {
     else {
       LogInfo.log("Invalid command: " + tree);
     }
+    
   }
   
   private void defineAccept(Session session, String query, String formula, Response response) {

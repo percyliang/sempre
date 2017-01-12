@@ -1020,9 +1020,12 @@ o('FeatureExtractor.featureDomains', 'rule', 'stats'),
 lambda { |e| system 'mkdir -p ./int-output/examples/'},
 lambda { |e| system 'mkdir -p ./int-output/logs/'},
 lambda { |e| system 'mkdir -p ./int-output/grammar/'},
+lambda { |e| system 'mkdir -p ./int-output/json/'},
+
 o('Master.newExamplesPath', './int-output/examples/'),
 o('Master.logPath', './int-output/logs/'),
 o('Master.newGrammarPath', './int-output/grammar/'),
+o('ILUtils.JSONLogPath', './int-output/json/'),
 
 o('Master.onlineLearnExamples', true),
 o('Master.independentSessions', false),
