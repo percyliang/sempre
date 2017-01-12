@@ -74,10 +74,10 @@ public class GrammarInducerTest {
       allRules = new ArrayList<>();
     }
     public void def(String head, String def) {
-      List<Rule> induced = InteractiveUtils.getInducer(head, def, "testsession",  parser, params).getRules();
+      List<Rule> induced = InteractiveUtils.induceRulesHelper(":def", head, def, parser, params, "testsession", null);
       allRules.addAll(induced);
-      induced.forEach(r -> InteractiveUtils.addRuleInteractive(r, parser));
       LogInfo.logs("Defining %s := %s, added %s", head, def, induced);
+      induced.forEach(r -> InteractiveUtils.addRuleInteractive(r, parser));
     }
     public boolean match(String head, String def) {
       Example.Builder b = new Example.Builder();
@@ -89,11 +89,13 @@ public class GrammarInducerTest {
       parser.parse(params, exHead, true);
       
       Derivation defDeriv = InteractiveUtils.combine(InteractiveUtils.derivsfromJson(def, parser, params), ActionFormula.Mode.block);
+      
       boolean found = false; 
       int ind = 0;
       for (Derivation d : exHead.predDerivations) {
-        // LogInfo.logs("considering: %s", d.formula.toString());
-        if (d.formula.equals(defDeriv.formula)) {
+        //LogInfo.logs("considering: %s", d.formula.toString());
+        LogInfo.logs("Comparing %s vs %s", InteractiveUtils.stripBlock(d).formula.toString(), InteractiveUtils.stripBlock(defDeriv).formula.toString());
+        if (InteractiveUtils.stripBlock(d).formula.toString().equals(InteractiveUtils.stripBlock(defDeriv).formula.toString())) {
           found = true;
           LogInfo.logs("found %s at %d", d.formula, ind);
         }
@@ -101,8 +103,7 @@ public class GrammarInducerTest {
       }
       printAllRules();
       if (!found) {
-        LogInfo.logs("Did not find %s", defDeriv.formula);
-        LogInfo.log(exHead.predDerivations);
+        LogInfo.logs("Did not find %s among \n %s", defDeriv.formula, exHead.predDerivations);
       }
       return found;
     }
@@ -210,15 +211,12 @@ public class GrammarInducerTest {
     
     T.def("add red top twice", d("add red; add red top"));
     T.accept("add yellow top twice", d("add yellow; add yellow top"));
-    T.accept("add yellow bot twice", d("add yellow; add yellow bot"));
-    T.accept("add brown left twice", d("add brown; add brown left"));
+    //T.accept("add yellow bot twice", d("add yellow; add yellow bot"));
+    // T.accept("add brown left twice", d("add brown; add brown left"));
     T.def("add red top twice", d("add red; add red top"));
-//    T.accept("add yellow top twice", d("add yellow; add yellow top"));
-//    T.accept("add yellow bot twice", d("add yellow; add yellow bot"));
-//    T.accept("add brown left twice", d("add brown; add brown left"));
-//    T.def("add red top twice", d("add red; add red top"));
     A.assertTrue(T.match("add blue right twice", d("add blue; add blue right")));
-       
+
+    
     //T.printAllRules();
     //A.assertAll();
    
@@ -228,7 +226,7 @@ public class GrammarInducerTest {
   @Test public void learnCatTest() {
     LogInfo.begin_track("test the learning via alignment");
     ParseTester T = new ParseTester();
-    Assertion A = soft;
+    Assertion A = hard;
     
     T.def("add cardinal", d("add red"));
     A.assertTrue(T.match("select has color cardinal", d("select has color red")));
@@ -241,7 +239,7 @@ public class GrammarInducerTest {
     A.assertTrue(T.match("remove the highest of all", d("remove very top of all")));
     
     T.def("select the top most of has color red", d("select very top of has color red"));
-    A.assertTrue(T.match("select the bot most of all", d("select the very bot most of all")));
+    A.assertTrue(T.match("remove the bot most of all", d("remove very bot of all")));
 
     //T.printAllRules();
     //A.assertAll();
@@ -287,7 +285,7 @@ public class GrammarInducerTest {
   }
   
   @Test public void setsTest() {
-    LogInfo.begin_track("testSets");
+    LogInfo.begin_track("setsTest");
     ParseTester T = new ParseTester();
     Assertion A = soft;
     

@@ -49,9 +49,7 @@
 (for @dir (top bot left right front back)
 (rule $Direction (@dir) @dir (anchored 1))
 )
-(for @dir (top bot left right front back)
-(rule $Extreme (very @dir) @dir (anchored 1))
-)
+(rule $Extreme (very $Direction) (IdentityFn) (anchored 1))
 
 (for @rel (col row height color name age)
      (rule $Rel (@rel) (ConstantFn @rel) (anchored 1))

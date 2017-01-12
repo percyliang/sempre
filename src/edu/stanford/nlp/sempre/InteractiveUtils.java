@@ -11,11 +11,14 @@ import org.testng.collections.Lists;
 import com.google.common.collect.ImmutableList;
 
 import edu.stanford.nlp.sempre.interactive.BlockFn;
+import edu.stanford.nlp.sempre.interactive.DefinitionAligner;
+import edu.stanford.nlp.sempre.interactive.DefinitionAligner.Match;
 import edu.stanford.nlp.sempre.interactive.GrammarInducer;
 import edu.stanford.nlp.sempre.interactive.actions.ActionFormula;
 import fig.basic.IOUtils;
 import fig.basic.LispTree;
 import fig.basic.LogInfo;
+import fig.basic.Ref;
 
 /**
  * Utilities for grammar induction
@@ -30,9 +33,13 @@ public final class InteractiveUtils {
     }
     return deriv;
   }
-  
-  public static GrammarInducer getInducer(String head, String jsonDef, String sessionId, Parser parser, Params params) {
-    return getInducer(head, jsonDef, sessionId, parser, params, ActionFormula.Mode.block);
+  public static Derivation stripBlock(Derivation deriv) {
+    LogInfo.logs("StripBlock %s %s %s", deriv, deriv.rule, deriv.cat);
+    while ((deriv.rule.sem instanceof BlockFn || deriv.rule.sem instanceof IdentityFn)
+        && deriv.children.size()==1) {
+      deriv = deriv.child(0);
+    }
+    return deriv;
   }
   
   public static List<Derivation> derivsfromJson(String jsonDef, Parser parser, Params params) {
@@ -77,32 +84,68 @@ public final class InteractiveUtils {
     }
     return allDerivs;
   }
+  
+  public static List<String> utterancefromJson(String jsonDef) {
+    @SuppressWarnings("unchecked")
+    List<Object> body = Json.readValueHard(jsonDef, List.class);
+    // string together the body definition
+    List<String> utts = new ArrayList<>();
+    for (Object obj : body) {
+      @SuppressWarnings("unchecked")
+      List<String> pair = (List<String>)obj;
+      String utt = pair.get(0);
+
+      Example.Builder b = new Example.Builder();
+      // b.setId("session:" + sessionId);
+      b.setUtterance(utt);
+      Example ex = b.createExample();
+      ex.preprocess();
+      
+      utts.addAll(ex.getTokens());
+      if (!utts.get(utts.size()-1).equals(";")) utts.add(";");
+      
+    }
+    return utts;
+  }
   // parse the definition, match with the chart of origEx, and add new rules to grammar
-  public static GrammarInducer getInducer(String head, String jsonDef, String sessionId, Parser parser, Params params, ActionFormula.Mode mode) {
-    Derivation bodyDeriv = combine(derivsfromJson(jsonDef, parser, params), mode);
+  public static List<Rule> induceRules(List<String> head, List<String> def, Derivation bodyDeriv, List<Derivation> chartList) {
+    
+    List<Rule> inducedRules = new ArrayList<>();
+    GrammarInducer grammarInducer = new GrammarInducer(head, bodyDeriv, chartList);
+    inducedRules.addAll(grammarInducer.getRules());
+    inducedRules.addAll(DefinitionAligner.getRules(head, def, bodyDeriv, grammarInducer.matches));
+
+    LogInfo.end_track();;
+    return inducedRules;
+  }
+  
+  public static List<Rule> induceRulesHelper(String command, String head, String jsonDef,
+      Parser parser, Params params, String sessionId, Ref<Example> refEx) {
+    ActionFormula.Mode blockmode = command.equals(":def")? ActionFormula.Mode.block : ActionFormula.Mode.blockr;
+    
+    Derivation bodyDeriv = InteractiveUtils.combine(
+        InteractiveUtils.derivsfromJson(jsonDef, parser, params), blockmode);
     
     Example.Builder b = new Example.Builder();
     b.setId("session:" + sessionId);
     b.setUtterance(head);
     Example exHead = b.createExample();
     exHead.preprocess();
+    exHead.predDerivations = Lists.newArrayList(bodyDeriv);
+    
+    if (refEx != null) refEx.value = exHead;
 
     LogInfo.begin_track("Definition");
-    LogInfo.logs("mode: %s", mode);
-    LogInfo.logs("head: %s", exHead.utterance);
-    BeamFloatingParserState state = (BeamFloatingParserState)parser.parse(params, exHead, true);
+    LogInfo.logs("mode: %s", blockmode);
+    LogInfo.logs("head: %s", exHead.getTokens());
+    LogInfo.logs("body: %s", InteractiveUtils.utterancefromJson(jsonDef));
     LogInfo.logs("defderiv: %s", bodyDeriv.toLispTree());
+    
+    BeamFloatingParserState state = (BeamFloatingParserState)parser.parse(params, exHead, true);
     LogInfo.logs("anchored: %s", state.chartList);
-
-    GrammarInducer grammarInducer = new GrammarInducer(exHead, bodyDeriv, state.chartList);
-//  updates the value that the derivation is modified.
-//    for (Derivation d : grammarInducer.getHead().predDerivations) {
-//      d.value = null; // cuz ensureExecuted checks.
-//      d.ensureExecuted(parser.executor, exHead.context);
-//    }
-//    parser.parse(params, exHead, false);
-    LogInfo.end_track();;
-    return grammarInducer;
+    LogInfo.logs("exHead: %s", exHead.getTokens());
+    return InteractiveUtils.induceRules(exHead.getTokens(), 
+        InteractiveUtils.utterancefromJson(jsonDef), bodyDeriv, state.chartList);
   }
   
   public static void logRawDef(String utt, String jsonDef, String sessionId) {
@@ -141,7 +184,9 @@ public final class InteractiveUtils {
       if (cmode == mode) {
         return children.get(0);
       }
+      return children.get(0);
     }
+    
     Formula f = new ActionFormula(mode, 
         children.stream().map(d -> d.formula).collect(Collectors.toList()));
     Derivation res = new Derivation.Builder()

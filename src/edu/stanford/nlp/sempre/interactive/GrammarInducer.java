@@ -47,25 +47,24 @@ public class GrammarInducer {
 
   private List<Rule> inducedRules = null;
   
-  List<String> tokens;
+  List<String> headTokens;
   String id;
   
-  private List<Derivation> matches;
-  
-  // really just a return value
-  Example head;
+  public List<Derivation> matches;
   Derivation def;
 
   // induce rule is possible,
   // otherwise set the correct status
-  public GrammarInducer(Example origEx, Derivation def,  List<Derivation> chartList) {
-    id = origEx.id;
-    head = origEx;
-    this.def = def;
-    head.predDerivations = Lists.newArrayList(def);
+  public GrammarInducer(List<String> headTokens, Derivation def, List<Derivation> chartList) {
+    if (def.grammarInfo.start == -1) {
+      def.grammarInfo.start = 0;
+      def.grammarInfo.end = headTokens.size();
+    }
     
-    tokens = origEx.getTokens();
-    int numTokens = origEx.numTokens();
+    this.def = def;
+    
+    this.headTokens = headTokens;
+    int numTokens = headTokens.size();
 
     this.matches = new ArrayList<>();
     addMatches(def, makeChartMap(chartList));
@@ -84,13 +83,12 @@ public class GrammarInducer {
     LogInfo.logs("formulaToCat: %s", formulaToCat);
     
     buildFormula(def, formulaToCat);
-    def.grammarInfo.start = 0;
-    def.grammarInfo.end = tokens.size();
+    
 
     inducedRules = new ArrayList<>(induceRules(bestPacking, def));
   }
-  
-  private Map<String, List<Derivation>> makeChartMap(List<Derivation> chartList) {
+    
+  static Map<String, List<Derivation>> makeChartMap(List<Derivation> chartList) {
     Map<String, List<Derivation>> chartMap = new HashMap<>();
     for (Derivation d : chartList) {
       List<Derivation> derivs = chartMap.get(catFormulaKey(d));
@@ -103,14 +101,15 @@ public class GrammarInducer {
   
   // this is used to test for matches, same cat, same formula
   // maybe cat needs to be more flexible
-  private String catFormulaKey(Derivation d) {
+  static String catFormulaKey(Derivation d) {
     // return d.formula.toString();
     return getNormalCat(d) + "::" + d.formula.toString();
   }
   private String varName(Derivation anchored) {
-    return getNormalCat(anchored) + anchored.start + "_" + anchored.end;
+    int s = def.grammarInfo.start;
+    return getNormalCat(anchored) + (anchored.start - s) + "_" + (anchored.end - s);
   }
-  private String getNormalCat(Derivation def) {
+  static private String getNormalCat(Derivation def) {
     // return def.cat;
     String cat = def.getCat();
     if (cat.endsWith("s"))
@@ -145,18 +144,6 @@ public class GrammarInducer {
     }
   }
   
-  
-  private int shortestLength(List<Derivation> derivs) {
-    if (derivs == null) return 0;
-    if (derivs.size() == 0) return 0;
-    int shortest = Integer.MAX_VALUE;
-    for (Derivation d : derivs) {
-      int l = d.end - d.start;
-      if (l < shortest)
-        shortest = l;
-    }
-    return shortest;
-  }
   
   // the maximum starting index of every match that ends on or before end
   private int blockingIndex(List<Derivation> matches, int end) {
@@ -222,13 +209,11 @@ public class GrammarInducer {
   }
 
   private List<Rule> induceRules(List<Derivation> packings, Derivation defDeriv) {
-    
     List<Rule> inducedRules = new ArrayList<>();
     List<String> RHS = getRHS(defDeriv, packings);
     SemanticFn sem = getSemantics(defDeriv, packings);
     String cat = getNormalCat(defDeriv);
     Rule inducedRule = new Rule(cat, RHS, sem);
-    inducedRule.addInfo(id, 1.0);
     inducedRule.addInfo("induced", 1.0);
     inducedRule.addInfo("anchored", 1.0);
     if (!inducedRule.isCatUnary()) {
@@ -253,8 +238,8 @@ public class GrammarInducer {
 
     for (Derivation c : deriv.children) {
       buildFormula(c, replaceMap);
-      deriv.grammarInfo.start = Math.min(deriv.grammarInfo.start, c.grammarInfo.start);
-      deriv.grammarInfo.end = Math.max(deriv.grammarInfo.end, c.grammarInfo.end);
+      // deriv.grammarInfo.start = Math.min(deriv.grammarInfo.start, c.grammarInfo.start);
+      // deriv.grammarInfo.end = Math.max(deriv.grammarInfo.end, c.grammarInfo.end);
     }
     Rule rule = deriv.rule;
     List<Derivation> args = deriv.children;
@@ -329,7 +314,7 @@ public class GrammarInducer {
   }
 
   private List<String> getRHS(Derivation def, List<Derivation> packings) {
-    List<String> rhs = new ArrayList<>(tokens);
+    List<String> rhs = new ArrayList<>(headTokens);
     for (Derivation deriv : packings) {
       // LogInfo.logs("got (%d,%d):%s:%s", deriv.start, deriv.end, deriv.formula, deriv.cat);
       rhs.set(deriv.start, getNormalCat(deriv));
@@ -359,9 +344,4 @@ public class GrammarInducer {
     // could check the chart here set partial, but no need for now
     return ParseStatus.Nothing;
   }
-
-  public Example getHead() {
-    return head;
-  }
-
 }

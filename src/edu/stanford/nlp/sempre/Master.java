@@ -454,7 +454,6 @@ public class Master {
       b.setUtterance(utt);
       b.setContext(session.context);
       Example ex = b.createExample();
-
       ex.preprocess();
 
       // Parse!
@@ -500,14 +499,13 @@ public class Master {
     } else if (command.equals(":def") || command.equals(":def_ret")) {
       if (tree.children.size() == 3) {
         String head = tree.children.get(1).value;
-       
-        ActionFormula.Mode blockmode = command.equals(":def")? ActionFormula.Mode.block : ActionFormula.Mode.blockr;
+        String jsonDef = tree.children.get(2).value;
         
-        InteractiveUtils.logRawDef(head, tree.children.get(2).value, session.id);
-        GrammarInducer inducer = InteractiveUtils.getInducer(head, tree.children.get(2).value, session.id, builder.parser, builder.params, blockmode);
-          
-        List<Rule> inducedRules  = inducer.getRules();
-        response.ex = inducer.getHead();
+        InteractiveUtils.logRawDef(head, jsonDef, session.id);
+         
+        Ref<Example> refExHead = new Ref<>();
+        List<Rule> inducedRules = InteractiveUtils.induceRulesHelper(command, head, jsonDef, builder.parser, builder.params, session.id, refExHead);
+        response.ex = refExHead.value;
         response.candidateIndex = response.ex.predDerivations.size() > 0 ? 0 : -1;
         
         if (inducedRules.size() > 0) {

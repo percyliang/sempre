@@ -203,15 +203,6 @@ public class Learner {
         ParserState state = parseExample(params, ex, computeExpectedCounts);
         // training for definitions for interative stuff
         addToAutocomplete(ex, params);
-        if (ex.definition!=null && ex.definition.length() > 0 && state instanceof BeamParserState) { 
-            
-            List<Rule> newRules = induceGrammar(ex, ex.definition, parser, params);
-            params.inducedRules.addAll(newRules);
-            for (Rule rule : newRules) {
-              parser.grammar.addRule(rule);
-              parser.addRule(rule);
-            }
-        }
         
         if (computeExpectedCounts) {
           if (opts.checkGradient) {
@@ -389,23 +380,5 @@ public class Learner {
       return true;
     }
     return false;
-  }
-  
-  static List<Rule> induceGrammar(Example origEx, String def, Parser parser, Params params) {
-    Example.Builder b = new Example.Builder();
-    b.setUtterance(def);
-    b.setNBestInd(0);
-    LogInfo.logs("Currrent definition is %s", def);
-    
-    Example ex = b.createExample();
-    ex.preprocess();
-    
-    // Parse!
-    parser.parse(params, ex, false);
-    addToAutocomplete(ex, params);
-    GrammarInducer grammarInducer = new GrammarInducer(ex, null, null);
-    List<Rule> inducedRules = grammarInducer.getRules();
-    
-    return inducedRules;
   }
 }
