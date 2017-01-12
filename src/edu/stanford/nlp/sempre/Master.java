@@ -504,14 +504,18 @@ public class Master {
         InteractiveUtils.logRawDef(head, jsonDef, session.id);
          
         Ref<Example> refExHead = new Ref<>();
-        List<Rule> inducedRules = InteractiveUtils.induceRulesHelper(command, head, jsonDef, builder.parser, builder.params, session.id, refExHead);
-        response.ex = refExHead.value;
-        response.candidateIndex = response.ex.predDerivations.size() > 0 ? 0 : -1;
-        
+        List<Rule> inducedRules = InteractiveUtils.induceRulesHelper(command, head, jsonDef, 
+            builder.parser, builder.params, session.id, refExHead);
+       
+      
         if (inducedRules.size() > 0) {
           for (Rule rule : inducedRules) {
               InteractiveUtils.addRuleInteractive(rule, builder.parser);
           }
+          
+          builder.parser.parse(builder.params, refExHead.value, false);
+          response.ex = refExHead.value;
+          response.candidateIndex = response.ex.predDerivations.size() > 0 ? 0 : -1;
           // write out the grammar
           PrintWriter out = IOUtils.openOutAppendHard(Paths.get(Master.opts.newGrammarPath, session.id + ".grammar").toString());
           for (Rule rule : inducedRules) {

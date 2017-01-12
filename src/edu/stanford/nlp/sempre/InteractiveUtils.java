@@ -133,7 +133,7 @@ public final class InteractiveUtils {
     exHead.preprocess();
     exHead.predDerivations = Lists.newArrayList(bodyDeriv);
     
-    if (refEx != null) refEx.value = exHead;
+    refEx.value = exHead;
 
     LogInfo.begin_track("Definition");
     LogInfo.logs("mode: %s", blockmode);
