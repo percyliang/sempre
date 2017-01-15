@@ -39,10 +39,7 @@ public abstract class FlatWorld {
     allitems.removeAll(selected);
     // this.selected.removeAll(selected);
   }
-  // current standards for "this", which is the current scope if it exists,
-  // or selected item if this does not exist
-  // the local variable this
-  // explicit and global selections
+  // it is bad to ever mutate select, which will break scoping
   public void select(Set<Item> set) {
     this.selected = set;
   }

@@ -19,7 +19,8 @@ import fig.basic.Option;
 import fig.basic.Pair;
 
 /**
- * Takes the definition and the head, and generate some rules
+ * Takes the definition and the head,
+ * then induce rules through alignment
  * @author Sida Wang
  */
 

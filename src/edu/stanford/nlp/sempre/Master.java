@@ -448,39 +448,16 @@ public class Master {
     else if (command.equals(":q")) {
       // Create example
       String utt = tree.children.get(1).value;
-      
-      Example.Builder b = new Example.Builder();
-      b.setId("session:" + session.id);
-      b.setUtterance(utt);
-      b.setContext(session.context);
-      Example ex = b.createExample();
-      ex.preprocess();
-
-      // Parse!
-
+      Example ex = exampleFromUtterance(utt, session);
       builder.parser.parse(builder.params, ex, false);
-      Learner.addToAutocomplete(ex, builder.params);
-      
       response.ex = ex;
-
-      if (response.ex.predDerivations.size() > 0) {
-        response.candidateIndex =  0;
-        response.ex.setTargetFormula(response.ex.predDerivations.get(0).formula);
-        response.ex.setTargetValue(response.ex.predDerivations.get(0).value);
-      }
-      ILUtils.logJSONExample(response.ex, session.id, line);
+      logJSON(line, response, session);
 
     } else if (command.equals(":accept")) {
       String utt = tree.children.get(1).value;
       String formula = tree.children.get(2).value;
       
-      Example.Builder b = new Example.Builder();
-      b.setId("session:" + session.id);
-      b.setUtterance(utt);
-      b.setContext(session.context);
-      Example ex = b.createExample();
-      ex.preprocess();
-      
+      Example ex = exampleFromUtterance(utt, session);
       response.ex = ex;
       
       // Parse!
@@ -501,12 +478,7 @@ public class Master {
         LogInfo.end_track();
       }
       
-      if (response.ex.predDerivations.size() > 0) {
-        response.candidateIndex =  0;
-        response.ex.setTargetFormula(response.ex.predDerivations.get(0).formula);
-        response.ex.setTargetValue(response.ex.predDerivations.get(0).value);
-      }
-      ILUtils.logJSONExample(response.ex, session.id, line);
+      logJSON(line, response, session);
 
     } else if (command.equals(":def") || command.equals(":def_ret")) {
       if (tree.children.size() == 3) {
@@ -524,7 +496,7 @@ public class Master {
               ILUtils.addRuleInteractive(rule, builder.parser);
           }
           // TODO : should not have to parse again, I guess just set the formula or something
-          builder.parser.parse(builder.params, refExHead.value, false);
+          // builder.parser.parse(builder.params, refExHead.value, false);
           response.ex = refExHead.value;
           
           // write out the grammar
@@ -535,12 +507,7 @@ public class Master {
           out.close();
         }
         
-        if (response.ex.predDerivations.size() > 0) {
-          response.candidateIndex =  0;
-          response.ex.setTargetFormula(response.ex.predDerivations.get(0).formula);
-          response.ex.setTargetValue(response.ex.predDerivations.get(0).value);
-        }
-        ILUtils.logJSONExample(response.ex, session.id, line);
+        logJSON(line, response, session);
       } else {
         LogInfo.logs("Invalid format for def");
       }
@@ -581,39 +548,24 @@ public class Master {
     
   }
   
-  private void defineAccept(Session session, String query, String formula, Response response) {
-    session.updateContext();
-
-    // Create example
-    Example ex = new Example.Builder()
-        .setId("session:" + session.id)
-        .setUtterance(query)
-        .setContext(session.context)
-        .createExample();
+  private void logJSON(String line, Response response, Session session) {
+    if (response.ex.predDerivations.size() > 0) {
+      response.candidateIndex =  0;
+      response.ex.setTargetFormula(response.ex.predDerivations.get(0).formula);
+      response.ex.setTargetValue(response.ex.predDerivations.get(0).value);
+    }
+    ILUtils.logJSONExample(response.ex, session.id, line);
+  }
+  
+  private Example exampleFromUtterance(String utt, Session session) {
+    Example.Builder b = new Example.Builder();
+    b.setId("session:" + session.id);
+    b.setUtterance(utt);
+    b.setContext(session.context);
+    Example ex = b.createExample();
     ex.preprocess();
-    
-    if (!Strings.isNullOrEmpty(opts.newExamplesPath)) {
-      LogInfo.begin_track("Adding new example");
-      if (opts.newExamplesPath.endsWith(".json") || opts.newExamplesPath.endsWith(".lisp"))
-        Dataset.appendExampleToFile(opts.newExamplesPath, ex);
-      else
-        Dataset.appendExampleToFile( Paths.get(opts.newExamplesPath, session.id + ".lisp").toString(), ex);
-      LogInfo.end_track();
-    }
 
-    // Parse!
-    ParserState state;
-    state = builder.parser.parse(builder.params, ex, false);
-    Learner.addToAutocomplete(ex, builder.params);
-
-    response.ex = ex;
-
-    ex.log();
-    if (ex.predDerivations.size() > 0) {
-      response.candidateIndex = 0;
-      printDerivation(response.getDerivation());
-    }
-    session.updateContext(ex, opts.contextMaxExchanges);
+    return ex;
   }
 
 

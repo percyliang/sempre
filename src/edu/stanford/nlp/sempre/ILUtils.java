@@ -143,19 +143,20 @@ public final class ILUtils {
     b.setUtterance(head);
     Example exHead = b.createExample();
     exHead.preprocess();
-    exHead.predDerivations = Lists.newArrayList(bodyDeriv);
     
-    refEx.value = exHead;
-
     LogInfo.begin_track("Definition");
     LogInfo.logs("mode: %s", blockmode);
     LogInfo.logs("head: %s", exHead.getTokens());
     LogInfo.logs("body: %s", ILUtils.utterancefromJson(jsonDef));
     LogInfo.logs("defderiv: %s", bodyDeriv.toLispTree());
+    LogInfo.logs("bodyformula: %s", bodyDeriv.formula.toLispTree());
     
     BeamFloatingParserState state = (BeamFloatingParserState)parser.parse(params, exHead, true);
     LogInfo.logs("anchored: %s", state.chartList);
     LogInfo.logs("exHead: %s", exHead.getTokens());
+    
+    exHead.predDerivations = Lists.newArrayList(bodyDeriv);
+    refEx.value = exHead;
     return ILUtils.induceRules(exHead.getTokens(), 
         ILUtils.utterancefromJson(jsonDef), bodyDeriv, state.chartList);
   }
@@ -183,8 +184,9 @@ public final class ILUtils {
       jsonMap.put("cmd", command);
       jsonMap.put("sessionId", sessionId);
       jsonMap.put("utterance", ex.utterance);
-      jsonMap.put("targetFormula", ex.targetFormula);
       jsonMap.put("context", FlatWorld.fromContext("BlocksWorld", ex.context).toJSON());
+     
+      jsonMap.put("targetFormula", ex.targetFormula);
       if (ex.targetValue instanceof StringValue)
         jsonMap.put("targetValue", ((StringValue)ex.targetValue).toString());
       else
@@ -228,6 +230,7 @@ public final class ILUtils {
         children.stream().map(d -> d.formula).collect(Collectors.toList()));
     Derivation res = new Derivation.Builder()
         .formula(f)
+        // setting start and end to -1 is important, which grammarInducer uses to check things
         .withCallable(new SemanticFn.CallInfo("$Action", -1, -1, blockRule(mode), ImmutableList.copyOf(children)))
         .createDerivation();
     return res;
