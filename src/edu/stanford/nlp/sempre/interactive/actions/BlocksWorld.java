@@ -3,6 +3,7 @@ package edu.stanford.nlp.sempre.interactive.actions;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
@@ -79,8 +80,10 @@ public class BlocksWorld extends FlatWorld {
 
   public void base(int x, int y) {
     Block basecube = new Block(x, y, 0, CubeColor.Fake.toString());
-    this.allitems.add(basecube);
-    this.selected.add(basecube);
+    this.allitems = new HashSet<>(this.allitems);
+    this.selected = new HashSet<>(this.selected);
+    allitems.add(basecube);
+    selected.add(basecube);
   }
   
   public Set<Item> origin() {
@@ -103,10 +106,10 @@ public class BlocksWorld extends FlatWorld {
 
   // we only use names S to communicate with the client, internally its just the select variable
   public String toJSON() {
+    
     // selected thats no longer in the world gets nothing
-    allitems.removeIf(c -> ((Block)c).color == CubeColor.Fake && !this.selected.contains(c));
+    // allitems.removeIf(c -> ((Block)c).color == CubeColor.Fake && !this.selected.contains(c));
     selected.forEach(i -> i.names.add(SELECT));
-
     if (allitems.size() > opts.maxBlocks)
       allitems = new HashSet<>(new ArrayList<>(allitems).subList(0, opts.maxBlocks));
      
@@ -142,43 +145,24 @@ public class BlocksWorld extends FlatWorld {
 
   @Override
   public void update(String rel, Object value, Set<Item> selected) {
-    allitems.removeAll(selected);
     selected.forEach(i -> i.update(rel, value));
-    allitems.addAll(selected);
+    keyConsistency();
   }
   
   // if selected is no longer in all, make it fake colored, and add to all;
+  // likewise, if some fake colored block is no longer selected, remove it
   @Override
   public void reconcile() {
     Sets.difference(selected, allitems).forEach(i -> ((Block)i).color = CubeColor.Fake);
+    allitems.removeIf(c -> ((Block)c).color == CubeColor.Fake && !this.selected.contains(c));
     allitems.addAll(selected);
   }
-  
-//  @Override
-//  public void remove(Set<Item> set) {
-//    allitems.removeIf(i -> set.contains(i) && !selected.contains(i));
-//    Sets.intersection(set, selected).forEach(i -> ((Block)i).color = CubeColor.Fake);
-//    // allitems.removeIf(c -> ((Block)c).color == CubeColor.Fake && !this.selected.contains(c)); 
-//  }
-//  @Override
-//  public void select(Set<Item> set) {
-//    this.selected = set;
-//    // allitems.removeIf(c -> ((Block)c).color == CubeColor.Fake && !this.selected.contains(c)); 
-//  }
-//  @Override
-//  public Set<Item> all() {
-//    return realBlocks(this.all());
-//  }
 
   // block world specific actions, non-overriding move
   public void move(String dir, Set<Item> selected) {
-    allitems.removeAll(selected);
+    // allitems.removeAll(selected);
     selected.forEach(b -> {if (((Block)b).color != CubeColor.Fake) ((Block)b).move(Direction.fromString(dir)); });
-    //refreshSet(selected);
-    HashSet<Item> temp = new HashSet<>(selected);
-    temp.addAll(allitems);  // overriding move
-    allitems.clear();
-    allitems.addAll(temp);
+    keyConsistency();
     // allitems.addAll(selected); // this is not overriding
   }
   
@@ -198,28 +182,6 @@ public class BlocksWorld extends FlatWorld {
           )
           .collect(Collectors.toList()));
     }
-  }
-  
-  // get cubes at the outer locations
-  private Set<Item> extremeCubes(Direction dir, Set<Item> selected) {
-    Set<Item> realCubes = realBlocks(allitems);
-    return selected.stream().map(c -> {
-      Block d = (Block)c;
-      while(realCubes.contains(d.copy(dir)))
-        d = d.copy(dir);
-      return d;
-    }).collect(Collectors.toSet());
-  }
-  
-  private void refreshSet(Set<Item> set) {
-    HashSet<Item> s = new HashSet<>(set);
-    set.clear();
-    set.addAll(s);
-  }
-  
-  private Set<Item> realBlocks(Set<Item> all) {
-    return all.stream().filter(b-> ((Block)b).color != CubeColor.Fake)
-        .collect(Collectors.toSet());
   }
 
   //get cubes at extreme positions
@@ -263,7 +225,35 @@ public class BlocksWorld extends FlatWorld {
   
   @Override
   public void noop() {
-    refreshSet(this.selected);
-    refreshSet(this.allitems);
+    keyConsistency();
+  }
+  
+  // get cubes at the outer locations
+  private Set<Item> extremeCubes(Direction dir, Set<Item> selected) {
+    Set<Item> realCubes = realBlocks(allitems);
+    return selected.stream().map(c -> {
+      Block d = (Block)c;
+      while(realCubes.contains(d.copy(dir)))
+        d = d.copy(dir);
+      return d;
+    }).collect(Collectors.toSet());
+  }
+  
+  // ensures key coherence on mutations
+  private void refreshSet(Set<Item> set) {
+    List<Item> s = new LinkedList<>(set);
+    set.clear();
+    set.addAll(s);
+  }
+  
+  private void keyConsistency() {
+    refreshSet(allitems);
+    refreshSet(selected);
+    refreshSet(previous);
+  }
+  
+  private Set<Item> realBlocks(Set<Item> all) {
+    return all.stream().filter(b-> ((Block)b).color != CubeColor.Fake)
+        .collect(Collectors.toSet());
   }
 }

@@ -4,6 +4,7 @@ import static org.testng.AssertJUnit.assertEquals;
 
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import fig.basic.*;
 import edu.stanford.nlp.sempre.*;
@@ -96,9 +97,9 @@ public class ActionExecutorTest {
     LogInfo.begin_track("testBasicActions");
     runFormula(executor, "(:s (: select *) (: remove))", context, x -> x.allitems.size() == 0);
     runFormula(executor, "(:s (: select (row (number 1))) (: add red top) (: add red top))", context, x -> x.allitems.size() == 8);
-    runFormula(executor, "(:for * (: remove))", context, x -> x.allitems.size() == 0);
-    runFormula(executor, "(:foreach * (: remove))", context, x -> x.allitems.size() == 0);
-    runFormula(executor, "(:s (: select (or (color red) (color orange))) (: remove))", context, x -> x.allitems.size() == 3);
+    runFormula(executor, "(:for * (: remove))", context, x -> real(x.allitems).size() == 0 );
+    runFormula(executor, "(:foreach * (: remove))", context, x -> real(x.allitems).size() == 0);
+    runFormula(executor, "(:s (: select (or (color red) (color orange))) (: remove))", context,  x -> real(x.allitems).size() == 3);
     runFormula(executor, "(:foreach (or (color red) (color orange)) (:loop (number 5) (: add red top)))",
        context, x -> x.allitems.size() == 9);
     runFormula(executor, "(:for (or (color red) (color blue)) (:loop (number 5) (:s (: move left) (: move right) (: move left))))",
@@ -107,15 +108,20 @@ public class ActionExecutorTest {
     LogInfo.end_track();
   }
   
+  private Set<Item> real(Set<Item> all) {
+    return all.stream().filter(c -> ((Block)c).color != CubeColor.Fake).collect(Collectors.toSet());
+  }
+  
   @Test public void testMoreActions() {
     // this is a green stick
     String defaultBlocks = "[[1,1,1,\"Green\",[]],[1,1,2,\"Green\",[]],[1,1,3,\"Green\",[]],[1,1,4,\"Green\",[]]]";
     ContextValue context = getContext(defaultBlocks);
     LogInfo.begin_track("testMoreActions");
-    runFormula(executor, "(:s (: select *) (:for (call veryx left this) (: remove)))", context, x -> x.allitems.size() == 0);
+    runFormula(executor, "(:s (: select *) (:for (call veryx left this) (: remove)))", context,
+        x -> x.allitems.stream().allMatch(c -> ((Block)c).color == CubeColor.Fake) );
     runFormula(executor, "(:for * (:for (call veryx bot) (:loop (number 2) (:s (: add red left) (: select (call adj top))))))", context, 
         x -> x.allitems.size() == 6);
-    runFormula(executor, "(:s (:for * (: select)) (: select (call veryx bot selected)) (: remove selected) )", context, x -> x.allitems.size() == 3);
+    runFormula(executor, "(:s (:for * (: select)) (: select (call veryx bot selected)) (: remove selected) )", context, x -> real(x.allitems).size() == 3);
     // x -> x.selected().iterator().next().get("height") == new Integer(3)
     runFormula(executor, "(:loop (count (color green)) (: add red left *))", context, x -> x.allitems.size() == 20);
 

@@ -69,6 +69,7 @@ public class ActionExecutor extends Executor {
       String id = ((NameValue)method).id;
       // all actions takes a fixed set as argument
       invoke(id, world, f.args.subList(1, f.args.size()).stream().map(x -> processSetFormula(x, world)).toArray());
+      world.reconcile();
     } else if (f.mode == ActionFormula.Mode.sequential) {
       for (Formula child : f.args) {
         performActions((ActionFormula)child, world);
@@ -95,22 +96,34 @@ public class ActionExecutor extends Executor {
       performActions((ActionFormula)f.args.get(1), world);
     } else if (f.mode == ActionFormula.Mode.foreach) {
       Set<Object> selected = toSet(processSetFormula(f.args.get(0), world));
-      //Set<Item> previous = world.selected;
+      Set<Item> previous = world.selected;
       CopyOnWriteArraySet<Object> fixedset = Sets.newCopyOnWriteArraySet(selected);
       for (Object item : fixedset) {
         world.selected = (toItemSet(toSet(item)));
         performActions((ActionFormula)f.args.get(1), world);
       }
-      //world.selected = previous;
+      world.selected = previous;
     } else if (f.mode == ActionFormula.Mode.isolate) {
       Set<Item> scope = toItemSet(toSet(processSetFormula(f.args.get(0), world)));
-      Set<Item> previous = world.allitems;
+      Set<Item> prevAll = world.allitems;
+      Set<Item> prevSelected = world.selected;
+      Set<Item> prevPrevious = world.previous;
+      
       world.allitems = scope;
+      world.selected = Sets.intersection(world.selected, scope);
+      world.previous = Sets.intersection(world.previous, scope);
+
       performActions((ActionFormula)f.args.get(1), world);
-      world.allitems.addAll(previous); // merge, weak
+      
+      world.allitems.addAll(prevAll); // merge, overriding;
+      world.selected = prevSelected;
+      world.previous = prevPrevious;
+      world.reconcile();
+      
     } else if (f.mode == ActionFormula.Mode.block || f.mode == ActionFormula.Mode.blockr) {
-      Set<Item> previous = world.selected;
-      Set<Item> prevprevious = world.previous;
+      // we should never mutate selected in actions
+      Set<Item> prevSelected = world.selected;
+      Set<Item> prevPrevious = world.previous;
       world.previous = world.selected;
       
       for (Formula child : f.args) {
@@ -119,10 +132,10 @@ public class ActionExecutor extends Executor {
       
       // restore on default blocks
       if (f.mode == ActionFormula.Mode.block) {
-        world.selected = previous;
+        world.selected = prevSelected;
         world.reconcile();
       }
-      world.previous = prevprevious;
+      world.previous = prevPrevious;
     }
 //    } else if (f.mode == ActionFormula.Mode.let) {
 //    // let declares a new local variable
