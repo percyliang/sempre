@@ -252,7 +252,8 @@ public final class ILUtils {
     BlockFn b = new BlockFn(mode);
     b.init(LispTree.proto.parseFromString("(a block)"));
     return new Rule("$Action", Lists.newArrayList("$Action", "$Action"), b);
-  }  
+  }
+  
   public static Derivation combine(List<Derivation> children, ActionFormula.Mode mode) {
     // stop double blocking
     if (children.size() == 1) {

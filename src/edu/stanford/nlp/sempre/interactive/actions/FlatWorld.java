@@ -36,6 +36,7 @@ public abstract class FlatWorld {
   }
   // general actions, flatness means these actions can be performed on allitems
   public void remove(Set<Item> selected) {
+    allitems = new HashSet<>(allitems);
     allitems.removeAll(selected);
     // this.selected.removeAll(selected);
   }

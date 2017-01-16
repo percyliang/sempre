@@ -106,8 +106,13 @@ public class ActionExecutor extends Executor {
     } else if (f.mode == ActionFormula.Mode.forset) {
       // mostly deprecated
       Set<Object> selected = toSet(processSetFormula(f.args.get(0), world));
+      Set<Item> prevSelected = world.selected;
+
       world.selected = toItemSet(selected);
       performActions((ActionFormula)f.args.get(1), world);
+      
+      world.selected = prevSelected;
+      world.merge();
     } else if (f.mode == ActionFormula.Mode.foreach) {
       Set<Item> selected = toItemSet(toSet(processSetFormula(f.args.get(0), world)));
       Set<Item> prevSelected = world.selected;
