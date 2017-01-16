@@ -233,7 +233,7 @@ public final class ILUtils {
     jsonMap.put("log", log);
 
     writer(Paths.get(ILUtils.opts.JSONLogPath, sessionId + ".log").toString())
-    .accept(Json.prettyWriteValueAsStringHard(jsonMap) + "\n");
+    .accept(Json.writeValueAsStringHard(jsonMap) + "\n");
 
     writer(Paths.get(ILUtils.opts.newInteractiveCommandLog).toString())
     .accept(Json.writeValueAsStringHard(jsonMap) + "\n");
