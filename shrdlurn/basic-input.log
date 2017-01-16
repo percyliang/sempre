@@ -1,0 +1,64 @@
+{"time":"2017-01-15T23:20:47.151","id":"sidaw","log":"(:context [[0,0,0,\\\"Fake\\\",[\\\"S\\\"]]])"}
+{"time":"2017-01-15T23:20:47.211","id":"sidaw","log":"(:q \"add red\")"}
+{"time":"2017-01-15T23:20:47.528","id":"sidaw","log":"(:accept \"add red\" \"(: add red here)\")"}
+{"time":"2017-01-15T23:20:47.548","id":"sidaw","log":"(:autocomplete \"\")"}
+{"time":"2017-01-15T23:20:52.539","id":"sidaw","log":"(:context [[0,0,0,\\\"Red\\\",[\\\"S\\\"]]])"}
+{"time":"2017-01-15T23:20:52.548","id":"sidaw","log":"(:q \"add red top\")"}
+{"time":"2017-01-15T23:20:52.884","id":"sidaw","log":"(:accept \"add red top\" \"(: add red top)\")"}
+{"time":"2017-01-15T23:20:52.890","id":"sidaw","log":"(:autocomplete \"\")"}
+{"time":"2017-01-15T23:20:54.360","id":"sidaw","log":"(:context [[0,0,0,\\\"Red\\\",[\\\"S\\\"]],[0,0,1,\\\"Red\\\",[]]])"}
+{"time":"2017-01-15T23:20:54.369","id":"sidaw","log":"(:q \"select red\")"}
+{"time":"2017-01-15T23:20:57.765","id":"sidaw","log":"(:context [[0,0,0,\\\"Red\\\",[\\\"S\\\"]],[0,0,1,\\\"Red\\\",[]]])"}
+{"time":"2017-01-15T23:20:57.778","id":"sidaw","log":"(:q \"select has color red\")"}
+{"time":"2017-01-15T23:20:58.068","id":"sidaw","log":"(:accept \"select has color red\" \"(:for (color red) (: select))\")"}
+{"time":"2017-01-15T23:20:58.087","id":"sidaw","log":"(:autocomplete \"\")"}
+{"time":"2017-01-15T23:20:59.982","id":"sidaw","log":"(:def_ret \"select red\" \"[[\\\"select has color red\\\",\\\"(:for (color red) (: select))\\\"]]\")"}
+{"time":"2017-01-15T23:21:08.531","id":"sidaw","log":"(:context [[0,0,0,\\\"Red\\\",[\\\"S\\\"]],[0,0,1,\\\"Red\\\",[\\\"S\\\"]]])"}
+{"time":"2017-01-15T23:21:08.539","id":"sidaw","log":"(:q \"select origin\")"}
+{"time":"2017-01-15T23:21:09.366","id":"sidaw","log":"(:accept \"select origin\" \"(:for (call origin) (: select))\")"}
+{"time":"2017-01-15T23:21:09.371","id":"sidaw","log":"(:autocomplete \"\")"}
+{"time":"2017-01-15T23:21:15.471","id":"sidaw","log":"(:context [[0,0,0,\\\"Red\\\",[\\\"S\\\"]],[0,0,1,\\\"Red\\\",[]]])"}
+{"time":"2017-01-15T23:21:15.494","id":"sidaw","log":"(:q \"yellow stick 5\")"}
+{"time":"2017-01-15T23:21:32.361","id":"sidaw","log":"(:context [[0,0,0,\\\"Red\\\",[\\\"S\\\"]],[0,0,1,\\\"Red\\\",[]]])"}
+{"time":"2017-01-15T23:21:32.374","id":"sidaw","log":"(:q \"add yellow top 4 times\")"}
+{"time":"2017-01-15T23:21:36.602","id":"sidaw","log":"(:context [[0,0,0,\\\"Red\\\",[\\\"S\\\"]],[0,0,1,\\\"Red\\\",[]]])"}
+{"time":"2017-01-15T23:21:36.620","id":"sidaw","log":"(:q \"repeat 4 [ add yellow top]\")"}
+{"time":"2017-01-15T23:21:37.173","id":"sidaw","log":"(:accept \"repeat 4 [ add yellow top]\" \"(:loop (number 4) (: add yellow top))\")"}
+{"time":"2017-01-15T23:21:37.183","id":"sidaw","log":"(:autocomplete \"\")"}
+{"time":"2017-01-15T23:21:39.608","id":"sidaw","log":"(:def_ret \"add yellow top 4 times\" \"[[\\\"repeat 4 [ add yellow top]\\\",\\\"(:loop (number 4) (: add yellow top))\\\"]]\")"}
+{"time":"2017-01-15T23:21:43.980","id":"sidaw","log":"(:context [[0,0,0,\\\"Red\\\",[\\\"S\\\"]],[0,0,1,\\\"Red\\\",[]],[0,0,2,\\\"Yellow\\\",[]],[0,0,3,\\\"Yellow\\\",[]],[0,0,4,\\\"Yellow\\\",[]],[0,0,5,\\\"Yellow\\\",[]]])"}
+{"time":"2017-01-15T23:21:43.993","id":"sidaw","log":"(:q \"add red 4 times\")"}
+{"time":"2017-01-15T23:21:46.945","id":"sidaw","log":"(:context [[0,0,0,\\\"Red\\\",[\\\"S\\\"]],[0,0,1,\\\"Red\\\",[]],[0,0,2,\\\"Yellow\\\",[]],[0,0,3,\\\"Yellow\\\",[]],[0,0,4,\\\"Yellow\\\",[]],[0,0,5,\\\"Yellow\\\",[]]])"}
+{"time":"2017-01-15T23:21:46.967","id":"sidaw","log":"(:q \"add red top 4 times\")"}
+{"time":"2017-01-15T23:21:47.547","id":"sidaw","log":"(:accept \"add red top 4 times\" \"(:loop (number 4) (: add red top))\")"}
+{"time":"2017-01-15T23:21:47.553","id":"sidaw","log":"(:autocomplete \"\")"}
+{"time":"2017-01-15T23:21:54.311","id":"sidaw","log":"(:context [[0,0,0,\\\"Red\\\",[\\\"S\\\"]],[0,0,1,\\\"Red\\\",[]],[0,0,2,\\\"Yellow\\\",[]],[0,0,3,\\\"Yellow\\\",[]],[0,0,4,\\\"Yellow\\\",[]],[0,0,5,\\\"Yellow\\\",[]],[0,0,6,\\\"Red\\\",[]],[0,0,7,\\\"Red\\\",[]],[0,0,8,\\\"Red\\\",[]],[0,0,9,\\\"Red\\\",[]]])"}
+{"time":"2017-01-15T23:21:54.333","id":"sidaw","log":"(:q \"red stick size 4\")"}
+{"time":"2017-01-15T23:22:02.232","id":"sidaw","log":"(:context [[0,0,0,\\\"Red\\\",[\\\"S\\\"]],[0,0,1,\\\"Red\\\",[]],[0,0,2,\\\"Yellow\\\",[]],[0,0,3,\\\"Yellow\\\",[]],[0,0,4,\\\"Yellow\\\",[]],[0,0,5,\\\"Yellow\\\",[]],[0,0,6,\\\"Red\\\",[]],[0,0,7,\\\"Red\\\",[]],[0,0,8,\\\"Red\\\",[]],[0,0,9,\\\"Red\\\",[]]])"}
+{"time":"2017-01-15T23:22:02.250","id":"sidaw","log":"(:q \"[add red; select top] 4 times\")"}
+{"time":"2017-01-15T23:22:02.877","id":"sidaw","log":"(:accept \"[add red; select top] 4 times\" \"(:loop (number 4) (:s (: add red here) (:for (call adj top) (: select))))\")"}
+{"time":"2017-01-15T23:22:02.891","id":"sidaw","log":"(:autocomplete \"\")"}
+{"time":"2017-01-15T23:22:06.003","id":"sidaw","log":"(:def_ret \"red stick size 4\" \"[[\\\"[add red; select top] 4 times\\\",\\\"(:loop (number 4) (:s (: add red here) (:for (call adj top) (: select))))\\\"]]\")"}
+{"time":"2017-01-15T23:22:16.995","id":"sidaw","log":"(:context [[0,0,0,\\\"Fake\\\",[\\\"S\\\"]]])"}
+{"time":"2017-01-15T23:22:17.003","id":"sidaw","log":"(:q \"red square size 4\")"}
+{"time":"2017-01-15T23:22:21.425","id":"sidaw","log":"(:context [[0,0,0,\\\"Fake\\\",[\\\"S\\\"]]])"}
+{"time":"2017-01-15T23:22:21.446","id":"sidaw","log":"(:q \"red stick size 4\")"}
+{"time":"2017-01-15T23:22:35.484","id":"sidaw","log":"(:context [[0,0,0,\\\"Fake\\\",[\\\"S\\\"]]])"}
+{"time":"2017-01-15T23:22:35.505","id":"sidaw","log":"(:q \"red sq size 4\")"}
+{"time":"2017-01-15T23:22:45.751","id":"sidaw","log":"(:context [[0,0,0,\\\"Fake\\\",[\\\"S\\\"]]])"}
+{"time":"2017-01-15T23:22:45.773","id":"sidaw","log":"(:q \"repeat 4 [{red stick size 4}]\")"}
+{"time":"2017-01-15T23:22:49.522","id":"sidaw","log":"(:context [[0,0,0,\\\"Fake\\\",[\\\"S\\\"]]])"}
+{"time":"2017-01-15T23:22:49.540","id":"sidaw","log":"(:q \"repeat 4 [{red stick size 4}; select left]\")"}
+{"time":"2017-01-15T23:22:50.572","id":"sidaw","log":"(:accept \"repeat 4 [{red stick size 4}; select left]\" \"(:loop (number 4) (:s (:blk (:loop (number 4) (:s (: add red here) (:for (call adj top) (: select))))) (:for (call adj left) (: select))))\")"}
+{"time":"2017-01-15T23:22:50.594","id":"sidaw","log":"(:autocomplete \"\")"}
+{"time":"2017-01-15T23:22:52.181","id":"sidaw","log":"(:def_ret \"red sq size 4\" \"[[\\\"repeat 4 [{red stick size 4}; select left]\\\",\\\"(:loop (number 4) (:s (:blk (:loop (number 4) (:s (: add red here) (:for (call adj top) (: select))))) (:for (call adj left) (: select))))\\\"]]\")"}
+{"time":"2017-01-15T23:24:11.450","id":"sidaw","log":"(:context [[0,0,0,\\\"Fake\\\",[\\\"S\\\"]]])"}
+{"time":"2017-01-15T23:24:11.465","id":"sidaw","log":"(:q \"red sq size 4\")"}
+{"time":"2017-01-15T23:24:12.270","id":"sidaw","log":"(:accept \"red sq size 4\" \"(:loop (number 4) (:s (:blk (:loop (number 4) (:s (: add red here) (:for (call adj top) (: select))))) (:for (call adj left) (: select))))\")"}
+{"time":"2017-01-15T23:24:12.281","id":"sidaw","log":"(:autocomplete \"\")"}
+{"time":"2017-01-15T23:24:52.169","id":"sidaw","log":"(:context [[0,4,0,\\\"Fake\\\",[\\\"S\\\"]],[0,3,0,\\\"Red\\\",[]],[0,2,0,\\\"Red\\\",[]],[0,1,0,\\\"Red\\\",[]],[0,0,0,\\\"Red\\\",[]],[0,3,1,\\\"Red\\\",[]],[0,2,1,\\\"Red\\\",[]],[0,1,1,\\\"Red\\\",[]],[0,0,1,\\\"Red\\\",[]],[0,3,2,\\\"Red\\\",[]],[0,2,2,\\\"Red\\\",[]],[0,1,2,\\\"Red\\\",[]],[0,0,2,\\\"Red\\\",[]],[0,3,3,\\\"Red\\\",[]],[0,2,3,\\\"Red\\\",[]],[0,1,3,\\\"Red\\\",[]],[0,0,3,\\\"Red\\\",[]]])"}
+{"time":"2017-01-15T23:24:52.177","id":"sidaw","log":"(:q \"add red top\")"}
+{"time":"2017-01-15T23:24:52.666","id":"sidaw","log":"(:accept \"add red top\" \"(: add red top)\")"}
+{"time":"2017-01-15T23:24:52.677","id":"sidaw","log":"(:autocomplete \"\")"}
+{"time":"2017-01-15T23:35:07.925","id":"sidaw","log":"(:context [[0,0,0,\\\"Fake\\\",[\\\"S\\\"]]])"}
+{"time":"2017-01-15T23:35:07.950","id":"sidaw","log":"(:q \"add red top 3 times\")"}
