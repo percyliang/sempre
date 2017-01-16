@@ -95,14 +95,17 @@ public class ActionExecutor extends Executor {
       world.selected = toItemSet(selected);
       performActions((ActionFormula)f.args.get(1), world);
     } else if (f.mode == ActionFormula.Mode.foreach) {
-      Set<Object> selected = toSet(processSetFormula(f.args.get(0), world));
-      Set<Item> previous = world.selected;
-      CopyOnWriteArraySet<Object> fixedset = Sets.newCopyOnWriteArraySet(selected);
-      for (Object item : fixedset) {
-        world.selected = (toItemSet(toSet(item)));
+      Set<Item> selected = toItemSet(toSet(processSetFormula(f.args.get(0), world)));
+      Set<Item> prevSelected = world.selected;
+      // CopyOnWriteArraySet<Object> fixedset = Sets.newCopyOnWriteArraySet(selected);
+      Iterator<Item> iterator = selected.iterator();
+      while (iterator.hasNext()) {
+        world.selected = (toItemSet(toSet(iterator.next())));
         performActions((ActionFormula)f.args.get(1), world);
       }
-      world.selected = previous;
+      world.selected = prevSelected;
+      world.reconcile();
+      
     } else if (f.mode == ActionFormula.Mode.isolate) {
       Set<Item> scope = toItemSet(toSet(processSetFormula(f.args.get(0), world)));
       Set<Item> prevAll = world.allitems;
