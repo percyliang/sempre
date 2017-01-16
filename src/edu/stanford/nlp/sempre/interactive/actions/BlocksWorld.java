@@ -152,7 +152,7 @@ public class BlocksWorld extends FlatWorld {
   // if selected is no longer in all, make it fake colored, and add to all;
   // likewise, if some fake colored block is no longer selected, remove it
   @Override
-  public void reconcile() {
+  public void merge() {
     Sets.difference(selected, allitems).forEach(i -> ((Block)i).color = CubeColor.Fake);
     allitems.removeIf(c -> ((Block)c).color == CubeColor.Fake && !this.selected.contains(c));
     allitems.addAll(selected);

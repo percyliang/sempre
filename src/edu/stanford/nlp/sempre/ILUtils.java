@@ -1,13 +1,18 @@
 package edu.stanford.nlp.sempre;
 
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.testng.collections.Lists;
 
@@ -34,11 +39,29 @@ public final class ILUtils {
   public static class Options {
     @Option(gloss = "Execute these commands before starting")
     public String JSONLogPath = "./int-output/json/";
-  }
 
+    @Option(gloss = "path to store new command logs")
+    public String newInteractiveCommandLog;
+    
+    @Option(gloss = "read and run these commands on startup")
+    public String interactiveCommandLog;
+  }
   public static Options opts = new Options();
   private ILUtils() { }
 
+  // dont spam my log when reading things in the beginning...
+  public static boolean fakeLog = false;
+  private static Consumer<String> writer(String path) {
+    if (fakeLog)
+      return s -> LogInfo.log(s);
+    else
+      return s -> {
+        PrintWriter out = IOUtils.openOutAppendHard(path);
+        out.write(s);
+        out.close();
+      };
+  }
+  
   public static Derivation stripDerivation(Derivation deriv) {
     while (deriv.rule.sem instanceof IdentityFn) {
       deriv = deriv.child(0);
@@ -161,45 +184,59 @@ public final class ILUtils {
         ILUtils.utterancefromJson(jsonDef), bodyDeriv, state.chartList);
   }
   
-  public static void logRawDef(String utt, String jsonDef, String sessionId) {
-    PrintWriter out = IOUtils.openOutAppendHard(Paths.get(Master.opts.newGrammarPath, sessionId + ".def").toString());
-    // deftree.addChild(oldEx.utterance);
-    LispTree deftree = LispTree.proto.newList(":def", utt);
-    deftree.addChild(jsonDef);
-    Example oldEx = new Example.Builder()
-        .setId(sessionId)
-        .setUtterance(utt)
-        .createExample();
-    LispTree treewithdef = oldEx.toLispTree(false).addChild(deftree);
-    out.println(treewithdef.toString());
-    out.flush();
-    out.close();
-  }
-  
+//  public static void logRawDef(String utt, String jsonDef, String sessionId) {
+//    PrintWriter out = IOUtils.openOutAppendHard(Paths.get(Master.opts.newGrammarPath, sessionId + ".def").toString());
+//    // deftree.addChild(oldEx.utterance);
+//    LispTree deftree = LispTree.proto.newList(":def", utt);
+//    deftree.addChild(jsonDef);
+//    Example oldEx = new Example.Builder()
+//        .setId(sessionId)
+//        .setUtterance(utt)
+//        .createExample();
+//    LispTree treewithdef = oldEx.toLispTree(false).addChild(deftree);
+//    out.println(treewithdef.toString());
+//    out.flush();
+//    out.close();
+//  }
+
   public static void logJSONExample(Example ex, String sessionId, String command) {
-    
-    Map<String, Object> jsonMap = new HashMap<>();
+    Map<String, Object> jsonMap = new LinkedHashMap<>();
     jsonMap.put("time", LocalDateTime.now().toString());
     try {
       jsonMap.put("cmd", command);
-      jsonMap.put("sessionId", sessionId);
       jsonMap.put("utterance", ex.utterance);
+      jsonMap.put("sessionId", sessionId);           
       jsonMap.put("context", FlatWorld.fromContext("BlocksWorld", ex.context).toJSON());
-     
       jsonMap.put("targetFormula", ex.targetFormula);
+      
       if (ex.targetValue instanceof StringValue)
         jsonMap.put("targetValue", ((StringValue)ex.targetValue).toString());
       else
         jsonMap.put("targetValue", ex.targetValue);
       
+      if (ex.predDerivations != null) {
+        jsonMap.put("predDerivSize", ex.predDerivations.size());
+      }
     } catch (Exception e) {
       jsonMap.put("exception", e.toString());
     } finally {
-      PrintWriter out = IOUtils.openOutAppendHard(Paths.get(ILUtils.opts.JSONLogPath, sessionId + ".json").toString());
+      
       String jsonStr = Json.prettyWriteValueAsStringHard(jsonMap) + "\n";
-      out.write(jsonStr);
-      out.close();
+      writer(Paths.get(ILUtils.opts.JSONLogPath, sessionId + ".json").toString()).accept(jsonStr);
     }
+  }
+  
+  public static void logJSON(String sessionId, String log) {
+    Map<String, Object> jsonMap = new LinkedHashMap<>();
+    jsonMap.put("time", LocalDateTime.now().toString());
+    jsonMap.put("id", sessionId);
+    jsonMap.put("log", log);
+
+    writer(Paths.get(ILUtils.opts.JSONLogPath, sessionId + ".log").toString())
+    .accept(Json.prettyWriteValueAsStringHard(jsonMap) + "\n");
+
+    writer(Paths.get(ILUtils.opts.newInteractiveCommandLog).toString())
+    .accept(Json.writeValueAsStringHard(jsonMap) + "\n");
   }
   
   public static synchronized void addRuleInteractive(Rule rule, Parser parser) {
@@ -235,5 +272,4 @@ public final class ILUtils {
         .createDerivation();
     return res;
   }
-
 }

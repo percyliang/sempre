@@ -1023,15 +1023,17 @@ lambda { |e| system 'mkdir -p ./int-output/grammar/'},
 lambda { |e| system 'mkdir -p ./int-output/json/'},
 
 o('Master.newExamplesPath', './int-output/examples/'),
-o('Master.logPath', './int-output/logs/'),
+# o('Master.logPath', './int-output/logs/'),
 o('Master.newGrammarPath', './int-output/grammar/'),
 o('ILUtils.JSONLogPath', './int-output/json/'),
+
+o('ILUtils.newInteractiveCommandLog', './int-output/interactive.log'),
+o('ILUtils.interactiveCommandLog', './int-output/basic-input.log'),
 
 o('Master.onlineLearnExamples', true),
 o('Master.independentSessions', false),
 
-o('Dataset.inPaths', 'def:./shrdlurn/sidaw.lisp'),
-o('Learner.maxTrainIters', 1),
+o('Master.onlyInteractive', true),
 
 o('server', true),
 o('Server.numThreads', 8),

@@ -26,7 +26,7 @@ public abstract class FlatWorld {
   public abstract Set<Item> has(String rel, Set<Object> values);
   public abstract Set<Object> get(String rel, Set<Item> subset);
   public abstract void update(String rel, Object value, Set<Item> selected);
-  public abstract void reconcile();
+  public abstract void merge();
   // public abstract void select(Set<Item> set);
   
   public FlatWorld() {

@@ -3,14 +3,11 @@ package edu.stanford.nlp.sempre;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Maps;
 
-import edu.stanford.nlp.sempre.Master.Response;
-import edu.stanford.nlp.sempre.interactive.GrammarInducer;
-import edu.stanford.nlp.sempre.interactive.PragmaticListener;
+
 import fig.basic.*;
 import fig.exec.Execution;
 
 import java.io.PrintWriter;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -233,13 +230,6 @@ public class Learner {
         // Write out examples and predictions
         if (opts.outputPredDerivations && Builder.opts.parser.equals("FloatingParser")) {
           ExampleUtils.writeParaphraseSDF(iter, group, ex, opts.outputPredDerivations);
-        }
-        
-        // pragmatics for interative stuff
-        if (Master.opts.bePragmatic) {
-          if (opts.batchSize!=1) throw new RuntimeException("pragmatic batch learning is not supported.");
-          parseExample(params, ex, true);
-          this.params.pragmaticListener.addExample(ex);
         }
 
         // To save memory

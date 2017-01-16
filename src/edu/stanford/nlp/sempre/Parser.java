@@ -233,17 +233,6 @@ public abstract class Parser {
           break;
         }
       }
-      if (Master.opts.bePragmatic) {
-        Derivation.sortByPragmaticScore(predDerivations);
-
-        for (int i = 0; i < numCandidates; i++) {
-          Derivation deriv = predDerivations.get(i);
-          if (deriv.compatibility == 1) {
-            correctIndexAfterParsePrag = i;
-            break;
-          }
-        }
-      }
     }
     // Compute probabilities
     double[] probs = Derivation.getProbs(predDerivations, 1);

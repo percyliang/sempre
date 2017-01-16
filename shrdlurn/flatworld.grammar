@@ -19,6 +19,7 @@
 # (rule $Action (for $Sets $Action ) (lambda s (lambda a (:for (var s) (var a)))) (anchored 1))
 (rule $Action (foreach $Sets $Action ) (lambda s (lambda a (:foreach (var s) (var a)))) (anchored 1))
 (rule $Action (isolate $Sets $Action ) (lambda s (lambda a (:isolate (var s) (var a)))) (anchored 1))
+(rule $Action (while $Sets $Action ) (lambda s (lambda a (:while (var s) (var a)))) (anchored 1))
 
 # global actions
 (rule $Action ($Action1 $Sets) (lambda a (lambda s (:for (var s) (var a)))) (anchored 1))

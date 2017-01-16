@@ -40,6 +40,12 @@ public class ActionExecutor extends Executor {
 
     @Option(gloss = "The type of FlatWorld used")
     public String FlatWorldType = "BlocksWorld";
+    
+    @Option(gloss = "the maximum number of primitive calls until we stop executing")
+    public int maxSteps= 1000;
+    
+    @Option(gloss = "The maximum number of while calls")
+    public int maxWhile = 20;
   }
   public static Options opts = new Options();
  
@@ -69,7 +75,7 @@ public class ActionExecutor extends Executor {
       String id = ((NameValue)method).id;
       // all actions takes a fixed set as argument
       invoke(id, world, f.args.subList(1, f.args.size()).stream().map(x -> processSetFormula(x, world)).toArray());
-      world.reconcile();
+      world.merge();
     } else if (f.mode == ActionFormula.Mode.sequential) {
       for (Formula child : f.args) {
         performActions((ActionFormula)child, world);
@@ -89,6 +95,14 @@ public class ActionExecutor extends Executor {
       // using the empty set to represent false
       boolean cond = toSet(processSetFormula(f.args.get(0), world)).iterator().hasNext();
       if (cond) performActions((ActionFormula)f.args.get(1), world);
+    } else if (f.mode == ActionFormula.Mode.whileloop) {
+      // using the empty set to represent false
+      boolean cond = toSet(processSetFormula(f.args.get(0), world)).iterator().hasNext();
+      for (int i = 0; i < opts.maxWhile; i++) {
+        if (cond) performActions((ActionFormula)f.args.get(1), world);
+        else break;
+        cond = toSet(processSetFormula(f.args.get(0), world)).iterator().hasNext();
+      }
     } else if (f.mode == ActionFormula.Mode.forset) {
       // mostly deprecated
       Set<Object> selected = toSet(processSetFormula(f.args.get(0), world));
@@ -104,7 +118,7 @@ public class ActionExecutor extends Executor {
         performActions((ActionFormula)f.args.get(1), world);
       }
       world.selected = prevSelected;
-      world.reconcile();
+      world.merge();
       
     } else if (f.mode == ActionFormula.Mode.isolate) {
       Set<Item> scope = toItemSet(toSet(processSetFormula(f.args.get(0), world)));
@@ -121,7 +135,7 @@ public class ActionExecutor extends Executor {
       world.allitems.addAll(prevAll); // merge, overriding;
       world.selected = prevSelected;
       world.previous = prevPrevious;
-      world.reconcile();
+      world.merge();
       
     } else if (f.mode == ActionFormula.Mode.block || f.mode == ActionFormula.Mode.blockr) {
       // we should never mutate selected in actions
@@ -136,7 +150,7 @@ public class ActionExecutor extends Executor {
       // restore on default blocks
       if (f.mode == ActionFormula.Mode.block) {
         world.selected = prevSelected;
-        world.reconcile();
+        world.merge();
       }
       world.previous = prevPrevious;
     }

@@ -2,24 +2,21 @@ package edu.stanford.nlp.sempre;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
-import edu.stanford.nlp.sempre.interactive.ApplyFn;
-import edu.stanford.nlp.sempre.interactive.GrammarInducer;
+
 import edu.stanford.nlp.sempre.interactive.PrefixTrie;
-import edu.stanford.nlp.sempre.interactive.actions.ActionFormula;
 import fig.basic.*;
-import fig.exec.Execution;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
-import java.nio.file.Path;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * A Master manages multiple sessions. Currently, they all share the same model,
@@ -50,16 +47,13 @@ public class Master {
     // Interactive stuff
     @Option(gloss = "Write out new grammar rules")
     public String newGrammarPath;
-    @Option(gloss = "Do pragmatic inference")
-    public boolean bePragmatic = false;
     @Option(gloss = "make sessions independent")
     public boolean independentSessions = false;
-    @Option(gloss = "use independent parameters for each session")
-    public boolean independentParams = false;
-    @Option(gloss = "Stores chart when no complete parse can be generated")
-    public boolean supportPartial = false;
     @Option(gloss = "number of utterances to return for autocomplete")
     public int autocompleteCount = 5;
+    @Option(gloss = "only allow interactive commands")
+    public boolean onlyInteractive = false;
+    
   }
 
   public static Options opts = new Options();
@@ -115,6 +109,23 @@ public class Master {
   public Master(Builder builder) {
     this.builder = builder;
     this.learner = new Learner(builder.parser, builder.params, new Dataset());
+    
+    // run all interactive commands logged
+    if (!Strings.isNullOrEmpty(ILUtils.opts.interactiveCommandLog)) {
+      ILUtils.fakeLog = true;
+      Session trainer = getSession("trainer");
+      try (Stream<String> stream = Files.lines(Paths.get(ILUtils.opts.interactiveCommandLog))) {
+        stream.forEach(l -> {
+          Map<String, Object> json = Json.readMapHard(l);
+          String command = json.get("log").toString();
+          handleCommand(trainer, command, new Response());
+        });
+      } catch (IOException e) {
+        e.printStackTrace();
+      } finally {
+        ILUtils.fakeLog = false;
+      }
+    }
   }
 
   public Params getParams() { return builder.params; }
@@ -210,6 +221,9 @@ public class Master {
   public synchronized Response processQuery(Session session, String line) {
     line = line.trim();
     Response response = new Response();
+    
+    if (!line.startsWith("(:") && opts.onlyInteractive)
+      response.lines.add("not allowed (onlyInteractive): " + line);
 
     // Capture log output and put it into response.
     // Hack: modifying a static variable to capture the logging.
@@ -310,6 +324,8 @@ public class Master {
     tree = builder.grammar.applyMacros(tree);
 
     String command = tree.child(0).value;
+    if (command != null && command.startsWith(":"))
+      ILUtils.logJSON(session.id, tree.toString());
 
     if (command == null || command.equals("help")) {
       printHelp();
@@ -485,7 +501,7 @@ public class Master {
         String head = tree.children.get(1).value;
         String jsonDef = tree.children.get(2).value;
         
-        ILUtils.logRawDef(head, jsonDef, session.id);
+        // ILUtils.logRawDef(head, jsonDef, session.id);
          
         Ref<Example> refExHead = new Ref<>();
         List<Rule> inducedRules = ILUtils.induceRulesHelper(command, head, jsonDef, 
@@ -549,7 +565,7 @@ public class Master {
   }
   
   private void logJSON(String line, Response response, Session session) {
-    if (response.ex.predDerivations.size() > 0) {
+    if (response.ex.predDerivations != null && response.ex.predDerivations.size() > 0) {
       response.candidateIndex =  0;
       response.ex.setTargetFormula(response.ex.predDerivations.get(0).formula);
       response.ex.setTargetValue(response.ex.predDerivations.get(0).value);

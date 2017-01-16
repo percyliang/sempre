@@ -24,6 +24,7 @@ public class ActionFormula extends Formula {
     sequential(":s"), // (:s (: add red top) (: remove this))
     repeat(":loop"), // (:loop (count (has color green)) (: add red top))
     conditional(":if"), // (:if (count (has color green)) (: add red top))
+    whileloop(":while"), // (:while (count (has color green)) (: add red top))
     forset(":for"), // (:for (and this (color red)) (:s (: add red top) (: add yellow top) (: remove)))
     foreach(":foreach"), // (:foreach * (add ((reverse color) this) top))
     
