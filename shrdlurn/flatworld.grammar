@@ -30,8 +30,6 @@
 (rule $Action (remove) (ConstantFn (: @remove)) (anchored 1))
 (rule $Action (remove $Sets) (lambda s (: @remove (var s))) (anchored 1))
 
-# (rule $Action (remove $Sets) (lambda s (:for (var s) (: @remove))) (anchored 1))
-
 ############### unary sets
 (rule $Set (selected) this (anchored 1))
 (rule $Set (previous) prev (anchored 1))

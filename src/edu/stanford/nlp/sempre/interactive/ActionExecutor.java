@@ -1,22 +1,17 @@
-package edu.stanford.nlp.sempre.interactive.actions;
+package edu.stanford.nlp.sempre.interactive;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.sql.Types;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.google.common.collect.ObjectArrays;
+import com.google.common.collect.Sets;
 
 import edu.stanford.nlp.sempre.*;
 import fig.basic.LogInfo;

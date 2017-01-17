@@ -986,8 +986,8 @@ addMode('interactive', 'interactive semantic parsing in blocks', lambda { |e| l(
   'edu.stanford.nlp.sempre.Main',
   figOpts,
 
-  o('Executor', 'interactive.actions.ActionExecutor'),
-  o('LanguageAnalyzer', 'interactive.actions.ActionLanguageAnalyzer'),
+  o('Executor', 'interactive.ActionExecutor'),
+  o('LanguageAnalyzer', 'interactive.ActionLanguageAnalyzer'),
   o('ActionExecutor.convertNumberValues', true),
   o('ActionExecutor.printStackTrace', true),
   o('BlocksWorld.maxBlocks', 200),
@@ -1014,7 +1014,7 @@ o('Parser.beamSize', 10),
 o('Params.initStepSize', 0.1),
 o('Params.adaptiveStepSize', true),
 
-o('FeatureExtractor.featureComputers', 'interactive.actions.ActionFeatureComputer'),
+o('FeatureExtractor.featureComputers', 'interactive.ActionFeatureComputer'),
 o('FeatureExtractor.featureDomains', 'rule', 'stats'),
 
 lambda { |e| system 'mkdir -p ./int-output/examples/'},
@@ -1023,12 +1023,12 @@ lambda { |e| system 'mkdir -p ./int-output/grammar/'},
 lambda { |e| system 'mkdir -p ./int-output/json/'},
 
 o('Master.newExamplesPath', './int-output/examples/'),
-# o('Master.logPath', './int-output/logs/'),
+o('Master.logPath', './int-output/logs/'),
 o('Master.newGrammarPath', './int-output/grammar/'),
 o('ILUtils.JSONLogPath', './int-output/json/'),
 
-o('ILUtils.newInteractiveCommandLog', './int-output/interactive.log'),
-o('ILUtils.interactiveCommandLog', './shrdlurn/basic-input.log'),
+o('ILUtils.commandLog', './int-output/interactive.log'),
+o('ILUtils.commandInputs', './shrdlurn/commandInputs/*.json'),
 
 o('Master.onlineLearnExamples', true),
 o('Master.independentSessions', false),
@@ -1036,7 +1036,7 @@ o('Master.independentSessions', false),
 o('Master.onlyInteractive', true),
 
 o('server', true),
-o('Server.numThreads', 8),
+o('Server.numThreads', 16),
 o('Server.maxCandidates', 50),
 o('Derivation.showTypes', false),
 nil) })

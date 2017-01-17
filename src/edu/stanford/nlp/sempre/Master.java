@@ -111,19 +111,32 @@ public class Master {
     this.learner = new Learner(builder.parser, builder.params, new Dataset());
     
     // run all interactive commands logged
-    if (!Strings.isNullOrEmpty(ILUtils.opts.interactiveCommandLog)) {
+    for (String fileName : ILUtils.opts.commandInputs) {
       ILUtils.fakeLog = true;
-      Session trainer = getSession("trainer");
-      try (Stream<String> stream = Files.lines(Paths.get(ILUtils.opts.interactiveCommandLog))) {
-        stream.forEach(l -> {
-          Map<String, Object> json = Json.readMapHard(l);
-          String command = json.get("log").toString();
-          handleCommand(trainer, command, new Response());
-        });
+      boolean useBestFormula = ILUtils.opts.useBestFormula;
+      ILUtils.opts.useBestFormula = true;
+
+      try (Stream<String> stream = Files.lines(Paths.get(fileName))) {
+        LogInfo.logs("Reading %s", fileName);
+        if (fileName.endsWith(".json")) {
+          stream.forEach(l -> {
+            Map<String, Object> json = Json.readMapHard(l);
+            String command = json.get("log").toString();
+            Session trainer = getSession(json.get("id").toString());
+            handleCommand(trainer, command, new Response());
+          });
+        } else if (fileName.endsWith(".lisp")) {
+          stream.forEach(l -> {
+            LogInfo.logs("processing %s", l);
+            Session trainer = getSession("default");
+            handleCommand(trainer, l, new Response());
+          });
+        }
       } catch (IOException e) {
         e.printStackTrace();
       } finally {
         ILUtils.fakeLog = false;
+        ILUtils.opts.useBestFormula = useBestFormula;
       }
     }
   }
@@ -565,6 +578,10 @@ public class Master {
   }
   
   private void logJSON(String line, Response response, Session session) {
+    if (response == null || response.ex == null) {
+      LogInfo.logs("Line %s cannot be used", line);
+      return;
+    }
     if (response.ex.predDerivations != null && response.ex.predDerivations.size() > 0) {
       response.candidateIndex =  0;
       response.ex.setTargetFormula(response.ex.predDerivations.get(0).formula);

@@ -19,12 +19,12 @@ import org.testng.collections.Lists;
 import com.google.common.collect.ImmutableList;
 
 import edu.stanford.nlp.sempre.Master.Options;
+import edu.stanford.nlp.sempre.interactive.ActionFormula;
 import edu.stanford.nlp.sempre.interactive.BlockFn;
 import edu.stanford.nlp.sempre.interactive.DefinitionAligner;
+import edu.stanford.nlp.sempre.interactive.FlatWorld;
 import edu.stanford.nlp.sempre.interactive.DefinitionAligner.Match;
 import edu.stanford.nlp.sempre.interactive.GrammarInducer;
-import edu.stanford.nlp.sempre.interactive.actions.ActionFormula;
-import edu.stanford.nlp.sempre.interactive.actions.FlatWorld;
 import fig.basic.IOUtils;
 import fig.basic.LispTree;
 import fig.basic.LogInfo;
@@ -41,10 +41,13 @@ public final class ILUtils {
     public String JSONLogPath = "./int-output/json/";
 
     @Option(gloss = "path to store new command logs")
-    public String newInteractiveCommandLog;
+    public String commandLog;
     
     @Option(gloss = "read and run these commands on startup")
-    public String interactiveCommandLog;
+    public List<String> commandInputs;
+
+    @Option(gloss = "use the best formula when no match or not provided")
+    public boolean useBestFormula = false;
   }
   public static Options opts = new Options();
   private ILUtils() { }
@@ -52,9 +55,9 @@ public final class ILUtils {
   // dont spam my log when reading things in the beginning...
   public static boolean fakeLog = false;
   private static Consumer<String> writer(String path) {
-    if (fakeLog)
+    if (fakeLog) {
       return s -> LogInfo.log(s);
-    else
+    } else
       return s -> {
         PrintWriter out = IOUtils.openOutAppendHard(path);
         out.write(s);
@@ -114,7 +117,7 @@ public final class ILUtils {
       if (!found && !formula.equals("?")) LogInfo.errors("matching formula not found: %s", formula);
       
       // just making testing easier, use top derivation when we formula is not given
-      if (!found && (formula.equals("?") || formula==null) && ex.predDerivations.size() > 0)
+      if (!found && ex.predDerivations.size() > 0 && (formula.equals("?") || formula==null || opts.useBestFormula) )
         allDerivs.add(stripDerivation(ex.predDerivations.get(0)));
     }
     return allDerivs;
@@ -220,9 +223,8 @@ public final class ILUtils {
     } catch (Exception e) {
       jsonMap.put("exception", e.toString());
     } finally {
-      
       String jsonStr = Json.prettyWriteValueAsStringHard(jsonMap) + "\n";
-      writer(Paths.get(ILUtils.opts.JSONLogPath, sessionId + ".json").toString()).accept(jsonStr);
+      writer(Paths.get(ILUtils.opts.JSONLogPath, sessionId + ".ex.json").toString()).accept(jsonStr);
     }
   }
   
@@ -232,10 +234,10 @@ public final class ILUtils {
     jsonMap.put("id", sessionId);
     jsonMap.put("log", log);
 
-    writer(Paths.get(ILUtils.opts.JSONLogPath, sessionId + ".log").toString())
+    writer(Paths.get(ILUtils.opts.JSONLogPath, sessionId + ".log.json").toString())
     .accept(Json.writeValueAsStringHard(jsonMap) + "\n");
 
-    writer(Paths.get(ILUtils.opts.newInteractiveCommandLog).toString())
+    writer(Paths.get(ILUtils.opts.commandLog).toString())
     .accept(Json.writeValueAsStringHard(jsonMap) + "\n");
   }
   

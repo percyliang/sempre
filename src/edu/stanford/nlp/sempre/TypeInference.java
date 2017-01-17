@@ -4,7 +4,7 @@ import fig.basic.*;
 
 import java.util.*;
 
-import edu.stanford.nlp.sempre.interactive.actions.ActionFormula;
+import edu.stanford.nlp.sempre.interactive.ActionFormula;
 
 /**
  * Performs type inference: given a Formula, return a SemType.

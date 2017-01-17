@@ -1,4 +1,4 @@
-package edu.stanford.nlp.sempre.interactive.actions;
+package edu.stanford.nlp.sempre.interactive;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;

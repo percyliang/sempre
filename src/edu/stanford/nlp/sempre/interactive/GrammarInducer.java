@@ -24,7 +24,6 @@ import edu.stanford.nlp.sempre.LambdaFormula;
 import edu.stanford.nlp.sempre.Rule;
 import edu.stanford.nlp.sempre.SemanticFn;
 import edu.stanford.nlp.sempre.VariableFormula;
-import edu.stanford.nlp.sempre.interactive.actions.ActionFormula;
 import fig.basic.LispTree;
 import fig.basic.LogInfo;
 import fig.basic.Option;

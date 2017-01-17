@@ -9,7 +9,6 @@ import edu.stanford.nlp.sempre.Example;
 import edu.stanford.nlp.sempre.Formula;
 import edu.stanford.nlp.sempre.SemanticFn;
 import edu.stanford.nlp.sempre.SingleDerivationStream;
-import edu.stanford.nlp.sempre.interactive.actions.ActionFormula;
 import fig.basic.LispTree;
 import fig.basic.Option;
 

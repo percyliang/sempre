@@ -1,4 +1,4 @@
-package edu.stanford.nlp.sempre.interactive.actions;
+package edu.stanford.nlp.sempre.interactive;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
