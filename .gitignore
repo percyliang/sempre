@@ -13,7 +13,11 @@ module-classes.txt
 state
 out
 test-output
+
+# interactive stuff
 int-output*
+old-int-*
+_OUTPATH_
 
 .project
 .classpath
