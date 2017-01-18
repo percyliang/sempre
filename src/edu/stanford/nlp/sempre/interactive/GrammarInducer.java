@@ -52,6 +52,7 @@ public class GrammarInducer {
   public List<Derivation> matches;
   Derivation def;
 
+  
   // induce rule is possible,
   // otherwise set the correct status
   public GrammarInducer(List<String> headTokens, Derivation def, List<Derivation> chartList) {
@@ -60,6 +61,7 @@ public class GrammarInducer {
       def.grammarInfo.end = headTokens.size();
     }
     
+    chartList.removeIf(d -> d.start == 0 && d.end == headTokens.size());
     this.def = def;
     
     this.headTokens = headTokens;
@@ -208,13 +210,14 @@ public class GrammarInducer {
   }
 
   private List<Rule> induceRules(List<Derivation> packings, Derivation defDeriv) {
-    List<Rule> inducedRules = new ArrayList<>();
     List<String> RHS = getRHS(defDeriv, packings);
     SemanticFn sem = getSemantics(defDeriv, packings);
     String cat = getNormalCat(defDeriv);
     Rule inducedRule = new Rule(cat, RHS, sem);
     inducedRule.addInfo("induced", 1.0);
     inducedRule.addInfo("anchored", 1.0);
+    
+    List<Rule> inducedRules = new ArrayList<>();
     if (!inducedRule.isCatUnary()) {
       inducedRules.add(inducedRule);
     }

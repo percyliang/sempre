@@ -82,6 +82,8 @@ public class Block extends Item {
     // updating with empty set does nothing, throw something?
     if (value instanceof Set && ((Set)value).size() == 0)
       return;
+    if (value instanceof Set && ((Set)value).size() == 1)
+      value = ((Set)value).iterator().next();
     
     if (property.equals("height") && value instanceof Integer)
       this.height = (Integer)value;
@@ -92,7 +94,7 @@ public class Block extends Item {
     else if (property.equals("color") && value instanceof String)
       this.color = CubeColor.fromString(value.toString());
     else
-      throw new RuntimeException("updating property " + property + "=" + value.toString() +" is not supported.");
+      throw new RuntimeException("updating property " + property + "=" + value.toString() +" is not supported. type: " + value.getClass());
   }
 
   @SuppressWarnings("unchecked")

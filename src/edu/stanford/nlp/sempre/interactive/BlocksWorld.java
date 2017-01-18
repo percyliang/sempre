@@ -63,7 +63,7 @@ enum Direction {
 public class BlocksWorld extends FlatWorld {
   public static class Options {
     @Option(gloss = "maximum number of cubes to convert")
-    public int maxBlocks = Integer.MAX_VALUE;
+    public int maxBlocks = 1024^2;
   }
   public static Options opts = new Options();
   
@@ -106,12 +106,11 @@ public class BlocksWorld extends FlatWorld {
 
   // we only use names S to communicate with the client, internally its just the select variable
   public String toJSON() {
-    
     // selected thats no longer in the world gets nothing
     // allitems.removeIf(c -> ((Block)c).color == CubeColor.Fake && !this.selected.contains(c));
     selected.forEach(i -> i.names.add(SELECT));
     if (allitems.size() > opts.maxBlocks)
-      allitems = new HashSet<>(new ArrayList<>(allitems).subList(0, opts.maxBlocks));
+      throw new RuntimeException("Number of blocks exceeds the upperlimit: " + opts.maxBlocks);
      
     return Json.writeValueAsStringHard(allitems.stream()
         .map(c -> ((Block)c).toJSON()).collect(Collectors.toList()));
@@ -146,7 +145,7 @@ public class BlocksWorld extends FlatWorld {
   @Override
   public void update(String rel, Object value, Set<Item> selected) {
     selected.forEach(i -> i.update(rel, value));
-    keyConsistency();
+    keyConsistency(selected);
   }
   
   // if selected is no longer in all, make it fake colored, and add to all;
@@ -156,13 +155,14 @@ public class BlocksWorld extends FlatWorld {
     Sets.difference(selected, allitems).forEach(i -> ((Block)i).color = CubeColor.Fake);
     allitems.removeIf(c -> ((Block)c).color == CubeColor.Fake && !this.selected.contains(c));
     allitems.addAll(selected);
+    // keyConsistency();
   }
 
-  // block world specific actions, non-overriding move
+  // block world specific actions, overriding move
   public void move(String dir, Set<Item> selected) {
     // allitems.removeAll(selected);
-    selected.forEach(b -> {if (((Block)b).color != CubeColor.Fake) ((Block)b).move(Direction.fromString(dir)); });
-    keyConsistency();
+    selected.forEach(b -> ((Block)b).move(Direction.fromString(dir)));
+    keyConsistency(selected);
     // allitems.addAll(selected); // this is not overriding
   }
   
@@ -250,6 +250,20 @@ public class BlocksWorld extends FlatWorld {
     refreshSet(allitems);
     refreshSet(selected);
     refreshSet(previous);
+  }
+  
+  private void refreshSet(Set<Item> set, Set<Item> selected) {
+    List<Item> s = new LinkedList<>(selected);
+    List<Item> s2 = new LinkedList<>(set);
+    set.clear();
+    set.addAll(s);
+    set.addAll(s2);
+  }
+  
+  private void keyConsistency(Set<Item> selected) {
+    refreshSet(allitems, selected);
+    refreshSet(selected, selected);
+    refreshSet(previous, selected);
   }
   
   private Set<Item> realBlocks(Set<Item> all) {
