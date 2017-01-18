@@ -61,6 +61,7 @@ public class GrammarInducer {
       def.grammarInfo.end = headTokens.size();
     }
     
+    // dont want weird cat unary rules with strange semantics
     chartList.removeIf(d -> d.start == 0 && d.end == headTokens.size());
     this.def = def;
     

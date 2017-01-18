@@ -55,7 +55,7 @@ public class ActionExecutor extends Executor {
     } catch (Exception e) {
       // Comment this out if we expect lots of innocuous type checking failures
       if (opts.printStackTrace) {
-        LogInfo.log("tried to execute: " + formula.toString());
+        LogInfo.log("Failed to execute " + formula.toString());
         e.printStackTrace();
       }
       return new Response(ErrorValue.badJava(e.toString()));
@@ -242,10 +242,7 @@ public class ActionExecutor extends Executor {
       MergeFormula.Mode mode = mergeFormula.mode;
       Set<Object> set1 = toSet(processSetFormula(mergeFormula.child1, world)); 
       Set<Object> set2 = toSet(processSetFormula(mergeFormula.child2, world));
-      LogInfo.logsForce(set1);
-      LogInfo.logsForce(set2);
-      LogInfo.logsForce("the union is " + Sets.union(set1, set2));
-
+      
       if (mode == MergeFormula.Mode.or)
         return Sets.union(set1, set2);
       if (mode == MergeFormula.Mode.and)

@@ -37,12 +37,12 @@ public class GrammarInducerTest {
     Derivation.opts.showRules = false;
     Derivation.opts.showCat = true;
     
-    LanguageAnalyzer.opts.languageAnalyzer = "interactive.actions.ActionLanguageAnalyzer";
+    LanguageAnalyzer.opts.languageAnalyzer = "interactive.ActionLanguageAnalyzer";
     Grammar.opts.inPaths = Lists.newArrayList("./shrdlurn/blocksworld.grammar");
     Grammar.opts.useApplyFn = "interactive.ApplyFn";
     Grammar.opts.binarizeRules = false;
     
-    FeatureExtractor.opts.featureComputers = Sets.newHashSet("interactive.actions.ActionFeatureComputer");
+    FeatureExtractor.opts.featureComputers = Sets.newHashSet("interactive.ActionFeatureComputer");
     FeatureExtractor.opts.featureDomains =  Sets.newHashSet("rule", "stats", "window");
 
     ActionExecutor executor = new ActionExecutor();
