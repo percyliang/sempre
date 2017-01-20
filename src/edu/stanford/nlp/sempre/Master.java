@@ -66,11 +66,8 @@ public class Master {
     int candidateIndex = -1;
 
     // Detailed information
+    String message = "";
     List<String> lines = new ArrayList<>();
-
-    // for interactive stuff
-    public String commandResponse = "";
-    public List<String> autocompletes;
 
     public String getFormulaAnswer() {
       if (ex.getPredDerivations().size() == 0 )
@@ -110,35 +107,7 @@ public class Master {
     this.builder = builder;
     this.learner = new Learner(builder.parser, builder.params, new Dataset());
     
-    // run all interactive commands logged
-    for (String fileName : ILUtils.opts.commandInputs) {
-      ILUtils.fakeLog = true;
-      boolean useBestFormula = ILUtils.opts.useBestFormula;
-      ILUtils.opts.useBestFormula = true;
-
-      try (Stream<String> stream = Files.lines(Paths.get(fileName))) {
-        LogInfo.logs("Reading %s", fileName);
-        if (fileName.endsWith(".json")) {
-          stream.forEach(l -> {
-            Map<String, Object> json = Json.readMapHard(l);
-            String command = json.get("log").toString();
-            Session trainer = getSession(json.get("id").toString());
-            handleCommand(trainer, command, new Response());
-          });
-        } else if (fileName.endsWith(".lisp")) {
-          stream.forEach(l -> {
-            LogInfo.logs("processing %s", l);
-            Session trainer = getSession("default");
-            handleCommand(trainer, l, new Response());
-          });
-        }
-      } catch (IOException e) {
-        e.printStackTrace();
-      } finally {
-        ILUtils.fakeLog = false;
-        ILUtils.opts.useBestFormula = useBestFormula;
-      }
-    }
+    ILUtils.readCommands(this);
   }
 
   public Params getParams() { return builder.params; }
@@ -231,7 +200,7 @@ public class Master {
   // Currently, synchronize a very crude level.
   // In the future, refine this.
   // Currently need the synchronization because of writing to stdout.
-  public synchronized Response processQuery(Session session, String line) {
+  public Response processQuery(Session session, String line) {
     line = line.trim();
     Response response = new Response();
     
@@ -241,8 +210,8 @@ public class Master {
     // Capture log output and put it into response.
     // Hack: modifying a static variable to capture the logging.
     // Make sure we're synchronized!
-    StringWriter stringOut = new StringWriter();
-    LogInfo.setFileOut(new PrintWriter(stringOut));
+    // StringWriter stringOut = new StringWriter();
+    // LogInfo.setFileOut(new PrintWriter(stringOut));
 
     if (line.startsWith("("))
       handleCommand(session, line, response);
@@ -250,14 +219,13 @@ public class Master {
       handleUtterance(session, line, response);
 
     // Clean up
-    for (String outLine : stringOut.toString().split("\n"))
-      response.lines.add(outLine);
+    // for (String outLine : stringOut.toString().split("\n"))
+    //  response.lines.add(outLine);
     LogInfo.setFileOut(null);
 
     // Log interaction to disk
     if (!Strings.isNullOrEmpty(opts.logPath)) {
       PrintWriter out;
-
       out = IOUtils.openOutAppendHard(
           Paths.get(opts.logPath, session.id + ".log").toString());
       out.println(
@@ -276,10 +244,14 @@ public class Master {
   }
 
   String summaryString(Response response) {
+    try {
     if (response.getExample() != null)
       return response.getFormulaAnswer();
     if (response.getLines().size() > 0)
       return response.getLines().get(0);
+    } catch (Exception e) {
+      return null;
+    }
     return null;
   }
 
@@ -332,7 +304,7 @@ public class Master {
     }
   }
 
-  private void handleCommand(Session session, String line, Response response) {
+  void handleCommand(Session session, String line, Response response) {
     LispTree tree = LispTree.proto.parseFromString(line);
     tree = builder.grammar.applyMacros(tree);
 
@@ -461,7 +433,6 @@ public class Master {
       Example ex = session.getLastExample();
       ContextValue context = (ex != null ? ex.context : session.context);
       Executor.Response execResponse = builder.executor.execute(Formulas.fromLispTree(tree.child(1)), context);
-      response.commandResponse = ((StringValue)execResponse.value).value;
       LogInfo.logs("%s", execResponse.value);
     } else if (command.equals("def")) {
       builder.grammar.interpretMacroDef(tree);
@@ -478,13 +449,30 @@ public class Master {
       // Create example
       String utt = tree.children.get(1).value;
       Example ex = exampleFromUtterance(utt, session);
-      builder.parser.parse(builder.params, ex, false);
+      
+      long approxSeq = ex.getLemmaTokens().stream().filter(s -> s.contains(";")).count();
+      if (approxSeq >= 8)
+        response.lines.add("You are taking many actions in one step, consider defining some of them.");
+      
+      if (approxSeq >= ILUtils.opts.maxSequence)
+        response.lines.add(String.format("way too many steps in one command (%d), refusing to execute.", approxSeq));
+      else {
+        builder.parser.parse(builder.params, ex, false);
+      }
       response.ex = ex;
       logJSON(line, response, session);
-
     } else if (command.equals(":accept")) {
       String utt = tree.children.get(1).value;
       String formula = tree.children.get(2).value;
+      Formula targetFormula;
+      try {
+        targetFormula = Formulas.fromLispTree(LispTree.proto.parseFromString(formula));
+      } catch (Exception e) {
+        response.lines.add("cannot accept formula: " + formula);
+        formula = "(:? ERROR)";
+        targetFormula = Formulas.fromLispTree(LispTree.proto.parseFromString(formula));
+      }
+      final Formula targetFormulaFinal = targetFormula;
       
       Example ex = exampleFromUtterance(utt, session);
       response.ex = ex;
@@ -494,10 +482,9 @@ public class Master {
       state = builder.parser.parse(builder.params, ex, false);
       state.ensureExecuted();
       
-      Formula targetFormula = Formulas.fromLispTree(LispTree.proto.parseFromString(formula));
       
       Derivation match = ex.predDerivations.stream()
-          .filter(d -> d.formula.equals(targetFormula)).findFirst().orElse(null);
+          .filter(d -> d.formula.equals(targetFormulaFinal)).findFirst().orElse(null);
       ex.setTargetFormula(targetFormula);
       if (match != null) {
         LogInfo.logs("Matched: %s", match);
@@ -547,10 +534,10 @@ public class Master {
         List<String> prefixTokens = LanguageAnalyzer.getSingleton().analyze(prefix).tokens;
         PrefixTrie trieMatch = builder.params.autocompleteTrie.traverse(prefixTokens);
         if (trieMatch != null)
-          response.autocompletes = trieMatch.getRandomMatches(opts.autocompleteCount);
+          response.lines = trieMatch.getRandomMatches(opts.autocompleteCount);
         else
-          response.autocompletes = Lists.newArrayList();
-        LogInfo.logs("%d options are %s", opts.autocompleteCount, response.autocompletes);
+          response.lines = Lists.newArrayList();
+        LogInfo.logs("%d options are %s", opts.autocompleteCount, response.lines);
       } else {
         LogInfo.logs("autocomplete just takes a prefix");
       }

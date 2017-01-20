@@ -133,8 +133,8 @@ class BeamFloatingParserState extends ChartParserState {
     
     this.chartList = this.collectChart();
 
-    boolean parseFloat;
-    if (BeamFloatingParser.opts.floatStrategy != BeamFloatingParser.FloatStrategy.Always)
+    boolean parseFloat = false;
+    if (BeamFloatingParser.opts.floatStrategy == BeamFloatingParser.FloatStrategy.Always)
       parseFloat = true;
     else if (BeamFloatingParser.opts.floatStrategy == BeamFloatingParser.FloatStrategy.NoParse)
       parseFloat = predDerivations.size() == 0;

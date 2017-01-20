@@ -1,5 +1,6 @@
 package edu.stanford.nlp.sempre;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import fig.basic.*;
 import fig.html.HtmlElement;
@@ -9,6 +10,9 @@ import java.net.URI;
 import java.net.URLDecoder;
 import java.net.HttpCookie;
 import com.sun.net.httpserver.HttpServer;
+
+import edu.stanford.nlp.sempre.Master.Response;
+
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.Headers;
@@ -522,10 +526,6 @@ public class Server {
     String makeLisp2json(Master.Response response) {
       Map<String, Object> json = new HashMap<String, Object>();
       
-      if (response.commandResponse != "")
-        json.put("commandResponse", response.commandResponse);
-      if (response.autocompletes != null)
-        json.put("autocompletes", response.autocompletes);
       
       if (response.getExample()!=null) {
         List<Object> items = new ArrayList<Object>();
@@ -688,18 +688,6 @@ public class Server {
       }
 
       out.close();
-    }
-
-    // not used
-    void getResults() throws IOException {
-      setHeaders("application/json");
-      Map<String, String> map = new HashMap<>();
-      map.put("a", "3");
-      map.put("b", "4");
-
-      PrintWriter writer = new PrintWriter(new OutputStreamWriter(exchange.getResponseBody()));
-      writer.println(Json.writeValueAsStringHard(map));
-      writer.close();
     }
 
     void getFile(String path) throws IOException {

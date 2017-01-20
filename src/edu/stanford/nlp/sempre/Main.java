@@ -25,14 +25,18 @@ public class Main implements Runnable {
 
     if (server) {
       Master master = new Master(builder);
-      Server server = new Server(master);
+      JsonServer server = new JsonServer(master);
       server.run();
     }
-
+        
     if (interactive) {
       LogInfo.msPerLine = 0;
       Master master = new Master(builder);
       master.runInteractivePrompt();
+    }
+    
+    if (!server && !interactive) {
+      Master master = new Master(builder);
     }
   }
 

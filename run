@@ -1030,15 +1030,21 @@ o('ILUtils.JSONLogPath', './int-output/json/'),
 o('ILUtils.commandLog', './int-output/interactive.log'),
 o('ILUtils.commandInputs', './shrdlurn/commandInputs/*.json'),
 
+o('ILUtils.maxSequence', 20),
+
 o('Master.onlineLearnExamples', true),
 o('Master.independentSessions', false),
 
 o('Master.onlyInteractive', true),
 
 o('server', true),
-o('Server.numThreads', 16),
-o('Server.maxCandidates', 50),
+
+o('JsonServer.numThreads', 16),
+o('JsonServer.maxCandidates', 50),
+
 o('Derivation.showTypes', false),
+o('Derivation.showValues', false),
+o('Derivation.showRules', true),
 nil) })
 
 
