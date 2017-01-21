@@ -43,7 +43,7 @@ public class CitationTracker {
     this.ex = ex;
   }
 
-  public void citeRule(Rule rule) {
+  public synchronized void citeRule(Rule rule) {
     writeLog(rule);
     writeSummary(rule);
   }
