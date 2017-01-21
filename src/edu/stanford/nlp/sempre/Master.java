@@ -4,7 +4,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 
-
+import edu.stanford.nlp.sempre.interactive.CitationTracker;
 import edu.stanford.nlp.sempre.interactive.PrefixTrie;
 import fig.basic.*;
 
@@ -455,10 +455,12 @@ public class Master {
         response.lines.add("You are taking many actions in one step, consider defining some of steps as one single step.");
       
       if (approxSeq >= ILUtils.opts.maxSequence)
-        response.lines.add(String.format("way too many steps in one command (%d), refusing to execute.", approxSeq));
-      else {
-        builder.parser.parse(builder.params, ex, false);
-      }
+        throw new RuntimeException(String.format("refused to execute: too many steps in one command (%d)", approxSeq));
+      if (utt.length() > 255)
+        throw new RuntimeException(String.format("refused to execute: you cannot exceed 255 characters in one command", approxSeq));
+      
+      builder.parser.parse(builder.params, ex, false);
+     
       response.ex = ex;
       logJSON(line, response, session);
     } else if (command.equals(":accept")) {
@@ -488,6 +490,10 @@ public class Master {
       ex.setTargetFormula(targetFormula);
       if (match != null) {
         LogInfo.logs("Matched: %s", match);
+        
+        CitationTracker tracker = new CitationTracker(session.id, ex);
+        tracker.citeAll(match);
+        
         ex.setTargetValue(match.value); // this is just for logging, not actually used for learning
         LogInfo.begin_track("Updating parameters");
         learner.onlineLearnExample(ex);

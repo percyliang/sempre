@@ -1021,11 +1021,14 @@ lambda { |e| system 'mkdir -p ./int-output/examples/'},
 lambda { |e| system 'mkdir -p ./int-output/logs/'},
 lambda { |e| system 'mkdir -p ./int-output/grammar/'},
 lambda { |e| system 'mkdir -p ./int-output/json/'},
+lambda { |e| system 'mkdir -p ./int-output/citation/'},
 
 o('Master.newExamplesPath', './int-output/examples/'),
 o('Master.logPath', './int-output/logs/'),
 o('Master.newGrammarPath', './int-output/grammar/'),
+
 o('ILUtils.JSONLogPath', './int-output/json/'),
+o('ILUtils.citationPath', './int-output/citation/'),
 
 o('ILUtils.commandLog', './int-output/interactive.log'),
 o('ILUtils.commandInputs', './shrdlurn/commandInputs/*.json'),
@@ -1044,7 +1047,7 @@ o('JsonServer.maxCandidates', 50),
 
 o('Derivation.showTypes', false),
 o('Derivation.showValues', false),
-o('Derivation.showRules', true),
+o('Derivation.showRules', false),
 nil) })
 
 

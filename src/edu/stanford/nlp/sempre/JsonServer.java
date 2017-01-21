@@ -8,6 +8,7 @@ import fig.html.HtmlUtils;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.net.HttpCookie;
 import com.sun.net.httpserver.HttpServer;
 
@@ -96,8 +97,8 @@ public class JsonServer {
           }
         }
       }
-
-      String sessionId = MapUtils.get(reqParams, "sessionId", "");
+      // do not decode sessionId, keep it filename and lisptree friendly
+      String sessionId = URLEncoder.encode(MapUtils.get(reqParams, "sessionId", ""),  "UTF-8");
       if (sessionId != null) { 
         isNewSession = false;
       } else {

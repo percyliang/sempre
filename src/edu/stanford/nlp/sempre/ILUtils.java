@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableList;
 
 import edu.stanford.nlp.sempre.interactive.ActionFormula;
 import edu.stanford.nlp.sempre.interactive.BlockFn;
+import edu.stanford.nlp.sempre.interactive.CitationTracker;
 import edu.stanford.nlp.sempre.interactive.DefinitionAligner;
 import edu.stanford.nlp.sempre.interactive.FlatWorld;
 import edu.stanford.nlp.sempre.interactive.GrammarInducer;
@@ -51,7 +52,10 @@ public final class ILUtils {
     public boolean useBestFormula = false;
     
     @Option(gloss = "use the best formula when no match or not provided")
-    public int maxSequence = 8;
+    public int maxSequence = 20;
+    
+    @Option(gloss = "path to the citations")
+    public String citationPath;
   }
   public static Options opts = new Options();
   private ILUtils() { }
@@ -177,7 +181,8 @@ public final class ILUtils {
     LogInfo.begin_track("Definition");
     LogInfo.logs("mode: %s", blockmode);
     LogInfo.logs("head: %s", exHead.getTokens());
-    LogInfo.logs("body: %s", ILUtils.utterancefromJson(jsonDef));
+    List<String> bodyList = ILUtils.utterancefromJson(jsonDef);
+    LogInfo.logs("body: %s", bodyList);
     LogInfo.logs("defderiv: %s", bodyDeriv.toLispTree());
     LogInfo.logs("bodyformula: %s", bodyDeriv.formula.toLispTree());
 
@@ -189,8 +194,16 @@ public final class ILUtils {
     if (refEx != null) {
       refEx.value = exHead;
     }
-    return ILUtils.induceRules(exHead.getTokens(), 
+    List<Rule> rules = ILUtils.induceRules(exHead.getTokens(), 
         ILUtils.utterancefromJson(jsonDef), bodyDeriv, state.chartList);
+    
+    for(Rule rule : rules) {
+      rule.addInfo(CitationTracker.IDPrefix + sessionId, 0.0);
+      rule.addInfo(CitationTracker.HeadPrefix + CitationTracker.encode(head), 0.0);
+      rule.addInfo(CitationTracker.BodyPrefix + CitationTracker.encode(String.join(" ", bodyList)), 0.0);
+    }
+    
+    return rules;
   }
 
   //  public static void logRawDef(String utt, String jsonDef, String sessionId) {

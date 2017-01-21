@@ -217,7 +217,6 @@ public class GrammarInducer {
     Rule inducedRule = new Rule(cat, RHS, sem);
     inducedRule.addInfo("induced", 1.0);
     inducedRule.addInfo("anchored", 1.0);
-    
     List<Rule> inducedRules = new ArrayList<>();
     if (!inducedRule.isCatUnary()) {
       inducedRules.add(inducedRule);
