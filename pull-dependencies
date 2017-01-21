@@ -265,6 +265,11 @@ addModule('overnight', 'Creating a parser for multiple domains', lambda {
   pull('/u/nlp/data/semparse/overnight/calendar/eval/calendar.test.turk.examples', 'data/overnight/', {:symlink => true})
 })
 
+# Community server
+addModule('community', 'Community Server', lambda {
+  exec('./community-server/install-deps.py')
+  })
+
 
 ############################################################
 
