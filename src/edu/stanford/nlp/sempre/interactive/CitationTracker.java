@@ -82,6 +82,7 @@ public class CitationTracker {
     summary.put("cite", 0);
     summary.put("self", 0);
     summary.put("head", decode(getHead(rule)));
+    summary.put("body", decode(getBody(rule)));
     return summary;
   }
 
@@ -94,11 +95,11 @@ public class CitationTracker {
     
     Map<String, Object> jsonMap = new LinkedHashMap<>();
     jsonMap.put("user", this.uid);
-    jsonMap.put("body", decode(getBody(rule)));
+    // jsonMap.put("body", decode(getBody(rule)));
     jsonMap.put("time", LocalDateTime.now().toString());
     jsonMap.put("tokens", ex.getTokens());
     //jsonMap.put("head", decode(headCode));
-    //jsonMap.put("author", decode(authorCode));
+    jsonMap.put("author", decode(authorCode));
 
     String jsonStr = Json.writeValueAsStringHard(jsonMap);
     PrintWriter out = IOUtils.openOutAppendHard(file);
