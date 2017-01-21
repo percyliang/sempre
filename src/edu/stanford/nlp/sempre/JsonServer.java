@@ -250,7 +250,7 @@ public class JsonServer {
     this.master = master;
   }
 
-  void run() {
+  public void run() {
     try {
       String hostname = fig.basic.SysInfoUtils.getHostName();
       HttpServer server = HttpServer.create(new InetSocketAddress(opts.port), 10);
@@ -262,7 +262,7 @@ public class JsonServer {
       server.createContext("/", new Handler());
       server.setExecutor(pool);
       server.start();
-      LogInfo.logs("JSON Server started at http://%s:%s/sempre", hostname, opts.port);
+      LogInfo.logs("JSON Server (%d threads) started at http://%s:%s/sempre", opts.numThreads, hostname, opts.port);
       LogInfo.log("Press Ctrl-D to terminate.");
       while (LogInfo.stdin.readLine() != null) { }
       LogInfo.log("Shutting down server...");

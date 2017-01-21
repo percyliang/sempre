@@ -6,12 +6,10 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -23,13 +21,10 @@ import org.testng.collections.Lists;
 
 import com.google.common.collect.ImmutableList;
 
-import edu.stanford.nlp.sempre.Master.Options;
-import edu.stanford.nlp.sempre.Master.Response;
 import edu.stanford.nlp.sempre.interactive.ActionFormula;
 import edu.stanford.nlp.sempre.interactive.BlockFn;
 import edu.stanford.nlp.sempre.interactive.DefinitionAligner;
 import edu.stanford.nlp.sempre.interactive.FlatWorld;
-import edu.stanford.nlp.sempre.interactive.DefinitionAligner.Match;
 import edu.stanford.nlp.sempre.interactive.GrammarInducer;
 import fig.basic.IOUtils;
 import fig.basic.LispTree;
@@ -191,7 +186,9 @@ public final class ILUtils {
     LogInfo.logs("exHead: %s", exHead.getTokens());
 
     exHead.predDerivations = Lists.newArrayList(bodyDeriv);
-    refEx.value = exHead;
+    if (refEx != null) {
+      refEx.value = exHead;
+    }
     return ILUtils.induceRules(exHead.getTokens(), 
         ILUtils.utterancefromJson(jsonDef), bodyDeriv, state.chartList);
   }
@@ -304,7 +301,9 @@ public final class ILUtils {
             Map<String, Object> json = Json.readMapHard(l);
             String command = json.get("log").toString();
             Session trainer = master.getSession(json.get("id").toString());
-            executor.execute(() -> master.handleCommand(trainer, command, master.new Response()));
+            executor.execute(() -> {
+              master.handleCommand(trainer, command, master.new Response());
+            });
           });
         } else if (fileName.endsWith(".lisp")) {
           stream.forEach(l -> {

@@ -14,7 +14,6 @@ import fig.basic.Option;
 
 /**
  * return a block sequencing all the children
- *
  * @author sidaw
  */
 public class BlockFn extends SemanticFn {

@@ -452,7 +452,7 @@ public class Master {
       
       long approxSeq = ex.getLemmaTokens().stream().filter(s -> s.contains(";")).count();
       if (approxSeq >= 8)
-        response.lines.add("You are taking many actions in one step, consider defining some of them.");
+        response.lines.add("You are taking many actions in one step, consider defining some of steps as one single step.");
       
       if (approxSeq >= ILUtils.opts.maxSequence)
         response.lines.add(String.format("way too many steps in one command (%d), refusing to execute.", approxSeq));
