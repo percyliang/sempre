@@ -42,3 +42,6 @@ java.hprof.txt
 /x
 scr
 rdf
+
+# Community server logs
+community-server/data

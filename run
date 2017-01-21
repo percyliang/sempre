@@ -1050,6 +1050,10 @@ o('Derivation.showValues', false),
 o('Derivation.showRules', false),
 nil) })
 
+# Community Server
+addMode('community', 'run the community server', lambda { |e| l(
+  'python community-server/server.py -- port 8406',
+nil) })
 
 ############################################################
 
