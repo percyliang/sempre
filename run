@@ -1059,14 +1059,14 @@ addMode('int-utils', 'small commands like run community server, backup, or simul
       lambda { |e| system 'echo "backing up with mv"'},
       lambda { |e| system 'mkdir -p ./int-backup/'},
       lambda { |e| system 'mv int-output int-backup/`date +%Y-%m-%d.%H:%M:%S`'},
-      lambda { |e| system 'mkdir -p ./int-output'},
+      lambda { |e| system 'mkdir -p ./int-output'}
      ),
      'backup-cp' => l(
        lambda { |e| system 'echo "backing up with cp"'},
        lambda { |e| system 'mkdir -p ./int-backup/'},
        lambda { |e| system 'cp int-output int-backup/`date +%Y-%m-%d.%H:%M:%S`'},
-       lambda { |e| system 'mkdir -p ./int-output'},
-      ),
+       lambda { |e| system 'mkdir -p ./int-output'}
+     ),
     'community' => l('python community-server/server.py -- port 8406'),
     'simulator' => l(
       rlwrap,
@@ -1076,7 +1076,7 @@ addMode('int-utils', 'small commands like run community server, backup, or simul
       letDefault(:server, 'local'),
       sel(:server, {
         'local' => o('serverURL', 'http://localhost:8410'),
-        'remote' => o('serverURL', 'http://jonsson.stanford.edu:8410'),
+        'remote' => o('serverURL', 'http://jonsson.stanford.edu:8410')
       }),
       o('logToFile', 0), # set to anything else to log stuff
     nil),
