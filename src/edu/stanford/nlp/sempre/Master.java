@@ -484,7 +484,7 @@ public class Master {
       if (match != null) {
         LogInfo.logs("Matched: %s", match);
         
-        if (session.logToFile) {
+        if (!session.sandbox) {
           CitationTracker tracker = new CitationTracker(session.id, ex);
           tracker.citeAll(match);
         }
@@ -512,7 +512,7 @@ public class Master {
           response.ex = refExHead.value;
           
           // write out the grammar
-          if (session.logToFile) {
+          if (!session.sandbox) {
             PrintWriter out = IOUtils.openOutAppendHard(Paths.get(Master.opts.newGrammarPath, session.id + ".grammar").toString());
             for (Rule rule : inducedRules) {
               out.println(rule.toLispTree().toStringWrap());

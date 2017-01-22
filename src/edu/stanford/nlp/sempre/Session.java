@@ -29,7 +29,7 @@ public class Session {
   Example lastEx;  // Last example that we processed
   Params params;
   Learner learner;
-  boolean logToFile = true;
+  boolean sandbox = false;
   
   public static Options opts = new Options();
   

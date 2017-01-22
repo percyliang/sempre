@@ -195,9 +195,9 @@ public class JsonServer {
     
     void handleQuery(String sessionId) throws IOException {
       String query = reqParams.get("q");
-      boolean logToFile = true; // false when simulating
-      if (reqParams.containsKey("logtofile") && reqParams.get("logtofile").equals("0"))
-        logToFile = false;
+      boolean sandbox = false; // false when simulating
+      if (reqParams.containsKey("sandbox") && !reqParams.get("sandbox").equals("0"))
+        sandbox = true;
       
       String queryTime = LocalDateTime.now().toString();
       { // write the query log
@@ -208,9 +208,11 @@ public class JsonServer {
         // jsonMap.putAll(reqParams);
         jsonMap.put("remote", remoteHost); 
         
-        boolean isContext = query.startsWith("(:context ");
+        
+        
         synchronized (queryLogLock)  {
-          if (logToFile &&  (!isContext || opts.verbose >= 2)) {
+          boolean isContext = query.startsWith("(:context ");
+          if (!sandbox && (!isContext || opts.verbose >= 2)) {
             PrintWriter out = IOUtils.openOutAppend(opts.queryLogPath);
             out.println(Json.writeValueAsStringHard(jsonMap));
             out.close();
@@ -225,7 +227,7 @@ public class JsonServer {
       session.remoteHost = remoteHost;
       session.format = "json";
       // 
-      session.logToFile = logToFile;
+      session.logToFile = sandbox;
 
       if (query == null) query = session.getLastQuery();
       if (query == null) query = "";
@@ -258,7 +260,7 @@ public class JsonServer {
         jsonMap.put("q", query); // backwards compatability...
         jsonMap.put("lines", responseMap.get("lines"));
         synchronized (responseLogLock) {
-          if (logToFile) {
+          if (!sandbox) {
             {
               PrintWriter out = IOUtils.openOutAppend(opts.responseLogPath);
               out.println(Json.writeValueAsStringHard(jsonMap));
