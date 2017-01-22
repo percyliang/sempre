@@ -9,6 +9,7 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.file.Paths;
 import java.net.HttpCookie;
 import com.sun.net.httpserver.HttpServer;
 
@@ -27,32 +28,31 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.ExecutorService;
 import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.time.LocalDateTime;
 
 import static fig.basic.LogInfo.logs;
 
 /**
- * This class implements a simple HTTP server which provides a web interface
- * into SEMPRE just like Master.runInteractivePrompt() exposes a command-line
- * tool.  Most of the work is dispatched to Master.processLine().
- * Cookies are used to store the session ID.
+ * JsonServer, most of the interactive stuff run through this. Handles log instead of master.
  *
- * @author Percy Liang, Sida Wang
+ * @author Sida Wang
  */
 public class JsonServer {
   public static class Options {
     @Option public int port = 8400;
     @Option public int numThreads = 4;
-    @Option public String title = "SEMPRE Demo";
-    @Option public String headerPath;
-    @Option public String basePath = "demo-www";
     @Option public int verbose = 1;
-    @Option public int htmlVerbose = 1;
     @Option public int maxCandidates = Integer.MAX_VALUE;
+    @Option public String queryLogPath = "./int-output/query.log";
+    @Option public String responseLogPath = "./int-output/response.log";
+    @Option public String fullResponseLogPath;
   }
   public static Options opts = new Options();
+  
+  private static Object queryLogLock = new Object();
+  private static Object responseLogLock = new Object();
 
   Master master;
-  public static final HtmlUtils H = new HtmlUtils();
 
   class Handler implements HttpHandler {
     public void handle(HttpExchange exchange) {
@@ -113,7 +113,7 @@ public class JsonServer {
       if (uriPath.equals("/sempre")) {
         handleQuery(sessionId);
       } else {
-        // getFile(opts.basePath + uriPath);
+        // getFile(opts.basePath + uriPath); security
       }
       exchange.close();
     }
@@ -138,7 +138,7 @@ public class JsonServer {
     }
 
    
-    String makeJson(Master.Response response) {
+    Map<String, Object> makeJson(Master.Response response) {
       Map<String, Object> json = new HashMap<String, Object>();
 
       if (response.lines != null) {
@@ -152,7 +152,10 @@ public class JsonServer {
         if (allCandidates != null) {
           if (allCandidates.size() >= JsonServer.opts.maxCandidates) {
             allCandidates = allCandidates.subList(0, JsonServer.opts.maxCandidates);
-            response.lines.add("Exceeded max options: " + allCandidates.size() + " / max: " + JsonServer.opts.maxCandidates );
+            response.lines.add(
+                String.format("Exceeded max options: (current: %d / max: %d) ", 
+                    allCandidates.size(), JsonServer.opts.maxCandidates)
+                );
           }
           
           for (Derivation deriv : allCandidates) {
@@ -175,9 +178,8 @@ public class JsonServer {
         }
       }
 
-      return Json.writeValueAsStringHard(json);
+      return json;
     }
-
 
     // Catch exception if any.
     Master.Response processQuery(Session session, String query) {
@@ -190,46 +192,91 @@ public class JsonServer {
         return response;
       }
     }
-
-    // If query is not already the last query, make it the last query.
-    boolean ensureQueryIsLast(Session session, String query) {
-      if (query != null && !query.equals(session.getLastQuery())) {
-        Master.Response response = processQuery(session, query);
-        if (response == null) return false;
-      }
-      return true;
-    }
-
+    
     void handleQuery(String sessionId) throws IOException {
       String query = reqParams.get("q");
-
+      boolean logToFile = true; // false when simulating
+      if (reqParams.containsKey("logtofile") && reqParams.get("logtofile").equals("0"))
+        logToFile = false;
+      
+      String queryTime = LocalDateTime.now().toString();
+      { // write the query log
+        Map<String, Object> jsonMap = new LinkedHashMap<>();
+        jsonMap.put("time", queryTime);
+        jsonMap.put("sessionId", sessionId);
+        jsonMap.put("q", query);
+        // jsonMap.putAll(reqParams);
+        jsonMap.put("remote", remoteHost); 
+        
+        boolean isContext = query.startsWith("(:context ");
+        synchronized (queryLogLock)  {
+          if (logToFile &&  (!isContext || opts.verbose >= 2)) {
+            PrintWriter out = IOUtils.openOutAppend(opts.queryLogPath);
+            out.println(Json.writeValueAsStringHard(jsonMap));
+            out.close();
+          } else {
+            LogInfo.log(Json.writeValueAsStringHard(jsonMap));
+          }
+        }
+      }
+      
       // If JSON, don't store cookies.
       Session session = master.getSession(sessionId);
       session.remoteHost = remoteHost;
       session.format = "json";
+      // 
+      session.logToFile = logToFile;
 
       if (query == null) query = session.getLastQuery();
       if (query == null) query = "";
       logs("Server.handleQuery %s: %s", session.id, query);
 
       // Print header
-     
       setHeaders("application/json");
-     
-      PrintWriter out = new PrintWriter(new OutputStreamWriter(exchange.getResponseBody()));
-
+      
       Master.Response masterResponse = null;
       if (query != null)
         masterResponse = processQuery(session, query);
 
-      if (masterResponse != null) {
-        // Render answer
-        Example ex = masterResponse.getExample();
-        out.println(makeJson(masterResponse));
+      Map<String, Object> responseMap = null;
+      {
+        PrintWriter out = new PrintWriter(new OutputStreamWriter(exchange.getResponseBody()));
+        if (masterResponse != null) {
+          // Render answer
+          Example ex = masterResponse.getExample();
+          responseMap = makeJson(masterResponse);
+          out.println(Json.writeValueAsStringHard(responseMap));
+        }
+        out.close();
       }
-
-      out.close();
-    }
+      
+      { // write the response log log
+        Map<String, Object> jsonMap = new LinkedHashMap<>();
+        jsonMap.put("response_time", LocalDateTime.now().toString());
+        jsonMap.put("query_time", queryTime);
+        jsonMap.put("sessionId", sessionId);
+        jsonMap.put("q", query); // backwards compatability...
+        jsonMap.put("lines", responseMap.get("lines"));
+        synchronized (responseLogLock) {
+          if (logToFile) {
+            {
+              PrintWriter out = IOUtils.openOutAppend(opts.responseLogPath);
+              out.println(Json.writeValueAsStringHard(jsonMap));
+              out.close();
+            }
+            
+            if (!Strings.isNullOrEmpty(opts.fullResponseLogPath)) {
+              jsonMap.put("candidates", responseMap.get("candidates"));
+              PrintWriter out = IOUtils.openOutAppend(opts.fullResponseLogPath);
+              out.println(Json.writeValueAsStringHard(jsonMap));
+              out.close();
+            }
+          } else {
+            LogInfo.log(Json.writeValueAsStringHard(jsonMap));
+          }
+        }
+      }
+   }
 
     void getFile(String path) throws IOException {
       if (!new File(path).exists()) {

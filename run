@@ -980,11 +980,11 @@ nil) })
 
 ############################################################
 # {2016-07-02} [Sida Wang]: interactive semantic parsing
-addMode('interactive', 'interactive semantic parsing in blocks', lambda { |e| l(
-  rlwrap,
+addMode('interactive', 'interactive semantic parsing in a blocksworld', lambda { |e| l(
+  #rlwrap,
   header('core,interactive'),
   'edu.stanford.nlp.sempre.Main',
-  figOpts,
+  #figOpts,
 
   o('Executor', 'interactive.ActionExecutor'),
   o('LanguageAnalyzer', 'interactive.ActionLanguageAnalyzer'),
@@ -1017,21 +1017,19 @@ o('Params.adaptiveStepSize', true),
 o('FeatureExtractor.featureComputers', 'interactive.ActionFeatureComputer'),
 o('FeatureExtractor.featureDomains', 'rule', 'stats'),
 
-lambda { |e| system 'mkdir -p ./int-output/examples/'},
-lambda { |e| system 'mkdir -p ./int-output/logs/'},
+lambda { |e| system 'mkdir -p ./int-output/'},
+lambda { |e| system 'mkdir -p ./int-output/log/'},
 lambda { |e| system 'mkdir -p ./int-output/grammar/'},
-lambda { |e| system 'mkdir -p ./int-output/json/'},
 lambda { |e| system 'mkdir -p ./int-output/citation/'},
 
-o('Master.newExamplesPath', './int-output/examples/'),
-o('Master.logPath', './int-output/logs/'),
+# o('Master.newExamplesPath', './int-output/examples/'),
+# o('Master.logPath', './int-output/logs/'),
 o('Master.newGrammarPath', './int-output/grammar/'),
 
-o('ILUtils.JSONLogPath', './int-output/json/'),
+# o('ILUtils.JSONLogPath', './int-output/json/'),
 o('ILUtils.citationPath', './int-output/citation/'),
-
-o('ILUtils.commandLog', './int-output/interactive.log'),
-o('ILUtils.commandInputs', './shrdlurn/commandInputs/*.json'),
+# o('ILUtils.commandLog', './int-output/interactive.log'),
+# o('ILUtils.commandInputs', './shrdlurn/commandInputs/*.json'),
 
 o('ILUtils.maxSequence', 20),
 
@@ -1044,6 +1042,9 @@ o('server', true),
 
 o('JsonServer.numThreads', 16),
 o('JsonServer.maxCandidates', 50),
+o('JsonServer.queryLogPath', './int-output/query.log'),
+o('JsonServer.responseLogPath', './int-output/response.log'),
+o('JsonServer.port', 8410),
 
 o('Derivation.showTypes', false),
 o('Derivation.showValues', false),
@@ -1051,8 +1052,35 @@ o('Derivation.showRules', false),
 nil) })
 
 # Community Server
-addMode('community', 'run the community server', lambda { |e| l(
-  'python community-server/server.py -- port 8406',
+addMode('int-utils', 'small commands like run community server, backup, or simulator', lambda { |e| l(
+  letDefault(:cmd, 'help'),
+  sel(:cmd, {
+    'backup-mv' => l(
+      lambda { |e| system 'echo "backing up with mv"'},
+      lambda { |e| system 'mkdir -p ./int-backup/'},
+      lambda { |e| system 'mv int-output int-backup/`date +%Y-%m-%d.%H:%M:%S`'},
+      lambda { |e| system 'mkdir -p ./int-output'},
+     ),
+     'backup-cp' => l(
+       lambda { |e| system 'echo "backing up with cp"'},
+       lambda { |e| system 'mkdir -p ./int-backup/'},
+       lambda { |e| system 'cp int-output int-backup/`date +%Y-%m-%d.%H:%M:%S`'},
+       lambda { |e| system 'mkdir -p ./int-output'},
+      ),
+    'community' => l('python community-server/server.py -- port 8406'),
+    'simulator' => l(
+      rlwrap,
+      header('core,interactive'),
+      'edu.stanford.nlp.sempre.interactive.Simulator',
+      # figOpts,
+      letDefault(:server, 'local'),
+      sel(:server, {
+        'local' => o('serverURL', 'http://localhost:8410'),
+        'remote' => o('serverURL', 'http://jonsson.stanford.edu:8410'),
+      }),
+      o('logToFile', 0), # set to anything else to log stuff
+    nil),
+  }),
 nil) })
 
 ############################################################

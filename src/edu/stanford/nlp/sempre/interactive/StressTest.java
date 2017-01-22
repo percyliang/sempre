@@ -96,9 +96,9 @@ public class StressTest {
   }
   
   private static void sempreQuery(String query) throws UnsupportedEncodingException {
-    String params = "q=" + URLEncoder.encode(query, "UTF-8");
+    String params = "q=" + URLEncoder.encode(query, "UTF-8") + "&sessionId=stresstester";
     // params = URLEncoder.encode(params);
-    String url = "http://localhost:8410/sempre?";
+    String url = "http://jonsson.stanford.edu:8410/sempre?";
     LogInfo.log(params);
     String response  = executePost(url + params,"");
     LogInfo.log(response);

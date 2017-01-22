@@ -55,7 +55,12 @@ public final class ILUtils {
     public int maxSequence = 20;
     
     @Option(gloss = "path to the citations")
+    public int maxChars = 200;
+    
+    @Option(gloss = "path to the citations")
     public String citationPath;
+
+   
   }
   public static Options opts = new Options();
   private ILUtils() { }
@@ -246,20 +251,7 @@ public final class ILUtils {
       writer(Paths.get(ILUtils.opts.JSONLogPath, sessionId + ".ex.json").toString()).accept(jsonStr);
     }
   }
-
-  public static void logJSON(String sessionId, String log) {
-    Map<String, Object> jsonMap = new LinkedHashMap<>();
-    jsonMap.put("time", LocalDateTime.now().toString());
-    jsonMap.put("id", sessionId);
-    jsonMap.put("log", log);
-
-    writer(Paths.get(ILUtils.opts.JSONLogPath, sessionId + ".log.json").toString())
-    .accept(Json.writeValueAsStringHard(jsonMap) + "\n");
-
-    writer(Paths.get(ILUtils.opts.commandLog).toString())
-    .accept(Json.writeValueAsStringHard(jsonMap) + "\n");
-  }
-
+  
   public static synchronized void addRuleInteractive(Rule rule, Parser parser) {
     LogInfo.logs("addRuleInteractive: %s", rule);
     parser.grammar.addRule(rule);

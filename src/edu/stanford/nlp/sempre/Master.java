@@ -106,8 +106,6 @@ public class Master {
   public Master(Builder builder) {
     this.builder = builder;
     this.learner = new Learner(builder.parser, builder.params, new Dataset());
-    
-    ILUtils.readCommands(this);
   }
 
   public Params getParams() { return builder.params; }
@@ -205,7 +203,7 @@ public class Master {
     Response response = new Response();
     
     if (!line.startsWith("(:") && opts.onlyInteractive)
-      response.lines.add("not allowed (onlyInteractive): " + line);
+      response.lines.add("command disabled for security: " + line);
 
     // Capture log output and put it into response.
     // Hack: modifying a static variable to capture the logging.
@@ -309,8 +307,6 @@ public class Master {
     tree = builder.grammar.applyMacros(tree);
 
     String command = tree.child(0).value;
-    if (command != null && command.startsWith(":"))
-      ILUtils.logJSON(session.id, tree.toString());
 
     if (command == null || command.equals("help")) {
       printHelp();
@@ -329,18 +325,15 @@ public class Master {
         Set<Rule> deduper = new HashSet<>();
         String fileName = "grammar-" + LocalDateTime.now() + ".grammar";
         LogInfo.logs("Printing rules to %s", fileName);
-        PrintWriter out = IOUtils.openOutHard(Paths.get(opts.newGrammarPath, fileName).toString());
         for (Rule rule : builder.grammar.rules) {
           if(!deduper.contains(rule)) {
-            out.println(rule.toLispTree().toString());
             deduper.add(rule);
             LogInfo.logs("Printed rule %s", rule.toString());
           } else {
             LogInfo.logs("Skipped rule %s", rule.toString());
           }
         }
-        out.flush();
-        out.close();
+
       }
     } else if (command.equals("params")) {
       if (tree.children.size() == 1) {
@@ -455,14 +448,15 @@ public class Master {
         response.lines.add("You are taking many actions in one step, consider defining some of steps as one single step.");
       
       if (approxSeq >= ILUtils.opts.maxSequence)
-        throw new RuntimeException(String.format("refused to execute: too many steps in one command (%d)", approxSeq));
-      if (utt.length() > 255)
-        throw new RuntimeException(String.format("refused to execute: you cannot exceed 255 characters in one command", approxSeq));
+        throw new RuntimeException(String.format("refused to execute: too many steps in one command (current: %d, max: %d)",
+            approxSeq, ILUtils.opts.maxSequence));
+      if (utt.length() > ILUtils.opts.maxChars)
+        throw new RuntimeException(String.format("refused to execute: too many characters in one command (current: %d, max: %d)",
+            utt.length(), ILUtils.opts.maxChars));
       
       builder.parser.parse(builder.params, ex, false);
      
       response.ex = ex;
-      logJSON(line, response, session);
     } else if (command.equals(":accept")) {
       String utt = tree.children.get(1).value;
       String formula = tree.children.get(2).value;
@@ -484,31 +478,27 @@ public class Master {
       state = builder.parser.parse(builder.params, ex, false);
       state.ensureExecuted();
       
-      
       Derivation match = ex.predDerivations.stream()
           .filter(d -> d.formula.equals(targetFormulaFinal)).findFirst().orElse(null);
       ex.setTargetFormula(targetFormula);
       if (match != null) {
         LogInfo.logs("Matched: %s", match);
         
-        CitationTracker tracker = new CitationTracker(session.id, ex);
-        tracker.citeAll(match);
+        if (session.logToFile) {
+          CitationTracker tracker = new CitationTracker(session.id, ex);
+          tracker.citeAll(match);
+        }
         
         ex.setTargetValue(match.value); // this is just for logging, not actually used for learning
         LogInfo.begin_track("Updating parameters");
         learner.onlineLearnExample(ex);
         LogInfo.end_track();
       }
-      
-      logJSON(line, response, session);
-
     } else if (command.equals(":def") || command.equals(":def_ret")) {
       if (tree.children.size() == 3) {
         String head = tree.children.get(1).value;
         String jsonDef = tree.children.get(2).value;
-        
-        // ILUtils.logRawDef(head, jsonDef, session.id);
-         
+
         Ref<Example> refExHead = new Ref<>();
         List<Rule> inducedRules = ILUtils.induceRulesHelper(command, head, jsonDef, 
             builder.parser, builder.params, session.id, refExHead);
@@ -522,14 +512,14 @@ public class Master {
           response.ex = refExHead.value;
           
           // write out the grammar
-          PrintWriter out = IOUtils.openOutAppendHard(Paths.get(Master.opts.newGrammarPath, session.id + ".grammar").toString());
-          for (Rule rule : inducedRules) {
-            out.println(rule.toLispTree().toStringWrap());
+          if (session.logToFile) {
+            PrintWriter out = IOUtils.openOutAppendHard(Paths.get(Master.opts.newGrammarPath, session.id + ".grammar").toString());
+            for (Rule rule : inducedRules) {
+              out.println(rule.toLispTree().toStringWrap());
+            }
+            out.close();
           }
-          out.close();
         }
-        
-        logJSON(line, response, session);
       } else {
         LogInfo.logs("Invalid format for def");
       }
@@ -568,19 +558,6 @@ public class Master {
       LogInfo.log("Invalid command: " + tree);
     }
     
-  }
-  
-  private void logJSON(String line, Response response, Session session) {
-    if (response == null || response.ex == null) {
-      LogInfo.logs("Line %s cannot be used", line);
-      return;
-    }
-    if (response.ex.predDerivations != null && response.ex.predDerivations.size() > 0) {
-      response.candidateIndex =  0;
-      response.ex.setTargetFormula(response.ex.predDerivations.get(0).formula);
-      response.ex.setTargetValue(response.ex.predDerivations.get(0).value);
-    }
-    ILUtils.logJSONExample(response.ex, session.id, line);
   }
   
   private Example exampleFromUtterance(String utt, Session session) {

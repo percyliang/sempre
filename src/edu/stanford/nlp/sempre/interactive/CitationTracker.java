@@ -109,7 +109,7 @@ public class CitationTracker {
 
   public void citeAll(Derivation deriv) {
     if (deriv.rule!=null && deriv.rule.isInduced()) {
-      LogInfo.logs("user %s is citing rule: %s", this.uid, deriv.rule.toString());
+      LogInfo.logs("CitationTracker: user %s is citing rule: %s", this.uid, deriv.rule.toString());
       citeRule(deriv.rule);
     }
     
@@ -119,7 +119,18 @@ public class CitationTracker {
     }
   }
 
-  static String getAuthor(Rule rule) { return (getPrefix(rule, IDPrefix)); }
+  static String getAuthor(Rule rule) {
+    try {
+    String author = getPrefix(rule, IDPrefix);
+    if (Strings.isNullOrEmpty(author))
+      return "__noname__";
+    else
+      return author;
+    } catch (Exception e) {
+      e.printStackTrace();
+      return "__noname__";
+    } 
+  }
   static String getHead(Rule rule) { return (getPrefix(rule, HeadPrefix)); }
   static String getBody(Rule rule) { return (getPrefix(rule, BodyPrefix)); }
   

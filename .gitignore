@@ -4,7 +4,6 @@ sfig
 refdb
 virtuoso-opensource
 
-
 classes
 libsempre
 sempre.jar
@@ -13,11 +12,6 @@ module-classes.txt
 state
 out
 test-output
-
-# interactive stuff
-int-output*
-old-int-*
-_OUTPATH_
 
 .project
 .classpath
@@ -43,5 +37,9 @@ java.hprof.txt
 scr
 rdf
 
+# interactive outputs
+int-output*
+int-backup
+_OUTPATH_
 # Community server logs
 community-server/data

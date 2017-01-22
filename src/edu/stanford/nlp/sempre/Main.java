@@ -34,10 +34,6 @@ public class Main implements Runnable {
       Master master = new Master(builder);
       master.runInteractivePrompt();
     }
-    
-    if (!server && !interactive) {
-      Master master = new Master(builder);
-    }
   }
 
   public static void main(String[] args) {
