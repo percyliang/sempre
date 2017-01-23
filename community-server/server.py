@@ -147,19 +147,21 @@ def emit_structs():
         # get the most recent 7 structs
         for fname in sorted([int(n[:-5]) for n in os.listdir(uid_folder)])[:7]:
             path = os.path.join(uid_folder, str(fname) + ".json")
+            try:
+                with open(path, 'r') as f:
+                    lines = f.readlines()
+                    if (len(lines) != 3):
+                        continue
 
-            with open(path, 'r') as f:
-                lines = f.readlines()
-                if (len(lines) != 3):
-                    continue
+                    upvotes = json.loads(lines[0].strip())
+                    timestamp = json.loads(lines[1].strip())
+                    struct = json.loads(lines[2].strip())
 
-                upvotes = json.loads(lines[0].strip())
-                timestamp = json.loads(lines[1].strip())
-                struct = json.loads(lines[2].strip())
-
-                score = score_struct(timestamp, len(upvotes))
-                message = {"uid": uid, "id": str(fname), "score": score, "upvotes": [scrub_uid(up) for up in upvotes], "struct": struct}
-                emit("struct", message)
+                    score = score_struct(timestamp, len(upvotes))
+                    message = {"uid": uid, "id": str(fname), "score": score, "upvotes": [scrub_uid(up) for up in upvotes], "struct": struct}
+                    emit("struct", message)
+            except:
+                pass
 
 
 def emit_utterances():
@@ -204,6 +206,8 @@ def emit_utterances():
 
 def log(message):
     """Logs the given message by writing it in the uid's JSON log file."""
+    uid = session.uid if hasattr(session, 'uid') else "NULL_session"
+
     path = os.path.join(LOG_FOLDER, session.uid + ".json")
 
     # Add a timestamp to the log
@@ -291,24 +295,32 @@ def upvote(data):
     # Read the first line of the file to get the number of upvotes
     upvotes = []
     score = 0
-    with open(struct_path, 'r') as f:
+    with open(struct_path, 'r+') as f:
         upvotes = json.loads(f.readline().strip())
 
         # If the user has not already upvoted this, add them
         if session.uid not in upvotes:
             upvotes.append(session.uid)
 
-            with open(struct_path, 'w') as fw:
-                fw.write(json.dumps(upvotes) + "\n")
-                timestamp = f.readline()
-                fw.write(timestamp)  # rewrite the timestamp
-                fw.write(f.readline())  # rewrite the actual struct
+            timestamp = f.readline()
+            struct = f.readline()
 
-                score = score_struct(timestamp, len(upvotes))
+            # reset file to top
+            f.seek(0)
 
-                # and then broadcast the new upvote to the room:
-                message = {"uid": data["uid"], "id": data["id"], "up": scrub_uid(session.uid), "score": score}
-                emit("upvote", message, broadcast=True, room="community")
+            # write file back with updated upvotes
+            f.write(json.dumps(upvotes) + "\n")
+            f.write(timestamp)  # rewrite the timestamp
+            f.write(struct)  # rewrite the actual struct
+
+            f.truncate()  # truncate to ensure flush appropriate
+
+            # calculate score
+            score = score_struct(timestamp, len(upvotes))
+
+            # and then broadcast the new upvote to the room:
+            message = {"uid": data["uid"], "id": data["id"], "up": scrub_uid(session.uid), "score": score}
+            emit("upvote", message, broadcast=True, room="community")
 
 
 @socketio.on('log')
