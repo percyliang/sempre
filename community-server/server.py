@@ -42,8 +42,7 @@ A client can make the following socket requests:
         filename.
     - "upvote": {"uid": UID, "id": ID}
         a user can upvote another user's struct by passing in the struct's
-        uid (the scrub_uid() of the user who submitted it) and the id of
-        the struct itself.
+        uid and the id of the struct itself.
     - "share": {"struct": STRUCT}
         a user can share a struct and it will be saved to their directory
 
@@ -94,6 +93,8 @@ DATA_FOLDER = "community-server/data/"
 LOG_FOLDER = os.path.join(DATA_FOLDER, "log/")
 STRUCTS_FOLDER = os.path.join(DATA_FOLDER, "structs/")
 
+CITATION_FOLDER = "int-output/citation"
+
 # Scoring function parameters
 GRAVITY = 1.4  # higher the gravity, the faster old structs lose score
 TIME_INTERVAL = 1800.0  # break off by every 30 minutes
@@ -125,19 +126,6 @@ def current_unix_time():
     return int(time.time())
 
 
-def scrub_uid(uid):
-    """We don't want to reveal other users' full session_id's to other users,
-    so we hide it by just sending the first 8 characters.
-
-    NB: We use the session_id as the sole source of truth for authentication
-    and logging purposes - if it was leaked, other turkers would be able to
-    impersonate users.
-
-    TODO: Convert to using signed JWTs.
-    """
-    return uid[:8]
-
-
 def emit_structs():
     """Walk through the STRUCTS_FOLDER directory and read each struct and emit
     it to the user one by one."""
@@ -147,19 +135,21 @@ def emit_structs():
         # get the most recent 7 structs
         for fname in sorted([int(n[:-5]) for n in os.listdir(uid_folder)])[:7]:
             path = os.path.join(uid_folder, str(fname) + ".json")
+            try:
+                with open(path, 'r') as f:
+                    lines = f.readlines()
+                    if (len(lines) != 3):
+                        continue
 
-            with open(path, 'r') as f:
-                lines = f.readlines()
-                if (len(lines) != 3):
-                    continue
+                    upvotes = json.loads(lines[0].strip())
+                    timestamp = json.loads(lines[1].strip())
+                    struct = json.loads(lines[2].strip())
 
-                upvotes = json.loads(lines[0].strip())
-                timestamp = json.loads(lines[1].strip())
-                struct = json.loads(lines[2].strip())
-
-                score = score_struct(timestamp, len(upvotes))
-                message = {"uid": uid, "id": str(fname), "score": score, "upvotes": [scrub_uid(up) for up in upvotes], "struct": struct}
-                emit("struct", message)
+                    score = score_struct(timestamp, len(upvotes))
+                    message = {"uid": uid, "id": str(fname), "score": score, "upvotes": [up for up in upvotes], "struct": struct}
+                    emit("struct", message)
+            except:
+                pass
 
 
 def emit_utterances():
@@ -186,7 +176,7 @@ def emit_utterances():
                     latest_5[earliest_idx] = file_info
 
     for (time, uid, path) in sorted(latest_5, key=lambda s: int(s[0]), reverse=True):
-        uid = scrub_uid(uid)
+        uid = uid
         utts = []
         count = 0
         for line in reverse_readline(path):
@@ -202,8 +192,62 @@ def emit_utterances():
         emit("utterances", message)
 
 
+def h_index(citations):
+    """https://github.com/kamyu104/LeetCode/blob/master/Python/h-index.py"""
+    citations.sort(reverse=True)
+    h = 0
+    for x in citations:
+        if x >= h + 1:
+            h += 1
+        else:
+            break
+    return h
+
+
+def compute_citations(dir):
+    citations = []
+    for fname in os.listdir(dir):
+        if not fname.endswith(".json"):
+            continue
+
+        path = os.path.join(dir, fname)
+
+        with open(path, 'r') as f:
+            data = json.load(f)
+            citations.append(data)
+
+    citation_numbers = [citation["cite"] + (citation["self"] / 10) for citation in citations]
+
+    citation_score = h_index(citation_numbers)
+
+    return (citations, citation_score)
+
+
+def emit_top_builders():
+    top_5_builders = []
+    for uid in os.listdir(CITATION_FOLDER):
+        subdir = os.path.join(CITATION_FOLDER, uid)
+        if not os.path.isdir(subdir):
+            continue
+
+        (citations, citation_score) = compute_citations(subdir)
+
+        if len(top_5_builders) < 5 or citation_score > top_5_builders[4][0]:
+            citations = sorted(citations, key=lambda c: c["cite"], reverse=True)[:5]
+
+            struct = (uid, citation_score, citations)
+            if len(top_5_builders) < 5:
+                top_5_builders.append(struct)
+            else:
+                top_5_builders[4] = struct
+
+    emit("top_builders", {"top_builders": top_5_builders}, broadcast=True, room="community")
+
+
 def log(message):
     """Logs the given message by writing it in the uid's JSON log file."""
+    uid = session.uid if hasattr(session, 'uid') else "NULL_session"
+
     path = os.path.join(LOG_FOLDER, session.uid + ".json")
 
     # Add a timestamp to the log
@@ -213,6 +257,15 @@ def log(message):
     with open(path, 'a') as f:
         json.dump(message, f)
         f.write('\n')
+
+
+@socketio.on('getscore')
+def get_score(data):
+    uid = session.uid
+    subdir = os.path.join(CITATION_FOLDER, uid)
+    if (os.path.isdir(subdir)):
+        (citations, score) = compute_citations(subdir)
+        emit("score", {"score": score})
 
 
 @socketio.on('join')
@@ -231,6 +284,9 @@ def on_join(data):
         # And then we emit the most recent 5 users' utterances per file
         emit_utterances()
 
+        # and also emit the top builders when first joining
+        emit_top_builders()
+
 
 @socketio.on('leave')
 def on_leave(data):
@@ -248,7 +304,7 @@ def handle_share(data):
     current score of the struct and ID is the unique index (auto-incremented) of
     this particular struct.."""
 
-    user_structs_folder = os.path.join(STRUCTS_FOLDER, scrub_uid(session.uid))
+    user_structs_folder = os.path.join(STRUCTS_FOLDER, session.uid)
     make_dir_if_necessary(user_structs_folder)
     names = os.listdir(user_structs_folder)
     new_struct_id = "1"
@@ -266,7 +322,7 @@ def handle_share(data):
         f.write(json.dumps(data["struct"]))  # the actual struct
 
     # Broadcast addition to the "community" room
-    message = {"uid": scrub_uid(session.uid), "id": new_struct_id, "score": score, "upvotes": [], "struct": data["struct"]}
+    message = {"uid": session.uid, "id": new_struct_id, "score": score, "upvotes": [], "struct": data["struct"]}
     emit("struct", message, broadcast=True, room="community")
 
 
@@ -291,24 +347,32 @@ def upvote(data):
     # Read the first line of the file to get the number of upvotes
     upvotes = []
     score = 0
-    with open(struct_path, 'r') as f:
+    with open(struct_path, 'r+') as f:
         upvotes = json.loads(f.readline().strip())
 
         # If the user has not already upvoted this, add them
         if session.uid not in upvotes:
             upvotes.append(session.uid)
 
-            with open(struct_path, 'w') as fw:
-                fw.write(json.dumps(upvotes) + "\n")
-                timestamp = f.readline()
-                fw.write(timestamp)  # rewrite the timestamp
-                fw.write(f.readline())  # rewrite the actual struct
+            timestamp = f.readline()
+            struct = f.readline()
 
-                score = score_struct(timestamp, len(upvotes))
+            # reset file to top
+            f.seek(0)
 
-                # and then broadcast the new upvote to the room:
-                message = {"uid": data["uid"], "id": data["id"], "up": scrub_uid(session.uid), "score": score}
-                emit("upvote", message, broadcast=True, room="community")
+            # write file back with updated upvotes
+            f.write(json.dumps(upvotes) + "\n")
+            f.write(timestamp)  # rewrite the timestamp
+            f.write(struct)  # rewrite the actual struct
+
+            f.truncate()  # truncate to ensure flush appropriate
+
+            # calculate score
+            score = score_struct(timestamp, len(upvotes))
+
+            # and then broadcast the new upvote to the room:
+            message = {"uid": data["uid"], "id": data["id"], "up": session.uid, "score": score}
+            emit("upvote", message, broadcast=True, room="community")
 
 
 @socketio.on('log')
@@ -327,10 +391,10 @@ def handle_log(data):
     # If the message is an accept or define type, broadcast it to all
     # community-connected clients so they can update their display.
     if data["type"] == "accept":
-        emit("new_accept", {"uid": scrub_uid(session.uid), "query": data["msg"]["query"], "timestamp": current_unix_time()},
+        emit("new_accept", {"uid": session.uid, "query": data["msg"]["query"], "timestamp": current_unix_time()},
              broadcast=True, room="community")
     elif data["type"] == "define":
-        emit("new_define", {"uid": scrub_uid(session.uid), "defined": data["msg"]["defineAs"], "timestamp": current_unix_time()},
+        emit("new_define", {"uid": session.uid, "defined": data["msg"]["defineAs"], "timestamp": current_unix_time()},
              broadcast=True, room="community")
 
 
