@@ -211,8 +211,9 @@ public class JsonServer {
         
         
         synchronized (queryLogLock)  {
-          boolean isContext = query.startsWith("(:context ");
-          if (!sandbox && (!isContext || opts.verbose >= 2)) {
+//          boolean isContext = query.startsWith("(:context ");
+//          if (!sandbox && (!isContext || opts.verbose >= 2)) {
+          if (!sandbox) {
             PrintWriter out = IOUtils.openOutAppend(opts.queryLogPath);
             out.println(Json.writeValueAsStringHard(jsonMap));
             out.close();
@@ -226,11 +227,8 @@ public class JsonServer {
       Session session = master.getSession(sessionId);
       session.remoteHost = remoteHost;
       session.format = "json";
-      // 
-      session.logToFile = sandbox;
-
-      if (query == null) query = session.getLastQuery();
-      if (query == null) query = "";
+      session.sandbox = sandbox;
+      if (query == null) query = "null";
       logs("Server.handleQuery %s: %s", session.id, query);
 
       // Print header
