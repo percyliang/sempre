@@ -93,6 +93,8 @@ DATA_FOLDER = "community-server/data/"
 LOG_FOLDER = os.path.join(DATA_FOLDER, "log/")
 STRUCTS_FOLDER = os.path.join(DATA_FOLDER, "structs/")
 
+CITATION_FOLDER = "int-output/citation"
+
 # Scoring function parameters
 GRAVITY = 1.4  # higher the gravity, the faster old structs lose score
 TIME_INTERVAL = 1800.0  # break off by every 30 minutes
@@ -190,6 +192,58 @@ def emit_utterances():
         emit("utterances", message)
 
 
+def h_index(citations):
+    """https://github.com/kamyu104/LeetCode/blob/master/Python/h-index.py"""
+    citations.sort(reverse=True)
+    h = 0
+    for x in citations:
+        if x >= h + 1:
+            h += 1
+        else:
+            break
+    return h
+
+
+def compute_citations(dir):
+    citations = []
+    for fname in os.listdir(dir):
+        if not fname.endswith(".json"):
+            continue
+
+        path = os.path.join(dir, fname)
+
+        with open(path, 'r') as f:
+            data = json.load(f)
+            citations.append(data)
+
+    citation_numbers = [citation["cite"] + (citation["self"] / 10) for citation in citations]
+
+    citation_score = h_index(citation_numbers)
+
+    return (citations, citation_score)
+
+
+def emit_top_builders():
+    top_5_builders = []
+    for uid in os.listdir(CITATION_FOLDER):
+        subdir = os.path.join(CITATION_FOLDER, uid)
+        if not os.path.isdir(subdir):
+            continue
+
+        (citations, citation_score) = compute_citations(subdir)
+
+        if len(top_5_builders) < 5 or citation_score > top_5_builders[4][0]:
+            citations = sorted(citations, key=lambda c: c["cite"], reverse=True)[:5]
+
+            struct = (uid, citation_score, citations)
+            if len(top_5_builders) < 5:
+                top_5_builders.append(struct)
+            else:
+                top_5_builders[4] = struct
+
+    emit("top_builders", {"top_builders": top_5_builders}, broadcast=True, room="community")
+
+
 def log(message):
     """Logs the given message by writing it in the uid's JSON log file."""
     uid = session.uid if hasattr(session, 'uid') else "NULL_session"
@@ -203,6 +257,15 @@ def log(message):
     with open(path, 'a') as f:
         json.dump(message, f)
         f.write('\n')
+
+
+@socketio.on('getscore')
+def get_score(data):
+    uid = session.uid
+    subdir = os.path.join(CITATION_FOLDER, uid)
+    if (os.path.isdir(subdir)):
+        (citations, score) = compute_citations(subdir)
+        emit("score", {"score": score})
 
 
 @socketio.on('join')
@@ -220,6 +283,9 @@ def on_join(data):
 
         # And then we emit the most recent 5 users' utterances per file
         emit_utterances()
+
+        # and also emit the top builders when first joining
+        emit_top_builders()
 
 
 @socketio.on('leave')
