@@ -96,8 +96,8 @@ STRUCTS_FOLDER = os.path.join(DATA_FOLDER, "structs/")
 CITATION_FOLDER = "int-output/citation"
 
 # Scoring function parameters
-GRAVITY = 1.4  # higher the gravity, the faster old structs lose score
-TIME_INTERVAL = 1800.0  # break off by every 30 minutes
+GRAVITY = 1.1  # higher the gravity, the faster old structs lose score
+TIME_INTERVAL = 7200.0  # break off by every 30 minutes
 
 # Default port for the server
 DEFAULT_PORT = 8406
@@ -133,7 +133,7 @@ def emit_structs():
     for uid in [name for name in os.listdir(STRUCTS_FOLDER) if os.path.isdir(os.path.join(STRUCTS_FOLDER, name))]:
         uid_folder = os.path.join(STRUCTS_FOLDER, uid)
         # get the most recent 7 structs
-        for fname in sorted([int(n[:-5]) for n in os.listdir(uid_folder)])[:7]:
+        for fname in sorted([int(n[:-5]) for n in os.listdir(uid_folder)])[:100]:
             path = os.path.join(uid_folder, str(fname) + ".json")
             try:
                 with open(path, 'r') as f:
@@ -216,7 +216,7 @@ def compute_citations(dir):
             data = json.load(f)
             citations.append(data)
 
-    citation_numbers = [citation["cite"] + (citation["self"] / 10) for citation in citations]
+    citation_numbers = [citation["cite"] + citation["self"] for citation in citations]
 
     citation_score = h_index(citation_numbers)
 
@@ -248,7 +248,7 @@ def log(message):
     """Logs the given message by writing it in the uid's JSON log file."""
     uid = session.uid if hasattr(session, 'uid') else "NULL_session"
 
-    path = os.path.join(LOG_FOLDER, session.uid + ".json")
+    path = os.path.join(LOG_FOLDER, uid + ".json")
 
     # Add a timestamp to the log
     message["timestamp"] = current_unix_time()

@@ -1067,7 +1067,7 @@ addMode('int-utils', 'small commands like run community server, backup, or simul
        lambda { |e| system 'cp int-output int-backup/`date +%Y-%m-%d.%H:%M:%S`'},
        lambda { |e| system 'mkdir -p ./int-output'}
      ),
-    'community' => l('python community-server/server.py -- port 8406'),
+    'community' => l('python community-server/server.py --port 8403'),
     'simulator' => l(
       rlwrap,
       header('core,interactive'),
