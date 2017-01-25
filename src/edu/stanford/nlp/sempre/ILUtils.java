@@ -197,6 +197,11 @@ public final class ILUtils {
       throw new RuntimeException(String.format("Cannot define with an empty head: %s", head));
 
     BeamFloatingParserState state = (BeamFloatingParserState)parser.parse(params, exHead, true);
+    
+    if (GrammarInducer.getParseStatus(exHead) == GrammarInducer.ParseStatus.Core) {
+      throw new RuntimeException(String.format("Redefining the core language is not allowed, reword your command and try again: %s", head));
+    }
+    
     LogInfo.logs("anchored: %s", state.chartList);
     LogInfo.logs("exHead: %s", exHead.getTokens());
 

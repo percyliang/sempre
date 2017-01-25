@@ -71,23 +71,22 @@ def figOpts; l(selo(:pooldir, 'execDir', 'exec', '_OUTPATH_'), o('overwriteExecD
 ############################################################
 # Unit tests
 # Community Server
-addMode('backup-cp', 'small commands like run community server, backup, or simulator', lambda { |e| l(
-  lambda { |e| system 'echo "backing up with cp"'},
-  lambda { |e| system 'mkdir -p ./int-backup/'},
-  lambda { |e| system 'cp int-output int-backup/`date +%Y-%m-%d.%H:%M:%S`'},
-  lambda { |e| system 'mkdir -p ./int-output'},
-nil)})
 
-addMode('backup-mv', 'small commands like run community server, backup, or simulator', lambda { |e| l(
+
+addMode('backup', 'small commands like run community server, backup, or simulator', lambda { |e| l(
   lambda { |e| system 'echo "backing up with mv"'},
   lambda { |e| system 'mkdir -p ./int-backup/'},
+	letDefault(:msg, 'backing up, no message'),
+	lambda { |e| l('echo ', :msg, '> ./int-backup/message')},
+	lambda { |e| l('echo ', '`date +%Y-%m-%d.%H:%M:%S`', '>> ./int-backup/message')},
   lambda { |e| system 'mv int-output int-backup/`date +%Y-%m-%d.%H:%M:%S`'},
   lambda { |e| system 'mkdir -p ./int-output'},
 nil)})
 
 addMode('trash', 'put int-output into trash with time stamp', lambda { |e| l(
   lambda { |e| system 'echo "trashing int-output with time stamp"'},
-  lambda { |e| system  'rm int-output-trash-*'},
+	lambda { |e| system 'mv int-output int-output-trash-`date +%Y-%m-%d.%H:%M:%S`'},
+  lambda { |e| system 'rm -rf int-output-trash-*'},
   lambda { |e| system 'mkdir -p ./int-output'},
 nil)})
 

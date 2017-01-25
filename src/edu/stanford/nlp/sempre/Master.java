@@ -444,11 +444,11 @@ public class Master {
       Example ex = exampleFromUtterance(utt, session);
       
       long approxSeq = ex.getLemmaTokens().stream().filter(s -> s.contains(";")).count();
-      if (approxSeq >= 8)
-        response.lines.add("You are taking many actions in one step, consider defining some of steps as one single step.");
+      //if (approxSeq >= 8)
+      //  response.lines.add("You are taking many actions in one step, consider defining some of steps as one single step.");
       
       if (approxSeq >= ILUtils.opts.maxSequence)
-        throw new RuntimeException(String.format("refused to execute: too many steps in one command (current: %d, max: %d)",
+        throw new RuntimeException(String.format("refused to execute: too many steps in one command -- consider defining some of steps as one single step.  (current: %d, max: %d)",
             approxSeq, ILUtils.opts.maxSequence));
       if (utt.length() > ILUtils.opts.maxChars)
         throw new RuntimeException(String.format("refused to execute: too many characters in one command (current: %d, max: %d)",

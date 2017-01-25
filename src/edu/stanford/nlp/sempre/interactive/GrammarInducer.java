@@ -62,6 +62,9 @@ public class GrammarInducer {
     }
     
     // dont want weird cat unary rules with strange semantics
+    if (headTokens == null || headTokens.isEmpty() ) {
+      throw new RuntimeException("The head is empty, refusing to define.");
+    }
     chartList.removeIf(d -> d.start == 0 && d.end == headTokens.size());
     this.def = def;
     

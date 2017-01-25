@@ -49,6 +49,7 @@ public class Simulator implements Runnable {
     ExecutorService executor = new ThreadPoolExecutor(JsonServer.opts.numThreads, JsonServer.opts.numThreads,
         5000, TimeUnit.MILLISECONDS,
         new LinkedBlockingQueue<Runnable>());
+    Evaluation evaluation = new Evaluation();
     
     long startTime = System.nanoTime();
     for (String fileName : logFiles) {
@@ -57,6 +58,7 @@ public class Simulator implements Runnable {
 
         stream.forEach(l -> 
         executor.execute(() -> {
+          long startTimeQ = System.nanoTime();
           Map<String, Object> json = Json.readMapHard(l);
           Object command = json.get("q");
           if (command == null) // to be backwards compatible
@@ -70,6 +72,12 @@ public class Simulator implements Runnable {
           } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
+          }
+          long endTimeQ = System.nanoTime();
+          double queryTime = (endTimeQ - startTimeQ)/1.0e9;
+          evaluation.add("queryTime",queryTime);
+          if (queryTime > 0.1) {
+            LogInfo.logs("slow query (%f): %s", queryTime, l);
           }
         }));
         executor.shutdown();
@@ -87,6 +95,11 @@ public class Simulator implements Runnable {
       long endTime = System.nanoTime();
       LogInfo.logs("Took %d ns or %.4f s", (endTime - startTime), (endTime - startTime)/1.0e9); 
     }
+    
+
+    evaluation.logStats("Simulator");
+    evaluation.putOutput("Simulator");
+    
     LogInfo.end_track();
   }
 

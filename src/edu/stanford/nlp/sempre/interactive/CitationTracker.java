@@ -1,31 +1,26 @@
 package edu.stanford.nlp.sempre.interactive;
 
-import com.google.common.base.Joiner;
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
-
-import edu.stanford.nlp.sempre.*;
-import fig.basic.IOUtils;
-import fig.basic.LispTree;
-import fig.basic.LogInfo;
-import fig.basic.Pair;
-
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Base64;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import com.google.common.base.Strings;
+
+import edu.stanford.nlp.sempre.Derivation;
+import edu.stanford.nlp.sempre.Example;
+import edu.stanford.nlp.sempre.ILUtils;
+import edu.stanford.nlp.sempre.Json;
+import edu.stanford.nlp.sempre.Rule;
+import fig.basic.IOUtils;
+import fig.basic.LogInfo;
+import fig.basic.Pair;
 
 /**
  * A rule specifies how to take a right hand of terminals and non-terminals.
