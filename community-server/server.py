@@ -96,8 +96,8 @@ STRUCTS_FOLDER = os.path.join(DATA_FOLDER, "structs/")
 CITATION_FOLDER = "int-output/citation"
 
 # Scoring function parameters
-GRAVITY = 1.4  # higher the gravity, the faster old structs lose score
-TIME_INTERVAL = 1800.0  # break off by every 30 minutes
+GRAVITY = 1.1  # higher the gravity, the faster old structs lose score
+TIME_INTERVAL = 7200.0  # break off by every 30 minutes
 
 # Default port for the server
 DEFAULT_PORT = 8406
@@ -132,9 +132,18 @@ def emit_structs():
 
     for uid in [name for name in os.listdir(STRUCTS_FOLDER) if os.path.isdir(os.path.join(STRUCTS_FOLDER, name))]:
         uid_folder = os.path.join(STRUCTS_FOLDER, uid)
-        # get the most recent 7 structs
-        for fname in sorted([int(n[:-5]) for n in os.listdir(uid_folder)])[:7]:
-            path = os.path.join(uid_folder, str(fname) + ".json")
+
+        count = 0
+        for name in os.listdir(uid_folder):
+            if count > 100:
+                break
+
+            path = os.path.join(uid_folder, name)
+            if not os.path.isfile(path):
+                continue
+
+            fname = name[:-5]
+
             try:
                 with open(path, 'r') as f:
                     lines = f.readlines()
@@ -146,10 +155,19 @@ def emit_structs():
                     struct = json.loads(lines[2].strip())
 
                     score = score_struct(timestamp, len(upvotes))
-                    message = {"uid": uid, "id": str(fname), "score": score, "upvotes": [up for up in upvotes], "struct": struct}
+                    message = {"uid": uid, "id": fname, "score": score, "upvotes": [up for up in upvotes], "struct": struct}
                     emit("struct", message)
+                    count += 1
             except:
                 pass
+
+
+def emit_user_structs_count():
+    """"Emits a count of the total number of user structs in the folder."""
+    path = os.path.join(STRUCTS_FOLDER, session.uid)
+    if os.path.isdir(path):
+        structs = [name for name in os.listdir(path) if os.path.isfile(os.path.join(path, name))]
+        emit("user_structs", {"structs": structs})
 
 
 def emit_utterances():
@@ -216,7 +234,7 @@ def compute_citations(dir):
             data = json.load(f)
             citations.append(data)
 
-    citation_numbers = [citation["cite"] + (citation["self"] / 10) for citation in citations]
+    citation_numbers = [citation["cite"] + citation["self"] for citation in citations]
 
     citation_score = h_index(citation_numbers)
 
@@ -248,7 +266,7 @@ def log(message):
     """Logs the given message by writing it in the uid's JSON log file."""
     uid = session.uid if hasattr(session, 'uid') else "NULL_session"
 
-    path = os.path.join(LOG_FOLDER, session.uid + ".json")
+    path = os.path.join(LOG_FOLDER, uid + ".json")
 
     # Add a timestamp to the log
     message["timestamp"] = current_unix_time()
@@ -266,6 +284,18 @@ def get_score(data):
     if (os.path.isdir(subdir)):
         (citations, score) = compute_citations(subdir)
         emit("score", {"score": score})
+
+
+@socketio.on('delete_struct')
+def delete_struct(data):
+    uid = session.uid
+    struct_id = data["id"]
+    struct_path = struct_id + ".json"
+    path = os.path.join(STRUCTS_FOLDER, uid, struct_path)
+    if (os.path.isfile(path)):
+        delete_dir = os.path.join(STRUCTS_FOLDER, uid, "deleted")
+        make_dir_if_necessary(delete_dir)
+        os.rename(path, os.path.join(delete_dir, struct_path))
 
 
 @socketio.on('join')
@@ -306,7 +336,7 @@ def handle_share(data):
 
     user_structs_folder = os.path.join(STRUCTS_FOLDER, session.uid)
     make_dir_if_necessary(user_structs_folder)
-    names = os.listdir(user_structs_folder)
+    names = [name for name in os.listdir(user_structs_folder) if os.path.isfile(os.path.join(user_structs_folder, name))]
     new_struct_id = "1"
     if len(names) > 0:
         new_struct_id = str(max([int(name[:-5]) for name in names]) + 1)
@@ -406,6 +436,11 @@ def session(data):
     context variable."""
     session.uid = data['sessionId']
     log({"type": "connect"})
+
+
+@socketio.on('getstructcount')
+def getstructcount(data):
+    emit_user_structs_count()
 
 
 @socketio.on('connect')
