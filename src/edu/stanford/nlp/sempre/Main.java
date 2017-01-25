@@ -1,5 +1,12 @@
 package edu.stanford.nlp.sempre;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import fig.basic.LogInfo;
 import fig.basic.Option;
 import fig.exec.Execution;

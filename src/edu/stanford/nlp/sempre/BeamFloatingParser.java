@@ -300,7 +300,9 @@ class BeamFloatingParserState extends ChartParserState {
     // Base case: our fencepost has walked to the end of the span, so
     // apply the rule on all the children gathered during the walk.
     if (i == end) {
-      for (Rule rule : node.rules) {
+      Iterator<Rule> ruleIterator = node.rules.iterator();
+      while (ruleIterator.hasNext()) {
+        Rule rule = ruleIterator.next();
         if (coarseAllows(rule.lhs, start, end)) {
           numNew.value += applyRule(start, end, rule, children);
         }

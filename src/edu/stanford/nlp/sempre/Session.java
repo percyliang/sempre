@@ -29,7 +29,7 @@ public class Session {
   Example lastEx;  // Last example that we processed
   Params params;
   Learner learner;
-  boolean sandbox = false;
+  Map<String,String> reqParams;
   
   public static Options opts = new Options();
   
@@ -81,9 +81,40 @@ public class Session {
       this.params.read(opts.inParamsPath);
     this.learner = new Learner(builder.parser, this.params, new Dataset());
   }
+  
+
+  //Decides if we write out any logs
+  //public boolean isWriting() {
+  //  return false;
+  //}
+  // provides highest level of isolation,
+  // should not even mutate the server
+  public boolean isSandbox() {
+    return true;
+  }
+  // determines whether we add rules used by the public
+  public boolean isUpdating() {
+    return true;
+  }
+  public boolean isGlobal() {
+    return true;
+  }
+  
 
   @Override
   public String toString() {
     return String.format("%s: %s; last: %s", id, context, lastEx);
+  }
+  
+  // Decides if we write out any logs
+  public boolean isLogging() { return defaultTrue("logging");}
+  public boolean isWritingCitation() { return defaultTrue("cite");}
+  public boolean isWritingGrammar() { return defaultTrue("grammar");}
+  public boolean isLearning() { return defaultTrue("learn");}
+  
+  private boolean defaultTrue(String key) {
+    if (this.reqParams == null) return true;
+    if (!this.reqParams.containsKey(key)) return true;
+    return !this.reqParams.get(key).equals("0");
   }
 }

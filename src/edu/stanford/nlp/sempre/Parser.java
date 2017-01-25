@@ -167,10 +167,10 @@ public abstract class Parser {
     // Parse
     StopWatch watch = new StopWatch();
     watch.start();
-    LogInfo.begin_track_printAll("Parser.parse: parse");
+    // LogInfo.begin_track_printAll("Parser.parse: parse");
     ParserState state = newParserState(params, ex, computeExpectedCounts);
     state.infer();
-    LogInfo.end_track();
+    // LogInfo.end_track();
     watch.stop();
     state.parseTime = watch.getCurrTimeLong();
     state.setEvaluation();

@@ -5,7 +5,9 @@ import com.google.common.collect.Lists;
 import fig.basic.LispTree;
 import fig.basic.Pair;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A rule specifies how to take a right hand of terminals and non-terminals.
@@ -145,6 +147,16 @@ public class Rule {
   public int hashCode() {
     return this.toString().hashCode();
   }
-
- 
+  
+  public String toJson() {
+    Map<String, Object> jsonMap = new LinkedHashMap<>();
+    jsonMap.put("lhs", lhs);
+    jsonMap.put("rhs", rhs);
+    jsonMap.put("sem", sem.toString());
+    if (info != null) {
+      for (Pair<String, Double> p : info)
+        jsonMap.put(p.getFirst(), p.getSecond());
+    }
+    return Json.writeValueAsStringHard(jsonMap);
+  }
 }

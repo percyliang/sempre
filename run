@@ -1012,19 +1012,18 @@ o('Params.l1Reg', 'lazy'),
 o('Params.l1RegCoeff', 0.001),
 o('Parser.beamSize', 10),
 o('Params.initStepSize', 0.1),
-o('Params.adaptiveStepSize', true),
+o('Params.adaptiveStepSize', false),
 
 o('FeatureExtractor.featureComputers', 'interactive.ActionFeatureComputer'),
 o('FeatureExtractor.featureDomains', 'rule', 'stats'),
 
 lambda { |e| system 'mkdir -p ./int-output/'},
 lambda { |e| system 'mkdir -p ./int-output/log/'},
-lambda { |e| system 'mkdir -p ./int-output/grammar/'},
 lambda { |e| system 'mkdir -p ./int-output/citation/'},
 
 # o('Master.newExamplesPath', './int-output/examples/'),
 # o('Master.logPath', './int-output/logs/'),
-o('Master.newGrammarPath', './int-output/grammar/'),
+o('Master.newGrammarPath', './int-output/grammar.lisp'),
 
 # o('ILUtils.JSONLogPath', './int-output/json/'),
 o('ILUtils.citationPath', './int-output/citation/'),
@@ -1050,39 +1049,6 @@ o('Derivation.showTypes', false),
 o('Derivation.showValues', false),
 o('Derivation.showRules', false),
 nil) })
-
-# Community Server
-addMode('int-utils', 'small commands like run community server, backup, or simulator', lambda { |e| l(
-  letDefault(:cmd, 'help'),
-  sel(:cmd, {
-    'backup-mv' => l(
-      lambda { |e| system 'echo "backing up with mv"'},
-      lambda { |e| system 'mkdir -p ./int-backup/'},
-      lambda { |e| system 'mv int-output int-backup/`date +%Y-%m-%d.%H:%M:%S`'},
-      lambda { |e| system 'mkdir -p ./int-output'}
-     ),
-     'backup-cp' => l(
-       lambda { |e| system 'echo "backing up with cp"'},
-       lambda { |e| system 'mkdir -p ./int-backup/'},
-       lambda { |e| system 'cp int-output int-backup/`date +%Y-%m-%d.%H:%M:%S`'},
-       lambda { |e| system 'mkdir -p ./int-output'}
-     ),
-    'community' => l('python community-server/server.py --port 8403'),
-    'simulator' => l(
-      rlwrap,
-      header('core,interactive'),
-      'edu.stanford.nlp.sempre.interactive.Simulator',
-      # figOpts,
-      letDefault(:server, 'local'),
-      sel(:server, {
-        'local' => o('serverURL', 'http://localhost:8410'),
-        'remote' => o('serverURL', 'http://jonsson.stanford.edu:8410')
-      }),
-      o('sandbox', 1), # set to 0 to enable logging
-    nil),
-  }),
-nil) })
-
 ############################################################
 
 if ARGV.size == 0

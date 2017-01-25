@@ -454,9 +454,9 @@ public class Master {
         throw new RuntimeException(String.format("refused to execute: too many characters in one command (current: %d, max: %d)",
             utt.length(), ILUtils.opts.maxChars));
       
-      builder.parser.parse(builder.params, ex, false);
-     
+      builder.parser.parse(builder.params, ex, false);     
       response.ex = ex;
+      
     } else if (command.equals(":accept")) {
       String utt = tree.children.get(1).value;
       String formula = tree.children.get(2).value;
@@ -484,17 +484,19 @@ public class Master {
       if (match != null) {
         LogInfo.logs("Matched: %s", match);
         
-        if (!session.sandbox) {
+        if (session.isWritingCitation()) {
           CitationTracker tracker = new CitationTracker(session.id, ex);
           tracker.citeAll(match);
         }
         
         ex.setTargetValue(match.value); // this is just for logging, not actually used for learning
-        LogInfo.begin_track("Updating parameters");
-        learner.onlineLearnExample(ex);
-        LogInfo.end_track();
+        if (session.isLearning()) {
+          LogInfo.begin_track("Updating parameters");
+          learner.onlineLearnExample(ex);
+          LogInfo.end_track();
+        }
       }
-    } else if (command.equals(":def") || command.equals(":def_ret")) {
+    } else if (command.startsWith(":def")) {
       if (tree.children.size() == 3) {
         String head = tree.children.get(1).value;
         String jsonDef = tree.children.get(2).value;
@@ -504,18 +506,20 @@ public class Master {
             builder.parser, builder.params, session.id, refExHead);
         
         if (inducedRules.size() > 0) {
-          for (Rule rule : inducedRules) {
-              ILUtils.addRuleInteractive(rule, builder.parser);
+          if (session.isLearning()) {
+            for (Rule rule : inducedRules) {
+                ILUtils.addRuleInteractive(rule, builder.parser);
+            }
           }
           // TODO : should not have to parse again, I guess just set the formula or something
           // builder.parser.parse(builder.params, refExHead.value, false);
           response.ex = refExHead.value;
           
           // write out the grammar
-          if (!session.sandbox) {
-            PrintWriter out = IOUtils.openOutAppendHard(Paths.get(Master.opts.newGrammarPath, session.id + ".grammar").toString());
+          if (session.isWritingGrammar()) {
+            PrintWriter out = IOUtils.openOutAppendHard(Paths.get(Master.opts.newGrammarPath).toString());
             for (Rule rule : inducedRules) {
-              out.println(rule.toLispTree().toStringWrap());
+              out.println(rule.toJson());
             }
             out.close();
           }

@@ -25,14 +25,7 @@ enum CubeColor {
   CubeColor(int value) { this.value = value; }
   public int toInt() { return this.value; }
   public boolean Compare(int i){return value == i;}
-  public static CubeColor fromInt(int intc) {
-    for(CubeColor c : CubeColor.values())
-    {
-      if (intc < 0) return CubeColor.None;
-      if (c.value == intc % (CubeColor.values().length-1)) return c;
-    }
-    return CubeColor.None;
-  }
+
   public static CubeColor fromString(String color) {
     for(CubeColor c : CubeColor.values())
       if (c.name().equalsIgnoreCase(color)) return c;
