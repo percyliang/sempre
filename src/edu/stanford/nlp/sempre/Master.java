@@ -447,12 +447,14 @@ public class Master {
       //if (approxSeq >= 8)
       //  response.lines.add("You are taking many actions in one step, consider defining some of steps as one single step.");
       
-      if (approxSeq >= ILUtils.opts.maxSequence)
-        throw new RuntimeException(String.format("refused to execute: too many steps in one command -- consider defining some of steps as one single step.  (current: %d, max: %d)",
-            approxSeq, ILUtils.opts.maxSequence));
       if (utt.length() > ILUtils.opts.maxChars)
         throw new RuntimeException(String.format("refused to execute: too many characters in one command (current: %d, max: %d)",
             utt.length(), ILUtils.opts.maxChars));
+      
+      if (approxSeq >= ILUtils.opts.maxSequence)
+        throw new RuntimeException(String.format("refused to execute: too many steps in one command -- consider defining some of steps as one single step.  (current: %d, max: %d)",
+            approxSeq, ILUtils.opts.maxSequence));
+      
       
       builder.parser.parse(builder.params, ex, false);     
       response.ex = ex;
@@ -492,7 +494,7 @@ public class Master {
         ex.setTargetValue(match.value); // this is just for logging, not actually used for learning
         if (session.isLearning()) {
           LogInfo.begin_track("Updating parameters");
-          learner.onlineLearnExample(ex);
+          learner.onlineLearnExampleByFormula(ex);
           LogInfo.end_track();
         }
       }

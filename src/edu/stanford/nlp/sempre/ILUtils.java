@@ -59,6 +59,9 @@ public final class ILUtils {
     
     @Option(gloss = "path to the citations")
     public String citationPath;
+    
+    @Option(gloss = "try partial matches")
+    public boolean useAligner;
 
    
   }
@@ -164,7 +167,8 @@ public final class ILUtils {
     List<Rule> inducedRules = new ArrayList<>();
     GrammarInducer grammarInducer = new GrammarInducer(head, bodyDeriv, chartList);
     inducedRules.addAll(grammarInducer.getRules());
-    inducedRules.addAll(DefinitionAligner.getRules(head, def, bodyDeriv, grammarInducer.matches));
+    if (opts.useAligner)
+      inducedRules.addAll(DefinitionAligner.getRules(head, def, bodyDeriv, grammarInducer.matches));
 
     LogInfo.end_track();;
     return inducedRules;

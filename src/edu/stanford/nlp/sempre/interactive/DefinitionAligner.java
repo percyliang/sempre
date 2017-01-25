@@ -31,11 +31,11 @@ public class DefinitionAligner {
     @Option(gloss = "phrase size")
     public int phraseSize = 2;
     @Option(gloss = "max length difference")
-    public int maxLengthDifference = 3;
+    public int maxLengthDifference = 2;
     @Option(gloss = "max set exclusion length")
     public int maxSetExclusionLength = 2;
     @Option(gloss = "max exact exclusion length")
-    public int maxExactExclusionLength = 4;
+    public int maxExactExclusionLength = 3;
     @Option(gloss = "window size")
     public int windowSize = 3;
     

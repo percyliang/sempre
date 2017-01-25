@@ -83,6 +83,12 @@ addMode('backup', 'small commands like run community server, backup, or simulato
   lambda { |e| system 'mkdir -p ./int-output'},
 nil)})
 
+addMode('backup-data', 'put community-server into trash with time stamp', lambda { |e| l(
+	lambda { |e| system 'echo "backing up data with mv"'},
+  lambda { |e| system 'mkdir -p ./community-server/data-backup'},
+  lambda { |e| system 'mv ./community-server/data ./community-server/data-backup/`date +%Y-%m-%d.%H:%M:%S`'},
+nil)})
+
 addMode('trash', 'put int-output into trash with time stamp', lambda { |e| l(
   lambda { |e| system 'echo "trashing int-output with time stamp"'},
 	lambda { |e| system 'mv int-output int-output-trash-`date +%Y-%m-%d.%H:%M:%S`'},
@@ -90,12 +96,17 @@ addMode('trash', 'put int-output into trash with time stamp', lambda { |e| l(
   lambda { |e| system 'mkdir -p ./int-output'},
 nil)})
 
+
 addMode('community', 'start the community server', lambda { |e| l(
 l('python community-server/server.py -- port 8403'),
 nil)})
 
+addMode('others', 'print out common commands', lambda { |e| l(
+	lambda { |e| system 'echo mv folder folder-`date +%Y-%m-%d.%H:%M:%S`'},
+nil)})
+
 addMode('simulator', 'run the simulator', lambda { |e| l(
-	rlwrap,
+	# rlwrap,
 	header('core,interactive'),
 	'edu.stanford.nlp.sempre.interactive.Simulator',
 	figOpts,
@@ -117,7 +128,9 @@ addMode('simulator', 'run the simulator', lambda { |e| l(
 	sel(:task, {
 		'qual1' => o('logFiles', './shrdlurn/commandInputs/qualifier20-0118.json'),
 		'free1' => o('logFiles', './shrdlurn/commandInputs/freebuild1-0121.json'),
-		'sidaw' => o('logFiles', './shrdlurn/commandInputs/sidaw.json.log')
+		'sidaw' => o('logFiles', './shrdlurn/commandInputs/sidaw.json.log'),
+		'all' => o('logFiles', './shrdlurn/commandInputs/sidaw.json.log',
+		'./shrdlurn/commandInputs/freebuild1-0121.json', './shrdlurn/commandInputs/qualifier20-0118.json')
 		}),
 nil)})
 

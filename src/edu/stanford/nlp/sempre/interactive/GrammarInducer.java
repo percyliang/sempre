@@ -89,7 +89,6 @@ public class GrammarInducer {
     
     buildFormula(def, formulaToCat);
     
-
     inducedRules = new ArrayList<>(induceRules(bestPacking, def));
   }
     

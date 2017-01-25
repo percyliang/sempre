@@ -1011,8 +1011,9 @@ o('ParserState.customExpectedCounts', 'None'),
 o('Params.l1Reg', 'lazy'),
 o('Params.l1RegCoeff', 0.001),
 o('Parser.beamSize', 20),
-o('Params.initStepSize', 0.1),
+o('Params.initStepSize', 0.2),
 o('Params.adaptiveStepSize', false),
+o('Params.stepSizeReduction', 0.1),
 
 o('FeatureExtractor.featureComputers', 'interactive.ActionFeatureComputer'),
 o('FeatureExtractor.featureDomains', 'rule', 'stats'),
@@ -1027,10 +1028,10 @@ o('Master.newGrammarPath', './int-output/grammar.lisp'),
 
 # o('ILUtils.JSONLogPath', './int-output/json/'),
 o('ILUtils.citationPath', './int-output/citation/'),
-# o('ILUtils.commandLog', './int-output/interactive.log'),
-# o('ILUtils.commandInputs', './shrdlurn/commandInputs/*.json'),
-
+o('ILUtils.useAligner', false),
 o('ILUtils.maxSequence', 20),
+
+o('DefinitionAligner.strategies', 'ExactExclusion'),
 
 o('Master.onlineLearnExamples', true),
 o('Master.independentSessions', false),

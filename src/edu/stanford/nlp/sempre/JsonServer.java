@@ -30,7 +30,6 @@ import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 
-import static fig.basic.LogInfo.logs;
 
 /**
  * JsonServer, most of the interactive stuff run through this. Handles log instead of master.
@@ -104,7 +103,7 @@ public class JsonServer {
       }
 
       if (opts.verbose >= 2)
-        LogInfo.logs("GET %s from %s (%ssessionId=%s)", uri, remoteHost, isNewSession ? "new " : "", sessionId);
+        logs("GET %s from %s (%ssessionId=%s)", uri, remoteHost, isNewSession ? "new " : "", sessionId);
 
       String uriPath = uri.getPath();
       if (uriPath.equals("/")) uriPath += "index.html";
@@ -219,7 +218,7 @@ public class JsonServer {
       // If JSON, don't store cookies.
      
       if (query == null) query = "null";
-      logs("Server.handleQuery %s: %s", session.id, query);
+        logs("Server.handleQuery %s: %s", session.id, query);
 
       // Print header
       setHeaders("application/json");
@@ -277,22 +276,9 @@ public class JsonServer {
         e.printStackTrace();
       }
     }
-
-    void getFile(String path) throws IOException {
-      if (!new File(path).exists()) {
-        LogInfo.logs("File doesn't exist: %s", path);
-        exchange.sendResponseHeaders(404, 0);  // File not found
-        return;
-      }
-
-      setHeaders(getMimeType(path));
-      if (opts.verbose >= 2)
-        LogInfo.logs("Sending %s", path);
-      OutputStream out = new BufferedOutputStream(exchange.getResponseBody());
-      InputStream in = new FileInputStream(path);
-      IOUtils.copy(in, out);
-    }
   }
+  
+  private void logs(String s, Object... args) {};
 
   public JsonServer(Master master) {
     this.master = master;
