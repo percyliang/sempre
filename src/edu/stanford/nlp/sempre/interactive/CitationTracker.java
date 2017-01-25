@@ -60,16 +60,21 @@ public class CitationTracker {
     
     Map<String, Object> summary;
     try {
-      summary = Json.readMapHard(IOUtils.readLine(summaryPath));
+      String line = IOUtils.readLineEasy(summaryPath);
+      if (line == null)
+        summary = defaultMap(rule);
+      else
+        summary = Json.readMapHard(line);
+      
       boolean selfcite = authorCode.equals(uid);
       if (!selfcite) {
         summary.put("cite", (Integer)summary.get("cite") + 1);
       } else {
         summary.put("self", (Integer)summary.get("self") + 1);
       }
-    } catch (IOException e) {
-      // e.printStackTrace();
+    } catch (Exception e) {
       summary = defaultMap(rule);
+      e.printStackTrace();
     } 
     String jsonStr = Json.writeValueAsStringHard(summary);
     PrintWriter out = IOUtils.openOutHard(file);

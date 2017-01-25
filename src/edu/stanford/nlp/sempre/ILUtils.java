@@ -127,7 +127,7 @@ public final class ILUtils {
           allDerivs.add(stripDerivation(d));
         }
       }
-      if (!found && !formula.equals("?")) LogInfo.errors("matching formula not found: %s", formula);
+      if (!found && !formula.equals("?")) LogInfo.logs("Error: matching formula not found: %s", formula);
 
       // just making testing easier, use top derivation when we formula is not given
       if (!found && ex.predDerivations.size() > 0 && (formula.equals("?") || formula==null || opts.useBestFormula) )
@@ -182,14 +182,19 @@ public final class ILUtils {
     b.setUtterance(head);
     Example exHead = b.createExample();
     exHead.preprocess();
+    
 
     LogInfo.begin_track("Definition");
     LogInfo.logs("mode: %s", blockmode);
+    LogInfo.logs("headraw: %s", head);
     LogInfo.logs("head: %s", exHead.getTokens());
     List<String> bodyList = ILUtils.utterancefromJson(jsonDef);
     LogInfo.logs("body: %s", bodyList);
     LogInfo.logs("defderiv: %s", bodyDeriv.toLispTree());
     LogInfo.logs("bodyformula: %s", bodyDeriv.formula.toLispTree());
+    
+    if (exHead.getTokens()==null || exHead.getTokens().size() == 0)
+      throw new RuntimeException(String.format("Cannot define with an empty head: %s", head));
 
     BeamFloatingParserState state = (BeamFloatingParserState)parser.parse(params, exHead, true);
     LogInfo.logs("anchored: %s", state.chartList);

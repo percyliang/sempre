@@ -13,15 +13,22 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import org.testng.collections.Lists;
 
 import edu.stanford.nlp.sempre.Json;
+import edu.stanford.nlp.sempre.JsonServer;
 import fig.basic.LogInfo;
 import fig.basic.Option;
 import fig.basic.OptionsParser;
 import fig.exec.Execution;
+import fig.basic.Evaluation;
 
 /**
  * utilites for simulating a session through the server
@@ -32,20 +39,24 @@ public class Simulator implements Runnable {
   @Option public static String serverURL = "http://localhost:8410";
   @Option public static int numThreads = 4;
   @Option public static int verbose = 1;
-  @Option(gloss = "0: do not write any real logs")
-  public static int logToFile = 0;
+  @Option public static String reqParams = "grammar=0&cite=0&learn=0";
   @Option public static List<String> logFiles = Lists.newArrayList("./shrdlurn/commandInputs/sidaw.json.log");
 
   public void readQueries() {
     LogInfo.begin_track("setsTest");
     //T.printAllRules();
     //A.assertAll();
+    ExecutorService executor = new ThreadPoolExecutor(JsonServer.opts.numThreads, JsonServer.opts.numThreads,
+        5000, TimeUnit.MILLISECONDS,
+        new LinkedBlockingQueue<Runnable>());
+    
     long startTime = System.nanoTime();
     for (String fileName : logFiles) {
       try (Stream<String> stream = Files.lines(Paths.get(fileName))) {
         LogInfo.logs("Reading %s", fileName);
 
-        stream.forEach(l -> {
+        stream.forEach(l -> 
+        executor.execute(() -> {
           Map<String, Object> json = Json.readMapHard(l);
           Object command = json.get("q");
           if (command == null) // to be backwards compatible
@@ -60,27 +71,35 @@ public class Simulator implements Runnable {
             // TODO Auto-generated catch block
             e.printStackTrace();
           }
-        });
+        }));
+        executor.shutdown();
+        try {
+          boolean finshed = executor.awaitTermination(5, TimeUnit.MINUTES);
+        } catch (InterruptedException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
 
       } catch (IOException e) {
         e.printStackTrace();
-      } finally {
-        long endTime = System.nanoTime();
-        LogInfo.logs("Simulator.TimeTaken = %d ns or %.4f s", (endTime - startTime), (endTime - startTime)/1.0e9); 
       }
+      
+      long endTime = System.nanoTime();
+      LogInfo.logs("Took %d ns or %.4f s", (endTime - startTime), (endTime - startTime)/1.0e9); 
     }
     LogInfo.end_track();
   }
 
-  public static void sempreQuery(String query, String sessionId) throws UnsupportedEncodingException {
+  public static String sempreQuery(String query, String sessionId) throws UnsupportedEncodingException {
     String params = "q=" + URLEncoder.encode(query, "UTF-8");
-    params += String.format("&sessionId=%s&logtofile=%d", sessionId, logToFile);
+    params += String.format("&sessionId=%s&%s", sessionId, reqParams);
     // params = URLEncoder.encode(params);
     String url = String.format("%s/sempre?", serverURL);
     // LogInfo.log(params);
     LogInfo.log(query);
     String response  = executePost(url + params, "");
     LogInfo.log(response);
+    return response;
   }
 
   public static String executePost(String targetURL, String urlParameters) {
