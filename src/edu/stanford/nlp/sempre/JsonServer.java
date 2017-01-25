@@ -180,14 +180,23 @@ public class JsonServer {
 
     // Catch exception if any.
     Master.Response processQuery(Session session, String query) {
+      String message = null;
+      Master.Response response = master.new Response();
       try {
-        return master.processQuery(session, query);
+        response = master.processQuery(session, query);
+      } catch (StringIndexOutOfBoundsException e) {
+        e.printStackTrace();
+        message = e.toString();
+        LogInfo.writeToStdout = false;
+        LogInfo.init();
       } catch (Throwable t) {
         t.printStackTrace();
-        Master.Response response = master.new Response();
-        response.lines.add(t.toString());
-        return response;
+        message = t.toString();
+      } finally {
+        if (!Strings.isNullOrEmpty(message))
+          response.lines.add(message);
       }
+      return response;
     }
 
     void handleQuery(String sessionId) throws IOException {
@@ -224,8 +233,9 @@ public class JsonServer {
       setHeaders("application/json");
 
       Master.Response masterResponse = null;
-      if (query != null)
-        masterResponse = processQuery(session, query);
+      if (query != null) {
+         masterResponse = processQuery(session, query);
+      }
 
       Map<String, Object> responseMap = null;
       {
