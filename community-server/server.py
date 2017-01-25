@@ -251,7 +251,13 @@ def emit_top_builders():
         (citations, citation_score) = compute_citations(subdir)
 
         if len(top_5_builders) < 5 or citation_score > top_5_builders[4][0]:
-            citations = sorted(citations, key=lambda c: c["cite"], reverse=True)[:5]
+            # If there are more than 5 citations with cites, only return those
+            citations_with_cites = [c for c in citations if c["cite"] > 0]
+            if len(citations_with_cites) >= 5:
+                citations = citations_with_cites
+
+            # Sort them by scorem and return the top 5.
+            citations = sorted(citations, key=lambda c: c["cite"] + c["self"], reverse=True)[:5]
 
             struct = (uid, citation_score, citations)
             if len(top_5_builders) < 5:
