@@ -30,7 +30,8 @@ public class Rule {
   public final List<String> rhs;  // Right-hand side: sequence of categories (have $ prefix) and tokens.
   public final SemanticFn sem;  // Takes derivations corresponding to RHS categories and produces a set of derivations corresponding to LHS.
   public List<Pair<String, Double>> info;  // Extra info
-
+  public RuleSource source;
+  
   // Cache the semanticRepn
   public String getSemRepn() {
     if (semRepn == null) semRepn = sem.getClass().getSimpleName();
@@ -156,6 +157,9 @@ public class Rule {
     if (info != null) {
       for (Pair<String, Double> p : info)
         jsonMap.put(p.getFirst(), p.getSecond());
+    }
+    if (source != null) {
+      jsonMap.put("source", source);
     }
     return Json.writeValueAsStringHard(jsonMap);
   }

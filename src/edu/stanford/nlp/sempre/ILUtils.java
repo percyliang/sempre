@@ -217,9 +217,7 @@ public final class ILUtils {
         ILUtils.utterancefromJson(jsonDef), bodyDeriv, state.chartList);
     
     for(Rule rule : rules) {
-      rule.addInfo(CitationTracker.IDPrefix + sessionId, 0.0);
-      rule.addInfo(CitationTracker.HeadPrefix + CitationTracker.encode(head), 0.0);
-      rule.addInfo(CitationTracker.BodyPrefix + CitationTracker.encode(String.join(" ", bodyList)), 0.0);
+      rule.source = new RuleSource(sessionId, head, bodyList);
     }
     
     return rules;

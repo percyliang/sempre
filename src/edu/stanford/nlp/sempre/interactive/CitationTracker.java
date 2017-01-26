@@ -45,11 +45,8 @@ public class CitationTracker {
   
   // The summary is ONE SINGLE line of json, has cite, self, and head
   private synchronized void writeSummary(Rule rule) {
-    String headCode = getHead(rule);
-    String authorCode = getAuthor(rule);
-    
-    
-    String summaryPath = Paths.get(ILUtils.opts.citationPath, authorCode, headCode + ".json").toString();
+    String author = getAuthor(rule);
+    String summaryPath = Paths.get(ILUtils.opts.citationPath, encode(author), encode(getHead(rule)) + ".json").toString();
     File file = new File(summaryPath);
     file.getParentFile().mkdirs();
     
@@ -61,7 +58,7 @@ public class CitationTracker {
       else
         summary = Json.readMapHard(line);
       
-      boolean selfcite = authorCode.equals(uid);
+      boolean selfcite = author.equals(uid);
       if (!selfcite) {
         summary.put("cite", (Integer)summary.get("cite") + 1);
       } else {
@@ -70,7 +67,7 @@ public class CitationTracker {
     } catch (Exception e) {
       summary = defaultMap(rule);
       e.printStackTrace();
-    } 
+    }
     String jsonStr = Json.writeValueAsStringHard(summary);
     PrintWriter out = IOUtils.openOutHard(file);
     out.println(jsonStr);
@@ -81,15 +78,16 @@ public class CitationTracker {
     Map<String, Object> summary = new LinkedHashMap<>();
     summary.put("cite", 0);
     summary.put("self", 0);
-    summary.put("head", decode(getHead(rule)));
-    summary.put("body", decode(getBody(rule)));
+    summary.put("private", true);
+    summary.put("head", getHead(rule));
+    summary.put("body", getBody(rule));
     return summary;
   }
 
   private synchronized void writeLog(Rule rule) {
-    String headCode = getHead(rule);
-    String authorCode = getAuthor(rule);
-    String logPath = Paths.get(ILUtils.opts.citationPath, authorCode, headCode + ".json.log").toString();
+    String head = getHead(rule);
+    String author = getAuthor(rule);
+    String logPath = Paths.get(ILUtils.opts.citationPath, encode(author), encode(head) + ".json.log").toString();
     File file = new File(logPath);
     file.getParentFile().mkdirs();
     
@@ -99,7 +97,7 @@ public class CitationTracker {
     jsonMap.put("time", LocalDateTime.now().toString());
     jsonMap.put("tokens", ex.getTokens());
     //jsonMap.put("head", decode(headCode));
-    jsonMap.put("author", decode(authorCode));
+    jsonMap.put("author", author);
 
     String jsonStr = Json.writeValueAsStringHard(jsonMap);
     PrintWriter out = IOUtils.openOutAppendHard(file);
@@ -121,7 +119,7 @@ public class CitationTracker {
 
   static String getAuthor(Rule rule) {
     try {
-    String author = getPrefix(rule, IDPrefix);
+    String author = rule.source.uid;
     if (Strings.isNullOrEmpty(author))
       return "__noname__";
     else
@@ -131,18 +129,8 @@ public class CitationTracker {
       return "__noname__";
     } 
   }
-  static String getHead(Rule rule) { return (getPrefix(rule, HeadPrefix)); }
-  static String getBody(Rule rule) { return (getPrefix(rule, BodyPrefix)); }
-  
-  private static String getPrefix(Rule rule, String prefix) {
-    if (rule.info != null) {
-      for (Pair<String, Double> p : rule.info) {
-        if (p.getFirst().startsWith(prefix))
-          return p.getFirst().substring(prefix.length());
-      }
-    }
-    throw new RuntimeException(String.format("Prefix %s not found in rule %s", prefix, rule.toLispTree()));
-  }
+  static String getHead(Rule rule) { return rule.source.head; }
+  static String getBody(Rule rule) { return String.join(". ", rule.source.body); }
   
   public static String encode(String utt) {
     try {

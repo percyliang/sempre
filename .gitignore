@@ -43,3 +43,4 @@ int-backup
 _OUTPATH_
 # Community server logs
 community-server/data
+community-server/data-backup
