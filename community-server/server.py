@@ -162,9 +162,9 @@ def emit_structs():
                 pass
 
 
-def emit_user_structs_count():
+def emit_user_structs_count(uid):
     """"Emits a count of the total number of user structs in the folder."""
-    path = os.path.join(STRUCTS_FOLDER, session.uid)
+    path = os.path.join(STRUCTS_FOLDER, uid)
     if os.path.isdir(path):
         structs = [name for name in os.listdir(path) if os.path.isfile(os.path.join(path, name))]
         emit("user_structs", {"structs": structs})
@@ -270,7 +270,7 @@ def emit_top_builders():
 
 def log(message):
     """Logs the given message by writing it in the uid's JSON log file."""
-    uid = session.uid if hasattr(session, 'uid') else "NULL_session"
+    uid = message["uid"] if hasattr(message, 'uid') else "NULL_session"
 
     path = os.path.join(LOG_FOLDER, uid + ".json")
 
@@ -285,7 +285,7 @@ def log(message):
 
 @socketio.on('getscore')
 def get_score(data):
-    uid = session.uid
+    uid = data['uid']
     subdir = os.path.join(CITATION_FOLDER, uid)
     if (os.path.isdir(subdir)):
         (citations, score) = compute_citations(subdir)
@@ -294,7 +294,7 @@ def get_score(data):
 
 @socketio.on('delete_struct')
 def delete_struct(data):
-    uid = session.uid
+    uid = data['uid']
     struct_id = data["id"]
     struct_path = struct_id + ".json"
     path = os.path.join(STRUCTS_FOLDER, uid, struct_path)
@@ -340,7 +340,7 @@ def handle_share(data):
     current score of the struct and ID is the unique index (auto-incremented) of
     this particular struct.."""
 
-    user_structs_folder = os.path.join(STRUCTS_FOLDER, session.uid)
+    user_structs_folder = os.path.join(STRUCTS_FOLDER, data['uid'])
     make_dir_if_necessary(user_structs_folder)
     names = [name for name in os.listdir(user_structs_folder) if os.path.isfile(os.path.join(user_structs_folder, name))]
     new_struct_id = "1"
@@ -358,7 +358,7 @@ def handle_share(data):
         f.write(json.dumps(data["struct"]))  # the actual struct
 
     # Broadcast addition to the "community" room
-    message = {"uid": session.uid, "id": new_struct_id, "score": score, "upvotes": [], "struct": data["struct"]}
+    message = {"uid": data['uid'], "id": new_struct_id, "score": score, "upvotes": [], "struct": data["struct"]}
     emit("struct", message, broadcast=True, room="community")
 
 
@@ -369,11 +369,10 @@ def upvote(data):
     Data should consist of: {"uid": UID, "id": "ID"}"""
 
     # if no session.uid, do nothing
-    if not session.uid:
+    if not data['uid']:
         return
 
-    user_structs_folder = os.path.join(STRUCTS_FOLDER, data["uid"])
-    struct_path = os.path.join(STRUCTS_FOLDER, data["uid"], str(data["id"]) + ".json")
+    struct_path = os.path.join(STRUCTS_FOLDER, data["struct_uid"], str(data["id"]) + ".json")
 
     # if the struct does not exist, do nothing
     if not os.path.isfile(struct_path):
@@ -387,8 +386,8 @@ def upvote(data):
         upvotes = json.loads(f.readline().strip())
 
         # If the user has not already upvoted this, add them
-        if session.uid not in upvotes:
-            upvotes.append(session.uid)
+        if data['uid'] not in upvotes:
+            upvotes.append(data['uid'])
 
             timestamp = f.readline()
             struct = f.readline()
@@ -407,7 +406,7 @@ def upvote(data):
             score = score_struct(timestamp, len(upvotes))
 
             # and then broadcast the new upvote to the room:
-            message = {"uid": data["uid"], "id": data["id"], "up": session.uid, "score": score}
+            message = {"uid": data["struct_uid"], "id": data["id"], "up": data['uid'], "score": score}
             emit("upvote", message, broadcast=True, room="community")
 
 
@@ -427,10 +426,10 @@ def handle_log(data):
     # If the message is an accept or define type, broadcast it to all
     # community-connected clients so they can update their display.
     if data["type"] == "accept":
-        emit("new_accept", {"uid": session.uid, "query": data["msg"]["query"], "timestamp": current_unix_time()},
+        emit("new_accept", {"uid": data['uid'], "query": data["msg"]["query"], "timestamp": current_unix_time()},
              broadcast=True, room="community")
     elif data["type"] == "define":
-        emit("new_define", {"uid": session.uid, "defined": data["msg"]["defineAs"], "timestamp": current_unix_time()},
+        emit("new_define", {"uid": data['uid'], "defined": data["msg"]["defineAs"], "timestamp": current_unix_time()},
              broadcast=True, room="community")
 
 
@@ -440,13 +439,13 @@ def session(data):
     the server that a new session has started. This sessionId is then used for
     all future authentication by storing it as uid in the session global
     context variable."""
-    session.uid = data['sessionId']
+    session.uid = data['uid']
     log({"type": "connect"})
 
 
 @socketio.on('getstructcount')
 def getstructcount(data):
-    emit_user_structs_count()
+    emit_user_structs_count(data['uid'])
 
 
 @socketio.on('connect')
@@ -458,7 +457,7 @@ def connect():
 @socketio.on('disconnect')
 def disconnect():
     """Log the fact that a user disconnected."""
-    log({"sessionId": session.uid, "type": "disconnect"})
+    log({"uid": session.uid, "type": "disconnect"})
 
 
 # http://stackoverflow.com/questions/2301789/read-a-file-in-reverse-order-using-python
