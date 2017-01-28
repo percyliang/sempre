@@ -153,14 +153,14 @@ public class Rule {
     Map<String, Object> jsonMap = new LinkedHashMap<>();
     jsonMap.put("lhs", lhs);
     jsonMap.put("rhs", rhs);
-    jsonMap.put("sem", sem.toString());
+    if (source != null) {
+      jsonMap.put("source", source);
+    }
     if (info != null) {
       for (Pair<String, Double> p : info)
         jsonMap.put(p.getFirst(), p.getSecond());
     }
-    if (source != null) {
-      jsonMap.put("source", source);
-    }
+    jsonMap.put("sem", sem.toString());
     return Json.writeValueAsStringHard(jsonMap);
   }
 }

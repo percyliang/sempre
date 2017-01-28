@@ -14,6 +14,7 @@ import java.net.HttpCookie;
 import com.sun.net.httpserver.HttpServer;
 
 import edu.stanford.nlp.sempre.Master.Response;
+import edu.stanford.nlp.sempre.interactive.BadInteractionException;
 
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpExchange;
@@ -189,6 +190,8 @@ public class JsonServer {
         message = e.toString();
         LogInfo.writeToStdout = false;
         LogInfo.init();
+      } catch (BadInteractionException e) {
+        message = e.getMessage() + " (BadInteractionException)";
       } catch (Throwable t) {
         t.printStackTrace();
         message = t.toString();

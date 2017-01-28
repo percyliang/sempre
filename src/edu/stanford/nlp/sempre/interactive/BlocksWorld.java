@@ -138,7 +138,7 @@ public class BlocksWorld extends FlatWorld {
   @Override
   public void update(String rel, Object value, Set<Item> selected) {
     selected.forEach(i -> i.update(rel, value));
-    keyConsistency(selected);
+    keyConsistency();
   }
   
   // if selected is no longer in all, make it fake colored, and add to all;
@@ -155,7 +155,7 @@ public class BlocksWorld extends FlatWorld {
   public void move(String dir, Set<Item> selected) {
     // allitems.removeAll(selected);
     selected.forEach(b -> ((Block)b).move(Direction.fromString(dir)));
-    keyConsistency(selected);
+    keyConsistency();
     // allitems.addAll(selected); // this is not overriding
   }
   
@@ -243,20 +243,6 @@ public class BlocksWorld extends FlatWorld {
     refreshSet(allitems);
     refreshSet(selected);
     refreshSet(previous);
-  }
-  
-  private void refreshSet(Set<Item> set, Set<Item> selected) {
-    List<Item> s = new LinkedList<>(selected);
-    List<Item> s2 = new LinkedList<>(set);
-    set.clear();
-    set.addAll(s);
-    set.addAll(s2);
-  }
-  
-  private void keyConsistency(Set<Item> selected) {
-    refreshSet(allitems, selected);
-    refreshSet(selected, selected);
-    refreshSet(previous, selected);
   }
   
   private Set<Item> realBlocks(Set<Item> all) {

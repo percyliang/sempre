@@ -33,6 +33,7 @@ public class RuleSource {
    @JsonProperty public int cite = 0;
    @JsonProperty public int self = 0;
    @JsonProperty public boolean isPrivate = true;
+   @JsonProperty public boolean isNonsense = false;
    
    public RuleSource(String uid, String head, List<String> body) {
      this.uid = uid;
@@ -40,5 +41,8 @@ public class RuleSource {
      this.body = body;
      this.time = LocalDateTime.now();
    }
+   
    public String toJson() { return Json.writeValueAsStringHard(this); }
+   
+   
 }

@@ -4,6 +4,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 
+import edu.stanford.nlp.sempre.interactive.BadInteractionException;
 import edu.stanford.nlp.sempre.interactive.CitationTracker;
 import edu.stanford.nlp.sempre.interactive.PrefixTrie;
 import fig.basic.*;
@@ -448,11 +449,11 @@ public class Master {
       //  response.lines.add("You are taking many actions in one step, consider defining some of steps as one single step.");
       
       if (utt.length() > ILUtils.opts.maxChars)
-        throw new RuntimeException(String.format("refused to execute: too many characters in one command (current: %d, max: %d)",
+        throw new BadInteractionException(String.format("refused to execute: too many characters in one command (current: %d, max: %d)",
             utt.length(), ILUtils.opts.maxChars));
       
       if (approxSeq >= ILUtils.opts.maxSequence)
-        throw new RuntimeException(String.format("refused to execute: too many steps in one command -- consider defining some of steps as one single step.  (current: %d, max: %d)",
+        throw new BadInteractionException(String.format("refused to execute: too many steps in one command -- consider defining some of steps as one single step.  (current: %d, max: %d)",
             approxSeq, ILUtils.opts.maxSequence));
       
       
