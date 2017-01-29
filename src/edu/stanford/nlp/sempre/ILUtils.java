@@ -64,6 +64,9 @@ public final class ILUtils {
 
     @Option(gloss = "try partial matches")
     public boolean useAligner;
+    
+    @Option(gloss = "mode for blocking")
+    public ActionFormula.Mode blockMode = ActionFormula.Mode.sequential;
   }
 
   public static Options opts = new Options();
@@ -191,9 +194,9 @@ public final class ILUtils {
 
   public static List<Rule> induceRulesHelper(String command, String head, String jsonDef, Parser parser, Params params,
       String sessionId, Ref<Example> refEx) {
-    ActionFormula.Mode blockmode = command.equals(":def") ? ActionFormula.Mode.block : ActionFormula.Mode.blockr;
+    // ActionFormula.Mode blockmode = command.equals(":def") ? ActionFormula.Mode.block : ActionFormula.Mode.blockr;
 
-    Derivation bodyDeriv = ILUtils.combine(ILUtils.derivsfromJson(jsonDef, parser, params), blockmode);
+    Derivation bodyDeriv = ILUtils.combine(ILUtils.derivsfromJson(jsonDef, parser, params), opts.blockMode);
 
     Example.Builder b = new Example.Builder();
     b.setId("session:" + sessionId);
@@ -202,7 +205,7 @@ public final class ILUtils {
     exHead.preprocess();
 
     LogInfo.begin_track("Definition");
-    LogInfo.logs("mode: %s", blockmode);
+    LogInfo.logs("mode: %s", opts.blockMode);
     LogInfo.logs("headraw: %s", head);
     LogInfo.logs("head: %s", exHead.getTokens());
     List<String> bodyList = ILUtils.utterancefromJson(jsonDef, false);
@@ -299,24 +302,18 @@ public final class ILUtils {
 
   static Rule blockRule(ActionFormula.Mode mode) {
     BlockFn b = new BlockFn(mode);
-    b.init(LispTree.proto.parseFromString("(a block)"));
+    b.init(LispTree.proto.parseFromString("(BlockFn sequential)"));
     return new Rule("$Action", Lists.newArrayList("$Action", "$Action"), b);
   }
 
   public static Derivation combine(List<Derivation> children, ActionFormula.Mode mode) {
-    // stop double blocking
     if (children.size() == 1) {
-      ActionFormula.Mode cmode = ((ActionFormula) children.get(0).formula).mode;
-      if (cmode == mode) {
-        return children.get(0);
-      }
       return children.get(0);
     }
-
     Formula f = new ActionFormula(mode, children.stream().map(d -> d.formula).collect(Collectors.toList()));
     Derivation res = new Derivation.Builder().formula(f)
-        // setting start and end to -1 is important, which grammarInducer uses
-        // to check things
+        // setting start to -1 is important, 
+        // which grammarInducer interprets to mean we do not want partial rules
         .withCallable(new SemanticFn.CallInfo("$Action", -1, -1, blockRule(mode), ImmutableList.copyOf(children)))
         .createDerivation();
     return res;

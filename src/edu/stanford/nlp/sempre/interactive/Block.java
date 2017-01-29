@@ -93,8 +93,12 @@ public class Block extends Item {
       this.height = (Integer)value;
     else if (property.equals("color") && value instanceof String)
       this.color = CubeColor.fromString(value.toString());
-    else
-      throw new RuntimeException("updating property " + property + "=" + value.toString() +" is not supported. type: " + value.getClass());
+    else if (value instanceof Set)
+      throw new RuntimeException(
+          String.format("Updating %s to %s is not allowed,"
+              + " which has %d values, but a property can only have 1 value. ", property, value.toString(), ((Set) value).size()));
+    else throw new RuntimeException(String.format("Updating property %s to %s is not allowed! (type %s is not expected for %s) "
+              , property, value.toString(), value.getClass(), property));
   }
 
   @SuppressWarnings("unchecked")

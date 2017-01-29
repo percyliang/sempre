@@ -478,7 +478,7 @@ public class Master {
       
       // Parse!
       ParserState state;
-      state = builder.parser.parse(builder.params, ex, false);
+      state = builder.parser.parse(builder.params, ex, true);
       state.ensureExecuted();
       
       Derivation match = ex.predDerivations.stream()

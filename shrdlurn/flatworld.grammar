@@ -3,7 +3,9 @@
 (def @remove remove)
 (def @R reverse)
 
-(rule $ROOT ($Actions) (IdentityFn) (anchored 1)) # process for better
+(rule $ROOT ($Actions) (IdentityFn) (anchored 1))
+(rule $ROOT ($Actions) (BlockFn isolate) (anchored 1))
+(rule $ROOT ($Actions) (BlockFn block) (anchored 1))
 
 (rule $Actions ($Actions ; $Action) (lambda a1 (lambda a2 (:s (var a1) (var a2)))) (anchored 1))
 (rule $Actions ($Action) (IdentityFn) (anchored 1))
@@ -18,17 +20,14 @@
 # basic actions, local scope "for has color red [add red left; add red top]"
 # (rule $Action (for $Sets $Action ) (lambda s (lambda a (:for (var s) (var a)))) (anchored 1))
 (rule $Action (foreach $Sets $Action ) (lambda s (lambda a (:foreach (var s) (var a)))) (anchored 1))
-(rule $Action (isolate $Sets $Action ) (lambda s (lambda a (:isolate (var s) (var a)))) (anchored 1))
-(rule $Action (foreach $Action ) (lambda s (lambda a (:foreach this (var a)))) (anchored 1))
-(rule $Action (isolate $Action ) (lambda s (lambda a (:isolate this (var a)))) (anchored 1))
+(rule $Action (foreach $Action ) (lambda a (:foreach this (var a))) (anchored 1))
+(rule $Action (isolate $Action ) (lambda a (:isolate (var a))) (anchored 1))
 (rule $Action (while $Sets $Action ) (lambda s (lambda a (:while (var s) (var a)))) (anchored 1))
 
 # global actions
 (rule $Action (select $Sets) (lambda s (: @select (var s))) (anchored 1))
 (rule $Action (select) (ConstantFn (: @select)) (anchored 1))
-
 (rule $Action (update $Rel $ValueSets) (lambda r (lambda v (: @update (var r) (var v)))) (anchored 1))
-
 (rule $Action (remove) (ConstantFn (: @remove)) (anchored 1))
 (rule $Action (remove $Sets) (lambda s (: @remove (var s))) (anchored 1))
 
@@ -77,13 +76,13 @@
 (rule $Numbers ( $Number ) (IdentityFn) (anchored 1))
 
 ###### Keywords
-(rule $Keyword (add) (ConstantFn (string keyword))  (anchored 1))
-(rule $Keyword (remove) (ConstantFn (string keyword))  (anchored 1))
-(rule $Keyword (repeat) (ConstantFn (string keyword))  (anchored 1))
-(rule $Keyword (has) (ConstantFn (string keyword))  (anchored 1))
-(rule $Keyword (of) (ConstantFn (string keyword))  (anchored 1))
-(rule $Keyword (and) (ConstantFn (string keyword))  (anchored 1))
-(rule $Keyword (or) (ConstantFn (string keyword))  (anchored 1))
+#(rule $Keyword (add) (ConstantFn (string keyword))  (anchored 1))
+#(rule $Keyword (remove) (ConstantFn (string keyword))  (anchored 1))
+#(rule $Keyword (repeat) (ConstantFn (string keyword))  (anchored 1))
+#(rule $Keyword (has) (ConstantFn (string keyword))  (anchored 1))
+#(rule $Keyword (of) (ConstantFn (string keyword))  (anchored 1))
+#(rule $Keyword (and) (ConstantFn (string keyword))  (anchored 1))
+#(rule $Keyword (or) (ConstantFn (string keyword))  (anchored 1))
 
 #############################
 # Floating rules

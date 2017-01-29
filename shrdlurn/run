@@ -128,6 +128,7 @@ addMode('simulator', 'run the simulator', lambda { |e| l(
 	sel(:task, {
 		'qual1' => o('logFiles', './shrdlurn/commandInputs/qualifier20-0118.json'),
 		'free1' => o('logFiles', './shrdlurn/commandInputs/freebuild1-0121.json'),
+		'free2' => o('logFiles', './shrdlurn/commandInputs/freebuild2-0127.json'),
 		'sidaw' => o('logFiles', './shrdlurn/commandInputs/sidaw.json.log'),
 		'all' => o('logFiles', './shrdlurn/commandInputs/sidaw.json.log',
 		'./shrdlurn/commandInputs/freebuild1-0121.json', './shrdlurn/commandInputs/qualifier20-0118.json')

@@ -13,7 +13,7 @@
 # extended set ops
 (def @veryx veryx)
 # commands
-(def @reset reset) # reset the world
+# (def @reset reset) # reset the world
 
 # typed lambdas
 # Action a, ItemSet i, ValueSet v, Rel r, Direction d, Color c, Number n
@@ -22,7 +22,7 @@
 ########### domain specific grammar
 
 # utilities
-(rule $Action (reset) (ConstantFn (: reset (string default))) (anchored 1))
+# (rule $Action (reset) (ConstantFn (: reset (string default))) (anchored 1))
 (rule $Action (base $Number $Number) (lambda x (lambda y (: @base (var x) (var y)))) (anchored 1))
 (rule $Action (noop) (ConstantFn (: noop)) (anchored 1))
 
@@ -74,16 +74,16 @@
 (rule $Color (pink) pink (anchored 1))
 (rule $Color (brown) brown (anchored 1))
 
-(rule $Keyword (col) (ConstantFn (string keyword)) (anchored 1))
-(rule $Keyword (row) (ConstantFn (string keyword)) (anchored 1))
-(rule $Keyword (height) (ConstantFn (string keyword)) (anchored 1))
-(rule $Keyword (color) (ConstantFn (string keyword)) (anchored 1))
-(rule $Keyword (top) (ConstantFn (string keyword)) (anchored 1))
-(rule $Keyword (bot) (ConstantFn (string keyword)) (anchored 1))
-(rule $Keyword (left) (ConstantFn (string keyword)) (anchored 1))
-(rule $Keyword (right) (ConstantFn (string keyword)) (anchored 1))
-(rule $Keyword (front) (ConstantFn (string keyword)) (anchored 1))
-(rule $Keyword (back) (ConstantFn (string keyword)) (anchored 1))
+#(rule $Keyword (col) (ConstantFn (string keyword)) (anchored 1))
+#(rule $Keyword (row) (ConstantFn (string keyword)) (anchored 1))
+#(rule $Keyword (height) (ConstantFn (string keyword)) (anchored 1))
+#(rule $Keyword (color) (ConstantFn (string keyword)) (anchored 1))
+#(rule $Keyword (top) (ConstantFn (string keyword)) (anchored 1))
+#(rule $Keyword (bot) (ConstantFn (string keyword)) (anchored 1))
+#(rule $Keyword (left) (ConstantFn (string keyword)) (anchored 1))
+#(rule $Keyword (right) (ConstantFn (string keyword)) (anchored 1))
+#(rule $Keyword (front) (ConstantFn (string keyword)) (anchored 1))
+#(rule $Keyword (back) (ConstantFn (string keyword)) (anchored 1))
 
 (rule $Number (zero) (ConstantFn (number 0)) (anchored 1))
 (rule $Number (one) (ConstantFn (number 1)) (anchored 1))

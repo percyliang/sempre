@@ -174,10 +174,10 @@ public class ActionExecutorTest {
     String defaultBlocks = "[[1,1,1,\"Green\",[\"S\"]],[1,1,2,\"Green\",[]],[1,1,3,\"Green\",[]],[1,1,4,\"Green\",[]]]";
     ContextValue context = getContext(defaultBlocks);
     LogInfo.begin_track("testIsolation");
-    runFormula(executor, "(:isolate this (:loop (number 4) (: add red top)))", context, x -> x.allitems.size() == 5);
-    runFormula(executor, "(:isolate this (:loop (number 2) (: add red top)))", context, x -> x.allitems.size() == 4);
-    runFormula(executor, "(:isolate this (:loop (number 5) (: add red top)))", context, x -> x.allitems.size() == 6);
-    runFormula(executor, "(:s (:isolate this (:loop (number 5) (: add red top))) (: select (color red)))", context, selectedSize(5));
+    runFormula(executor, "(:isolate (:loop (number 4) (: add red top)))", context, x -> x.allitems.size() == 5);
+    runFormula(executor, "(:isolate (:loop (number 2) (: add red top)))", context, x -> x.allitems.size() == 4);
+    runFormula(executor, "(:isolate (:loop (number 5) (: add red top)))", context, x -> x.allitems.size() == 6);
+    runFormula(executor, "(:s (:isolate (:loop (number 5) (: add red top))) (: select (color red)))", context, selectedSize(5));
     LogInfo.end_track();
   }
 

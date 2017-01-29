@@ -256,7 +256,6 @@ public class GrammarInducer {
           throw new RuntimeException("Expected LambdaFormula, but got " + f);
         Formula after = renameBoundVars(f, new HashSet<>());
         // LogInfo.logs("renameBoundVar %s === %s", after, f);
-
         f = Formulas.lambdaApply((LambdaFormula)after, arg.grammarInfo.formula);
       }
       deriv.grammarInfo.formula = f;

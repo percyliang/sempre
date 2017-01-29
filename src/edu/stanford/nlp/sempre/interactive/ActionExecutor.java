@@ -121,20 +121,18 @@ public class ActionExecutor extends Executor {
       world.merge();
       
     } else if (f.mode == ActionFormula.Mode.isolate) {
-      Set<Item> scope = toItemSet(toSet(processSetFormula(f.args.get(0), world)));
       Set<Item> prevAll = world.allitems;
-      Set<Item> prevSelected = world.selected;
-      Set<Item> prevPrevious = world.previous;
+      //Set<Item> prevSelected = world.selected;
+      //Set<Item> prevPrevious = world.previous;
       
-      world.allitems = scope;
-      world.selected = Sets.intersection(world.selected, scope);
-      world.previous = Sets.intersection(world.previous, scope);
-
-      performActions((ActionFormula)f.args.get(1), world);
+      world.allitems = Sets.newHashSet(world.selected);
+      //world.selected = scope;
+      //world.previous = scope;
+      performActions((ActionFormula)f.args.get(0), world);
       
       world.allitems.addAll(prevAll); // merge, overriding;
-      world.selected = prevSelected;
-      world.previous = prevPrevious;
+      //world.selected = prevSelected;
+      //world.previous = prevPrevious;
       world.merge();
       
     } else if (f.mode == ActionFormula.Mode.block || f.mode == ActionFormula.Mode.blockr) {
