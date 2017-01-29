@@ -277,7 +277,7 @@ def emit_top_builders():
 
 def log(message):
     """Logs the given message by writing it in the uid's JSON log file."""
-    uid = message["uid"] if hasattr(message, 'uid') else "NULL_session"
+    uid = message["uid"] if 'uid' in message else "NULL_session"
 
     path = os.path.join(LOG_FOLDER, uid + ".json")
 
