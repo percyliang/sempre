@@ -249,7 +249,9 @@ public class GrammarInducer {
     List<Derivation> args = deriv.children;
 
     // cant use the standard DerivationStream because formula is final
-    if (rule.sem instanceof ApplyFn) {
+    if (rule == null || rule.sem == null) {
+      deriv.grammarInfo.formula = deriv.formula;
+    } else if (rule.sem instanceof ApplyFn) {
       Formula f = Formulas.fromLispTree(((ApplyFn)rule.sem).formula.toLispTree());
       for (Derivation arg : args) {
         if (!(f instanceof LambdaFormula))

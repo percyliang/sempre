@@ -116,7 +116,7 @@ public final class ILUtils {
       String formula = pair.get(1);
 
       if (formula.equals("()")) {
-        LogInfo.error("Got empty formula");
+        LogInfo.logs("Error: Got empty formula");
         continue;
       }
 
@@ -130,20 +130,29 @@ public final class ILUtils {
       parser.parse(params, ex, false);
 
       boolean found = false;
+      Formula targetFormula = Formulas.fromLispTree(LispTree.proto.parseFromString(formula));
       for (Derivation d : ex.predDerivations) {
         // LogInfo.logs("considering: %s", d.formula.toString());
-        if (d.formula.equals(Formulas.fromLispTree(LispTree.proto.parseFromString(formula)))) {
+        if (d.formula.equals(targetFormula)) {
           found = true;
           allDerivs.add(stripDerivation(d));
         }
       }
       if (!found && !formula.equals("?"))
-        LogInfo.logs("Error: matching formula not found: %s", formula);
+        LogInfo.logs("Error: matching formula not found (useBest :s): %s", formula, Boolean.toString(opts.useBestFormula));
 
       // just making testing easier, use top derivation when we formula is not
       // given
       if (!found && ex.predDerivations.size() > 0 && (formula.equals("?") || formula == null || opts.useBestFormula))
         allDerivs.add(stripDerivation(ex.predDerivations.get(0)));
+      else if (!found) {
+        Derivation res = new Derivation.Builder().formula(targetFormula)
+            // setting start to -1 is important, 
+            // which grammarInducer interprets to mean we do not want partial rules
+            .withCallable(new SemanticFn.CallInfo("$Action", -1, -1, null, new ArrayList<>()))
+            .createDerivation();
+        allDerivs.add(res);
+      }
     }
     return allDerivs;
   }
