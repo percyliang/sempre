@@ -150,6 +150,8 @@ public class ActionExecutor extends Executor {
         world.selected = prevSelected;
         world.merge();
       }
+      //LogInfo.logs("CBlocking prevselected=%s selected=%s all=%s", prevSelected, world.selected, world.allitems);
+      //LogInfo.logs("BlockingWorldIs %s", world.toJSON());
       world.previous = prevPrevious;
     }
 //    } else if (f.mode == ActionFormula.Mode.let) {

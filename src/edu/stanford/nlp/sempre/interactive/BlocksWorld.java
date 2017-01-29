@@ -100,13 +100,22 @@ public class BlocksWorld extends FlatWorld {
   // we only use names S to communicate with the client, internally its just the select variable
   public String toJSON() {
     // selected thats no longer in the world gets nothing
-    // allitems.removeIf(c -> ((Block)c).color == CubeColor.Fake && !this.selected.contains(c));
-    selected.forEach(i -> i.names.add(SELECT));
+    
+    
     if (allitems.size() > opts.maxBlocks)
       throw new RuntimeException("Number of blocks exceeds the upperlimit: " + opts.maxBlocks);
-     
+    
+    //allitems.removeIf(c -> ((Block)c).color == CubeColor.Fake && !this.selected.contains(c));
+    //allitems.stream().filter(c -> selected.contains(c)).forEach(i -> i.names.add(SELECT));
+    
+    
     return Json.writeValueAsStringHard(allitems.stream()
-        .map(c -> ((Block)c).toJSON()).collect(Collectors.toList()));
+        .map(c -> {
+          Block b = ((Block)c).clone();
+          if (selected.contains(b))
+            b.names.add("S");
+          return b.toJSON();
+        }).collect(Collectors.toList()));
     // return this.worldlist.stream().map(c -> c.toJSON()).reduce("", (o, n) -> o+","+n);
   }
 
@@ -195,7 +204,7 @@ public class BlocksWorld extends FlatWorld {
   public Set<Item> adj(String dirstr, Set<Item> selected) {
     Direction dir = Direction.fromString(dirstr);
     Set<Item> selectors = selected.stream()
-        .map(c -> {Item d = ((Block)c).copy(dir); ((Block)d).color = CubeColor.Fake; return d;})
+        .map(c -> {Block b= ((Block)c).copy(dir); b.color = CubeColor.Fake; return b;})
         .collect(Collectors.toSet());
 
     this.allitems.addAll(selectors);

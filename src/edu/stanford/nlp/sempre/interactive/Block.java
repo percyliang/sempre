@@ -172,4 +172,9 @@ public class Block extends Item {
     else
       names.remove("S");
   }
+  
+  @Override
+  public String toString() {
+    return this.toJSON().toString();
+  }
 }
