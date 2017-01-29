@@ -4,8 +4,8 @@
 (def @R reverse)
 
 (rule $ROOT ($Actions) (IdentityFn) (anchored 1))
-(rule $ROOT ($Actions) (BlockFn isolate) (anchored 1))
-(rule $ROOT ($Actions) (BlockFn block) (anchored 1))
+(rule $ROOT ($Actions) (interactive.BlockFn isolate) (anchored 1))
+(rule $ROOT ($Actions) (interactive.BlockFn block) (anchored 1))
 
 (rule $Actions ($Actions ; $Action) (lambda a1 (lambda a2 (:s (var a1) (var a2)))) (anchored 1))
 (rule $Actions ($Action) (IdentityFn) (anchored 1))

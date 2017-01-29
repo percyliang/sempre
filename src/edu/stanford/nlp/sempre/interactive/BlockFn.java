@@ -13,6 +13,7 @@ import edu.stanford.nlp.sempre.ILUtils;
 import edu.stanford.nlp.sempre.SemanticFn;
 import edu.stanford.nlp.sempre.SingleDerivationStream;
 import fig.basic.LispTree;
+import fig.basic.LogInfo;
 import fig.basic.Option;
 
 /**
@@ -43,19 +44,26 @@ public class BlockFn extends SemanticFn {
   public BlockFn(ActionFormula.Mode mode) {
     this.mode = mode;
   }
+  
+  public BlockFn() {
+    this.mode = ActionFormula.Mode.sequential;
+  }
 
   public DerivationStream call(final Example ex, final Callable c) {
     return new SingleDerivationStream() {
       @Override
       public Derivation createDerivation() {
         List<Derivation> args = c.getChildren();
-
         if (args.size() == 1) {
           Derivation onlyChild = args.get(0);
-
+          
           if (onlyChild == null) return null;
+          
+          if (onlyChild.getStart() != 0  || onlyChild.getEnd() != ex.getTokens().size()) return null;
           // do not do anything to the core language
-          if (!onlyChild.rule.isInduced()) return null;
+          // LogInfo.logs("BlockFn %s : %s Example.size=%d, callInfo(%d,%d)", onlyChild, mode, ex.getTokens().size(), onlyChild.getStart(), onlyChild.getEnd());
+          if (onlyChild.allAnchored()) return null;
+          if (!ILUtils.stripBlock(onlyChild).rule.isInduced()) return null;
 
           // if already blocked, do not do anything
           if ( allModes.contains(((ActionFormula)onlyChild.formula).mode)) return null;
@@ -68,17 +76,17 @@ public class BlockFn extends SemanticFn {
               .formula(new ActionFormula(mode, Lists.newArrayList(onlyChild.formula)))
               .withCallable(c)
               .createDerivation();
-        }
+        } else return null;
 
-        // not used for now
-        Formula f = new ActionFormula(mode, 
-            args.stream().map(d -> d.formula).collect(Collectors.toList()));
-        Derivation res = new Derivation.Builder()
-            .formula(f)
-            .withCallable(c)
-            .createDerivation();
-        
-        return res;
+//        // not used for now
+//        Formula f = new ActionFormula(mode, 
+//            args.stream().map(d -> d.formula).collect(Collectors.toList()));
+//        Derivation res = new Derivation.Builder()
+//            .formula(f)
+//            .withCallable(c)
+//            .createDerivation();
+//        
+//        return res;
       }
     };
   }

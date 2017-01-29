@@ -88,7 +88,7 @@ public class GrammarInducerTest {
       // LogInfo.logs("Parsing definition: %s", ex.utterance);
       parser.parse(params, exHead, true);
       
-      Derivation defDeriv = ILUtils.combine(ILUtils.derivsfromJson(def, parser, params), ActionFormula.Mode.block);
+      Derivation defDeriv = ILUtils.combine(ILUtils.derivsfromJson(def, parser, params), ActionFormula.Mode.sequential);
       
       boolean found = false; 
       int ind = 0;

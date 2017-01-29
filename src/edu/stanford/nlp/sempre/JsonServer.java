@@ -256,8 +256,8 @@ public class JsonServer {
         Map<String, Object> jsonMap = new LinkedHashMap<>();
         LocalDateTime responseTime = LocalDateTime.now();
         // jsonMap.put("responseTime", responseTime.toString());
-        jsonMap.put("time", queryTime);
-        jsonMap.put("ms", String.format("%.3f", java.time.Duration.between(queryTime, responseTime).toNanos()/1000.0));
+        jsonMap.put("time", queryTime.toString());
+        jsonMap.put("ms", String.format("%.3f", java.time.Duration.between(queryTime, responseTime).toNanos()/1.0e6));
         jsonMap.put("sessionId", sessionId);
         jsonMap.put("q", query); // backwards compatability...
         jsonMap.put("lines", responseMap.get("lines"));
