@@ -135,7 +135,6 @@ public class JsonServer {
       exchange.sendResponseHeaders(200, 0);
     }
 
-
     Map<String, Object> makeJson(Master.Response response) {
       Map<String, Object> json = new HashMap<String, Object>();
 
@@ -145,6 +144,7 @@ public class JsonServer {
       if (response.getExample()!=null) {
         List<Object> items = new ArrayList<Object>();
         json.put("candidates", items);
+        json.put("stats", response.stats);
         List<Derivation> allCandidates = response.getExample().getPredDerivations();
 
         if (allCandidates != null) {

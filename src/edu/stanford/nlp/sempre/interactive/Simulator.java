@@ -49,7 +49,6 @@ public class Simulator implements Runnable {
     ExecutorService executor = new ThreadPoolExecutor(JsonServer.opts.numThreads, JsonServer.opts.numThreads,
         5000, TimeUnit.MILLISECONDS,
         new LinkedBlockingQueue<Runnable>());
-    Evaluation evaluation = new Evaluation();
     
     long startTime = System.nanoTime();
     for (String fileName : logFiles) {
@@ -67,7 +66,8 @@ public class Simulator implements Runnable {
           if (sessionId == null) // to be backwards compatible
             sessionId = json.get("id"); 
           try {
-            sempreQuery(command.toString(), sessionId.toString());
+            String response = sempreQuery(command.toString(), sessionId.toString());
+            SimulationAnalyzer.add(sessionId, command.toString(), response);
             //Thread.sleep(10);
           } catch (Exception e) {
             // TODO Auto-generated catch block
@@ -95,11 +95,7 @@ public class Simulator implements Runnable {
       long endTime = System.nanoTime();
       LogInfo.logs("Took %d ns or %.4f s", (endTime - startTime), (endTime - startTime)/1.0e9); 
     }
-    
-
-    evaluation.logStats("Simulator");
-    evaluation.putOutput("Simulator");
-    
+    SimulationAnalyzer.flush();
     LogInfo.end_track();
   }
 
@@ -109,9 +105,9 @@ public class Simulator implements Runnable {
     // params = URLEncoder.encode(params);
     String url = String.format("%s/sempre?", serverURL);
     // LogInfo.log(params);
-    LogInfo.log(query);
+    // LogInfo.log(query);
     String response  = executePost(url + params, "");
-    LogInfo.log(response);
+    //LogInfo.log(response);
     return response;
   }
 

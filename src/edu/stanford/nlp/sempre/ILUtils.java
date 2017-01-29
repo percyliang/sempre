@@ -197,7 +197,6 @@ public final class ILUtils {
       inducedRules.addAll(DefinitionAligner.getRules(head, def, bodyDeriv, grammarInducer.matches));
 
     LogInfo.end_track();
-    ;
     return inducedRules;
   }
 
@@ -242,6 +241,7 @@ public final class ILUtils {
     }
     List<Rule> rules = ILUtils.induceRules(exHead.getTokens(), ILUtils.utterancefromJson(jsonDef, true), bodyDeriv,
         state.chartList);
+  
 
     for (Rule rule : rules) {
       rule.source = new RuleSource(sessionId, head, bodyList);

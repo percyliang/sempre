@@ -81,26 +81,7 @@ public class Session {
       this.params.read(opts.inParamsPath);
     this.learner = new Learner(builder.parser, this.params, new Dataset());
   }
-  
-
-  //Decides if we write out any logs
-  //public boolean isWriting() {
-  //  return false;
-  //}
-  // provides highest level of isolation,
-  // should not even mutate the server
-  public boolean isSandbox() {
-    return true;
-  }
-  // determines whether we add rules used by the public
-  public boolean isUpdating() {
-    return true;
-  }
-  public boolean isGlobal() {
-    return true;
-  }
-  
-
+ 
   @Override
   public String toString() {
     return String.format("%s: %s; last: %s", id, context, lastEx);
@@ -111,6 +92,7 @@ public class Session {
   public boolean isWritingCitation() { return defaultTrue("cite");}
   public boolean isWritingGrammar() { return defaultTrue("grammar");}
   public boolean isLearning() { return defaultTrue("learn");}
+  public boolean isStatsing() { return defaultTrue("stats");}
   
   private boolean defaultTrue(String key) {
     if (this.reqParams == null) return true;

@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 
 import edu.stanford.nlp.sempre.interactive.BadInteractionException;
 import edu.stanford.nlp.sempre.interactive.CitationTracker;
+import edu.stanford.nlp.sempre.interactive.GrammarInducer;
 import edu.stanford.nlp.sempre.interactive.PrefixTrie;
 import fig.basic.*;
 
@@ -67,7 +68,7 @@ public class Master {
     int candidateIndex = -1;
 
     // Detailed information
-    String message = "";
+    Map<String, Object> stats = new LinkedHashMap<>();
     List<String> lines = new ArrayList<>();
 
     public String getFormulaAnswer() {
@@ -458,6 +459,12 @@ public class Master {
       
       
       builder.parser.parse(builder.params, ex, false);     
+      
+      if (session.isStatsing()) {
+        response.stats.put("type", "q");
+        response.stats.put("size", ex.predDerivations!=null? ex.predDerivations.size() : 0);
+        response.stats.put("status", GrammarInducer.getParseStatus(ex));
+      }
       response.ex = ex;
       
     } else if (command.equals(":accept")) {
@@ -481,8 +488,26 @@ public class Master {
       state = builder.parser.parse(builder.params, ex, true);
       state.ensureExecuted();
       
-      Derivation match = ex.predDerivations.stream()
-          .filter(d -> d.formula.equals(targetFormulaFinal)).findFirst().orElse(null);
+      
+      //Derivation match = ex.predDerivations.stream()
+      //    .filter(d -> d.formula.equals(targetFormulaFinal)).findFirst().orElse(null);
+      
+      int rank = -1;
+      Derivation match = null;
+      for (int i = 0; i < ex.predDerivations.size(); i++) {
+        Derivation derivi = ex.predDerivations.get(i);
+        if (derivi.formula.equals(targetFormulaFinal)) {
+          rank = i; match = derivi;
+        }
+      }
+      
+      if (session.isStatsing()) {
+        response.stats.put("type", "accept");
+        response.stats.put("rank", rank);
+        response.stats.put("status", GrammarInducer.getParseStatus(ex));
+        response.stats.put("size", ex.predDerivations.size());
+      }
+      
       ex.setTargetFormula(targetFormula);
       if (match != null) {
         LogInfo.logs("Matched: %s", match);
@@ -526,6 +551,11 @@ public class Master {
             }
             out.close();
           }
+        }
+        
+        if (session.isStatsing()) {
+          response.stats.put("type", "def");
+          response.stats.put("numRules", inducedRules.size());
         }
       } else {
         LogInfo.logs("Invalid format for def");

@@ -24,6 +24,7 @@ import edu.stanford.nlp.sempre.LambdaFormula;
 import edu.stanford.nlp.sempre.Rule;
 import edu.stanford.nlp.sempre.SemanticFn;
 import edu.stanford.nlp.sempre.VariableFormula;
+import edu.stanford.nlp.sempre.interactive.GrammarInducer.ParseStatus;
 import fig.basic.LispTree;
 import fig.basic.LogInfo;
 import fig.basic.Option;
@@ -334,7 +335,13 @@ public class GrammarInducer {
     Nothing, // nothing at all parses in the utterance
     Float, // something parse
     Induced, // redefining known utterance
-    Core; // define known utterance in core, should reject
+    Core;
+
+    public static ParseStatus fromString(String status) {
+      for(ParseStatus c : ParseStatus.values())
+        if (c.name().equalsIgnoreCase(status)) return c;
+      return null;
+    } // define known utterance in core, should reject
   }
 
   public static ParseStatus getParseStatus(Example ex) {
