@@ -180,7 +180,7 @@ def emit_utterances():
             mtime = os.stat(path).st_mtime
             file_info = (mtime, fname[:-5], path)
 
-            if len(latest_5) < 5:
+            if len(latest_5) < 3:
                 latest_5.append(file_info)
             else:
                 earliest_time = latest_5[0][0]
@@ -212,13 +212,20 @@ def emit_utterances():
 
 def h_index(citations):
     """https://github.com/kamyu104/LeetCode/blob/master/Python/h-index.py"""
-    citations.sort(reverse=True)
-    h = 0
+    n = len(citations)
+    count = [0] * (n + 1)
     for x in citations:
-        if x >= h + 1:
-            h += 1
+        # Put all x >= n in the same bucket.
+        if x >= n:
+            count[n] += 1
         else:
-            break
+            count[x] += 1
+
+    h = 0
+    for i in reversed(xrange(0, n + 1)):
+        h += count[i]
+        if h >= i:
+            return i
     return h
 
 
@@ -235,7 +242,6 @@ def compute_citations(dir):
             citations.append(data)
 
     citation_numbers = [citation["cite"] + citation["self"] for citation in citations]
-
     citation_score = h_index(citation_numbers)
 
     return (citations, citation_score)
@@ -250,20 +256,21 @@ def emit_top_builders():
 
         (citations, citation_score) = compute_citations(subdir)
 
-        if len(top_5_builders) < 5 or citation_score > top_5_builders[4][0]:
+        top_5_builders = sorted(top_5_builders, key=lambda b: b[0], reverse=True)
+        if len(top_5_builders) < 7 or citation_score > top_5_builders[6][0]:
             # If there are more than 5 citations with cites, only return those
-            citations_with_cites = [c for c in citations if c["cite"] > 0]
-            if len(citations_with_cites) >= 5:
-                citations = citations_with_cites
+            # citations_with_cites = [c for c in citations if c["cite"] > 0]
+            # if len(citations_with_cites) >= 6:
+            #     citations = citations_with_cites
 
-            # Sort them by scorem and return the top 5.
-            citations = sorted(citations, key=lambda c: c["cite"] + c["self"], reverse=True)[:5]
+            # Sort them by score and return the top 7.
+            citations = sorted(citations, key=lambda c: c["cite"] + c["self"], reverse=True)[:7]
 
             struct = (uid, citation_score, citations)
-            if len(top_5_builders) < 5:
+            if len(top_5_builders) < 7:
                 top_5_builders.append(struct)
             else:
-                top_5_builders[4] = struct
+                top_5_builders[6] = struct
 
     emit("top_builders", {"top_builders": top_5_builders}, broadcast=True, room="community")
 
@@ -314,14 +321,14 @@ def on_join(data):
     join_room(room)
 
     if (room == "community"):
-        # We iterate through all the shared structs and emit them one by one
-        emit_structs()
-
         # And then we emit the most recent 5 users' utterances per file
         emit_utterances()
 
         # and also emit the top builders when first joining
         emit_top_builders()
+
+        # We iterate through all the shared structs and emit them one by one
+        emit_structs()
 
 
 @socketio.on('leave')
