@@ -196,8 +196,10 @@ public class JsonServer {
         t.printStackTrace();
         message = t.toString();
       } finally {
-        if (!Strings.isNullOrEmpty(message))
+        if (!Strings.isNullOrEmpty(message)) {
           response.lines.add(message);
+          response.stats.put("error", message);
+        }
       }
       return response;
     }

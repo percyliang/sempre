@@ -24,7 +24,6 @@ import com.google.common.collect.ImmutableList;
 import edu.stanford.nlp.sempre.interactive.ActionFormula;
 import edu.stanford.nlp.sempre.interactive.BadInteractionException;
 import edu.stanford.nlp.sempre.interactive.BlockFn;
-import edu.stanford.nlp.sempre.interactive.CitationTracker;
 import edu.stanford.nlp.sempre.interactive.DefinitionAligner;
 import edu.stanford.nlp.sempre.interactive.FlatWorld;
 import edu.stanford.nlp.sempre.interactive.GrammarInducer;
@@ -328,6 +327,7 @@ public final class ILUtils {
     return res;
   }
 
+  @Deprecated
   public static void readCommands(Master master) {// run all interactive
                                                   // commands logged
     long startTime = System.nanoTime();

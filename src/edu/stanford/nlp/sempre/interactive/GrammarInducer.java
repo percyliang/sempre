@@ -333,7 +333,7 @@ public class GrammarInducer {
 
   public static enum ParseStatus {
     Nothing, // nothing at all parses in the utterance
-    Float, // something parse
+    /// Float, // something parse, no longer used.
     Induced, // redefining known utterance
     Core;
 

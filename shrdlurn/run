@@ -52,7 +52,7 @@ def header(modules='core', codalabDependencies=nil)
     '-cp', 'libsempre/*:lib/*',
     # Profiling
     letDefault(:prof, 0), sel(:prof, l(), '-Xrunhprof:cpu=samples,depth=100,file=_OUTPATH_/java.hprof.txt'),
-    # debugging
+    # Debugging
     letDefault(:debug, 0), sel(:debug, l(), l('-Xdebug', '-Xrunjdwp:server=y,transport=dt_socket,suspend=y,address=8898')),
   nil)
 end
@@ -126,12 +126,13 @@ addMode('simulator', 'run the simulator', lambda { |e| l(
 	}),
 	letDefault(:task, 'sidaw'),
 	sel(:task, {
-		'qual1' => o('logFiles', './shrdlurn/commandInputs/qualifier20-0118.json'),
-		'free1' => o('logFiles', './shrdlurn/commandInputs/freebuild1-0121.json'),
-		'free2' => o('logFiles', './shrdlurn/commandInputs/freebuild2-0127.json'),
-		'sidaw' => o('logFiles', './shrdlurn/commandInputs/sidaw.json.log'),
-		'all' => o('logFiles', './shrdlurn/commandInputs/sidaw.json.log',
-		'./shrdlurn/commandInputs/freebuild1-0121.json', './shrdlurn/commandInputs/qualifier20-0118.json')
+		'qual1' => o('logFiles', './shrdlurn/queries/qualifier1-0118.json'),
+		'qual2' => o('logFiles', './shrdlurn/queries/qualifier2-0129.json'),
+		'free1' => o('logFiles', './shrdlurn/queries/freebuild1-0121.json'),
+		'free2' => o('logFiles', './shrdlurn/queries/freebuild2-0127.json'),
+		'sidaw' => o('logFiles', './shrdlurn/queries/sidaw.json.log'),
+		'all' => o('logFiles', './shrdlurn/queries/sidaw.json.log',
+		'./shrdlurn/queries/freebuild1-0121.json', './shrdlurn/queries/qualifier20-0118.json')
 		}),
 nil)})
 

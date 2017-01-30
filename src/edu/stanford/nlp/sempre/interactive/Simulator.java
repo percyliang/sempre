@@ -67,7 +67,7 @@ public class Simulator implements Runnable {
             sessionId = json.get("id"); 
           try {
             String response = sempreQuery(command.toString(), sessionId.toString());
-            SimulationAnalyzer.add(sessionId, command.toString(), response);
+            SimulationAnalyzer.addStats(json, response);
             //Thread.sleep(10);
           } catch (Exception e) {
             // TODO Auto-generated catch block
