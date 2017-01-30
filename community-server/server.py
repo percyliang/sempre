@@ -147,12 +147,12 @@ def emit_structs():
             try:
                 with open(path, 'r') as f:
                     lines = f.readlines()
-                    if (len(lines) != 3):
+                    if (len(lines) != 4):
                         continue
 
                     upvotes = json.loads(lines[0].strip())
                     timestamp = json.loads(lines[1].strip())
-                    struct = json.loads(lines[2].strip())
+                    struct = lines[2].strip()
 
                     score = score_struct(timestamp, len(upvotes))
                     message = {"uid": uid, "id": fname, "score": score, "upvotes": [up for up in upvotes], "struct": struct}
@@ -166,7 +166,7 @@ def emit_user_structs_count(uid):
     """"Emits a count of the total number of user structs in the folder."""
     path = os.path.join(STRUCTS_FOLDER, uid)
     if os.path.isdir(path):
-        structs = [name for name in os.listdir(path) if os.path.isfile(os.path.join(path, name))]
+        structs = [name[:-5] for name in os.listdir(path) if os.path.isfile(os.path.join(path, name)) and os.path.join(path, name).endswith(".json")]
         emit("user_structs", {"structs": structs})
 
 
@@ -290,6 +290,26 @@ def log(message):
         f.write('\n')
 
 
+@socketio.on('load_struct')
+def load_struct(data):
+    uid = data['uid']
+    id = data['id']
+    subdir = os.path.join(STRUCTS_FOLDER, uid)
+    make_dir_if_necessary(subdir)
+    path = os.path.join(subdir, id + ".json")
+
+    history = ""
+
+    if os.path.isfile(path):
+        with open(path, 'r') as f:
+            f.readline()  # upvotes
+            f.readline()  # timestamps
+            f.readline()  # latest struct
+            history = f.readline().strip()
+
+    emit("load_struct", {"id": id, "history": history})
+
+
 @socketio.on('getscore')
 def get_score(data):
     uid = data['uid']
@@ -349,23 +369,24 @@ def handle_share(data):
 
     user_structs_folder = os.path.join(STRUCTS_FOLDER, data['uid'])
     make_dir_if_necessary(user_structs_folder)
-    names = [name for name in os.listdir(user_structs_folder) if os.path.isfile(os.path.join(user_structs_folder, name))]
-    new_struct_id = "1"
-    if len(names) > 0:
-        new_struct_id = str(max([int(name[:-5]) for name in names]) + 1)
-
-    new_struct_path = os.path.join(user_structs_folder, new_struct_id + ".json")
+    new_struct_path = os.path.join(user_structs_folder, data['id'] + ".json")
 
     submission_time = current_unix_time()
-    score = score_struct(submission_time, 0)
+
+    upvotes = "[]"
+    if (os.path.isfile(new_struct_path)):
+        with open(new_struct_path, 'r') as f:
+            upvotes = f.readline().strip()
 
     with open(new_struct_path, 'w') as f:
-        f.write("[]\n")  # it starts with no upvoters
+        f.write(upvotes + "\n")  # it starts with no upvoters
         f.write(str(submission_time) + "\n")  # timestamp of submission
-        f.write(json.dumps(data["struct"]))  # the actual struct
+        f.write(data["struct"] + "\n")  # the actual struct
+        f.write(data["history"])  # the history leading up to the struct
 
     # Broadcast addition to the "community" room
-    message = {"uid": data['uid'], "id": new_struct_id, "score": score, "upvotes": [], "struct": data["struct"]}
+    score = score_struct(submission_time, 0)
+    message = {"uid": data['uid'], "id": data['id'], "score": score, "upvotes": [], "struct": data["struct"]}
     emit("struct", message, broadcast=True, room="community")
 
 
@@ -398,6 +419,7 @@ def upvote(data):
 
             timestamp = f.readline()
             struct = f.readline()
+            history = f.readline()
 
             # reset file to top
             f.seek(0)
@@ -406,6 +428,7 @@ def upvote(data):
             f.write(json.dumps(upvotes) + "\n")
             f.write(timestamp)  # rewrite the timestamp
             f.write(struct)  # rewrite the actual struct
+            f.write(history)  # rewrite the history
 
             f.truncate()  # truncate to ensure flush appropriate
 
