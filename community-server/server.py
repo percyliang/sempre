@@ -256,7 +256,7 @@ def emit_top_builders():
 
         (citations, citation_score) = compute_citations(subdir)
 
-        top_5_builders = sorted(top_5_builders, key=lambda b: b[0], reverse=True)
+        top_5_builders = sorted(top_5_builders, key=lambda b: b[1], reverse=True)
         if len(top_5_builders) < 7 or citation_score > top_5_builders[6][0]:
             # If there are more than 5 citations with cites, only return those
             # citations_with_cites = [c for c in citations if c["cite"] > 0]
