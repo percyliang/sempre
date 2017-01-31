@@ -12,13 +12,10 @@ import fig.basic.*;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.lang.reflect.Field;
-import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Stream;
 
 /**
  * A Master manages multiple sessions. Currently, they all share the same model,
@@ -506,6 +503,9 @@ public class Master {
         response.stats.put("rank", rank);
         response.stats.put("status", GrammarInducer.getParseStatus(ex));
         response.stats.put("size", ex.predDerivations.size());
+        
+        response.stats.put("len_formula", targetFormula.toString().length());
+        response.stats.put("len_utterance", ex.utterance.length());
       }
       
       ex.setTargetFormula(targetFormula);

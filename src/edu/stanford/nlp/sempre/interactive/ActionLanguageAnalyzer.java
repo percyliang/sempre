@@ -25,6 +25,7 @@ public class ActionLanguageAnalyzer extends LanguageAnalyzer {
   }
 
   private static final String[] numbers = {"zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "many"};
+  private static final String[] determiners = {"the", "a", "an", "that"};
 
   public LanguageInfo analyze(String utterance) {
     LanguageInfo languageInfo = new LanguageInfo();
@@ -45,16 +46,17 @@ public class ActionLanguageAnalyzer extends LanguageAnalyzer {
     for (int i = 0; i < utterance.length(); i++) {
       char c = utterance.charAt(i);
       // Put whitespace around certain characters.
-      // TODO(pliang): handle contractions such as "can't" properly.
       boolean boundaryBefore = !(i - 1 >= 0) || utterance.charAt(i - 1) == ' ';
       boolean boundaryAfter = !(i + 1 < utterance.length()) || utterance.charAt(i + 1) == ' ';
-      boolean separate;
+      boolean separate = false;
       if (c == '.') // Break off period if already space around it (to preserve numbers like 3.5)
         separate = boundaryBefore || boundaryAfter;
       else if (c == '=') // separate all >, =, < except >=, <=
-        separate = (utterance.charAt(i - 1) != '>' && utterance.charAt(i - 1) != '<');
+        separate = !(i - 1 >= 0) || 
+        ((utterance.charAt(i - 1) != '>' && utterance.charAt(i - 1) != '<'));
       else if (c == '>' || c == '<')
-        separate = (utterance.charAt(i + 1) != '=' && utterance.charAt(i + 1) != '=');
+        separate = !(i + 1 < utterance.length()) ||
+        ((utterance.charAt(i + 1) != '=' && utterance.charAt(i + 1) != '='));
       else
         separate = (",?'\"[];{}+-".indexOf(c) != -1);
 
@@ -95,6 +97,14 @@ public class ActionLanguageAnalyzer extends LanguageAnalyzer {
           languageInfo.nerValues.add(x + "");
           continue;
         }
+        
+        x = Arrays.asList(determiners).indexOf(token);
+        if (x != -1) {
+          languageInfo.posTags.add("DET");
+          languageInfo.nerTags.add("UNK");
+          continue;
+        }
+
 
         try {
           Double.parseDouble(token);
