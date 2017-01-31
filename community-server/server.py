@@ -166,7 +166,7 @@ def emit_user_structs_count(uid):
     """"Emits a count of the total number of user structs in the folder."""
     path = os.path.join(STRUCTS_FOLDER, uid)
     if os.path.isdir(path):
-        structs = [name for name in os.listdir(path) if os.path.isfile(os.path.join(path, name))]
+        structs = [name[:-5] for name in os.listdir(path) if os.path.isfile(os.path.join(path, name)) and os.path.join(path, name).endswith(".json")]
         emit("user_structs", {"structs": structs})
 
 
@@ -349,12 +349,7 @@ def handle_share(data):
 
     user_structs_folder = os.path.join(STRUCTS_FOLDER, data['uid'])
     make_dir_if_necessary(user_structs_folder)
-    names = [name for name in os.listdir(user_structs_folder) if os.path.isfile(os.path.join(user_structs_folder, name))]
-    new_struct_id = "1"
-    if len(names) > 0:
-        new_struct_id = str(max([int(name[:-5]) for name in names]) + 1)
-
-    new_struct_path = os.path.join(user_structs_folder, new_struct_id + ".json")
+    new_struct_path = os.path.join(user_structs_folder, data["id"] + ".json")
 
     submission_time = current_unix_time()
     score = score_struct(submission_time, 0)
@@ -365,7 +360,7 @@ def handle_share(data):
         f.write(json.dumps(data["struct"]))  # the actual struct
 
     # Broadcast addition to the "community" room
-    message = {"uid": data['uid'], "id": new_struct_id, "score": score, "upvotes": [], "struct": data["struct"]}
+    message = {"uid": data['uid'], "id": data["id"], "score": score, "upvotes": [], "struct": data["struct"]}
     emit("struct", message, broadcast=True, room="community")
 
 
