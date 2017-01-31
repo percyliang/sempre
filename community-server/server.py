@@ -147,12 +147,12 @@ def emit_structs():
             try:
                 with open(path, 'r') as f:
                     lines = f.readlines()
-                    if (len(lines) != 4):
+                    if (len(lines) != 3):
                         continue
 
                     upvotes = json.loads(lines[0].strip())
                     timestamp = json.loads(lines[1].strip())
-                    struct = lines[2].strip()
+                    struct = json.loads(lines[2].strip())
 
                     score = score_struct(timestamp, len(upvotes))
                     message = {"uid": uid, "id": fname, "score": score, "upvotes": [up for up in upvotes], "struct": struct}
@@ -290,26 +290,6 @@ def log(message):
         f.write('\n')
 
 
-@socketio.on('load_struct')
-def load_struct(data):
-    uid = data['uid']
-    id = data['id']
-    subdir = os.path.join(STRUCTS_FOLDER, uid)
-    make_dir_if_necessary(subdir)
-    path = os.path.join(subdir, id + ".json")
-
-    history = ""
-
-    if os.path.isfile(path):
-        with open(path, 'r') as f:
-            f.readline()  # upvotes
-            f.readline()  # timestamps
-            f.readline()  # latest struct
-            history = f.readline().strip()
-
-    emit("load_struct", {"id": id, "history": history})
-
-
 @socketio.on('getscore')
 def get_score(data):
     uid = data['uid']
@@ -369,24 +349,18 @@ def handle_share(data):
 
     user_structs_folder = os.path.join(STRUCTS_FOLDER, data['uid'])
     make_dir_if_necessary(user_structs_folder)
-    new_struct_path = os.path.join(user_structs_folder, data['id'] + ".json")
+    new_struct_path = os.path.join(user_structs_folder, data["id"] + ".json")
 
     submission_time = current_unix_time()
-
-    upvotes = "[]"
-    if (os.path.isfile(new_struct_path)):
-        with open(new_struct_path, 'r') as f:
-            upvotes = f.readline().strip()
+    score = score_struct(submission_time, 0)
 
     with open(new_struct_path, 'w') as f:
-        f.write(upvotes + "\n")  # it starts with no upvoters
+        f.write("[]\n")  # it starts with no upvoters
         f.write(str(submission_time) + "\n")  # timestamp of submission
-        f.write(data["struct"] + "\n")  # the actual struct
-        f.write(data["history"])  # the history leading up to the struct
+        f.write(json.dumps(data["struct"]))  # the actual struct
 
     # Broadcast addition to the "community" room
-    score = score_struct(submission_time, 0)
-    message = {"uid": data['uid'], "id": data['id'], "score": score, "upvotes": [], "struct": data["struct"]}
+    message = {"uid": data['uid'], "id": data["id"], "score": score, "upvotes": [], "struct": data["struct"]}
     emit("struct", message, broadcast=True, room="community")
 
 
@@ -419,7 +393,6 @@ def upvote(data):
 
             timestamp = f.readline()
             struct = f.readline()
-            history = f.readline()
 
             # reset file to top
             f.seek(0)
@@ -428,7 +401,6 @@ def upvote(data):
             f.write(json.dumps(upvotes) + "\n")
             f.write(timestamp)  # rewrite the timestamp
             f.write(struct)  # rewrite the actual struct
-            f.write(history)  # rewrite the history
 
             f.truncate()  # truncate to ensure flush appropriate
 
