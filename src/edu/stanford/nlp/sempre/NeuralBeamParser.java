@@ -75,6 +75,11 @@ class NeuralBeamParserState extends NeuralParserState {
     super(parser, cgWrapper, ex, computeExpectedCounts);
     this.chart = (HashMap<String, List<Derivation>>[][])
       Array.newInstance(HashMap.class, numTokens, numTokens + 1);
+    for (int start = 0; start < numTokens; start++) {
+      for (int end = start + 1; end <= numTokens; end++) {
+        chart[start][end] = new HashMap<>();
+      }
+    }
     this.parser = parser;
     this.mode = mode;
     this.coarseState = coarseState;
@@ -116,6 +121,7 @@ class NeuralBeamParserState extends NeuralParserState {
 
     if (parser.verbose(2)) LogInfo.end_track();
     setPredDerivations();
+    ensureExecuted();
   }
 
   // Create all the derivations for the span [start, end).

@@ -78,6 +78,8 @@ public class Builder {
         return new ReinforcementParser(spec);
       case "FloatingParser":
         return new FloatingParser(spec);
+      case "NeuralBeamParser":
+        return new NeuralBeamParser(spec);
       default:
         // Try instantiating by name
         try {

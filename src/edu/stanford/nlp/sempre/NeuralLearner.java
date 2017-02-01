@@ -20,7 +20,7 @@ import java.util.Map;
 public class NeuralLearner {
   public static class Options {
     @Option(gloss = "Number of iterations to train")
-    public int maxTrainIters = 0;
+    public int maxTrainIters = 3;
 
     @Option(gloss = "When using mini-batch updates for SGD, this is the batch size")
     public int batchSize = 1;  // Default is SGD
@@ -48,6 +48,7 @@ public class NeuralLearner {
     this.parser = parser;
     this.dataset = dataset;
     this.cgWrapper = new ComputationGraphWrapper();
+    cgWrapper.InitDynet(ComputationGraphWrapper.opts.numDenseFeatures);
     this.eventsOut = IOUtils.openOutAppendEasy(Execution.getFile("learner.events"));
 
     // Collect all semantic functions to update.
@@ -140,14 +141,12 @@ public class NeuralLearner {
       Execution.putOutput("example", e);
 
       ParserState state = parseExample(cgWrapper, ex, computeExpectedCounts);
+      LogInfo.logs("Hash collisions=%d, non-collisions=%d, ratio=%f",
+        cgWrapper.getHashCollisions(), cgWrapper.getHashNonCollisions(), cgWrapper.getCollisionRatio());
+
       if (computeExpectedCounts) {
-        List<Double> rewards = new ArrayList<>();
-        List<Derivation> predDerivations = state.predDerivations;
-        for (Derivation predDerivation: predDerivations) {
-          rewards.add(ParserState.compatibilityToReward(predDerivation.getCompatibility()));
-        }
         //todo(joberant): Define loss over predictions in state and update parameters based on loss.
-        cgWrapper.addRewardWeightedCondLiklihood(predDerivations, rewards);
+        cgWrapper.addRewardWeightedCondLikelihood(state.predDerivations);
       }
 
       LogInfo.logs("Current: %s", ex.evaluation.summary());

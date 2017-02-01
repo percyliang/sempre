@@ -10,10 +10,10 @@ extern "C" {
 /*
  * Class:     edu_stanford_nlp_sempre_ComputationGraphWrapper
  * Method:    InitDynet
- * Signature: ()V
+ * Signature: (I)V
  */
 JNIEXPORT void JNICALL Java_edu_stanford_nlp_sempre_ComputationGraphWrapper_InitDynet
-  (JNIEnv *, jobject);
+  (JNIEnv *, jobject, jint);
 
 /*
  * Class:     edu_stanford_nlp_sempre_ComputationGraphWrapper
@@ -22,6 +22,14 @@ JNIEXPORT void JNICALL Java_edu_stanford_nlp_sempre_ComputationGraphWrapper_Init
  */
 JNIEXPORT jdouble JNICALL Java_edu_stanford_nlp_sempre_ComputationGraphWrapper_scoreWithNetwork
   (JNIEnv *, jobject, jdoubleArray);
+
+/*
+ * Class:     edu_stanford_nlp_sempre_ComputationGraphWrapper
+ * Method:    computeCondLikelihoodLoss
+ * Signature: ([D[D)V
+ */
+JNIEXPORT void JNICALL Java_edu_stanford_nlp_sempre_ComputationGraphWrapper_computeCondLikelihoodLoss
+  (JNIEnv *, jobject, jdoubleArray, jdoubleArray);
 
 #ifdef __cplusplus
 }

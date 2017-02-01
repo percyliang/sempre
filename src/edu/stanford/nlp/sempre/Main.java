@@ -11,6 +11,7 @@ import fig.exec.Execution;
 public class Main implements Runnable {
   @Option public boolean interactive = false;
   @Option public boolean server = false;
+  @Option public boolean isNeural = false;
 
   public void run() {
     Builder builder = new Builder();
@@ -19,8 +20,13 @@ public class Main implements Runnable {
     Dataset dataset = new Dataset();
     dataset.read();
 
-    Learner learner = new Learner(builder.parser, builder.params, dataset);
-    learner.learn();
+    if (isNeural) {
+      NeuralLearner learner = new NeuralLearner((NeuralBeamParser) builder.parser, dataset);
+      learner.learn();
+    } else {
+      Learner learner = new Learner(builder.parser, builder.params, dataset);
+      learner.learn();
+    }
 
     if (server) {
       Master master = new Master(builder);

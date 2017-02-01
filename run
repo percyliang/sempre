@@ -950,6 +950,7 @@ addMode('geo880', 'Semantic parsing on the geo880 dataset', lambda { |e| l(
   letDefault(:data, 0),
   sel(:data,
     l(o('Dataset.inPaths', 'train,lib/data/geo880/geo880-train.preprocessed.examples'), unbalancedTrainDevSplit), # (0) train 0.8, dev 0.2
+    l(o('Dataset.inPaths', 'train,lib/data/geo880/geo880-train.preprocessed.debug.examples')), # (0) train 0.8, dev 0.2
     l(o('Dataset.inPaths', 'train,lib/data/geo880/geo880-train.examples', 'test,lib/data/geo880/geo880-test.preprocessed/examples')), # (1) Don't run on test yet!
   nil),
   # Load the graph
@@ -979,8 +980,8 @@ addMode('geo880', 'Semantic parsing on the geo880 dataset', lambda { |e| l(
   sel(:feat, {
     'none' => l(),   # No features (random)
     'freebase' => l(
-      o('FeatureExtractor.featureDomains', 'rule opCount constant whType span lemmaAndBinaries denotation lexAlign joinPos skipPos'.split),
-#      o('FeatureExtractor.featureDomains', 'rule opCount constant whType lemmaAndBinaries denotation lexAlign joinPos skipPos'.split),
+#     o('FeatureExtractor.featureDomains', 'rule opCount constant whType span lemmaAndBinaries denotation lexAlign joinPos skipPos'.split),
+      o('FeatureExtractor.featureDomains', 'rule opCount constant whType lemmaAndBinaries denotation lexAlign joinPos skipPos'.split),
     nil),
   }),
 nil) })
