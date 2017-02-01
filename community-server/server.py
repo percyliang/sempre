@@ -108,6 +108,15 @@ def index():
     return "Hello World! ~ SHRDLURN Community Server"
 
 
+def is_safe_path(basedir, path, follow_symlinks=True):
+    """https://security.openstack.org/guidelines/dg_using-file-paths.html"""
+    # resolves symbolic links
+    if follow_symlinks:
+        return os.path.realpath(path).startswith(basedir)
+
+    return os.path.abspath(path).startswith(basedir)
+
+
 def score_struct(timestamp, upvotesN):
     """We use the HN formula to score structures for ranking.
 
@@ -165,6 +174,9 @@ def emit_structs():
 def emit_user_structs_count(uid):
     """"Emits a count of the total number of user structs in the folder."""
     path = os.path.join(STRUCTS_FOLDER, uid)
+    if not is_safe_path(STRUCTS_FOLDER, path):
+        return
+
     if os.path.isdir(path):
         structs = [name[:-5] for name in os.listdir(path) if os.path.isfile(os.path.join(path, name)) and os.path.join(path, name).endswith(".json")]
         emit("user_structs", {"structs": structs})
@@ -281,6 +293,9 @@ def log(message):
 
     path = os.path.join(LOG_FOLDER, uid + ".json")
 
+    if not is_safe_path(LOG_FOLDER, path):
+        return
+
     # Add a timestamp to the log
     message["timestamp"] = current_unix_time()
 
@@ -294,7 +309,7 @@ def log(message):
 def get_score(data):
     uid = data['uid']
     subdir = os.path.join(CITATION_FOLDER, uid)
-    if (os.path.isdir(subdir)):
+    if (os.path.isdir(subdir) and is_safe_path(CITATION_FOLDER, subdir)):
         (citations, score) = compute_citations(subdir)
         emit("score", {"score": score})
 
@@ -304,8 +319,11 @@ def delete_struct(data):
     uid = data['uid']
     struct_id = data["id"]
     struct_path = struct_id + ".json"
-    path = os.path.join(STRUCTS_FOLDER, uid, struct_path)
-    if (os.path.isfile(path)):
+    subdir = os.path.join(STRUCTS_FOLDER, uid)
+    if not (is_safe_path(STRUCTS_FOLDER, subdir)):
+        return
+    path = os.path.join(subdir, struct_path)
+    if (is_safe_path(subdir, path) and os.path.isfile(path)):
         delete_dir = os.path.join(STRUCTS_FOLDER, uid, "deleted")
         make_dir_if_necessary(delete_dir)
         os.rename(path, os.path.join(delete_dir, struct_path))
@@ -348,8 +366,12 @@ def handle_share(data):
     this particular struct.."""
 
     user_structs_folder = os.path.join(STRUCTS_FOLDER, data['uid'])
+    if not is_safe_path(STRUCTS_FOLDER, user_structs_folder):
+        return
     make_dir_if_necessary(user_structs_folder)
     new_struct_path = os.path.join(user_structs_folder, data["id"] + ".json")
+    if not is_safe_path(user_structs_folder, new_struct_path):
+        return
 
     submission_time = current_unix_time()
     score = score_struct(submission_time, 0)
@@ -374,10 +396,13 @@ def upvote(data):
     if not data['uid']:
         return
 
-    struct_path = os.path.join(STRUCTS_FOLDER, data["struct_uid"], str(data["id"]) + ".json")
+    subdir = os.path.join(STRUCTS_FOLDER, data["struct_uid"])
+    if not is_safe_path(STRUCTS_FOLDER, subdir):
+        return
+    struct_path = os.path.join(subdir, str(data["id"]) + ".json")
 
     # if the struct does not exist, do nothing
-    if not os.path.isfile(struct_path):
+    if not is_safe_path(subdir, struct_path) or os.path.isfile(struct_path):
         print("not", struct_path)
         return
 
