@@ -313,11 +313,13 @@ public class JsonServer {
       server.start();
       LogInfo.logs("JSON Server (%d threads) started at http://%s:%s/sempre", opts.numThreads, hostname, opts.port);
       LogInfo.log("Press Ctrl-D to terminate.");
+      LogInfo.begin_threads();
       while (LogInfo.stdin.readLine() != null) { }
       LogInfo.log("Shutting down server...");
       server.stop(0);
       LogInfo.log("Shutting down executor pool...");
       pool.shutdown();
+      LogInfo.end_threads();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

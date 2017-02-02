@@ -10,6 +10,7 @@ import java.util.function.Predicate;
 import fig.basic.*;
 import edu.stanford.nlp.sempre.*;
 import edu.stanford.nlp.sempre.Parser.Spec;
+import edu.stanford.nlp.sempre.interactive.DefinitionAligner.Strategies;
 
 import org.testng.Assert;
 import org.testng.asserts.SoftAssert;
@@ -43,8 +44,11 @@ public class GrammarInducerTest {
     Grammar.opts.binarizeRules = false;
     
     FeatureExtractor.opts.featureComputers = Sets.newHashSet("interactive.ActionFeatureComputer");
-    FeatureExtractor.opts.featureDomains =  Sets.newHashSet("rule", "stats", "window");
-
+    FeatureExtractor.opts.featureDomains =  Sets.newHashSet(":rule", ":stats", ":window");
+    
+    DefinitionAligner.opts.strategies = Sets.newHashSet(DefinitionAligner.Strategies.ExactExclusion);
+    DefinitionAligner.opts.verbose = 1;
+    
     ActionExecutor executor = new ActionExecutor();
     
     FeatureExtractor extractor = new FeatureExtractor(executor);

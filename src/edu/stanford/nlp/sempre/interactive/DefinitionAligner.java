@@ -14,6 +14,7 @@ import edu.stanford.nlp.sempre.Derivation;
 import edu.stanford.nlp.sempre.Example;
 import edu.stanford.nlp.sempre.Rule;
 import edu.stanford.nlp.sempre.interactive.DefinitionAligner.Match;
+import edu.stanford.nlp.sempre.interactive.GrammarInducer.ParseStatus;
 import fig.basic.LogInfo;
 import fig.basic.Option;
 import fig.basic.Pair;
@@ -31,17 +32,21 @@ public class DefinitionAligner {
     @Option(gloss = "phrase size")
     public int phraseSize = 2;
     @Option(gloss = "max length difference")
-    public int maxLengthDifference = 2;
+    public int maxLengthDifference = 3;
     @Option(gloss = "max set exclusion length")
     public int maxSetExclusionLength = 2;
     @Option(gloss = "max exact exclusion length")
-    public int maxExactExclusionLength = 3;
+    public int maxExactExclusionLength = 5;
     @Option(gloss = "window size")
-    public int windowSize = 3;
+    public int windowSize = 1;
     
     @Option(gloss = "strategies")
     public Set<Strategies> strategies = Sets.newHashSet(Strategies.SetExclusion, Strategies.ExactExclusion);
+    @Option(gloss = "maximum matches")
     public int maxMatches = 1;
+    @Option(gloss = "verbose")
+    public int verbose = 0;
+    
   }
   public enum Strategies {SetExclusion, ExactExclusion};
   public static Options opts = new Options();
@@ -61,11 +66,19 @@ public class DefinitionAligner {
     DefinitionAligner aligner = new DefinitionAligner(head, def, deriv, chartList);
     if (aligner.allMatches.size() == 0)
       return Lists.newArrayList();
+    if (opts.verbose > 0) LogInfo.logs("DefinitionAligner: got %d matches", aligner.allMatches.size());
+    
     
     Match match = aligner.allMatches.get(0);
-    int start = match.start; int end = match.end;
     List<Derivation> filteredList = chartList.stream()
-        .filter(d -> d.start >= match.deriv.start && d.end <= match.deriv.end).collect(Collectors.toList());
+        .filter(d -> d.start >= match.deriv.start && d.end <= match.deriv.end)
+        .collect(Collectors.toList());
+    
+//    List<Derivation> currentParses = chartList.stream().filter(d -> (d.start == match.deriv.start  && d.end == match.deriv.end ))
+//        .collect(Collectors.toList());
+//    if ( GrammarInducer.getParseStatus(currentParses) == ParseStatus.Core ) {
+//      
+//    }
     
     GrammarInducer grammarInducer = new GrammarInducer(head, match.deriv, filteredList);
     return grammarInducer.getRules();
@@ -77,7 +90,9 @@ public class DefinitionAligner {
   public DefinitionAligner(List<String> headTokens, List<String> defTokens, Derivation def, List<Derivation> chartList) {
     this.headTokens = headTokens; this.defTokens = defTokens;
     this.chartMap = GrammarInducer.makeChartMap(chartList);
-    
+    if (opts.verbose > 0) LogInfo.logs("DefinitionAligner: head '%s' as body: '%s'", headTokens, defTokens);
+    if (Math.abs(headTokens.size() - defTokens.size()) >= 4)
+      return;
     recursiveMatch(def);
   }
   
@@ -86,8 +101,9 @@ public class DefinitionAligner {
     for (int start = 0; start < headTokens.size(); start++) {
       for (int end = headTokens.size(); end > start ; end--) {
         //LogInfo.logs("Testing (%d,%d)", start, end);
+        if (end == headTokens.size() && start == 0) continue;
         if (isMatch(def, start, end)) {
-          LogInfo.logs("Matched head(%d,%d)=%s with deriv(%d,%d)=%s: %s", 
+          if (opts.verbose > 0)  LogInfo.logs("Matched head(%d,%d)=%s with deriv(%d,%d)=%s: %s", 
               start, end, headTokens.subList(start, end),
               def.start, def.end, defTokens.subList(def.start, def.end), def);
           allMatches.add(new Match(def, start, end));
@@ -104,7 +120,8 @@ public class DefinitionAligner {
   boolean isMatch(Derivation def, int start, int end) {
     if (def.start == -1 || def.end == -1 ) return false;
     if (chartMap.containsKey(GrammarInducer.catFormulaKey(def))) return false;
-    if (Math.abs((end - start) - (def.end - def.start)) > opts.maxLengthDifference)
+    if (opts.verbose > 0) LogInfo.logs("checkingLengths (%d, %d) - (%d, %d)", start, end, def.start, def.end);
+    if (Math.abs((end - start) - (def.end - def.start)) >= opts.maxLengthDifference)
       return false;
     if (opts.strategies.contains(Strategies.ExactExclusion) && exactExclusion(def, start, end))
       return true;
@@ -134,20 +151,22 @@ public class DefinitionAligner {
     List<String> ret = new ArrayList<>();
     for (int i = lower; i < upper; i++) {
       if (i < 0 || i>=list.size()) 
-        ret.add("*");
+        ret.add("(*)"); // a bit of a hack...
       else ret.add(list.get(i));
     }
     return ret;
   }
   private boolean exactExclusion(Derivation def, int start, int end) {
+    if (opts.verbose > 0) LogInfo.log("In exactExclusion");
     if (end - start > opts.maxExactExclusionLength) return false;
     
     boolean prefixEq = window(start-opts.windowSize, start, headTokens)
         .equals(window(def.start-opts.windowSize, def.start, defTokens));
     boolean sufixEq = window(end, end+opts.windowSize, headTokens)
         .equals(window(def.end, def.end + opts.windowSize, defTokens));
-    //LogInfo.logs("(%d,%d)-head(%d,%d): %b %b %s %s", def.start, def.end, start, end, prefixEq, sufixEq,
-    //    headTokens.subList(end, headTokens.size()), defTokens.subList(def.end, defTokens.size()));
+    if (opts.verbose > 0) LogInfo.logs("%b : %b", prefixEq, sufixEq);
+    if (opts.verbose > 0) LogInfo.logs("(%d,%d)-head(%d,%d): %b %b %s %s", def.start, def.end, start, end, prefixEq, sufixEq,
+        window(end, end+opts.windowSize, headTokens), window(def.end, def.end + opts.windowSize, defTokens));
     if (!prefixEq || !sufixEq) return false;
     if (headTokens.subList(start, end).equals(defTokens.subList(def.start, def.end)))
       return false;

@@ -39,8 +39,8 @@ public class GrammarInducer {
   public static class Options {
     @Option(gloss = "categories that can serve as rules")
     public Set<String> filteredCats = new HashSet<String>();
-    @Option(gloss = "add bias")
-    public int addBias = 1;
+    @Option(gloss = "verbose")
+    public int verbose = 0;
   }
 
   public static Options opts = new Options();
@@ -57,6 +57,8 @@ public class GrammarInducer {
   // induce rule is possible,
   // otherwise set the correct status
   public GrammarInducer(List<String> headTokens, Derivation def, List<Derivation> chartList) {
+    
+    // grammarInfo start and end is used to indicate partial, when using aligner
     if (def.grammarInfo.start == -1) {
       def.grammarInfo.start = 0;
       def.grammarInfo.end = headTokens.size();
@@ -66,7 +68,7 @@ public class GrammarInducer {
     if (headTokens == null || headTokens.isEmpty() ) {
       throw new RuntimeException("The head is empty, refusing to define.");
     }
-    chartList.removeIf(d -> d.start == 0 && d.end == headTokens.size());
+    chartList.removeIf(d -> d.start == def.grammarInfo.start && d.end == def.grammarInfo.end);
     this.def = def;
     
     this.headTokens = headTokens;
@@ -80,13 +82,13 @@ public class GrammarInducer {
     
     HashMap<String, String> formulaToCat = new HashMap<>();
     bestPacking.forEach(d -> formulaToCat.put(catFormulaKey(d), varName(d)));
-    
-    LogInfo.logs("chartList.size = %d", chartList.size());
-    LogInfo.log("Potential packings: " );
-    this.matches.forEach(d -> LogInfo.logs("%f: %s\t", d.getScore(), d.formula));
-    LogInfo.logs("BestPacking: %s", bestPacking);
-    
-    LogInfo.logs("formulaToCat: %s", formulaToCat);
+    if (opts.verbose > 2) {
+      LogInfo.logs("chartList.size = %d", chartList.size());
+      LogInfo.log("Potential packings: " );
+      this.matches.forEach(d -> LogInfo.logs("%f: %s\t", d.getScore(), d.formula));
+      LogInfo.logs("BestPacking: %s", bestPacking);
+      LogInfo.logs("formulaToCat: %s", formulaToCat);
+    }
     
     buildFormula(def, formulaToCat);
     
@@ -345,8 +347,12 @@ public class GrammarInducer {
   }
 
   public static ParseStatus getParseStatus(Example ex) {
-    if (ex.predDerivations.size() > 0) {
-      for (Derivation deriv : ex.predDerivations) {
+   return getParseStatus(ex.predDerivations);
+  }
+  
+  public static ParseStatus getParseStatus(List<Derivation> derivs) {
+    if (derivs.size() > 0) {
+      for (Derivation deriv : derivs) {
         if (deriv.allAnchored()) {
           return ParseStatus.Core;
         }

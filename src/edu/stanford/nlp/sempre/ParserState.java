@@ -231,7 +231,7 @@ public abstract class ParserState {
 
   // Ensure that all the logical forms are executed and compatibilities are computed.
   public void ensureExecuted() {
-    LogInfo.begin_track("Parser.ensureExecuted");
+    // LogInfo.begin_track("Parser.ensureExecuted");
     // Execute predicted derivations to get value.
     for (Derivation deriv : predDerivations) {
       deriv.ensureExecuted(parser.executor, ex.context);
@@ -239,7 +239,7 @@ public abstract class ParserState {
         deriv.compatibility = parser.valueEvaluator.getCompatibility(ex.targetValue, deriv.value);
       if (!computeExpectedCounts && Parser.opts.executeTopFormulaOnly) break;
     }
-    LogInfo.end_track();
+    // LogInfo.end_track();
   }
 
   // Add statistics to |evaluation|.

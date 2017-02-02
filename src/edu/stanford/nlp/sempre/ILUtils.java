@@ -19,6 +19,7 @@ import java.util.stream.Stream;
 
 import org.testng.collections.Lists;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableList;
 
 import edu.stanford.nlp.sempre.interactive.ActionFormula;
@@ -62,7 +63,7 @@ public final class ILUtils {
     public String citationPath;
 
     @Option(gloss = "try partial matches")
-    public boolean useAligner;
+    public boolean useAligner = true;
     
     @Option(gloss = "mode for blocking")
     public ActionFormula.Mode blockMode = ActionFormula.Mode.sequential;
@@ -161,7 +162,8 @@ public final class ILUtils {
     List<Object> body = Json.readValueHard(jsonDef, List.class);
     // string together the body definition
     List<String> utts = new ArrayList<>();
-    for (Object obj : body) {
+    for (int i = 0; i < body.size(); i++) {
+      Object obj = body.get(i);
       @SuppressWarnings("unchecked")
       List<String> pair = (List<String>) obj;
       String utt = pair.get(0);
@@ -174,7 +176,7 @@ public final class ILUtils {
 
       if (tokenize) {
         utts.addAll(ex.getTokens());
-        if (!utts.get(utts.size() - 1).equals(";"))
+        if (i!=body.size()-1 && !utts.get(utts.size() - 1).equals(";"))
           utts.add(";");
       } else {
         utts.add(String.join(" ", ex.getTokens()));
@@ -188,14 +190,12 @@ public final class ILUtils {
   // grammar
   public static List<Rule> induceRules(List<String> head, List<String> def, Derivation bodyDeriv,
       List<Derivation> chartList) {
-
     List<Rule> inducedRules = new ArrayList<>();
     GrammarInducer grammarInducer = new GrammarInducer(head, bodyDeriv, chartList);
     inducedRules.addAll(grammarInducer.getRules());
-    if (opts.useAligner)
+    if (opts.useAligner) {
       inducedRules.addAll(DefinitionAligner.getRules(head, def, bodyDeriv, grammarInducer.matches));
-
-    LogInfo.end_track();
+    }
     return inducedRules;
   }
 
@@ -204,7 +204,6 @@ public final class ILUtils {
     // ActionFormula.Mode blockmode = command.equals(":def") ? ActionFormula.Mode.block : ActionFormula.Mode.blockr;
 
     Derivation bodyDeriv = ILUtils.combine(ILUtils.derivsfromJson(jsonDef, parser, params), opts.blockMode);
-
     Example.Builder b = new Example.Builder();
     b.setId("session:" + sessionId);
     b.setUtterance(head);
@@ -238,15 +237,27 @@ public final class ILUtils {
     if (refEx != null) {
       refEx.value = exHead;
     }
-    List<Rule> rules = ILUtils.induceRules(exHead.getTokens(), ILUtils.utterancefromJson(jsonDef, true), bodyDeriv,
-        state.chartList);
-  
 
-    for (Rule rule : rules) {
+    
+    List<Rule> inducedRules = new ArrayList<>();
+    GrammarInducer grammarInducer = new GrammarInducer(exHead.getTokens(), bodyDeriv, state.chartList);
+    inducedRules.addAll(grammarInducer.getRules());
+    
+    for (Rule rule : inducedRules) {
       rule.source = new RuleSource(sessionId, head, bodyList);
     }
+    
+    if (opts.useAligner && bodyList.size()==1){
+      List<Rule> alignedRules = DefinitionAligner.getRules(exHead.getTokens(), 
+          ILUtils.utterancefromJson(jsonDef, true), bodyDeriv, grammarInducer.matches);
+      for (Rule rule : alignedRules) {
+        rule.source = new RuleSource(sessionId, head, bodyList);
+        rule.source.align = true;
+      }
+      inducedRules.addAll(alignedRules);
+    }
 
-    return rules;
+    return inducedRules;
   }
 
   // public static void logRawDef(String utt, String jsonDef, String sessionId)
