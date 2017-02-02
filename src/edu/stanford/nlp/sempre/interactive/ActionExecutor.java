@@ -124,6 +124,7 @@ public class ActionExecutor extends Executor {
       Set<Item> prevAll = world.allitems;
       //Set<Item> prevSelected = world.selected;
       //Set<Item> prevPrevious = world.previous;
+      if (f.args.size() > 1) throw new RuntimeException("No longer supporting this isolate formula: " + f);
       
       world.allitems = Sets.newHashSet(world.selected);
       //world.selected = scope;

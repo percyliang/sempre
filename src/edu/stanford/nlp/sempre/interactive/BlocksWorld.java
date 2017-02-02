@@ -248,7 +248,7 @@ public class BlocksWorld extends FlatWorld {
     set.addAll(s);
   }
   
-  private void keyConsistency() {
+  private synchronized void keyConsistency() {
     refreshSet(allitems);
     refreshSet(selected);
     refreshSet(previous);

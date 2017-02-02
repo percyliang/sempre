@@ -48,6 +48,7 @@ public class GrammarInducerTest {
     
     DefinitionAligner.opts.strategies = Sets.newHashSet(DefinitionAligner.Strategies.ExactExclusion);
     DefinitionAligner.opts.verbose = 2;
+    GrammarInducer.opts.verbose = 2;
     
     ActionExecutor executor = new ActionExecutor();
     

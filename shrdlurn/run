@@ -140,7 +140,15 @@ addMode('simulator', 'run the simulator', lambda { |e| l(
 		'./shrdlurn/queries/sidaw.json.log',
 		#'./shrdlurn/queries/freebuild2-0127.json',
 		'./shrdlurn/queries/qualifier1-0118.json',
-		'./shrdlurn/queries/qualifier3-0201.json')
+		'./shrdlurn/queries/qualifier3-0201.json'),
+
+		'stress' => o('logFiles',
+		'./shrdlurn/queries/sidaw.json.log',
+		'./shrdlurn/queries/freebuild1-0121.json',
+		'./shrdlurn/queries/freebuild2-0127.json',
+		'./shrdlurn/queries/qualifier1-0118.json',
+		'./shrdlurn/queries/qualifier3-0201.json',
+		)
 		}),
 nil)})
 

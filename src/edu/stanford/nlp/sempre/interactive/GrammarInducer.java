@@ -41,6 +41,12 @@ public class GrammarInducer {
     public Set<String> filteredCats = new HashSet<String>();
     @Option(gloss = "verbose")
     public int verbose = 0;
+    @Option(gloss = "cats that never overlaps, and always save to replace")
+    public List<String> simpleCats = Lists.newArrayList("$Color", "$Number", "$Direction");
+    @Option(gloss = "use best packing")
+    public boolean useBestPacking = true;
+    @Option(gloss = "use simple packing")
+    public boolean useSimplePacking = true;
   }
 
   public static Options opts = new Options();
@@ -77,22 +83,70 @@ public class GrammarInducer {
     this.matches = new ArrayList<>();
     addMatches(def, makeChartMap(chartList));
     Collections.reverse(this.matches);
+   
+
+    inducedRules = new ArrayList<>();
     
-    List<Derivation> bestPacking = bestPackingDP(this.matches, numTokens);
-    
-    HashMap<String, String> formulaToCat = new HashMap<>();
-    bestPacking.forEach(d -> formulaToCat.put(catFormulaKey(d), varName(d)));
-    if (opts.verbose > 2) {
-      LogInfo.logs("chartList.size = %d", chartList.size());
-      LogInfo.log("Potential packings: " );
-      this.matches.forEach(d -> LogInfo.logs("%f: %s\t", d.getScore(), d.formula));
-      LogInfo.logs("BestPacking: %s", bestPacking);
-      LogInfo.logs("formulaToCat: %s", formulaToCat);
+    if (opts.useBestPacking) {
+      List<Derivation> bestPacking = bestPackingDP(this.matches, numTokens);
+      
+      HashMap<String, String> formulaToCat = new HashMap<>();
+      bestPacking.forEach(d -> formulaToCat.put(catFormulaKey(d), varName(d)));
+      buildFormula(def, formulaToCat);
+      inducedRules.addAll(induceRules(bestPacking, def));
+      
+      if (opts.verbose > 1) {
+        LogInfo.logs("chartList.size = %d", chartList.size());
+        LogInfo.log("Potential packings: " );
+        this.matches.forEach(d -> LogInfo.logs("%f: %s\t", d.getScore(), d.formula));
+        LogInfo.logs("BestPacking: %s", bestPacking);
+        LogInfo.logs("formulaToCat: %s", formulaToCat);
+      }
+      
     }
-    
-    buildFormula(def, formulaToCat);
-    
-    inducedRules = new ArrayList<>(induceRules(bestPacking, def));
+    if (opts.useSimplePacking) {
+      List<Derivation> filteredMatches = this.matches.stream().filter( d -> {
+        return opts.simpleCats.contains(d.cat) && d.allAnchored() && d.end - d.start == 1;
+      }).collect(Collectors.toList());
+      
+      List<Derivation> packing = new ArrayList<>();
+      for (int i = 0; i<=headTokens.size(); i++) {
+        for (Derivation d : filteredMatches) {
+          if (d.start == i) {
+            packing.add(d);
+            break;
+          }
+        }
+      }
+      
+      HashMap<String, String> formulaToCat = new HashMap<>();
+      packing.forEach(d -> formulaToCat.put(catFormulaKey(d), varName(d)));
+      buildFormula(def, formulaToCat);
+      List<Rule> simpleInduced = induceRules(packing, def);
+      for (Rule rule : simpleInduced)
+        rule.addInfo("simple_packing", 1.0);
+      addRuleDedupByRHS(simpleInduced);
+      
+      if (opts.verbose > 1) {
+        LogInfo.logs("Simple Packing", chartList.size());
+        LogInfo.logs("chartList.size = %d", chartList.size());
+        LogInfo.log("Potential packings: " );
+        this.matches.forEach(d -> LogInfo.logs("%f: %s\t", d.getScore(), d.formula));
+        LogInfo.logs("packing: %s", packing);
+        LogInfo.logs("formulaToCat: %s", formulaToCat);
+      }
+    }
+  }
+  
+  private void addRuleDedupByRHS(List<Rule> rules) {
+    Set<String> RHSs = new HashSet<>();
+    for (Rule rule : inducedRules) {
+      RHSs.add(rule.rhs.toString());
+    }
+    for (Rule rule : rules) {
+      if (!RHSs.contains(rule.rhs.toString()))
+        inducedRules.add(rule);
+    }
   }
     
   static Map<String, List<Derivation>> makeChartMap(List<Derivation> chartList) {
@@ -206,7 +260,6 @@ public class GrammarInducer {
         maximalAtI.add(i, new Packing(0, new ArrayList<>()));
       }
     }
-    
     return maximalAtI.get(length).packing;
   }
 
