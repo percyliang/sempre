@@ -1017,7 +1017,7 @@ o('Params.stepSizeReduction', 0.1),
 
 o('FeatureExtractor.featureComputers', 'interactive.ActionFeatureComputer'),
 
-o('FeatureExtractor.featureDomains', ':rule', ':span', ':stats', ':scope', ':social', ':window'), # +lexAlign
+o('FeatureExtractor.featureDomains', ':rule', ':span', ':stats', ':scope', ':social', ':window'), 
 # o('FeatureExtractor.featureDomains', ':rule'),
 
 # o('Master.newExamplesPath', './int-output/examples/'),
