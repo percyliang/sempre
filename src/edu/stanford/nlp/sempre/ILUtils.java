@@ -247,9 +247,9 @@ public final class ILUtils {
       rule.source = new RuleSource(sessionId, head, bodyList);
     }
     
-    if (opts.useAligner && bodyList.size()==1){
+    if (opts.useAligner && bodyList.size() == 1){
       List<Rule> alignedRules = DefinitionAligner.getRules(exHead.getTokens(), 
-          ILUtils.utterancefromJson(jsonDef, true), bodyDeriv, grammarInducer.matches);
+          ILUtils.utterancefromJson(jsonDef, true), bodyDeriv, state.chartList);
       for (Rule rule : alignedRules) {
         rule.source = new RuleSource(sessionId, head, bodyList);
         rule.source.align = true;

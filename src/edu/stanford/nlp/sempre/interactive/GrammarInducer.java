@@ -199,7 +199,7 @@ public class GrammarInducer {
         if (bestEndsAtI.get(j).score >= bestOverall.score)
           bestOverall = bestEndsAtI.get(j);
       }
-      LogInfo.dbgs("maximalAtI[%d] = %f: %s, BlockingIndex: %d", i, bestOverall.score, bestOverall.packing, blockingIndex(matches, i));
+      if (opts.verbose > 1) LogInfo.logs("maximalAtI[%d] = %f: %s, BlockingIndex: %d", i, bestOverall.score, bestOverall.packing, blockingIndex(matches, i));
       if (bestOverall.score > Double.NEGATIVE_INFINITY)
         maximalAtI.add(i, bestOverall);
       else {

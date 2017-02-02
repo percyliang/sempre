@@ -43,7 +43,7 @@ public class DefinitionAligner {
     @Option(gloss = "strategies")
     public Set<Strategies> strategies = Sets.newHashSet(Strategies.SetExclusion, Strategies.ExactExclusion);
     @Option(gloss = "maximum matches")
-    public int maxMatches = 1;
+    public int maxMatches = 3;
     @Option(gloss = "verbose")
     public int verbose = 0;
     
@@ -51,6 +51,10 @@ public class DefinitionAligner {
   public enum Strategies {SetExclusion, ExactExclusion};
   public static Options opts = new Options();
   public class Match {
+    @Override
+    public String toString() {
+      return "Match [deriv=" + deriv + ", start=" + start + ", end=" + end + "]";
+    }
     public Match(Derivation def, int start, int end) {
       deriv = def; this.start = start; this.end = end;
       deriv.grammarInfo.start = start; deriv.grammarInfo.end = end;
@@ -63,25 +67,38 @@ public class DefinitionAligner {
   List<String> defTokens;
   
   public static List<Rule> getRules(List<String> head, List<String> def, Derivation deriv, List<Derivation> chartList) {
+    if (opts.verbose > 0) LogInfo.logs("DefinitionAligner.chartList: %s", chartList);
+
     DefinitionAligner aligner = new DefinitionAligner(head, def, deriv, chartList);
-    if (aligner.allMatches.size() == 0)
-      return Lists.newArrayList();
-    if (opts.verbose > 0) LogInfo.logs("DefinitionAligner: got %d matches", aligner.allMatches.size());
     
-    
-    Match match = aligner.allMatches.get(0);
-    List<Derivation> filteredList = chartList.stream()
-        .filter(d -> d.start >= match.deriv.start && d.end <= match.deriv.end)
-        .collect(Collectors.toList());
-    
-//    List<Derivation> currentParses = chartList.stream().filter(d -> (d.start == match.deriv.start  && d.end == match.deriv.end ))
-//        .collect(Collectors.toList());
-//    if ( GrammarInducer.getParseStatus(currentParses) == ParseStatus.Core ) {
-//      
-//    }
-    
-    GrammarInducer grammarInducer = new GrammarInducer(head, match.deriv, filteredList);
-    return grammarInducer.getRules();
+    List<Rule> allAlignedRules = Lists.newArrayList();
+    if (opts.verbose > 0) LogInfo.logs("DefinitionAligner.allMatches.size(): %d", aligner.allMatches.size());
+
+    for (int i = 0; i < aligner.allMatches.size() && i <= opts.maxMatches; i++) {
+      // just take the top match
+      Match match = aligner.allMatches.get(i);
+      
+      List<Derivation> filteredList = chartList.stream()
+          .filter(d -> d.start >= match.deriv.start && d.end <= match.deriv.end)
+          .collect(Collectors.toList());
+      
+      // filter out core
+      List<Derivation> currentParses = chartList.stream().filter(d -> {
+        if (opts.verbose > 1) LogInfo.logs("DefinitionAligner.chartList.d: %s", d);
+        return (d.start == match.start  && d.end == match.end);
+      })
+          .collect(Collectors.toList());
+
+      if (opts.verbose > 1) LogInfo.logs("DefinitionAligner.Match: %s", match);
+      if (opts.verbose > 1) LogInfo.logs("DefinitionAligner.currentParses: %s", currentParses);
+      
+      if ( GrammarInducer.getParseStatus(currentParses) != ParseStatus.Core ) {
+        if (opts.verbose > 1) LogInfo.logs("DefinitionAligner.NotCore: %s", currentParses);
+        GrammarInducer grammarInducer = new GrammarInducer(head, match.deriv, filteredList);
+        allAlignedRules.addAll(grammarInducer.getRules());
+      }
+    }
+    return allAlignedRules;    
   }
   
   public List<Match> allMatches = new ArrayList<>();

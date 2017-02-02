@@ -47,7 +47,7 @@ public class GrammarInducerTest {
     FeatureExtractor.opts.featureDomains =  Sets.newHashSet(":rule", ":stats", ":window");
     
     DefinitionAligner.opts.strategies = Sets.newHashSet(DefinitionAligner.Strategies.ExactExclusion);
-    DefinitionAligner.opts.verbose = 1;
+    DefinitionAligner.opts.verbose = 2;
     
     ActionExecutor executor = new ActionExecutor();
     
@@ -239,6 +239,15 @@ public class GrammarInducerTest {
     A.assertTrue(T.match("select up", d("select top")));
     A.assertTrue(T.match("add red up", d("add red top")));
     
+    T.def("move it up", d("move top"));
+    A.assertTrue(T.match("select up", d("select top")));
+    A.assertTrue(T.match("add red up", d("add red top")));
+    
+    // do not redefine core test
+    T.def("move it top", d("move it bot"));
+    A.assertFalse(T.match("select top", d("select bot")));
+    A.assertFalse(T.match("add red top", d("add red bot")));
+
     T.def("select the highest of has color red", d("select very top of has color red"));
     A.assertTrue(T.match("remove the highest of all", d("remove very top of all")));
     
