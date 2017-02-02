@@ -464,6 +464,11 @@ public class Master {
       }
       response.ex = ex;
       
+    } else if (command.equals(":reject")) {
+      if (session.isStatsing()) {
+        response.stats.put("type", "reject");
+        response.stats.put("rejectsize", tree.children.size()-2);
+      }
     } else if (command.equals(":accept")) {
       String utt = tree.children.get(1).value;
       String formula = tree.children.get(2).value;
@@ -599,15 +604,13 @@ public class Master {
   
   private Example exampleFromUtterance(String utt, Session session) {
     Example.Builder b = new Example.Builder();
-    b.setId("session:" + session.id);
+    b.setId(session.id);
     b.setUtterance(utt);
     b.setContext(session.context);
     Example ex = b.createExample();
     ex.preprocess();
-
     return ex;
   }
-
 
   void addNewExample(Example origEx, Session session) {
     // Create the new example, but only add relevant information.

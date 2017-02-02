@@ -30,7 +30,7 @@ public class Rule {
   public final List<String> rhs;  // Right-hand side: sequence of categories (have $ prefix) and tokens.
   public final SemanticFn sem;  // Takes derivations corresponding to RHS categories and produces a set of derivations corresponding to LHS.
   public List<Pair<String, Double>> info;  // Extra info
-  public RuleSource source;
+  public RuleSource source = null;
   
   // Cache the semanticRepn
   public String getSemRepn() {
@@ -49,8 +49,11 @@ public class Rule {
 
   @Override
   public String toString() {
-    if (stringRepn == null)
-      stringRepn = lhs + " -> " + (rhs == null ? "" : Joiner.on(' ').join(rhs)) + " " + sem;
+    if (stringRepn == null) {
+      String semStr = sem.toString();
+      if (semStr.length() > 100) semStr = semStr.substring(0,100); // just stop some ridiculously long rules
+      stringRepn = lhs + " -> " + (rhs == null ? "" : Joiner.on(' ').join(rhs)) + " " + semStr;
+    }
     return stringRepn;
   }
   private String stringRepn;  // Cache toString()

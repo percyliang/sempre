@@ -46,12 +46,13 @@ public class Simulator implements Runnable {
     LogInfo.begin_track("setsTest");
     //T.printAllRules();
     //A.assertAll();
-    ExecutorService executor = new ThreadPoolExecutor(JsonServer.opts.numThreads, JsonServer.opts.numThreads,
-        5000, TimeUnit.MILLISECONDS,
-        new LinkedBlockingQueue<Runnable>());
-    
-    long startTime = System.nanoTime();
     for (String fileName : logFiles) {
+      ExecutorService executor = new ThreadPoolExecutor(JsonServer.opts.numThreads, JsonServer.opts.numThreads,
+          5000, TimeUnit.MILLISECONDS,
+          new LinkedBlockingQueue<Runnable>());
+      
+      long startTime = System.nanoTime();
+    
       try (Stream<String> stream = Files.lines(Paths.get(fileName))) {
         LogInfo.logs("Reading %s", fileName);
 

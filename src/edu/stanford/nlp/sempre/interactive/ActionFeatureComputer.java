@@ -4,6 +4,8 @@ import fig.basic.*;
 import java.util.*;
 
 import com.beust.jcommander.internal.Lists;
+import com.google.common.base.Joiner;
+
 import edu.stanford.nlp.sempre.*;
 
 /**
@@ -29,22 +31,25 @@ public class ActionFeatureComputer implements FeatureComputer {
   @Override public void extractLocal(Example ex, Derivation deriv) {
     addStatsFeatures(ex, deriv);
     addWindowFeatures(ex, deriv);
+    addSocialFeatures(ex, deriv);
+    extractRuleFeatures(ex, deriv);
+    extractSpanFeatures(ex, deriv);
   }
 
 
   // function to abstract out ALL anchored stuff in the utterance.
-  private List<String> abstractAnchors(Derivation deriv, List<String> tokens) {
+  private List<String> abstractAnchors(Derivation deriv, List<String> tokens, int window) {
     if (deriv.start == -1) 
       return tokens;
     List<String> newTokens = new ArrayList<>();
-    int startInd = Math.max(0, deriv.start - opts.windowSize);
-    int endInd = Math.min(tokens.size(), deriv.end + opts.windowSize);
+    int startInd = Math.max(0, deriv.start - window);
+    int endInd = Math.min(tokens.size(), deriv.end + window);
     newTokens.addAll(tokens.subList(startInd, deriv.start));
     newTokens.add(deriv.cat);
     newTokens.addAll(tokens.subList(deriv.end, endInd));
     return newTokens;
   }
-  
+
 
   private List<String> getAllNgrams(List<String> tokens, int n, Derivation deriv) {
     List<String> ngrams = new ArrayList<>();
@@ -78,29 +83,65 @@ public class ActionFeatureComputer implements FeatureComputer {
     }
     return ngrams;
   }
-  
+
   private void addWindowFeatures(Example ex, Derivation deriv) {
-    if (!FeatureExtractor.containsDomain("window")) return;
+    if (!FeatureExtractor.containsDomain(":window")) return;
     if (deriv.rule != Rule.nullRule) {
-      List<String> abstractAnchors = abstractAnchors(deriv, ex.getTokens());
-      deriv.addFeature("win", abstractAnchors.toString());
+      deriv.addFeature(":window", abstractAnchors(deriv, ex.getTokens(), 1).toString());
+      deriv.addFeature(":window", abstractAnchors(deriv, ex.getTokens(), 2).toString());
     }
   }
-  
+
   private void addStatsFeatures(Example ex, Derivation deriv) {
-    if (!FeatureExtractor.containsDomain("stats")) return;
+    if (!FeatureExtractor.containsDomain(":stats")) return;
     if (deriv.rule != Rule.nullRule) {
-      String cat = deriv.rule.getLhs();
-      if (deriv.rule.isAnchored())
-        deriv.addFeature("stats", "numAnchored");
-      // deriv.addFeature("stats", cat);
-      deriv.addFeature("stats", "anchored-" + cat + "-" + deriv.rule.isAnchored());
-      deriv.addFeature("stats", "depth");
-      
-      if (deriv.rule.getInfoTag("induced") == 1.0)
-        deriv.addFeature("stats", "numInduced");
+      if (deriv.rule.isInduced())
+        deriv.addFeature(":stats", "induced");
       else
-        deriv.addFeature("stats", "numCore");
+        deriv.addFeature(":stats", "core");
+
+      if (deriv.rule.source!=null) {
+        deriv.addFeature(":stats", "cite", deriv.rule.source.cite);
+        if (deriv.rule.source.cite > 0)
+          deriv.addFeature(":stats", "has_cite");
+        else
+          deriv.addFeature(":stats", "no_cite");
+
+        if (deriv.rule.source.self > 0)
+          deriv.addFeature(":stats", "has_selfcite");
+        else
+          deriv.addFeature(":stats", "no_selfcite");
+      }
     }
   }
+  private void addSocialFeatures(Example ex, Derivation deriv) {
+    if (!FeatureExtractor.containsDomain(":social")) return;
+    if (deriv.rule != Rule.nullRule && deriv.rule.source!=null) {
+      // everyone like a particular author
+      deriv.addFeature(":social", deriv.rule.source.uid);
+      // a particular user likes a particular author, perhaps himself
+      deriv.addFeature(":social", deriv.rule.source.uid + "::" + ex.id);
+      // the degree everyone likes to use their own rules
+      deriv.addFeature(":social", "isself::" + deriv.rule.source.uid.equals(ex.id));
+    }
+  }
+
+
+  //Add an indicator for each applied rule.
+  private void extractRuleFeatures(Example ex, Derivation deriv) {
+    if (!FeatureExtractor.containsDomain(":rule")) return;
+    if (deriv.rule != Rule.nullRule) {
+      deriv.addFeature(":rule", "fire");
+      deriv.addFeature(":rule", deriv.rule.toString());
+    }
+  }
+
+  // Extract features on the linguistic information of the spanned (anchored) tokens.
+  // (Not applicable for floating rules)
+  private void extractSpanFeatures(Example ex, Derivation deriv) {
+    if (!FeatureExtractor.containsDomain(":span") || deriv.start == -1) return;
+    deriv.addFeature(":span", "cat=" + deriv.cat + ":: len=" + (deriv.end - deriv.start));
+    deriv.addFeature(":span", "cat=" + deriv.cat + ":: " + ex.token(deriv.start) + "..." + ex.token(deriv.end - 1));
+  }
+
 }

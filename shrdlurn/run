@@ -128,11 +128,19 @@ addMode('simulator', 'run the simulator', lambda { |e| l(
 	sel(:task, {
 		'qual1' => o('logFiles', './shrdlurn/queries/qualifier1-0118.json'),
 		'qual2' => o('logFiles', './shrdlurn/queries/qualifier2-0129.json'),
+		'qual3' => o('logFiles', './shrdlurn/queries/qualifier3-0201.json'), #  both 2 and 3
 		'free1' => o('logFiles', './shrdlurn/queries/freebuild1-0121.json'),
 		'free2' => o('logFiles', './shrdlurn/queries/freebuild2-0127.json'),
 		'sidaw' => o('logFiles', './shrdlurn/queries/sidaw.json.log'),
 		'all' => o('logFiles', './shrdlurn/queries/sidaw.json.log',
-		'./shrdlurn/queries/freebuild1-0121.json', './shrdlurn/queries/qualifier20-0118.json')
+		'./shrdlurn/queries/freebuild1-0121.json', './shrdlurn/queries/freebuild2-0127.json'),
+		'quals' => o('logFiles', './shrdlurn/queries/qualifier1-0118.json',
+		'./shrdlurn/queries/qualifier2-0129.json', './shrdlurn/queries/qualifier3-0201.json'),
+		'test' => o('logFiles',
+		'./shrdlurn/queries/sidaw.json.log',
+		#'./shrdlurn/queries/freebuild2-0127.json',
+		'./shrdlurn/queries/qualifier1-0118.json',
+		'./shrdlurn/queries/qualifier3-0201.json')
 		}),
 nil)})
 

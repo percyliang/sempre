@@ -32,8 +32,8 @@ public class RuleSource {
 
    @JsonProperty public int cite = 0;
    @JsonProperty public int self = 0;
-   @JsonProperty public boolean isPrivate = true;
-   @JsonProperty public boolean isNonsense = false;
+   // @JsonProperty public boolean isPrivate = true;
+   // @JsonProperty public boolean isNonsense = false;
    
    public RuleSource(String uid, String head, List<String> body) {
      this.uid = uid;

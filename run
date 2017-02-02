@@ -990,7 +990,7 @@ addMode('interactive', 'interactive semantic parsing in a blocksworld', lambda {
   o('LanguageAnalyzer', 'interactive.ActionLanguageAnalyzer'),
   o('ActionExecutor.convertNumberValues', true),
   o('ActionExecutor.printStackTrace', true),
-  o('BlocksWorld.maxBlocks', 1000),
+  o('BlocksWorld.maxBlocks', 1500),
   selo(0, 'ActionExecutor.FlatWorldType', 'BlocksWorld', 'CalendarWorld'),
   selo(0, 'Grammar.inPaths', './shrdlurn/blocksworld.grammar', './shrdlurn/calendar.grammar'),
 
@@ -1016,11 +1016,9 @@ o('Params.adaptiveStepSize', false),
 o('Params.stepSizeReduction', 0.1),
 
 o('FeatureExtractor.featureComputers', 'interactive.ActionFeatureComputer'),
-o('FeatureExtractor.featureDomains', 'rule', 'stats'),
 
-lambda { |e| system 'mkdir -p ./int-output/'},
-lambda { |e| system 'mkdir -p ./int-output/log/'},
-lambda { |e| system 'mkdir -p ./int-output/citation/'},
+o('FeatureExtractor.featureDomains', ':rule', ':span', ':stats', ':scope', ':social', ':window'), # +lexAlign
+# o('FeatureExtractor.featureDomains', ':rule'),
 
 # o('Master.newExamplesPath', './int-output/examples/'),
 # o('Master.logPath', './int-output/logs/'),
@@ -1049,6 +1047,14 @@ o('JsonServer.port', 8410),
 o('Derivation.showTypes', false),
 o('Derivation.showValues', false),
 o('Derivation.showRules', false),
+
+lambda { |e| system 'mkdir -p ./int-output/'; nil},
+lambda { |e| system 'mkdir -p ./int-output/log/'; nil},
+lambda { |e| system 'mkdir -p ./int-output/citation/'; nil},
+lambda { |e| system 'mkdir -p server.exec';
+	l(o('execDir', 'server.exec/'),
+	o('overwriteExecDir'))
+ },
 nil) })
 ############################################################
 
