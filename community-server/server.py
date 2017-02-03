@@ -269,20 +269,20 @@ def emit_top_builders():
         (citations, citation_score) = compute_citations(subdir)
 
         top_5_builders = sorted(top_5_builders, key=lambda b: b[1], reverse=True)
-        if len(top_5_builders) < 7 or citation_score > top_5_builders[6][0]:
+        if len(top_5_builders) < 10 or citation_score > top_5_builders[9][1]:
             # If there are more than 5 citations with cites, only return those
             # citations_with_cites = [c for c in citations if c["cite"] > 0]
             # if len(citations_with_cites) >= 6:
             #     citations = citations_with_cites
 
             # Sort them by score and return the top 7.
-            citations = sorted(citations, key=lambda c: c["cite"] + c["self"], reverse=True)[:7]
+            citations = sorted(citations, key=lambda c: c["cite"] + c["self"], reverse=True)[:10]
 
             struct = (uid, citation_score, citations)
-            if len(top_5_builders) < 7:
+            if len(top_5_builders) < 10:
                 top_5_builders.append(struct)
             else:
-                top_5_builders[6] = struct
+                top_5_builders[9] = struct
 
     emit("top_builders", {"top_builders": top_5_builders}, broadcast=True, room="community")
 
