@@ -61,9 +61,12 @@ public class CitationTracker {
       boolean selfcite = author.equals(uid);
       if (!selfcite) {
         summary.put("cite", (Integer)summary.get("cite") + 1);
+        rule.source.cite++;
       } else {
         summary.put("self", (Integer)summary.get("self") + 1);
+        rule.source.self++;
       }
+      
     } catch (Exception e) {
       summary = defaultMap(rule);
       e.printStackTrace();

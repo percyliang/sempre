@@ -101,6 +101,8 @@ public class Rule {
       for (Pair<String, Double> p : info)
         tree.addChild(LispTree.proto.newList(p.getFirst(), "" + p.getSecond()));
     }
+    if (source!=null)
+      tree.addChild(source.toJson());
     return tree;
   }
 

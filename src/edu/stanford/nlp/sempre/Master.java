@@ -16,6 +16,7 @@ import java.lang.reflect.Field;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * A Master manages multiple sessions. Currently, they all share the same model,
@@ -45,7 +46,7 @@ public class Master {
 
     // Interactive stuff
     @Option(gloss = "Write out new grammar rules")
-    public String newGrammarPath;
+    public String intOutputPath;
     @Option(gloss = "make sessions independent")
     public boolean independentSessions = false;
     @Option(gloss = "number of utterances to return for autocomplete")
@@ -218,8 +219,7 @@ public class Master {
     // Clean up
     // for (String outLine : stringOut.toString().split("\n"))
     //  response.lines.add(outLine);
-    LogInfo.setFileOut(null);
-
+    
     // Log interaction to disk
     if (!Strings.isNullOrEmpty(opts.logPath)) {
       PrintWriter out;
@@ -320,20 +320,6 @@ public class Master {
     } else if (command.equals("grammar")) {
       for (Rule rule : builder.grammar.rules)
         LogInfo.logs("%s", rule.toLispTree());
-      if (opts.newGrammarPath != null) {
-        Set<Rule> deduper = new HashSet<>();
-        String fileName = "grammar-" + LocalDateTime.now() + ".grammar";
-        LogInfo.logs("Printing rules to %s", fileName);
-        for (Rule rule : builder.grammar.rules) {
-          if(!deduper.contains(rule)) {
-            deduper.add(rule);
-            LogInfo.logs("Printed rule %s", rule.toString());
-          } else {
-            LogInfo.logs("Skipped rule %s", rule.toString());
-          }
-        }
-
-      }
     } else if (command.equals("params")) {
       if (tree.children.size() == 1) {
         builder.params.write(LogInfo.stdout);
@@ -464,6 +450,21 @@ public class Master {
       }
       response.ex = ex;
       
+    } else if (command.equals(":qdebug")) {
+      // Create example
+      String utt = tree.children.get(1).value;
+      Example ex = exampleFromUtterance(utt, session);
+            
+      builder.parser.parse(builder.params, ex, false);
+      
+      Derivation.opts.showCat = true;
+      Derivation.opts.showRules = true;
+      for (Derivation d : ex.predDerivations) {
+         response.lines.add(d.toLispTree().toString());
+      }
+      Derivation.opts.showCat = false;
+      Derivation.opts.showRules = false;
+      response.ex = ex;
     } else if (command.equals(":reject")) {
       if (session.isStatsing()) {
         response.stats.put("type", "reject");
@@ -471,16 +472,16 @@ public class Master {
       }
     } else if (command.equals(":accept")) {
       String utt = tree.children.get(1).value;
-      String formula = tree.children.get(2).value;
-      Formula targetFormula;
+      
+      List<Formula> targetFormulas = new ArrayList<>();
       try {
-        targetFormula = Formulas.fromLispTree(LispTree.proto.parseFromString(formula));
+        targetFormulas = tree.children.subList(2, tree.children.size()).stream()
+            .map(t -> Formulas.fromLispTree(LispTree.proto.parseFromString(t.value)))
+            .collect(Collectors.toList());
       } catch (Exception e) {
-        response.lines.add("cannot accept formula: " + formula);
-        formula = "(:? ERROR)";
-        targetFormula = Formulas.fromLispTree(LispTree.proto.parseFromString(formula));
+        e.printStackTrace();
+        response.lines.add("cannot accept formula: ");
       }
-      final Formula targetFormulaFinal = targetFormula;
       
       Example ex = exampleFromUtterance(utt, session);
       response.ex = ex;
@@ -498,8 +499,8 @@ public class Master {
       Derivation match = null;
       for (int i = 0; i < ex.predDerivations.size(); i++) {
         Derivation derivi = ex.predDerivations.get(i);
-        if (derivi.formula.equals(targetFormulaFinal)) {
-          rank = i; match = derivi;
+        if (targetFormulas.contains(derivi.formula)) {
+          rank = i; match = derivi; break;
         }
       }
       
@@ -508,24 +509,25 @@ public class Master {
         response.stats.put("rank", rank);
         response.stats.put("status", GrammarInducer.getParseStatus(ex));
         response.stats.put("size", ex.predDerivations.size());
+        response.stats.put("formulas.size", targetFormulas.size());
+        response.stats.put("rank", rank);
         
-        response.stats.put("len_formula", targetFormula.toString().length());
+        response.stats.put("len_formula", targetFormulas.get(0).toString().length());
         response.stats.put("len_utterance", ex.utterance.length());
       }
       
-      ex.setTargetFormula(targetFormula);
-      if (match != null) {
-        LogInfo.logs("Matched: %s", match);
+      if (match!=null) {
+        LogInfo.logs(":accept successful: %s", response.stats);
         
         if (session.isWritingCitation()) {
           CitationTracker tracker = new CitationTracker(session.id, ex);
           tracker.citeAll(match);
         }
         
-        ex.setTargetValue(match.value); // this is just for logging, not actually used for learning
+        // ex.setTargetValue(match.value); // this is just for logging, not actually used for learning
         if (session.isLearning()) {
           LogInfo.begin_track("Updating parameters");
-          learner.onlineLearnExampleByFormula(ex);
+          learner.onlineLearnExampleByFormula(ex, targetFormulas);
           LogInfo.end_track();
         }
       }
@@ -550,12 +552,14 @@ public class Master {
           
           // write out the grammar
           if (session.isWritingGrammar()) {
-            PrintWriter out = IOUtils.openOutAppendHard(Paths.get(Master.opts.newGrammarPath).toString());
+            PrintWriter out = IOUtils.openOutAppendHard(Paths.get(Master.opts.intOutputPath, "grammar.log.json").toString());
             for (Rule rule : inducedRules) {
               out.println(rule.toJson());
             }
             out.close();
           }
+        } else {
+          LogInfo.logs("No rule induced for head %s", head);
         }
         
         if (session.isStatsing()) {
@@ -565,6 +569,16 @@ public class Master {
       } else {
         LogInfo.logs("Invalid format for def");
       }
+    } else if (command.equals(":admin")) {
+      if (!tree.child(1).value.equals("withcrappysecurity")) return;
+      LogInfo.logs("Printing and overriding grammar and parameters...");
+      builder.params.write(Paths.get(Master.opts.intOutputPath, "params.params").toString());
+      PrintWriter out = IOUtils.openOutAppendHard(Paths.get(Master.opts.intOutputPath + "grammar.final.json").toString());
+      for (Rule rule : builder.grammar.rules) {
+        out.println(rule.toJson());
+      }
+      out.close();
+      LogInfo.logs("Done printing and overriding grammar and parameters...");
     } else if (command.equals(":autocomplete")) {
       if (tree.children.size() == 2) {
         String prefix = tree.children.get(1).value;

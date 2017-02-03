@@ -94,10 +94,16 @@ public class Simulator implements Runnable {
       }
       
       long endTime = System.nanoTime();
-      LogInfo.logs("Took %d ns or %.4f s", (endTime - startTime), (endTime - startTime)/1.0e9); 
+      LogInfo.logs("Took %d ns or %.4f s", (endTime - startTime), (endTime - startTime)/1.0e9);
     }
     SimulationAnalyzer.flush();
     LogInfo.end_track();
+    try {
+      sempreQuery("(:admin withcrappysecurity)", "simulator");
+    } catch (UnsupportedEncodingException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
   }
 
   public static String sempreQuery(String query, String sessionId) throws UnsupportedEncodingException {

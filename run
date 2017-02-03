@@ -1008,25 +1008,22 @@ addMode('interactive', 'interactive semantic parsing in a blocksworld', lambda {
   selo(0, 'BeamFloatingParser.floatStrategy', 'Never', 'NoParse', 'Always'),
 
 o('ParserState.customExpectedCounts', 'None'),
-o('Params.l1Reg', 'lazy'),
-o('Params.l1RegCoeff', 0.001),
-o('Parser.beamSize', 10),
-o('Params.initStepSize', 0.2),
-o('Params.adaptiveStepSize', false),
-o('Params.stepSizeReduction', 0.1),
+o('Params.l1Reg', 'nonlazy'),
+o('Params.l1RegCoeff', 0.0001),
+o('Parser.beamSize', 25),
+o('Params.initStepSize', 0.1),
+o('Params.adaptiveStepSize', true),
+#o('Params.stepSizeReduction', 0.25),
 
 o('FeatureExtractor.featureComputers', 'interactive.ActionFeatureComputer'),
 
 o('FeatureExtractor.featureDomains', ':rule', ':span', ':stats', ':scope', ':social', ':window'),
 # o('FeatureExtractor.featureDomains', ':rule'),
 
-# o('Master.newExamplesPath', './int-output/examples/'),
-# o('Master.logPath', './int-output/logs/'),
-o('Master.newGrammarPath', './int-output/grammar.json'),
-
-# o('ILUtils.JSONLogPath', './int-output/json/'),
+o('Master.intOutputPath', './int-output/'),
 o('ILUtils.citationPath', './int-output/citation/'),
-o('ILUtils.useAligner', true),
+
+o('ILUtils.useAligner', false),
 o('ILUtils.maxSequence', 20),
 
 o('DefinitionAligner.strategies', 'ExactExclusion'),
@@ -1043,6 +1040,9 @@ o('JsonServer.maxCandidates', 50),
 o('JsonServer.queryLogPath', './int-output/query.log'),
 o('JsonServer.responseLogPath', './int-output/response.log'),
 o('JsonServer.port', 8410),
+
+o('GrammarInducer.useBestPacking', true),
+o('GrammarInducer.useSimplePacking', true),
 
 o('Derivation.showTypes', false),
 o('Derivation.showValues', false),

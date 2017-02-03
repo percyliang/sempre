@@ -67,6 +67,9 @@ public final class ILUtils {
     
     @Option(gloss = "mode for blocking")
     public ActionFormula.Mode blockMode = ActionFormula.Mode.sequential;
+
+    @Option(gloss = "verbose")
+    public int verbose = 0;
   }
 
   public static Options opts = new Options();
@@ -96,7 +99,7 @@ public final class ILUtils {
   }
 
   public static Derivation stripBlock(Derivation deriv) {
-    LogInfo.logs("StripBlock %s %s %s", deriv, deriv.rule, deriv.cat);
+    if (opts.verbose  > 0) LogInfo.logs("StripBlock %s %s %s", deriv, deriv.rule, deriv.cat);
     while ((deriv.rule.sem instanceof BlockFn || deriv.rule.sem instanceof IdentityFn) && deriv.children.size() == 1) {
       deriv = deriv.child(0);
     }
@@ -136,6 +139,7 @@ public final class ILUtils {
         if (d.formula.equals(targetFormula)) {
           found = true;
           allDerivs.add(stripDerivation(d));
+          break;
         }
       }
       if (!found && !formula.equals("?"))
@@ -154,6 +158,7 @@ public final class ILUtils {
         allDerivs.add(res);
       }
     }
+    // LogInfo.logs("returning deriv list %s, \n %s", allDerivs.toString(), jsonDef);
     return allDerivs;
   }
 
@@ -201,6 +206,7 @@ public final class ILUtils {
 
   public static List<Rule> induceRulesHelper(String command, String head, String jsonDef, Parser parser, Params params,
       String sessionId, Ref<Example> refEx) {
+
     // ActionFormula.Mode blockmode = command.equals(":def") ? ActionFormula.Mode.block : ActionFormula.Mode.blockr;
 
     Derivation bodyDeriv = ILUtils.combine(ILUtils.derivsfromJson(jsonDef, parser, params), opts.blockMode);
@@ -210,7 +216,6 @@ public final class ILUtils {
     Example exHead = b.createExample();
     exHead.preprocess();
 
-    LogInfo.begin_track("Definition");
     LogInfo.logs("mode: %s", opts.blockMode);
     LogInfo.logs("headraw: %s", head);
     LogInfo.logs("head: %s", exHead.getTokens());
@@ -238,7 +243,6 @@ public final class ILUtils {
       refEx.value = exHead;
     }
 
-    
     List<Rule> inducedRules = new ArrayList<>();
     GrammarInducer grammarInducer = new GrammarInducer(exHead.getTokens(), bodyDeriv, state.chartList);
     inducedRules.addAll(grammarInducer.getRules());

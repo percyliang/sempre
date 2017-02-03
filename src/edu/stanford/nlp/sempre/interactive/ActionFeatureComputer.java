@@ -102,15 +102,19 @@ public class ActionFeatureComputer implements FeatureComputer {
 
       if (deriv.rule.source!=null) {
         deriv.addFeature(":stats", "cite", deriv.rule.source.cite);
-        if (deriv.rule.source.cite > 0)
-          deriv.addFeature(":stats", "has_cite");
-        else
-          deriv.addFeature(":stats", "no_cite");
+        if (deriv.rule.source.cite > 0) deriv.addFeature(":stats", "has_cite");
+        else deriv.addFeature(":stats", "no_cite");
+        
+       
+        if (deriv.rule.source.self > 0) deriv.addFeature(":stats", "has_selfcite");
+        else deriv.addFeature(":stats", "no_selfcite");
+        
+        if (deriv.rule.source.align) deriv.addFeature(":stats", "align");
+        else deriv.addFeature(":stats", "no_align");
 
-        if (deriv.rule.source.self > 0)
-          deriv.addFeature(":stats", "has_selfcite");
-        else
-          deriv.addFeature(":stats", "no_selfcite");
+        if (deriv.rule.getInfoTag("simple_packing")!=-1.0) deriv.addFeature(":stats", "simple_packing");
+        else deriv.addFeature(":stats", "no_simple_packing");
+
       }
     }
   }

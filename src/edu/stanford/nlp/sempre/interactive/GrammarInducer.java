@@ -63,11 +63,12 @@ public class GrammarInducer {
   // induce rule is possible,
   // otherwise set the correct status
   public GrammarInducer(List<String> headTokens, Derivation def, List<Derivation> chartList) {
-    
     // grammarInfo start and end is used to indicate partial, when using aligner
+    boolean allHead = false;
     if (def.grammarInfo.start == -1) {
       def.grammarInfo.start = 0;
       def.grammarInfo.end = headTokens.size();
+      allHead = true;
     }
     
     // dont want weird cat unary rules with strange semantics
@@ -86,25 +87,7 @@ public class GrammarInducer {
    
 
     inducedRules = new ArrayList<>();
-    
-    if (opts.useBestPacking) {
-      List<Derivation> bestPacking = bestPackingDP(this.matches, numTokens);
-      
-      HashMap<String, String> formulaToCat = new HashMap<>();
-      bestPacking.forEach(d -> formulaToCat.put(catFormulaKey(d), varName(d)));
-      buildFormula(def, formulaToCat);
-      inducedRules.addAll(induceRules(bestPacking, def));
-      
-      if (opts.verbose > 1) {
-        LogInfo.logs("chartList.size = %d", chartList.size());
-        LogInfo.log("Potential packings: " );
-        this.matches.forEach(d -> LogInfo.logs("%f: %s\t", d.getScore(), d.formula));
-        LogInfo.logs("BestPacking: %s", bestPacking);
-        LogInfo.logs("formulaToCat: %s", formulaToCat);
-      }
-      
-    }
-    if (opts.useSimplePacking) {
+    if (allHead && opts.useSimplePacking) {
       List<Derivation> filteredMatches = this.matches.stream().filter( d -> {
         return opts.simpleCats.contains(d.cat) && d.allAnchored() && d.end - d.start == 1;
       }).collect(Collectors.toList());
@@ -123,9 +106,10 @@ public class GrammarInducer {
       packing.forEach(d -> formulaToCat.put(catFormulaKey(d), varName(d)));
       buildFormula(def, formulaToCat);
       List<Rule> simpleInduced = induceRules(packing, def);
-      for (Rule rule : simpleInduced)
+      for (Rule rule : simpleInduced) {
         rule.addInfo("simple_packing", 1.0);
-      addRuleDedupByRHS(simpleInduced);
+        addRuleDedupByRHS(rule);
+      }
       
       if (opts.verbose > 1) {
         LogInfo.logs("Simple Packing", chartList.size());
@@ -136,16 +120,33 @@ public class GrammarInducer {
         LogInfo.logs("formulaToCat: %s", formulaToCat);
       }
     }
+    if (opts.useBestPacking) {
+      List<Derivation> bestPacking = bestPackingDP(this.matches, numTokens);
+      
+      HashMap<String, String> formulaToCat = new HashMap<>();
+      bestPacking.forEach(d -> formulaToCat.put(catFormulaKey(d), varName(d)));
+      buildFormula(def, formulaToCat);
+      for (Rule rule : induceRules(bestPacking, def)) {
+        if (rule.rhs.stream().allMatch(s -> Rule.isCat(s))) continue;
+        addRuleDedupByRHS(rule);
+      }
+      
+      if (opts.verbose > 1) {
+        LogInfo.logs("chartList.size = %d", chartList.size());
+        LogInfo.log("Potential packings: " );
+        this.matches.forEach(d -> LogInfo.logs("%f: %s\t", d.getScore(), d.formula));
+        LogInfo.logs("BestPacking: %s", bestPacking);
+        LogInfo.logs("formulaToCat: %s", formulaToCat);
+      }
+    }
+    
   }
   
-  private void addRuleDedupByRHS(List<Rule> rules) {
-    Set<String> RHSs = new HashSet<>();
-    for (Rule rule : inducedRules) {
-      RHSs.add(rule.rhs.toString());
-    }
-    for (Rule rule : rules) {
-      if (!RHSs.contains(rule.rhs.toString()))
-        inducedRules.add(rule);
+  Set<String> RHSs = new HashSet<>();
+  private void addRuleDedupByRHS(Rule rule) {
+    if (!RHSs.contains(rule.rhs.toString())) {
+       inducedRules.add(rule);
+       RHSs.add(rule.rhs.toString());
     }
   }
     
@@ -325,7 +326,6 @@ public class GrammarInducer {
     } else {
       deriv.grammarInfo.formula = deriv.formula;
     }
-    
     // LogInfo.logs("BUILT %s for %s", deriv.grammarInfo.formula, deriv.formula);
     // LogInfo.log("built " + deriv.grammarInfo.formula);
   }
@@ -354,6 +354,7 @@ public class GrammarInducer {
  
   private SemanticFn getSemantics(final Derivation def, List<Derivation> packings) {
     Formula baseFormula = def.grammarInfo.formula;
+    if (opts.verbose > 0) LogInfo.logs("getSemantics %s", baseFormula);
     if (packings.size() == 0) {
       SemanticFn constantFn = new ConstantFn();
       LispTree newTree = LispTree.proto.newList();

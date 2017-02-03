@@ -180,8 +180,8 @@ public abstract class Parser {
     Derivation.sortByScore(ex.predDerivations);
     
     // Evaluate
-    ex.evaluation = new Evaluation();
-    addToEvaluation(state, ex.evaluation);
+    // ex.evaluation = new Evaluation();
+    // addToEvaluation(state, ex.evaluation);
 
     // Clean up temporary state used during parsing
     ex.clearTempState();

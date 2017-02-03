@@ -301,7 +301,7 @@ public class GrammarInducerTest {
   @Test public void setsTest() {
     LogInfo.begin_track("setsTest");
     ParseTester T = new ParseTester();
-    Assertion A = soft;
+    Assertion A = hard;
     
     T.def("remove those red blocks", d("remove has color red"));
     A.assertTrue(T.match("select those red blocks", d("select has color red")));

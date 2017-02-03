@@ -48,7 +48,7 @@ public class DefinitionAligner {
     public int verbose = 0;
     
   }
-  public enum Strategies {SetExclusion, ExactExclusion};
+  public enum Strategies {SetExclusion, ExactExclusion, cmdSet};
   public static Options opts = new Options();
   public class Match {
     @Override
@@ -75,7 +75,6 @@ public class DefinitionAligner {
     if (opts.verbose > 0) LogInfo.logs("DefinitionAligner.allMatches.size(): %d", aligner.allMatches.size());
 
     for (int i = 0; i < aligner.allMatches.size() && i <= opts.maxMatches; i++) {
-      // just take the top match
       Match match = aligner.allMatches.get(i);
       
       List<Derivation> filteredList = chartList.stream()
@@ -87,7 +86,7 @@ public class DefinitionAligner {
         if (opts.verbose > 1) LogInfo.logs("DefinitionAligner.chartList.d: %s", d);
         return (d.start == match.start  && d.end == match.end);
       })
-          .collect(Collectors.toList());
+      .collect(Collectors.toList());
 
       if (opts.verbose > 1) LogInfo.logs("DefinitionAligner.Match: %s", match);
       if (opts.verbose > 1) LogInfo.logs("DefinitionAligner.currentParses: %s", currentParses);
@@ -144,6 +143,8 @@ public class DefinitionAligner {
       return true;
     if (opts.strategies.contains(Strategies.SetExclusion) && setExclusion(def, start, end))
       return true;
+    if (opts.strategies.contains(Strategies.cmdSet) && cmdSet(def, start, end))
+      return true;
 
     return false;
   }
@@ -168,7 +169,7 @@ public class DefinitionAligner {
     List<String> ret = new ArrayList<>();
     for (int i = lower; i < upper; i++) {
       if (i < 0 || i>=list.size()) 
-        ret.add("(*)"); // a bit of a hack...
+        ret.add("(*)");
       else ret.add(list.get(i));
     }
     return ret;
@@ -189,6 +190,16 @@ public class DefinitionAligner {
       return false;
     
     return true;
+  }
+  
+  // exact match plus big
+  private boolean cmdSet(Derivation def, int start, int end) {
+    if (opts.verbose > 0) LogInfo.log("In exactPlusBig");
+    // match only beginning and end
+    boolean cmdSet = (end == headTokens.size()) && (start > 0) && def.end == defTokens.size() && def.start > 0;
+    if (cmdSet && headTokens.subList(0, start).equals(defTokens.subList(0, start))) return true;
+    
+    return false;
   }
   
 

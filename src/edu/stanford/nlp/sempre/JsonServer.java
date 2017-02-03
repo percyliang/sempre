@@ -199,6 +199,7 @@ public class JsonServer {
         if (!Strings.isNullOrEmpty(message)) {
           response.lines.add(message);
           response.stats.put("error", message);
+          LogInfo.resetInfos();
         }
       }
       return response;
