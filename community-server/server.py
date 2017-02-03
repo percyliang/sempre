@@ -112,9 +112,9 @@ def is_safe_path(basedir, path, follow_symlinks=True):
     """https://security.openstack.org/guidelines/dg_using-file-paths.html"""
     # resolves symbolic links
     if follow_symlinks:
-        return os.path.realpath(path).startswith(basedir)
+        return os.path.realpath(path).startswith(os.path.realpath(basedir))
 
-    return os.path.abspath(path).startswith(basedir)
+    return os.path.abspath(path).startswith(os.path.abspath(basedir))
 
 
 def score_struct(timestamp, upvotesN):
@@ -294,6 +294,7 @@ def log(message):
     path = os.path.join(LOG_FOLDER, uid + ".json")
 
     if not is_safe_path(LOG_FOLDER, path):
+        print("NOT SAFE!", path)
         return
 
     # Add a timestamp to the log
@@ -402,7 +403,7 @@ def upvote(data):
     struct_path = os.path.join(subdir, str(data["id"]) + ".json")
 
     # if the struct does not exist, do nothing
-    if not is_safe_path(subdir, struct_path) or os.path.isfile(struct_path):
+    if not (is_safe_path(subdir, struct_path) or os.path.isfile(struct_path)):
         print("not", struct_path)
         return
 
