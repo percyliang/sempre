@@ -139,6 +139,7 @@ def emit_structs():
     """Walk through the STRUCTS_FOLDER directory and read each struct and emit
     it to the user one by one."""
 
+    structs = []
     for uid in [name for name in os.listdir(STRUCTS_FOLDER) if os.path.isdir(os.path.join(STRUCTS_FOLDER, name))]:
         uid_folder = os.path.join(STRUCTS_FOLDER, uid)
 
@@ -165,10 +166,12 @@ def emit_structs():
 
                     score = score_struct(timestamp, len(upvotes))
                     message = {"uid": uid, "id": fname, "score": score, "upvotes": [up for up in upvotes], "struct": struct}
-                    emit("struct", message)
+                    structs.append(message)
                     count += 1
             except:
                 pass
+
+    emit("structs", structs)
 
 
 def emit_user_structs_count(uid):
