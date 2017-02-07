@@ -990,7 +990,7 @@ addMode('interactive', 'interactive semantic parsing in a blocksworld', lambda {
   o('LanguageAnalyzer', 'interactive.ActionLanguageAnalyzer'),
   o('ActionExecutor.convertNumberValues', true),
   o('ActionExecutor.printStackTrace', true),
-  o('BlocksWorld.maxBlocks', 1000),
+  o('BlocksWorld.maxBlocks', 3000),
   selo(0, 'ActionExecutor.FlatWorldType', 'BlocksWorld', 'CalendarWorld'),
   selo(0, 'Grammar.inPaths', './shrdlurn/blocksworld.grammar', './shrdlurn/calendar.grammar'),
 
@@ -1016,7 +1016,6 @@ o('Params.adaptiveStepSize', true),
 #o('Params.stepSizeReduction', 0.25),
 
 o('FeatureExtractor.featureComputers', 'interactive.ActionFeatureComputer'),
-
 o('FeatureExtractor.featureDomains', ':rule', ':span', ':stats', ':scope', ':social', ':window'),
 # o('FeatureExtractor.featureDomains', ':rule'),
 

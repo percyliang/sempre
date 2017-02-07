@@ -512,8 +512,8 @@ public class Master {
         response.stats.put("formulas.size", targetFormulas.size());
         response.stats.put("rank", rank);
         
-        response.stats.put("len_formula", targetFormulas.get(0).toString().length());
-        response.stats.put("len_utterance", ex.utterance.length());
+        response.stats.put("len_formula", targetFormulas.get(0).toLispTree().numNodes());
+        response.stats.put("len_utterance", ex.getTokens().size());
       }
       
       if (match!=null) {

@@ -78,7 +78,7 @@ public class Simulator implements Runnable {
           double queryTime = (endTimeQ - startTimeQ)/1.0e9;
           // evaluation.add("queryTime",queryTime);
           if (queryTime > 0.1) {
-            LogInfo.logs("slow query (%f): %s", queryTime, l);
+            // LogInfo.logs("slow query (%f): %s", queryTime, l);
           }
         }));
         executor.shutdown();

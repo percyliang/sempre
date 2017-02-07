@@ -116,16 +116,19 @@ addMode('simulator', 'run the simulator', lambda { |e| l(
 		'remote' => o('serverURL', 'http://jonsson.stanford.edu:8410')
 	}),
 	# set to 0 to enable logging
-	o('numThreads', 4),
+	o('numThreads', 1),
 	letDefault(:sandbox, 'full'),
 	sel(:sandbox, {
 		'all' => o('reqParams', 'grammar=0\&cite=0\&learn=0\&logging=0'),
 		'nolog' => o('reqParams', 'grammar=0\&cite=0\&learn=1\&logging=0'),
 		'nolearn' => o('reqParams', 'grammar=1\&cite=1\&learn=0\&logging=0'),
-		'none' => o('reqParams', 'grammar=1\&cite=1\&learn=1\&logging=0')
+		'none' => o('reqParams', 'grammar=1\&cite=1\&learn=1\&logging=0'),
+		'nocite' => o('reqParams', 'grammar=1\&cite=0\&learn=1\&logging=0'),
 	}),
 	letDefault(:task, 'sidaw'),
 	sel(:task, {
+		'freebig' => o('logFiles', './shrdlurn/queries/freebuildbig-0206.json'),
+
 		'qual1' => o('logFiles', './shrdlurn/queries/qualifier1-0118.json'),
 		'qual2' => o('logFiles', './shrdlurn/queries/qualifier2-0129.json'),
 		'qual3' => o('logFiles', './shrdlurn/queries/qualifier3-0201.json'), #  both 2 and 3
