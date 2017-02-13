@@ -263,6 +263,11 @@ public class TableKnowledgeGraph extends KnowledgeGraph implements FuzzyMatchabl
     return toTableValue().toLispTree();
   }
 
+  @Override
+  public LispTree toShortLispTree() {
+    return toLispTree();
+  }
+
   public TableValue toTableValue() {
     List<String> tableValueHeader = new ArrayList<>();
     List<List<Value>> tableValueRows = new ArrayList<>();

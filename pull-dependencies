@@ -281,6 +281,15 @@ addModule('esslli_2016', 'Data for ESSLLI 2016 semantic parsing class', lambda {
   pull('/u/nlp/data/semparse/esslli_2016', 'data/esslli_2016/', {:symlink => true})
 })
 
+addModule('geo880', 'Data, lexicon, grammars and KB for geo880', lambda {
+  pull('/u/nlp/data/semparse/geo880/geo880-test.examples', 'data/geo880', {:symlink => true})
+  pull('/u/nlp/data/semparse/geo880/geo880-test.preprocessed.examples', 'data/geo880', {:symlink => true})
+  pull('/u/nlp/data/semparse/geo880/geo880-train.preprocessed.examples', 'data/geo880', {:symlink => true})
+  pull('/u/nlp/data/semparse/geo880/geo880.grammar', 'data/geo880', {:symlink => true})
+  pull('/u/nlp/data/semparse/geo880/geo880.lexicon', 'data/geo880', {:symlink => true})
+  pull('/u/nlp/data/semparse/geo880/geo880.kg', 'data/geo880', {:symlink => true})
+  pull('/u/nlp/data/semparse/geo880/geo880.type_hierarchy', 'data/geo880', {:symlink => true})
+})
 ############################################################
 
 if ARGV.size == 0

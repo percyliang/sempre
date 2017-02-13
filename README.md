@@ -123,22 +123,23 @@ For Ubuntu, follow this:
     sudo apt-get install -y automake gawk gperf libtool bison flex libssl-dev
 
     # Clone the repository
-    git clone https://github.com/openlink/virtuoso-opensource
+    ./pull-dependencies virtuoso
+
+    # Make and install
     cd virtuoso-opensource
-    git checkout tags/v7.0.0
-
-    # Configure
     ./autogen.sh
-    mv INSTALL INSTALL.txt  # Avoid conflict on case-insensitive file systems
     ./configure --prefix=$PWD/install
-
-    # Make (this takes a while)
     make
     make install
     cd ..
 
 on OS/X you can install virtuoso using homebrew by following the instructions 
 [here](http://carsten.io/virtuoso-os-on-mac-os/)
+
+To have SEMPRE interact with Virtuoso, the required modules need to be compiled as follow:
+
+    ./pull-dependencies core corenlp freebase
+    ant freebase
 
 # Contribute
 

@@ -38,6 +38,9 @@ public class Dataset {
 
     @Option(gloss = "Only keep examples which have at most this number of tokens")
     public int maxTokens = Integer.MAX_VALUE;
+
+    @Option(gloss = "Path to a knowledge graph that will be uploaded as global context")
+    public String globalGraphPath;
   }
 
   public static Options opts = new Options();
@@ -96,9 +99,21 @@ public class Dataset {
         return;
       }
     }
-
     readLispTreeFromPathPairs(pathPairs);
+    updateGlobalContext();
   }
+
+  private void updateGlobalContext() {
+    if (opts.globalGraphPath != null) {
+      KnowledgeGraph graph = NaiveKnowledgeGraph.fromFile(opts.globalGraphPath);
+      for (String group : allExamples.keySet()) {
+        for (Example ex : allExamples.get(group)) {
+          ex.setContext(new ContextValue(graph));
+        }
+      }
+    }
+  }
+
 
   private void readJsonFromPathPairs(List<Pair<String, String>> pathPairs) {
     List<GroupInfo> groups = Lists.newArrayListWithCapacity(pathPairs.size());

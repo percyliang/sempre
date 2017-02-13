@@ -184,4 +184,16 @@ public class NaiveKnowledgeGraph extends KnowledgeGraph {
     }
     return tree;
   }
+
+  @Override
+  public LispTree toShortLispTree() {
+    if (triples.size() > 1000) {
+      LispTree tree = LispTree.proto.newList();
+      tree.addChild("graph");
+      tree.addChild("NaiveKnowledgeGraph");
+      tree.addChild(("TooManyTriples"));
+      return tree;
+    }
+    return toLispTree();
+  }
 }
