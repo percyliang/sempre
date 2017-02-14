@@ -208,7 +208,11 @@ class LambdaDCSCoreLogic {
       UnaryDenotation headD = computeUnary(superlative.head, typeHint);
       BinaryDenotation relationD = computeBinary(superlative.relation, typeHint.newRestrictedBinary(headD, null));
       ExplicitBinaryDenotation table = relationD.explicitlyFilterFirst(headD, graph);
-      return typeHint.applyBound(DenotationUtils.superlative(rank, count, table, superlative.mode));
+      if (superlative.mode == SuperlativeFormula.Mode.filter) {
+        return typeHint.applyBound(table.getFirsts());
+      } else {
+        return typeHint.applyBound(DenotationUtils.superlative(rank, count, table, superlative.mode));
+      }
 
     } else if (formula instanceof ArithmeticFormula) {
       // ============================================================
@@ -243,16 +247,6 @@ class LambdaDCSCoreLogic {
       }
       return typeHint.applyBound(new ExplicitUnaryDenotation(values));
 
-    } else if (formula instanceof FilterFormula) {
-      // ============================================================
-      // Filter
-      // ============================================================
-      FilterFormula filter = (FilterFormula) formula;
-      UnaryDenotation domainD = computeUnary(filter.domain, typeHint);
-      BinaryDenotation conditionD = computeBinary(filter.condition, typeHint.newRestrictedBinary(null, domainD));
-      ExplicitBinaryDenotation table = conditionD.explicitlyFilterSecond(domainD, graph);
-      return typeHint.applyBound(table.getSeconds());
-      
     } else {
       throw new LambdaDCSException(Type.notUnary, "[Unary] Not a unary " + formula);
     }

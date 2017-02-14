@@ -41,8 +41,6 @@ public abstract class Formulas {
           args.add(fromLispTree(tree.child(i)));
         return new CallFormula(callFunc, args);
       }
-      if (func.equals("filter"))
-        return new FilterFormula(fromLispTree(tree.child(1)), fromLispTree(tree.child(2)));
     }
 
     { // Merge: (and (fb:type.object.type fb:people.person) (fb:people.person.children fb:en.barack_obama))
@@ -60,14 +58,19 @@ public abstract class Formulas {
     { // Superlative: (argmax 1 1 (fb:type.object.type fb:people.person) (lambda x (!fb:people.person.height_meters (var x))))
       SuperlativeFormula.Mode mode = SuperlativeFormula.parseMode(func);
       if (mode != null) {
-        Formula rank = parseIntToFormula(tree.child(1));
-        Formula count = parseIntToFormula(tree.child(2));
-        return new SuperlativeFormula(
-            mode,
-            rank,
-            count,
-            fromLispTree(tree.child(3)),
-            fromLispTree(tree.child(4)));
+        if (tree.children.size() == 3) {
+          Formula ONE = new ValueFormula<NumberValue>(new NumberValue(1));
+          return new SuperlativeFormula(mode, ONE, ONE, fromLispTree(tree.child(1)), fromLispTree(tree.child(2)));
+        } else {
+          Formula rank = parseIntToFormula(tree.child(1));
+          Formula count = parseIntToFormula(tree.child(2));
+          return new SuperlativeFormula(
+              mode,
+              rank,
+              count,
+              fromLispTree(tree.child(3)),
+              fromLispTree(tree.child(4)));
+        }
       }
     }
 
@@ -185,10 +188,6 @@ public abstract class Formulas {
     if (formula instanceof NotFormula) {
       NotFormula notForm = (NotFormula) formula;
       return containsFreeVar(notForm.child, var);
-    }
-    if (formula instanceof FilterFormula) {
-      FilterFormula filter = (FilterFormula) formula;
-      return containsFreeVar(filter.domain, var) || containsFreeVar(filter.condition, var);
     }
     throw new RuntimeException("Unhandled: " + formula);
   }

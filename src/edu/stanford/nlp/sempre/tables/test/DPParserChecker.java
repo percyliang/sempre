@@ -184,10 +184,6 @@ public class DPParserChecker implements Runnable {
       } else if (formula instanceof LambdaFormula) {
         LambdaFormula lambda = (LambdaFormula) formula;
         return new LambdaFormula("x", canonicalizeFormula(lambda.body));
-      } else if (formula instanceof FilterFormula) {
-        FilterFormula filter = (FilterFormula) formula;
-        return new FilterFormula(
-            canonicalizeFormula(filter.domain), canonicalizeFormula(filter.condition));
       } else {
         throw new RuntimeException("Unsupported formula " + formula);
       }

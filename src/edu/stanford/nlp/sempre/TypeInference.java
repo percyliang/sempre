@@ -248,13 +248,6 @@ public final class TypeInference {
         inferType(call.args.get(i), env, info.argTypes.get(i));
       return check(type.meet(info.retType));
       
-    } else if (formula instanceof FilterFormula) {
-      FilterFormula filter = (FilterFormula) formula;
-      type = check(type.meet(SemType.anyType));  // Must be not higher-order
-      type = inferType(filter.domain, env, type); // Domain
-      inferType(filter.condition, env, SemType.anyAnyFunc);
-      return type;
-      
     } else {
       throw new RuntimeException("Can't infer type of formula: " + formula);
     }
