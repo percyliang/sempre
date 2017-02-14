@@ -100,22 +100,29 @@ public class LambdaDCSExecutorTest {
           "(fb:en.barack_obama fb:people.person.place_of_birth fb:en.honolulu)" +
           "(fb:en.barack_obama fb:people.person.profession fb:en.politician)" +
           "(fb:en.barack_obama fb:people.person.weight_kg (number 82))" +
+          "(fb:en.barack_obama fb:people.person.height_cm (number 185))" +
           "(fb:en.george_w_bush fb:people.person.place_of_birth fb:en.new_haven)" +
           "(fb:en.george_w_bush fb:people.person.profession fb:en.politician)" +
           "(fb:en.george_w_bush fb:people.person.weight_kg (number 86))" +
+          "(fb:en.george_w_bush fb:people.person.height_cm (number 182))" +
           "(fb:en.bill_clinton fb:people.person.place_of_birth fb:en.hope_arkansas)" +
           "(fb:en.bill_clinton fb:people.person.profession fb:en.lawyer)" +
           "(fb:en.bill_clinton fb:people.person.profession fb:en.politician)" +
           "(fb:en.bill_clinton fb:people.person.weight_kg (number 100))" +
+          "(fb:en.bill_clinton fb:people.person.height_cm (number 188))" +
           "(fb:en.nicole_kidman fb:people.person.place_of_birth fb:en.honolulu)" +
           "(fb:en.nicole_kidman fb:people.person.profession fb:en.actor)" +
           "(fb:en.nicole_kidman fb:people.person.weight_kg (number 58))" +
+          "(fb:en.nicole_kidman fb:people.person.height_cm (number 180))" +
           "(fb:en.morgan_freeman fb:people.person.place_of_birth fb:en.memphis)" +
           "(fb:en.morgan_freeman fb:people.person.profession fb:en.actor)" +
           "(fb:en.morgan_freeman fb:people.person.weight_kg (number 91))" +
+          "(fb:en.morgan_freeman fb:people.person.height_cm (number 188))" +
           "(fb:en.ronald_reagan fb:people.person.place_of_birth fb:en.tampico)" +
           "(fb:en.ronald_reagan fb:people.person.profession fb:en.politician)" +
+          "(fb:en.ronald_reagan fb:people.person.profession fb:en.actor)" +
           "(fb:en.ronald_reagan fb:people.person.weight_kg (number 82))" +
+          "(fb:en.ronald_reagan fb:people.person.height_cm (number 185))" +
           "(fb:en.honolulu fb:location.location.containedby fb:en.hawaii)" +
           "(fb:en.memphis fb:location.location.containedby fb:en.tennessee)" +
           "(fb:en.new_haven fb:location.location.containedby fb:en.connecticut)" +
@@ -148,9 +155,9 @@ public class LambdaDCSExecutorTest {
     runFormula(executor, "(and (fb:people.person.place_of_birth fb:en.honolulu) (fb:people.person.profession fb:en.actor))",
         graph, matches("(name fb:en.nicole_kidman)"));
     runFormula(executor, "(or (fb:people.person.place_of_birth fb:en.honolulu) (fb:people.person.profession fb:en.actor))",
-        graph, matchesAll("(name fb:en.barack_obama)", "(name fb:en.nicole_kidman)", "(name fb:en.morgan_freeman)"));
+        graph, matchesAll("(name fb:en.barack_obama)", "(name fb:en.nicole_kidman)", "(name fb:en.morgan_freeman)", "(name fb:en.ronald_reagan)"));
     runFormula(executor, "(count (or (fb:people.person.place_of_birth fb:en.honolulu) (fb:people.person.profession fb:en.actor)))",
-        graph, matches("(number 3)"));
+        graph, matches("(number 4)"));
   }
 
   @Test(groups = "lambdaPrez") public void lambdaOnGraphInfiniteTest() {
@@ -186,6 +193,18 @@ public class LambdaDCSExecutorTest {
     runFormula(executor, "(and ((reverse (lambda x (fb:people.person.place_of_birth (var x)))) fb:en.barack_obama) (!fb:people.person.place_of_birth *))",
         graph, matches("(name fb:en.honolulu)"));
   }
+  
+  @Test(groups = "lambdaPrez") public void lambdaOnGraphFilterTest() {
+    KnowledgeGraph graph = getKnowledgeGraph("prez");
+    // People such that 100 + weight < height
+    runFormula(executor, "(filter (fb:people.person.weight_kg *) (reverse (lambda x "
+        + "(and (+ (number 100) (!fb:people.person.weight_kg (var x))) (< (!fb:people.person.height_cm (var x)))))))",
+        graph, matchesAll("(name fb:en.barack_obama)", "(name fb:en.nicole_kidman)", "(name fb:en.ronald_reagan)"));
+    // People with at least 2 professions
+    runFormula(executor, "(filter (fb:people.person.weight_kg *) (reverse (lambda x "
+        + "(and (count (!fb:people.person.profession (var x))) (>= (number 2))))))",
+        graph, matchesAll("(name fb:en.bill_clinton)", "(name fb:en.ronald_reagan)"));
+  }
 
   @Test(groups = "lambdaCSV") public void lambdaOnGraphCSVTest() {
     KnowledgeGraph graph = getKnowledgeGraph("csv");
@@ -207,5 +226,4 @@ public class LambdaDCSExecutorTest {
           graph, matches("(number 2)"));
     }
   }
-
 }
