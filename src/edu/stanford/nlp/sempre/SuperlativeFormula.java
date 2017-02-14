@@ -19,7 +19,7 @@ public class SuperlativeFormula extends Formula {
 
   public final Mode mode;
   public final Formula rank;      // (for argmax, argmin) rank-th item
-  public final Formula count;     // (for filter) Number of items to fetch
+  public final Formula count;     // (for argmax, argmin) Number of items to fetch
   public final Formula head;
   public final Formula relation;  // Apply relation(head, degree) and sort by degree.
 
