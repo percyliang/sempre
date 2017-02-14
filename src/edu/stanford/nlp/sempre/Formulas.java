@@ -58,14 +58,19 @@ public abstract class Formulas {
     { // Superlative: (argmax 1 1 (fb:type.object.type fb:people.person) (lambda x (!fb:people.person.height_meters (var x))))
       SuperlativeFormula.Mode mode = SuperlativeFormula.parseMode(func);
       if (mode != null) {
-        Formula rank = parseIntToFormula(tree.child(1));
-        Formula count = parseIntToFormula(tree.child(2));
-        return new SuperlativeFormula(
-            mode,
-            rank,
-            count,
-            fromLispTree(tree.child(3)),
-            fromLispTree(tree.child(4)));
+        if (tree.children.size() == 3) {
+          Formula ONE = new ValueFormula<NumberValue>(new NumberValue(1));
+          return new SuperlativeFormula(mode, ONE, ONE, fromLispTree(tree.child(1)), fromLispTree(tree.child(2)));
+        } else {
+          Formula rank = parseIntToFormula(tree.child(1));
+          Formula count = parseIntToFormula(tree.child(2));
+          return new SuperlativeFormula(
+              mode,
+              rank,
+              count,
+              fromLispTree(tree.child(3)),
+              fromLispTree(tree.child(4)));
+        }
       }
     }
 

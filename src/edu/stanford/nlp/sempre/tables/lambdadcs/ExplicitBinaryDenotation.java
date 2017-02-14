@@ -98,4 +98,19 @@ public class ExplicitBinaryDenotation extends BinaryDenotation {
     return new ExplicitBinaryDenotation(filtered);
   }
 
+  public UnaryDenotation getFirsts() {
+    Set<Value> firsts = new HashSet<>();
+    for (Pair<Value, Value> pair : pairs) {
+      firsts.add(pair.getFirst());
+    }
+    return new ExplicitUnaryDenotation(firsts);
+  }
+  
+  public UnaryDenotation getSeconds() {
+    Set<Value> seconds = new HashSet<>();
+    for (Pair<Value, Value> pair : pairs) {
+      seconds.add(pair.getSecond());
+    }
+    return new ExplicitUnaryDenotation(seconds);
+  }
 }

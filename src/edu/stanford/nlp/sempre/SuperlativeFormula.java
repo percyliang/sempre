@@ -6,17 +6,20 @@ import fig.basic.LispTree;
 import java.util.List;
 
 /**
- * Computes the extreme elements of a set |head| according to the degree given
- * by |relation|.
+ * Apply the relation |relation(element, value)| to each element in the set |head|,
+ * then select every element whose value achieves the criteria:
+ * - argmin: the value is the smallest among all values
+ * - argmax: the value is the largest among all values
+ * - filter: the value is not empty
  *
  * @author Percy Liang
  */
 public class SuperlativeFormula extends Formula {
-  public enum Mode { argmin, argmax };
+  public enum Mode { argmin, argmax, filter };
 
   public final Mode mode;
-  public final Formula rank;  // rank-th item
-  public final Formula count;  // Number of items to fetch
+  public final Formula rank;      // (for argmax, argmin) rank-th item
+  public final Formula count;     // (for argmax, argmin) Number of items to fetch
   public final Formula head;
   public final Formula relation;  // Apply relation(head, degree) and sort by degree.
 
@@ -31,6 +34,7 @@ public class SuperlativeFormula extends Formula {
   public static Mode parseMode(String mode) {
     if ("argmin".equals(mode)) return Mode.argmin;
     if ("argmax".equals(mode)) return Mode.argmax;
+    if ("filter".equals(mode)) return Mode.filter;
     return null;
   }
 

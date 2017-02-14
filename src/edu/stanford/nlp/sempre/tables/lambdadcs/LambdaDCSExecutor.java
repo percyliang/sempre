@@ -190,12 +190,6 @@ class LambdaDCSCoreLogic {
         }
       }
 
-    } else if (formula instanceof NotFormula) {
-      // ============================================================
-      // Not
-      // ============================================================
-      // TODO(ice): (Low priority)
-
     } else if (formula instanceof AggregateFormula) {
       // ============================================================
       // Aggregate
@@ -214,7 +208,11 @@ class LambdaDCSCoreLogic {
       UnaryDenotation headD = computeUnary(superlative.head, typeHint);
       BinaryDenotation relationD = computeBinary(superlative.relation, typeHint.newRestrictedBinary(headD, null));
       ExplicitBinaryDenotation table = relationD.explicitlyFilterFirst(headD, graph);
-      return typeHint.applyBound(DenotationUtils.superlative(rank, count, table, superlative.mode));
+      if (superlative.mode == SuperlativeFormula.Mode.filter) {
+        return typeHint.applyBound(table.getFirsts());
+      } else {
+        return typeHint.applyBound(DenotationUtils.superlative(rank, count, table, superlative.mode));
+      }
 
     } else if (formula instanceof ArithmeticFormula) {
       // ============================================================
@@ -224,12 +222,6 @@ class LambdaDCSCoreLogic {
       UnaryDenotation child1D = computeUnary(arithmetic.child1, typeHint.newUnrestrictedUnary());
       UnaryDenotation child2D = computeUnary(arithmetic.child2, typeHint.newUnrestrictedUnary());
       return typeHint.applyBound(DenotationUtils.arithmetic(child1D, child2D, arithmetic.mode));
-
-    } else if (formula instanceof CallFormula) {
-      // ============================================================
-      // Call
-      // ============================================================
-      // TODO(ice): (Low priority)
 
     } else if (formula instanceof VariableFormula) {
       // ============================================================

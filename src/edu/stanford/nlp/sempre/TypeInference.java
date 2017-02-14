@@ -247,6 +247,7 @@ public final class TypeInference {
       for (int i = 0; i < info.argTypes.size(); i++)
         inferType(call.args.get(i), env, info.argTypes.get(i));
       return check(type.meet(info.retType));
+      
     } else {
       throw new RuntimeException("Can't infer type of formula: " + formula);
     }
