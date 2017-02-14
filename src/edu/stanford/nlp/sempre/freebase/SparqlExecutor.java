@@ -620,6 +620,9 @@ public class SparqlExecutor extends Executor {
       } else if (rawFormula instanceof SuperlativeFormula) {
         // Superlative (new environment, close scope)
         SuperlativeFormula formula = (SuperlativeFormula) rawFormula;
+        if (formula.mode == SuperlativeFormula.Mode.filter) {
+          throw new RuntimeException("filter mode for SuperlativeFormula is currently not supported in SparqlExecutor");
+        }
 
         int rank = Formulas.getInt(formula.rank);
         int count = Formulas.getInt(formula.count);
