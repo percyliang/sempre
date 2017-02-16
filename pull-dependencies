@@ -237,8 +237,11 @@ addModule('tables', 'Semantic parsing with execution on tables', lambda {
 })
 
 addModule('tables-data', 'Data for semantic parsing with execution on tables', lambda {
-  pull('/u/nlp/data/semparse/wikitable/data', 'data/tables/', {:symlink => true})
-  pull('/u/nlp/data/semparse/wikitable/mturk-trivia-data/csv', 'data/tables/', {:symlink => true})
+  # Compact version of the dataset
+  pull('https://github.com/ppasupat/WikiTableQuestions/releases/download/v1.0.2/WikiTableQuestions-1.0.2-compact.zip', 'data')
+  if not File.exists?('lib/data/WikiTableQuestions')
+    system "cd lib/data && unzip WikiTableQuestions-1.0.2-compact.zip" or exit 1
+  end
 })
 
 

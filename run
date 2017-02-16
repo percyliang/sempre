@@ -736,7 +736,7 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
   o('FeatureVector.ignoreZeroWeight'),
   o('maxPrintedPredictions', 10), o('maxPrintedTrue', 10), o('logFeaturesLimit', 10),
   o('LambdaDCSException.noErrorMessage'),
-  letDefault(:verbose, 2),
+  letDefault(:verbose, 1),
   sel(:verbose,
     l(),
     l(
@@ -884,8 +884,8 @@ end
 
 def tablesDataPaths
   lambda { |e|
-    baseDir = ['lib/data/tables/data/', 'WikiTableQuestions/data/'][e[:cldir]]
-    csvDir = ['lib/data/tables/', 'WikiTableQuestions/'][e[:cldir]]
+    baseDir = ['lib/data/WikiTableQuestions/data/', 'WikiTableQuestions/data/'][e[:cldir]]
+    csvDir = ['lib/data/WikiTableQuestions/', 'WikiTableQuestions/'][e[:cldir]]
     datasets = {
       'none' => l(),
       'train' => o('Dataset.inPaths', "train,#{baseDir}training.examples"),
