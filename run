@@ -702,7 +702,7 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
       o('FloatingParser.betaReduce'), o('initialFloatingHasZeroDepth'),
     nil),
   }),
-  o('Parser.verbose', 1),
+  o('Parser.verbose', 0),
   letDefault(:pruning, 1),
   sel(:pruning,
     l(),
@@ -736,7 +736,7 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
   o('FeatureVector.ignoreZeroWeight'),
   o('maxPrintedPredictions', 10), o('maxPrintedTrue', 10), o('logFeaturesLimit', 10),
   o('LambdaDCSException.noErrorMessage'),
-  letDefault(:verbose, 1),
+  letDefault(:verbose, 0),
   sel(:verbose,
     l(),
     l(
@@ -796,7 +796,7 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
       o('FeatureExtractor.featureComputers', 'tables.features.PhrasePredicateFeatureComputer tables.features.PhraseDenotationFeatureComputer'.split),
     nil),
     'all' => l(      # All features
-      o('FeatureExtractor.featureDomains', 'custom-denotation phrase-predicate phrase-denotation headword-denotation missing-predicate'.split),
+      o('FeatureExtractor.featureDomains', 'custom-denotation phrase-predicate phrase-denotation headword-denotation'.split),
       o('FeatureExtractor.featureComputers', 'tables.features.PhrasePredicateFeatureComputer tables.features.PhraseDenotationFeatureComputer'.split),
     nil),
     'all-fragment' => l(
@@ -824,7 +824,6 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
     'none' => l(),
     'careful' => l(
       o('maxNforLexicalizeAllPairs', 2),
-      o('useGenericCellType'),
       o('computeFuzzyMatchPredicates'),
     nil),
   }),
@@ -908,7 +907,7 @@ def tablesDataPaths
     end
     # That's it!
     l(
-      o('splitDevFromTrain', false),
+      #o('splitDevFromTrain', false),
       o('TableKnowledgeGraph.baseCSVDir', csvDir),
       sel(:data, datasets),
     nil)

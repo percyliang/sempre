@@ -17,8 +17,6 @@ public class PhraseDenotationFeatureComputer implements FeatureComputer {
   public static class Options {
     @Option(gloss = "Verbosity")
     public int verbose = 0;
-    @Option(gloss = "Define features for generic cell types too")
-    public boolean useGenericCellType = false;
   }
   public static Options opts = new Options();
   
