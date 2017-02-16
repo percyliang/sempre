@@ -146,7 +146,7 @@ public class PhraseDenotationFeatureComputer implements FeatureComputer {
 
   private void extractHeadwordDenotationFeatures(Example ex, Derivation deriv, Collection<String> denotationTypes) {
     if (!FeatureExtractor.containsDomain("headword-denotation")) return;
-    HeadwordInfo headwordInfo = HeadwordInfo.analyze(ex.languageInfo);
+    HeadwordInfo headwordInfo = HeadwordInfo.getHeadwordInfo(ex);
     if (headwordInfo == null) return;
     if (opts.verbose >= 2)
       LogInfo.logs("%s [%s] | %s %s %s", ex.utterance, headwordInfo, deriv.value, deriv.type, denotationTypes);

@@ -1,5 +1,9 @@
 package edu.stanford.nlp.sempre.tables.features;
 
+import java.util.concurrent.ExecutionException;
+
+import com.google.common.cache.*;
+
 import edu.stanford.nlp.sempre.*;
 
 /**
@@ -26,35 +30,65 @@ public class HeadwordInfo {
   }
 
   public String toString() {
-    return "(" + questionWord + "," + headword + ")";
+    return "Q=" + questionWord + ",H=" + headword;
   }
 
   public String questionWordTuple() {
-    return "(" + questionWord + ",*)";
+    return "Q=" + questionWord;
   }
 
   public String headwordTuple() {
-    return "(*," + headword + ")";
+    return "H=" + headword;
   }
-
-  // Heuristics: find the first N* after the first W*
-  // Example: tell me [who] is the first [person] ... --> person
-  public static HeadwordInfo analyze(LanguageInfo langInfo) {
-    String questionWord = null;
-    for (int i = 0; i < langInfo.numTokens(); i++) {
-      String posTag = langInfo.posTags.get(i);
-      if (posTag.startsWith("W")) {
-        questionWord = langInfo.lemmaTokens.get(i);
-        if (questionWord.equals("how")) {
-          // Possibly "how many", "how much", ...
-          if (i + 1 < langInfo.numTokens() && langInfo.posTags.get(i + 1).startsWith("J"))
-            questionWord += " " + langInfo.lemmaTokens.get(i + 1);
+  
+  // Caching
+  private static final LoadingCache<Example, HeadwordInfo> cache = CacheBuilder
+      .newBuilder().maximumSize(20)
+      .build(new CacheLoader<Example, HeadwordInfo>() {
+        @Override
+        public HeadwordInfo load(Example ex) throws Exception {
+          LanguageInfo langInfo = ex.languageInfo;
+          String questionWord = "", headWord = "";
+          for (int i = 0; i < langInfo.numTokens(); i++) {
+            String token = langInfo.lemmaTokens.get(i), posTag = langInfo.posTags.get(i);
+            if (posTag.startsWith("W")) {
+              if ("who".equals(token) || "where".equals(token) || "when".equals(token)) {
+                // These are treated as head words
+                headWord = token;
+                //LogInfo.logs("HEADWORD: %s => %s | %s", ex.utterance, questionWord, headWord);
+                return new HeadwordInfo(questionWord.trim(), headWord.trim());
+              }
+              questionWord += " " + token;
+              if (token.equals("how")) {
+                // Possibly "how many", "how much", ...
+                if (i + 1 < langInfo.numTokens() && langInfo.posTags.get(i + 1).startsWith("J"))
+                  questionWord += " " + langInfo.lemmaTokens.get(i + 1);
+              }
+            } else if (posTag.startsWith("N") && !questionWord.isEmpty()) {
+              if ("number".equals(token)) {
+                questionWord += " " + token;
+              } else {
+                headWord += " " + token;
+                while (i + 1 < langInfo.numTokens() && langInfo.posTags.get(i + 1).startsWith("N")) {
+                  i++;
+                  headWord += " " + langInfo.lemmaTokens.get(i);
+                }
+                //LogInfo.logs("HEADWORD: %s => %s | %s", ex.utterance, questionWord, headWord);
+                return new HeadwordInfo(questionWord.trim(), headWord.trim());
+              }
+            }
+          }
+          //LogInfo.logs("HEADWORD: %s => NULL", ex.utterance);
+          return null;
         }
-      } else if (posTag.startsWith("N") && questionWord != null) {
-        return new HeadwordInfo(questionWord, langInfo.lemmaTokens.get(i));
-      }
+      });
+
+  public static HeadwordInfo getHeadwordInfo(Example ex) {
+    try {
+      return cache.get(ex);
+    } catch (ExecutionException e) {
+      throw new RuntimeException(e.getCause());
     }
-    return null;
   }
 
 }
