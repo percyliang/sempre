@@ -53,6 +53,8 @@ public class WordEmbeddingFeatureComputer implements FeatureComputer {
     LogInfo.logs("%d words loaded (%d dimensions)", wordVectors.size(), opts.vecCapacity);
     LogInfo.end_track();
   }
+  
+  @Override public void setExecutor(Executor executor) { }    // Do nothing
 
   @Override
   public void extractLocal(Example ex, Derivation deriv) {

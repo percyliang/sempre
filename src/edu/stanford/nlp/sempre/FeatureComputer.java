@@ -13,6 +13,8 @@ package edu.stanford.nlp.sempre;
  * to check the feature domain first.
  */
 public interface FeatureComputer {
+  
+  void setExecutor(Executor executor);
 
   /**
    * This function is called on every sub-Derivation.

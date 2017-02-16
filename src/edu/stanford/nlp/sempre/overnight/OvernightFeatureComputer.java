@@ -59,6 +59,8 @@ public class OvernightFeatureComputer implements FeatureComputer {
   private static Aligner aligner;
   private static Map<String, Map<String, Double>> phraseTable;
   public final SimpleLexicon simpleLexicon = SimpleLexicon.getSingleton();
+  
+  @Override public void setExecutor(Executor executor) { }    // Do nothing
 
   @Override public void extractLocal(Example ex, Derivation deriv) {
     if (deriv.rule.rhs == null) return;

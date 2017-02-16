@@ -79,7 +79,7 @@ public class HeadwordInfo {
             }
           }
           //LogInfo.logs("HEADWORD: %s => NULL", ex.utterance);
-          return null;
+          return new HeadwordInfo("", "");
         }
       });
 

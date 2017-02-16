@@ -824,7 +824,7 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
     'none' => l(),
     'careful' => l(
       o('maxNforLexicalizeAllPairs', 2),
-      o('lookUnderCellProperty'), o('useGenericCellType'),
+      o('useGenericCellType'),
       o('computeFuzzyMatchPredicates'),
     nil),
   }),

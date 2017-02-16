@@ -13,6 +13,8 @@ import fig.basic.LispTree;
  * @author ppasupat
  */
 public class FormulaFeatureComputer implements FeatureComputer {
+  
+  @Override public void setExecutor(Executor executor) { }    // Do nothing
 
   @Override
   public void extractLocal(Example ex, Derivation deriv) {

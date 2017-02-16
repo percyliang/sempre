@@ -29,6 +29,8 @@ public class DerivOpCountFeatureComputer implements FeatureComputer {
   public static final String bridgeFn = "BridgeFn";
   public static Set<String> featureNames = Sets.newHashSet(entityCat, unaryCat, binaryCat, joinFn, mergeFn, bridgeFn);
 
+  @Override public void setExecutor(Executor executor) { }    // Do nothing
+  
   @Override
   public void extractLocal(Example ex, Derivation deriv) {
     if (!FeatureExtractor.containsDomain("opCount")) return;
