@@ -128,6 +128,7 @@ addMode('simulator', 'run the simulator', lambda { |e| l(
 	letDefault(:task, 'sidaw'),
 	sel(:task, {
 		'freebig' => o('logFiles', './shrdlurn/queries/freebuildbig-0206.json'),
+		'freebigcontext' => o('logFiles', './shrdlurn/queries/freebuildbig-0206.context.json'),
 
 		'qual1' => o('logFiles', './shrdlurn/queries/qualifier1-0118.json'),
 		'qual2' => o('logFiles', './shrdlurn/queries/qualifier2-0129.json'),

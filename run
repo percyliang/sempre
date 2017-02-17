@@ -1022,7 +1022,7 @@ o('FeatureExtractor.featureDomains', ':rule', ':span', ':stats', ':scope', ':soc
 o('Master.intOutputPath', './int-output/'),
 o('ILUtils.citationPath', './int-output/citation/'),
 
-o('ILUtils.useAligner', false),
+o('ILUtils.useAligner', true),
 o('ILUtils.maxSequence', 20),
 
 o('DefinitionAligner.strategies', 'ExactExclusion'),
