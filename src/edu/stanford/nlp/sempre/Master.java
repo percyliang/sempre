@@ -549,7 +549,6 @@ public class Master {
           // TODO : should not have to parse again, I guess just set the formula or something
           // builder.parser.parse(builder.params, refExHead.value, false);
           response.ex = refExHead.value;
-          
           // write out the grammar
           if (session.isWritingGrammar()) {
             PrintWriter out = IOUtils.openOutAppendHard(Paths.get(Master.opts.intOutputPath, "grammar.log.json").toString());
@@ -608,6 +607,8 @@ public class Master {
         session.context = ContextValue.fromString(
             String.format("(context (graph NaiveKnowledgeGraph ((string \"%s\") (name b) (name c))))",
                 tree.children.get(1).toString()));
+        if (session.isStatsing())
+          response.stats.put("context-length", tree.children.get(1).toString().length());
       }
     }
     else {
