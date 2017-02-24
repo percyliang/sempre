@@ -652,7 +652,7 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
   }),
   # Fig parameters
   selo(:cldir, 'execDir', '_OUTPATH_', 'output'),
-  o('overwriteExecDir'), o('addToView', 12), o('jarFiles', 'libsempre/*'),
+  o('overwriteExecDir'), o('addToView', 13), o('jarFiles', 'libsempre/*'),
   sel(:cldir, l(), '>/dev/null'),
   # Set environment for table execution
   o('executor', 'tables.lambdadcs.LambdaDCSExecutor'),
