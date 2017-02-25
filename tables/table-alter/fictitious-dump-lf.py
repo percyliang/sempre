@@ -80,7 +80,7 @@ def process(ex_id, filename, scheme):
             lf_matched.append(i)
     return n, lf_matched
 
-def get_best_lf(ex_id, filename, indices):
+def get_best_lf(ex_id, filename, indices, return_all=False):
     lfs = []
     with gzip.open(filename) as fin:
         for line in fin:
@@ -105,7 +105,7 @@ def get_best_lf(ex_id, filename, indices):
             lfs.append((size, formula))
     lfs = [lfs[i] for i in indices]
     lfs.sort()
-    return lfs[0]
+    return lfs if return_all else lfs[0]
 
 ################################################
 # Main entry
@@ -117,7 +117,12 @@ def main():
     parser.add_argument('dump_dir')
     # ./run @mode=tables @class=alter-ex -dumpdir [above] -turkedDataPath ...
     parser.add_argument('turk_ex_dir')
+    parser.add_argument('-a', '--dump-all',
+            help='Dump all matching LFs. Specify the base directory here')
     args = parser.parse_args()
+
+    if args.dump_all:
+        assert os.path.isdir(args.dump_all)
     
     # Note relevant files
     check_denotations_files = {}
@@ -151,8 +156,15 @@ def main():
         n, matched = process(ex_id, filename, SCHEMES[args.scheme])
         if matched:
             print >> sys.stderr, ex_id, n, len(matched)
-            size, best_lf = get_best_lf(ex_id, dump_files[ex_id], matched)
-            print '\t'.join(unicode(x) for x in ['nt-' + str(ex_id), best_lf])
+            if args.dump_all:
+                lfs = get_best_lf(ex_id, dump_files[ex_id], matched, True)
+                path = os.path.join(args.dump_all, 'nt-' + str(ex_id) + '.gz')
+                with gzip.open(path, 'w') as fout:
+                    for size, lf in lfs:
+                        print >> fout, lf
+            else:
+                size, best_lf = get_best_lf(ex_id, dump_files[ex_id], matched)
+                print '\t'.join(unicode(x) for x in ['nt-' + str(ex_id), best_lf])
 
 if __name__ == '__main__':
     main()
