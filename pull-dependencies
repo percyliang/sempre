@@ -236,14 +236,25 @@ addModule('tables', 'Semantic parsing with execution on tables', lambda {
   pull('/u/nlp/data/semparse/resources/opencsv-3.0.jar')
 })
 
-addModule('tables-data', 'Data for semantic parsing with execution on tables', lambda {
+addModule('tables-data', 'WikiTableQuestions dataset v1.0.2', lambda {
   # Compact version of the dataset
   pull('https://github.com/ppasupat/WikiTableQuestions/releases/download/v1.0.2/WikiTableQuestions-1.0.2-compact.zip', 'data')
-  if not File.exists?('lib/data/WikiTableQuestions')
-    system "cd lib/data && unzip WikiTableQuestions-1.0.2-compact.zip" or exit 1
+  # Remove old file (for backward compatibility)
+  if File.directory?('lib/data/WikiTableQuestions')
+    system 'rm -rv lib/data/WikiTableQuestions' or exit 1
   end
+  system "cd lib/data && unzip WikiTableQuestions-1.0.2-compact.zip" or exit 1
 })
 
+addModule('tables-data-0.5', 'WikiTableQuestions dataset v0.5 (for backward reproducibility)', lambda {
+  # Compact version of the dataset
+  pull('https://github.com/ppasupat/WikiTableQuestions/releases/download/v0.5/WikiTableQuestions-0.5-compact.zip', 'data')
+  # Remove old file (for backward compatibility)
+  if File.directory?('lib/data/WikiTableQuestions')
+    system 'rm -rv lib/data/WikiTableQuestions' or exit 1
+  end
+  system "cd lib/data && unzip WikiTableQuestions-0.5-compact.zip" or exit 1
+})
 
 addModule('overnight', 'Creating a parser for multiple domains', lambda {
   # Geo evaluation
