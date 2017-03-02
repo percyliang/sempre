@@ -11,10 +11,19 @@ import java.util.List;
  * @author Percy Liang
  */
 public abstract class PrimitiveFormula extends Formula {
+
+  @Override
+  public void forEach(Function<Formula, Boolean> func) {
+    func.apply(this);
+  }
+
+  @Override
   public Formula map(Function<Formula, Formula> func) {
     Formula result = func.apply(this);
     return result == null ? this : result;
   }
+
+  @Override
   public List<Formula> mapToList(Function<Formula, List<Formula>> func, boolean alwaysRecurse) {
     return func.apply(this);
   }

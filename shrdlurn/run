@@ -1,0 +1,193 @@
+#!/usr/bin/ruby
+
+# This is the main entry point for running all SEMPRE programs.  See
+# fig/lib/execrunner.rb for more documentation for how commands are generated.
+# There are a bunch of modes that this script can be invoked with, which
+# loosely correspond to the modules.
+
+$: << 'fig/lib'
+require 'execrunner'
+
+$modes = []
+def addMode(name, description, func)
+  $modes << [name, description, func]
+end
+
+def codalab(dependencies=nil)
+  # Set @cl=1 to run job on CodaLab
+  dependencies ||= l(':fig', ':lib', ':module-classes.txt', ':libsempre')
+  l(
+    letDefault(:cl, 0),
+    sel(:cl,
+      l(),
+      l('cl', 'run', dependencies, '---', 'LC_ALL=C.UTF-8'),
+    nil),
+  nil)
+end
+
+def header(modules='core', codalabDependencies=nil)
+  l(
+    codalab(codalabDependencies),
+    # Queuing system
+    letDefault(:q, 0), sel(:q, l(), l('fig/bin/q', '-shareWorkingPath', o('mem', '5g'), o('memGrace', 10), '-add', '---')),
+    # Create execution directory
+    letDefault(:pooldir, 1),
+    sel(:pooldir, l(), 'fig/bin/qcreate'),
+    # Run the Java command...
+    'java',
+    '-ea',
+    '-Dmodules='+modules,
+    # Memory size
+    letDefault(:memsize, 'default'),
+    sel(:memsize, {
+      'tiny' => l('-Xms2G', '-Xmx4G'),
+      'low' => l('-Xms5G', '-Xmx7G'),
+      'default' => l('-Xms8G', '-Xmx10G'),
+      'medium' => l('-Xms12G', '-Xmx14G'),
+      'high' => l('-Xms20G', '-Xmx24G'),
+      'higher' => l('-Xms40G', '-Xmx50G'),
+      'impressive' => l('-Xms75G', '-Xmx90G'),
+    }),
+    # Classpath
+    '-cp', 'libsempre/*:lib/*',
+    # Profiling
+    letDefault(:prof, 0), sel(:prof, l(), '-Xrunhprof:cpu=samples,depth=100,file=_OUTPATH_/java.hprof.txt'),
+    # Debugging
+    letDefault(:debug, 0), sel(:debug, l(), l('-Xdebug', '-Xrunjdwp:server=y,transport=dt_socket,suspend=y,address=8898')),
+  nil)
+end
+
+def rlwrap; system('which rlwrap') ? 'rlwrap' : nil end
+
+def unbalancedTrainDevSplit
+  l(o('Dataset.trainFrac', 0.8), o('Dataset.devFrac', 0.2))
+end
+def balancedTrainDevSplit
+  l(o('Dataset.trainFrac', 0.5), o('Dataset.devFrac', 0.5))
+end
+
+def figOpts; l(selo(:pooldir, 'execDir', 'exec', '_OUTPATH_'), o('overwriteExecDir'), o('addToView', 0)) end
+
+############################################################
+# Unit tests
+# Community Server
+
+
+addMode('backup', 'small commands like run community server, backup, or simulator', lambda { |e| l(
+  lambda { |e| system 'echo "backing up with mv"'},
+  lambda { |e| system 'mkdir -p ./int-backup/'},
+	letDefault(:msg, 'backing up, no message'),
+	lambda { |e| l('echo ', :msg, '> ./int-backup/message')},
+	lambda { |e| l('echo ', '`date +%Y-%m-%d.%H:%M:%S`', '>> ./int-backup/message')},
+  lambda { |e| system 'mv int-output int-backup/`date +%Y-%m-%d.%H:%M:%S`'},
+  lambda { |e| system 'mkdir -p ./int-output'},
+nil)})
+
+addMode('backup-data', 'put community-server into trash with time stamp', lambda { |e| l(
+	lambda { |e| system 'echo "backing up data with mv"'},
+  lambda { |e| system 'mkdir -p ./community-server/data-backup'},
+  lambda { |e| system 'mv ./community-server/data ./community-server/data-backup/`date +%Y-%m-%d.%H:%M:%S`'},
+nil)})
+
+addMode('trash', 'put int-output into trash with time stamp', lambda { |e| l(
+  lambda { |e| system 'echo "trashing int-output with time stamp"'},
+	lambda { |e| system 'mv int-output int-output-trash-`date +%Y-%m-%d.%H:%M:%S`'},
+  lambda { |e| system 'rm -rf int-output-trash-*'},
+  lambda { |e| system 'mkdir -p ./int-output'},
+nil)})
+
+
+addMode('community', 'start the community server', lambda { |e| l(
+l('python community-server/server.py -- port 8403'),
+nil)})
+
+addMode('others', 'print out common commands', lambda { |e| l(
+	lambda { |e| system 'echo mv folder folder-`date +%Y-%m-%d.%H:%M:%S`'},
+nil)})
+
+addMode('simulator', 'run the simulator', lambda { |e| l(
+	# rlwrap,
+	header('core,interactive'),
+	'edu.stanford.nlp.sempre.interactive.Simulator',
+	figOpts,
+	letDefault(:server, 'local'),
+	sel(:server, {
+		'local' => o('serverURL', 'http://localhost:8410'),
+		'remote' => o('serverURL', 'http://jonsson.stanford.edu:8410')
+	}),
+	# set to 0 to enable logging
+	o('numThreads', 1),
+	letDefault(:sandbox, 'full'),
+	sel(:sandbox, {
+		'all' => o('reqParams', 'grammar=0\&cite=0\&learn=0\&logging=0'),
+		'nolog' => o('reqParams', 'grammar=0\&cite=0\&learn=1\&logging=0'),
+		'nolearn' => o('reqParams', 'grammar=1\&cite=1\&learn=0\&logging=0'),
+		'none' => o('reqParams', 'grammar=1\&cite=1\&learn=1\&logging=0'),
+		'nocite' => o('reqParams', 'grammar=1\&cite=0\&learn=1\&logging=0'),
+	}),
+	letDefault(:task, 'sidaw'),
+	sel(:task, {
+		'freebig' => o('logFiles', './shrdlurn/queries/freebuildbig-0206.json'),
+		'freebigcontext' => o('logFiles', './shrdlurn/queries/freebuildbig-0206.context.json'),
+
+		'qual1' => o('logFiles', './shrdlurn/queries/qualifier1-0118.json'),
+		'qual2' => o('logFiles', './shrdlurn/queries/qualifier2-0129.json'),
+		'qual3' => o('logFiles', './shrdlurn/queries/qualifier3-0201.json'), #  both 2 and 3
+		'free1' => o('logFiles', './shrdlurn/queries/freebuild1-0121.json'),
+		'free2' => o('logFiles', './shrdlurn/queries/freebuild2-0127.json'),
+		'sidaw' => o('logFiles', './shrdlurn/queries/sidaw.json.log'),
+
+		'testqual' => o('logFiles',
+		'./shrdlurn/queries/sidaw.json.log',
+		#'./shrdlurn/queries/freebuild2-0127.json',
+		'./shrdlurn/queries/qualifier1-0118.json',
+		'./shrdlurn/queries/qualifier3-0201.json'),
+
+		'testfree' => o('logFiles',
+		'./shrdlurn/queries/sidaw.json.log',
+		#'./shrdlurn/queries/freebuild2-0127.json',
+		#'./shrdlurn/queries/freebuild1-0121.json',
+		'./shrdlurn/queries/freebuild2-0127.json'),
+
+		'stress' => o('logFiles',
+		'./shrdlurn/queries/sidaw.json.log',
+		'./shrdlurn/queries/qualifier1-0118.json',
+		'./shrdlurn/queries/freebuild1-0121.json',
+		'./shrdlurn/queries/freebuild2-0127.json',
+		'./shrdlurn/queries/qualifier3-0201.json',
+		'./shrdlurn/queries/sidaw.json.log',
+		'./shrdlurn/queries/qualifier1-0118.json',
+		'./shrdlurn/queries/freebuild1-0121.json',
+		'./shrdlurn/queries/freebuild2-0127.json',
+		'./shrdlurn/queries/qualifier3-0201.json',
+		'./shrdlurn/queries/sidaw.json.log',
+		'./shrdlurn/queries/qualifier1-0118.json',
+		'./shrdlurn/queries/freebuild1-0121.json',
+		'./shrdlurn/queries/freebuild2-0127.json',
+		'./shrdlurn/queries/qualifier3-0201.json',
+		'./shrdlurn/queries/sidaw.json.log',
+		'./shrdlurn/queries/qualifier1-0118.json',
+		'./shrdlurn/queries/freebuild1-0121.json',
+		'./shrdlurn/queries/freebuild2-0127.json',
+		'./shrdlurn/queries/qualifier3-0201.json'
+		)
+		}),
+nil)})
+
+############################################################
+
+if ARGV.size == 0
+  puts "#{$0} @mode=<mode> [options]"
+  puts
+  puts 'This is the main entry point for all SHRDLRUN related runs.'
+  puts "Modes:"
+  $modes.each { |name,description,func|
+    puts "  #{name}: #{description}"
+  }
+end
+
+modesMap = {}
+$modes.each { |name,description,func|
+  modesMap[name] = func
+}
+run!(sel(:mode, modesMap))

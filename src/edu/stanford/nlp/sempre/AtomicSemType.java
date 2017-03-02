@@ -1,7 +1,6 @@
 package edu.stanford.nlp.sempre;
 
 import fig.basic.LispTree;
-import java.util.*;
 
 // Represents an atomic type (strings, entities, numbers, dates, etc.).
 public class AtomicSemType extends SemType {

@@ -3,6 +3,8 @@ package edu.stanford.nlp.sempre;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 
+import edu.stanford.nlp.sempre.interactive.PragmaticListener;
+import edu.stanford.nlp.sempre.interactive.PrefixTrie;
 import fig.basic.*;
 
 import java.io.BufferedReader;
@@ -36,6 +38,13 @@ public class Params {
     @Option(gloss = "Lazy L1 full update frequency") public int lazyL1FullUpdateFreq = 5000;
   }
   public static Options opts = new Options();
+  
+
+  // interactive stuff, stores the autocomplete trie
+  public PragmaticListener pragmaticListener = new PragmaticListener();
+  public PrefixTrie autocompleteTrie = new PrefixTrie();
+  public List<Rule> inducedRules = new ArrayList<>();
+
   public enum L1Reg {
     LAZY,
     NONLAZY,

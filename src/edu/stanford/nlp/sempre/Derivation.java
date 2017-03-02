@@ -1,8 +1,10 @@
 package edu.stanford.nlp.sempre;
 
-import fig.basic.*;
-
 import java.util.*;
+
+import com.beust.jcommander.internal.Lists;
+
+import fig.basic.*;
 
 /**
  * A Derivation corresponds to the production of a (partial) logical form
@@ -14,7 +16,19 @@ import java.util.*;
  */
 public class Derivation implements SemanticFn.Callable, HasScore {
   public static class Options {
-    @Option(gloss = "When printing derivations, to show values (could be quite verbose)")
+    // Used to compare derivations by compatibility.
+	public static class CompatibilityDerivationComparator implements Comparator<Derivation> {
+	  @Override
+	  public int compare(Derivation deriv1, Derivation deriv2) {
+	    if (deriv1.compatibility > deriv2.compatibility) return -1;
+	    if (deriv1.compatibility < deriv2.compatibility) return +1;
+	    // Ensure reproducible randomness
+	    if (deriv1.creationIndex < deriv2.creationIndex) return -1;
+	    if (deriv1.creationIndex > deriv2.creationIndex) return +1;
+	    return 0;
+	  }
+	}
+	@Option(gloss = "When printing derivations, to show values (could be quite verbose)")
     public boolean showValues = true;
     @Option(gloss = "When printing derivations, to show the first value (ignored when showValues is set)")
     public boolean showFirstValue = false;
@@ -24,8 +38,12 @@ public class Derivation implements SemanticFn.Callable, HasScore {
     public boolean showRules = false;
     @Option(gloss = "When printing derivations, to show canonical utterance")
     public boolean showUtterance = false;
+    @Option(gloss = "When printing derivations, show the category")
+    public boolean showCat = false;
     @Option(gloss = "When executing, show formulae (for debugging)")
     public boolean showExecutions = false;
+    @Option(gloss = "changes ScoredDerivationComparator to use pragmatic_score instead")
+    public boolean comparePragmatically = false;
   }
 
   public static Options opts = new Options();
@@ -41,6 +59,19 @@ public class Derivation implements SemanticFn.Callable, HasScore {
   // TODO(yushi): make fields final
   public String canonicalUtterance;
   private boolean[] anchoredTokens;   // Tokens which anchored rules are defined on
+  public boolean allAnchored = true;
+  private int[] numAnchors;     // Number of times each token was anchored
+  
+  // information for grammar induction
+  public class GrammarInfo {
+    public boolean anchored = false;
+    public boolean matched = false;
+    public int start = -1, end = -1;
+    public Formula formula;
+    public List<Derivation> matches = Lists.newArrayList();
+  }
+  public GrammarInfo grammarInfo = new GrammarInfo();
+
 
   // If this derivation is composed of other derivations
   public final Rule rule;  // Which rule was used to produce this derivation?  Set to nullRule if not.
@@ -64,6 +95,7 @@ public class Derivation implements SemanticFn.Callable, HasScore {
   private final FeatureVector localFeatureVector;  // Features
   double score = Double.NaN;  // Weighted combination of features
 
+
   // Used during parsing (by FeatureExtractor, SemanticFn) to cache arbitrary
   // computation across different sub-Derivations.
   // Convention:
@@ -78,8 +110,12 @@ public class Derivation implements SemanticFn.Callable, HasScore {
 
   // Number in [0, 1] denoting how correct the value is.
   public double compatibility = Double.NaN;
+
   // Probability (normalized exp of score).
   public double prob = Double.NaN;
+  // Probability after pragmatics
+  public double pragmatic_prob = Double.NaN;
+
 
   // Miscellaneous statistics
   int maxBeamPosition = -1;  // Lowest position that this tree or any of its children is on the beam (after sorting)
@@ -95,6 +131,7 @@ public class Derivation implements SemanticFn.Callable, HasScore {
   long creationIndex;
   public static long numCreated = 0;  // Incremented for each derivation we create.
   public static final Comparator<Derivation> derivScoreComparator = new ScoredDerivationComparator();
+  public static final Comparator<Derivation> pragDerivScoreComparator = new PragmaticallyScoredDerivationComparator();
 
   public static final List<Derivation> emptyList = Collections.emptyList();
 
@@ -149,6 +186,24 @@ public class Derivation implements SemanticFn.Callable, HasScore {
       this.end = c.getEnd();
       this.rule = c.getRule();
       this.children = c.getChildren();
+      return this;
+    }
+
+    public Builder withAllFrom(Derivation deriv) {
+      this.cat = deriv.cat;
+      this.start = deriv.start;
+      this.end = deriv.end;
+      this.rule = deriv.rule;
+      this.children = deriv.children == null ? null : new ArrayList<>(deriv.children);
+      this.formula = deriv.formula;
+      this.type = deriv.type;
+      this.localFeatureVector = deriv.localFeatureVector;
+      this.score = deriv.score;
+      this.value = deriv.value;
+      this.executorStats = deriv.executorStats;
+      this.compatibility = deriv.compatibility;
+      this.prob = deriv.prob;
+      this.canonicalUtterance = deriv.canonicalUtterance;
       return this;
     }
 
@@ -227,6 +282,11 @@ public class Derivation implements SemanticFn.Callable, HasScore {
     return localFeatureVector.dotProduct(params);
   }
 
+  // SHOULD NOT BE USED except during test time if the memory is desperately needed.
+  public void clearFeatures() {
+    localFeatureVector.clear();
+  }
+
   /**
    * Recursively compute the score for each node in derivation. Update |score|
    * field as well as return its value.
@@ -280,7 +340,6 @@ public class Derivation implements SemanticFn.Callable, HasScore {
           tree.addChild(values.size() + " values");
         }
       }
-
     }
     if (type != null && opts.showTypes)
       tree.addChild(LispTree.proto.newList("type", type.toLispTree()));
@@ -289,6 +348,9 @@ public class Derivation implements SemanticFn.Callable, HasScore {
     }
     if (opts.showUtterance && canonicalUtterance != null) {
       tree.addChild(LispTree.proto.newList("canonicalUtterance", canonicalUtterance));
+    }
+    if (opts.showCat && cat != null) {
+      tree.addChild(LispTree.proto.newList("cat", cat));
     }
     return tree;
   }
@@ -388,27 +450,31 @@ public class Derivation implements SemanticFn.Callable, HasScore {
   public static class ScoredDerivationComparator implements Comparator<Derivation> {
     @Override
     public int compare(Derivation deriv1, Derivation deriv2) {
-      if (deriv1.score > deriv2.score) return -1;
-      if (deriv1.score < deriv2.score) return +1;
-      // Ensure reproducible randomness
-      if (deriv1.creationIndex < deriv2.creationIndex) return -1;
-      if (deriv1.creationIndex > deriv2.creationIndex) return +1;
-      return 0;
+        if (deriv1.score > deriv2.score) return -1;
+        if (deriv1.score < deriv2.score) return +1;
+        // Ensure reproducible randomness
+        if (deriv1.creationIndex < deriv2.creationIndex) return -1;
+        if (deriv1.creationIndex > deriv2.creationIndex) return +1;
+        return 0;
     }
   }
 
-  // Used to compare derivations by compatibility.
-  public static class CompatibilityDerivationComparator implements Comparator<Derivation> {
-    @Override
-    public int compare(Derivation deriv1, Derivation deriv2) {
-      if (deriv1.compatibility > deriv2.compatibility) return -1;
-      if (deriv1.compatibility < deriv2.compatibility) return +1;
-      // Ensure reproducible randomness
-      if (deriv1.creationIndex < deriv2.creationIndex) return -1;
-      if (deriv1.creationIndex > deriv2.creationIndex) return +1;
-      return 0;
-    }
-  }
+ //Used to compare derivations by pragmatic score.
+ public static class PragmaticallyScoredDerivationComparator implements Comparator<Derivation> {
+   @Override
+   public int compare(Derivation deriv1, Derivation deriv2) {
+     if (Double.isNaN(deriv1.pragmatic_prob) || Double.isNaN(deriv2.pragmatic_prob))
+       throw new RuntimeException("pragmatic_prob not assigned!");
+
+     // adding the small number for stability
+     if (deriv1.pragmatic_prob > deriv2.pragmatic_prob + 1e-6) return -1;
+     if (deriv1.pragmatic_prob < deriv2.pragmatic_prob - 1e-6) return +1;
+
+     if (deriv1.creationIndex < deriv2.creationIndex) return -1;
+     if (deriv1.creationIndex > deriv2.creationIndex) return +1;
+     return 0;
+   }
+ }
 
   // for debugging
   public void printDerivationRecursively() {
@@ -422,6 +488,9 @@ public class Derivation implements SemanticFn.Callable, HasScore {
 
   public static void sortByScore(List<Derivation> trees) {
     Collections.sort(trees, derivScoreComparator);
+  }
+  public static void sortByPragmaticScore(List<Derivation> trees) {
+    Collections.sort(trees, pragDerivScoreComparator);
   }
 
   // Generate a probability distribution over derivations given their scores.
@@ -448,27 +517,63 @@ public class Derivation implements SemanticFn.Callable, HasScore {
         child.clearTempState();
   }
 
-  // Compute anchoredTokens and return the result
-  // anchoredTokens[>= anchoredTokens.length] are False by default
-  public boolean[] getAnchoredTokens() {
-    if (anchoredTokens == null) {
+  /**
+   * Return an int array numAnchors where numAnchors[i] is
+   * the number of times we anchored on token i.
+   *
+   * numAnchors[>= numAnchors.length] are 0 by default.
+   */
+  public int[] getNumAnchors() {
+    if (numAnchors == null) {
       if (rule.isAnchored()) {
-        anchoredTokens = new boolean[end];
-        for (int i = start; i < end; i++) anchoredTokens[i] = true;
+        numAnchors = new int[end];
+        for (int i = start; i < end; i++) numAnchors[i] = 1;
       } else {
-        anchoredTokens = new boolean[0];
+        numAnchors = new int[0];
         for (Derivation child : children) {
-          boolean[] childAnchoredTokens = child.getAnchoredTokens();
-          if (anchoredTokens.length < childAnchoredTokens.length) {
-            boolean[] newAnchoredTokens = new boolean[childAnchoredTokens.length];
-            for (int i = 0; i < anchoredTokens.length; i++) newAnchoredTokens[i] = anchoredTokens[i];
-            anchoredTokens = newAnchoredTokens;
+          int[] childNumAnchors = child.getNumAnchors();
+          if (numAnchors.length < childNumAnchors.length) {
+            int[] newNumAnchors = new int[childNumAnchors.length];
+            for (int i = 0; i < numAnchors.length; i++)
+              newNumAnchors[i] = numAnchors[i];
+            numAnchors = newNumAnchors;
           }
-          for (int i = 0; i < childAnchoredTokens.length; i++)
-            anchoredTokens[i] = anchoredTokens[i] || childAnchoredTokens[i];
+          for (int i = 0; i < childNumAnchors.length; i++)
+            numAnchors[i] += childNumAnchors[i];
         }
       }
     }
-    return anchoredTokens.clone();
+    return numAnchors;
+  }
+
+  /**
+   * Return a boolean array anchoredTokens where anchoredTokens[i]
+   * indicates whether we have anchored on token i.
+   *
+   * anchoredTokens[>= anchoredTokens.length] are False by default
+   */
+  public boolean[] getAnchoredTokens() {
+    int[] numAnchors = getNumAnchors();
+    boolean[] anchoredTokens = new boolean[numAnchors.length];
+    for (int i = 0; i < numAnchors.length; i++)
+      anchoredTokens[i] = (numAnchors[i] > 0);
+    return anchoredTokens;
+  }
+
+  public Derivation betaReduction() {
+    Formula reduced = Formulas.betaReduction(formula);
+    return new Builder().withAllFrom(this).formula(reduced).createDerivation();
+  }
+
+  public boolean allAnchored() {
+    if (rule.isFloating() || rule.isInduced() || !this.allAnchored) {
+      this.allAnchored = false;
+      return false;
+    } else {
+      for (Derivation child : children) {
+        if (child.allAnchored() == false) return false;
+      }
+      return true;
+    }
   }
 }

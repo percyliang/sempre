@@ -1,23 +1,38 @@
 #!/usr/bin/env ruby
 
-# SEMPRE depends on several library/data files into *lib*.  Run this script to
+# SEMPRE depends on several library/data files into |lib|.  Run this script to
 # copy those dependencies to your local directory.  This allows you to run
 # SEMPRE from anywhere.  This file consists of a set of modules (which loosely
 # correspond to the code modules).
+#
+# The master copy of these dependencies are stored on the Stanford NLP machines.
+#
+# Usage:
+#   ./pull-dependencies <module-1> ... <module-n>
+#
+# For developers with ssh access to NLP machines, there are two more local commands:
+# - Copy or link |sourcePath| into lib/|dir|.
+#   ./pull-dependencies -l <module-1> ... <module-n>
+# - Deploy the dependencies to the NLP machines's public www.
+#   ./pull-dependencies -l -r <module-1> ... <module-n>
 
-# The master copy of these dependencies are stored on the Stanford NLP
-# machines.
-
+# Specify the version of the dependencies
+# (To developer: Update this before releasing a new version!)
 $version = '2.0'
-$isPublic = true
 
+$isLocal = ARGV.index('-l')
+$isRelease = ARGV.index('-r')
+if $isRelease and not $isLocal
+  puts "ERROR: To release, must use both -l and -r"
+  exit 1
+end
+ARGV.delete_if { |x| x == '-l' or x == '-r' }
 
 def isZip(name)
   # Directories are zipped
   name.end_with?('.exec') or name !~ /\./
 end
 
-# - Download the dependencies from the Stanford SEMPRE servers.
 def pull(sourcePath, dir=nil, opts={})
   puts sourcePath
   destDir = 'lib' + (dir ? '/' + dir : '')
@@ -26,7 +41,7 @@ def pull(sourcePath, dir=nil, opts={})
   name = File.basename(sourcePath)
   ext = isZip(name) ? '.zip' : ''
 
-  if $isPublic
+  if not $isLocal and not $isRelease
     # Download url => localPath
     url = 'http://nlp.stanford.edu/software/sempre/dependencies-' + $version + sourcePath + ext
     localPath = destDir + '/' + name + ext
@@ -38,6 +53,38 @@ def pull(sourcePath, dir=nil, opts={})
       system "rm #{localPath}" or exit 1
     end
   else
+    rsyncOpts = '-rlptDzi'  # Preserve everything except groups and permissions
+    if $isRelease
+      # Copy sourcePath to cluster
+      baseDeployPath = '/u/apache/htdocs/static/software/sempre/dependencies-' + $version
+      deployPath = baseDeployPath + sourcePath + ext
+      system "mkdir -p #{File.dirname(deployPath)}" or exit 1
+      if File.exists?(sourcePath)
+        if isZip(name)
+          system "cd #{File.dirname(sourcePath)} && zip -r #{deployPath} #{File.basename(sourcePath)}" or exit 1
+        else
+          if opts[:symlink]
+            system "ln -sf #{File.expand_path(sourcePath)} #{deployPath}" or exit 1
+          else
+            system "rsync #{rsyncOpts} #{sourcePath} #{deployPath}" or exit 1
+          end
+        end
+      else
+        system "rsync #{rsyncOpts} jamie.stanford.edu:#{sourcePath} #{deployPath}" or exit 1
+      end
+      system "chmod -R og=u #{baseDeployPath}" #or exit 1
+    else
+      # Download sourcePath from cluster to destDir
+      if File.exists?(sourcePath)
+        if opts[:symlink]
+          system "ln -sf #{File.expand_path(sourcePath)} #{destDir}" or exit 1
+        else
+          system "rsync #{rsyncOpts} #{sourcePath} #{destDir}" or exit 1
+        end
+      else
+        system "rsync #{rsyncOpts} jamie.stanford.edu:#{sourcePath} #{destDir}" or exit 1
+      end
+    end
   end
 end
 
@@ -88,15 +135,44 @@ addModule('core', 'Core utilities (need to compile)', lambda {
   pull('/u/nlp/data/semparse/resources/jackson-databind-2.2.0.jar')
 })
 
-addModule('corenlp', 'Stanford CoreNLP (code and modules)', lambda {
+addModule('corenlp', 'Stanford CoreNLP 3.6.0', lambda {
+  pull('/u/nlp/data/semparse/resources/stanford-corenlp-full-2015-12-09.zip', '', {:symlink => true})
+  if not File.exists?('lib/stanford-corenlp-full-2015-12-09')
+    system "cd lib && unzip stanford-corenlp-full-2015-12-09.zip" or exit 1
+  end
+  pull('/u/nlp/data/semparse/resources/stanford-corenlp-caseless-2015-04-20-models.jar',
+       'stanford-corenlp-full-2015-12-09', {:symlink => true})
+  # Remove old file (for backward compatibility)
+  if Dir.glob('lib/stanford-corenlp*.jar').any?
+    system 'rm -v lib/stanford-corenlp*.jar' or exit 1
+  end
+  {'stanford-corenlp-3.6.0.jar' => 'stanford-corenlp.jar',
+   'stanford-corenlp-3.6.0-models.jar' => 'stanford-corenlp-models.jar',
+   'stanford-corenlp-caseless-2015-04-20-models.jar' => 'stanford-corenlp-caseless-models.jar',
+   'joda-time.jar' => 'joda-time.jar',
+   'jollyday.jar' => 'jollyday.jar'}.each { |key, value|
+    system "ln -sfv stanford-corenlp-full-2015-12-09/#{key} lib/#{value}" or exit 1
+  }
+})
+
+addModule('corenlp-3.2.0', 'Stanford CoreNLP 3.2.0 (for backward reproducibility)', lambda {
   pull('/u/nlp/data/semparse/resources/stanford-corenlp-full-2013-06-20.zip', '', {:symlink => true})
   if not File.exists?('lib/stanford-corenlp-full-2013-06-20')
     system "cd lib && unzip stanford-corenlp-full-2013-06-20.zip" or exit 1
   end
-  ['stanford-corenlp-3.2.0.jar', 'stanford-corenlp-3.2.0-models.jar', 'joda-time.jar', 'jollyday.jar'].each { |file|
-    system "ln -sfv stanford-corenlp-full-2013-06-20/#{file} lib" or exit 1
+  pull('/u/nlp/data/semparse/resources/stanford-corenlp-caseless-2013-06-07-models.jar',
+       'stanford-corenlp-full-2013-06-20', {:symlink => true})
+  # Remove old file (for backward compatibility)
+  if Dir.glob('lib/stanford-corenlp*.jar').any?
+    system 'rm -v lib/stanford-corenlp*.jar' or exit 1
+  end
+  {'stanford-corenlp-3.2.0.jar' => 'stanford-corenlp.jar',
+   'stanford-corenlp-3.2.0-models.jar' => 'stanford-corenlp-models.jar',
+   'stanford-corenlp-caseless-2013-06-07-models.jar' => 'stanford-corenlp-caseless-models.jar',
+   'joda-time.jar' => 'joda-time.jar',
+   'jollyday.jar' => 'jollyday.jar'}.each { |key, value|
+    system "ln -sfv stanford-corenlp-full-2013-06-20/#{key} lib/#{value}" or exit 1
   }
-  pull('/u/nlp/data/semparse/resources/stanford-corenlp-caseless-2013-06-07-models.jar', '', {:symlink => true})
 })
 
 addModule('freebase', 'Freebase: need to construct Freebase schemas', lambda {
@@ -188,6 +264,11 @@ addModule('overnight', 'Creating a parser for multiple domains', lambda {
   # Pull the independent sets for calendar
   pull('/u/nlp/data/semparse/overnight/calendar/eval/calendar.test.turk.examples', 'data/overnight/', {:symlink => true})
 })
+
+# Community server
+addModule('community', 'Community Server', lambda {
+  exec('./community-server/install-deps.py')
+  })
 
 
 ############################################################

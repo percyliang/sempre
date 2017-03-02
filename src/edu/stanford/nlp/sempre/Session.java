@@ -1,7 +1,14 @@
 package edu.stanford.nlp.sempre;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import com.google.common.base.Strings;
+
+import fig.basic.NumUtils;
+import fig.basic.Option;
 
 /**
  * A Session contains the information specific to a user.
@@ -13,11 +20,20 @@ import java.util.List;
  */
 public class Session {
   public final String id;  // Session id
+  public static class Options {
+    @Option public String inParamsPath;
+  }
   String remoteHost;  // Where we connected from
   String format;  // html or json
   ContextValue context;  // Current context used to create new examples
   Example lastEx;  // Last example that we processed
-
+  Params params;
+  Learner learner;
+  Map<String,String> reqParams;
+  
+  public static Options opts = new Options();
+  
+  // per session parameters
   public Session(String id) {
     this.id = id;
     context = new ContextValue(id, DateValue.now(), new ArrayList<ContextValue.Exchange>());
@@ -58,9 +74,29 @@ public class Session {
       newExchanges.add(context.exchanges.get(i));
     return context.withNewExchange(newExchanges);
   }
-
+  
+  public void useIndependentLearner(Builder builder) {
+    this.params = new Params();
+    if (!Strings.isNullOrEmpty(opts.inParamsPath))
+      this.params.read(opts.inParamsPath);
+    this.learner = new Learner(builder.parser, this.params, new Dataset());
+  }
+ 
   @Override
   public String toString() {
     return String.format("%s: %s; last: %s", id, context, lastEx);
+  }
+  
+  // Decides if we write out any logs
+  public boolean isLogging() { return defaultTrue("logging");}
+  public boolean isWritingCitation() { return defaultTrue("cite");}
+  public boolean isWritingGrammar() { return defaultTrue("grammar");}
+  public boolean isLearning() { return defaultTrue("learn");}
+  public boolean isStatsing() { return defaultTrue("stats");}
+  
+  private boolean defaultTrue(String key) {
+    if (this.reqParams == null) return true;
+    if (!this.reqParams.containsKey(key)) return true;
+    return !this.reqParams.get(key).equals("0");
   }
 }

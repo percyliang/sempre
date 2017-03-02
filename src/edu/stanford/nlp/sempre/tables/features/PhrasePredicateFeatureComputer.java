@@ -21,7 +21,8 @@ import fig.basic.*;
  */
 public class PhrasePredicateFeatureComputer implements FeatureComputer {
   public static class Options {
-    @Option(gloss = "Verbosity") public int verbose = 0;
+    @Option(gloss = "Verbosity")
+    public int verbose = 0;
     @Option(gloss = "Define features on partial derivations as well")
     public boolean defineOnPartialDerivs = true;
     @Option(gloss = "Also define features on prefix and suffix matches")
@@ -46,8 +47,7 @@ public class PhrasePredicateFeatureComputer implements FeatureComputer {
   @Override
   public void extractLocal(Example ex, Derivation deriv) {
     if (!(FeatureExtractor.containsDomain("phrase-predicate")
-          || FeatureExtractor.containsDomain("missing-predicate")
-          || FeatureExtractor.containsDomain("phrase-formula"))) return;
+        || FeatureExtractor.containsDomain("missing-predicate"))) return;
     // Only compute features at the root, except when the partial option is set.
     if (!opts.defineOnPartialDerivs && !deriv.isRoot(ex.numTokens())) return;
     List<PhraseInfo> phraseInfos = PhraseInfo.getPhraseInfos(ex);
@@ -90,9 +90,6 @@ public class PhrasePredicateFeatureComputer implements FeatureComputer {
     if (FeatureExtractor.containsDomain("missing-predicate")) {
       extractMissing(ex, deriv, phraseInfos, predicateInfos);
     }
-    if (FeatureExtractor.containsDomain("phrase-formula")) {
-      extractPhraseFormula(ex, deriv, phraseInfos);
-    }
   }
 
   // ============================================================
@@ -101,17 +98,9 @@ public class PhrasePredicateFeatureComputer implements FeatureComputer {
 
   private void extractMatch(Example ex, Derivation deriv, PhraseInfo phraseInfo, PredicateInfo predicateInfo, double factor) {
     if (predicateInfo.originalString != null) {
-      if (!PhraseInfo.opts.usePhraseLemmaOnly) {
-        extractMatch(ex, deriv, phraseInfo, phraseInfo.text, "(o)",
-            predicateInfo, predicateInfo.originalString, "(o)", factor);
-      }
       extractMatch(ex, deriv, phraseInfo, phraseInfo.lemmaText, "",
           predicateInfo, predicateInfo.originalString, "(o)", factor);
     } else {
-      if (!PhraseInfo.opts.usePhraseLemmaOnly) {
-        extractMatch(ex, deriv, phraseInfo, phraseInfo.text, "(o)",
-            predicateInfo, predicateInfo.predicate, "(i)", factor);
-      }
       extractMatch(ex, deriv, phraseInfo, phraseInfo.lemmaText, "",
           predicateInfo, predicateInfo.predicate, "(i)", factor);
     }
@@ -198,27 +187,6 @@ public class PhrasePredicateFeatureComputer implements FeatureComputer {
     }
     for (String missing : missingPredicates) {
       deriv.addFeature("m-p", missing);
-    }
-  }
-
-  // ============================================================
-  // Phrase - Formula features
-  // ============================================================
-
-  private void extractPhraseFormula(Example ex, Derivation deriv, List<PhraseInfo> phraseInfos) {
-    if (deriv.formula instanceof LambdaFormula) return;
-    // Get rough formula
-    LispTree tree = PredicateInfo.normalizeFormula(ex, deriv);
-    if (opts.verbose >= 2) {
-      LogInfo.logs("original formula %s", deriv.formula);
-      LogInfo.logs("normalized formula %s", tree);
-    }
-    deriv.addFeature("p-f", "" + tree);
-    for (PhraseInfo phraseInfo : phraseInfos) {
-      if (!PhraseInfo.opts.usePhraseLemmaOnly) {
-        deriv.addFeature("p-f", phraseInfo.text + "(o);" + tree);
-      }
-      deriv.addFeature("p-f", phraseInfo.lemmaText + ";" + tree);
     }
   }
 

@@ -1,106 +1,131 @@
 # Simple Grammar
-# Use only joins, next, and maybe superlatives
+# 
+# Main Categories:
+# - Set
+# - Relation (function from Set to Set)
 
 ################################################################
-# Macros
+# Macros 
 
 (def @R reverse)
 (def @type fb:type.object.type)
 (def @row fb:type.row)
 
 (def @next fb:row.row.next)
-(def @!next !fb:row.row.next)
 (def @index fb:row.row.index)
-(def @!index !fb:row.row.index)
-
 (def @p.num fb:cell.cell.number)
-(def @!p.num !fb:cell.cell.number)
 (def @p.date fb:cell.cell.date)
-(def @!p.date !fb:cell.cell.date)
+(def @p.num2 fb:cell.cell.num2)
+(def @p.str1 fb:cell.cell.str1)
+(def @p.str2 fb:cell.cell.str2)
 
 ################################################################
 # Lexicon
 
 ################################
-# Anchored Rules: Entity, Unary, Binary
+# Anchored Rules
 (rule $Entity ($PHRASE) (FuzzyMatchFn entity) (anchored 1))
-(rule $Binary ($PHRASE) (FuzzyMatchFn binary) (anchored 1))
 (rule $Entity ($PHRASE) (NumberFn) (anchored 1))
 (rule $Entity ($PHRASE) (DateFn) (anchored 1))
 
-################################
-# Create binary from thin air
-(rule $Binary (nothing) (FuzzyMatchFn any binary))
+(rule $Set ($Entity) (IdentityFn))
+
+(when alternative
+  (rule $Set ($Entity $Entity) (lambda e1 (lambda e2 (or (var e1) (var e2)))))
+)
 
 ################################
-# Property
-# (@p.num (number 42)) / (@p.date (date 2012 12 21))
-(for @property (@p.num @p.date)
-  (rule $Property (nothing) (ConstantFn @property))
+# Floating Rules
+(rule $Set (nothing) (ConstantFn (@type @row)))
+
+################################################################
+# Binaries
+
+(rule $Binary (nothing) (FuzzyMatchFn any binary))
+(for @property (@p.num @p.date @p.num2 @next)
+  (rule $Binary (nothing) (ConstantFn @property))
+)
+# Treat comparisons specially as reversed comparisons are redundant.
+(for @comparison (< > <= >= !=)
+  (rule $Comparison (nothing) (ConstantFn @comparison))
 )
 
 ################################################################
 # Composition
 
-# $RowSet = list of rows (type = fb:row.row)
-# $ValueSet = list of values (NameValue or other primitives)
-
 ################################
-# Generic Rows
-# (@type @row)
-(rule $RowSet (nothing) (ConstantFn (@type @row)))
+# Composition
+
+# Option 1: Create any Relation with any domain
+(when (not scoped)
+  (rule $Relation ($Binary) (IdentityFn))
+  (rule $Relation ($Binary) (lambda b (lambda x ((@R (var b)) (var x)))))
+  (rule $Relation ($Comparison) (IdentityFn))
+)
+# Option 2: Relations must be scoped with a Set
+(when scoped
+  (rule $Relation ($Set $Binary)
+    (lambda s (lambda b (lambda x ((var b) (and (var s) (var x)))))))
+  (rule $Relation ($Set $Binary)
+    (lambda s (lambda b (lambda x ((@R (var b)) (and (var s) (var x)))))))
+  (rule $Relation ($Set $Comparison)
+    (lambda s (lambda c (lambda x ((var c) (and (var s) (var x)))))))
+)
+  
+(rule $Relation ($Binary $Relation) 
+  (lambda b (lambda r (lambda x ((var b) ((var r) (var x)))))))
+(rule $Relation ($Binary $Relation) 
+  (lambda b (lambda r (lambda x ((@R (var b)) ((var r) (var x)))))))
+(rule $Relation ($Comparison $Relation)
+  (lambda b (lambda r (lambda x ((var b) ((var r) (var x)))))))
 
 ################################
 # Join
-# c_name.barack_obama
-(rule $ValueSet ($Entity) (IdentityFn))
-# (c.name c_name.barack_obama)
-(rule $RowSet ($Binary $ValueSet) (lambda b (lambda v ((var b) (var v)))))
-# (!c.name (...[rows]...)) --> c_name.barack_obama
-(rule $ValueSet ($Binary $RowSet) (lambda b (lambda r ((@R (var b)) (var r)))))
-# (c.height (@p.num (number 180)))
-(rule $RowSet ($Binary $Property $ValueSet)
-  (lambda b (lambda p (lambda v ((var b) ((var p) (var v))))))
+
+# Option 1: Repeatedly apply binaries to Set
+(when layerjoin
+  (rule $Set ($Binary $Set) (lambda b (lambda s ((var b) (var s)))))
+  (rule $Set ($Binary $Set) (lambda b (lambda s ((@R (var b)) (var s)))))
+  (rule $Set ($Comparison $Set) (lambda c (lambda s ((var c) (var s)))))
 )
-# (@!p.num (!c.height (...[rows]...))) --> (number 180)
-(rule $ValueSet ($Binary $Property $RowSet)
-  (lambda b (lambda p (lambda r ((@R (var p)) ((@R (var b)) (var r))))))
+# Option 2: Apply composed relations to Set
+# This is cleaner and more general, but it produces redundant formulas.
+(when (not layerjoin)
+  (rule $Set ($Relation $Set) (lambda r (lambda s ((var r) (var s)))))
 )
 
-(when movement
-  # (@next (...[rows]...)) --> ...[rows]...
-  (for @movement (@next @!next)
-    # HACK: Added 'nothing' to prevent unary cycle
-    (rule $RowSet (nothing $RowSet) (lambda r (@movement (var r))))
-  )
+################################
+# Aggregate
+(for @aggregate (count min max sum avg)
+  # Technically can be combined with the rule below,
+  # but the resulting formula will be different from the annotation
+  (rule $Set (nothing $Set) (lambda s (@aggregate (var s))))
+  (rule $Relation (nothing $Relation) (lambda r (lambda x (@aggregate ((var r) (var x))))))
 )
 
 ################################
 # Superlative
+(for @argm (argmax argmin)
+  (rule $Set (nothing $Set) (lambda s (@argm 1 1 (var s) @index)))
+  (rule $Set ($Set $Relation) (lambda s (lambda r (@argm 1 1 (var s) (@R (var r))))))
+)
 
-(when superlative
-  (for @argm (argmax argmin)
-    # "first", "last"
-    (rule $RowSet (nothing $RowSet) (lambda r (@argm 1 1 (var r) @index)))
-    # Generic argmax / argmin on rows or values
-    # (argmax 1 1 (@type @row) (reverse ___))
-    # ___ = (lambda r (@!p.num (!c.height (var r))))
-    # "highest"
-    (rule $RowSet ($RowSet $Binary $Property)
-      (lambda r (lambda b (lambda p (@argm 1 1 (var r) (reverse (lambda x ((@R (var p)) ((@R (var b)) (var x) ))))))))
-    )
+################################
+# Arithmetic
+(when arithmetic
+  (rule $Set ($Set $Set) (lambda s1 (lambda s2 (- (var s1) (var s2)))))
+  (when r-arithmetic
+    (rule $Set ($Relation $Set $Set)
+      (lambda r (lambda s1 (lambda s2 (- ((var r) (var s1)) ((var r) (var s2)))))))
   )
 )
 
 ################################
-# ROOT
-(rule $ROOT ($ValueSet) (IdentityFn))
-
-################################################################
-# For debugging:
-
-(when debug 
-  (rule $Any ($ValueSet) (IdentityFn))
-  (rule $Any ($RowSet) (IdentityFn))
-  (rule $ROOT ($Any) (IdentityFn))
+# Merge
+(when merge
+  (rule $Set ($Set $Set) (lambda s1 (lambda s2 (and (var s1) (var s2)))))
 )
+
+################################
+# ROOT
+(rule $ROOT ($Set) (IdentityFn))

@@ -945,7 +945,7 @@ which are used in our first sematic parsing applications, but they probably
 should be avoided unless you're specifically doing Freebase QA.  Even in that
 case, the main thing you should think about is:
 
-    (rule $Entity ($PHRASE) (LexiconFn fbsearch)
+    (rule $Entity ($PHRASE) (LexiconFn fbsearch))
 
 which uses the Freebase Search API to look up entities.  Be aware here that the
 API will generously return many candidate entities for any string you give it,

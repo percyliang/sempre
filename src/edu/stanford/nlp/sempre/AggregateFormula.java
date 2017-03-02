@@ -36,6 +36,12 @@ public class AggregateFormula extends Formula {
     return null;
   }
 
+  @Override
+  public void forEach(Function<Formula, Boolean> func) {
+    if (!func.apply(this)) child.forEach(func);
+  }
+
+  @Override
   public Formula map(Function<Formula, Formula> func) {
     Formula result = func.apply(this);
     return result == null ? new AggregateFormula(mode, child.map(func)) : result;

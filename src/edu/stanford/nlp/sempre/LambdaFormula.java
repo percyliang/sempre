@@ -26,6 +26,12 @@ public class LambdaFormula extends Formula {
     return tree;
   }
 
+  @Override
+  public void forEach(Function<Formula, Boolean> func) {
+    if (!func.apply(this)) body.forEach(func);
+  }
+
+  @Override
   public Formula map(Function<Formula, Formula> func) {
     Formula result = func.apply(this);
     return result == null ? new LambdaFormula(var, body.map(func)) : result;

@@ -80,7 +80,7 @@ public class FeatureExtractor {
       deriv.addFeature("rule", deriv.rule.toString());
     }
   }
-
+  
   // Extract features on the linguistic information of the spanned (anchored) tokens.
   // (Not applicable for floating rules)
   void extractSpanFeatures(Example ex, Derivation deriv) {
