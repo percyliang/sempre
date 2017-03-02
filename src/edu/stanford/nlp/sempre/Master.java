@@ -9,6 +9,7 @@ import edu.stanford.nlp.sempre.interactive.CitationTracker;
 import edu.stanford.nlp.sempre.interactive.GrammarInducer;
 import edu.stanford.nlp.sempre.interactive.PrefixTrie;
 import fig.basic.*;
+import jline.console.ConsoleReader;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -53,7 +54,7 @@ public class Master {
     public int autocompleteCount = 5;
     @Option(gloss = "only allow interactive commands")
     public boolean onlyInteractive = false;
-    
+
   }
 
   public static Options opts = new Options();
@@ -162,26 +163,22 @@ public class Master {
 
     if (opts.printHelp)
       printHelp();
-
-    while (true) {
-      LogInfo.stdout.print("> ");
-      LogInfo.stdout.flush();
+    try {
+      ConsoleReader reader = new ConsoleReader();
+      reader.setPrompt("> ");
       String line;
-      try {
-        line = LogInfo.stdin.readLine();
-      } catch (IOException e) {
-        throw new RuntimeException(e);
+      while ((line = reader.readLine()) != null) {
+        int indent = LogInfo.getIndLevel();
+        try {
+          processQuery(session, line);
+        } catch (Throwable t) {
+          while (LogInfo.getIndLevel() > indent)
+            LogInfo.end_track();
+          t.printStackTrace();
+        }
       }
-      if (line == null) break;
-
-      int indent = LogInfo.getIndLevel();
-      try {
-        processQuery(session, line);
-      } catch (Throwable t) {
-        while (LogInfo.getIndLevel() > indent)
-          LogInfo.end_track();
-        t.printStackTrace();
-      }
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
   }
 
@@ -201,7 +198,7 @@ public class Master {
   public Response processQuery(Session session, String line) {
     line = line.trim();
     Response response = new Response();
-    
+
     if (!line.startsWith("(:") && opts.onlyInteractive)
       response.lines.add("command disabled for security: " + line);
 
@@ -219,7 +216,7 @@ public class Master {
     // Clean up
     // for (String outLine : stringOut.toString().split("\n"))
     //  response.lines.add(outLine);
-    
+
     // Log interaction to disk
     if (!Strings.isNullOrEmpty(opts.logPath)) {
       PrintWriter out;
@@ -270,8 +267,7 @@ public class Master {
     Learner.addToAutocomplete(ex, builder.params);
 
     response.ex = ex;
-
-    ex.log();
+    ex.logWithoutContext();
     if (ex.predDerivations.size() > 0) {
       response.candidateIndex = 0;
       printDerivation(response.getDerivation());
@@ -420,43 +416,49 @@ public class Master {
       } else {
         session.context = new ContextValue(tree);
       }
+    } else if (command.equals("loadgraph")) {
+      if (tree.children.size() != 2 || !tree.child(1).isLeaf())
+        throw new RuntimeException("Invalid argument: argument should be a file path");
+      KnowledgeGraph graph = NaiveKnowledgeGraph.fromFile(tree.child(1).value);
+      session.context = new ContextValue(session.context.user, session.context.date,
+        session.context.exchanges, graph);
     }
-    
+
     // Start of interactive commands
     else if (command.equals(":q")) {
       // Create example
       String utt = tree.children.get(1).value;
       Example ex = exampleFromUtterance(utt, session);
-      
+
       long approxSeq = ex.getLemmaTokens().stream().filter(s -> s.contains(";")).count();
       //if (approxSeq >= 8)
       //  response.lines.add("You are taking many actions in one step, consider defining some of steps as one single step.");
-      
+
       if (utt.length() > ILUtils.opts.maxChars)
         throw new BadInteractionException(String.format("refused to execute: too many characters in one command (current: %d, max: %d)",
             utt.length(), ILUtils.opts.maxChars));
-      
+
       if (approxSeq >= ILUtils.opts.maxSequence)
         throw new BadInteractionException(String.format("refused to execute: too many steps in one command -- consider defining some of steps as one single step.  (current: %d, max: %d)",
             approxSeq, ILUtils.opts.maxSequence));
-      
-      
-      builder.parser.parse(builder.params, ex, false);     
-      
+
+
+      builder.parser.parse(builder.params, ex, false);
+
       if (session.isStatsing()) {
         response.stats.put("type", "q");
         response.stats.put("size", ex.predDerivations!=null? ex.predDerivations.size() : 0);
         response.stats.put("status", GrammarInducer.getParseStatus(ex));
       }
       response.ex = ex;
-      
+
     } else if (command.equals(":qdebug")) {
       // Create example
       String utt = tree.children.get(1).value;
       Example ex = exampleFromUtterance(utt, session);
-            
+
       builder.parser.parse(builder.params, ex, false);
-      
+
       Derivation.opts.showCat = true;
       Derivation.opts.showRules = true;
       for (Derivation d : ex.predDerivations) {
@@ -472,7 +474,7 @@ public class Master {
       }
     } else if (command.equals(":accept")) {
       String utt = tree.children.get(1).value;
-      
+
       List<Formula> targetFormulas = new ArrayList<>();
       try {
         targetFormulas = tree.children.subList(2, tree.children.size()).stream()
@@ -482,19 +484,19 @@ public class Master {
         e.printStackTrace();
         response.lines.add("cannot accept formula: ");
       }
-      
+
       Example ex = exampleFromUtterance(utt, session);
       response.ex = ex;
-      
+
       // Parse!
       ParserState state;
       state = builder.parser.parse(builder.params, ex, true);
       state.ensureExecuted();
-      
-      
+
+
       //Derivation match = ex.predDerivations.stream()
       //    .filter(d -> d.formula.equals(targetFormulaFinal)).findFirst().orElse(null);
-      
+
       int rank = -1;
       Derivation match = null;
       for (int i = 0; i < ex.predDerivations.size(); i++) {
@@ -503,7 +505,7 @@ public class Master {
           rank = i; match = derivi; break;
         }
       }
-      
+
       if (session.isStatsing()) {
         response.stats.put("type", "accept");
         response.stats.put("rank", rank);
@@ -511,19 +513,19 @@ public class Master {
         response.stats.put("size", ex.predDerivations.size());
         response.stats.put("formulas.size", targetFormulas.size());
         response.stats.put("rank", rank);
-        
+
         response.stats.put("len_formula", targetFormulas.get(0).toLispTree().numNodes());
         response.stats.put("len_utterance", ex.getTokens().size());
       }
-      
+
       if (match!=null) {
         LogInfo.logs(":accept successful: %s", response.stats);
-        
+
         if (session.isWritingCitation()) {
           CitationTracker tracker = new CitationTracker(session.id, ex);
           tracker.citeAll(match);
         }
-        
+
         // ex.setTargetValue(match.value); // this is just for logging, not actually used for learning
         if (session.isLearning()) {
           LogInfo.begin_track("Updating parameters");
@@ -537,9 +539,9 @@ public class Master {
         String jsonDef = tree.children.get(2).value;
 
         Ref<Example> refExHead = new Ref<>();
-        List<Rule> inducedRules = ILUtils.induceRulesHelper(command, head, jsonDef, 
+        List<Rule> inducedRules = ILUtils.induceRulesHelper(command, head, jsonDef,
             builder.parser, builder.params, session.id, refExHead);
-        
+
         if (inducedRules.size() > 0) {
           if (session.isLearning()) {
             for (Rule rule : inducedRules) {
@@ -560,7 +562,7 @@ public class Master {
         } else {
           LogInfo.logs("No rule induced for head %s", head);
         }
-        
+
         if (session.isStatsing()) {
           response.stats.put("type", "def");
           response.stats.put("numRules", inducedRules.size());
@@ -610,13 +612,14 @@ public class Master {
         if (session.isStatsing())
           response.stats.put("context-length", tree.children.get(1).toString().length());
       }
+
     }
     else {
       LogInfo.log("Invalid command: " + tree);
     }
-    
+
   }
-  
+
   private Example exampleFromUtterance(String utt, Session session) {
     Example.Builder b = new Example.Builder();
     b.setId(session.id);

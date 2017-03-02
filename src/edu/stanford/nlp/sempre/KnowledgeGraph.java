@@ -60,6 +60,7 @@ public abstract class KnowledgeGraph {
   // ============================================================
 
   public abstract LispTree toLispTree();
+  public abstract LispTree toShortLispTree();
   @Override public String toString() { return toLispTree().toString(); }
 
   /** Return all y such that x in firsts and (x,r,y) in graph */

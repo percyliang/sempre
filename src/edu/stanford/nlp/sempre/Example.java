@@ -246,6 +246,21 @@ public class Example {
     LogInfo.end_track();
   }
 
+  public void logWithoutContext() {
+    LogInfo.begin_track("Example: %s", utterance);
+    LogInfo.logs("Tokens: %s", getTokens());
+    LogInfo.logs("Lemmatized tokens: %s", getLemmaTokens());
+    LogInfo.logs("POS tags: %s", languageInfo.posTags);
+    LogInfo.logs("NER tags: %s", languageInfo.nerTags);
+    LogInfo.logs("NER values: %s", languageInfo.nerValues);
+    if (targetFormula != null)
+      LogInfo.logs("targetFormula: %s", targetFormula);
+    if (targetValue != null)
+      LogInfo.logs("targetValue: %s", targetValue);
+    LogInfo.logs("Dependency children: %s", languageInfo.dependencyChildren);
+    LogInfo.end_track();
+  }
+
   public List<Derivation> getCorrectDerivations() {
     List<Derivation> res = new ArrayList<>();
     for (Derivation deriv : predDerivations) {

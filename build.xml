@@ -91,6 +91,7 @@
     <jar destfile="${libsempre}/sempre-overnight.jar" basedir="${classes}/overnight"/>
   </target>
 
+<<<<<<< HEAD
   <!-- BEGIN_HIDE -->
 
   <target name="compile.internal" depends="fbalignment,paraphrase,clojure,regex,jungle,logicpuzzles"/>
@@ -155,7 +156,7 @@
     <jar destfile="${libsempre}/sempre-logicpuzzles.jar" basedir="${classes}/logicpuzzles"/>
   </target>
 
-    <!-- Compile interactive -->
+  <!-- Compile interactive -->
   <target name="interactive" depends="init,core">
     <echo message="Compiling ${ant.project.name}: interactive"/>
     <mkdir dir="${classes}/interactive"/>
@@ -165,8 +166,17 @@
     <jar destfile="${libsempre}/sempre-interactive.jar" basedir="${classes}/interactive"/>
   </target>
 
-  <!-- END_HIDE -->
+  <!-- Compile geo880 -->
+  <target name="geo880" depends="init,core,corenlp,tables">
+    <echo message="Compiling ${ant.project.name}: geo880"/>
+    <mkdir dir="${classes}/geo880"/>
+    <javac srcdir="${src}" destdir="${classes}/geo880" classpathref="lib.path" debug="true" includeantruntime="false" source="${source}" target="${target}">
+      <include name="edu/stanford/nlp/sempre/geo880/"/>
+    </javac>
+    <jar destfile="${libsempre}/sempre-geo880.jar" basedir="${classes}/geo880"/>
+  </target>
 
+  <!-- END_HIDE -->
   <!-- Clean up -->
   <target name="clean">
     <delete includeemptydirs="true" quiet="true">
