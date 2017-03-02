@@ -57,8 +57,6 @@ def header(modules='core', codalabDependencies=nil)
   nil)
 end
 
-def rlwrap; system('which rlwrap') ? 'rlwrap' : nil end
-
 def unbalancedTrainDevSplit
   l(o('Dataset.trainFrac', 0.8), o('Dataset.devFrac', 0.2))
 end
@@ -301,7 +299,7 @@ addMode('freebase', 'Freebase (for EMNLP 2013, ACL 2014, TACL 2014)', lambda { |
     l('nlpsub', '-d/scr/yonatan/sandbox/blackhole', '-nyonatan', '-qjag', '-c3'),
     l('nlpsub', '-d/scr/yonatan/sandbox/blackhole', '-nyonatan', '-qjohn', '-c3'),
   nil),
-  sel(:interact, l(), rlwrap),
+  sel(:interact, l()),
   freebaseHeader,
   'edu.stanford.nlp.sempre.Main',
   freebaseOpts,
@@ -450,19 +448,27 @@ nil) })
 
 # Just start a simple interactive shell to try out SEMPRE commands
 addMode('simple', 'Simple shell', lambda { |e| l(
-  codalab, rlwrap, 'java', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.Main',
+  codalab, 'java', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.Main',
   o('Main.interactive'),
 nil) })
 
 addMode('simple-sparql', 'Simple shell for querying SPARQL', lambda { |e| l(
-  codalab, rlwrap, 'java', '-Dmodules=core,freebase', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.Main',
+  codalab, 'java', '-Dmodules=core,freebase', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.Main',
   o('executor', 'freebase.SparqlExecutor'),
   sparqlOpts,
   o('Main.interactive'),
 nil) })
 
+addMode('simple-lambdadcs', 'Simple shell for querying with the LambdaDCSExecutor', lambda { |e| l(
+  codalab, 'java', '-Dmodules=core,tables,corenlp', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.Main',
+  o('executor', 'tables.lambdadcs.LambdaDCSExecutor'),
+  o('FeatureExtractor.featureDomains', 'denotation lexAlign joinPos skipPos'.split),
+  o('LanguageAnalyzer.languageAnalyzer', 'corenlp.CoreNLPAnalyzer'),
+  o('Main.interactive'),
+nil) })
+
 addMode('simple-freebase', 'Simple shell for using Freebase', lambda { |e| l(
-  rlwrap, 'java', '-Dmodules=core,freebase', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.Main',
+  'java', '-Dmodules=core,freebase', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.Main',
   o('executor', 'freebase.SparqlExecutor'),
   letDefault(:sparqlserver, 'freebase.cloudapp.net:3093'),
   letDefault(:cacheserver, 'freebase.cloudapp.net:4000'),
@@ -487,6 +493,22 @@ addMode('simple-freebase', 'Simple shell for using Freebase', lambda { |e| l(
   o('Main.interactive'),
 nil) })
 
+addMode('simple-freebase-nocache', 'Simple shell for using Freebase (without a cache server)', lambda { |e| l(
+  'java', '-Dmodules=core,freebase', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.Main',
+  o('executor', 'freebase.SparqlExecutor'),
+  letDefault(:sparqlserver, 'freebase.cloudapp.net:3093'),
+  sparqlOpts,
+  o('FeatureExtractor.featureDomains', 'rule'),
+  o('Parser.coarsePrune'),
+  o('JoinFn.typeInference'),
+  o('UnaryLexicon.unaryLexiconFilePath', '/dev/null'),
+  o('BinaryLexicon.binaryLexiconFilesPath', '/dev/null'),
+  #o('JoinFn.showTypeCheckFailures'),  # Use this to debug
+  o('Grammar.inPaths', 'freebase/data/demo1.grammar'),  # Override with your own custom grammar
+  #o('SparqlExecutor.includeSupportingInfo'),  # Show full information
+  o('Main.interactive'),
+nil) })
+
 
 ############################################################
 # {2014-12-27} [Percy]: Overnight semantic parsing
@@ -505,7 +527,6 @@ def overnightFeatureDomains
 end
 
 addMode('overnight', 'Overnight semantic parsing', l(
-  rlwrap,
   header('core,freebase,overnight'),
   'edu.stanford.nlp.sempre.Main',
   figOpts,
@@ -617,7 +638,7 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
   # Add @cldir=1 to use CodaLab's directory paths
   letDefault(:cldir, 0),
   # Usual header
-  rlwrap, header('core,tables,corenlp'),
+  header('core,tables,corenlp'),
   # Select class
   letDefault(:class, 'main'),
   sel(:class, {
@@ -918,7 +939,7 @@ end
 addMode('genovernight', 'Generate utterances for overnight semantic parsing', lambda { |e| l(
   'fig/bin/qcreate',
   letDefault(:gen, 0),
-  sel(:gen, rlwrap, l()),
+  sel(:gen, l()),
   'java', '-Dmodules=core,overnight', '-Xmx10g', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.overnight.GenerationMain',
   figOpts,
   o('JoinFn.typeInference', true),
@@ -977,6 +998,72 @@ addMode('genovernight-wrapper', 'Generate utterances for overnight semantic pars
   lambda { |e| system 'mkdir -p genovernight.out'; o('execDir', 'genovernight.out/' + e[:domain]) },
 nil) })
 
+addMode('geo880', 'Semantic parsing on the geo880 dataset', lambda { |e| l(
+  # Usual header
+  header('core,tables,corenlp,geo880'),
+  'edu.stanford.nlp.sempre.Main',
+  # Fig parameters
+  figOpts,
+  o('executor', 'tables.lambdadcs.LambdaDCSExecutor'),
+  o('JoinFn.specializedTypeCheck', false), o('JoinFn.typeInference', false),
+  # Parser
+  o('Builder.parser', 'BeamParser'),
+  o('Parser.coarsePrune'),
+ 
+  # Evaluation
+  o('Builder.valueEvaluator', 'geo880.Geo880ValueEvaluator'),
+
+  # Grammar
+  o('Grammar.inPaths','lib/data/geo880/geo880.grammar'),
+
+  # Type hierarchy
+  o('Geo880TypeLookup.typeHierarchyPath', 'lib/data/geo880/geo880.type_hierarchy'),
+  o('TypeInference.typeLookup','geo880.Geo880TypeLookup'),
+
+  # Yrkvpba
+  o('SimpleLexicon.inPaths', 'lib/data/geo880/geo880.lexicon'),
+  
+  # Learner
+  o('Learner.maxTrainIters', 3),
+
+  # Dataset
+  letDefault(:data, 0),
+  sel(:data,
+    l(o('Dataset.inPaths', 'train,lib/data/geo880/geo880-train.preprocessed.examples'), unbalancedTrainDevSplit), # (0) train 0.8, dev 0.2
+    l(o('Dataset.inPaths', 'train,lib/data/geo880/geo880-train.examples', 'test,lib/data/geo880/geo880-test.preprocessed/examples')), # (1) Don't run on test yet!
+  nil),
+  # Load the graph
+  o('Dataset.globalGraphPath', 'lib/data/geo880/geo880.kg'),
+  # Verbosity
+  letDefault(:verbose, 0),
+  sel(:verbose,
+    l(),
+    l(
+      o('showRules'),
+      o('Parser.verbose', 2),
+      o('JoinFn.verbose', 3),
+      o('JoinFn.showTypeCheckFailures'),
+    nil),
+  nil),
+  # Language Analyzer
+  l(o('LanguageAnalyzer', 'corenlp.CoreNLPAnalyzer'), o('annotators', *'tokenize ssplit pos lemma ner'.split)),
+  # Regularization
+  letDefault(:l1, 0),
+  sel(:l1,
+    l(),
+    l(o('Params.l1Reg','lazy'), o('Params.l1RegCoeff', '3e-5')),
+    l(o('Params.l1Reg','lazy'), selo(nil, 'Params.l1RegCoeff', 0, 0.00001, 0.0001, 0.001, 0.01)),
+  nil),
+  # Features
+  letDefault(:feat, 'freebase'),
+  sel(:feat, {
+    'none' => l(),   # No features (random)
+    'freebase' => l(
+      o('FeatureExtractor.featureDomains', 'rule opCount constant whType span lemmaAndBinaries denotation lexAlign joinPos skipPos'.split),
+#      o('FeatureExtractor.featureDomains', 'rule opCount constant whType lemmaAndBinaries denotation lexAlign joinPos skipPos'.split),
+    nil),
+  }),
+nil) })
 
 ############################################################
 # {2016-07-02} [Sida Wang]: interactive semantic parsing

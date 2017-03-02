@@ -211,10 +211,12 @@ public class FeatureExtractor {
     List<String> nonEntityLemmas = new LinkedList<>();
     extractNonEntityLemmas(ex, deriv, nonEntityLemmas);
     List<String> binaries = extractBinaries(deriv.formula);
-    String binariesStr = Joiner.on('_').join(binaries);
-    for (String nonEntityLemma : nonEntityLemmas) {
-      deriv.addFeature("lemmaAndBinaries", "nonEntitylemmas=" + nonEntityLemma +
-              ",binaries=" + binariesStr);
+    if (!binaries.isEmpty()) {
+      String binariesStr = Joiner.on('_').join(binaries);
+      for (String nonEntityLemma : nonEntityLemmas) {
+        deriv.addFeature("lemmaAndBinaries", "nonEntitylemmas=" + nonEntityLemma +
+          ",binaries=" + binariesStr);
+      }
     }
   }
 
