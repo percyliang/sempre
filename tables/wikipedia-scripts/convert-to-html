@@ -1,0 +1,4 @@
+#!/bin/bash
+# Convert Wikipedia markup to HTML using pandoc
+# Not reliable because of Wikipedia macros and shorthands
+pandoc -f mediawiki -t html5 -s

@@ -5,56 +5,66 @@ import java.util.*;
 import fig.basic.*;
 
 /**
- * Cache the executed values of LambdaDCSExecutor.
+ * Cache the executed values of an executor.
+ *
+ * The cache should be cleared once the parser finishes each example.
+ * The metakey Object specifies the current example.
+ * When the metakey is changed, the cache is cleared.
  *
  * @author ppasupat
  */
 public final class ExecutorCache {
   public static class Options {
-    @Option(gloss = "maximum number of entries to retain")
-    public int maxCacheSize = 1;
+    @Option(gloss = "maximum number of values to retain")
+    public int maxCacheSize = 1000000;
+    @Option(gloss = "minimum number of values evicted before garbage collection")
+    public int cacheGCThreshold = 10000000;
+    @Option public int verbose = 0;
   }
   public static Options opts = new Options();
 
+  // Default cache
   public static final ExecutorCache singleton = new ExecutorCache();
 
-  private final Map<Object, Map<Object, Object>> cache;
-  private final Map<Object, Long> lastUsed;
-  private long timestamp = 0;
+  private Object currentMetakey = null;
+  private final Map<Object, Object> cache;
+  private int accumSize = 0;
 
-  private ExecutorCache() {
+  public ExecutorCache() {
     cache = new HashMap<>();
-    lastUsed = new HashMap<>();
   }
 
   public synchronized Object get(Object metakey, Object key) {
-    Map<Object, Object> cacheForMetakey = cache.get(metakey);
-    if (cacheForMetakey == null) return null;
-    lastUsed.put(metakey, timestamp++);
-    return cacheForMetakey.get(key);
+    if (currentMetakey != metakey) {
+      clearCache(metakey);
+    }
+    Object value = cache.get(key);
+    if (opts.verbose >= 1)
+      LogInfo.logs("[GET =>] %s => %s", key, value);
+    return value;
   }
 
   public synchronized void put(Object metakey, Object key, Object value) {
-    Map<Object, Object> cacheForMetakey = cache.get(metakey);
-    if (cacheForMetakey == null) {
-      while (cache.size() >= opts.maxCacheSize) evict();
-      cache.put(metakey, cacheForMetakey = new HashMap<>());
+    if (currentMetakey != metakey) {
+      clearCache(metakey);
     }
-    cacheForMetakey.put(key, value);
+    if (opts.verbose >= 1)
+      LogInfo.logs("[<= PUT] %s <= %s", key, value);
+    if (cache.size() < opts.maxCacheSize)
+      cache.put(key, value);
   }
 
-  private void evict() {
-    long minLastUsed = Long.MAX_VALUE;
-    Object minLastUsedMetakey = null;
-    for (Object existingMetakey : cache.keySet()) {
-      Long existingLastUsed = lastUsed.get(existingMetakey);
-      if (existingLastUsed == null) existingLastUsed = 0L;
-      if (existingLastUsed < minLastUsed) {
-        minLastUsed = existingLastUsed;
-        minLastUsedMetakey = existingMetakey;
-      }
+  public void clearCache(Object metakey) {
+    accumSize += cache.size();
+    cache.clear();
+    // Garbage collect
+    if (accumSize >= opts.cacheGCThreshold) {
+      System.gc();
+      accumSize = 0;
     }
-    cache.remove(minLastUsedMetakey);
+    if (opts.verbose >= 1)
+      LogInfo.logs("[clearCache] metakey = %s", metakey);
+    currentMetakey = metakey;
   }
 
 }

@@ -1,0 +1,4 @@
+#!/usr/bin/env perl
+# Decode HTML entities (e.g. &lt; becomes <)
+use HTML::Entities;
+while(<>) {print decode_entities($_);}

@@ -2,6 +2,8 @@ package edu.stanford.nlp.sempre;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
+
+import edu.stanford.nlp.sempre.interactive.ActionFormula;
 import fig.basic.LispTree;
 
 import java.util.HashSet;
@@ -74,6 +76,16 @@ public abstract class Formulas {
       if (mode != null)
         return new ArithmeticFormula(mode, fromLispTree(tree.child(1)), fromLispTree(tree.child(2)));
     }
+    
+    { // ActionFormula
+      ActionFormula.Mode mode = ActionFormula.parseMode(func);
+      if (mode != null) {
+        List<Formula> args = Lists.newArrayList();
+        for (int i = 1; i < tree.children.size(); i++)
+          args.add(fromLispTree(tree.child(i)));
+        return new ActionFormula(mode, args);
+      }
+    }
 
     // Default is join: (fb:type.object.type fb:people.person)
     if (tree.children.size() != 2)
@@ -85,7 +97,7 @@ public abstract class Formulas {
   private static Formula parseIntToFormula(LispTree tree) {
     try {
       int i = Integer.parseInt(tree.value);
-      double d = (double) i;
+      double d = i;
       NumberValue value = new NumberValue(d);
       return new ValueFormula(value);
     } catch (NumberFormatException e) {
@@ -260,6 +272,27 @@ public abstract class Formulas {
     return (int) getDouble(formula);
   }
 
+  /**
+   * If the formula represents a binary (e.g., fb:a.b.c or <=),
+   *   return the ID of the binary as a string.
+   * If the formula represents a reversed binary (e.g., !fb:a.b.c or (reverse fb:a.b.c)),
+   *   return "!" + ID of the binary.
+   * Otherwise, return null.
+   */
+  public static String getBinaryId(Formula formula) {
+    if (formula instanceof ReverseFormula) {
+      String childId = getBinaryId(((ReverseFormula) formula).child);
+      if (childId == null) return null;
+      return CanonicalNames.reverseProperty(childId);
+    } else if (formula instanceof ValueFormula) {
+      Value v = ((ValueFormula<?>) formula).value;
+      if (v instanceof NameValue) {
+        return ((NameValue) v).id;
+      }
+    }
+    return null;
+  }
+
   public static ValueFormula<NameValue> newNameFormula(String id) {
     return new ValueFormula<NameValue>(new NameValue(id));
   }
@@ -360,8 +393,19 @@ public abstract class Formulas {
   // !fb:people.person.place_of_birth <=> fb:people.person.place_of_birth
   private static ValueFormula<NameValue> reverseNameFormula(ValueFormula<NameValue> formula) {
     String id = formula.value.id;
-    return new ValueFormula<>(
-            new NameValue(CanonicalNames.isReverseProperty(id) ?  id.substring(1) : "!" + id));
+    return new ValueFormula<>(new NameValue(CanonicalNames.reverseProperty(id)));
   }
+
+  // Try to simplify reverse subformulas within the specified formula
+  public static Formula simplifyReverses(Formula formula) {
+    return formula.map(new Function<Formula, Formula>() {
+      public Formula apply(Formula formula) {
+        if (formula instanceof ReverseFormula)
+          return reverseFormula(((ReverseFormula) formula).child);
+        return null;
+      }
+    });
+  }
+
 
 }

@@ -1,7 +1,7 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
 
 <suite name="SempreTestSuite" verbose="10">
-  <test name="AllTests">
+  <!-- <test name="AllTests">
     <packages>
       <package name="edu.stanford.nlp.sempre" />
     </packages>
@@ -10,5 +10,14 @@
         <exclude name="grammar" />
       </run>
     </groups>
+  </test> -->
+  <test name="GrammarTest">
+    <classes>
+      <class name="edu.stanford.nlp.sempre.interactive.actions.GrammarInducerTest">
+        <methods>
+          <include name="basicTest" />
+        </methods>
+      </class>
+    </classes>
   </test>
 </suite>

@@ -1,0 +1,37 @@
+Tools for extracting data from Wikipedia
+========================================
+See the docstring of each file for descriptions
+
+Extracting categories
+---------------------
+Requires SQL dumps of category data
+
+- dump.py
+    * Dump a field from an SQL dump
+- extract.py
+    * Extract categories and their members (requires multiple steps)
+- format.py
+    * Reformat Wikipedia article names
+
+Extracting articles
+-------------------
+Requires Wikipedia dump (bz2)
+
+- get-wikipedia-pages.py
+    * Get wikipedia pages from the dump
+- download-wikipedia-pages.py
+    * Download wikipedia pages using the metadata from get-wikipedia-pages.py
+- display.*
+    * Display the downloaded pages 
+- find-good-tables.py
+    * Find pages with information-rich tables
+
+Other utilities
+---------------
+
+- decode-html
+    * Decode HTML entities (&lt; becomes <)
+- convert-to-html / convert-all-to-html
+    * Use pandoc to convert Markup to HTML (not that reliable)
+- table-to-csv.py
+    * Does what it says

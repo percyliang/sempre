@@ -62,10 +62,11 @@ public class PhraseDenotationFeatureComputer implements FeatureComputer {
     } else {
       for (LispTree subtree : tree.children) {
         if (!subtree.isLeaf()) continue;
-        if (subtree.value.startsWith(TableTypeSystem.CELL_SPECIFIC_TYPE_PREFIX)) {
+        // TODO: not sure if this is correct
+        if (subtree.value.startsWith(TableTypeSystem.CELL_TYPE)) {
           denotationTypes.add(prefix + subtree.value);
           if (opts.useGenericCellType)
-            denotationTypes.add(prefix + TableTypeSystem.CELL_GENERIC_TYPE);
+            denotationTypes.add(prefix + TableTypeSystem.CELL_TYPE);
         }
       }
     }
@@ -120,9 +121,6 @@ public class PhraseDenotationFeatureComputer implements FeatureComputer {
       LogInfo.logs("%s %s %s", deriv.value, deriv.type, denotationTypes);
     for (String denotationType : denotationTypes) {
       for (PhraseInfo phraseInfo : phraseInfos) {
-        if (!PhraseInfo.opts.usePhraseLemmaOnly) {
-          deriv.addFeature("p-d", "(o)" + phraseInfo.text + ";" + denotationType);
-        }
         deriv.addFeature("p-d", phraseInfo.lemmaText + ";" + denotationType);
       }
       // Check original column text
@@ -130,13 +128,8 @@ public class PhraseDenotationFeatureComputer implements FeatureComputer {
       String actualType = tokens[tokens.length - 1], suffix = (tokens.length == 1) ? "" : "(" + tokens[0] + ")";
       String originalColumn;
       if ((originalColumn = PredicateInfo.getOriginalString(actualType, ex)) != null) {
-        if (PredicateInfo.opts.usePredicateLemma) {
-          originalColumn = PredicateInfo.getLemma(originalColumn);
-        }
+        originalColumn = PredicateInfo.getLemma(originalColumn);
         for (PhraseInfo phraseInfo : phraseInfos) {
-          if (!PhraseInfo.opts.usePhraseLemmaOnly && phraseInfo.text.equals(originalColumn)) {
-            deriv.addFeature("p-d", "(o)=" + suffix);
-          }
           if (phraseInfo.lemmaText.equals(originalColumn)) {
             if (opts.verbose >= 2)
               LogInfo.logs("%s %s %s %s", phraseInfo, actualType, originalColumn, Arrays.asList(tokens));
@@ -166,9 +159,7 @@ public class PhraseDenotationFeatureComputer implements FeatureComputer {
       String actualType = tokens[tokens.length - 1], suffix = (tokens.length == 1) ? "" : "(" + tokens[0] + ")";
       String originalColumn;
       if ((originalColumn = PredicateInfo.getOriginalString(actualType, ex)) != null) {
-        if (PredicateInfo.opts.usePredicateLemma) {
-          originalColumn = PredicateInfo.getLemma(originalColumn);
-        }
+        originalColumn = PredicateInfo.getLemma(originalColumn);
         if (headwordInfo.headword.equals(originalColumn)) {
           if (opts.verbose >= 2)
             LogInfo.logs("%s %s %s %s", headwordInfo, actualType, originalColumn, Arrays.asList(tokens));

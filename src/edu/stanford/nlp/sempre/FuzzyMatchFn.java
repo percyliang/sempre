@@ -5,7 +5,7 @@ import java.util.*;
 import fig.basic.*;
 
 /**
- * Similar to LexiconFn, but list all approximate matches from a TableKnowledgeGraph or PuzzleKnowledgeGraph.
+ * Similar to LexiconFn, but list all approximate matches from a FuzzyMatchable instance.
  *
  * @author ppasupat
  */
@@ -50,9 +50,10 @@ public class FuzzyMatchFn extends SemanticFn {
 
   public static class LazyFuzzyMatchFnDerivs extends MultipleDerivationStream {
     final Example ex;
-    final KnowledgeGraph graph;
+    final FuzzyMatchable matchable;
     final Callable c;
     final String query;
+    final List<String> sentence;
     final FuzzyMatchFnMode mode;
     final boolean matchAny;
 
@@ -61,9 +62,19 @@ public class FuzzyMatchFn extends SemanticFn {
 
     public LazyFuzzyMatchFnDerivs(Example ex, Callable c, FuzzyMatchFnMode mode, boolean matchAny) {
       this.ex = ex;
-      this.graph = (ex.context == null) ? null : ex.context.graph;
+      if (ex.context != null && ex.context.graph != null && ex.context.graph instanceof FuzzyMatchable)
+        this.matchable = (FuzzyMatchable) ex.context.graph;
+      else
+        this.matchable = null;
       this.c = c;
       this.query = (matchAny || c.getChildren().isEmpty()) ? null : c.childStringValue(0);
+      if (c.getRule().rhs.size() == 1 && Rule.phraseCat.equals(c.getRule().rhs.get(0))) {
+        sentence = ex.getTokens();
+      } else if (c.getRule().rhs.size() == 1 && Rule.lemmaPhraseCat.equals(c.getRule().rhs.get(0))) {
+        sentence = ex.getLemmaTokens();
+      } else {
+        sentence = null;
+      }
       this.mode = mode;
       this.matchAny = matchAny;
       if (opts.verbose >= 2)
@@ -73,15 +84,17 @@ public class FuzzyMatchFn extends SemanticFn {
 
     @Override
     public Derivation createDerivation() {
-      if (graph == null) return null;
+      if (matchable == null) return null;
       if (query == null && !matchAny) return null;
 
       // Compute the formulas if not computed yet
       if (formulas == null) {
         if (matchAny)
-          formulas = new ArrayList<>(graph.getAllFormulas(mode));
+          formulas = new ArrayList<>(matchable.getAllFormulas(mode));
+        else if (sentence != null)
+          formulas = new ArrayList<>(matchable.getFuzzyMatchedFormulas(sentence, c.getStart(), c.getEnd(), mode));
         else
-          formulas = new ArrayList<>(graph.getFuzzyMatchedFormulas(query, mode));
+          formulas = new ArrayList<>(matchable.getFuzzyMatchedFormulas(query, mode));
       }
 
       // Use the next formula to create a derivation

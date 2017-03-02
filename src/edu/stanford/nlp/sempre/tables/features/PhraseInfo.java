@@ -1,6 +1,9 @@
 package edu.stanford.nlp.sempre.tables.features;
 
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+
+import com.google.common.cache.*;
 
 import edu.stanford.nlp.sempre.*;
 import edu.stanford.nlp.sempre.FuzzyMatchFn.FuzzyMatchFnMode;
@@ -18,8 +21,6 @@ public class PhraseInfo {
   public static class Options {
     @Option(gloss = "Maximum number of tokens in a phrase")
     public int maxPhraseLength = 3;
-    @Option(gloss = "Use lemma form only")
-    public boolean usePhraseLemmaOnly = false;
     @Option(gloss = "Fuzzy match predicates")
     public boolean computeFuzzyMatchPredicates = false;
   }
@@ -32,6 +33,7 @@ public class PhraseInfo {
   public final List<String> lemmaTokens;
   public final List<String> posTags;
   public final List<String> nerTags;
+  public final String normalizedNerSpan;
   public final String canonicalPosSeq;
   public final List<String> fuzzyMatchedPredicates;
 
@@ -44,6 +46,10 @@ public class PhraseInfo {
     lemmaTokens = languageInfo.tokens.subList(start, end);
     posTags = languageInfo.posTags.subList(start, end);
     nerTags = languageInfo.nerTags.subList(start, end);
+    if (nerTags.get(0) == null)
+      normalizedNerSpan = null;
+    else
+      normalizedNerSpan = languageInfo.getNormalizedNerSpan(nerTags.get(0), start, end);
     text = languageInfo.phrase(start, end).toLowerCase();
     lemmaText = languageInfo.lemmaPhrase(start, end).toLowerCase();
     canonicalPosSeq = languageInfo.canonicalPosSeq(start, end);
@@ -55,7 +61,7 @@ public class PhraseInfo {
       return null;
     TableKnowledgeGraph graph = (TableKnowledgeGraph) context.graph;
     List<String> matchedPredicates = new ArrayList<>();
-    // Assume everything is ValueFormula
+    // Assume everything is ValueFormula with NameValue inside
     List<Formula> formulas = new ArrayList<>();
     formulas.addAll(graph.getFuzzyMatchedFormulas(text, FuzzyMatchFnMode.ENTITY));
     formulas.addAll(graph.getFuzzyMatchedFormulas(text, FuzzyMatchFnMode.BINARY));
@@ -64,11 +70,7 @@ public class PhraseInfo {
         Value value = ((ValueFormula<?>) formula).value;
         if (value instanceof NameValue) {
           matchedPredicates.add(((NameValue) value).id);
-        } else {
-          throw new RuntimeException("Not a NameValue: " + value);
         }
-      } else {
-        throw new RuntimeException("Not a ValueFormula: " + formula);
       }
     }
     return matchedPredicates;
@@ -80,21 +82,29 @@ public class PhraseInfo {
   }
 
   // Caching
-  public static final Map<Example, List<PhraseInfo>> phraseInfosCache = new HashMap<>();
+  private static final LoadingCache<Example, List<PhraseInfo>> cache = CacheBuilder.newBuilder()
+      .maximumSize(20)
+      .build(
+          new CacheLoader<Example, List<PhraseInfo>>() {
+            @Override
+            public List<PhraseInfo> load(Example ex) throws Exception {
+              List<PhraseInfo> phraseInfos = new ArrayList<>();
+              List<String> tokens = ex.languageInfo.tokens;
+              for (int s = 1; s <= opts.maxPhraseLength; s++) {
+                for (int i = 0; i <= tokens.size() - s; i++) {
+                  phraseInfos.add(new PhraseInfo(ex, i, i + s));
+                }
+              }
+              return phraseInfos;
+            }
+          });
 
-  public static synchronized List<PhraseInfo> getPhraseInfos(Example ex) {
-    List<PhraseInfo> phraseInfos = phraseInfosCache.get(ex);
-    if (phraseInfos == null) {
-      phraseInfos = new ArrayList<>();
-      List<String> tokens = ex.languageInfo.tokens;
-      for (int s = 1; s <= opts.maxPhraseLength; s++) {
-        for (int i = 0; i <= tokens.size() - s; i++) {
-          phraseInfos.add(new PhraseInfo(ex, i, i + s));
-        }
-      }
-      phraseInfosCache.put(ex, phraseInfos);
+  public static List<PhraseInfo> getPhraseInfos(Example ex) {
+    try {
+      return cache.get(ex);
+    } catch (ExecutionException e) {
+      throw new RuntimeException(e.getCause());
     }
-    return phraseInfos;
   }
 
 }

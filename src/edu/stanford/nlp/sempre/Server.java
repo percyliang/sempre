@@ -1,5 +1,6 @@
 package edu.stanford.nlp.sempre;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import fig.basic.*;
 import fig.html.HtmlElement;
@@ -9,6 +10,9 @@ import java.net.URI;
 import java.net.URLDecoder;
 import java.net.HttpCookie;
 import com.sun.net.httpserver.HttpServer;
+
+import edu.stanford.nlp.sempre.Master.Response;
+
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.Headers;
@@ -41,6 +45,7 @@ final class SecureIdentifiers {
  */
 public class Server {
   public static class Options {
+    
     @Option public int port = 8400;
     @Option public int numThreads = 4;
     @Option public String title = "SEMPRE Demo";
@@ -48,6 +53,7 @@ public class Server {
     @Option public String basePath = "demo-www";
     @Option public int verbose = 1;
     @Option public int htmlVerbose = 1;
+    @Option public int maxCandidates = Integer.MAX_VALUE;
   }
   public static Options opts = new Options();
 
@@ -74,7 +80,9 @@ public class Server {
     HttpCookie cookie;
     boolean isNewSession;
     String format;
-    boolean jsonFormat() { return format.equals("json"); }
+    boolean jsonFormat() { return format.equals("json") || format.equals("lisp2json"); }
+    // convert the value and formula in lisp to json as well
+    boolean lisp2jsonFormat() { return format.equals("lisp2json"); }
 
     // For writing main content
 
@@ -100,22 +108,27 @@ public class Server {
         }
       }
       this.format = MapUtils.get(reqParams, "format", "html");
-
-      String cookieStr = exchange.getRequestHeaders().getFirst("Cookie");
-      if (cookieStr != null) {  // Cookie already exists
-        cookie = HttpCookie.parse(cookieStr).get(0);
-        isNewSession = false;
-      } else {
-        if (!jsonFormat()) {
-          cookie = new HttpCookie("sessionId", SecureIdentifiers.getId());
+      String jsonSessionId = MapUtils.get(reqParams, "sessionId", "");
+      if (!jsonFormat()) {
+        String cookieStr = exchange.getRequestHeaders().getFirst("Cookie");
+        if (cookieStr != null) {  // Cookie already exists
+          cookie = HttpCookie.parse(cookieStr).get(0);
+          isNewSession = false;
         } else {
-          cookie = null;
+          cookie = new HttpCookie("sessionId", SecureIdentifiers.getId());
+          isNewSession = true;  // Create a new cookie
         }
-        isNewSession = true;  // Create a new cookie
+      } else {
+        // similar process for json request, which needs to attach sessionId in uri
+        if (jsonSessionId != null) { 
+          isNewSession = false;
+        } else {
+          isNewSession = true; 
+        }
       }
-
       String sessionId = null;
       if (cookie != null) sessionId = cookie.getValue();
+      if (jsonFormat() && jsonSessionId != "") sessionId = jsonSessionId;
       if (opts.verbose >= 2)
         LogInfo.logs("GET %s from %s (%ssessionId=%s)", uri, remoteHost, isNewSession ? "new " : "", sessionId);
 
@@ -126,7 +139,6 @@ public class Server {
       } else {
         getFile(opts.basePath + uriPath);
       }
-
       exchange.close();
     }
 
@@ -152,9 +164,9 @@ public class Server {
     private HtmlElement makeInputBox(String line, String action) {
       return H.div().child(
           H.form().action(action)
-           .child(H.text(line == null ? "" : line).cls("question").autofocus().size(50).name("q"))
-           .child(H.button("Go").cls("ask"))
-           .end());
+          .child(H.text(line == null ? "" : line).cls("question").autofocus().size(50).name("q"))
+          .child(H.button("Go").cls("ask"))
+          .end());
     }
 
     private HtmlElement makeTooltip(HtmlElement main, HtmlElement aux) {
@@ -224,14 +236,14 @@ public class Server {
 
       return H.table().child(
           H.tr()
-           .child(
-               H.td(
-                   makeTooltip(
-                       H.span().cls("correctButton").child("[Correct]"),
-                       H.div().cls("bubble").child("If this answer is correct, click to add as a new training example!"),
-                       uri + "&accept=" + response.getCandidateIndex())))
-           .child(H.td(H.span().cls("answer").child(answer)))
-           .end());
+          .child(
+              H.td(
+                  makeTooltip(
+                      H.span().cls("correctButton").child("[Correct]"),
+                      H.div().cls("bubble").child("If this answer is correct, click to add as a new training example!"),
+                      uri + "&accept=" + response.getCandidateIndex())))
+          .child(H.td(H.span().cls("answer").child(answer)))
+          .end());
     }
 
     private HtmlElement makeGroup(List<HtmlElement> items) {
@@ -265,8 +277,8 @@ public class Server {
 
       String header = "Derivation";
       return H.div()
-              .child(H.span().cls("listHeader").child(header))
-              .child(table);
+          .child(H.span().cls("listHeader").child(header))
+          .child(table);
     }
 
     HtmlElement makeDerivationHelper(Example ex, Derivation deriv, String indent, boolean moreInfo) {
@@ -309,9 +321,9 @@ public class Server {
       Collections.sort(entries, new ValueComparator<String, Double>(false));
       table.child(
           H.tr()
-           .child(H.td(H.b("Feature")))
-           .child(H.td(H.b("Value")))
-           .child(H.td(H.b("Weight"))));
+          .child(H.td(H.b("Feature")))
+          .child(H.td(H.b("Value")))
+          .child(H.td(H.b("Weight"))));
 
       for (Map.Entry<String, Double> entry : entries) {
         String feature = entry.getKey();
@@ -319,9 +331,9 @@ public class Server {
         double weight = params.getWeight(feature);
         table.child(
             H.tr()
-             .child(H.td(feature))
-             .child(H.td(Fmt.D(MapUtils.getDouble(features, feature, 0))))
-             .child(H.td(Fmt.D(weight))));
+            .child(H.td(feature))
+            .child(H.td(Fmt.D(MapUtils.getDouble(features, feature, 0))))
+            .child(H.td(Fmt.D(weight))));
       }
 
       String header;
@@ -336,8 +348,8 @@ public class Server {
         header = String.format("All features (score=%s, prob=%s)", Fmt.D(deriv.getScore()), Fmt.D(deriv.getProb()));
       }
       return H.div()
-              .child(H.span().cls("listHeader").child(header))
-              .child(table);
+          .child(H.span().cls("listHeader").child(header))
+          .child(table);
     }
 
     HtmlElement linkSelect(int index, String uri, String str) {
@@ -347,35 +359,35 @@ public class Server {
     private HtmlElement makeCandidates(Example ex, String uri) {
       HtmlElement table = H.table().cls("candidateTable");
       HtmlElement header = H.tr()
-         .child(H.td(H.b("Rank")))
-         .child(H.td(H.b("Score")))
-         .child(H.td(H.b("Answer")));
+          .child(H.td(H.b("Rank")))
+          .child(H.td(H.b("Score")))
+          .child(H.td(H.b("Answer")));
       if (opts.htmlVerbose >= 1)
-         header.child(H.td(H.b("Formula")));
+        header.child(H.td(H.b("Formula")));
       table.child(header);
       for (int i = 0; i < ex.getPredDerivations().size(); i++) {
         Derivation deriv = ex.getPredDerivations().get(i);
 
         HtmlElement correct = makeTooltip(
-          H.span().cls("correctButton").child("[Correct]"),
-          H.div().cls("bubble").child("If this answer is correct, click to add as a new training example!"),
-          uri + "&accept=" + i);
+            H.span().cls("correctButton").child("[Correct]"),
+            H.div().cls("bubble").child("If this answer is correct, click to add as a new training example!"),
+            uri + "&accept=" + i);
         String value = shorten(deriv.getValue() == null ? "" : deriv.getValue().toString(), 200);
         HtmlElement formula = makeTooltip(
-          H.span(deriv.getFormula().toString()),
-          H.div().cls("nowrap").child(makeDerivation(ex, deriv, false)),
-          uri + "&select=" + i);
+            H.span(deriv.getFormula().toString()),
+            H.div().cls("nowrap").child(makeDerivation(ex, deriv, false)),
+            uri + "&select=" + i);
         HtmlElement row = H.tr()
-           .child(H.td(linkSelect(i, uri, i + " " + correct)).cls("nowrap"))
-           .child(H.td(Fmt.D(deriv.getScore())))
-           .child(H.td(value)).style("width:250px");
+            .child(H.td(linkSelect(i, uri, i + " " + correct)).cls("nowrap"))
+            .child(H.td(Fmt.D(deriv.getScore())))
+            .child(H.td(value)).style("width:250px");
         if (opts.htmlVerbose >= 1)
           row.child(H.td(formula));
         table.child(row);
       }
       return H.div()
-              .child(H.span().cls("listHeader").child("Candidates"))
-              .child(table);
+          .child(H.span().cls("listHeader").child("Candidates"))
+          .child(table);
     }
 
     private String shorten(String s, int n) {
@@ -460,8 +472,8 @@ public class Server {
       }
 
       return H.div().cls("lexicalResponse")
-              .child(H.span().cls("listHeader").child("Lexical Triggers"))
-              .child(H.table().child(predicatesElem).child(tokensElem));
+          .child(H.span().cls("listHeader").child("Lexical Triggers"))
+          .child(H.table().child(predicatesElem).child(tokensElem));
     }
 
     String makeJson(Master.Response response) {
@@ -494,6 +506,57 @@ public class Server {
 
       return Json.writeValueAsStringHard(json);
     }
+
+    List<Object> convertLispToList(LispTree l) {
+      List<Object> items = new ArrayList<Object>();
+      if (l.isLeaf()) {
+        items.add(l.value);
+      } else {
+        for (LispTree child : l.children) {
+          if (child.isLeaf()) {
+            items.add(child.value);
+          } else {
+            items.add(convertLispToList(child));
+          }
+        }
+      }
+      return items;
+    }
+
+    String makeLisp2json(Master.Response response) {
+      Map<String, Object> json = new HashMap<String, Object>();
+      
+      
+      if (response.getExample()!=null) {
+        List<Object> items = new ArrayList<Object>();
+        json.put("candidates", items);
+        List<Derivation> allCandidates = response.getExample().getPredDerivations();
+        
+        if (allCandidates != null && allCandidates.size() >= Server.opts.maxCandidates)
+          allCandidates = allCandidates.subList(0, Server.opts.maxCandidates);
+        
+        for (Derivation deriv : allCandidates) {
+          Map<String, Object> item = new HashMap<String, Object>();
+          Value value = deriv.getValue();
+          if (value instanceof StringValue)
+            item.put("value", ((StringValue)value).value);
+          else if (value instanceof ErrorValue)
+            item.put("value", ((ErrorValue)value).sortString());
+          else if (value != null)
+            item.put("value", value.sortString());
+          else
+            item.put("value", "[[]]");
+          item.put("score", deriv.score);
+          item.put("prob", deriv.prob);
+          item.put("anchored", deriv.allAnchored); // used only anchored rules
+          item.put("formula", deriv.formula.toLispTree().toString());
+          items.add(item);
+        }
+      }
+
+      return Json.writeValueAsStringHard(json);
+    }
+
 
     // Catch exception if any.
     Master.Response processQuery(Session session, String query) {
@@ -537,10 +600,10 @@ public class Server {
         out.println(H.html().open());
         out.println(
             H.head()
-             .child(H.title(opts.title))
-             .child(H.link().rel("stylesheet").type("text/css").href("main.css"))
-             .child(H.script().src("main.js"))
-             .end());
+            .child(H.title(opts.title))
+            .child(H.link().rel("stylesheet").type("text/css").href("main.css"))
+            .child(H.script().src("main.js"))
+            .end());
 
         out.println(H.body().open());
 
@@ -596,14 +659,16 @@ public class Server {
       if (masterResponse != null) {
         // Render answer
         Example ex = masterResponse.getExample();
+        if (lisp2jsonFormat()) {
+          out.println(makeLisp2json(masterResponse));
+        }
         if (ex != null) {
           if (!jsonFormat()) {
             out.println(makeAnswerBox(masterResponse, uri).toString());
             out.println(makeDetails(masterResponse, uri).toString());
-          } else {
-            out.println(makeJson(masterResponse));
           }
-        }
+          // else { out.println(makeJson(masterResponse));}
+        } 
 
         if (!jsonFormat() && opts.htmlVerbose >= 1) {
           // Write response to user
@@ -611,29 +676,18 @@ public class Server {
           for (String outLine : masterResponse.getLines())
             out.println(outLine);
           out.println(H.elem("pre").close());
+        } else {
+          if (query != null && !jsonFormat())
+            out.println(H.span("Internal error!").cls("error"));
         }
-      } else {
-        if (query != null && !jsonFormat())
-          out.println(H.span("Internal error!").cls("error"));
-      }
 
-      if (!jsonFormat()) {
-        out.println(H.body().close());
-        out.println(H.html().close());
+        if (!jsonFormat()) {
+          out.println(H.body().close());
+          out.println(H.html().close());
+        }
       }
 
       out.close();
-    }
-
-    void getResults() throws IOException {
-      setHeaders("application/json");
-      Map<String, String> map = new HashMap<>();
-      map.put("a", "3");
-      map.put("b", "4");
-
-      PrintWriter writer = new PrintWriter(new OutputStreamWriter(exchange.getResponseBody()));
-      writer.println(Json.writeValueAsStringHard(map));
-      writer.close();
     }
 
     void getFile(String path) throws IOException {

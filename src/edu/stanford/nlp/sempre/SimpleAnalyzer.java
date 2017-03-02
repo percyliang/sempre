@@ -21,7 +21,7 @@ public class SimpleAnalyzer extends LanguageAnalyzer {
     return buf.toString();
   }
 
-  private static final String[] numbers = {"zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"};
+  private static final String[] numbers = {"zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "many"};
 
   public LanguageInfo analyze(String utterance) {
     LanguageInfo languageInfo = new LanguageInfo();
@@ -65,10 +65,15 @@ public class SimpleAnalyzer extends LanguageAnalyzer {
     if (!utterance.equals("")) {
       String[] tokens = utterance.split("\\s+");
       for (String token : tokens) {
-        languageInfo.tokens.add(LanguageAnalyzer.opts.lowerCaseTokens ? token.toLowerCase() : token);
         String lemma = token;
         if (token.endsWith("s") && token.length() > 1)
           lemma = token.substring(0, token.length() - 1);
+        
+        if (!LanguageAnalyzer.opts.useLemmaTokens)
+          languageInfo.tokens.add(LanguageAnalyzer.opts.lowerCaseTokens ? token.toLowerCase() : token);
+        else
+          languageInfo.tokens.add(LanguageAnalyzer.opts.lowerCaseTokens ? lemma.toLowerCase() : lemma);
+        
         languageInfo.lemmaTokens.add(LanguageAnalyzer.opts.lowerCaseTokens ? lemma.toLowerCase() : lemma);
 
         // Is it a written out number?

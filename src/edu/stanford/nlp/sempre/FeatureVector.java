@@ -2,6 +2,7 @@ package edu.stanford.nlp.sempre;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+
 import fig.basic.*;
 
 import java.util.*;
@@ -40,7 +41,7 @@ public class FeatureVector {
     Arrays.fill(denseFeatures, 0d);
   }
 
-  private static String toFeature(String domain, String name) { return domain + " :: " + name; }
+  public static String toFeature(String domain, String name) { return domain + " :: " + name; }
 
   public void add(String domain, String name) {
     add(toFeature(domain, name));

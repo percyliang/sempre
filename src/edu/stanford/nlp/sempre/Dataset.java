@@ -228,8 +228,10 @@ public class Dataset {
     while (examples.size() < maxExamples && trees.hasNext()) {
       // Format: (example (id ...) (utterance ...) (targetFormula ...) (targetValue ...))
       LispTree tree = trees.next();
-      if (tree.children.size() < 2 && !"example".equals(tree.child(0).value))
+      if (tree.children.size() < 2 || !"example".equals(tree.child(0).value)) {
+        if ("metadata".equals(tree.child(0).value)) continue;
         throw new RuntimeException("Invalid example: " + tree);
+      }
 
       Example ex = Example.fromLispTree(tree, path + ":" + n);  // Specify a default id if it doesn't exist
       n++;
@@ -247,6 +249,17 @@ public class Dataset {
     LogInfo.end_track();
   }
 
+  public Map<String, String> getDatasetSummary() {
+    Map<String, String> summary = new HashMap<>();
+    summary.put("numTokenTypes", Integer.toString(tokenTypes.size()));
+    summary.put("numTokensPerExample", numTokensFig.toString());
+
+    for (Map.Entry<String, List<Example>> e : allExamples.entrySet())
+      summary.put("numExamples." + e.getKey(), Integer.toString(e.getValue().size()));
+    return summary;
+
+  }
+  
   private void collectStats() {
     LogInfo.begin_track_printAll("Dataset stats");
     Execution.putLogRec("numTokenTypes", tokenTypes.size());
@@ -256,7 +269,7 @@ public class Dataset {
     LogInfo.end_track();
   }
 
-  private static int getMaxExamplesForGroup(String group) {
+  public static int getMaxExamplesForGroup(String group) {
     int maxExamples = Integer.MAX_VALUE;
     for (Pair<String, Integer> maxPair : opts.maxExamples)
       if (maxPair.getFirst().equals(group))
@@ -267,15 +280,26 @@ public class Dataset {
   public static void appendExampleToFile(String path, Example ex) {
     // JSON is an annoying format because we can't just append.
     // So currently we have to read the entire file in and write it out.
-    List<Example> examples;
-    if (new File(path).exists()) {
-      examples = Json.readValueHard(
-          IOUtils.openInHard(path),
-          new TypeReference<List<Example>>() { });
-    } else {
-      examples = new ArrayList<Example>();
+    if (path.endsWith(".json")) {
+      List<Example> examples;
+      if (new File(path).exists()) {
+        examples = Json.readValueHard(
+            IOUtils.openInHard(path),
+            new TypeReference<List<Example>>() { });
+      } else {
+        examples = new ArrayList<Example>();
+      }
+      examples.add(ex);
+      Json.prettyWriteValueHard(new File(path), examples);
+    } else { // writes lisptree by just appending
+      try {
+        PrintWriter out = IOUtils.openOutAppend(path);
+        out.println(ex.toLispTree(false).toStringWrap());
+        out.flush();
+        out.close();
+      } catch (IOException e) {
+        LogInfo.logs(e.getMessage());
+      }
     }
-    examples.add(ex);
-    Json.prettyWriteValueHard(new File(path), examples);
   }
 }

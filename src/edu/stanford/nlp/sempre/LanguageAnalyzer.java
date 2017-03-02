@@ -14,6 +14,9 @@ public abstract class LanguageAnalyzer {
 
     @Option(gloss = "Whether to convert tokens in the utterance to lowercase")
     public boolean lowerCaseTokens = true;
+    @Option(gloss = "Whether to simply use lemmatized tokens")
+    public boolean useLemmaTokens = false;
+    
   }
   public static Options opts = new Options();
 

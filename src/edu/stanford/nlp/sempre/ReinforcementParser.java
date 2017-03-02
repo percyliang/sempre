@@ -251,8 +251,8 @@ final class ReinforcementParserState extends AbstractReinforcementParserState {
       return false;
     }
 
-    return chart[0][numTokens].get(Rule.rootCat) == null ||
-            chart[0][numTokens].get(Rule.rootCat).size() < getBeamSize();
+    return getChart()[0][numTokens].get(Rule.rootCat) == null ||
+            getChart()[0][numTokens].get(Rule.rootCat).size() < getBeamSize();
   }
 
   public void infer() {
