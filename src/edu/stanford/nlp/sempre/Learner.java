@@ -41,10 +41,16 @@ public class Learner {
     @Option(gloss = "Initialize with these parameters")
     public List<Pair<String, Double>> initialization;
 
-    @Option(gloss = "whether to update weights")
+    @Option(gloss = "Whether to update weights")
     public boolean updateWeights = true;
-    @Option(gloss = "whether to check gradient")
+    @Option(gloss = "Whether to check gradient")
     public boolean checkGradient = false;
+
+    @Option(gloss = "Whether to skip the 'train' group in the last iteration and non-'train' groups in other iterations")
+    public boolean skipUnnecessaryGroups = false;
+
+    @Option(gloss = "Number of threads to parallelize")
+    public int numParallelThreads = 1;
   }
   public static Options opts = new Options();
 
@@ -87,7 +93,7 @@ public class Learner {
    */
   public void learn(int numIters, Map<String, List<Evaluation>> evaluations) {
     LogInfo.begin_track("Learner.learn()");
-   // if when we start we have parameters already - need to sort the semantic functions.
+    // if when we start we have parameters already - need to sort the semantic functions.
     if (!params.isEmpty())
       sortOnFeedback();
     // For each iteration, go through the groups and parse (updating if train).
@@ -108,26 +114,29 @@ public class Learner {
       for (String group : dataset.groups()) {
         boolean lastIter = (iter == numIters);
         boolean updateWeights = opts.updateWeights && group.equals("train") && !lastIter;  // Don't train on last iteration
-        Evaluation eval = processExamples(
-                iter,
-                group,
-                dataset.examples(group),
-                updateWeights);
+        if (opts.skipUnnecessaryGroups) {
+          if ((group.equals("train") && lastIter) || (!group.equals("train") && !lastIter))
+            continue;
+        }
+        // Allow the parser to change behavior based on current group and iteration
+        parser.onBeginDataGroup(iter, numIters, group);
+        Evaluation eval = processExamples(iter, group, dataset.examples(group), updateWeights);
         MapUtils.addToList(evaluations, group, eval);
         meanEvaluations.get(group).add(eval);
         StopWatchSet.logStats();
+        writeParams(iter);
       }
-
-      // Write out parameters
-      String path = Execution.getFile("params." + iter);
-      if (path != null) {
-        params.write(path);
-        Utils.systemHard("ln -sf params." + iter + " " + Execution.getFile("params"));
-      }
-
       LogInfo.end_track();
     }
     LogInfo.end_track();
+  }
+
+  private void writeParams(int iter) {
+    String path = Execution.getFile("params." + iter);
+    if (path != null) {
+      params.write(path);
+      Utils.systemHard("ln -sf params." + iter + " " + Execution.getFile("params"));
+    }
   }
 
   public void onlineLearnExample(Example ex) {
@@ -141,8 +150,7 @@ public class Learner {
   }
 
   private Evaluation processExamples(int iter, String group,
-                                     List<Example> examples,
-                                     boolean computeExpectedCounts) {
+      List<Example> examples, boolean computeExpectedCounts) {
     Evaluation evaluation = new Evaluation();
 
     if (examples.size() == 0)
@@ -152,65 +160,80 @@ public class Learner {
 
     Execution.putOutput("group", group);
     LogInfo.begin_track_printAll(
-            "Processing %s: %s examples", prefix, examples.size());
+        "Processing %s: %s examples", prefix, examples.size());
     LogInfo.begin_track("Examples");
 
-    Map<String, Double> counts = new HashMap<>();
-    int batchSize = 0;
-    for (int e = 0; e < examples.size(); e++) {
+    if (opts.numParallelThreads > 1) {
+      // Parallelize!
+      Parallelizer<Example> paral = new Parallelizer<>(opts.numParallelThreads);
+      LearnerParallelProcessor processor = new LearnerParallelProcessor(
+          parser, params, prefix, computeExpectedCounts, evaluation);
+      LogInfo.begin_threads();
+      paral.process(examples, processor);
+      LogInfo.end_threads();
 
-      Example ex = examples.get(e);
+    } else {
+      // Original code (single-threaded)
 
-      LogInfo.begin_track_printAll(
-              "%s: example %s/%s: %s", prefix, e, examples.size(), ex.id);
-      ex.log();
-      Execution.putOutput("example", e);
+      Map<String, Double> counts = new HashMap<>();
+      int batchSize = 0;
+      for (int e = 0; e < examples.size(); e++) {
 
-      ParserState state = parseExample(params, ex, computeExpectedCounts);
-      if (computeExpectedCounts) {
-        if (opts.checkGradient) {
-          LogInfo.begin_track("Checking gradient");
-          checkGradient(ex, state);
-          LogInfo.end_track();
+        Example ex = examples.get(e);
+
+        LogInfo.begin_track_printAll(
+            "%s: example %s/%s: %s", prefix, e, examples.size(), ex.id);
+        ex.log();
+        Execution.putOutput("example", e);
+
+        ParserState state = parseExample(params, ex, computeExpectedCounts);
+        if (computeExpectedCounts) {
+          if (opts.checkGradient) {
+            LogInfo.begin_track("Checking gradient");
+            checkGradient(ex, state);
+            LogInfo.end_track();
+          }
+
+          SempreUtils.addToDoubleMap(counts, state.expectedCounts);
+
+          batchSize++;
+          if (batchSize >= opts.batchSize) {
+            // Gathered enough examples, update parameters
+            updateWeights(counts);
+            batchSize = 0;
+          }
         }
 
-        SempreUtils.addToDoubleMap(counts, state.expectedCounts);
+        LogInfo.logs("Current: %s", ex.evaluation.summary());
+        evaluation.add(ex.evaluation);
+        LogInfo.logs("Cumulative(%s): %s", prefix, evaluation.summary());
 
-        batchSize++;
-        if (batchSize >= opts.batchSize) {
-          // Gathered enough examples, update parameters
-          updateWeights(counts);
-          batchSize = 0;
+        printLearnerEventsIter(ex, iter, group);
+        LogInfo.end_track();
+        if (opts.addFeedback && computeExpectedCounts)
+          addFeedback(ex);
+
+        // Write out examples and predictions
+        if (opts.outputPredDerivations && Builder.opts.parser.equals("FloatingParser")) {
+          ExampleUtils.writeParaphraseSDF(iter, group, ex, opts.outputPredDerivations);
         }
-      }
-     // }
 
-      LogInfo.logs("Current: %s", ex.evaluation.summary());
-      evaluation.add(ex.evaluation);
-      LogInfo.logs("Cumulative(%s): %s", prefix, evaluation.summary());
-
-      printLearnerEventsIter(ex, iter, group);
-      LogInfo.end_track();
-      if (opts.addFeedback && computeExpectedCounts)
-        addFeedback(ex);
-
-      // Write out examples and predictions
-      if (opts.outputPredDerivations && Builder.opts.parser.equals("FloatingParser")) {
-        ExampleUtils.writeParaphraseSDF(iter, group, ex, opts.outputPredDerivations);
+        // To save memory
+        ex.predDerivations.clear();
       }
 
-      // To save memory
-      ex.predDerivations.clear();
+      if (computeExpectedCounts && batchSize > 0)
+        updateWeights(counts);
+
     }
 
-    if (computeExpectedCounts && batchSize > 0)
-      updateWeights(counts);
     params.finalizeWeights();
     if (opts.sortOnFeedback && computeExpectedCounts)
       sortOnFeedback();
 
     LogInfo.end_track();
     logEvaluationStats(evaluation, prefix);
+    evaluation.putOutput(prefix.replace('.', '-'));
     printLearnerEventsSummary(evaluation, iter, group);
     ExampleUtils.writeEvaluationSDF(iter, group, evaluation, examples.size());
     LogInfo.end_track();
@@ -273,7 +296,7 @@ public class Learner {
   // Print summary over all examples
   private void logEvaluationStats(Evaluation evaluation, String prefix) {
     LogInfo.logs("Stats for %s: %s", prefix, evaluation.summary());
-   // evaluation.add(LexiconFn.lexEval);
+    // evaluation.add(LexiconFn.lexEval);
     evaluation.logStats(prefix);
     evaluation.putOutput(prefix);
   }

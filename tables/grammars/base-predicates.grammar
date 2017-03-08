@@ -1,0 +1,84 @@
+# Grammar for Printing out Base Predicates
+
+################################################################
+# Macros
+
+(def @R reverse)
+(def @type fb:type.object.type)
+(def @row fb:type.row)
+(def @numdate (union fb:type.number fb:type.datetime))
+
+(def @next fb:row.row.next)
+(def @index fb:row.row.index)
+(def @p.num fb:cell.cell.number)
+(def @p.date fb:cell.cell.date)
+(def @p.num2 fb:cell.cell.num2)
+(def @p.part fb:cell.cell.part)
+
+################################################################
+# Base Rules for Sets
+
+################################
+# Anchored Rules
+
+# Fuzzy match the utterance phrase to a table cell (or part of cell)
+(rule $Set ($PHRASE) (FuzzyMatchFn entity) (anchored 1))
+
+# Extract number or date value from the phrase
+(rule $Set ($PHRASE) (NumberFn) (anchored 1))
+(rule $Set ($PHRASE) (DateFn) (anchored 1))
+(when yearrange
+  (rule $Set ($PHRASE) (YearRangeFn) (anchored 1))
+)
+
+################################
+# Floating Rules
+
+# Set of all rows
+(rule $Set (nothing) (ConstantFn (@type @row)))
+
+(when closedclass
+  # Generate things like "null"
+  (rule $Set (nothing) (tables.match.ClosedClassFn generic))
+  # If a column contains only a few unique things, generate them
+  (rule $Set (nothing) (tables.match.ClosedClassFn column))
+)
+
+################################################################
+# Binaries
+
+# Table column relations (row <-> cell)
+(rule $Binary (nothing) (FuzzyMatchFn any binary))
+
+# Normalization relations (cell <-> primitive)
+(when (not prenormalized)
+  (for @property (@next @index @p.num @p.date @p.num2)
+    (rule $Binary (nothing) (ConstantFn @property))
+  )
+  (when part
+    (rule $Binary (nothing) (ConstantFn @p.part))
+  )
+)
+(when prenormalized
+  (for @property (@next @index)
+    (rule $Binary (nothing) (ConstantFn @property))
+  )
+)
+
+# Comparison
+(when comparison
+  (for @comparison (< > <= >=)
+    (rule $Comparison (nothing) (ConstantFn @comparison))
+  )
+)
+(when neq
+  (rule $Neq (nothing) (ConstantFn !=))
+)
+
+################################################################
+# ROOT
+
+(rule $ROOT ($Set) (IdentityFn))
+(rule $ROOT ($Binary) (IdentityFn))
+(rule $ROOT ($Comparison) (IdentityFn))
+(rule $ROOT ($Neq) (IdentityFn))

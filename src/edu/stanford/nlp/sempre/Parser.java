@@ -51,7 +51,7 @@ public abstract class Parser {
     @Option(gloss = "Source of random noise")
     public Random derivationScoreRandom = new Random(1);
 
-    @Option (gloss = "Prune away error denotations")
+    @Option(gloss = "Prune away error denotations")
     public boolean pruneErrorValues = false;
 
     @Option(gloss = "Dump all features (for debugging)")
@@ -97,7 +97,8 @@ public abstract class Parser {
     this.valueEvaluator = spec.valueEvaluator;
 
     computeCatUnaryRules();
-    LogInfo.logs("Parser: %d catUnaryRules (sorted), %d nonCatUnaryRules (in trie)", catUnaryRules.size(), grammar.rules.size() - catUnaryRules.size());
+    LogInfo.logs("Parser: %d catUnaryRules (sorted), %d nonCatUnaryRules (in trie)",
+        catUnaryRules.size(), grammar.rules.size() - catUnaryRules.size());
   }
 
   // If grammar changes, then we might need to update aspects of the parser.
@@ -106,7 +107,7 @@ public abstract class Parser {
       catUnaryRules.add(rule);
   }
 
-  private void computeCatUnaryRules() {
+  protected void computeCatUnaryRules() {
     // Handle catUnaryRules
     catUnaryRules = new ArrayList<>();
     Map<String, List<Rule>> graph = new HashMap<>();  // Node from LHS to list of rules
@@ -121,10 +122,8 @@ public abstract class Parser {
   }
 
   // Helper function for transitive closure of unary rules.
-  private void traverse(List<Rule> catUnaryRules,
-                          String node,
-                          Map<String, List<Rule>> graph,
-                          Map<String, Boolean> done) {
+  protected void traverse(List<Rule> catUnaryRules, String node,
+      Map<String, List<Rule>> graph, Map<String, Boolean> done) {
     Boolean d = done.get(node);
     if (Boolean.TRUE.equals(d)) return;
     if (Boolean.FALSE.equals(d))
@@ -135,6 +134,15 @@ public abstract class Parser {
       catUnaryRules.add(rule);
     }
     done.put(node, true);
+  }
+
+  /**
+   * Override this method to change the parser's behavior based on current
+   * group name and iteration number. This method will be called at the
+   * beginning of each data group.
+   */
+  public void onBeginDataGroup(int iter, int numIters, String group) {
+    // DEFAULT: Do nothing.
   }
 
   // Main thing for parsers to implement.
@@ -154,7 +162,7 @@ public abstract class Parser {
     // Parse
     StopWatch watch = new StopWatch();
     watch.start();
-    LogInfo.begin_track("Parser.parse: parse");
+    LogInfo.begin_track_printAll("Parser.parse: parse");
     ParserState state = newParserState(params, ex, computeExpectedCounts);
     state.infer();
     LogInfo.end_track();
@@ -173,7 +181,6 @@ public abstract class Parser {
     ex.clearTempState();
     for (Derivation deriv : ex.predDerivations)
       deriv.clearTempState();
-
     return state;
   }
 
@@ -199,12 +206,12 @@ public abstract class Parser {
     int correctIndexAfterParse = -1;
     double maxCompatibility = 0.0;
     double[] compatibilities = null;
+
     if (ex.targetValue != null) {
       compatibilities = new double[numCandidates];
       for (int i = 0; i < numCandidates; i++) {
         Derivation deriv = predDerivations.get(i);
         compatibilities[i] = deriv.compatibility;
-
         // Must be fully compatible to count as correct.
         if (compatibilities[i] == 1 && correctIndex == -1)
           correctIndex = i;
@@ -213,8 +220,7 @@ public abstract class Parser {
       }
       // What if we only had parsed bottom up?
       for (int i = 0; i < numCandidates; i++) {
-        Derivation deriv = predDerivations.get(i);
-        if (deriv.compatibility == 1) {
+        if (compatibilities[i] == 1) {
           correctIndexAfterParse = i;
           break;
         }
@@ -233,13 +239,12 @@ public abstract class Parser {
     double topMass = 0;
     if (ex.targetValue != null) {
       while (numTop < numCandidates &&
-              Math.abs(predDerivations.get(numTop).score - predDerivations.get(0).score) < 1e-10) {
+          Math.abs(predDerivations.get(numTop).score - predDerivations.get(0).score) < 1e-10) {
         topMass += probs[numTop];
         numTop++;
       }
     }
-    double correct = 0;
-    double partCorrect = 0;
+    double correct = 0, partCorrect = 0;
     if (ex.targetValue != null) {
       for (int i = 0; i < numTop; i++) {
         if (compatibilities[i] == 1) correct += probs[i] / topMass;
@@ -273,8 +278,8 @@ public abstract class Parser {
         boolean print = printAllPredictions || (numPrintedSoFar < opts.maxPrintedTrue);
         if (print) {
           LogInfo.logs(
-                  "True@%04d: %s [score=%s, prob=%s%s]", i, deriv.toString(),
-                  Fmt.D(deriv.score), Fmt.D(probs[i]), compatibilities != null ? ", comp=" + Fmt.D(compatibilities[i]) : "");
+              "True@%04d: %s [score=%s, prob=%s%s]", i, deriv.toString(),
+              Fmt.D(deriv.score), Fmt.D(probs[i]), compatibilities != null ? ", comp=" + Fmt.D(compatibilities[i]) : "");
           numPrintedSoFar++;
           if (opts.dumpAllFeatures) FeatureVector.logFeatureWeights("Features", deriv.getAllFeatureVector(), state.params);
         }
@@ -288,8 +293,8 @@ public abstract class Parser {
         boolean print = printAllPredictions || (numPrintedSoFar < opts.maxPrintedTrue);
         if (print) {
           LogInfo.logs(
-                  "Part@%04d: %s [score=%s, prob=%s%s]", i, deriv.toString(),
-                  Fmt.D(deriv.score), Fmt.D(probs[i]), compatibilities != null ? ", comp=" + Fmt.D(compatibilities[i]) : "");
+              "Part@%04d: %s [score=%s, prob=%s%s]", i, deriv.toString(),
+              Fmt.D(deriv.score), Fmt.D(probs[i]), compatibilities != null ? ", comp=" + Fmt.D(compatibilities[i]) : "");
           numPrintedSoFar++;
           if (opts.dumpAllFeatures) FeatureVector.logFeatureWeights("Features", deriv.getAllFeatureVector(), state.params);
         }
@@ -303,8 +308,8 @@ public abstract class Parser {
       boolean print = printAllPredictions || ((probs[i] >= probs[0] / 2 || i < 10) && i < opts.maxPrintedPredictions);
       if (print) {
         LogInfo.logs(
-                "Pred@%04d: %s [score=%s, prob=%s%s]", i, deriv.toString(),
-                Fmt.D(deriv.score), Fmt.D(probs[i]), compatibilities != null ? ", comp=" + Fmt.D(compatibilities[i]) : "");
+            "Pred@%04d: %s [score=%s, prob=%s%s]", i, deriv.toString(),
+            Fmt.D(deriv.score), Fmt.D(probs[i]), compatibilities != null ? ", comp=" + Fmt.D(compatibilities[i]) : "");
         // LogInfo.logs("Derivation tree: %s", deriv.toRecursiveString());
         if (opts.dumpAllFeatures) FeatureVector.logFeatureWeights("Features", deriv.getAllFeatureVector(), state.params);
       }

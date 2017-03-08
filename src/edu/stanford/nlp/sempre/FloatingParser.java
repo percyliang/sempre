@@ -16,53 +16,126 @@ import static fig.basic.LogInfo.logs;
  * where many of the words are unaccounted for.
  *
  * Assume the Grammar is binarized and only has rules of the following form:
+ *
  *   $Cat => token
  *   $Cat => $Cat
  *   $Cat => token token
  *   $Cat => token $Cat
  *   $Cat => $Cat token
  *   $Cat => $Cat $Cat
- * Each rule is either anchored or floating or both.
+ *
+ * Each rule can be either anchored or floating (or technically, both).
+ * For floating rules, tokens on the RHS are ignored.
  *
  * Chart cells are either:
- * - anchored: (cat, start, end) [these are effectively at depth 0]
- * - floating: (cat, depth) [depends on anchored cells as base cases]
+ * - anchored: (cat, start, end)    [these are effectively at depth 0]
+ * - floating: (cat, depth or size) [depends on anchored cells as base cases]
  *
- * Rules:
+ * With rules:
  *   cat => cat1 cat2 [binary]
  *   cat => cat1 [unary]
- * Combinations:
- *   (cat1, start, end) => (cat, start, end)
- *   (cat1, depth) => (cat, depth)
  *
+ * Anchored Combinations:
+ *   (cat1, start, end) => (cat, start, end)
  *   (cat1, start, mid), (cat2, mid, end) => (cat, start, end)
- *   (cat1, start, end), (cat2, depth) => (cat, depth + 1)
- *   (cat1, depth), (cat2, start, end) => (cat, depth + 1)
- *   (cat1, depth1), (cat2, depth2) => (cat, max(depth1, depth2)+1)
+ *   (cat, start, end) => (cat, 0)   [anchored => floating]
+ *
+ * Floating Combinations:
+ *   [nothing] => (cat, 1)           [from $Cat => token]
+ *   (cat1, depth) => (cat, depth + 1)
+ *   (cat1, depth1), (cat2, depth2) => (cat, max(depth1, depth2) + 1)
+ *
+ * If --useSizeInsteadOfDepth is turned on, the floating combinations become:
+ *   [nothing] => (cat, 1)           [from $Cat => token]
+ *   (cat1, size) => (cat, size + 1)
+ *   (cat1, size1), (cat2, size2) => (cat, size1 + size2 + 1)
  *
  * @author Percy Liang
  */
 public class FloatingParser extends Parser {
   public static class Options {
-    @Option public int maxDepth = 10;
-    @Option public boolean defaultIsFloating = true;
-    @Option (gloss = "Flag specifying whether anchored spans/tokens can only be used once in a derivation")
-    public boolean useAnchorsOnce = false;
-    @Option (gloss = "Flag specifying whether floating rules are allowed to be applied consecutively")
-    public boolean consecutiveRules = true;
-    @Option (gloss = "Whether to always execute the derivation")
-    public boolean executeAllDerivations = false;
-    @Option (gloss = "Whether to output a file with all utterances predicted")
-    public boolean printPredictedUtterances = false;
+    // Floating rules
+    @Option(gloss = "Whether rules without the (anchored 1) or (floating 1) tag should be anchored or floating")
+    public boolean defaultIsFloating = true;
+    @Option(gloss = "Limit on formula depth (or formula size when --useSizeInsteadOfDepth is true)")
+    public int maxDepth = 10;
     @Option(gloss = "Put a limit on formula size instead of formula depth")
     public boolean useSizeInsteadOfDepth = false;
+    @Option(gloss = "Whether floating rules are allowed to be applied consecutively")
+    public boolean consecutiveRules = true;
+    @Option(gloss = "Whether floating rule (rule $A (a)) should have depth 0 or 1")
+    public boolean initialFloatingHasZeroDepth = false;
+    @Option(gloss = "Filter child derivations using the type information from SemanticFn")
+    public boolean filterChildDerivations = true;
+    // Anchored rules
+    @Option(gloss = "Whether anchored spans/tokens can only be used once in a derivation")
+    public boolean useAnchorsOnce = false;
+    @Option(gloss = "Each span can be anchored this number of times (unused if useAnchorsOnce is active)")
+    public int useMaxAnchors = -1;
+    // Other options
+    @Option(gloss = "Whether to always execute the derivation")
+    public boolean executeAllDerivations = false;
+    @Option(gloss = "Whether to output a file with all utterances predicted")
+    public boolean printPredictedUtterances = false;
     @Option(gloss = "Custom beam size at training time (default = Parser.beamSize)")
     public int trainBeamSize = -1;
+    @Option(gloss = "Whether to beta reduce the formula")
+    public boolean betaReduce = false;
+    @Option(gloss = "DEBUG: Print amount of time spent on each rule")
+    public boolean summarizeRuleTime = false;
+    @Option(gloss = "Stop the parser if it has used more than this amount of time (in seconds)")
+    public int maxFloatingParsingTime = 600;
   }
 
   public static Options opts = new Options();
 
-  public FloatingParser(Spec spec) { super(spec); }
+  protected List<Rule> orderedFloatingRules;
+  public List<Rule> getOrderedFloatingRules() { return orderedFloatingRules; }
+
+  public FloatingParser(Spec spec) {
+    super(spec);
+  }
+
+  /**
+   * computeCatUnaryRules, but do not topologically sort floating rules
+   */
+  @Override
+  protected void computeCatUnaryRules() {
+    // Handle anchored catUnaryRules
+    catUnaryRules = new ArrayList<>();
+    Map<String, List<Rule>> graph = new HashMap<>();  // Node from LHS to list of rules
+    for (Rule rule : grammar.rules)
+      if (rule.isCatUnary() && rule.isAnchored())
+        MapUtils.addToList(graph, rule.lhs, rule);
+
+    // Topologically sort catUnaryRules so that B->C occurs before A->B
+    Map<String, Boolean> done = new HashMap<>();
+    for (String node : graph.keySet())
+      traverse(catUnaryRules, node, graph, done);
+
+    // Add floating catUnaryRules
+    for (Rule rule : grammar.rules)
+      if (rule.isCatUnary() && rule.isFloating())
+        catUnaryRules.add(rule);
+  }
+
+  // Helper function for transitive closure of floating rules.
+  protected void traverseFloatingRules(List<Rule> orderedFloatingRules,
+      String node, Map<String, List<Rule>> graph, Map<String, Boolean> done) {
+    Boolean d = done.get(node);
+    if (Boolean.TRUE.equals(d)) return;
+    if (Boolean.FALSE.equals(d))
+      throw new RuntimeException("Found cycle of floating rules involving " + node);
+    done.put(node, false);
+    for (Rule rule : MapUtils.getList(graph, node)) {
+      for (String rhsCat : rule.rhs) {
+        if (Grammar.isIntermediate(rhsCat))
+          traverseFloatingRules(orderedFloatingRules, rhsCat, graph, done);
+      }
+      orderedFloatingRules.add(rule);
+    }
+    done.put(node, true);
+  }
 
   public ParserState newParserState(Params params, Example ex, boolean computeExpectedCounts) {
     return new FloatingParserState(this, params, ex, computeExpectedCounts);
@@ -79,18 +152,21 @@ public class FloatingParser extends Parser {
  * @author Percy Liang
  */
 class FloatingParserState extends ParserState {
-  // cell => list of derivations, formula set
-  // Examples of state:
-  //   (category, depth)
-  //   (category, depth, set of tokens)
 
+  // cell => list of derivations
+  // Anchored cells: cat[start,end]
+  // Floating cells: cat:depth
   private final Map<Object, List<Derivation>> chart = new HashMap<>();
 
   private final DerivationPruner pruner;
+  private final CatSizeBound catSizeBound;
+  private Map<Rule, Long> ruleTime;
+  private boolean timeout = false;
 
   public FloatingParserState(FloatingParser parser, Params params, Example ex, boolean computeExpectedCounts) {
     super(parser, params, ex, computeExpectedCounts);
     pruner = new DerivationPruner(this);
+    catSizeBound = new CatSizeBound(FloatingParser.opts.maxDepth, parser.grammar);
   }
 
   @Override
@@ -100,14 +176,12 @@ class FloatingParserState extends ParserState {
     return Parser.opts.beamSize;
   }
 
-
-
   // Construct state names.
   private Object floatingCell(String cat, int depth) {
-    return cat + ":" + depth;
+    return (cat + ":" + depth).intern();
   }
   private Object anchoredCell(String cat, int start, int end) {
-    return cat + "[" + start + "," + end + "]";
+    return (cat + "[" + start + "," + end + "]").intern();
   }
   private Object cell(String cat, int start, int end, int depth) {
     return (start != -1) ? anchoredCell(cat, start, end) : floatingCell(cat, depth);
@@ -122,7 +196,18 @@ class FloatingParserState extends ParserState {
     MapUtils.addToList(chart, cell, deriv);
   }
 
-  private void applyRule(Rule rule, int start, int end, int depth, Derivation child1, Derivation child2, String canonicalUtterance) {
+  private boolean isRootRule(Rule rule) {
+    return Rule.rootCat.equals(rule.lhs);
+  }
+
+  private boolean applyRule(Rule rule, int start, int end, int depth,
+      Derivation child1, Derivation child2, String canonicalUtterance) {
+    if (timeout && !isRootRule(rule)) return false;
+    applyRuleActual(rule, start, end, depth, child1, child2, canonicalUtterance);
+    return true;
+  }
+
+  private void applyRuleActual(Rule rule, int start, int end, int depth, Derivation child1, Derivation child2, String canonicalUtterance) {
     if (Parser.opts.verbose >= 5) logs("applyRule %s [%s:%s] depth=%s, %s %s", rule, start, end, depth, child1, child2);
     List<Derivation> children;
     if (child1 == null)  // 0-ary
@@ -131,9 +216,14 @@ class FloatingParserState extends ParserState {
       children = Collections.singletonList(child1);
     else {
       // Optional: ensure that each anchor is only used once per derivation.
-      if (FloatingParser.opts.useAnchorsOnce &&
-              FloatingRuleUtils.derivationAnchorsOverlap(child1, child2))
-        return;
+      if (FloatingParser.opts.useAnchorsOnce) {
+        if (FloatingRuleUtils.derivationAnchorsOverlap(child1, child2))
+          return;
+      } else if (FloatingParser.opts.useMaxAnchors >= 0) {
+        if (FloatingRuleUtils.maxNumAnchorOverlaps(child1, child2)
+            > FloatingParser.opts.useMaxAnchors)
+          return;
+      }
       children = ListUtils.newList(child1, child2);
     }
 
@@ -145,9 +235,10 @@ class FloatingParserState extends ParserState {
     }
 
     DerivationStream results = rule.sem.call(ex,
-            new SemanticFn.CallInfo(rule.lhs, start, end, rule, children));
+        new SemanticFn.CallInfo(rule.lhs, start, end, rule, children));
     while (results.hasNext()) {
       Derivation newDeriv = results.next();
+      if (FloatingParser.opts.betaReduce) newDeriv = newDeriv.betaReduction();
       newDeriv.canonicalUtterance = canonicalUtterance;
 
       // make sure we execute
@@ -162,19 +253,42 @@ class FloatingParserState extends ParserState {
     }
   }
 
-  private void applyAnchoredRule(Rule rule, int start, int end, Derivation child1, Derivation child2, String canonicalUtterance) {
-    applyRule(rule, start, end, -1, child1, child2, canonicalUtterance);
+  private boolean applyAnchoredRule(Rule rule, int start, int end, Derivation child1, Derivation child2, String canonicalUtterance) {
+    return applyRule(rule, start, end, -1, child1, child2, canonicalUtterance);
   }
 
-  private void applyFloatingRule(Rule rule, int depth, Derivation child1, Derivation child2, String canonicalUtterance) {
-    applyRule(rule, -1, -1, depth, child1, child2, canonicalUtterance);
+  private boolean applyFloatingRule(Rule rule, int depth, Derivation child1, Derivation child2, String canonicalUtterance) {
+    return applyRule(rule, -1, -1, depth, child1, child2, canonicalUtterance);
   }
 
+  /**
+   * Return a collection of Derivation.
+   */
   private List<Derivation> getDerivations(Object cell) {
     List<Derivation> derivations = chart.get(cell);
     // logs("getDerivations %s => %s", cell, derivations);
     if (derivations == null) return Derivation.emptyList;
     return derivations;
+  }
+
+  /**
+   * Return a collection of DerivationGroup.
+   *
+   * The rule should be applied on all derivations (or all pairs of derivations) in each DerivationGroup.
+   */
+  private Collection<ChildDerivationsGroup> getFilteredDerivations(Rule rule, Object cell1, Object cell2) {
+    List<Derivation> derivations1 = getDerivations(cell1),
+        derivations2 = (cell2 == null) ? null : getDerivations(cell2);
+    if (!FloatingParser.opts.filterChildDerivations)
+      return Collections.singleton(new ChildDerivationsGroup(derivations1, derivations2));
+    // Try to filter down the number of partial logical forms
+    if (rule.getSem().supportFilteringOnTypeData())
+      return rule.getSem().getFilteredDerivations(derivations1, derivations2);
+    return Collections.singleton(new ChildDerivationsGroup(derivations1, derivations2));
+  }
+
+  private Collection<ChildDerivationsGroup> getFilteredDerivations(Rule rule, Object cell) {
+    return getFilteredDerivations(rule, cell, null);
   }
 
   // Build derivations over span |start|, |end|.
@@ -184,8 +298,10 @@ class FloatingParserState extends ParserState {
       if (!rule.isAnchored()) continue;
       if (rule.rhs.size() != 1 || rule.isCatUnary()) continue;
       boolean match = (end - start == 1) && ex.token(start).equals(rule.rhs.get(0));
-      if (match)
-        applyAnchoredRule(rule, start, end, null, null, rule.rhs.get(0));
+      if (!match) continue;
+      StopWatch stopWatch = new StopWatch().start();
+      applyAnchoredRule(rule, start, end, null, null, rule.rhs.get(0));
+      ruleTime.put(rule, ruleTime.getOrDefault(rule, 0L) + stopWatch.stop().ms);
     }
 
     // Apply binaries on spans (rule $A ($B $C)), ...
@@ -194,6 +310,7 @@ class FloatingParserState extends ParserState {
         if (!rule.isAnchored()) continue;
         if (rule.rhs.size() != 2) continue;
 
+        StopWatch stopWatch = new StopWatch().start();
         String rhs1 = rule.rhs.get(0);
         String rhs2 = rule.rhs.get(1);
         boolean match1 = (mid - start == 1) && ex.token(start).equals(rhs1);
@@ -221,6 +338,7 @@ class FloatingParserState extends ParserState {
             for (Derivation deriv2 : derivations2)
               applyAnchoredRule(rule, start, end, deriv1, deriv2, deriv1.canonicalUtterance + " " + deriv2.canonicalUtterance);
         }
+        ruleTime.put(rule, ruleTime.getOrDefault(rule, 0L) + stopWatch.stop().ms);
       }
     }
 
@@ -228,79 +346,89 @@ class FloatingParserState extends ParserState {
     // Important: do this in topologically sorted order and after all the binaries are done.
     for (Rule rule : parser.catUnaryRules) {
       if (!rule.isAnchored()) continue;
+      StopWatch stopWatch = new StopWatch().start();
       List<Derivation> derivations = getDerivations(anchoredCell(rule.rhs.get(0), start, end));
-      for (Derivation deriv : derivations) {
+      for (Derivation deriv : derivations)
         applyAnchoredRule(rule, start, end, deriv, null, deriv.canonicalUtterance);
-      }
+      ruleTime.put(rule, ruleTime.getOrDefault(rule, 0L) + stopWatch.stop().ms);
     }
   }
 
   // Build floating derivations of exactly depth |depth|.
   private void buildFloating(int depth) {
-    // Apply unary tokens on spans (rule $A (a))
-    if (depth == 1) {
+    // Build a floating predicate from thin air
+    // (rule $A (a)); note that "a" is ignored
+    if (depth == (FloatingParser.opts.initialFloatingHasZeroDepth ? 0 : 1)) {
       for (Rule rule : parser.grammar.rules) {
+        if (timeout && !isRootRule(rule)) continue;
         if (!rule.isFloating()) continue;
         if (rule.rhs.size() != 1 || rule.isCatUnary()) continue;
+        StopWatch stopWatch = new StopWatch().start();
         applyFloatingRule(rule, depth, null, null, rule.rhs.get(0));
+        ruleTime.put(rule, ruleTime.getOrDefault(rule, 0L) + stopWatch.stop().ms);
       }
     }
 
     // Apply binaries on spans (rule $A ($B $C)), ...
     for (Rule rule : parser.grammar.rules) {
+      if (timeout && !isRootRule(rule)) continue;
       if (!rule.isFloating()) continue;
       if (rule.rhs.size() != 2) continue;
+      if (catSizeBound.getBound(rule.lhs) < depth) continue;
 
+      StopWatch stopWatch = new StopWatch().start();
       String rhs1 = rule.rhs.get(0);
       String rhs2 = rule.rhs.get(1);
+      if (!Rule.isCat(rhs1) || !Rule.isCat(rhs2))
+        throw new RuntimeException("Floating rules with > 1 arguments cannot have tokens on the RHS: " + rule);
 
-      if (!Rule.isCat(rhs1) && !Rule.isCat(rhs2)) {  // token token
-        if (depth == 1)
-          applyFloatingRule(rule, depth, null, null, rhs1 + " " + rhs2);
-      } else if (!Rule.isCat(rhs1) && Rule.isCat(rhs2)) {  // token $Cat
-        List<Derivation> derivations = getDerivations(floatingCell(rhs2, depth - 1));
-        for (Derivation deriv : derivations)
-          applyFloatingRule(rule, depth, deriv, null, rhs1 + " " + deriv.canonicalUtterance);
-      } else if (Rule.isCat(rhs1) && !Rule.isCat(rhs2)) {  // $Cat token
-        List<Derivation> derivations = getDerivations(floatingCell(rhs1, depth - 1));
-        for (Derivation deriv : derivations)
-          applyFloatingRule(rule, depth, deriv, null, deriv.canonicalUtterance + " " + rhs2);
-      } else {  // $Cat $Cat
-        if (FloatingParser.opts.useSizeInsteadOfDepth) {
-          for (int depth1 = 0; depth1 < depth; depth1++) {
+      if (FloatingParser.opts.useSizeInsteadOfDepth) {
+        derivLoop:
+          for (int depth1 = 0; depth1 < depth; depth1++) {  // sizes must add up to depth-1 (actually size-1)
             int depth2 = depth - 1 - depth1;
-            List<Derivation> derivations1 = getDerivations(floatingCell(rhs1, depth1));
-            List<Derivation> derivations2 = getDerivations(floatingCell(rhs2, depth2));
-            for (Derivation deriv1 : derivations1)
-              for (Derivation deriv2 : derivations2)
-                applyFloatingRule(rule, depth, deriv1, deriv2, deriv1.canonicalUtterance + " " + deriv2.canonicalUtterance);
+            for (ChildDerivationsGroup group : getFilteredDerivations(rule, floatingCell(rhs1, depth1), floatingCell(rhs2, depth2)))
+              for (Derivation deriv1 : group.derivations1)
+                for (Derivation deriv2 : group.derivations2)
+                  if (!applyFloatingRule(rule, depth, deriv1, deriv2, deriv1.canonicalUtterance + " " + deriv2.canonicalUtterance))
+                    break derivLoop;
           }
-        } else {
-          for (int subDepth = 0; subDepth < depth; subDepth++) {  // depth-1 <=depth-1
-            List<Derivation> derivations1 = getDerivations(floatingCell(rhs1, depth - 1));
-            List<Derivation> derivations2 = getDerivations(floatingCell(rhs2, subDepth));
-            for (Derivation deriv1 : derivations1)
-              for (Derivation deriv2 : derivations2)
-                applyFloatingRule(rule, depth, deriv1, deriv2, deriv1.canonicalUtterance + " " + deriv2.canonicalUtterance);
-          }
-          for (int subDepth = 0; subDepth < depth - 1; subDepth++) {  // <depth-1 depth-1
-            List<Derivation> derivations1 = getDerivations(floatingCell(rhs1, subDepth));
-            List<Derivation> derivations2 = getDerivations(floatingCell(rhs2, depth - 1));
-            for (Derivation deriv1 : derivations1)
-              for (Derivation deriv2 : derivations2)
-                applyFloatingRule(rule, depth, deriv1, deriv2, deriv1.canonicalUtterance + " " + deriv2.canonicalUtterance);
-          }
+      } else {
+        {
+          derivLoop:
+            for (int subDepth = 0; subDepth < depth; subDepth++) {  // depth-1 <=depth-1
+              for (ChildDerivationsGroup group : getFilteredDerivations(rule, floatingCell(rhs1, depth - 1), floatingCell(rhs2, subDepth)))
+                for (Derivation deriv1 : group.derivations1)
+                  for (Derivation deriv2 : group.derivations2)
+                    if (!applyFloatingRule(rule, depth, deriv1, deriv2, deriv1.canonicalUtterance + " " + deriv2.canonicalUtterance))
+                      break derivLoop;
+            }
+        }
+        {
+          derivLoop:
+            for (int subDepth = 0; subDepth < depth - 1; subDepth++) {  // <depth-1 depth-1
+              for (ChildDerivationsGroup group : getFilteredDerivations(rule, floatingCell(rhs1, subDepth), floatingCell(rhs2, depth - 1)))
+                for (Derivation deriv1 : group.derivations1)
+                  for (Derivation deriv2 : group.derivations2)
+                    if (!applyFloatingRule(rule, depth, deriv1, deriv2, deriv1.canonicalUtterance + " " + deriv2.canonicalUtterance))
+                      break derivLoop;
+            }
         }
       }
+      ruleTime.put(rule, ruleTime.getOrDefault(rule, 0L) + stopWatch.stop().ms);
     }
 
     // Apply unary categories on spans (rule $A ($B))
-    // Important: do this in topologically sorted order and after all the binaries are done.
     for (Rule rule : parser.catUnaryRules) {
+      if (timeout && !isRootRule(rule)) continue;
       if (!rule.isFloating()) continue;
-      List<Derivation> derivations = getDerivations(floatingCell(rule.rhs.get(0), depth - 1));
-      for (Derivation deriv : derivations)
-        applyFloatingRule(rule, depth, deriv, null, deriv.canonicalUtterance);
+      if (catSizeBound.getBound(rule.lhs) < depth) continue;
+      StopWatch stopWatch = new StopWatch().start();
+      derivLoop:
+        for (ChildDerivationsGroup group : getFilteredDerivations(rule, floatingCell(rule.rhs.get(0), depth - 1)))
+          for (Derivation deriv : group.derivations1)
+            if (!applyFloatingRule(rule, depth, deriv, null, deriv.canonicalUtterance))
+              break derivLoop;
+      ruleTime.put(rule, ruleTime.getOrDefault(rule, 0L) + stopWatch.stop().ms);
     }
   }
 
@@ -311,7 +439,8 @@ class FloatingParserState extends ParserState {
   }
 
   @Override public void infer() {
-    LogInfo.begin_track("FloatingParser.infer()");
+    LogInfo.begin_track_printAll("FloatingParser.infer()");
+    ruleTime = new HashMap<>();
 
     // Base case ($TOKEN, $PHRASE)
     for (Derivation deriv : gatherTokenAndPhraseDerivations()) {
@@ -323,6 +452,8 @@ class FloatingParserState extends ParserState {
     for (Rule rule : parser.grammar.rules)
       categories.add(rule.lhs);
 
+    if (Parser.opts.verbose >= 1)
+      LogInfo.begin_track_printAll("Anchored");
     // Build up anchored derivations (like the BeamParser)
     int numTokens = ex.numTokens();
     for (int len = 1; len <= numTokens; len++) {
@@ -334,19 +465,49 @@ class FloatingParserState extends ParserState {
         }
       }
     }
+    if (Parser.opts.verbose >= 1)
+      LogInfo.end_track();
 
     // Build up floating derivations
-    for (int depth = 1; depth <= FloatingParser.opts.maxDepth; depth++) {
-      buildFloating(depth);
-      for (String cat : categories) {
-        String cell = floatingCell(cat, depth).toString();
-        pruneCell(cell, chart.get(cell));
+    // Timeout if taking too long
+    timeout = false;
+    Thread parsingThread = new Thread(new Runnable() {
+      @Override
+      public void run() {
+        for (int depth = (FloatingParser.opts.initialFloatingHasZeroDepth ? 0 : 1); depth <= FloatingParser.opts.maxDepth; depth++) {
+          if (Parser.opts.verbose >= 1)
+            LogInfo.begin_track_printAll("%s = %d", FloatingParser.opts.useSizeInsteadOfDepth ? "SIZE" : "DEPTH", depth);
+          buildFloating(depth);
+          for (String cat : categories) {
+            String cell = floatingCell(cat, depth).toString();
+            pruneCell(cell, chart.get(cell));
+          }
+          if (Parser.opts.verbose >= 1)
+            LogInfo.end_track();
+        }
       }
+    });
+    parsingThread.start();
+    try {
+      parsingThread.join(FloatingParser.opts.maxFloatingParsingTime * 1000);
+      if (parsingThread.isAlive()) {
+        // This will only interrupt first or second passes, not the final candidate collection.
+        LogInfo.warnings("Parsing time exceeded %d seconds. Will now interrupt ...", FloatingParser.opts.maxFloatingParsingTime);
+        timeout = true;
+        parsingThread.interrupt();
+        parsingThread.join();
+      }
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+      LogInfo.fails("DPParser error: %s", e);
     }
+    evaluation.add("timeout", timeout);
+
+    if (FloatingParser.opts.summarizeRuleTime) summarizeRuleTime();
 
     // Collect final predicted derivations
     addToDerivations(anchoredCell(Rule.rootCat, 0, numTokens), predDerivations);
-    for (int depth = 1; depth <= FloatingParser.opts.maxDepth; depth++)
+    for (int depth = 0; depth <= FloatingParser.opts.maxDepth; depth++)
       addToDerivations(floatingCell(Rule.rootCat, depth), predDerivations);
 
     // Compute gradient with respect to the predicted derivations
@@ -357,8 +518,8 @@ class FloatingParserState extends ParserState {
     }
 
     // Example summary
-    if (Parser.opts.verbose >= 1) {
-      LogInfo.begin_track("Summary of Example %s", ex.getUtterance());
+    if (Parser.opts.verbose >= 2) {
+      LogInfo.begin_track_printAll("Summary of Example %s", ex.getUtterance());
       for (Derivation deriv : predDerivations)
         LogInfo.logs("Generated: canonicalUtterance=%s, value=%s", deriv.canonicalUtterance, deriv.value);
       LogInfo.end_track();
@@ -387,6 +548,7 @@ class FloatingParserState extends ParserState {
     evaluation.add("numCells", chart.size());
   }
 
+  @SuppressWarnings("unused")
   private void visualizeAnchoredChart(Set<String> categories) {
     for (String cat : categories) {
       for (int len = 1; len <= numTokens; ++len) {
@@ -398,5 +560,15 @@ class FloatingParserState extends ParserState {
         }
       }
     }
+  }
+
+  private void summarizeRuleTime() {
+    List<Map.Entry<Rule, Long>> entries = new ArrayList<>(ruleTime.entrySet());
+    entries.sort(new ValueComparator<>(true));
+    LogInfo.begin_track_printAll("Rule time");
+    for (Map.Entry<Rule, Long> entry : entries) {
+      LogInfo.logs("%9d : %s", entry.getValue(), entry.getKey());
+    }
+    LogInfo.end_track();
   }
 }

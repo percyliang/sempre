@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" type="text/css" href="style.css">
+  <script type="text/javascript" src="jquery.min.js"></script>
+  <script type="text/javascript" src="templates.js"></script>
+  <script type="text/javascript" src="main.js"></script>
+  <title>MTurk</title>
+</head>
+<body>
+  <div id="webpage" class="column">
+    
+  </div>
+  <div id="wrapper" class="column">
+    <div id="instruction">
+      <div id="hidingInstruction" class="hidden">
+        <button type="button" class="floatButton" id="showInstructionButton">Show Instructions</button>
+      </div>
+      <div id="showingInstruction">
+        <h1>Instructions</h1>
+        <button type="button" class="floatButton" id="hideInstructionButton" disabled>Loading ...</button>
+        <p><strong>Write trivia questions</strong> using the information from
+          the <strong style="color:green;">highlighted table</strong> (green borders).</p>
+        <p>Each question must <strong>follow the question template</strong>.
+          You can use words with the same meaning (e.g. for the pattern <em>"... first/last ..."</em>
+          you can use <em>"latest"</em> as well).
+          You can also randomize the question template by clicking the <img src="img/shuffle.png"> button.</p>
+        <p>Please use <strong>different grammatical constructs</strong>.
+          See the examples for some ideas. However, a person must be able to answer the questions
+          using <strong style="color:red;">only the texts from the highlighted table</strong>.</p>
+        <p><strong>Examples:</strong> &nbsp;&nbsp;(<a style="font-size:90%" href="http://en.wikipedia.org/wiki/List_of_Presidents_of_the_United_States#List_of_presidents" target="_blank">http://en.wikipedia.org/wiki/List_of_Presidents_of_the_United_States#List_of_presidents</a>)</p>
+        <h3>Good Questions</h3>
+        <ul>
+          <li>presidents who were also vice presidents</li>
+          <li>How old was Lincoln when he took office?</li>
+          <li>Which party has had the most number of presidents?</li>
+          <li>How long did Lincoln live?</li>
+          <li>Which presidents were under 50 when they took office?</li>
+          <li>the average age of the first ten presidents when they first took office</li>
+        </ul>
+        <h3>Bad Questions</h3>
+        <ul>
+          <li>Which presidents were born in New York? (requires outside information)</li>
+          <li>presidents with glasses (requires images)</li>
+        </ul>
+        <p><em>If you have any problems or suggestions, please <a href="mailto:percyliangresearch@gmail.com?subject=%5BMTurk%5D%20web%20page%20extraction%20task" id="email">contact us</a>.</em></p>
+      </div>
+    </div>
+    <div id="warning" class="hidden">
+      Preview Mode.<br>Please accept the HIT to start working.
+    </div>
+    <form id="answerForm">
+      <input type="hidden" name="title">
+      <input type="hidden" name="url">
+      <input type="hidden" name="hash">
+      <input type="hidden" name="pageid">
+      <input type="hidden" name="tableid">
+      <div id="questionWrapper">
+        <h2>Trivia Questions</h2>
+        <p><strong>IMPORTANT:</strong> The questions must be answerable using the
+          <strong style="color:green;">highlighted table</strong> only.</p>
+        <p><button id="s1" class="s" title="shuffle"><img src="img/shuffle.png"></button>
+          1. <span id="c1text"></span><input type="hidden" id="c1" name="c1">
+          <input type="hidden" id="shuf1" name="shuf1" value="0"><br>
+          <textarea name="a1" id="a1" rows="2"></textarea></p>
+        <p><button id="s2" class="s" title="shuffle"><img src="img/shuffle.png"></button>
+          2. <span id="c2text"></span><input type="hidden" id="c2" name="c2">
+          <input type="hidden" id="shuf2" name="shuf2" value="0"><br>
+          <textarea name="a2" id="a2" rows="2"></textarea></p>
+        <p><button id="s3" class="s" title="shuffle"><img src="img/shuffle.png"></button>
+          3. <span id="c3text"></span><input type="hidden" id="c3" name="c3">
+          <input type="hidden" id="shuf3" name="shuf3" value="0"><br>
+          <textarea name="a3" id="a3" rows="2"></textarea></p>
+        <p><button id="s4" class="s" title="shuffle"><img src="img/shuffle.png"></button>
+          4. <span id="c4text"></span><input type="hidden" id="c4" name="c4">
+          <input type="hidden" id="shuf4" name="shuf4" value="0"><br>
+          <textarea name="a4" id="a4" rows="2"></textarea></p>
+      </div>
+      <div id="navbar" class="centerize">
+        <input type="hidden" id="assignmentId" name="assignmentId">
+        <input type="hidden" id="batchIndex" name="batchIndex">
+        <input type="hidden" id="dataIndex" name="dataIndex">
+        <input type="hidden" id="lastRow" name="lastRow">
+        <button id="submitButton" type="button" disabled><strong>Submit</strong></button>
+        <p id="incompleteWarning" class="hidden">Error: Please fill in all input boxes.</p>
+      </div>
+    </form>
+  </div>
+</body>
+</html>

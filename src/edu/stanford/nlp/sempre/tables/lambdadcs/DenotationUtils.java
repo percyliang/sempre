@@ -14,11 +14,6 @@ import fig.basic.*;
  * @author ppasupat
  */
 public final class DenotationUtils {
-  public static class Options {
-    @Option(gloss = "Allow string comparison (lexicographic)")
-    public boolean allowStringComparison = false;
-  }
-  public static Options opts = new Options();
 
   private DenotationUtils() { }
 
@@ -82,6 +77,31 @@ public final class DenotationUtils {
   // ============================================================
 
   /**
+   * Join between a BinaryDenotation and a UnarylikeDenotation.
+   */
+  public static Unarylike genericJoin(Binarylike b, Unarylike u) {
+    if (u instanceof UnaryDenotation)
+      return b.joinOnKey((UnaryDenotation) u);
+    Map<Value, Collection<Value>> mapping = new HashMap<>();
+    if (u.domain().size() != Integer.MAX_VALUE) {
+      for (Value value : u.domain())
+        mapping.put(value, b.joinOnKey(u.get(value)));
+      return new MappingDenotation<>(u.getDomainVar(), new ExplicitPairList(mapping));
+    } else {
+      ExplicitPairList binary = b.explicitlyFilterOnKey(u.range()).pairList;
+      for (Map.Entry<Value, UnaryDenotation> entry : binary.mapping.entrySet()) {
+        for (Value key : u.inverseGet(entry.getKey())) {
+          if (!mapping.containsKey(key))
+            mapping.put(key, new ArrayList<>(entry.getValue()));
+          else
+            mapping.get(key).addAll(entry.getValue());
+        }
+      }
+      return new MappingDenotation<>(u.getDomainVar(), new ExplicitPairList(mapping));
+    }
+  }
+
+  /**
    * Aggregate values of the same type.
    */
   public static Value aggregate(Collection<Value> values, AggregateFormula.Mode mode) {
@@ -108,78 +128,148 @@ public final class DenotationUtils {
   }
 
   /**
-   * Compute the superlative.
-   *
-   * If opt.aggregateReturnAllTopTies is true, (argmin 1 1 ...) and (argmax 1 1 ...) will return
-   * the list of all values that produce the min or max. Otherwise, only 1 arbitrary value will be returned.
+   * Helper: Check if the two Unarylikes have the same domain variable and return it.
+   * Throw an exception if the domain variables are not the same.
    */
-  public static UnaryDenotation superlative(int rank, int count, ExplicitBinaryDenotation table, SuperlativeFormula.Mode mode) {
-    // Handle basic cases
-    if (table.pairs.isEmpty()) {
-      if (LambdaDCSExecutor.opts.superlativesFailOnEmptyLists)
-        throw new LambdaDCSException(Type.emptyList, "Cannot call %s on an empty list.", mode);
-      return new ExplicitUnaryDenotation();
+  public static String checkDomainVars(Unarylike u1, Unarylike u2) {
+    if (u1 == null || u1.getDomainVar() == null) return u2.getDomainVar();
+    if (u2 == null || u2.getDomainVar() == null) return u1.getDomainVar();
+    if (u1.getDomainVar().equals(u2.getDomainVar())) return u1.getDomainVar();
+    throw new LambdaDCSException(Type.invalidFormula, "Different domain variables: %s != %s",
+        u1.getDomainVar(), u2.getDomainVar());
+  }
+
+  /**
+   * Merge values.
+   */
+  public static Unarylike merge(Unarylike u1, Unarylike u2, MergeFormula.Mode mode) {
+    if (u1 instanceof UnaryDenotation && u2 instanceof UnaryDenotation)
+      return ((UnaryDenotation) u1).merge((UnaryDenotation) u2, mode);
+    // MappingDenotation: Go over the union of the domains
+    String domainVar = checkDomainVars(u1, u2);
+    Map<Value, UnaryDenotation> answer = new HashMap<>();
+    for (Value key : u1.domain()) {
+      if (!answer.containsKey(key))
+        answer.put(key, u1.get(key).merge(u2.get(key), mode));
     }
-    // General cases
-    List<Value> seconds = new ArrayList<>();
-    for (Pair<Value, Value> pair : table.pairs)
-      seconds.add(pair.getSecond());
-    TypeProcessor processor = getTypeProcessor(seconds);
+    for (Value key : u2.domain()) {
+      if (!answer.containsKey(key))
+        answer.put(key, u1.get(key).merge(u2.get(key), mode));
+    }
+    if (!answer.containsKey(null))
+      answer.put(null, u1.get(null).merge(u2.get(null), mode));
+    answer.entrySet().removeIf(e -> e.getValue().size() == 0);
+    return new MappingDenotation<>(domainVar, new ExplicitPairList(answer));
+  }
+
+  /**
+   * Perform arithmetic operation. Currently each Value must be a NumberValue.
+   *
+   * If arithmeticsFailOnMultipleElements is specified, throw an error if
+   *   both children contain more than 1 Value.
+   */
+  public static Unarylike arithmetic(Unarylike u1, Unarylike u2, ArithmeticFormula.Mode mode) {
+    TypeProcessor processor = getTypeProcessor(u1.range(), u2.range());
+    if (u1 instanceof UnaryDenotation && u2 instanceof UnaryDenotation)
+      return arithmeticUnary((UnaryDenotation) u1, (UnaryDenotation) u2, mode, processor);
+    // MappingDenotation: Go over the union of the domains
+    String domainVar = checkDomainVars(u1, u2);
+    Map<Value, UnaryDenotation> answer = new HashMap<>();
+    for (Value key : u1.domain()) {
+      if (!answer.containsKey(key))
+        answer.put(key, arithmeticUnary(u1.get(key), u2.get(key), mode, processor));
+    }
+    for (Value key : u2.domain()) {
+      if (!answer.containsKey(key))
+        answer.put(key, arithmeticUnary(u1.get(key), u2.get(key), mode, processor));
+    }
+    if (!answer.containsKey(null))
+      answer.put(null, arithmeticUnary(u1.get(null), u2.get(null), mode, processor));
+    answer.entrySet().removeIf(e -> e.getValue().size() == 0);
+    return new MappingDenotation<>(domainVar, new ExplicitPairList(answer));
+  }
+
+  public static UnaryDenotation arithmeticUnary(UnaryDenotation u1, UnaryDenotation u2,
+      ArithmeticFormula.Mode mode, TypeProcessor processor) {
+    if (LambdaDCSExecutor.opts.arithmeticsFailOnEmptyLists && (u1.size() == 0 || u2.size() == 0))
+      throw new LambdaDCSException(Type.emptyList, "Cannot call %s on an empty list.", mode);
+    if (LambdaDCSExecutor.opts.arithmeticsFailOnMultipleElements && u1.size() > 1 && u2.size() > 1)
+      throw new LambdaDCSException(Type.nonSingletonList, "Cannot call %s when both denotations have > 1 values.", mode);
+    if (processor == null) processor = getTypeProcessor(u1, u2);
     List<Value> answer = new ArrayList<>();
-    if (LambdaDCSExecutor.opts.superlativesReturnAllTopTies && rank == 1 && count == 1) {
-      // Special case: Return all ties at the top
-      Value topValue;
-      switch (mode) {
-        case argmax: topValue = processor.max(seconds); break;
-        case argmin: topValue = processor.min(seconds); break;
-        default: throw new LambdaDCSException(Type.invalidFormula, "Unknown superlative mode: %s", mode);
-      }
-      for (Pair<Value, Value> pair : table.pairs)
-        if (topValue.equals(pair.getSecond()) && !answer.contains(pair.getFirst()))
-          answer.add(pair.getFirst());
-    } else {
-      // Other cases
-      List<Integer> indices;
-      switch (mode) {
-        case argmax: indices = processor.argsort(seconds); Collections.reverse(indices); break;
-        case argmin: indices = processor.argsort(seconds); break;
-        default: throw new LambdaDCSException(Type.invalidFormula, "Unknown superlative mode: %s", mode);
-      }
-      int from = Math.min(rank - 1, indices.size()),
-          to = Math.min(from + count, indices.size());
-      for (int index : indices.subList(from, to))
-        answer.add(table.pairs.get(index).getFirst());
+    switch (mode) {
+      case add: for (Value v1 : u1) for (Value v2 : u2) answer.add(processor.add(v1, v2)); break;
+      case sub: for (Value v1 : u1) for (Value v2 : u2) answer.add(processor.sub(v1, v2)); break;
+      case mul: for (Value v1 : u1) for (Value v2 : u2) answer.add(processor.mul(v1, v2)); break;
+      case div: for (Value v1 : u1) for (Value v2 : u2) answer.add(processor.div(v1, v2)); break;
+      default:
+        throw new LambdaDCSException(Type.invalidFormula, "Unknown arithmetic mode: %s", mode);
     }
     return new ExplicitUnaryDenotation(answer);
   }
 
   /**
-   * Perform arithmetic operation.
+   * Compute the superlative (argmax/min rank count head (reverse relation)).
    *
-   * Currently each Value must be a NumberValue.
+   * Note that |relation| is reversed so that |relation| can be directly joined with |head|.
+   *
+   * If opt.aggregateReturnAllTopTies is true, (argmin 1 1 ...) and (argmax 1 1 ...) will return
+   * the list of all values that produce the min or max. Otherwise, only 1 arbitrary value will be returned.
    */
-  public static UnaryDenotation arithmetic(Collection<Value> child1D, Collection<Value> child2D, ArithmeticFormula.Mode mode) {
-    TypeProcessor processor = getTypeProcessor(child1D, child2D);
-    if (LambdaDCSExecutor.opts.arithmeticsFailOnMultipleElements) {
-      if (child1D.size() > 1 && child2D.size() > 1)
-        throw new LambdaDCSException(Type.nonSingletonList, "Cannot call %s when both denotations have > 1 values.", mode);
+  public static Unarylike superlative(int rank, int count, Unarylike head,
+      Binarylike relation, SuperlativeFormula.Mode mode) {
+    // Filter the relation with the possible keys
+    BinaryDenotation<ExplicitPairList> filtered = relation.explicitlyFilterOnKey(head.range());
+    TypeProcessor processor = getTypeProcessor(filtered.pairList.range());
+    if (head instanceof UnaryDenotation) {
+      return superlativeUnary(rank, count, filtered.pairList.pairs, mode, processor);
     }
-    List<Value> answer = new ArrayList<>();
-    switch (mode) {
-      case add:
-        for (Value v1 : child1D) for (Value v2 : child2D) answer.add(processor.add(v1, v2));
-        break;
-      case sub:
-        for (Value v1 : child1D) for (Value v2 : child2D) answer.add(processor.sub(v1, v2));
-        break;
-      case mul:
-        for (Value v1 : child1D) for (Value v2 : child2D) answer.add(processor.mul(v1, v2));
-        break;
-      case div:
-        for (Value v1 : child1D) for (Value v2 : child2D) answer.add(processor.div(v1, v2));
-        break;
-      default:
-        throw new LambdaDCSException(Type.invalidFormula, "Unknown arithmetic mode: %s", mode);
+    // MappingDenotation: Go over the domain
+    Map<Value, UnaryDenotation> answer = new HashMap<>();
+    for (Value key : head.domain()) {
+      BinaryDenotation<ExplicitPairList> refiltered = filtered.explicitlyFilterOnKey(head.get(key));
+      answer.put(key, superlativeUnary(rank, count, refiltered.pairList.pairs, mode, processor));
+    }
+    return new MappingDenotation<>(head.getDomainVar(), new ExplicitPairList(answer));
+  }
+
+  /**
+   * Perform superlative on a list of (value, key).
+   */
+  public static UnaryDenotation superlativeUnary(int rank, int count, List<Pair<Value, Value>> pairs,
+      SuperlativeFormula.Mode mode, TypeProcessor processor) {
+    if (pairs.isEmpty()) {
+      if (LambdaDCSExecutor.opts.superlativesFailOnEmptyLists)
+        throw new LambdaDCSException(Type.emptyList, "Cannot call %s on an empty list.", mode);
+      return UnaryDenotation.EMPTY;
+    }
+    List<Value> values = new ArrayList<>(), answer = new ArrayList<>();
+    for (Pair<Value, Value> pair : pairs)
+      values.add(pair.getFirst());
+    if (processor == null) processor = getTypeProcessor(values);
+    if (LambdaDCSExecutor.opts.superlativesReturnAllTopTies && rank == 1 && count == 1) {
+      // Special case: Return all ties at the top
+      Value topValue;
+      switch (mode) {
+        case argmax: topValue = processor.max(values); break;
+        case argmin: topValue = processor.min(values); break;
+        default: throw new LambdaDCSException(Type.invalidFormula, "Unknown superlative mode: %s", mode);
+      }
+      for (Pair<Value, Value> pair : pairs)
+        if (topValue.equals(pair.getFirst()) && !answer.contains(pair.getSecond()))
+          answer.add(pair.getSecond());
+    } else {
+      // Other cases
+      List<Integer> indices;
+      switch (mode) {
+        case argmax: indices = processor.argsort(values); Collections.reverse(indices); break;
+        case argmin: indices = processor.argsort(values); break;
+        default: throw new LambdaDCSException(Type.invalidFormula, "Unknown superlative mode: %s", mode);
+      }
+      int from = Math.min(rank - 1, indices.size()),
+          to = Math.min(from + count, indices.size());
+      for (int index : indices.subList(from, to))
+        answer.add(pairs.get(index).getSecond());
     }
     return new ExplicitUnaryDenotation(answer);
   }
@@ -192,7 +282,10 @@ public final class DenotationUtils {
    * Processor for each data type.
    */
   public abstract static class TypeProcessor {
+    // Is the value v compatible with this processor?
     public abstract boolean isCompatible(Value v);
+    // Is the collection sortable? (Is there a total order on the elements?)
+    public abstract boolean isSortable(Collection<Value> values);
     // positive if v1 > v2 | negative if v1 < v2 | 0 if v1 == v2
     public int compareValues(Value v1, Value v2) { throw new LambdaDCSException(Type.typeMismatch, "Cannot compare values with " + getClass().getSimpleName()); }
     public Value sum(Collection<Value> values) { throw new LambdaDCSException(Type.typeMismatch, "Cannot compute sum with " + getClass().getSimpleName()); }
@@ -203,6 +296,8 @@ public final class DenotationUtils {
     public Value div(Value v1, Value v2) { throw new LambdaDCSException(Type.typeMismatch, "Cannot compute div with " + getClass().getSimpleName()); }
 
     public Value max(Collection<Value> values) {
+      if (!isSortable(values))
+        throw new LambdaDCSException(Type.typeMismatch, "Values cannot be sorted.");
       Value max = null;
       for (Value value : values) {
         if (max == null || compareValues(max, value) < 0)
@@ -212,6 +307,8 @@ public final class DenotationUtils {
     }
 
     public Value min(Collection<Value> values) {
+      if (!isSortable(values))
+        throw new LambdaDCSException(Type.typeMismatch, "Values cannot be sorted.");
       Value min = null;
       for (Value value : values) {
         if (min == null || compareValues(min, value) > 0)
@@ -221,6 +318,8 @@ public final class DenotationUtils {
     }
 
     public List<Integer> argsort(List<Value> values) {
+      if (!isSortable(values))
+        throw new LambdaDCSException(Type.typeMismatch, "Values cannot be sorted.");
       List<Integer> indices = new ArrayList<>();
       for (int i = 0; i < values.size(); i++)
         indices.add(i);
@@ -243,6 +342,11 @@ public final class DenotationUtils {
     @Override
     public boolean isCompatible(Value v) {
       return v instanceof NumberValue;
+    }
+    
+    @Override
+    public boolean isSortable(Collection<Value> values) {
+      return true;
     }
 
     @Override
@@ -283,6 +387,22 @@ public final class DenotationUtils {
     public boolean isCompatible(Value v) {
       return v instanceof DateValue;
     }
+    
+    @Override
+    public boolean isSortable(Collection<Value> values) {
+      DateValue firstDate = null;
+      for (Value value : values) {
+        DateValue date = (DateValue) value; 
+        if (firstDate == null) {
+          firstDate = date;
+        } else {
+          if ((firstDate.year == -1) != (date.year == -1)) return false;
+          if ((firstDate.month == -1) != (date.month == -1)) return false;
+          if ((firstDate.day == -1) != (date.day == -1)) return false;
+        }  
+      }
+      return true;
+    }
 
     @Override
     public int compareValues(Value v1, Value v2) {
@@ -300,33 +420,6 @@ public final class DenotationUtils {
       } else {
         return d1.year - d2.year;
       }
-    }
-  }
-
-  /**
-   * Handle StringValue. Only comparison is possible.
-   */
-  public static class StringProcessor extends TypeProcessor {
-    public static TypeProcessor singleton = new StringProcessor();
-
-    @Override
-    public boolean isCompatible(Value v) {
-      return v instanceof StringValue;
-    }
-
-    String getString(Value v) {
-      if (v instanceof StringValue) return ((StringValue) v).value;
-      if (v instanceof NameValue) {
-        NameValue nameValue = (NameValue) v;
-        return (nameValue.description == null || nameValue.description.isEmpty()) ? nameValue.id : nameValue.description;
-      }
-      if (v instanceof NumberValue) return "" + ((NumberValue) v).value;
-      return v.toString();
-    }
-
-    @Override
-    public int compareValues(Value v1, Value v2) {
-      return getString(v1).compareTo(getString(v2));
     }
   }
 
@@ -369,10 +462,8 @@ public final class DenotationUtils {
     } else if (canBeDate) {
       return DateProcessor.singleton;
     } else {
-      if (opts.allowStringComparison)
-        return StringProcessor.singleton;
-      else
-        throw new LambdaDCSException(Type.typeMismatch, "Cannot compare values");
+      throw new LambdaDCSException(Type.typeMismatch, "Cannot compare values");
     }
   }
+ 
 }

@@ -1,0 +1,227 @@
+/*****************************************************************/
+
+.centerize {
+  text-align: center;
+  margin: 0 auto;
+}
+
+.hidden {
+  display: none;
+}
+
+.red {
+  color: red;
+}
+
+.floatButton {
+  position: absolute;
+  top: 1em;
+  right: 1em;
+}
+
+.clearFloat {
+  clear: both;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.column {
+  left: 0;
+  top: 0;
+}
+
+/*****************************************************************/
+
+#wrapper {
+  position: fixed;
+  width: 350px;
+  background-color: #ded;
+  border-bottom-right-radius: 1em;
+}
+
+#wrapper h1 {
+  font-size: 120%;
+  margin: 0.5em auto;
+}
+
+#wrapper h2 {
+  font-size: 100%;
+  margin: 1em auto 0.5em;
+}
+
+#wrapper h3 {
+  font-size: 90%;
+  margin: 0.8em auto 0.3em;
+}
+
+#instruction, #warning, #answerForm, #footer, #navbar {
+  margin: 0.8em;
+}
+
+#warning {
+  margin-top: 3em;
+  padding: 0.8em;
+  text-align: center;
+  color: #d22;
+  background-color: #cdc;
+  font-weight: bold;
+}
+
+#showingInstruction {
+  font-size: 90%;
+  padding: 0.2em 1em;
+  width: 650px;
+  position: absolute;
+  margin-left: 100px;
+  border-radius: 1em;
+  background-color: #ded;
+  border: 2px solid #bcb;
+}
+
+#showingInstruction p, #showingInstruction h3 {
+  margin: 0.3em 0;
+}
+
+#showingInstruction ul {
+  margin-top: 0.3em;
+  margin-bottom: 0.3em;
+}
+
+#showingInstruction ul li {
+  margin-bottom: 0em;
+}
+
+#showingInstruction table th {
+  min-width: 5em;
+  text-align: right;
+  padding-right: 0.5em;
+}
+
+#showingInstruction .example {
+  margin: 0 auto;
+}
+
+#showingInstruction .example img {
+  float: left;
+  margin-right: 2em;
+}
+
+#qNum {
+  margin: 0 0.5em;
+}
+
+#navbar button {
+  width: 7em;
+  height: 2.5em;
+}
+
+#navbar button:disabled {
+  color: #aaa;
+}
+
+.urlWrapper {
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.urlWrapper:hover {
+  overflow: visible;
+}
+
+.url {
+  padding: 4px;
+  background-color: #ded;
+  border-radius: 3px;
+}
+
+.url:hover {
+  padding: 3px;
+  border: 1px solid #ada;
+  background-color: #cdc;
+}
+
+#answerForm textarea  {
+  width: 96%;
+}
+
+#answerForm button.s {
+  padding: 2px 0;
+}
+
+#answerForm p {
+  margin: 0.5em 0;
+}
+
+/*****************************************************************/
+
+#webpage {
+  position: absolute;
+  margin-left: 350px;
+  padding: 1em;
+  height: 100%;
+}
+
+#webpage table {
+  border-collapse: collapse;
+}
+
+#webpage table, #webpage th, #webpage td {
+  border: 1px solid #DDD;
+  background-color: none;
+}
+
+#webpage table.highlightedTable {
+  border-collapse: collapse;
+}
+
+#webpage table.highlightedTable, #webpage table.highlightedTable th, #webpage table.highlightedTable td {
+  border: 2px solid green;
+  background-color: #FFE;
+}
+
+#webpage img {
+  border: 1px solid #DBB;
+  background-color: #FDD;
+}
+
+#webpage a {
+  text-decoration: underline;
+}
+
+#webpage .reference, #webpage .navbox, #webpage .sortkey {
+  display: none;
+}
+
+/* Fading Effect */
+
+#webpage {
+  color: #BBB;
+}
+
+#webpage a {
+  color: #BBD;
+}
+
+#webpage table.highlightedTable {
+  color: black;
+}
+
+#webpage table.highlightedTable a {
+  color: #22B;
+}
+
+#webpage img {
+  opacity: 0.3;
+  filter: alpha(opacity=30);
+}
+
+#webpage table.highlightedTable img {
+  opacity: 1.0;
+  filter: alpha(opacity=100);
+}

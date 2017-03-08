@@ -3,6 +3,9 @@ package edu.stanford.nlp.sempre.tables.lambdadcs;
 import java.util.*;
 
 import edu.stanford.nlp.sempre.*;
+import edu.stanford.nlp.sempre.tables.ScopedFormula;
+import edu.stanford.nlp.sempre.tables.ScopedValue;
+import edu.stanford.nlp.sempre.tables.TableKnowledgeGraph;
 import edu.stanford.nlp.sempre.tables.lambdadcs.LambdaDCSException.Type;
 import fig.basic.*;
 
@@ -14,18 +17,25 @@ import fig.basic.*;
 public class LambdaDCSExecutor extends Executor {
   public static class Options {
     @Option(gloss = "Verbosity") public int verbose = 0;
-    @Option(gloss = "If the result is empty, return an ErrorValue instead of an empty ListValue")
-    public boolean failOnEmptyLists = false;
+    @Option(gloss = "Use caching") public boolean useCache = true;
+    @Option(gloss = "Sort the resulting values (may slow down execution)")
+    public boolean sortResults = true;
+    @Option(gloss = "Allow the return value to be an implicit value")
+    public boolean allowImplicitValues = true;
+    @Option(gloss = "Allow the root formula to be a binary")
+    public boolean executeBinary = false;
+    @Option(gloss = "Generic DateValue: (date -1 5 -1) in formula also matches (date -1 5 12)")
+    public boolean genericDateValue = false;
     @Option(gloss = "Return all ties on (argmax 1 1 ...) and (argmin 1 1 ...)")
     public boolean superlativesReturnAllTopTies = true;
     @Option(gloss = "Aggregates (sum, avg, max, min) throw an error on empty lists")
     public boolean aggregatesFailOnEmptyLists = false;
     @Option(gloss = "Superlatives (argmax, argmin) throw an error on empty lists")
     public boolean superlativesFailOnEmptyLists = false;
+    @Option(gloss = "Arithmetics (+, -, *, /) throw an error on empty lists")
+    public boolean arithmeticsFailOnEmptyLists = false;
     @Option(gloss = "Arithmetics (+, -, *, /) throw an error when both operants have > 1 values")
-    public boolean arithmeticsFailOnMultipleElements = false;
-    @Option(gloss = "Use caching")
-    public boolean useCache = true;
+    public boolean arithmeticsFailOnMultipleElements = true;
   }
   public static Options opts = new Options();
 
@@ -41,17 +51,12 @@ public class LambdaDCSExecutor extends Executor {
     }
     StopWatch stopWatch = new StopWatch();
     stopWatch.start();
+    formula = Formulas.betaReduction(formula);
     Value answer = logic.execute(formula);
     stopWatch.stop();
     stats.addCumulative("execTime", stopWatch.ms);
     if (stopWatch.ms >= 10 && opts.verbose >= 1)
-      LogInfo.logs("long time: %s %s", Formulas.betaReduction(formula), answer);
-    /*///////// DEBUG! //////////
-    if (answer instanceof ErrorValue) {
-      if (!((ErrorValue) answer).type.startsWith("notUnary"))
-        LogInfo.logs("%s %s", Formulas.betaReduction(formula), answer);
-    }
-    ////////// END DEBUG /////////*/
+      LogInfo.logs("long time (%d ms): %s => %s", stopWatch.ms, formula, answer);
     return new Response(answer);
   }
 
@@ -91,48 +96,98 @@ class LambdaDCSCoreLogic {
 
   final KnowledgeGraph graph;
   final Evaluation stats;
+  ExecutorCache cache;
 
   public LambdaDCSCoreLogic(ContextValue context, Evaluation stats) {
     graph = context.graph;
     this.stats = stats;
     if (graph == null)
       throw new RuntimeException("Cannot call LambdaDCSExecutor when context graph is null");
+    if (graph instanceof TableKnowledgeGraph)
+      cache = ((TableKnowledgeGraph) graph).executorCache;
+    if (cache == null)
+      cache = ExecutorCache.singleton;
   }
 
   public Value execute(Formula formula) {
-    Formula f = Formulas.betaReduction(formula);
     if (LambdaDCSExecutor.opts.verbose >= 2)
-      LogInfo.logs("%s", f);
-    try {
-      UnaryDenotation denotation = computeUnary(f, TypeHint.UNRESTRICTED_UNARY);
-      if (LambdaDCSExecutor.opts.useCache) {
-        ExecutorCache.singleton.put(graph, f, denotation);
+      LogInfo.logs("%s", formula);
+    Value answer;
+    // Special case: ScopedFormula
+    if (formula instanceof ScopedFormula) {
+      ScopedFormula scoped = (ScopedFormula) formula;
+      try {
+        // Head
+        UnaryDenotation head = (UnaryDenotation) computeUnary(scoped.head, TypeHint.UNRESTRICTED_UNARY);
+        if (head.size() == Integer.MAX_VALUE)
+          throw new LambdaDCSException(Type.infiniteList, "Cannot have an infinite head: ", head);
+        ListValue headValue = ((ListValue) head.toValue()).getUnique();
+        // Relation
+        LambdaFormula lambdaRelation = (LambdaFormula) scoped.relation;
+        List<Pair<Value, Value>> collapsedPairs = new ArrayList<>();
+        for (Value varValue : headValue.values) {
+          UnaryDenotation results = (UnaryDenotation) computeUnary(lambdaRelation.body,
+              TypeHint.UNRESTRICTED_UNARY.withVar(lambdaRelation.var, varValue));
+          if (LambdaDCSExecutor.opts.useCache) {
+            cache.put(graph,
+                new Pair<>(lambdaRelation.body, new Pair<>(lambdaRelation.var, varValue)), results);
+          }
+          if (!results.isEmpty())
+            collapsedPairs.add(new Pair<>(varValue, results.toValue()));
+        }
+        Value relationValue = new PairListValue(collapsedPairs);
+        answer = new ScopedValue(headValue, relationValue);
+      } catch (LambdaDCSException e) {
+        answer = new ErrorValue(e.toString());
       }
-      ListValue answer = denotation.toListValue(graph);
-      if (answer.values.isEmpty()) {
-        if (LambdaDCSExecutor.opts.failOnEmptyLists)
-          return ErrorValue.empty;
+    } else {
+      // Unaries and Binaries
+      try {
+        Unarylike denotation = computeUnary(formula, TypeHint.UNRESTRICTED_UNARY);
+        if (LambdaDCSExecutor.opts.useCache) {
+          cache.put(graph, formula, denotation);
+        }
+        answer = denotation.toValue();
+      } catch (LambdaDCSException e) {
+        if (LambdaDCSExecutor.opts.executeBinary && e.type == Type.notUnary) {
+          try {
+            Binarylike denotation = computeBinary(formula, TypeHint.UNRESTRICTED_BINARY);
+            answer = denotation.toValue();
+          } catch (LambdaDCSException e2) {
+            answer = new ErrorValue(e2.toString());
+          }
+        } else {
+          answer = new ErrorValue(e.toString());
+        }
       }
-      return answer;
-    } catch (final LambdaDCSException e) {
-      return new ErrorValue(e.toString());
     }
+    if (LambdaDCSExecutor.opts.verbose >= 2)
+      LogInfo.logs("=> %s", answer);
+    return answer;
   }
 
-  public UnaryDenotation computeUnary(Formula formula, UnaryTypeHint typeHint) {
+  public Unarylike computeUnary(Formula formula, UnarylikeTypeHint typeHint) {
     assert typeHint != null;
     if (formula instanceof LambdaFormula) {
-      throw new LambdaDCSException(Type.notUnary, "[Unary] Not a unary " + formula);
+      throw new LambdaDCSException(Type.notUnary, "[Unary] Not a unary %s", formula);
     }
 
     if (LambdaDCSExecutor.opts.useCache) {
-      Object object = ExecutorCache.singleton.get(graph, formula);
-      if (object != null && object instanceof UnaryDenotation) {
-        stats.addCumulative("cacheHit", true);
-        return (UnaryDenotation) object;
-      } else {
-        stats.addCumulative("cacheHit", false);
+      Object object = cache.get(graph, formula);
+      if (object != null && object instanceof Unarylike) {
+        stats.addCumulative("normalCacheHit", true);
+        stats.addCumulative("scopedCacheHit", false);
+        return (Unarylike) object;
+      } else if (typeHint.getIfSingleVar() != null) {
+        object = cache.get(graph, new Pair<>(formula, typeHint.getIfSingleVar()));
+        if (object != null && object instanceof Unarylike) {
+          stats.addCumulative("normalCacheHit", false);
+          stats.addCumulative("scopedCacheHit", true);
+          return (Unarylike) object;
+        }
       }
+      stats.addCumulative("normalCacheHit", false);
+      stats.addCumulative("scopedCacheHit", false);
     }
 
     if (formula instanceof ValueFormula) {
@@ -144,8 +199,29 @@ class LambdaDCSCoreLogic {
           value instanceof StringValue || value instanceof DateValue || value instanceof NameValue) {
         // Special case: *
         if (STAR.equals(value)) return InfiniteUnaryDenotation.STAR_UNARY;
+        // Special case: generic date
+        if (LambdaDCSExecutor.opts.genericDateValue && value instanceof DateValue)
+          return typeHint.applyBound(InfiniteUnaryDenotation.GenericDateUnaryDenotation.get((DateValue) value));
+        // Rule out binaries
+        if (CanonicalNames.isBinary(value) && LambdaDCSExecutor.opts.executeBinary)
+          throw new LambdaDCSException(Type.notUnary, "[Unary] Binary value %s", formula);
+        if (value instanceof NameValue && graph instanceof TableKnowledgeGraph)
+          value = ((TableKnowledgeGraph) graph).getNameValueWithOriginalString((NameValue) value);
+        // Other cases
         return typeHint.applyBound(new ExplicitUnaryDenotation(value));
       }
+
+    } else if (formula instanceof VariableFormula) {
+      // ============================================================
+      // Variable
+      // ============================================================
+      String name = ((VariableFormula) formula).name;
+      Value value = typeHint.get(name);
+      if (value != null)
+        return typeHint.applyBound(new ExplicitUnaryDenotation(value));
+      // Could be a mapping
+      if (name.equals(typeHint.getFreeVar()))
+        return typeHint.applyBound(new MappingDenotation<>(name, PredicatePairList.IDENTITY));
 
     } else if (formula instanceof JoinFormula) {
       // ============================================================
@@ -154,18 +230,19 @@ class LambdaDCSCoreLogic {
       JoinFormula join = (JoinFormula) formula;
       try {
         // Compute unary, then join binary
-        UnaryDenotation childD = computeUnary(join.child, typeHint.newUnrestrictedUnary());
-        BinaryDenotation relationD = computeBinary(join.relation, typeHint.asFirstOfBinaryWithSecond(childD));
-        return typeHint.applyBound(relationD.joinSecond(childD, graph));
+        Unarylike childD = computeUnary(join.child, typeHint.unrestrictedUnary());
+        Binarylike relationD = computeBinary(join.relation, typeHint.asFirstOfBinaryWithSecond(childD.range()));
+        return typeHint.applyBound(DenotationUtils.genericJoin(relationD, childD));
       } catch (LambdaDCSException e1) {
         try {
           // Compute binary, then join unary
-          BinaryDenotation relationD = computeBinary(join.relation, typeHint.asFirstOfBinary());
-          UnaryDenotation childUpperBound = relationD.joinFirst(typeHint.upperBound, graph);
-          UnaryDenotation childD = computeUnary(join.child, typeHint.newRestrictedUnary(childUpperBound));
-          return typeHint.applyBound(relationD.joinSecond(childD, graph));
+          Binarylike relationD = computeBinary(join.relation, typeHint.asFirstOfBinary());
+          Unarylike childUpperBound = relationD.joinOnValue(typeHint.upperBound);
+          Unarylike childD = computeUnary(join.child, typeHint.restrictedUnary(childUpperBound.range()));
+          return typeHint.applyBound(DenotationUtils.genericJoin(relationD, childD));
         } catch (LambdaDCSException e2) {
-          throw new LambdaDCSException(Type.unknown, "Cannot join | %s | %s", e1, e2);
+          Type errorType = (e1.type == e2.type) ? e1.type : Type.unknown;
+          throw new LambdaDCSException(errorType, "Cannot join | %s | %s", e1, e2);
         }
       }
 
@@ -175,33 +252,28 @@ class LambdaDCSCoreLogic {
       // ============================================================
       MergeFormula merge = (MergeFormula) formula;
       try {
-        UnaryDenotation child1D = computeUnary(merge.child1, typeHint);
-        UnaryDenotation child2D = computeUnary(merge.child2,
+        Unarylike child1D = computeUnary(merge.child1, typeHint);
+        Unarylike child2D = computeUnary(merge.child2,
             merge.mode == MergeFormula.Mode.and ? typeHint.restrict(child1D) : typeHint);
-        return typeHint.applyBound(child1D.merge(child2D, merge.mode));
+        return typeHint.applyBound(DenotationUtils.merge(child1D, child2D, merge.mode));
       } catch (LambdaDCSException e1) {
         try {
-          UnaryDenotation child2D = computeUnary(merge.child2, typeHint);
-          UnaryDenotation child1D = computeUnary(merge.child1,
+          Unarylike child2D = computeUnary(merge.child2, typeHint);
+          Unarylike child1D = computeUnary(merge.child1,
               merge.mode == MergeFormula.Mode.and ? typeHint.restrict(child2D) : typeHint);
-          return typeHint.applyBound(child2D.merge(child1D, merge.mode));
+          return typeHint.applyBound(DenotationUtils.merge(child2D, child1D, merge.mode));
         } catch (LambdaDCSException e2) {
-          throw new LambdaDCSException(Type.unknown, "Cannot merge | %s | %s", e1, e2);
+          Type errorType = (e1.type == e2.type) ? e1.type : Type.unknown;
+          throw new LambdaDCSException(errorType, "Cannot merge | %s | %s", e1, e2);
         }
       }
-
-    } else if (formula instanceof NotFormula) {
-      // ============================================================
-      // Not
-      // ============================================================
-      // TODO(ice): (Low priority)
 
     } else if (formula instanceof AggregateFormula) {
       // ============================================================
       // Aggregate
       // ============================================================
       AggregateFormula aggregate = (AggregateFormula) formula;
-      UnaryDenotation childD = computeUnary(aggregate.child, typeHint.newUnrestrictedUnary());
+      Unarylike childD = computeUnary(aggregate.child, typeHint.unrestrictedUnary());
       return typeHint.applyBound(childD.aggregate(aggregate.mode));
 
     } else if (formula instanceof SuperlativeFormula) {
@@ -209,83 +281,67 @@ class LambdaDCSCoreLogic {
       // Superlative
       // ============================================================
       SuperlativeFormula superlative = (SuperlativeFormula) formula;
-      int rank = DenotationUtils.getSinglePositiveInteger(computeUnary(superlative.rank, typeHint.newUnrestrictedUnary()));
-      int count = DenotationUtils.getSinglePositiveInteger(computeUnary(superlative.count, typeHint.newUnrestrictedUnary()));
-      UnaryDenotation headD = computeUnary(superlative.head, typeHint);
-      BinaryDenotation relationD = computeBinary(superlative.relation, typeHint.newRestrictedBinary(headD, null));
-      ExplicitBinaryDenotation table = relationD.explicitlyFilterFirst(headD, graph);
-      return typeHint.applyBound(DenotationUtils.superlative(rank, count, table, superlative.mode));
+      int rank = DenotationUtils.getSinglePositiveInteger(
+          computeUnary(superlative.rank, typeHint.unrestrictedUnary()).range());
+      int count = DenotationUtils.getSinglePositiveInteger(
+          computeUnary(superlative.count, typeHint.unrestrictedUnary()).range());
+      Unarylike headD = computeUnary(superlative.head, typeHint);
+      Binarylike relationD;
+      if (superlative.relation instanceof ReverseFormula) {
+        relationD = computeBinary(((ReverseFormula) superlative.relation).child,
+            typeHint.restrictedBinary(null, headD.range()));
+      } else {
+        relationD = computeBinary(superlative.relation,
+            typeHint.restrictedBinary(headD.range(), null)).reverse();
+      }
+      return typeHint.applyBound(DenotationUtils.superlative(rank, count, headD, relationD, superlative.mode));
 
     } else if (formula instanceof ArithmeticFormula) {
       // ============================================================
       // Arithmetic
       // ============================================================
       ArithmeticFormula arithmetic = (ArithmeticFormula) formula;
-      UnaryDenotation child1D = computeUnary(arithmetic.child1, typeHint.newUnrestrictedUnary());
-      UnaryDenotation child2D = computeUnary(arithmetic.child2, typeHint.newUnrestrictedUnary());
+      Unarylike child1D = computeUnary(arithmetic.child1, typeHint.unrestrictedUnary());
+      Unarylike child2D = computeUnary(arithmetic.child2, typeHint.unrestrictedUnary());
       return typeHint.applyBound(DenotationUtils.arithmetic(child1D, child2D, arithmetic.mode));
-
-    } else if (formula instanceof CallFormula) {
-      // ============================================================
-      // Call
-      // ============================================================
-      // TODO(ice): (Low priority)
-
-    } else if (formula instanceof VariableFormula) {
-      // ============================================================
-      // Variable
-      // ============================================================
-      VariableFormula variable = (VariableFormula) formula;
-      Value value = typeHint.get(variable.name);
-      return typeHint.applyBound(new ExplicitUnaryDenotation(value));
 
     } else if (formula instanceof MarkFormula) {
       // ============================================================
       // Mark
       // ============================================================
       MarkFormula mark = (MarkFormula) formula;
-      String var = mark.var;
-      // Assuming that the type hint has enough information ...
-      List<Value> values = new ArrayList<>();
-      for (Value varValue : typeHint.upperBound) {
-        UnaryDenotation results = computeUnary(mark.body, typeHint.withVar(var, varValue));
-        if (results.contains(varValue)) {
-          values.add(varValue);
-        }
-      }
-      return typeHint.applyBound(new ExplicitUnaryDenotation(values));
+      LambdaFormula lambda = new LambdaFormula(mark.var,
+          new MergeFormula(MergeFormula.Mode.and, new VariableFormula(mark.var), mark.body));
+      Binarylike lambdaD = computeBinary(lambda, typeHint.asFirstAndSecondOfBinary());
+      return lambdaD.joinOnValue(InfiniteUnaryDenotation.STAR_UNARY);
 
     } else {
-      throw new LambdaDCSException(Type.notUnary, "[Unary] Not a unary " + formula);
+      throw new LambdaDCSException(Type.notUnary, "[Unary] Not a valid unary %s", formula);
     }
 
     // Catch-all error
-    throw new LambdaDCSException(Type.unknown, "[Unary] Cannot handle formula " + formula);
+    throw new LambdaDCSException(Type.unknown, "[Unary] Cannot handle formula %s", formula);
   }
 
-  public BinaryDenotation computeBinary(Formula formula, BinaryTypeHint typeHint) {
+  public Binarylike computeBinary(Formula formula, BinaryTypeHint typeHint) {
     assert typeHint != null;
     if (formula instanceof ValueFormula) {
       // ============================================================
       // ValueFormula
       // ============================================================
       Value value = ((ValueFormula<?>) formula).value;
-      if (SpecialBinaryDenotation.isSpecial(value))
-        return SpecialBinaryDenotation.create(value);
-      if (value instanceof BooleanValue || value instanceof NumberValue ||
-          value instanceof StringValue || value instanceof DateValue ||
-          value instanceof UriValue || value instanceof NameValue ||
-          value instanceof ListValue) {
-        if (!STAR.equals(value))
-          return new PredicateBinaryDenotation(value);
-      }
+      // Must be a binary
+      if (CanonicalNames.isBinary(value))
+        return new BinaryDenotation<>(new PredicatePairList(value, graph));
+      else
+        throw new LambdaDCSException(Type.notBinary, "[Binary] Unary value %s", formula);
 
     } else if (formula instanceof ReverseFormula) {
       // ============================================================
       // Reverse
       // ============================================================
       ReverseFormula reverse = (ReverseFormula) formula;
-      BinaryDenotation childD = computeBinary(reverse.child, typeHint.reverse());
+      Binarylike childD = computeBinary(reverse.child, typeHint.reverse());
       return childD.reverse();
 
     } else if (formula instanceof LambdaFormula) {
@@ -299,23 +355,49 @@ class LambdaDCSCoreLogic {
       try {
         List<Pair<Value, Value>> pairs = new ArrayList<>();
         for (Value varValue : typeHint.secondUpperBound) {
-          UnaryDenotation results = computeUnary(lambda.body, typeHint.first().withVar(var, varValue));
-          for (Value result : results) {
+          Unarylike results = computeUnary(lambda.body, typeHint.first().withVar(var, varValue));
+          if (!(results instanceof UnaryDenotation))
+            throw new LambdaDCSException(Type.notUnary, "Not a unary denotation: %s", results);
+          for (Value result : (UnaryDenotation) results) {
             pairs.add(new Pair<>(result, varValue));
           }
         }
-        return new ExplicitBinaryDenotation(pairs);
-      } catch (UnsupportedOperationException e) {
-        // The type hint does not have enough information. Probably a floating lambda.
-        // Just throw an Exception.
+        return new BinaryDenotation<>(new ExplicitPairList(pairs));
+      } catch (LambdaDCSException e) {  }
+      // Try the reverse
+      try {
+        Formula reversed = Formulas.reverseFormula(lambda);
+        if (reversed instanceof LambdaFormula && !reversed.equals(lambda)) {
+          List<Pair<Value, Value>> pairs = new ArrayList<>();
+          for (Value varValue : typeHint.firstUpperBound) {
+            Unarylike results = computeUnary(((LambdaFormula) reversed).body,
+                typeHint.second().withVar(var, varValue));
+            if (!(results instanceof UnaryDenotation))
+              throw new LambdaDCSException(Type.notUnary, "Not a unary denotation: %s", results);
+            for (Value result : (UnaryDenotation) results) {
+              pairs.add(new Pair<>(varValue, result));
+            }
+          }
+          return new BinaryDenotation<>(new ExplicitPairList(pairs));
+        } else {
+          throw new LambdaDCSException(Type.unknown, "Cannot compute reverse of %s", lambda);
+        }
+      } catch (LambdaDCSException e) {  }
+      // Try to execute using a mapping.
+      if (LambdaDCSExecutor.opts.executeBinary) {
+        try {
+          Unarylike mapping = computeUnary(lambda.body, typeHint.asMapping(lambda.var));
+          if (mapping instanceof MappingDenotation)
+            return ((MappingDenotation<?>) mapping).asBinary();
+        } catch (LambdaDCSException e) {  }
       }
 
     } else {
-      throw new LambdaDCSException(Type.notBinary, "[Unary] Not a binary " + formula);
+      throw new LambdaDCSException(Type.notBinary, "[Binary] Not a valid binary %s", formula);
     }
 
     // Catch-all error
-    throw new LambdaDCSException(Type.unknown, "[Binary] Cannot handle formula " + formula);
+    throw new LambdaDCSException(Type.unknown, "[Binary] Cannot handle formula %s", formula);
   }
 
 }
@@ -331,10 +413,10 @@ class LambdaDCSCoreLogicWithVerbosity extends LambdaDCSCoreLogic {
   }
 
   @Override
-  public UnaryDenotation computeUnary(Formula formula, UnaryTypeHint typeHint) {
+  public Unarylike computeUnary(Formula formula, UnarylikeTypeHint typeHint) {
     LogInfo.begin_track("UNARY %s [%s]", formula, typeHint);
     try {
-      UnaryDenotation denotation = super.computeUnary(formula, typeHint);
+      Unarylike denotation = super.computeUnary(formula, typeHint);
       LogInfo.logs("%s", denotation);
       LogInfo.end_track();
       return denotation;
@@ -345,10 +427,10 @@ class LambdaDCSCoreLogicWithVerbosity extends LambdaDCSCoreLogic {
   }
 
   @Override
-  public BinaryDenotation computeBinary(Formula formula, BinaryTypeHint typeHint) {
+  public Binarylike computeBinary(Formula formula, BinaryTypeHint typeHint) {
     LogInfo.begin_track("BINARY %s [%s]", formula, typeHint);
     try {
-      BinaryDenotation denotation = super.computeBinary(formula, typeHint);
+      Binarylike denotation = super.computeBinary(formula, typeHint);
       LogInfo.logs("%s", denotation);
       LogInfo.end_track();
       return denotation;

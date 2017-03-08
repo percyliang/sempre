@@ -1,12 +1,18 @@
 package edu.stanford.nlp.sempre.tables;
 
 import java.io.*;
+import java.nio.file.Paths;
 import java.util.*;
 
-import au.com.bytecode.opencsv.CSVReader;
 import edu.stanford.nlp.sempre.*;
+import edu.stanford.nlp.sempre.FuzzyMatchFn.FuzzyMatchFnMode;
+import edu.stanford.nlp.sempre.tables.lambdadcs.ExecutorCache;
+import edu.stanford.nlp.sempre.tables.lambdadcs.InfiniteUnaryDenotation;
 import edu.stanford.nlp.sempre.tables.lambdadcs.LambdaDCSException;
 import edu.stanford.nlp.sempre.tables.lambdadcs.LambdaDCSException.Type;
+import edu.stanford.nlp.sempre.tables.match.FuzzyMatcher;
+import edu.stanford.nlp.sempre.tables.serialize.TableReader;
+import edu.stanford.nlp.sempre.tables.serialize.TableWriter;
 import fig.basic.*;
 
 /**
@@ -14,251 +20,225 @@ import fig.basic.*;
  *
  * - Each row becomes an entity
  * - Each cell becomes an entity
- * - Each column becomes a property between a row and a cell
- *     e.g., (row5 nationality canada)
- * - Rows have several special properties (next, index)
- *
- * === Special Row Properties ===
- * - name = fb:row.row.next  | type = (-> fb:type.row fb:type.row)
- * - name = fb:row.row.index | type = (-> fb:type.int fb:type.row)
- *
- * === Special Cell Properties ===
- * - name = fb:cell.cell.number | type = (-> fb:type.number fb:type.cell)
+ * - Each column becomes a relation between a row and a cell
+ *     e.g., (fb:row.r5 fb:row.row.nationality fb:cell.canada)
+ * - Each cell has relations pointing to different normalization nodes
+ *     e.g., (fb:cell.3_km fb:cell.cell.number (number 3))
  *
  * @author ppasupat
  */
-public class TableKnowledgeGraph extends KnowledgeGraph {
+public class TableKnowledgeGraph extends KnowledgeGraph implements FuzzyMatchable {
   public static class Options {
     @Option(gloss = "Verbosity") public int verbose = 0;
-    @Option(gloss = "Base directory for CSV files") public String baseCSVDir = null;
-    @Option(gloss = "Normalize cell content before assigning id")
-    public boolean normalizeBeforeCreatingId = true;
+    @Option(gloss = "Base directory for CSV files")
+    public String baseCSVDir = null;
+    @Option(gloss = "Whether to cache TableKnowledgeGraph")
+    public boolean cacheTableKnowledgeGraphs = true;
     @Option(gloss = "Forbid row.row.next on multiple rows")
     public boolean forbidNextOnManyRows = true;
+    @Option(gloss = "Set up executor cache for each graph (must manually clear, or else will get memory overflow)")
+    public boolean individualExecutorCache = false;
   }
   public static Options opts = new Options();
-
-  // ============================================================
-  // Data Structure
-  // ============================================================
-
-  static class TableColumn {
-    public final List<TableCell> children;
-    public final String originalString;
-    public final String fieldName;
-    public final int index;
-    // Property Name
-    public final NameValue propertyNameValue;
-    // Property Type (FuncSemType)
-    public final SemType propertySemType;
-    // Children Cell's Type (EntitySemType)
-    public final String cellTypeString;
-    public final NameValue cellTypeValue;
-    public final SemType cellSemType;
-
-    public TableColumn(String originalString, String fieldName, int index) {
-      this.children = new ArrayList<>();
-      this.originalString = originalString;
-      this.fieldName = fieldName;
-      this.index = index;
-      this.propertyNameValue = new NameValue(TableTypeSystem.getPropertyName(fieldName), originalString);
-      this.propertySemType = TableTypeSystem.getPropertySemType(fieldName);
-      this.cellTypeString = TableTypeSystem.getCellType(fieldName);
-      this.cellTypeValue = new NameValue(this.cellTypeString, originalString);
-      this.cellSemType = SemType.newAtomicSemType(this.cellTypeString);
-    }
-
-    public static Set<String> getReservedFieldNames() {
-      Set<String> usedNames = new HashSet<>();
-      usedNames.add("next");
-      usedNames.add("index");
-      return usedNames;
-    }
-
-    @Override
-    public String toString() {
-      return propertyNameValue.toString();
-    }
-  }
-
-  static class TableRow {
-    public final List<TableCell> children;
-    public final int index;
-    public final NumberValue indexValue;
-    public final NameValue entityNameValue;
-
-    public TableRow(int index) {
-      this.children = new ArrayList<>();
-      this.index = index;
-      this.indexValue = new NumberValue(index);
-      this.entityNameValue = new NameValue(TableTypeSystem.getRowName(index), "" + index);
-    }
-
-    @Override
-    public String toString() {
-      return entityNameValue.toString();
-    }
-  }
-
-  static final class TableCell {
-    public final TableColumn parentColumn;
-    public final TableRow parentRow;
-    public final TableCellProperties properties;
-
-    private TableCell(TableCellProperties properties, TableColumn column, TableRow row) {
-      this.parentColumn = column;
-      this.parentRow = row;
-      this.properties = properties;
-    }
-
-    public static TableCell createAndAddTo(TableCellProperties properties, TableColumn column, TableRow row) {
-      TableCell answer = new TableCell(properties, column, row);
-      column.children.add(answer);
-      row.children.add(answer);
-      return answer;
-    }
-
-    @Override
-    public String toString() {
-      return properties.entityNameValue.toString();
-    }
-  }
-
-  // Contract: There is only one TableCellProperties for each unique id.
-  static class TableCellProperties {
-    public final String id;
-    public final String originalString;
-    public final NameValue entityNameValue;
-    public final Map<Value, Value> metadata;
-
-    public TableCellProperties(String id, String originalString) {
-      this.id = id;
-      this.originalString = originalString;
-      this.entityNameValue = new NameValue(id, originalString);
-      this.metadata = new HashMap<>();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (!(o instanceof TableCellProperties)) return false;
-      return id.equals(((TableCellProperties) o).id);
-    }
-
-    @Override
-    public int hashCode() {
-      return id.hashCode();
-    }
-  }
 
   // ============================================================
   // Fields
   // ============================================================
 
-  List<TableRow> rows;
-  List<TableColumn> columns;
-  String filename;
+  public List<TableRow> rows;
+  public List<TableColumn> columns;
+  public Set<TableCellProperties> cellProperties;
+  public Set<NameValue> cellParts;
+  public final String filename;
 
-  Map<String, TableRow> rowNameToTableRow;
-  Map<String, TableColumn> columnNameToTableColumn;
-  Map<String, TableColumn> propertyIdToTableColumn;
+  // "fb:row.r5" --> TableRow object
+  Map<String, TableRow> rowIdToTableRow;
+  // "fb:row.row.population" --> TableColumn object
+  Map<String, TableColumn> relationIdToTableColumn;
+  // "fb:cell.palo_alto_ca" --> TableCellProperties object
   Map<String, TableCellProperties> cellIdToTableCellProperties;
+
   FuzzyMatcher fuzzyMatcher;
+  public ExecutorCache executorCache;
+
+  @Override
+  public void clean() {
+    if (executorCache != null) executorCache.clearCache(this);
+  }
 
   // ============================================================
   // Constructor
   // ============================================================
 
   /**
-   * Constructor (not visible to public)
+   * Construct a new TableKnowledgeGraph from a String matrix.
+   * Does not cache the data.
    */
-  TableKnowledgeGraph(String filename) {
-    // Cells in the same column with the same string content gets the same id.
-    Map<Pair<TableColumn, String>, String> columnAndOriginalStringToCellId = new HashMap<>();
-
-    // Read the CSV file
+  public TableKnowledgeGraph(String filename, Iterable<String[]> data) {
     this.filename = filename;
-    filename = new File(opts.baseCSVDir, filename).getPath();
-    try (CSVReader csv = new CSVReader(new FileReader(filename))) {
-      for (String[] record : csv) {
-        if (columns == null) {
-          // Initialize
-          rows = new ArrayList<>();
-          columns = new ArrayList<>();
-          rowNameToTableRow = new HashMap<>();
-          columnNameToTableColumn = new HashMap<>();
-          propertyIdToTableColumn = new HashMap<>();
-          cellIdToTableCellProperties = new HashMap<>();
-          // Read the header row
-          for (String entry : record) {
-            entry = StringNormalizationUtils.unescape(entry);
-            String normalizedEntry = (opts.normalizeBeforeCreatingId ?
-                StringNormalizationUtils.characterNormalize(entry).toLowerCase() : entry);
-            String columnName = TableTypeSystem.getUnusedName(
-                TableTypeSystem.canonicalizeName(normalizedEntry), columnNameToTableColumn.keySet());
-            TableColumn column = new TableColumn(entry, columnName, columns.size());
-            columns.add(column);
-            columnNameToTableColumn.put(columnName, column);
-            propertyIdToTableColumn.put(column.propertyNameValue.id, column);
-          }
-        } else {
-          // Read the content row
-          if (record.length != columns.size()) {
-            LogInfo.warnings("Table has %d columns but row has %d cells: %s | %s", columns.size(),
-                record.length, columns, Fmt.D(record));
-          }
-          TableRow currentRow = new TableRow(rows.size());
-          rowNameToTableRow.put(currentRow.entityNameValue.id, currentRow);
-          rows.add(currentRow);
-          for (int i = 0; i < columns.size(); i++) {
-            TableColumn column = columns.get(i);
-            String entry = (i < record.length) ? record[i] : "";
-            entry = StringNormalizationUtils.unescape(entry);
-            String normalizedEntry = (opts.normalizeBeforeCreatingId ?
-                StringNormalizationUtils.characterNormalize(entry).toLowerCase() : entry);
-            Pair<TableColumn, String> columnAndOriginalString = new Pair<>(column, normalizedEntry);
-            String id = columnAndOriginalStringToCellId.get(columnAndOriginalString);
-            if (id == null) {
-              String canonicalName = TableTypeSystem.canonicalizeName(normalizedEntry);
-              id = TableTypeSystem.getUnusedName(
-                  TableTypeSystem.getCellName(canonicalName, column.fieldName),
-                  cellIdToTableCellProperties.keySet());
-              columnAndOriginalStringToCellId.put(columnAndOriginalString, id);
-              cellIdToTableCellProperties.put(id, new TableCellProperties(id, entry));
-            }
-            TableCellProperties properties = cellIdToTableCellProperties.get(id);
-            TableCell.createAndAddTo(properties, column, currentRow);
-          }
+    // Used column names (no two columns have the same id)
+    Set<String> usedColumnNames = new HashSet<>();
+    // Cells with the same string content gets the same id.
+    Map<String, String> originalStringToCellId = new HashMap<>();
+    // Parts with the same string content gets the same id.
+    Map<String, String> originalStringToPartId = new HashMap<>();
+    // Go though the data
+    for (String[] record : data) {
+      if (columns == null) {
+        // Initialize
+        rows = new ArrayList<>();
+        columns = new ArrayList<>();
+        rowIdToTableRow = new HashMap<>();
+        relationIdToTableColumn = new HashMap<>();
+        cellIdToTableCellProperties = new HashMap<>();
+        // Read the header row
+        for (String entry : record) {
+          String normalizedEntry = StringNormalizationUtils.characterNormalize(entry).toLowerCase();
+          String canonicalName = TableTypeSystem.canonicalizeName(normalizedEntry);
+          String columnName = TableTypeSystem.getUnusedName(canonicalName, usedColumnNames);
+          TableColumn column = new TableColumn(entry, columnName, columns.size());
+          columns.add(column);
+          usedColumnNames.add(columnName);
+          relationIdToTableColumn.put(column.relationNameValue.id, column);
+        }
+      } else {
+        // Read the content row
+        if (record.length != columns.size()) {
+          LogInfo.warnings("Table has %d columns but row has %d cells: %s | %s", columns.size(),
+              record.length, columns, Fmt.D(record));
+        }
+        TableRow currentRow = new TableRow(rows.size());
+        rowIdToTableRow.put(currentRow.nameValue.id, currentRow);
+        rows.add(currentRow);
+        for (int i = 0; i < columns.size(); i++) {
+          TableColumn column = columns.get(i);
+          String cellString = (i < record.length) ? record[i] : "";
+          // Create a NameValue
+          String id = TableTypeSystem.getOrCreateName(cellString, originalStringToCellId,
+              (String canonicalName) -> TableTypeSystem.getCellName(canonicalName));
+          TableCellProperties properties = cellIdToTableCellProperties.get(id);
+          if (properties == null)
+            cellIdToTableCellProperties.put(id, properties = new TableCellProperties(id, cellString));
+          TableCell.createAndAddTo(properties, column, currentRow);
+          properties.columns.add(column);
         }
       }
-      // Generate cell properties by analyzing cell content in each column
-      for (TableColumn column : columns)
-        StringNormalizationUtils.analyzeColumn(column);
-      // Precompute normalized strings for fuzzy matching
-      fuzzyMatcher = new FuzzyMatcher(this);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
     }
+    // Generate cell properties by analyzing cell content in each column
+    for (TableColumn column : columns)
+      StringNormalizationUtils.analyzeColumn(column, originalStringToPartId);
+    // Collect cell properties for public access
+    cellProperties = new HashSet<>(cellIdToTableCellProperties.values());
+    cellParts = new HashSet<>();
+    for (TableCellProperties properties : cellProperties)
+      for (Value part : properties.metadata.get(TableTypeSystem.CELL_PART_VALUE))
+        cellParts.add((NameValue) part);
+    // Precompute normalized strings for fuzzy matching
+    fuzzyMatcher = FuzzyMatcher.getFuzzyMatcher(this);
+    executorCache = opts.individualExecutorCache ? new ExecutorCache() : null;
   }
 
-  // Cache (don't create multiple graphs for the same CSV file)
+  /**
+   * Read CSV or TSV file.
+   */
+  TableKnowledgeGraph(String filename) throws IOException {
+    this(filename, new TableReader(filename));
+  }
+
+  // Cache (don't create multiple graphs for the same CSV or TSV file)
   static final Map<String, TableKnowledgeGraph> filenameToGraph = new HashMap<>();
 
-  public static synchronized TableKnowledgeGraph fromFilename(String filename) {
+  public static synchronized TableKnowledgeGraph fromRootedFilename(String filename) {
     // Get from cache if possible
     TableKnowledgeGraph graph = filenameToGraph.get(filename);
     if (graph == null) {
       if (opts.verbose >= 1)
         LogInfo.logs("create new TableKnowledgeGraph from filename = %s", filename);
       StopWatchSet.begin("TableKnowledgeGraph.new");
-      graph = new TableKnowledgeGraph(filename);
+      try {
+        graph = new TableKnowledgeGraph(filename);
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
       StopWatchSet.end();
-      filenameToGraph.put(filename, graph);
+      if (opts.cacheTableKnowledgeGraphs)
+        filenameToGraph.put(filename, graph);
     }
     return graph;
   }
 
+  public static TableKnowledgeGraph fromFilename(String filename) {
+    return fromRootedFilename(new File(opts.baseCSVDir, filename).getPath());
+  }
+
   public static TableKnowledgeGraph fromLispTree(LispTree tree) {
-    return fromFilename(tree.child(2).value);
+    if (tree.children.size() > 3 && "rooted-path".equals(tree.child(3).value))
+      return fromRootedFilename(tree.child(2).value);
+    else
+      return fromFilename(tree.child(2).value);
+
+  }
+
+  // ============================================================
+  // Construct from existing cells
+  // ============================================================
+
+  /**
+   * Construct a new TableKnowledgeGraph using the same columns as an old table
+   * but with different cell ordering.
+   * Does not cache the data.
+   */
+  public TableKnowledgeGraph(String filename, List<TableColumn> oldColumns,
+      List<List<TableCellProperties>> oldCells, boolean cellsAreGroupedByColumn) {
+    this.filename = filename;
+    rows = new ArrayList<>();
+    columns = new ArrayList<>();
+    rowIdToTableRow = new HashMap<>();
+    relationIdToTableColumn = new HashMap<>();
+    cellIdToTableCellProperties = new HashMap<>();
+    // Header row
+    for (TableColumn oldColumn : oldColumns) {
+      TableColumn column = new TableColumn(oldColumn);
+      columns.add(column);
+      relationIdToTableColumn.put(column.relationNameValue.id, column);
+    }
+    // Sanity check
+    int numRows, numColumns = columns.size();
+    if (cellsAreGroupedByColumn) {    // oldCells[column][row]
+      if (oldCells.size() != numColumns)
+        throw new RuntimeException("Mismatched sizes: oldCells has " + oldCells.size() + " != " + numColumns + " columns");
+      numRows = oldCells.get(0).size();
+      for (List<TableCellProperties> oldCellsRow : oldCells)
+        if (oldCellsRow.size() != numRows)
+          throw new RuntimeException("Mismatched sizes: oldCells has " + oldCells.size() + " != " + numColumns + " rows");
+    } else {    // oldCells[row][column]
+      numRows = oldCells.size();
+      for (List<TableCellProperties> oldCellsColumn : oldCells)
+        if (oldCellsColumn.size() != numColumns)
+          throw new RuntimeException("Mismatched sizes: oldCells has " + oldCells.size() + " != " + numColumns + " columns");
+    }
+    // Content rows
+    for (int i = 0; i < numRows; i++) {
+      TableRow currentRow = new TableRow(i);
+      rows.add(currentRow);
+      rowIdToTableRow.put(currentRow.nameValue.id, currentRow);
+      for (int j = 0; j < numColumns; j++) {
+        TableColumn column = columns.get(j);
+        TableCellProperties properties = new TableCellProperties(
+            cellsAreGroupedByColumn ? oldCells.get(j).get(i) : oldCells.get(i).get(j));
+        cellIdToTableCellProperties.put(properties.id, properties);
+        TableCell.createAndAddTo(properties, column, currentRow);
+      }
+    }
+    // Finalize
+    cellProperties = new HashSet<>(cellIdToTableCellProperties.values());
+    cellParts = new HashSet<>();
+    for (TableCellProperties properties : cellProperties)
+      for (Value part : properties.metadata.get(TableTypeSystem.CELL_PART_VALUE))
+        cellParts.add((NameValue) part);
+    // Precompute normalized strings for fuzzy matching
+    fuzzyMatcher = FuzzyMatcher.getFuzzyMatcher(this);
+    executorCache = opts.individualExecutorCache ? new ExecutorCache() : null;
   }
 
   // ============================================================
@@ -272,7 +252,12 @@ public class TableKnowledgeGraph extends KnowledgeGraph {
       LispTree tree = LispTree.proto.newList();
       tree.addChild("graph");
       tree.addChild("tables.TableKnowledgeGraph");
-      tree.addChild(filename);
+      if (filename.startsWith(opts.baseCSVDir))
+        tree.addChild(Paths.get(opts.baseCSVDir).relativize(Paths.get(filename)).toString());
+      else {
+        tree.addChild(filename);
+        tree.addChild("rooted-path");
+      }
       return tree;
     }
     return toTableValue().toLispTree();
@@ -292,11 +277,15 @@ public class TableKnowledgeGraph extends KnowledgeGraph {
     for (TableRow row : rows) {
       List<Value> tableValueRow = new ArrayList<>();
       for (TableCell cell : row.children) {
-        tableValueRow.add(cell.properties.entityNameValue);
+        tableValueRow.add(cell.properties.nameValue);
       }
       tableValueRows.add(tableValueRow);
     }
     return new TableValue(tableValueHeader, tableValueRows);
+  }
+
+  public void log() {
+    new TableWriter(this).log();
   }
 
   // ============================================================
@@ -306,6 +295,12 @@ public class TableKnowledgeGraph extends KnowledgeGraph {
   @Override
   public Collection<Formula> getFuzzyMatchedFormulas(String term, FuzzyMatchFn.FuzzyMatchFnMode mode) {
     return fuzzyMatcher.getFuzzyMatchedFormulas(term, mode);
+  }
+
+  @Override
+  public Collection<Formula> getFuzzyMatchedFormulas(
+      List<String> sentence, int startIndex, int endIndex, FuzzyMatchFnMode mode) {
+    return fuzzyMatcher.getFuzzyMatchedFormulas(sentence, startIndex, endIndex, mode);
   }
 
   @Override
@@ -319,12 +314,13 @@ public class TableKnowledgeGraph extends KnowledgeGraph {
 
   public static final NameValue TYPE = new NameValue(CanonicalNames.TYPE);
   public static final NameValue ROW_TYPE = new NameValue(TableTypeSystem.ROW_TYPE);
-  public static final NameValue CELL_TYPE = new NameValue(TableTypeSystem.CELL_GENERIC_TYPE);
+  public static final NameValue CELL_TYPE = new NameValue(TableTypeSystem.CELL_TYPE);
+  public static final NameValue PART_TYPE = new NameValue(TableTypeSystem.PART_TYPE);
 
   /** Return all y such that x in firsts and (x,r,y) in graph */
   @Override
   public List<Value> joinFirst(Value r, Collection<Value> firsts) {
-    return joinSecond(getReversedPredicate(r), firsts);
+    return joinSecond(CanonicalNames.reverseProperty(r), firsts);
   }
 
   /** Return all x such that y in seconds and (x,r,y) in graph */
@@ -339,70 +335,73 @@ public class TableKnowledgeGraph extends KnowledgeGraph {
   /** Return all (x,y) such that x in firsts and (x,r,y) in graph */
   @Override
   public List<Pair<Value, Value>> filterFirst(Value r, Collection<Value> firsts) {
-    return getReversedPairs(filterSecond(getReversedPredicate(r), firsts));
+    return getReversedPairs(filterSecond(CanonicalNames.reverseProperty(r), firsts));
   }
 
   /*
-   * - one-one and many-one: Each X maps to 1 Y:
+   * - {one,many} to one: Each X maps to 1 Y:
    *   X-Y = row-row, row-primitive, primitive-row, row-cell, cell-primitive
-   * - one-many: Deduplicate first, then each X maps to possibly many Y's
+   * - {one,many} to many: Remove duplicates first, then each X maps to possibly many Y's
    *   X-Y = cell-row, primitive-cell
    */
   /** Return all (x,y) such that y in seconds and (x,r,y) in graph */
-  // TODO(ice): Check correctness
   @Override
   public List<Pair<Value, Value>> filterSecond(Value r, Collection<Value> seconds) {
     List<Pair<Value, Value>> answer = new ArrayList<>();
-    Value reversed = isReversedRelation(r);
-    if (reversed != null) {
-      r = reversed;
+    if (CanonicalNames.isReverseProperty(r)) {
+      r = CanonicalNames.reverseProperty(r);
       if (r.equals(TYPE)) {
+        ////////////////////////////////////////////////////////////
         // (!fb:type.object.type fb:row.r5) --> fb:type.row
         // Not handled right now.
         throw new BadFormulaException("Unhandled! " + r);
       } else if (r.equals(TableTypeSystem.ROW_NEXT_VALUE)) {
+        ////////////////////////////////////////////////////////////
         // (!fb:row.row.next fb:row.r5) --> fb:row.r6
-        if (opts.forbidNextOnManyRows && seconds.size() != 1) {
+        if (opts.forbidNextOnManyRows && seconds.size() != 1 && seconds != InfiniteUnaryDenotation.STAR_UNARY) {
           throw new LambdaDCSException(Type.nonSingletonList, "cannot call next on " + seconds.size() + " rows.");
         }
         if (seconds.size() == Integer.MAX_VALUE) {
           for (int i = 0; i < rows.size() - 1; i++) {
-            if (!seconds.contains(rows.get(i).entityNameValue)) continue;
-            answer.add(new Pair<>(rows.get(i + 1).entityNameValue, rows.get(i).entityNameValue));
+            if (!seconds.contains(rows.get(i).nameValue)) continue;
+            answer.add(new Pair<>(rows.get(i + 1).nameValue, rows.get(i).nameValue));
           }
         } else {
           for (Value value : seconds) {
             if (!(value instanceof NameValue)) continue;
-            TableRow row = rowNameToTableRow.get(((NameValue) value).id);
+            TableRow row = rowIdToTableRow.get(((NameValue) value).id);
             if (row == null) continue;
             int i = row.index;
             if (i + 1 >= rows.size()) continue;
-            answer.add(new Pair<>(rows.get(i + 1).entityNameValue, row.entityNameValue));
+            answer.add(new Pair<>(rows.get(i + 1).nameValue, row.nameValue));
           }
         }
       } else if (r.equals(TableTypeSystem.ROW_INDEX_VALUE)) {
+        ////////////////////////////////////////////////////////////
         // (!fb:row.row.index fb:row.r5) --> (number 5)
         if (seconds.size() == Integer.MAX_VALUE) {
           for (TableRow row : rows) {
-            if (!seconds.contains(row.entityNameValue)) continue;
-            answer.add(new Pair<>(row.indexValue, row.entityNameValue));
+            if (!seconds.contains(row.nameValue)) continue;
+            answer.add(new Pair<>(row.indexValue, row.nameValue));
           }
         } else {
           for (Value value : seconds) {
             if (!(value instanceof NameValue)) continue;
-            TableRow row = rowNameToTableRow.get(((NameValue) value).id);
+            TableRow row = rowIdToTableRow.get(((NameValue) value).id);
             if (row == null) continue;
-            answer.add(new Pair<>(row.indexValue, row.entityNameValue));
+            answer.add(new Pair<>(row.indexValue, row.nameValue));
           }
         }
       } else if (TableTypeSystem.isCellProperty(r)) {
-        // (!fb:cell.cell.number fb:cell_id.5) --> 5
+        ////////////////////////////////////////////////////////////
+        // (!fb:cell.cell.number fb:cell.5_dollars) --> (number 5)
         if (seconds.size() == Integer.MAX_VALUE) {
           for (TableColumn column : columns) {
             for (TableCell cell : column.children) {
-              Value property = cell.properties.metadata.get(r);
-              if (property == null || !seconds.contains(cell.properties.entityNameValue)) continue;
-              answer.add(new Pair<>(property, cell.properties.entityNameValue));
+              for (Value property : cell.properties.metadata.get(r)) {
+                if (!seconds.contains(cell.properties.nameValue)) continue;
+                answer.add(new Pair<>(property, cell.properties.nameValue));
+              }
             }
           }
         } else {
@@ -410,106 +409,146 @@ public class TableKnowledgeGraph extends KnowledgeGraph {
             if (!(value instanceof NameValue)) continue;
             TableCellProperties properties = cellIdToTableCellProperties.get(((NameValue) value).id);
             if (properties == null) continue;
-            Value property = properties.metadata.get(r);
-            if (property == null) continue;
-            answer.add(new Pair<>(property, properties.entityNameValue));
+            for (Value property : properties.metadata.get(r)) {
+              answer.add(new Pair<>(property, properties.nameValue));
+            }
           }
         }
-      } else {
-        // (!fb:column.nationality fb:row.r5) --> fb:cell.canada
+      } else if (TableTypeSystem.isRowProperty(r)) {
+        ////////////////////////////////////////////////////////////
+        // (!fb:row.row.nationality fb:row.r5) --> fb:cell.canada
         if (seconds.size() == Integer.MAX_VALUE) {
           for (int i = 0; i < columns.size(); i++) {
-            if (!r.equals(columns.get(i).propertyNameValue)) continue;
+            if (!r.equals(columns.get(i).relationNameValue)) continue;
             for (TableRow row : rows) {
-              if (!seconds.contains(row.entityNameValue)) continue;
-              answer.add(new Pair<>(row.children.get(i).properties.entityNameValue, row.entityNameValue));
+              if (!seconds.contains(row.nameValue)) continue;
+              answer.add(new Pair<>(row.children.get(i).properties.nameValue, row.nameValue));
             }
           }
         } else {
           for (int i = 0; i < columns.size(); i++) {
-            if (!r.equals(columns.get(i).propertyNameValue)) continue;
+            if (!r.equals(columns.get(i).relationNameValue)) continue;
             for (Value value : seconds) {
               if (!(value instanceof NameValue)) continue;
-              TableRow row = rowNameToTableRow.get(((NameValue) value).id);
+              TableRow row = rowIdToTableRow.get(((NameValue) value).id);
               if (row == null) continue;
-              answer.add(new Pair<>(row.children.get(i).properties.entityNameValue, row.entityNameValue));
+              answer.add(new Pair<>(row.children.get(i).properties.nameValue, row.nameValue));
             }
+          }
+        }
+      } else if (TableTypeSystem.isRowConsecutiveProperty(r)) {
+        ////////////////////////////////////////////////////////////
+        // (!fb:row.consecutive.nationality fb:row.r5) --> (number 2)
+        for (int i = 0; i < columns.size(); i++) {
+          if (!r.equals(columns.get(i).relationConsecutiveNameValue)) continue;
+          int count = 0;
+          NameValue lastCell = null;
+          for (TableRow row : rows) {
+            if (row.children.get(i).properties.nameValue.equals(lastCell))
+              count++;
+            else {
+              count = 1;
+              lastCell = row.children.get(i).properties.nameValue;
+            }
+            if (!seconds.contains(row.nameValue)) continue;
+            answer.add(new Pair<>(new NumberValue(count), row.nameValue));
           }
         }
       }
     } else {
       if (r.equals(TYPE)) {
+        ////////////////////////////////////////////////////////////
         // (fb:type.object.type fb:type.row) --> {fb:row.r1, fb:row.r2, ...}
-        // Right now handles fb:type.row, fb:type.cell, fb:column.___
         for (Value second : seconds) {
           if (second.equals(ROW_TYPE)) {
             for (TableRow row : rows)
-              answer.add(new Pair<>(row.entityNameValue, second));
+              answer.add(new Pair<>(row.nameValue, second));
           } else if (second.equals(CELL_TYPE)) {
-            for (TableRow row : rows)
-              for (TableCell cell : row.children)
-                answer.add(new Pair<>(cell.properties.entityNameValue, second));
-          } else {
-            for (TableColumn column : columns) {
-              if (!second.equals(column.cellTypeValue)) continue;
-              for (TableCell cell : column.children)
-                answer.add(new Pair<>(cell.properties.entityNameValue, second));
-            }
+            for (TableCellProperties properties : cellProperties)
+              answer.add(new Pair<>(properties.nameValue, second));
+          } else if (second.equals(PART_TYPE)) {
+            for (NameValue part : cellParts)
+              answer.add(new Pair<>(part, second));
           }
         }
       } else if (r.equals(TableTypeSystem.ROW_NEXT_VALUE)) {
+        ////////////////////////////////////////////////////////////
         // (fb:row.row.next fb:row.r5) --> fb:row.r4
-        if (opts.forbidNextOnManyRows && seconds.size() != 1) {
+        if (opts.forbidNextOnManyRows && seconds.size() != 1 && seconds != InfiniteUnaryDenotation.STAR_UNARY) {
           throw new LambdaDCSException(Type.nonSingletonList, "cannot call next on " + seconds.size() + " rows.");
         }
         if (seconds.size() == Integer.MAX_VALUE) {
           for (int i = 1; i < rows.size(); i++) {
-            if (!seconds.contains(rows.get(i).entityNameValue)) continue;
-            answer.add(new Pair<>(rows.get(i - 1).entityNameValue, rows.get(i).entityNameValue));
+            if (!seconds.contains(rows.get(i).nameValue)) continue;
+            answer.add(new Pair<>(rows.get(i - 1).nameValue, rows.get(i).nameValue));
           }
         } else {
           for (Value value : seconds) {
             if (!(value instanceof NameValue)) continue;
-            TableRow row = rowNameToTableRow.get(((NameValue) value).id);
+            TableRow row = rowIdToTableRow.get(((NameValue) value).id);
             if (row == null) continue;
             int i = row.index;
             if (i - 1 < 0) continue;
-            answer.add(new Pair<>(rows.get(i - 1).entityNameValue, row.entityNameValue));
+            answer.add(new Pair<>(rows.get(i - 1).nameValue, row.nameValue));
           }
         }
       } else if (r.equals(TableTypeSystem.ROW_INDEX_VALUE)) {
+        ////////////////////////////////////////////////////////////
         // (fb:row.row.index (number 5)) --> fb:row.r5
         if (seconds.size() == Integer.MAX_VALUE) {
           for (TableRow row : rows) {
             if (!seconds.contains(row.indexValue)) continue;
-            answer.add(new Pair<>(row.entityNameValue, row.indexValue));
+            answer.add(new Pair<>(row.nameValue, row.indexValue));
           }
         } else {
           for (Value value : seconds) {
             if (!(value instanceof NumberValue)) continue;
-            int i = (int) ((NumberValue) value).value;
+            double x = ((NumberValue) value).value;
+            if (Math.abs(x - Math.round(x)) > 1e-6) continue;    // Ignore non-integers
+            int i = (int) x;
             if (i < 0 || i >= rows.size()) continue;
             TableRow row = rows.get(i);
-            answer.add(new Pair<>(row.entityNameValue, row.indexValue));
+            answer.add(new Pair<>(row.nameValue, row.indexValue));
           }
         }
       } else if (TableTypeSystem.isCellProperty(r)) {
-        // (fb:cell.cell.number (number 5)) --> {fb:cell_id.5 fb:cell_population.5, ...}
+        ////////////////////////////////////////////////////////////
+        // (fb:cell.cell.number (number 5)) --> {fb:cell.5 fb:cell.5_dollars, ...}
         // Possibly with repeated id (if there are multiple cells with that id)
         for (TableColumn column : columns) {
           for (TableCell cell : column.children) {
-            Value property = cell.properties.metadata.get(r);
-            if (property == null || !seconds.contains(property)) continue;
-            answer.add(new Pair<>(cell.properties.entityNameValue, property));
+            for (Value property : cell.properties.metadata.get(r)) {
+              if (!seconds.contains(property)) continue;
+              answer.add(new Pair<>(cell.properties.nameValue, property));
+            }
           }
         }
-      } else {
-        // (fb:column.nationality fb:cell.canada) --> fb:row.r5
+      } else if (TableTypeSystem.isRowProperty(r)) {
+        ////////////////////////////////////////////////////////////
+        // (fb:row.row.nationality fb:cell.canada) --> fb:row.r5
         for (int i = 0; i < columns.size(); i++) {
-          if (!r.equals(columns.get(i).propertyNameValue)) continue;
+          if (!r.equals(columns.get(i).relationNameValue)) continue;
           for (TableRow row : rows) {
-            if (!seconds.contains(row.children.get(i).properties.entityNameValue)) continue;
-            answer.add(new Pair<>(row.entityNameValue, row.children.get(i).properties.entityNameValue));
+            if (!seconds.contains(row.children.get(i).properties.nameValue)) continue;
+            answer.add(new Pair<>(row.nameValue, row.children.get(i).properties.nameValue));
+          }
+        }
+      } else if (TableTypeSystem.isRowConsecutiveProperty(r)) {
+        ////////////////////////////////////////////////////////////
+        // (fb:row.consecutive.nationality (number 2)) --> fb:row.r5
+        for (int i = 0; i < columns.size(); i++) {
+          if (!r.equals(columns.get(i).relationConsecutiveNameValue)) continue;
+          int count = 0;
+          NameValue lastCell = null;
+          for (TableRow row : rows) {
+            if (row.children.get(i).properties.nameValue.equals(lastCell))
+              count++;
+            else {
+              count = 1;
+              lastCell = row.children.get(i).properties.nameValue;
+            }
+            if (!seconds.contains(new NumberValue(count))) continue;
+            answer.add(new Pair<>(row.nameValue, new NumberValue(count)));
           }
         }
       }
@@ -529,6 +568,19 @@ public class TableKnowledgeGraph extends KnowledgeGraph {
 
   public int numRows() { return rows.size(); }
   public int numColumns() { return columns.size(); }
+  public int numUniqueCells() { return cellProperties.size(); }
+
+  public TableRow getRow(int rowIndex) {
+    return rows.get(rowIndex);
+  }
+
+  public TableColumn getColumn(int columnIndex) {
+    return columns.get(columnIndex);
+  }
+
+  public TableCell getCell(int rowIndex, int colIndex) {
+    return rows.get(rowIndex).children.get(colIndex);
+  }
 
   public List<String> getAllColumnStrings() {
     List<String> columnStrings = new ArrayList<>();
@@ -556,25 +608,55 @@ public class TableKnowledgeGraph extends KnowledgeGraph {
     if (nameValueId.startsWith("!")) nameValueId = nameValueId.substring(1);
     if (cellIdToTableCellProperties.containsKey(nameValueId))
       return cellIdToTableCellProperties.get(nameValueId).originalString;
-    if (propertyIdToTableColumn.containsKey(nameValueId))
-      return propertyIdToTableColumn.get(nameValueId).originalString;
-    if (nameValueId.startsWith(TableTypeSystem.CELL_SPECIFIC_TYPE_PREFIX)) {
-      String property = nameValueId.replace(TableTypeSystem.CELL_SPECIFIC_TYPE_PREFIX, TableTypeSystem.ROW_PROPERTY_NAME_PREFIX);
-      if (propertyIdToTableColumn.containsKey(property))
-        return propertyIdToTableColumn.get(property).originalString;
-    }
+    if (relationIdToTableColumn.containsKey(nameValueId))
+      return relationIdToTableColumn.get(nameValueId).originalString;
     return null;
   }
 
-  public List<Integer> getRowIndices(String nameValueId) {
-    String property = TableTypeSystem.getPropertyOfEntity(nameValueId);
-    if (property == null) return null;
-    TableColumn column = propertyIdToTableColumn.get(property);
-    if (column == null) return null;
+  public Value getNameValueWithOriginalString(NameValue value) {
+    if (value.description == null)
+      value = new NameValue(value.id, getOriginalString(value.id));
+    return value;
+  }
+
+  public ListValue getListValueWithOriginalStrings(ListValue answers) {
+    List<Value> values = new ArrayList<>();
+    for (Value value : answers.values) {
+      if (value instanceof NameValue) {
+        NameValue name = (NameValue) value;
+        if (name.description == null)
+          value = new NameValue(name.id, getOriginalString(name.id));
+      }
+      values.add(value);
+    }
+    return new ListValue(values);
+  }
+
+  /**
+   * Return a list of rows that contain a cell with the specified NameValue ID.
+   */
+  public List<Integer> getRowsOfCellId(String nameValueId) {
     List<Integer> answer = new ArrayList<>();
-    for (int i = 0; i < column.children.size(); i++) {
-      if (column.children.get(i).properties.id.equals(nameValueId))
-        answer.add(i);
+    TableCellProperties properties = cellIdToTableCellProperties.get(nameValueId);
+    if (properties == null) return answer;
+    for (TableColumn column : properties.columns) {
+      for (int i = 0; i < column.children.size(); i++) {
+        if (column.children.get(i).properties.id.equals(nameValueId))
+          answer.add(i);
+      }
+    }
+    return answer;
+  }
+
+  /**
+   * Return a list of columns that contain a cell with the specified NameValue ID.
+   */
+  public List<String> getColumnsOfCellId(String nameValueId) {
+    List<String> answer = new ArrayList<>();
+    TableCellProperties properties = cellIdToTableCellProperties.get(nameValueId);
+    if (properties == null) return answer;
+    for (TableColumn column : properties.columns) {
+      answer.add(column.columnName);
     }
     return answer;
   }
@@ -586,20 +668,25 @@ public class TableKnowledgeGraph extends KnowledgeGraph {
   public static void main(String[] args) {
     //opts.baseCSVDir = "tables/toy-examples/random/";
     //String filename = "nikos_machlas.csv";
-    opts.normalizeBeforeCreatingId = true;
+    StringNormalizationUtils.opts.verbose = 5;
+    //LanguageAnalyzer.opts.languageAnalyzer = "corenlp.CoreNLPAnalyzer";
+    StringNormalizationUtils.opts.numberCanStartAnywhere = true;
+    StringNormalizationUtils.opts.num2CanStartAnywhere = true;
     opts.baseCSVDir = "lib/data/tables/";
-    String filename = "csv/204-csv/255.csv";
+    String filename = "csv/200-csv/0.csv";
     TableKnowledgeGraph graph = (TableKnowledgeGraph) KnowledgeGraph.fromLispTree(
         LispTree.proto.parseFromString("(graph tables.TableKnowledgeGraph " + filename + ")"));
     //LogInfo.logs("%s", graph.toLispTree().toStringWrap());
     //LogInfo.logs("%s", graph.toTableValue().toLispTree().toStringWrap(100));
     for (TableColumn column : graph.columns) {
-      LogInfo.begin_track("%s", column.fieldName);
+      LogInfo.begin_track("%s (%s)", column.columnName, column.originalString);
       for (TableCell cell : column.children) {
-        LogInfo.logs("%s %s", cell.properties.entityNameValue, cell.properties.metadata);
+        LogInfo.logs("%s (%s) %s", cell.properties.nameValue,
+            cell.properties.originalString, cell.properties.metadata);
       }
       LogInfo.end_track();
     }
   }
+
 
 }
