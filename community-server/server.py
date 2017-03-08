@@ -19,6 +19,7 @@ from optparse import OptionParser
 from flask import Flask, request, session
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit, join_room, leave_room
+import jwt
 import requests
 
 # Setup flask
@@ -44,6 +45,9 @@ TIME_INTERVAL = 7200.0  # break off by every 30 minutes
 
 # Default port for the server
 DEFAULT_PORT = 8406
+
+JWT_SECRET = os.environ['SEMPRE_JWT_SECRET']
+SLACK_SECRET = os.environ['SLACK_OAUTH_SECRET']
 
 
 @app.route("/")
@@ -250,6 +254,10 @@ def log(message):
     """Logs the given message by writing it in the uid's JSON log file."""
     uid = message["uid"] if 'uid' in message else "NULL_session"
 
+    user = current_user(message['token'])
+    if user:
+        uid = user['id']
+
     path = os.path.join(LOG_FOLDER, uid + ".json")
 
     if not is_safe_path(LOG_FOLDER, path):
@@ -267,7 +275,11 @@ def log(message):
 
 @socketio.on('getscore')
 def get_score(data):
-    uid = data['uid']
+    user = current_user(data['token'])
+    if not user:
+        return
+
+    uid = user['id']
     subdir = os.path.join(CITATION_FOLDER, uid)
     if (os.path.isdir(subdir) and is_safe_path(CITATION_FOLDER, subdir)):
         (citations, score) = compute_citations(subdir)
@@ -325,7 +337,13 @@ def handle_share(data):
     current score of the struct and ID is the unique index (auto-incremented) of
     this particular struct.."""
 
-    user_structs_folder = os.path.join(STRUCTS_FOLDER, data['uid'])
+    user = current_user(data['token'])
+    if not user:
+        return
+
+    uid = user['id']
+
+    user_structs_folder = os.path.join(STRUCTS_FOLDER, uid)
     if not is_safe_path(STRUCTS_FOLDER, user_structs_folder):
         return
     make_dir_if_necessary(user_structs_folder)
@@ -343,19 +361,19 @@ def handle_share(data):
         f.write(data["image"])  # the png of the struct
 
     # Broadcast addition to the "community" room
-    message = {"uid": data['uid'], "id": data["id"], "score": score, "upvotes": [
+    message = {"uid": uid, "id": data["id"], "score": score, "upvotes": [
     ], "struct": data["struct"], "image": data["image"]}
     emit("struct", message, broadcast=True, room="community")
 
 
 @socketio.on('upvote')
 def upvote(data):
-    """Users can upvote other users' structures.
+    """Users can upvote other users' structures."""
 
-    Data should consist of: {"uid": UID, "id": "ID"}"""
+    user = current_user(data['token'])
 
-    # if no session.uid, do nothing
-    if not data['uid']:
+    # if no authenticated user, do nothing
+    if not user:
         return
 
     subdir = os.path.join(STRUCTS_FOLDER, data["struct_uid"])
@@ -375,8 +393,8 @@ def upvote(data):
         upvotes = json.loads(f.readline().strip())
 
         # If the user has not already upvoted this, add them
-        if data['uid'] not in upvotes:
-            upvotes.append(data['uid'])
+        if user['id'] not in upvotes:
+            upvotes.append(user['id'])
 
             timestamp = f.readline()
             struct = f.readline()
@@ -392,7 +410,7 @@ def upvote(data):
             f.write(image)  # rewrite the image
 
             message = {"uid": data["struct_uid"],
-                       "id": data["id"], "up": data['uid'], "score": score}
+                       "id": data["id"], "up": user['id'], "score": score}
 
             f.truncate()  # truncate to ensure flush appropriate
 
@@ -401,7 +419,7 @@ def upvote(data):
 
             # and then broadcast the new upvote to the room:
             message = {"uid": data["struct_uid"],
-                       "id": data["id"], "up": data['uid'], "score": score}
+                       "id": data["id"], "up": user['id'], "score": score}
             emit("upvote", message, broadcast=True, room="community")
 
 
@@ -435,7 +453,7 @@ def get_session(data):
     all future authentication by storing it as uid in the session global
     context variable."""
     session.uid = data['uid']
-    log({"type": "connect"})
+    log({"type": "connect", "token": ""})
 
 
 @socketio.on('getstructcount')
@@ -459,32 +477,39 @@ def disconnect():
 @socketio.on('sign_in')
 def sign_in(data):
     r = requests.get("https://slack.com/api/oauth.access", params={
-                     'code': data['code'], 'client_id': '130265636855.151294060356', 'client_secret': '9c75dd7b0f7b689e5d64a11a53657fdb'})
+                     'code': data['code'], 'client_id': '130265636855.151294060356', 'client_secret': SLACK_SECRET})
     data = r.json()
     session['access_token'] = data['access_token']
     user = data['user']
     session['user'] = user
 
+    encoded = jwt.encode(
+        {'name': user['name'], 'email': user['email'], 'id': user['id']}, JWT_SECRET, algorithm='HS256').decode('utf-8')
+
     emit('sign_in', {
-         "name": user['name'], "email": user['email'], 'id': user['id'], 'token': data['access_token']})
+         "name": user['name'], "email": user['email'], 'id': user['id'], 'token': encoded})
 
 
 @socketio.on('get_user')
 def get_user(data):
-    token = data['token']
-    r = requests.get("https://slack.com/api/users.identity", params={
-        "token": token})
-    data = r.json()
-
-    if (data['ok']):
-        user = data['user']
-        session['user'] = user
-        session['access_token'] = token
+    user = current_user(data['token'])
+    if user:
         emit('sign_in', {
-            "name": user['name'], "email": user['email'], 'id': user['id'], 'token': token})
+            "name": user['name'], "email": user['email'], 'id': user['id'], 'token': data['token']
+        })
+    else:
+        emit('sign_in_failed')
 
+
+def current_user(token):
+    try:
+        return jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+    except:
+        return False
 
 # http://stackoverflow.com/questions/2301789/read-a-file-in-reverse-order-using-python
+
+
 def reverse_readline(filename, buf_size=8192):
     """a generator that returns the lines of a file in reverse order"""
     with open(filename) as fh:
