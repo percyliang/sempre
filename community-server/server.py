@@ -3,7 +3,7 @@
 """
 SHRDLURN - Community & Logging Server
 
-## Instructions
+# Instructions
 
 You can run the server by running ```./server.py --port <PORT_NUMBER>```
 """
@@ -19,6 +19,7 @@ from optparse import OptionParser
 from flask import Flask, request, session
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit, join_room, leave_room
+import requests
 
 # Setup flask
 app = Flask(__name__)
@@ -453,6 +454,34 @@ def disconnect():
     """Log the fact that a user disconnected."""
     if 'uid' in session:
         log({"uid": session.uid, "type": "disconnect"})
+
+
+@socketio.on('sign_in')
+def sign_in(data):
+    r = requests.get("https://slack.com/api/oauth.access", params={
+                     'code': data['code'], 'client_id': '130265636855.151294060356', 'client_secret': '9c75dd7b0f7b689e5d64a11a53657fdb'})
+    data = r.json()
+    session['access_token'] = data['access_token']
+    user = data['user']
+    session['user'] = user
+
+    emit('sign_in', {
+         "name": user['name'], "email": user['email'], 'id': user['id'], 'token': data['access_token']})
+
+
+@socketio.on('get_user')
+def get_user(data):
+    token = data['token']
+    r = requests.get("https://slack.com/api/users.identity", params={
+        "token": token})
+    data = r.json()
+
+    if (data['ok']):
+        user = data['user']
+        session['user'] = user
+        session['access_token'] = token
+        emit('sign_in', {
+            "name": user['name'], "email": user['email'], 'id': user['id'], 'token': token})
 
 
 # http://stackoverflow.com/questions/2301789/read-a-file-in-reverse-order-using-python
