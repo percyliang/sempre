@@ -91,9 +91,17 @@
     <jar destfile="${libsempre}/sempre-overnight.jar" basedir="${classes}/overnight"/>
   </target>
 
-<<<<<<< HEAD
+	<!-- Compile interactive -->
+  <target name="interactive" depends="init,core">
+    <echo message="Compiling ${ant.project.name}: interactive"/>
+    <mkdir dir="${classes}/interactive"/>
+    <javac srcdir="${src}" destdir="${classes}/interactive" classpathref="lib.path" debug="true" includeantruntime="false" source="${source}" target="${target}">
+      <include name="edu/stanford/nlp/sempre/interactive/"/>
+    </javac>
+    <jar destfile="${libsempre}/sempre-interactive.jar" basedir="${classes}/interactive"/>
+  </target>
+	
   <!-- BEGIN_HIDE -->
-
   <target name="compile.internal" depends="fbalignment,paraphrase,clojure,regex,jungle,logicpuzzles"/>
 
   <!-- Compile fbalignment -->
@@ -154,16 +162,6 @@
       <include name="edu/stanford/nlp/sempre/logicpuzzles/"/>
     </javac>
     <jar destfile="${libsempre}/sempre-logicpuzzles.jar" basedir="${classes}/logicpuzzles"/>
-  </target>
-
-  <!-- Compile interactive -->
-  <target name="interactive" depends="init,core">
-    <echo message="Compiling ${ant.project.name}: interactive"/>
-    <mkdir dir="${classes}/interactive"/>
-    <javac srcdir="${src}" destdir="${classes}/interactive" classpathref="lib.path" debug="true" includeantruntime="false" source="${source}" target="${target}">
-      <include name="edu/stanford/nlp/sempre/interactive/"/>
-    </javac>
-    <jar destfile="${libsempre}/sempre-interactive.jar" basedir="${classes}/interactive"/>
   </target>
 
   <!-- Compile geo880 -->

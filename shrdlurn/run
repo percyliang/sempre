@@ -1,6 +1,6 @@
 #!/usr/bin/ruby
 
-# This is the main entry point for running all SEMPRE programs.  See
+# This is the main entry point for running SHRDLURN.  See
 # fig/lib/execrunner.rb for more documentation for how commands are generated.
 # There are a bunch of modes that this script can be invoked with, which
 # loosely correspond to the modules.
@@ -57,21 +57,10 @@ def header(modules='core', codalabDependencies=nil)
   nil)
 end
 
-def rlwrap; system('which rlwrap') ? 'rlwrap' : nil end
-
-def unbalancedTrainDevSplit
-  l(o('Dataset.trainFrac', 0.8), o('Dataset.devFrac', 0.2))
-end
-def balancedTrainDevSplit
-  l(o('Dataset.trainFrac', 0.5), o('Dataset.devFrac', 0.5))
-end
-
 def figOpts; l(selo(:pooldir, 'execDir', 'exec', '_OUTPATH_'), o('overwriteExecDir'), o('addToView', 0)) end
 
 ############################################################
 # Unit tests
-# Community Server
-
 
 addMode('backup', 'small commands like run community server, backup, or simulator', lambda { |e| l(
   lambda { |e| system 'echo "backing up with mv"'},
@@ -99,10 +88,6 @@ nil)})
 
 addMode('community', 'start the community server', lambda { |e| l(
 l('python community-server/server.py -- port 8403'),
-nil)})
-
-addMode('others', 'print out common commands', lambda { |e| l(
-	lambda { |e| system 'echo mv folder folder-`date +%Y-%m-%d.%H:%M:%S`'},
 nil)})
 
 addMode('simulator', 'run the simulator', lambda { |e| l(
@@ -174,6 +159,83 @@ addMode('simulator', 'run the simulator', lambda { |e| l(
 		}),
 nil)})
 
+############################################################
+# {2016-07-02} [Sida Wang]: interactive semantic parsing
+addMode('interactive', 'interactive semantic parsing in a blocksworld', lambda { |e| l(
+  #rlwrap,
+  header('core,interactive'),
+  'edu.stanford.nlp.sempre.Main',
+  #figOpts,
+
+  o('Executor', 'interactive.ActionExecutor'),
+  o('LanguageAnalyzer', 'interactive.ActionLanguageAnalyzer'),
+  o('ActionExecutor.convertNumberValues', true),
+  o('ActionExecutor.printStackTrace', true),
+  o('BlocksWorld.maxBlocks', 3000),
+  selo(0, 'ActionExecutor.FlatWorldType', 'BlocksWorld', 'CalendarWorld'),
+  selo(0, 'Grammar.inPaths', './shrdlurn/blocksworld.grammar', './shrdlurn/calendar.grammar'),
+
+  o('Params.initWeightsRandomly', false),
+  o('Grammar.binarizeRules', false),
+  o('Grammar.useApplyFn', 'interactive.ApplyFn'),
+
+  o('LanguageAnalyzer.lowerCaseTokens', true),
+  o('LanguageAnalyzer.useLemmaTokens', false),
+
+  o('Parser.pruneErrorValues', true),
+  o('Parser', 'BeamFloatingParser'),
+  o('Parser.trackedCats', 'Number', 'Numbers', 'Color',  'Direction', 'Set', 'Sets', 'Action', 'Actions'),
+  o('FloatingParser.defaultIsFloating', true),
+  selo(0, 'BeamFloatingParser.floatStrategy', 'Never', 'NoParse', 'Always'),
+
+	o('ParserState.customExpectedCounts', 'None'),
+	o('Params.l1Reg', 'nonlazy'),
+	o('Params.l1RegCoeff', 0.0001),
+	o('Parser.beamSize', 25),
+	o('Params.initStepSize', 0.1),
+	o('Params.adaptiveStepSize', true),
+	#o('Params.stepSizeReduction', 0.25),
+
+	o('FeatureExtractor.featureComputers', 'interactive.ActionFeatureComputer'),
+	o('FeatureExtractor.featureDomains', ':rule', ':span', ':stats', ':scope', ':social', ':window'),
+	# o('FeatureExtractor.featureDomains', ':rule'),
+
+	o('Master.intOutputPath', './int-output/'),
+	o('ILUtils.citationPath', './int-output/citation/'),
+
+	o('ILUtils.useAligner', true),
+	o('ILUtils.maxSequence', 20),
+
+	o('DefinitionAligner.strategies', 'ExactExclusion'),
+
+	o('Master.onlineLearnExamples', true),
+	o('Master.independentSessions', false),
+
+	o('Master.onlyInteractive', true),
+
+	o('server', true),
+
+	o('JsonServer.numThreads', 16),
+	o('JsonServer.maxCandidates', 50),
+	o('JsonServer.queryLogPath', './int-output/query.log'),
+	o('JsonServer.responseLogPath', './int-output/response.log'),
+	o('JsonServer.port', 8410),
+
+	o('GrammarInducer.useBestPacking', true),
+	o('GrammarInducer.useSimplePacking', true),
+
+	o('Derivation.showTypes', false),
+	o('Derivation.showValues', false),
+	o('Derivation.showRules', false),
+
+	lambda { |e| system 'mkdir -p ./int-output/'; nil},
+	lambda { |e| system 'mkdir -p ./int-output/log/'; nil},
+	lambda { |e| system 'mkdir -p ./int-output/citation/'; nil},
+	lambda { |e| system 'mkdir -p server.exec';
+		l(o('execDir', 'server.exec/'),
+		o('overwriteExecDir'))
+	 },
+nil) })
 ############################################################
 
 if ARGV.size == 0
