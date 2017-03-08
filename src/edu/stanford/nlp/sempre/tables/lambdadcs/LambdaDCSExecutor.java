@@ -205,6 +205,8 @@ class LambdaDCSCoreLogic {
         // Rule out binaries
         if (CanonicalNames.isBinary(value) && LambdaDCSExecutor.opts.executeBinary)
           throw new LambdaDCSException(Type.notUnary, "[Unary] Binary value %s", formula);
+        if (value instanceof NameValue && graph instanceof TableKnowledgeGraph)
+          value = ((TableKnowledgeGraph) graph).getNameValueWithOriginalString((NameValue) value);
         // Other cases
         return typeHint.applyBound(new ExplicitUnaryDenotation(value));
       }

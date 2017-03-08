@@ -4,6 +4,7 @@ import java.util.*;
 
 import fig.basic.*;
 import edu.stanford.nlp.sempre.*;
+import edu.stanford.nlp.sempre.corenlp.CoreNLPAnalyzer;
 import edu.stanford.nlp.sempre.tables.TableKnowledgeGraph;
 
 import org.testng.annotations.Test;
@@ -152,6 +153,8 @@ public class LambdaDCSExecutorTest {
       return TableKnowledgeGraph.fromFilename("tables/toy-examples/random/nikos_machlas.csv");
     } else if ("csv2".equals(name)) {
       return TableKnowledgeGraph.fromFilename("lib/data/tables/csv/204-csv/495.tsv");
+    } else if ("csv3".equals(name)) {
+      return TableKnowledgeGraph.fromFilename("lib/data/tables/csv/203-csv/839.tsv");
     }
     throw new RuntimeException("Unknown graph name: " + name);
   }
@@ -247,14 +250,26 @@ public class LambdaDCSExecutorTest {
   
   @Test(groups = "lambdaCSV2") public void lambdaOnGraphCSV2Test() {
     KnowledgeGraph graph = getKnowledgeGraph("csv2");
-    // fb:cell.away', 'fb:row.row.venue', '!fb:row.row.result',
-    // '!fb:cell.cell.num2', 'avg', 'fb:row.row.index', 'fb:row.row.next', '!fb:row.row.opponent'
-    //runFormula(executor,
-    //    "(!fb:row.row.opponent (fb:row.row.next (fb:row.row.index (avg (!fb:cell.cell.num2 (!fb:row.row.result (fb:row.row.venue fb:cell.away)))))))",
-    //    graph, matches("(name fb:cell.derby_county)"));
     runFormula(executor,
         "(and (!= (and (!= fb:cell.away) fb:cell.home)) ((reverse fb:row.row.opponent) (fb:row.row.index (- (number 1) (number 1)))))",
         graph, matches("(name fb:cell.derby_county)"));
   }
 
+  @Test(groups = "lambdaCSV3") public void lambdaOnGraphCSV3Test() {
+    LanguageAnalyzer.setSingleton(new CoreNLPAnalyzer());
+    KnowledgeGraph graph = getKnowledgeGraph("csv3");
+    runFormula(executor,
+        "(count (fb:type.object.type fb:type.row))",
+        graph, matches("(number 21)"));
+    runFormula(executor,
+        "(count (fb:row.row.opened (fb:cell.cell.date (< (date 1926 -1 -1)))))",
+        graph, matches("(number 6)"));
+    runFormula(executor,
+        "(sum (- (count ((reverse fb:row.row.index) (fb:type.object.type fb:type.row))) " +
+            "((reverse fb:row.row.index) (fb:row.row.latitude ((reverse fb:row.row.longitude) (fb:type.object.type fb:type.row))))))",
+        graph, matches("(number 6)"));
+    runFormula(executor,
+        "(- (number 1926) (argmax (number 1) (number 1) ((reverse fb:cell.cell.number) (or (or (or fb:cell.1920 fb:cell.1925) fb:cell.1926) fb:cell.1946)) (reverse (lambda x (sum ((reverse fb:cell.cell.number) (fb:cell.cell.number (var x))))))))",
+        graph, matches("(number 6)"));
+  }
 }

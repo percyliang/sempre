@@ -5,7 +5,12 @@ import java.util.*;
 
 import edu.stanford.nlp.sempre.*;
 
-public class AnnotatedGenerator {
+/**
+ * Generate a TSV file for the dataset release.
+ * 
+ * @author ppasupat
+ */
+public class TSVGenerator {
   protected PrintWriter out;
 
   protected void dump(String... stuff) {

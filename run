@@ -648,10 +648,11 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
     'dump' => 'edu.stanford.nlp.sempre.tables.serialize.SerializedDumper',
     'load' => l('edu.stanford.nlp.sempre.tables.serialize.SerializedLoader', let(:parser, 'serialized')),
     'stats' => 'edu.stanford.nlp.sempre.tables.test.TableStatsComputer',
-    'ann-data' => 'edu.stanford.nlp.sempre.tables.serialize.AnnotatedDatasetGenerator',
-    'ann-table' => 'edu.stanford.nlp.sempre.tables.serialize.AnnotatedTableGenerator',
+    'tag-data' => 'edu.stanford.nlp.sempre.tables.serialize.TaggedDatasetGenerator',
+    'tag-table' => 'edu.stanford.nlp.sempre.tables.serialize.TaggedTableGenerator',
     'alter' => l('edu.stanford.nlp.sempre.tables.alter.BatchTableAlterer', let(:parser, 'serialized')),
     'alter-ex' => l('edu.stanford.nlp.sempre.tables.alter.AlteredTablesExecutor', let(:parser, 'serialized')),
+    'filter' => 'edu.stanford.nlp.sempre.tables.serialize.DumpFilterer',
   }),
   # Fig parameters
   selo(:cldir, 'execDir', '_OUTPATH_', 'output'),
@@ -674,7 +675,7 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
     nil),
   }),
   # Parser
-  letDefault(:parser, 'floatsize'),
+  letDefault(:parser, 'old-floatsize'),
   sel(:parser, {
     'old-floatsize' => l(
       o('Builder.parser', 'FloatingParser'),
@@ -885,13 +886,11 @@ def tablesDataPaths
     csvDir = ['lib/data/tables/', 'WikiTableQuestions/'][e[:cldir]]
     datasets = {
       'none' => l(),
+      'train' => o('Dataset.inPaths', "train,#{baseDir}training.examples"),
       # Pristine test test
-      'test' => l(
-        o('Dataset.inPaths',
-          "train,#{baseDir}training.examples",
-          "test,#{baseDir}pristine-unseen-tables.examples"),
-        o('Dataset.trainFrac', 1), o('Dataset.devFrac', 0),
-      nil),
+      'test' => o('Dataset.inPaths',
+        "train,#{baseDir}training.examples",
+        "test,#{baseDir}pristine-unseen-tables.examples"),
       # @data=annotated can be used with @class=check only
       'annotated' => o('Dataset.inPaths', "train,#{baseDir}annotated-all.examples"),
       'before300' => o('Dataset.inPaths', "train,#{baseDir}training-before300.examples"),

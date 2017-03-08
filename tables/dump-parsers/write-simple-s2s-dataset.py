@@ -18,7 +18,7 @@ def get_formula(fpost):
         formula, size = line[:-1].split('\t')
         formulas.append([formula, int(size)])
     if not formulas:
-        return None
+        return ''
     # Choose a formula
     best_size = min(x[1] for x in formulas)
     best_formulas = [x[0] for x in formulas if x[1] == best_size]
@@ -34,6 +34,8 @@ def main():
             help='path to postfix directory')
     parser.add_argument('-e', '--ex-id', action='store_true',
             help='add example ID as the first column')
+    parser.add_argument('-n', '--no-skip', action='store_true',
+            help='do not skip examples without formula')
     args = parser.parse_args()
 
     # Read annotated data
@@ -48,7 +50,9 @@ def main():
     count = 0
     with open(args.dataset_path, 'r', 'utf8') as fin:
         header = fin.readline()[:-1].split('\t')
-        for line in fin:
+        for i, line in enumerate(fin):
+            if i % 500 == 0:
+                print >> sys.stderr, 'Processing Line', i, '...'
             record = dict(zip(header, line[:-1].split('\t')))
             record = annotated[record['id']]
             ex_id = record['id']
@@ -56,7 +60,7 @@ def main():
             with gzip.open(os.path.join(args.postfix_dir, ex_id + '.gz')) as fpost:
                 random.seed(ex_id)
                 formula = get_formula(fpost)
-            if formula:
+            if formula or args.no_skip:
                 fields = [' '.join(question), formula]
                 if args.ex_id:
                     fields.insert(0, ex_id)
