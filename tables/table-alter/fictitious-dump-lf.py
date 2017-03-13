@@ -56,7 +56,7 @@ SCHEMES = {
     'e': lambda vector: all(x != 'Ax' and x != 'Bx' for x in vector),
     # [A] When the Turkers agree on an answer, LF must agree with that
     #     Also the Turkers must agree on the original table
-    'A': lambda vector: vector[0][0] == 'A' and all(x != 'Ax' for x in vector),
+    'A': lambda vector: vector and vector[0][0] == 'A' and all(x != 'Ax' for x in vector),
     # [a] When the Turkers agree on an answer, LF must agree with that
     'a': lambda vector: all(x != 'Ax' for x in vector),
     # [l] Allow LF to disagree with Turkers at most once
