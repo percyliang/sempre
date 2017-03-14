@@ -646,6 +646,7 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
     'stats' => 'edu.stanford.nlp.sempre.tables.test.TableStatsComputer',
     'tag-data' => 'edu.stanford.nlp.sempre.tables.serialize.TaggedDatasetGenerator',
     'tag-table' => 'edu.stanford.nlp.sempre.tables.serialize.TaggedTableGenerator',
+    'tag-fuzzy' => 'edu.stanford.nlp.sempre.tables.serialize.TaggedFuzzyGenerator',
     'alter' => l('edu.stanford.nlp.sempre.tables.alter.BatchTableAlterer', let(:parser, 'serialized')),
     'alter-ex' => l('edu.stanford.nlp.sempre.tables.alter.AlteredTablesExecutor', let(:parser, 'serialized')),
     'filter' => 'edu.stanford.nlp.sempre.tables.serialize.DumpFilterer',
