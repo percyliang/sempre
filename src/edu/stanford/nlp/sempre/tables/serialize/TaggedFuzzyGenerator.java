@@ -4,6 +4,7 @@ import java.util.*;
 
 import edu.stanford.nlp.sempre.*;
 import edu.stanford.nlp.sempre.FuzzyMatchFn.FuzzyMatchFnMode;
+import edu.stanford.nlp.sempre.SemanticFn.CallInfo;
 import edu.stanford.nlp.sempre.tables.TableKnowledgeGraph;
 import fig.basic.*;
 import fig.exec.Execution;
@@ -20,8 +21,12 @@ public class TaggedFuzzyGenerator extends TSVGenerator implements Runnable {
         Master.getOptionsParser());
   }
 
+  private Grammar grammar = new Grammar();
+  
   @Override
   public void run() {
+    // Read grammar
+    grammar.read(Grammar.opts.inPaths);
     // Read dataset
     LogInfo.begin_track("Dataset.read");
     for (Pair<String, String> pathPair : Dataset.opts.inPaths) {
@@ -47,9 +52,10 @@ public class TaggedFuzzyGenerator extends TSVGenerator implements Runnable {
         }
         Example ex = Example.fromLispTree(tree, path + ":" + n);
         ex.preprocess();
-        LogInfo.logs("Example %s (%d): %s => %s", ex.id, n, ex.getTokens(), ex.targetValue);
+        LogInfo.begin_track("Example %s (%d): %s => %s", ex.id, n, ex.getTokens(), ex.targetValue);
         n++;
         dumpExample(ex, tree);
+        LogInfo.end_track();
       }
       out.close();
       LogInfo.logs("Finished dumping to %s", filename);
@@ -67,22 +73,32 @@ public class TaggedFuzzyGenerator extends TSVGenerator implements Runnable {
     assert stuff.length == FIELDS.length;
     super.dump(stuff);
   }
-
+  
   private void dumpExample(Example ex, LispTree tree) {
-    TableKnowledgeGraph graph = (TableKnowledgeGraph) (ex.context.graph);
     int n = ex.numTokens();
-    List<String> tokens = ex.getTokens();
     for (int i = 0; i < n; i++) {
       StringBuilder sb = new StringBuilder(ex.token(i));
       for (int j = i; j < n; j++) {
         String term = sb.toString();
-        for (Formula formula : graph.getFuzzyMatchedFormulas(tokens, i, j + 1, FuzzyMatchFnMode.ENTITY)) {
-          LogInfo.logs("Found ENT %s -> %s", term, formula);
-          dump(ex.id, "ENT", "" + i, "" + (j + 1), term, formula.toString());
-        }
-        for (Formula formula : graph.getFuzzyMatchedFormulas(tokens, i, j + 1, FuzzyMatchFnMode.BINARY)) {
-          LogInfo.logs("Found REL %s -> %s", term, formula);
-          dump(ex.id, "REL", "" + i, "" + (j + 1), term, formula.toString());
+        Derivation deriv = 
+            new Derivation.Builder()
+                    .cat(Rule.phraseCat).start(i).end(j)
+                    .rule(Rule.nullRule)
+                    .children(Derivation.emptyList)
+                    .withStringFormulaFrom(term)
+                    .canonicalUtterance(term)
+                    .createDerivation();
+        List<Derivation> children = new ArrayList<>();
+        children.add(deriv);
+        // Get the derived derivations
+        for (Rule rule : grammar.getRules()) {
+          CallInfo c = new CallInfo(rule.lhs, i, j + 1, rule, children);
+          Iterator<Derivation> itr = rule.sem.call(ex, c);
+          while (itr.hasNext()) {
+            deriv = itr.next();
+            LogInfo.logs("Found %s %s -> %s", rule.lhs, term, deriv.formula);
+            dump(ex.id, rule.lhs.substring(1), "" + i, "" + (j + 1), term, deriv.formula.toString());
+          }
         }
         if (j + 1 < n)
           sb.append(" ").append(ex.token(j + 1));
