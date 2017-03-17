@@ -288,7 +288,13 @@ def get_score(data):
 
 @socketio.on('delete_struct')
 def delete_struct(data):
-    uid = data['uid']
+    user = current_user(data['token'])
+
+    if not user:
+        return
+
+    uid = user['id']
+
     struct_id = data["id"]
     struct_path = struct_id + ".json"
     subdir = os.path.join(STRUCTS_FOLDER, uid)
@@ -507,9 +513,8 @@ def current_user(token):
     except:
         return False
 
+
 # http://stackoverflow.com/questions/2301789/read-a-file-in-reverse-order-using-python
-
-
 def reverse_readline(filename, buf_size=8192):
     """a generator that returns the lines of a file in reverse order"""
     with open(filename) as fh:
