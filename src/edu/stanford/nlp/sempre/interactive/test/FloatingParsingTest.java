@@ -1,4 +1,4 @@
-package edu.stanford.nlp.sempre.interactive;
+package edu.stanford.nlp.sempre.interactive.test;
 
 import static org.testng.AssertJUnit.assertEquals;
 
@@ -8,6 +8,7 @@ import java.util.function.Predicate;
 import fig.basic.*;
 import edu.stanford.nlp.sempre.*;
 import edu.stanford.nlp.sempre.Parser.Spec;
+import edu.stanford.nlp.sempre.interactive.ActionExecutor;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -17,7 +18,7 @@ import org.testng.collections.Lists;
  * Test the parser, and some floating examples
  * @author Sida Wang
  */
-public class BlocksParsingTest {
+public class FloatingParsingTest {
   Predicate<Example> contains(String formula) {
     Formula answer = Formulas.fromLispTree(LispTree.proto.parseFromString(formula));
     return e -> e.predDerivations.stream().anyMatch(d -> d.formula.equals(answer));
@@ -100,7 +101,7 @@ public class BlocksParsingTest {
     ContextValue context = getContext(defaultBlocks);
     LogInfo.begin_track("testJoin");
 
-    parse("select all", "select all", context, contains("(:foreach * (: select))"));
+    parse("select all", "select all", context, contains("(: select *)"));
     // parse("select has color red", "red blocks", context, contains("(:for (color red) (: select))"));
     parse("select has color red", "red blocks", context, hasAll("(color red)", "(: select)", ":foreach"));
     parse("add red top", "add some to top of red blocks", context, contains("(: add red top)"));

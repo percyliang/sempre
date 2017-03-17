@@ -13,9 +13,9 @@ import java.util.List;
  * Formula represents actions and their combinations. : is used as a prefix to denote an ActionFormula
  * primitive (: actioname args)
  * sequential (:s ActionFormula ActionFormula ...)
- * repeat (:rep Number ActionFormula)
+ * repeat (:loop Number ActionFormula)
  * conditional (:if Set ActionFormula)
- * scope (:scope Set ActionFormula)
+ * block scoping (:blk ActionFormula)
  * @author Sida Wang
  */
 public class ActionFormula extends Formula {

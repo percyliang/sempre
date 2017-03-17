@@ -1,4 +1,4 @@
-package edu.stanford.nlp.sempre.interactive;
+package edu.stanford.nlp.sempre.interactive.test;
 
 import static org.testng.AssertJUnit.assertEquals;
 
@@ -8,6 +8,11 @@ import java.util.stream.Collectors;
 
 import fig.basic.*;
 import edu.stanford.nlp.sempre.*;
+import edu.stanford.nlp.sempre.interactive.ActionExecutor;
+import edu.stanford.nlp.sempre.interactive.World;
+import edu.stanford.nlp.sempre.interactive.Item;
+import edu.stanford.nlp.sempre.interactive.voxelurn.Color;
+import edu.stanford.nlp.sempre.interactive.voxelurn.Voxel;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -19,7 +24,7 @@ import org.testng.annotations.Test;
 public class ActionExecutorTest {
   ActionExecutor executor = new ActionExecutor();
 
-  protected static void runFormula(ActionExecutor executor, String formula, ContextValue context, Predicate<FlatWorld> checker) {
+  protected static void runFormula(ActionExecutor executor, String formula, ContextValue context, Predicate<World> checker) {
     LogInfo.begin_track("formula: %s", formula);
     executor.opts.FlatWorldType = "BlocksWorld";
     Executor.Response response = executor.execute(Formulas.fromLispTree(LispTree.proto.parseFromString(formula)), context);
@@ -32,7 +37,7 @@ public class ActionExecutorTest {
     LogInfo.end_track();
 
     if (checker != null) {
-      if (!checker.test(FlatWorld.fromContext("BlocksWorld", getContext(jsonStr)))) {
+      if (!checker.test(World.fromContext("BlocksWorld", getContext(jsonStr)))) {
         LogInfo.end_track();
         Assert.fail(jsonStr);
       }
@@ -45,7 +50,7 @@ public class ActionExecutorTest {
     return ContextValue.fromString(String.format("(context (graph NaiveKnowledgeGraph ((string \"%s\") (name b) (name c))))", strigify2));
   }
 
-  public Predicate<FlatWorld> selectedSize(int n) {
+  public Predicate<World> selectedSize(int n) {
     return x -> {LogInfo.logs("Got %d, expected %d", x.selected().size(), n); return x.selected().size()==n;};
   }
 
@@ -95,13 +100,13 @@ public class ActionExecutorTest {
     String defaultBlocks = "[[1,1,1,\"Green\",[]],[1,2,1,\"Blue\",[]],[2,2,1,\"Red\",[]],[2,2,3,\"Yellow\",[]]]";
     ContextValue context = getContext(defaultBlocks);
     LogInfo.begin_track("testBasicActions");
-    runFormula(executor, "(:s (: select *) (: remove))", context, x -> real(x.allitems).size() == 0);
-    runFormula(executor, "(:s (: select (row (number 1))) (: add red top) (: add red top))", context, x -> real(x.allitems).size() == 8);
-    runFormula(executor, "(:for * (: remove))", context, x -> real(x.allitems).size() == 0 );
-    runFormula(executor, "(:foreach * (: remove))", context, x -> real(x.allitems).size() == 0);
-    runFormula(executor, "(:s (: select (or (color red) (color orange))) (: remove))", context,  x -> real(x.allitems).size() == 3);
+    runFormula(executor, "(:s (: select *) (: remove))", context, x -> real(x.allItems).size() == 0);
+    runFormula(executor, "(:s (: select (row (number 1))) (: add red top) (: add red top))", context, x -> real(x.allItems).size() == 8);
+    runFormula(executor, "(:for * (: remove))", context, x -> real(x.allItems).size() == 0 );
+    runFormula(executor, "(:foreach * (: remove))", context, x -> real(x.allItems).size() == 0);
+    runFormula(executor, "(:s (: select (or (color red) (color orange))) (: remove))", context,  x -> real(x.allItems).size() == 3);
     runFormula(executor, "(:foreach (or (color red) (color orange)) (:loop (number 5) (: add red top)))",
-        context, x -> x.allitems.size() == 9);
+        context, x -> x.allItems.size() == 9);
     runFormula(executor, "(:for (or (color red) (color blue)) (:loop (number 5) (:s (: move left) (: move right) (: move left))))",
         context, null);
 
@@ -109,7 +114,7 @@ public class ActionExecutorTest {
   }
 
   private Set<Item> real(Set<Item> all) {
-    return all.stream().filter(c -> ((Block)c).color != CubeColor.Fake).collect(Collectors.toSet());
+    return all.stream().filter(c -> ((Voxel)c).color != Color.Fake).collect(Collectors.toSet());
   }
   @Test public void testRemove() {
     // this is a green stick
@@ -117,11 +122,11 @@ public class ActionExecutorTest {
     ContextValue context = getContext(defaultBlocks);
     LogInfo.begin_track("testMoreActions");
     runFormula(executor, "(: remove)", context,
-        x -> real(x.allitems).size() == 2 && x.selected.size() == 2 );
+        x -> real(x.allItems).size() == 2 && x.selected.size() == 2 );
     runFormula(executor, "(:for * (: remove))", context,
-        x -> x.selected.size() == 2 && real(x.allitems).size() == 0);
+        x -> x.selected.size() == 2 && real(x.allItems).size() == 0);
     runFormula(executor, "(:for (color green) (: remove))", context, 
-        x -> x.selected.size() == 2 && real(x.allitems).size() == 1);
+        x -> x.selected.size() == 2 && real(x.allItems).size() == 1);
 
     LogInfo.end_track();
   }
@@ -132,12 +137,12 @@ public class ActionExecutorTest {
     ContextValue context = getContext(defaultBlocks);
     LogInfo.begin_track("testMoreActions");
     runFormula(executor, "(:s (: select *) (:for (call veryx left this) (: remove)))", context,
-        x -> x.allitems.stream().allMatch(c -> ((Block)c).color == CubeColor.Fake) );
+        x -> x.allItems.stream().allMatch(c -> ((Voxel)c).color == Color.Fake) );
     runFormula(executor, "(:for * (:for (call veryx bot) (:loop (number 2) (:s (: add red left) (: select (call adj top))))))", context, 
-        x -> x.allitems.size() == 6);
-    runFormula(executor, "(:s (: select *) (: select (call veryx bot selected)) (: remove selected) )", context, x -> real(x.allitems).size() == 3);
+        x -> x.allItems.size() == 6);
+    runFormula(executor, "(:s (: select *) (: select (call veryx bot selected)) (: remove selected) )", context, x -> real(x.allItems).size() == 3);
     // x -> x.selected().iterator().next().get("height") == new Integer(3)
-    runFormula(executor, "(:loop (count (color green)) (: add red left *))", context, x -> x.allitems.size() == 20);
+    runFormula(executor, "(:loop (count (color green)) (: add red left *))", context, x -> x.allItems.size() == 20);
 
     LogInfo.end_track();
   }
@@ -163,8 +168,8 @@ public class ActionExecutorTest {
     runFormula(executor, "(: add red left)", context, selectedSize(1));
     runFormula(executor, "(: add red here)", context, selectedSize(1));
     runFormula(executor, "(:loop (number 3) (: add red left))", context, selectedSize(1));
-    runFormula(executor, "(:loop (number 3) (: add red top))", context, x -> x.allitems.size() == 4);
-    runFormula(executor, "(:loop (number 3) (: add red left))", context, x -> x.allitems.size() == 4);
+    runFormula(executor, "(:loop (number 3) (: add red top))", context, x -> x.allItems.size() == 4);
+    runFormula(executor, "(:loop (number 3) (: add red left))", context, x -> x.allItems.size() == 4);
     runFormula(executor, "(:loop (number 3) (: select (or this (call adj top this))))", context, selectedSize(4));
     LogInfo.end_track();
   }
@@ -174,9 +179,9 @@ public class ActionExecutorTest {
     String defaultBlocks = "[[1,1,1,\"Green\",[\"S\"]],[1,1,2,\"Green\",[]],[1,1,3,\"Green\",[]],[1,1,4,\"Green\",[]]]";
     ContextValue context = getContext(defaultBlocks);
     LogInfo.begin_track("testIsolation");
-    runFormula(executor, "(:isolate (:loop (number 4) (: add red top)))", context, x -> x.allitems.size() == 5);
-    runFormula(executor, "(:isolate (:loop (number 2) (: add red top)))", context, x -> x.allitems.size() == 4);
-    runFormula(executor, "(:isolate (:loop (number 5) (: add red top)))", context, x -> x.allitems.size() == 6);
+    runFormula(executor, "(:isolate (:loop (number 4) (: add red top)))", context, x -> x.allItems.size() == 5);
+    runFormula(executor, "(:isolate (:loop (number 2) (: add red top)))", context, x -> x.allItems.size() == 4);
+    runFormula(executor, "(:isolate (:loop (number 5) (: add red top)))", context, x -> x.allItems.size() == 6);
     runFormula(executor, "(:s (:isolate (:loop (number 5) (: add red top))) (: select (color red)))", context, selectedSize(5));
     LogInfo.end_track();
   }

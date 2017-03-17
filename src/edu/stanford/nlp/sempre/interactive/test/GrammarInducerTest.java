@@ -1,4 +1,4 @@
-package edu.stanford.nlp.sempre.interactive;
+package edu.stanford.nlp.sempre.interactive.test;
 
 import static org.testng.AssertJUnit.assertEquals;
 
@@ -10,6 +10,11 @@ import java.util.function.Predicate;
 import fig.basic.*;
 import edu.stanford.nlp.sempre.*;
 import edu.stanford.nlp.sempre.Parser.Spec;
+import edu.stanford.nlp.sempre.interactive.ActionExecutor;
+import edu.stanford.nlp.sempre.interactive.ActionFormula;
+import edu.stanford.nlp.sempre.interactive.DefinitionAligner;
+import edu.stanford.nlp.sempre.interactive.GrammarInducer;
+import edu.stanford.nlp.sempre.interactive.ActionFormula.Mode;
 import edu.stanford.nlp.sempre.interactive.DefinitionAligner.Strategies;
 
 import org.testng.Assert;

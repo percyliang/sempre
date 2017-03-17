@@ -5,18 +5,19 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import edu.stanford.nlp.sempre.ContextValue;
+import edu.stanford.nlp.sempre.interactive.voxelurn.VoxelWorld;
 
 // flat world is just a list of allitems where actions can be performed on them
 
-public abstract class FlatWorld {
+public abstract class World {
   // supports variables, and perhaps scoping
-  public Set<Item> allitems;
+  public Set<Item> allItems;
   public Set<Item> selected;
   public Set<Item> previous;
   
-  public static FlatWorld fromContext(String worldname, ContextValue context) {
+  public static World fromContext(String worldname, ContextValue context) {
     if (worldname.equals("BlocksWorld"))
-      return BlocksWorld.fromContext(context);
+      return VoxelWorld.fromContext(context);
     throw new RuntimeException("World does not exist: " + worldname);
   }
   
@@ -29,15 +30,15 @@ public abstract class FlatWorld {
   public abstract void merge();
   // public abstract void select(Set<Item> set);
   
-  public FlatWorld() {
-    this.allitems = new HashSet<>();
+  public World() {
+    this.allItems = new HashSet<>();
     this.selected = new HashSet<>();
     this.previous = new HashSet<>();
   }
   // general actions, flatness means these actions can be performed on allitems
   public void remove(Set<Item> selected) {
-    allitems = new HashSet<>(allitems);
-    allitems.removeAll(selected);
+    allItems = new HashSet<>(allItems);
+    allItems.removeAll(selected);
     // this.selected.removeAll(selected);
   }
   // it is bad to ever mutate select, which will break scoping
@@ -53,7 +54,7 @@ public abstract class FlatWorld {
     return this.previous;
   }
   public Set<Item> all() {
-    return allitems;
+    return allItems;
   }
   public Set<Item> empty() {
     return new HashSet<>();

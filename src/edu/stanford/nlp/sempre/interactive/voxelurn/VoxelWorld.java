@@ -1,4 +1,4 @@
-package edu.stanford.nlp.sempre.interactive;
+package edu.stanford.nlp.sempre.interactive.voxelurn;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,45 +15,12 @@ import edu.stanford.nlp.sempre.ContextValue;
 import edu.stanford.nlp.sempre.Json;
 import edu.stanford.nlp.sempre.NaiveKnowledgeGraph;
 import edu.stanford.nlp.sempre.StringValue;
+import edu.stanford.nlp.sempre.interactive.World;
+import edu.stanford.nlp.sempre.interactive.Item;
 import fig.basic.Option;
 
-enum CubeColor {
-  Red(0), Orange(1), Yellow (2), Green(3), Blue(4), White(6), Black(7),
-  Pink(8), Brown(9), Gray(10), Fake(11), None(-5);
-  private final int value;
-  private static final int MAXCOLOR = 7;
-  CubeColor(int value) { this.value = value; }
-  public int toInt() { return this.value; }
-  public boolean Compare(int i){return value == i;}
-
-  public static CubeColor fromString(String color) {
-    for(CubeColor c : CubeColor.values())
-      if (c.name().equalsIgnoreCase(color)) return c;
-    return CubeColor.None;
-  }
-}
-enum Direction {
-  Top, Bot, Left, Right, Front, Back, None;
-  public static Direction fromString(String dir) {
-    dir = dir.toLowerCase();
-    if (dir.equals("up") || dir.equals("top"))
-      return Direction.Top;
-    if (dir.equals("down") || dir.equals("bot"))
-      return Direction.Bot;
-    if (dir.equals("left"))
-      return Direction.Left;
-    if (dir.equals("right"))
-      return Direction.Right;
-    if (dir.equals("front"))
-      return Direction.Front;
-    if (dir.equals("back"))
-      return Direction.Back;
-    return Direction.None;
-  }
-}
-
 // the world of stacks
-public class BlocksWorld extends FlatWorld {
+public class VoxelWorld extends World {
   public static class Options {
     @Option(gloss = "maximum number of cubes to convert")
     public int maxBlocks = 1024^2;
@@ -62,7 +29,7 @@ public class BlocksWorld extends FlatWorld {
   
   public final static String SELECT = "S";
 
-  public static BlocksWorld fromContext(ContextValue context) {
+  public static VoxelWorld fromContext(ContextValue context) {
     if (context == null || context.graph == null) {
       return fromJSON("[[3,3,1,\"Gray\",[\"S\"]],[4,4,1,\"Blue\",[]]]");
     }
@@ -72,28 +39,28 @@ public class BlocksWorld extends FlatWorld {
   }
 
   public void base(int x, int y) {
-    Block basecube = new Block(x, y, 0, CubeColor.Fake.toString());
-    this.allitems = new HashSet<>(this.allitems);
+    Voxel basecube = new Voxel(x, y, 0, Color.Fake.toString());
+    this.allItems = new HashSet<>(this.allItems);
     this.selected = new HashSet<>(this.selected);
-    allitems.add(basecube);
+    allItems.add(basecube);
     selected.add(basecube);
   }
   
   public Set<Item> origin() {
-    for (Item i : allitems) {
-      Block b = (Block)i;
+    for (Item i : allItems) {
+      Voxel b = (Voxel)i;
       if (b.col==0 && b.row==0 & b.height==0)
         return Sets.newHashSet(b);
     }
-    Block basecube = new Block(0, 0, 0, CubeColor.Fake.toString());
+    Voxel basecube = new Voxel(0, 0, 0, Color.Fake.toString());
     return Sets.newHashSet(basecube);
   }
  
   @SuppressWarnings("unchecked")
-  public BlocksWorld(Set<Item> blockset) {
+  public VoxelWorld(Set<Item> blockset) {
     super();
-    this.allitems = blockset;
-    this.selected = blockset.stream().filter(b -> ((Block)b).names.contains(SELECT)).collect(Collectors.toSet());
+    this.allItems = blockset;
+    this.selected = blockset.stream().filter(b -> ((Voxel)b).names.contains(SELECT)).collect(Collectors.toSet());
     this.selected.forEach(i -> i.names.remove(SELECT));
   }
 
@@ -101,17 +68,15 @@ public class BlocksWorld extends FlatWorld {
   public String toJSON() {
     // selected thats no longer in the world gets nothing
     
-    
-    if (allitems.size() > opts.maxBlocks)
+    if (allItems.size() > opts.maxBlocks)
       throw new RuntimeException("Number of blocks exceeds the upperlimit: " + opts.maxBlocks);
-    
     //allitems.removeIf(c -> ((Block)c).color == CubeColor.Fake && !this.selected.contains(c));
     //allitems.stream().filter(c -> selected.contains(c)).forEach(i -> i.names.add(SELECT));
     
     
-    return Json.writeValueAsStringHard(allitems.stream()
+    return Json.writeValueAsStringHard(allItems.stream()
         .map(c -> {
-          Block b = ((Block)c).clone();
+          Voxel b = ((Voxel)c).clone();
           if (selected.contains(b))
             b.names.add("S");
           return b.toJSON();
@@ -119,13 +84,13 @@ public class BlocksWorld extends FlatWorld {
     // return this.worldlist.stream().map(c -> c.toJSON()).reduce("", (o, n) -> o+","+n);
   }
 
-  private static BlocksWorld fromJSON(String wallString) {
+  private static VoxelWorld fromJSON(String wallString) {
     @SuppressWarnings("unchecked")
     List<List<Object>> cubestr = Json.readValueHard(wallString, List.class);
-    Set<Item> cubes = cubestr.stream().map(c -> {return Block.fromJSONObject(c);})
+    Set<Item> cubes = cubestr.stream().map(c -> {return Voxel.fromJSONObject(c);})
         .collect(Collectors.toSet());
     // throw new RuntimeException(a.toString()+a.get(1).toString());
-    BlocksWorld world = new BlocksWorld(cubes);
+    VoxelWorld world = new VoxelWorld(cubes);
     // world.previous.addAll(world.selected);
     // we can only use previous within a block;
     return world;
@@ -134,7 +99,7 @@ public class BlocksWorld extends FlatWorld {
   @Override
   public Set<Item> has(String rel, Set<Object> values) {
     // LogInfo.log(values);
-    return this.allitems.stream().filter(i -> values.contains(i.get(rel)))
+    return this.allItems.stream().filter(i -> values.contains(i.get(rel)))
         .collect(Collectors.toSet());
   }
 
@@ -154,31 +119,31 @@ public class BlocksWorld extends FlatWorld {
   // likewise, if some fake colored block is no longer selected, remove it
   @Override
   public void merge() {
-    Sets.difference(selected, allitems).forEach(i -> ((Block)i).color = CubeColor.Fake);
-    allitems.removeIf(c -> ((Block)c).color == CubeColor.Fake && !this.selected.contains(c));
-    allitems.addAll(selected);
+    Sets.difference(selected, allItems).forEach(i -> ((Voxel)i).color = Color.Fake);
+    allItems.removeIf(c -> ((Voxel)c).color == Color.Fake && !this.selected.contains(c));
+    allItems.addAll(selected);
     // keyConsistency();
   }
 
   // block world specific actions, overriding move
   public void move(String dir, Set<Item> selected) {
     // allitems.removeAll(selected);
-    selected.forEach(b -> ((Block)b).move(Direction.fromString(dir)));
+    selected.forEach(b -> ((Voxel)b).move(Direction.fromString(dir)));
     keyConsistency();
     // allitems.addAll(selected); // this is not overriding
   }
   
   public void add(String colorstr, String dirstr, Set<Item> selected) {
     Direction dir = Direction.fromString(dirstr);
-    CubeColor color = CubeColor.fromString(colorstr);
+    Color color = Color.fromString(colorstr);
     
     if (dir == Direction.None) { // add here
-      selected.forEach(b -> ((Block)b).color = color);
+      selected.forEach(b -> ((Voxel)b).color = color);
     } else {
       Set<Item> extremeCubes = extremeCubes(dir, selected);
-      this.allitems.addAll(extremeCubes.stream().map(
+      this.allItems.addAll(extremeCubes.stream().map(
           c -> {
-            Block d = ((Block)c).copy(dir);
+            Voxel d = ((Voxel)c).copy(dir);
             d.color = color;
             return d;}
           )
@@ -204,25 +169,25 @@ public class BlocksWorld extends FlatWorld {
   public Set<Item> adj(String dirstr, Set<Item> selected) {
     Direction dir = Direction.fromString(dirstr);
     Set<Item> selectors = selected.stream()
-        .map(c -> {Block b= ((Block)c).copy(dir); b.color = CubeColor.Fake; return b;})
+        .map(c -> {Voxel b= ((Voxel)c).copy(dir); b.color = Color.Fake; return b;})
         .collect(Collectors.toSet());
 
-    this.allitems.addAll(selectors);
+    this.allItems.addAll(selectors);
     
-    Set<Item> actual = allitems.stream().filter(c -> selectors.contains(c))
+    Set<Item> actual = allItems.stream().filter(c -> selectors.contains(c))
         .collect(Collectors.toSet());
     
     return actual;
   }
 
-  public static Set<Item> argmax(Function<Block, Integer> f, Set<Item> items) {
+  public static Set<Item> argmax(Function<Voxel, Integer> f, Set<Item> items) {
     int maxvalue = Integer.MIN_VALUE;
     for (Item i : items) {
-      int cvalue = f.apply((Block)i);
+      int cvalue = f.apply((Voxel)i);
       if (cvalue > maxvalue) maxvalue = cvalue;
     }
     final int maxValue = maxvalue;
-    return items.stream().filter(c -> f.apply((Block)c) >= maxValue).collect(Collectors.toSet());
+    return items.stream().filter(c -> f.apply((Voxel)c) >= maxValue).collect(Collectors.toSet());
   }
   
   @Override
@@ -232,9 +197,9 @@ public class BlocksWorld extends FlatWorld {
   
   // get cubes at the outer locations
   private Set<Item> extremeCubes(Direction dir, Set<Item> selected) {
-    Set<Item> realCubes = realBlocks(allitems);
+    Set<Item> realCubes = realBlocks(allItems);
     return selected.stream().map(c -> {
-      Block d = (Block)c;
+      Voxel d = (Voxel)c;
       while(realCubes.contains(d.copy(dir)))
         d = d.copy(dir);
       return d;
@@ -249,13 +214,13 @@ public class BlocksWorld extends FlatWorld {
   }
   
   private synchronized void keyConsistency() {
-    refreshSet(allitems);
+    refreshSet(allItems);
     refreshSet(selected);
     refreshSet(previous);
   }
   
   private Set<Item> realBlocks(Set<Item> all) {
-    return all.stream().filter(b-> ((Block)b).color != CubeColor.Fake)
+    return all.stream().filter(b-> ((Voxel)b).color != Color.Fake)
         .collect(Collectors.toSet());
   }
 }

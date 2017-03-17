@@ -85,6 +85,20 @@ addMode('trash', 'put int-output into trash with time stamp', lambda { |e| l(
   lambda { |e| system 'mkdir -p ./int-output'},
 nil)})
 
+addMode('test', 'Run unit tests for interactive stuff', lambda { |e|
+  l(
+    'java', '-ea', '-Xmx12g', '-cp', 'libsempre/*:lib/*',
+    letDefault(:debug, 0), sel(:debug, l(), l('-Xdebug', '-Xrunjdwp:server=y,transport=dt_socket,suspend=y,address=8898')),
+    'org.testng.TestNG',
+    lambda { |e|
+      if e[:class]
+        l('-testclass', 'edu.stanford.nlp.sempre.interactive.test.' + e[:class])
+      else
+        'shrdlurn/testng.xml'
+      end
+    },
+  nil)
+})
 
 addMode('community', 'start the community server', lambda { |e| l(
 l('python community-server/server.py -- port 8403'),

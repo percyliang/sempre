@@ -11,7 +11,6 @@ import edu.stanford.nlp.sempre.LanguageInfo;
  * @author sidaw
  */
 public class ActionLanguageAnalyzer extends LanguageAnalyzer {
-  
   // Stanford tokenizer doesn't break hyphens.
   // Replace hypens with spaces for utterances like
   // "Spanish-speaking countries" but not for "2012-03-28".
@@ -104,7 +103,6 @@ public class ActionLanguageAnalyzer extends LanguageAnalyzer {
           languageInfo.nerTags.add("UNK");
           continue;
         }
-
 
         try {
           Double.parseDouble(token);

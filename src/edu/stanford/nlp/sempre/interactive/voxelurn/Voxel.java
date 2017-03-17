@@ -1,4 +1,4 @@
-package edu.stanford.nlp.sempre.interactive;
+package edu.stanford.nlp.sempre.interactive.voxelurn;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -6,30 +6,31 @@ import java.util.stream.Collectors;
 
 import org.testng.collections.Lists;
 import edu.stanford.nlp.sempre.Json;
+import edu.stanford.nlp.sempre.interactive.Item;
 
 //individual stacks
-public class Block extends Item {
-  public CubeColor color;
+public class Voxel extends Item {
+  public Color color;
   int row, col, height;
   int age;
 
-  public Block(int row, int col, int height, String color) {
+  public Voxel(int row, int col, int height, String color) {
     this(row, col, height);
-    this.color = CubeColor.fromString(color);
+    this.color = Color.fromString(color);
   }
-  public Block() {
-    this.row = Integer.MAX_VALUE; this.col = Integer.MAX_VALUE; this.height = Integer.MAX_VALUE;
-    this.color = CubeColor.fromString("None");
+  public Voxel() {
+    this.row = -1; this.col = 0; this.height = 0;
+    this.color = Color.fromString("None");
     this.names = new HashSet<>();
     this.age = 0;
   }
   // used as a key
-  public Block(int row, int col, int height) {
+  public Voxel(int row, int col, int height) {
     this();
     this.row = row; this.col = col; this.height = height;
   }
 
-  public Block move(Direction dir) {
+  public Voxel move(Direction dir) {
     switch (dir) {
     case Back: this.row +=1; break;
     case Front: this.row -= 1; break;
@@ -42,8 +43,8 @@ public class Block extends Item {
     return this;
   }
  
-  public Block copy(Direction dir) {
-    Block c = this.clone();
+  public Voxel copy(Direction dir) {
+    Voxel c = this.clone();
     switch (dir) {
     case Back: c.row += 1; break;
     case Front: c.row -= 1; break;
@@ -78,7 +79,6 @@ public class Block extends Item {
   
   @Override
   public void update(String property, Object value) {
-    
     // updating with empty set does nothing, throw something?
     if (value instanceof Set && ((Set)value).size() == 0)
       return;
@@ -92,7 +92,7 @@ public class Block extends Item {
     else if (property.equals("col") && value instanceof Integer)
       this.height = (Integer)value;
     else if (property.equals("color") && value instanceof String)
-      this.color = CubeColor.fromString(value.toString());
+      this.color = Color.fromString(value.toString());
     else if (value instanceof Set)
       throw new RuntimeException(
           String.format("Updating %s to %s is not allowed,"
@@ -102,17 +102,17 @@ public class Block extends Item {
   }
 
   @SuppressWarnings("unchecked")
-  public static Block fromJSON(String json) {
+  public static Voxel fromJSON(String json) {
     List<Object> props = Json.readValueHard(json, List.class);
     return fromJSONObject(props);
   }
   @SuppressWarnings("unchecked")
-  public static Block fromJSONObject(List<Object> props) {
-    Block retcube = new Block();
+  public static Voxel fromJSONObject(List<Object> props) {
+    Voxel retcube = new Voxel();
     retcube.row = ((Integer)props.get(0));
     retcube.col = ((Integer)props.get(1));
     retcube.height = ((Integer)props.get(2));
-    retcube.color = CubeColor.fromString(((String)props.get(3)));
+    retcube.color = Color.fromString(((String)props.get(3)));
 
     retcube.names.addAll((List<String>)props.get(4));
     return retcube;
@@ -124,8 +124,8 @@ public class Block extends Item {
   }
 
   @Override
-  public Block clone() {
-    Block c = new Block(this.row, this.col, this.height, this.color.toString());
+  public Voxel clone() {
+    Voxel c = new Voxel(this.row, this.col, this.height, this.color.toString());
     return c;
   }
   @Override
@@ -147,7 +147,7 @@ public class Block extends Item {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    Block other = (Block) obj;
+    Voxel other = (Voxel) obj;
     
     if (col != other.col)
       return false;

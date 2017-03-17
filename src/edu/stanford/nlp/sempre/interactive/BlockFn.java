@@ -19,7 +19,7 @@ import fig.basic.LogInfo;
 import fig.basic.Option;
 
 /**
- * return a block sequencing all the children
+ * return a (scoping) block sequencing all the children
  * Block here refers to a block of code, not the a voxel..
  * @author sidaw
  */

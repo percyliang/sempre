@@ -26,7 +26,7 @@ import edu.stanford.nlp.sempre.interactive.ActionFormula;
 import edu.stanford.nlp.sempre.interactive.BadInteractionException;
 import edu.stanford.nlp.sempre.interactive.BlockFn;
 import edu.stanford.nlp.sempre.interactive.DefinitionAligner;
-import edu.stanford.nlp.sempre.interactive.FlatWorld;
+import edu.stanford.nlp.sempre.interactive.World;
 import edu.stanford.nlp.sempre.interactive.GrammarInducer;
 import fig.basic.IOUtils;
 import fig.basic.LispTree;
@@ -295,7 +295,7 @@ public final class ILUtils {
       jsonMap.put("cmd", command);
       jsonMap.put("utterance", ex.utterance);
       jsonMap.put("sessionId", sessionId);
-      jsonMap.put("context", FlatWorld.fromContext("BlocksWorld", ex.context).toJSON());
+      jsonMap.put("context", World.fromContext("BlocksWorld", ex.context).toJSON());
       jsonMap.put("targetFormula", ex.targetFormula);
 
       if (ex.targetValue instanceof StringValue)

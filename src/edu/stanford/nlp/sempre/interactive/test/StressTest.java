@@ -1,4 +1,4 @@
-package edu.stanford.nlp.sempre.interactive;
+package edu.stanford.nlp.sempre.interactive.test;
 
 import static org.testng.AssertJUnit.assertEquals;
 

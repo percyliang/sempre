@@ -47,7 +47,7 @@ public class ActionExecutor extends Executor {
   public Response execute(Formula formula, ContextValue context) {
     // We can do beta reduction here since macro substitution preserves the
     // denotation (unlike for lambda DCS).
-    FlatWorld world = FlatWorld.fromContext(opts.FlatWorldType, context);
+    World world = World.fromContext(opts.FlatWorldType, context);
     formula = Formulas.betaReduction(formula);
     try {
       performActions((ActionFormula)formula, world);
@@ -63,7 +63,7 @@ public class ActionExecutor extends Executor {
   }  
 
   @SuppressWarnings("rawtypes")
-  private void performActions(ActionFormula f, FlatWorld world) {
+  private void performActions(ActionFormula f, World world) {
     if (f.mode == ActionFormula.Mode.primitive) {
       // use reflection to call primitive stuff
       Value method  = ((ValueFormula)f.args.get(0)).value;
@@ -121,17 +121,17 @@ public class ActionExecutor extends Executor {
       world.merge();
       
     } else if (f.mode == ActionFormula.Mode.isolate) {
-      Set<Item> prevAll = world.allitems;
+      Set<Item> prevAll = world.allItems;
       //Set<Item> prevSelected = world.selected;
       //Set<Item> prevPrevious = world.previous;
       if (f.args.size() > 1) throw new RuntimeException("No longer supporting this isolate formula: " + f);
       
-      world.allitems = Sets.newHashSet(world.selected);
+      world.allItems = Sets.newHashSet(world.selected);
       //world.selected = scope;
       //world.previous = scope;
       performActions((ActionFormula)f.args.get(0), world);
       
-      world.allitems.addAll(prevAll); // merge, overriding;
+      world.allItems.addAll(prevAll); // merge, overriding;
       //world.selected = prevSelected;
       //world.previous = prevPrevious;
       world.merge();
@@ -174,6 +174,7 @@ public class ActionExecutor extends Executor {
       
   }
   
+  @SuppressWarnings("unchecked")
   private Set<Object> toSet(Object maybeSet) {
     if (maybeSet instanceof Set) return (Set<Object>) maybeSet;
     else return Sets.newHashSet(maybeSet);
@@ -201,7 +202,7 @@ public class ActionExecutor extends Executor {
   // a subset of lambda dcs. no types, and no marks
   // if this gets any more complicated, you should consider the LambdaDCSExecutor
   @SuppressWarnings("unchecked")
-  private Object processSetFormula(Formula formula, final FlatWorld world) {
+  private Object processSetFormula(Formula formula, final World world) {
     if (formula instanceof ValueFormula<?>) {
       Value v = ((ValueFormula<?>) formula).value;
       // special unary
@@ -254,7 +255,7 @@ public class ActionExecutor extends Executor {
     if (formula instanceof NotFormula)  {
       NotFormula notFormula = (NotFormula)formula;
       Set<Item> set1 = toItemSet(toSet(processSetFormula(notFormula.child, world))); 
-      return Sets.difference(world.allitems, set1);
+      return Sets.difference(world.allItems, set1);
     }
 
     if (formula instanceof AggregateFormula)  {
@@ -300,7 +301,7 @@ public class ActionExecutor extends Executor {
 
   // Example: id = "Math.cos". similar to JavaExecutor's invoke,
   // but matches arg by building singleton set as needed
-  private Object invoke(String id, FlatWorld thisObj, Object ... args) {
+  private Object invoke(String id, World thisObj, Object ... args) {
     Method[] methods;
     Class<?> cls;
     String methodName;

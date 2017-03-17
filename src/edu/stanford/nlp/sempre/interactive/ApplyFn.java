@@ -15,7 +15,7 @@ import fig.basic.Option;
 
 /**
  * Take any number of arguments and apply them to the lambda expression given in this SemanticFn
- *
+ * TODO: type inference, some function applications
  * @author sidaw
  */
 public class ApplyFn extends SemanticFn {
