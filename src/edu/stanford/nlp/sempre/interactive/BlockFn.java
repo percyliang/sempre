@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import org.testng.collections.Lists;
 
+import edu.stanford.nlp.sempre.ActionFormula;
 import edu.stanford.nlp.sempre.Derivation;
 import edu.stanford.nlp.sempre.DerivationStream;
 import edu.stanford.nlp.sempre.Example;

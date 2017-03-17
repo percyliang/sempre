@@ -206,8 +206,6 @@ public class Learner {
         Execution.putOutput("example", e);
 
         ParserState state = parseExample(params, ex, computeExpectedCounts);
-        // training for definitions for interative stuff
-        addToAutocomplete(ex, params);
         
         if (computeExpectedCounts) {
           if (opts.checkGradient) {
@@ -367,16 +365,5 @@ public class Learner {
     fields.add(evaluation.summary("\t"));
     eventsOut.println(Joiner.on('\t').join(fields));
     eventsOut.flush();
-  }
-  
-  public static boolean addToAutocomplete(Example ex, Params params) {
-    int num = ex.predDerivations.size();
-    // i guess or if it's in core
-    if (num > 0) {
-      params.autocompleteTrie.add(ex.getTokens());
-      LogInfo.logs("added %s to trie %s", ex.getTokens(), params.autocompleteTrie.toLispTree(1));
-      return true;
-    }
-    return false;
   }
 }

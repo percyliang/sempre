@@ -175,7 +175,7 @@ nil)})
 
 ############################################################
 # {2016-07-02} [Sida Wang]: interactive semantic parsing
-addMode('interactive', 'interactive semantic parsing in a blocksworld', lambda { |e| l(
+addMode('interactive', 'interactive semantic parsing in a VoxelWorld', lambda { |e| l(
   #rlwrap,
   header('core,interactive'),
   'edu.stanford.nlp.sempre.Main',
@@ -185,7 +185,7 @@ addMode('interactive', 'interactive semantic parsing in a blocksworld', lambda {
   o('LanguageAnalyzer', 'interactive.ActionLanguageAnalyzer'),
   o('ActionExecutor.convertNumberValues', true),
   o('ActionExecutor.printStackTrace', true),
-  o('BlocksWorld.maxBlocks', 3000),
+  o('VoxelWorld.maxBlocks', 3000),
   selo(0, 'ActionExecutor.FlatWorldType', 'BlocksWorld', 'CalendarWorld'),
   selo(0, 'Grammar.inPaths', './shrdlurn/blocksworld.grammar', './shrdlurn/calendar.grammar'),
 

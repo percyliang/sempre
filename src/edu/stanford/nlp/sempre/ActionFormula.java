@@ -1,9 +1,8 @@
-package edu.stanford.nlp.sempre.interactive;
+package edu.stanford.nlp.sempre;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
-import edu.stanford.nlp.sempre.Formula;
-import edu.stanford.nlp.sempre.Formulas;
+
 import fig.basic.LispTree;
 import fig.basic.LogInfo;
 

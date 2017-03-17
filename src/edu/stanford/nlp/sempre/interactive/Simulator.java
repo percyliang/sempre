@@ -37,7 +37,7 @@ import fig.basic.Evaluation;
 public class Simulator implements Runnable {
 
   @Option public static String serverURL = "http://localhost:8410";
-  @Option public static int numThreads = 4;
+  @Option public static int numThreads = 1;
   @Option public static int verbose = 1;
   @Option public static String reqParams = "grammar=0&cite=0&learn=0";
   @Option public static List<String> logFiles = Lists.newArrayList("./shrdlurn/commandInputs/sidaw.json.log");
@@ -47,7 +47,7 @@ public class Simulator implements Runnable {
     //T.printAllRules();
     //A.assertAll();
     for (String fileName : logFiles) {
-      ExecutorService executor = new ThreadPoolExecutor(JsonServer.opts.numThreads, JsonServer.opts.numThreads,
+      ExecutorService executor = new ThreadPoolExecutor(numThreads, numThreads,
           5000, TimeUnit.MILLISECONDS,
           new LinkedBlockingQueue<Runnable>());
       
@@ -99,7 +99,7 @@ public class Simulator implements Runnable {
     SimulationAnalyzer.flush();
     LogInfo.end_track();
     try {
-      sempreQuery("(:admin withcrappysecurity)", "simulator");
+      sempreQuery("(:admin withcrappysecurityWRONG)", "simulator");
     } catch (UnsupportedEncodingException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();

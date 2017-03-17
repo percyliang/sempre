@@ -7,7 +7,6 @@ import com.google.common.collect.Lists;
 import edu.stanford.nlp.sempre.interactive.BadInteractionException;
 import edu.stanford.nlp.sempre.interactive.CitationTracker;
 import edu.stanford.nlp.sempre.interactive.GrammarInducer;
-import edu.stanford.nlp.sempre.interactive.PrefixTrie;
 import fig.basic.*;
 import jline.console.ConsoleReader;
 
@@ -264,7 +263,6 @@ public class Master {
     // Parse!
     ParserState state;
     state = builder.parser.parse(builder.params, ex, false);
-    Learner.addToAutocomplete(ex, builder.params);
 
     response.ex = ex;
     ex.logWithoutContext();
@@ -580,20 +578,6 @@ public class Master {
       }
       out.close();
       LogInfo.logs("Done printing and overriding grammar and parameters...");
-    } else if (command.equals(":autocomplete")) {
-      if (tree.children.size() == 2) {
-        String prefix = tree.children.get(1).value;
-        LogInfo.logs("Getting autocomplete for prefix: %s", prefix);
-        List<String> prefixTokens = LanguageAnalyzer.getSingleton().analyze(prefix).tokens;
-        PrefixTrie trieMatch = builder.params.autocompleteTrie.traverse(prefixTokens);
-        if (trieMatch != null)
-          response.lines = trieMatch.getRandomMatches(opts.autocompleteCount);
-        else
-          response.lines = Lists.newArrayList();
-        LogInfo.logs("%d options are %s", opts.autocompleteCount, response.lines);
-      } else {
-        LogInfo.logs("autocomplete just takes a prefix");
-      }
     } else if (command.equals(":action")) {
       // test code for mutating worlds, updates the context
       String query = tree.children.get(1).value;

@@ -10,4 +10,5 @@ potentially reset citation and grammar information as well?
 
 Default port: 8410 for sempre, 8406 for user
 Run: ./run @mode=interactive -Server.port 8410
-Test command : ./run @mode=test @class=interactive.actions.ActionExecutorTest -verbose 5
+Test command : .shrdlurn/run @mode=test @class=interactive.test.ActionExecutorTest -verbose 5
+Test command : .shrdlurn/run @mode=test -verbose 5

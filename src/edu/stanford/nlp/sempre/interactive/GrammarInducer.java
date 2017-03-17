@@ -14,6 +14,7 @@ import org.testng.collections.Sets;
 import com.beust.jcommander.internal.Lists;
 import com.google.common.base.Function;
 
+import edu.stanford.nlp.sempre.ActionFormula;
 import edu.stanford.nlp.sempre.ConstantFn;
 import edu.stanford.nlp.sempre.Derivation;
 import edu.stanford.nlp.sempre.Example;

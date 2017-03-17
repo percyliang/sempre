@@ -22,7 +22,6 @@ import org.testng.collections.Lists;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableList;
 
-import edu.stanford.nlp.sempre.interactive.ActionFormula;
 import edu.stanford.nlp.sempre.interactive.BadInteractionException;
 import edu.stanford.nlp.sempre.interactive.BlockFn;
 import edu.stanford.nlp.sempre.interactive.DefinitionAligner;
@@ -143,7 +142,7 @@ public final class ILUtils {
         }
       }
       if (!found && !formula.equals("?"))
-        LogInfo.logs("Error: matching formula not found (useBest :s): %s", formula, Boolean.toString(opts.useBestFormula));
+        LogInfo.errors("matching formula not found: %s :: %s", utt, formula);
 
       // just making testing easier, use top derivation when we formula is not
       // given
