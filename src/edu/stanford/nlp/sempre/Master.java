@@ -4,9 +4,6 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 
-import edu.stanford.nlp.sempre.interactive.BadInteractionException;
-import edu.stanford.nlp.sempre.interactive.CitationTracker;
-import edu.stanford.nlp.sempre.interactive.GrammarInducer;
 import fig.basic.*;
 import jline.console.ConsoleReader;
 
@@ -427,25 +424,16 @@ public class Master {
       String utt = tree.children.get(1).value;
       Example ex = exampleFromUtterance(utt, session);
 
-      long approxSeq = ex.getLemmaTokens().stream().filter(s -> s.contains(";")).count();
       //if (approxSeq >= 8)
       //  response.lines.add("You are taking many actions in one step, consider defining some of steps as one single step.");
-
-      if (utt.length() > ILUtils.opts.maxChars)
-        throw new BadInteractionException(String.format("refused to execute: too many characters in one command (current: %d, max: %d)",
-            utt.length(), ILUtils.opts.maxChars));
-
-      if (approxSeq >= ILUtils.opts.maxSequence)
-        throw new BadInteractionException(String.format("refused to execute: too many steps in one command -- consider defining some of steps as one single step.  (current: %d, max: %d)",
-            approxSeq, ILUtils.opts.maxSequence));
-
+      ILUtils.sanitize(ex);
 
       builder.parser.parse(builder.params, ex, false);
 
       if (session.isStatsing()) {
         response.stats.put("type", "q");
         response.stats.put("size", ex.predDerivations!=null? ex.predDerivations.size() : 0);
-        response.stats.put("status", GrammarInducer.getParseStatus(ex));
+        response.stats.put("status", ILUtils.getParseStatus(ex));
       }
       response.ex = ex;
 
@@ -506,7 +494,7 @@ public class Master {
       if (session.isStatsing()) {
         response.stats.put("type", "accept");
         response.stats.put("rank", rank);
-        response.stats.put("status", GrammarInducer.getParseStatus(ex));
+        response.stats.put("status", ILUtils.getParseStatus(ex));
         response.stats.put("size", ex.predDerivations.size());
         response.stats.put("formulas.size", targetFormulas.size());
         response.stats.put("rank", rank);
@@ -519,8 +507,7 @@ public class Master {
         LogInfo.logs(":accept successful: %s", response.stats);
 
         if (session.isWritingCitation()) {
-          CitationTracker tracker = new CitationTracker(session.id, ex);
-          tracker.citeAll(match);
+          ILUtils.cite(match, ex);
         }
 
         // ex.setTargetValue(match.value); // this is just for logging, not actually used for learning

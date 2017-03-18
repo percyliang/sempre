@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableList;
 
 import edu.stanford.nlp.sempre.interactive.BadInteractionException;
 import edu.stanford.nlp.sempre.interactive.BlockFn;
+import edu.stanford.nlp.sempre.interactive.CitationTracker;
 import edu.stanford.nlp.sempre.interactive.DefinitionAligner;
 import edu.stanford.nlp.sempre.interactive.World;
 import edu.stanford.nlp.sempre.interactive.GrammarInducer;
@@ -390,5 +391,27 @@ public final class ILUtils {
 
     long endTime = System.nanoTime();
     LogInfo.logs("Took %d ns or %.4f s", (endTime - startTime), (endTime - startTime) / 1.0e9);
+  }
+
+  
+  // Method so that master only depends on the interactive package through ILUtils
+  public static void sanitize(Example ex) {
+    if (ex.utterance.length() > ILUtils.opts.maxChars)
+      throw new BadInteractionException(String.format("refused to execute: too many characters in one command (current: %d, max: %d)",
+          ex.utterance.length(), ILUtils.opts.maxChars));
+    
+    long approxSeq = ex.getLemmaTokens().stream().filter(s -> s.contains(";")).count();
+    if (approxSeq >= ILUtils.opts.maxSequence)
+      throw new BadInteractionException(String.format("refused to execute: too many steps in one command -- consider defining some of steps as one single step.  (current: %d, max: %d)",
+          approxSeq, ILUtils.opts.maxSequence));
+  }
+
+  public static String getParseStatus(Example ex) {
+    return GrammarInducer.getParseStatus(ex).toString();
+  }
+
+  public static void cite(Derivation match, Example ex) {
+    CitationTracker tracker = new CitationTracker(ex.id, ex);
+    tracker.citeAll(match);
   }
 }
