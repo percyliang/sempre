@@ -2,8 +2,6 @@ package edu.stanford.nlp.sempre;
 
 import java.util.*;
 
-import com.beust.jcommander.internal.Lists;
-
 import fig.basic.*;
 
 /**
@@ -65,7 +63,7 @@ public class Derivation implements SemanticFn.Callable, HasScore {
     public boolean matched = false;
     public int start = -1, end = -1;
     public Formula formula;
-    public List<Derivation> matches = Lists.newArrayList();
+    public List<Derivation> matches = new ArrayList<>();
   }
   public GrammarInfo grammarInfo = new GrammarInfo();
 

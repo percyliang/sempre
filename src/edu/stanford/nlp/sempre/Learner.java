@@ -2,18 +2,14 @@ package edu.stanford.nlp.sempre;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Maps;
-
-
 import fig.basic.*;
 import fig.exec.Execution;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * The main learning loop.  Goes over a dataset multiple times, calling the
@@ -49,10 +45,6 @@ public class Learner {
     public boolean updateWeights = true;
     @Option(gloss = "Whether to check gradient")
     public boolean checkGradient = false;
-    
-    @Option(gloss = "count correct examples in an online fashion")
-    public boolean onlineEvaluation = false;
-    public boolean skipSeen = false;
 
     @Option(gloss = "Whether to skip the 'train' group in the last iteration and non-'train' groups in other iterations")
     public boolean skipUnnecessaryGroups = false;
