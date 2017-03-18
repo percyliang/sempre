@@ -28,7 +28,7 @@ public class Derivation implements SemanticFn.Callable, HasScore {
 	    return 0;
 	  }
 	}
-	@Option(gloss = "When printing derivations, to show values (could be quite verbose)")
+    @Option(gloss = "When printing derivations, to show values (could be quite verbose)")
     public boolean showValues = true;
     @Option(gloss = "When printing derivations, to show the first value (ignored when showValues is set)")
     public boolean showFirstValue = false;
@@ -42,8 +42,6 @@ public class Derivation implements SemanticFn.Callable, HasScore {
     public boolean showCat = false;
     @Option(gloss = "When executing, show formulae (for debugging)")
     public boolean showExecutions = false;
-    @Option(gloss = "changes ScoredDerivationComparator to use pragmatic_score instead")
-    public boolean comparePragmatically = false;
   }
 
   public static Options opts = new Options();
@@ -58,7 +56,6 @@ public class Derivation implements SemanticFn.Callable, HasScore {
   // Floating cell information
   // TODO(yushi): make fields final
   public String canonicalUtterance;
-  private boolean[] anchoredTokens;   // Tokens which anchored rules are defined on
   public boolean allAnchored = true;
   private int[] numAnchors;     // Number of times each token was anchored
   
@@ -94,7 +91,7 @@ public class Derivation implements SemanticFn.Callable, HasScore {
   // Information for scoring
   private final FeatureVector localFeatureVector;  // Features
   double score = Double.NaN;  // Weighted combination of features
-
+  public double prob = Double.NaN;  // Probability (normalized exp of score).
 
   // Used during parsing (by FeatureExtractor, SemanticFn) to cache arbitrary
   // computation across different sub-Derivations.
@@ -111,12 +108,6 @@ public class Derivation implements SemanticFn.Callable, HasScore {
   // Number in [0, 1] denoting how correct the value is.
   public double compatibility = Double.NaN;
 
-  // Probability (normalized exp of score).
-  public double prob = Double.NaN;
-  // Probability after pragmatics
-  public double pragmatic_prob = Double.NaN;
-
-
   // Miscellaneous statistics
   int maxBeamPosition = -1;  // Lowest position that this tree or any of its children is on the beam (after sorting)
   int maxUnsortedBeamPosition = -1;  // Lowest position that this tree or any of its children is on the beam (before sorting)
@@ -131,7 +122,6 @@ public class Derivation implements SemanticFn.Callable, HasScore {
   long creationIndex;
   public static long numCreated = 0;  // Incremented for each derivation we create.
   public static final Comparator<Derivation> derivScoreComparator = new ScoredDerivationComparator();
-  public static final Comparator<Derivation> pragDerivScoreComparator = new PragmaticallyScoredDerivationComparator();
 
   public static final List<Derivation> emptyList = Collections.emptyList();
 
@@ -340,6 +330,7 @@ public class Derivation implements SemanticFn.Callable, HasScore {
           tree.addChild(values.size() + " values");
         }
       }
+
     }
     if (type != null && opts.showTypes)
       tree.addChild(LispTree.proto.newList("type", type.toLispTree()));
@@ -466,7 +457,6 @@ public class Derivation implements SemanticFn.Callable, HasScore {
       if (deriv1.compatibility > deriv2.compatibility) return -1;
       if (deriv1.compatibility < deriv2.compatibility) return +1;
       // Ensure reproducible randomness
-
       if (deriv1.creationIndex < deriv2.creationIndex) return -1;
       if (deriv1.creationIndex > deriv2.creationIndex) return +1;
       return 0;

@@ -375,7 +375,6 @@ public class Master {
         ex.setTargetFormula(response.getDerivation().getFormula());
         ex.setTargetValue(response.getDerivation().getValue());
         ex.setContext(session.getContextExcludingLast());
-        ex.setNBestInd(index);
         addNewExample(ex, session);
       }
     } else if (command.equals("answer")) {
@@ -622,31 +621,19 @@ public class Master {
         .setContext(origEx.context)
         .setTargetFormula(origEx.targetFormula)
         .setTargetValue(origEx.targetValue)
-        .setNBestInd(origEx.NBestInd)
         .createExample();
 
     if (!Strings.isNullOrEmpty(opts.newExamplesPath)) {
       LogInfo.begin_track("Adding new example");
-      if (opts.newExamplesPath.endsWith(".json") || opts.newExamplesPath.endsWith(".lisp"))
-        Dataset.appendExampleToFile(opts.newExamplesPath, ex);
-      else
-        Dataset.appendExampleToFile( Paths.get(opts.newExamplesPath, session.id + ".lisp").toString(), ex);
+      Dataset.appendExampleToFile(opts.newExamplesPath, ex);
       LogInfo.end_track();
     }
 
     if (opts.onlineLearnExamples) {
       LogInfo.begin_track("Updating parameters");
       learner.onlineLearnExample(origEx);
-      LogInfo.end_track();
-    }
-
-    if (opts.independentSessions) {
-      if (opts.onlineLearnExamples) {
-        LogInfo.warning("Both independentSessions and onlineLearnExamples are on");
-      } else {
-        LogInfo.begin_track("Updating parameters (independent)");
-        session.learner.onlineLearnExample(origEx);
-      }
+      if (!Strings.isNullOrEmpty(opts.newParamsPath))
+        builder.params.write(opts.newParamsPath);
       LogInfo.end_track();
     }
   }
