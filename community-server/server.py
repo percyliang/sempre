@@ -3,68 +3,10 @@
 """
 SHRDLURN - Community & Logging Server
 
-## Instructions
+# Instructions
 
 You can run the server by running ```./server.py --port <PORT_NUMBER>```
-
-## Data Formats
-
-We store the logs in the "DATA_FOLDER/log" path. Every user gets a file named
-with their "SESSION_ID.json". Every log is composed of lines of json objects that
-correspond to logged events. We append new logs to the end of every file as we
-receive them.
-
-We store the structs in the "DATA_FOLDER/structs" path. Structs are then stored
-in an interior folder whose name is the SESSION_ID
-of the user who submitted the struct. Within that user's folder, we store each
-struct in its own file. Every struct file has as its first line a JSON array
-corresponding to a list of the users who upvoted that struct. The second line
-is the timestamp of when the struct was submitted. And the third line is a JSON
-object of the submitted struct.
-
-Old data from previous experiments should be moved out of the DATA_FOLDER and
-into a separate time-stamped folder.
-
-## API
-
-server.py provides an API for the client to log actions, share structures, and
-view the community's work.
-
-A client can make the following socket requests:
-
-    - "session": {"sessionId": SESSION_ID}
-        on first connection, the client should submit a sessionId to
-        be used to match all future requests. This sessionId is stored in the
-        flask "request" global context variable.
-    - "log": {"type": LOG_TYPE, "msg": OBJECT}
-        whenever the client would like an event logged, the client can submit a
-        log query and this will be logged in a file with the SESSION_ID as the
-        filename.
-    - "upvote": {"uid": UID, "id": ID}
-        a user can upvote another user's struct by passing in the struct's
-        uid and the id of the struct itself.
-    - "share": {"struct": STRUCT}
-        a user can share a struct and it will be saved to their directory
-
-
-The server expects the client to handle the following messages when connected
-to the "community" room:
-
-    - "new_accept": {"uid": UID, "query": QUERY, "timestamp": TIMESTAMP}
-        whenever a connected user accepts a new structure, we broadcast it
-    - "new_define": {"uid": UID, "defined": DEFINED_TERM, "timestamp": TIMESTAMP}
-        whenever a connected user defines a new query, we broadcast it
-    - "upvote": {"uid": UID, "id": ID, "up": UPVOTER_ID, "score": NEW_SCORE}
-        whenever a user upvotes a new struct, we broadcast the scrubbed uid
-        of the new user
-    - "struct": {"uid": session.uid, "id": new_struct_id, "score": score, "upvotes": [], "struct": STRUCT}
-        emitted when either a new struct has been shared or on an initial load,
-        when reading all the structs - this gets emitted one by one.
-    - "utterances": {"uid": UID, "utterances": [UTTERANCES]}
-        when a user joins the community room, we emit the latest 5 turkers'
-        last 11 utterances.
 """
-
 
 import json
 import sys
@@ -77,6 +19,8 @@ from optparse import OptionParser
 from flask import Flask, request, session
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit, join_room, leave_room
+import jwt
+import requests
 
 # Setup flask
 app = Flask(__name__)
@@ -102,6 +46,9 @@ TIME_INTERVAL = 7200.0  # break off by every 30 minutes
 # Default port for the server
 DEFAULT_PORT = 8406
 
+JWT_SECRET = os.environ['SEMPRE_JWT_SECRET']
+SLACK_SECRET = os.environ['SLACK_OAUTH_SECRET']
+
 
 @app.route("/")
 def index():
@@ -126,7 +73,8 @@ def score_struct(timestamp, upvotesN):
              structure was submitted
            - GRAVITY: a constant to determine the weight of T v. P
     """
-    time_ago = (current_unix_time() / TIME_INTERVAL) - (int(timestamp) / TIME_INTERVAL)
+    time_ago = (current_unix_time() / TIME_INTERVAL) - \
+        (int(timestamp) / TIME_INTERVAL)
     return (upvotesN + 1) / ((time_ago + 2) ** GRAVITY)
 
 
@@ -157,15 +105,17 @@ def emit_structs():
             try:
                 with open(path, 'r') as f:
                     lines = f.readlines()
-                    if (len(lines) != 3):
-                        continue
 
                     upvotes = json.loads(lines[0].strip())
                     timestamp = json.loads(lines[1].strip())
                     struct = json.loads(lines[2].strip())
+                    image = lines[3].strip()
 
                     score = score_struct(timestamp, len(upvotes))
-                    message = {"uid": uid, "id": fname, "score": score, "upvotes": [up for up in upvotes], "struct": struct}
+
+                    message = {"uid": uid, "id": fname, "score": score, "upvotes": [
+                        up for up in upvotes], "struct": struct, "image": image}
+
                     structs.append(message)
                     count += 1
             except:
@@ -179,9 +129,11 @@ def emit_user_structs_count(uid):
     path = os.path.join(STRUCTS_FOLDER, uid)
     if not is_safe_path(STRUCTS_FOLDER, path):
         return
-
+        structs = [name[:-5] for name in os.listdir(path) if os.path.isfile(
+            os.path.join(path, name)) and os.path.join(path, name).endswith(".json")]
     if os.path.isdir(path):
-        structs = [name[:-5] for name in os.listdir(path) if os.path.isfile(os.path.join(path, name)) and os.path.join(path, name).endswith(".json")]
+        structs = [name[:-5] for name in os.listdir(path) if os.path.isfile(
+            os.path.join(path, name)) and os.path.join(path, name).endswith(".json")]
         emit("user_structs", {"structs": structs})
 
 
@@ -256,7 +208,8 @@ def compute_citations(dir):
             data = json.load(f)
             citations.append(data)
 
-    citation_numbers = [citation["cite"] + citation["self"] for citation in citations]
+    citation_numbers = [citation["cite"] + citation["self"]
+                        for citation in citations]
     citation_score = h_index(citation_numbers)
 
     return (citations, citation_score)
@@ -269,17 +222,23 @@ def emit_top_builders():
         if not os.path.isdir(subdir):
             continue
 
+        top_5_builders = sorted(
+            top_5_builders, key=lambda b: b[1], reverse=True)
+
         (citations, citation_score) = compute_citations(subdir)
 
-        top_5_builders = sorted(top_5_builders, key=lambda b: b[1], reverse=True)
+        top_5_builders = sorted(
+            top_5_builders, key=lambda b: b[1], reverse=True)
         if len(top_5_builders) < 10 or citation_score > top_5_builders[9][1]:
             # If there are more than 5 citations with cites, only return those
-            # citations_with_cites = [c for c in citations if c["cite"] > 0]
+            citations = sorted(
+                citations, key=lambda c: c["cite"] + c["self"], reverse=True)[:10]
             # if len(citations_with_cites) >= 6:
             #     citations = citations_with_cites
 
             # Sort them by score and return the top 7.
-            citations = sorted(citations, key=lambda c: c["cite"] + c["self"], reverse=True)[:10]
+            citations = sorted(
+                citations, key=lambda c: c["cite"] + c["self"], reverse=True)[:10]
 
             struct = (uid, citation_score, citations)
             if len(top_5_builders) < 10:
@@ -287,12 +246,17 @@ def emit_top_builders():
             else:
                 top_5_builders[9] = struct
 
-    emit("top_builders", {"top_builders": top_5_builders}, broadcast=True, room="community")
+    emit("top_builders", {"top_builders": top_5_builders},
+         broadcast=True, room="community")
 
 
 def log(message):
     """Logs the given message by writing it in the uid's JSON log file."""
     uid = message["uid"] if 'uid' in message else "NULL_session"
+
+    user = current_user(message['token'])
+    if user:
+        uid = user['id']
 
     path = os.path.join(LOG_FOLDER, uid + ".json")
 
@@ -311,7 +275,11 @@ def log(message):
 
 @socketio.on('getscore')
 def get_score(data):
-    uid = data['uid']
+    user = current_user(data['token'])
+    if not user:
+        return
+
+    uid = user['id']
     subdir = os.path.join(CITATION_FOLDER, uid)
     if (os.path.isdir(subdir) and is_safe_path(CITATION_FOLDER, subdir)):
         (citations, score) = compute_citations(subdir)
@@ -320,7 +288,13 @@ def get_score(data):
 
 @socketio.on('delete_struct')
 def delete_struct(data):
-    uid = data['uid']
+    user = current_user(data['token'])
+
+    if not user:
+        return
+
+    uid = user['id']
+
     struct_id = data["id"]
     struct_path = struct_id + ".json"
     subdir = os.path.join(STRUCTS_FOLDER, uid)
@@ -356,7 +330,7 @@ def on_join(data):
 @socketio.on('leave')
 def on_leave(data):
     """A user can leave a room"""
-    username = data['sessionId']
+    # username = data['sessionId']
     room = data['room']
     leave_room(room)
 
@@ -369,7 +343,13 @@ def handle_share(data):
     current score of the struct and ID is the unique index (auto-incremented) of
     this particular struct.."""
 
-    user_structs_folder = os.path.join(STRUCTS_FOLDER, data['uid'])
+    user = current_user(data['token'])
+    if not user:
+        return
+
+    uid = user['id']
+
+    user_structs_folder = os.path.join(STRUCTS_FOLDER, uid)
     if not is_safe_path(STRUCTS_FOLDER, user_structs_folder):
         return
     make_dir_if_necessary(user_structs_folder)
@@ -383,21 +363,23 @@ def handle_share(data):
     with open(new_struct_path, 'w') as f:
         f.write("[]\n")  # it starts with no upvoters
         f.write(str(submission_time) + "\n")  # timestamp of submission
-        f.write(json.dumps(data["struct"]))  # the actual struct
+        f.write(json.dumps(data["struct"]) + "\n")  # the actual struct
+        f.write(data["image"])  # the png of the struct
 
     # Broadcast addition to the "community" room
-    message = {"uid": data['uid'], "id": data["id"], "score": score, "upvotes": [], "struct": data["struct"]}
+    message = {"uid": uid, "id": data["id"], "score": score, "upvotes": [
+    ], "struct": data["struct"], "image": data["image"]}
     emit("struct", message, broadcast=True, room="community")
 
 
 @socketio.on('upvote')
 def upvote(data):
-    """Users can upvote other users' structures.
+    """Users can upvote other users' structures."""
 
-    Data should consist of: {"uid": UID, "id": "ID"}"""
+    user = current_user(data['token'])
 
-    # if no session.uid, do nothing
-    if not data['uid']:
+    # if no authenticated user, do nothing
+    if not user:
         return
 
     subdir = os.path.join(STRUCTS_FOLDER, data["struct_uid"])
@@ -417,11 +399,12 @@ def upvote(data):
         upvotes = json.loads(f.readline().strip())
 
         # If the user has not already upvoted this, add them
-        if data['uid'] not in upvotes:
-            upvotes.append(data['uid'])
+        if user['id'] not in upvotes:
+            upvotes.append(user['id'])
 
             timestamp = f.readline()
             struct = f.readline()
+            image = f.readline()
 
             # reset file to top
             f.seek(0)
@@ -430,6 +413,10 @@ def upvote(data):
             f.write(json.dumps(upvotes) + "\n")
             f.write(timestamp)  # rewrite the timestamp
             f.write(struct)  # rewrite the actual struct
+            f.write(image)  # rewrite the image
+
+            message = {"uid": data["struct_uid"],
+                       "id": data["id"], "up": user['id'], "score": score}
 
             f.truncate()  # truncate to ensure flush appropriate
 
@@ -437,7 +424,8 @@ def upvote(data):
             score = score_struct(timestamp, len(upvotes))
 
             # and then broadcast the new upvote to the room:
-            message = {"uid": data["struct_uid"], "id": data["id"], "up": data['uid'], "score": score}
+            message = {"uid": data["struct_uid"],
+                       "id": data["id"], "up": user['id'], "score": score}
             emit("upvote", message, broadcast=True, room="community")
 
 
@@ -465,13 +453,13 @@ def handle_log(data):
 
 
 @socketio.on('session')
-def session(data):
+def get_session(data):
     """On every new connection, the client should transmit the sessionId to tell
     the server that a new session has started. This sessionId is then used for
     all future authentication by storing it as uid in the session global
     context variable."""
     session.uid = data['uid']
-    log({"type": "connect"})
+    log({"type": "connect", "token": ""})
 
 
 @socketio.on('getstructcount')
@@ -488,7 +476,42 @@ def connect():
 @socketio.on('disconnect')
 def disconnect():
     """Log the fact that a user disconnected."""
-    log({"uid": session.uid, "type": "disconnect"})
+    if 'uid' in session:
+        log({"uid": session.uid, "type": "disconnect"})
+
+
+@socketio.on('sign_in')
+def sign_in(data):
+    r = requests.get("https://slack.com/api/oauth.access", params={
+                     'code': data['code'], 'client_id': '130265636855.151294060356', 'client_secret': SLACK_SECRET})
+    data = r.json()
+    session['access_token'] = data['access_token']
+    user = data['user']
+    session['user'] = user
+
+    encoded = jwt.encode(
+        {'name': user['name'], 'email': user['email'], 'id': user['id']}, JWT_SECRET, algorithm='HS256').decode('utf-8')
+
+    emit('sign_in', {
+         "name": user['name'], "email": user['email'], 'id': user['id'], 'token': encoded})
+
+
+@socketio.on('get_user')
+def get_user(data):
+    user = current_user(data['token'])
+    if user:
+        emit('sign_in', {
+            "name": user['name'], "email": user['email'], 'id': user['id'], 'token': data['token']
+        })
+    else:
+        emit('sign_in_failed')
+
+
+def current_user(token):
+    try:
+        return jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+    except:
+        return False
 
 
 # http://stackoverflow.com/questions/2301789/read-a-file-in-reverse-order-using-python
