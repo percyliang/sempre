@@ -375,7 +375,7 @@ public class Master {
         ex.setTargetFormula(response.getDerivation().getFormula());
         ex.setTargetValue(response.getDerivation().getValue());
         ex.setContext(session.getContextExcludingLast());
-        addNewExample(ex, session);
+        addNewExample(ex);
       }
     } else if (command.equals("answer")) {
       if (tree.children.size() != 2) {
@@ -389,7 +389,7 @@ public class Master {
         return;
       }
       ex.setTargetValue(Values.fromLispTree(tree.child(1)));
-      addNewExample(ex, session);
+      addNewExample(ex);
     } else if (command.equals("rule")) {
       int n = builder.grammar.rules.size();
       builder.grammar.addStatement(tree.toString());
@@ -613,7 +613,7 @@ public class Master {
     return ex;
   }
 
-  void addNewExample(Example origEx, Session session) {
+  void addNewExample(Example origEx) {
     // Create the new example, but only add relevant information.
     Example ex = new Example.Builder()
         .setId(origEx.id)

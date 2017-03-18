@@ -1,13 +1,11 @@
 package edu.stanford.nlp.sempre;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.google.common.base.Strings;
 
-import fig.basic.NumUtils;
 import fig.basic.Option;
 
 /**
@@ -21,12 +19,15 @@ import fig.basic.Option;
 public class Session {
   public final String id;  // Session id
   public static class Options {
+    // path for default parameters, if using a different set for each session
     @Option public String inParamsPath;
   }
   String remoteHost;  // Where we connected from
   String format;  // html or json
   ContextValue context;  // Current context used to create new examples
   Example lastEx;  // Last example that we processed
+  
+  // if every user have their own model
   Params params;
   Learner learner;
   Map<String,String> reqParams;

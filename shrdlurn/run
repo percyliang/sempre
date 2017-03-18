@@ -198,9 +198,10 @@ addMode('interactive', 'interactive semantic parsing in a VoxelWorld', lambda { 
 
   o('Parser.pruneErrorValues', true),
   o('Parser', 'BeamFloatingParser'),
-  o('Parser.trackedCats', 'Number', 'Numbers', 'Color',  'Direction', 'Set', 'Sets', 'Action', 'Actions'),
   o('FloatingParser.defaultIsFloating', true),
+
   selo(0, 'BeamFloatingParser.floatStrategy', 'Never', 'NoParse', 'Always'),
+	o('BeamFloatingParser.trackedCats', 'Number', 'Numbers', 'Color',  'Direction', 'Set', 'Sets', 'Action', 'Actions'),
 
 	o('ParserState.customExpectedCounts', 'None'),
 	o('Params.l1Reg', 'nonlazy'),

@@ -51,7 +51,9 @@ public class Rule {
   public String toString() {
     if (stringRepn == null) {
       String semStr = sem.toString();
-      if (semStr.length() > 100) semStr = semStr.substring(0,100); // just stop some ridiculously long rules
+      // stop printing very long rules
+      int maxLength = 100;
+      if (semStr.length() > maxLength) semStr = semStr.substring(0,maxLength) + "..."; 
       stringRepn = lhs + " -> " + (rhs == null ? "" : Joiner.on(' ').join(rhs)) + " " + semStr;
     }
     return stringRepn;

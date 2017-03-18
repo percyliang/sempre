@@ -230,8 +230,8 @@ public abstract class ParserState {
   }
 
   // Ensure that all the logical forms are executed and compatibilities are computed.
-  public void ensureExecuted() {
-    // LogInfo.begin_track("Parser.ensureExecuted");
+  protected void ensureExecuted() {
+    LogInfo.begin_track("Parser.ensureExecuted");
     // Execute predicted derivations to get value.
     for (Derivation deriv : predDerivations) {
       deriv.ensureExecuted(parser.executor, ex.context);
@@ -239,7 +239,7 @@ public abstract class ParserState {
         deriv.compatibility = parser.valueEvaluator.getCompatibility(ex.targetValue, deriv.value);
       if (!computeExpectedCounts && Parser.opts.executeTopFormulaOnly) break;
     }
-    // LogInfo.end_track();
+    LogInfo.end_track();
   }
 
   // Add statistics to |evaluation|.
@@ -273,7 +273,7 @@ public abstract class ParserState {
 
     trueScores = new double[n];
     predScores = new double[n];
-    // Experimental (ice): For update schemas that choose one good and one bad candidate to update
+    // For update schemas that choose one good and one bad candidate to update
     int[] goodAndBad = null;
     if (opts.customExpectedCounts == CustomExpectedCount.TOP) {
       goodAndBad = getTopDerivations(derivations);
@@ -306,8 +306,7 @@ public abstract class ParserState {
     }
 
     // Usually this happens when there are no derivations.
-    if(!NumUtils.expNormalize(trueScores)) return;
-   
+    if (!NumUtils.expNormalize(trueScores)) return;
     if (!NumUtils.expNormalize(predScores)) return;
 
     // Update parameters

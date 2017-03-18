@@ -19,13 +19,17 @@ import org.testng.collections.Sets;
  *
  * Note that this code does not rely on the Grammar being binarized,
  * which makes it more complex.
- *
- * @author Percy Liang
+ * 
+ * Sida: basically from BeamParser, but can float a little bit.
+ * 
+ * @author Percy Liang, Sida Wang
  */
 public class BeamFloatingParser extends Parser {
   public static class Options {
     @Option public int maxNewTreesPerSpan = Integer.MAX_VALUE;
     @Option public FloatStrategy floatStrategy = FloatStrategy.Never;
+    @Option(gloss = "track these categories")
+    public List<String> trackedCats;
   }
   public enum FloatStrategy {Always, Never, NoParse};
   public static Options opts = new Options();
@@ -34,10 +38,10 @@ public class BeamFloatingParser extends Parser {
 
   public BeamFloatingParser(Spec spec) {
     super(spec);
-    if (Parser.opts.trackedCats != null) {
-      Parser.opts.trackedCats = Parser.opts.trackedCats.stream()
+    if (opts.trackedCats != null) {
+      opts.trackedCats = opts.trackedCats.stream()
           .map(s -> "$" + s).collect(Collectors.toList());
-      LogInfo.logs("Mapped trackedCats to: %s", Parser.opts.trackedCats);
+      LogInfo.logs("Mapped trackedCats to: %s", opts.trackedCats);
     }
     // Index the non-cat-unary rules
     trie = new Trie();

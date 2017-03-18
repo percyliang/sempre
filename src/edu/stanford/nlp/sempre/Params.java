@@ -36,8 +36,6 @@ public class Params {
     @Option(gloss = "Lazy L1 full update frequency") public int lazyL1FullUpdateFreq = 5000;
   }
   public static Options opts = new Options();
-
-
   public enum L1Reg {
     LAZY,
     NONLAZY,
