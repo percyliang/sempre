@@ -290,11 +290,6 @@ addModule('geo880', 'Data, lexicon, grammars and KB for geo880', lambda {
   pull('/u/nlp/data/semparse/geo880/geo880.kg', 'data/geo880', {:symlink => true})
   pull('/u/nlp/data/semparse/geo880/geo880.type_hierarchy', 'data/geo880', {:symlink => true})
 })
-
-# Community server for voxelurn
-addModule('community', 'Community Server', lambda {
-  exec('./community-server/install-deps.py')
-})
 ############################################################
 
 if ARGV.size == 0
