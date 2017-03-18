@@ -126,50 +126,15 @@ addMode('simulator', 'run the simulator', lambda { |e| l(
 	}),
 	letDefault(:task, 'sidaw'),
 	sel(:task, {
-		'freebig' => o('logFiles', './shrdlurn/queries/freebuildbig-0206.json'),
-		'freebigcontext' => o('logFiles', './shrdlurn/queries/freebuildbig-0206.context.json'),
+		'freebig' => o('logFiles', './shrdlurn/queries/freebuildbig-0206.json.gz'),
+		'freebigcontext' => o('logFiles', './shrdlurn/queries/freebuildbig-0206.context.json.gz'),
 
-		'qual1' => o('logFiles', './shrdlurn/queries/qualifier1-0118.json'),
-		'qual2' => o('logFiles', './shrdlurn/queries/qualifier2-0129.json'),
-		'qual3' => o('logFiles', './shrdlurn/queries/qualifier3-0201.json'), #  both 2 and 3
-		'free1' => o('logFiles', './shrdlurn/queries/freebuild1-0121.json'),
-		'free2' => o('logFiles', './shrdlurn/queries/freebuild2-0127.json'),
-		'sidaw' => o('logFiles', './shrdlurn/queries/sidaw.json.log'),
-
-		'testqual' => o('logFiles',
-		'./shrdlurn/queries/sidaw.json.log',
-		#'./shrdlurn/queries/freebuild2-0127.json',
-		'./shrdlurn/queries/qualifier1-0118.json',
-		'./shrdlurn/queries/qualifier3-0201.json'),
-
-		'testfree' => o('logFiles',
-		'./shrdlurn/queries/sidaw.json.log',
-		#'./shrdlurn/queries/freebuild2-0127.json',
-		#'./shrdlurn/queries/freebuild1-0121.json',
-		'./shrdlurn/queries/freebuild2-0127.json'),
-
-		'stress' => o('logFiles',
-		'./shrdlurn/queries/sidaw.json.log',
-		'./shrdlurn/queries/qualifier1-0118.json',
-		'./shrdlurn/queries/freebuild1-0121.json',
-		'./shrdlurn/queries/freebuild2-0127.json',
-		'./shrdlurn/queries/qualifier3-0201.json',
-		'./shrdlurn/queries/sidaw.json.log',
-		'./shrdlurn/queries/qualifier1-0118.json',
-		'./shrdlurn/queries/freebuild1-0121.json',
-		'./shrdlurn/queries/freebuild2-0127.json',
-		'./shrdlurn/queries/qualifier3-0201.json',
-		'./shrdlurn/queries/sidaw.json.log',
-		'./shrdlurn/queries/qualifier1-0118.json',
-		'./shrdlurn/queries/freebuild1-0121.json',
-		'./shrdlurn/queries/freebuild2-0127.json',
-		'./shrdlurn/queries/qualifier3-0201.json',
-		'./shrdlurn/queries/sidaw.json.log',
-		'./shrdlurn/queries/qualifier1-0118.json',
-		'./shrdlurn/queries/freebuild1-0121.json',
-		'./shrdlurn/queries/freebuild2-0127.json',
-		'./shrdlurn/queries/qualifier3-0201.json'
-		)
+		'qual1' => o('logFiles', './shrdlurn/queries/qualifier1-0118.json.gz'),
+		'qual2' => o('logFiles', './shrdlurn/queries/qualifier2-0129.json.gz'),
+		'qual3' => o('logFiles', './shrdlurn/queries/qualifier3-0201.json.gz'), #  both 2 and 3
+		'free1' => o('logFiles', './shrdlurn/queries/freebuild1-0121.json.gz'),
+		'free2' => o('logFiles', './shrdlurn/queries/freebuild2-0127.json.gz'),
+		'sidaw' => o('logFiles', './shrdlurn/queries/sidaw.json'),
 		}),
 nil)})
 
@@ -194,7 +159,6 @@ addMode('interactive', 'interactive semantic parsing in a VoxelWorld', lambda { 
   o('Grammar.useApplyFn', 'interactive.ApplyFn'),
 
   o('LanguageAnalyzer.lowerCaseTokens', true),
-  o('LanguageAnalyzer.useLemmaTokens', false),
 
   o('Parser.pruneErrorValues', true),
   o('Parser', 'BeamFloatingParser'),
@@ -228,7 +192,7 @@ addMode('interactive', 'interactive semantic parsing in a VoxelWorld', lambda { 
 
 	o('Master.onlyInteractive', true),
 
-	o('server', true),
+	o('jsonServer', true),
 
 	o('JsonServer.numThreads', 16),
 	o('JsonServer.maxCandidates', 50),

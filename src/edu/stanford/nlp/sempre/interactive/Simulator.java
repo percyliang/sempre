@@ -1,15 +1,19 @@
 package edu.stanford.nlp.sempre.interactive;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.Closeable;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +23,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
+import java.util.zip.GZIPInputStream;
 
 import org.testng.collections.Lists;
 
@@ -34,6 +39,47 @@ import fig.basic.Evaluation;
  * utilites for simulating a session through the server
  * @author Sida Wang
  */
+
+class GZIPFiles {
+  /**
+   * Get a lazily loaded stream of lines from a gzipped file, similar to
+   * {@link Files#lines(java.nio.file.Path)}.
+   * 
+   * @param path
+   *          The path to the gzipped file.
+   * @return stream with lines.
+   */
+  public static Stream<String> lines(Path path) {
+    InputStream fileIs = null;
+    BufferedInputStream bufferedIs = null;
+    GZIPInputStream gzipIs = null;
+    try {
+      fileIs = Files.newInputStream(path);
+      // Even though GZIPInputStream has a buffer it reads individual bytes
+      // when processing the header, better add a buffer in-between
+      bufferedIs = new BufferedInputStream(fileIs, 65535);
+      gzipIs = new GZIPInputStream(bufferedIs);
+    } catch (IOException e) {
+      closeSafely(gzipIs);
+      closeSafely(bufferedIs);
+      closeSafely(fileIs);
+      throw new UncheckedIOException(e);
+    }
+    BufferedReader reader = new BufferedReader(new InputStreamReader(gzipIs));
+    return reader.lines().onClose(() -> closeSafely(reader));
+  }
+
+  private static void closeSafely(Closeable closeable) {
+    if (closeable != null) {
+      try {
+        closeable.close();
+      } catch (IOException e) {
+        // Ignore
+      }
+    }
+  }
+}
+
 public class Simulator implements Runnable {
 
   @Option public static String serverURL = "http://localhost:8410";
@@ -50,10 +96,15 @@ public class Simulator implements Runnable {
       ExecutorService executor = new ThreadPoolExecutor(numThreads, numThreads,
           5000, TimeUnit.MILLISECONDS,
           new LinkedBlockingQueue<Runnable>());
-      
+
       long startTime = System.nanoTime();
-    
-      try (Stream<String> stream = Files.lines(Paths.get(fileName))) {
+      Stream<String> stream;
+      try {
+        if (fileName.endsWith(".gz"))
+          stream = GZIPFiles.lines(Paths.get(fileName));
+        else
+          stream = Files.lines(Paths.get(fileName));
+
         LogInfo.logs("Reading %s", fileName);
 
         stream.forEach(l -> 
@@ -88,11 +139,10 @@ public class Simulator implements Runnable {
           // TODO Auto-generated catch block
           e.printStackTrace();
         }
-
       } catch (IOException e) {
         e.printStackTrace();
       }
-      
+
       long endTime = System.nanoTime();
       LogInfo.logs("Took %d ns or %.4f s", (endTime - startTime), (endTime - startTime)/1.0e9);
     }
