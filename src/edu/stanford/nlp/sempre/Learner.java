@@ -106,23 +106,21 @@ public class Learner {
       sortOnFeedback();
     // For each iteration, go through the groups and parse (updating if train).
     for (int iter = 0; iter <= numIters; iter++) {
-      if (opts.onlineEvaluation && iter==numIters) break;
-      
+
       LogInfo.begin_track("Iteration %s/%s", iter, numIters);
       Execution.putOutput("iter", iter);
 
       // Averaged over all iterations
       // Group -> evaluation for that group.
       Map<String, Evaluation> meanEvaluations = Maps.newHashMap();
+
       // Clear
       for (String group : dataset.groups())
         meanEvaluations.put(group, new Evaluation());
 
       // Test and train
       for (String group : dataset.groups()) {
-        // boolean isDef = group.startsWith("def");
         boolean lastIter = (iter == numIters);
-
         boolean updateWeights = opts.updateWeights && group.equals("train") && !lastIter;  // Don't train on last iteration
         if (opts.skipUnnecessaryGroups) {
           if ((group.equals("train") && lastIter) || (!group.equals("train") && !lastIter))
@@ -136,7 +134,6 @@ public class Learner {
         StopWatchSet.logStats();
         writeParams(iter);
       }
-
       LogInfo.end_track();
     }
     LogInfo.end_track();
@@ -171,7 +168,7 @@ public class Learner {
   private Evaluation processExamples(int iter, String group,
       List<Example> examples, boolean computeExpectedCounts) {
     Evaluation evaluation = new Evaluation();
-    Set<String> seen = new HashSet<>();
+
     if (examples.size() == 0)
       return evaluation;
 
@@ -206,7 +203,6 @@ public class Learner {
         Execution.putOutput("example", e);
 
         ParserState state = parseExample(params, ex, computeExpectedCounts);
-        
         if (computeExpectedCounts) {
           if (opts.checkGradient) {
             LogInfo.begin_track("Checking gradient");
@@ -241,6 +237,10 @@ public class Learner {
         // To save memory
         ex.predDerivations.clear();
       }
+
+      if (computeExpectedCounts && batchSize > 0)
+        updateWeights(counts);
+
     }
 
     params.finalizeWeights();
@@ -356,9 +356,8 @@ public class Learner {
   private void printLearnerEventsSummary(Evaluation evaluation,
                                          int iter,
                                          String group) {
-    if (eventsOut == null) {
+    if (eventsOut == null)
       return;
-    }
     List<String> fields = new ArrayList<>();
     fields.add("iter=" + iter);
     fields.add("group=" + group);

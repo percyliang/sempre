@@ -1,6 +1,5 @@
 package edu.stanford.nlp.sempre;
 
-import com.beust.jcommander.internal.Lists;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 
@@ -8,7 +7,6 @@ import fig.basic.*;
 import fig.exec.Execution;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * A simple bottom-up chart-based parser that keeps the |beamSize| top
@@ -27,28 +25,21 @@ public class BeamParser extends Parser {
   public static Options opts = new Options();
 
   Trie trie;  // For non-cat-unary rules
-  
+
   public BeamParser(Spec spec) {
     super(spec);
-    if (Parser.opts.trackedCats != null) {
-      Parser.opts.trackedCats = Parser.opts.trackedCats.stream()
-          .map(s -> "$" + s).collect(Collectors.toList());
-      LogInfo.logs("Mapped trackedCats to: %s", Parser.opts.trackedCats);
-    }
+
     // Index the non-cat-unary rules
     trie = new Trie();
-    for (Rule rule : grammar.rules) {
-      if (!rule.isFloating())
-        addRule(rule);
-    }
+    for (Rule rule : grammar.rules)
+      addRule(rule);
     if (Parser.opts.visualizeChartFilling)
       this.chartFillOut = IOUtils.openOutAppendEasy(Execution.getFile("chartfill"));
   }
 
   public synchronized void addRule(Rule rule) {
-    if (!rule.isCatUnary()) {
+    if (!rule.isCatUnary())
       trie.add(rule);
-    }
   }
 
   public ParserState newParserState(Params params, Example ex, boolean computeExpectedCounts) {
@@ -105,7 +96,7 @@ class BeamParserState extends ChartParserState {
     for (int len = 1; len <= numTokens; len++)
       for (int i = 0; i + len <= numTokens; i++)
         build(i, i + len);
-    
+
     if (parser.verbose(2)) LogInfo.end_track();
 
     // Visualize
@@ -116,10 +107,7 @@ class BeamParserState extends ChartParserState {
     }
 
     setPredDerivations();
-    for (Derivation deriv : predDerivations) {
-      deriv.getAnchoredTokens();
-    }
-    
+
     if (mode == Mode.full) {
       // Compute gradient with respect to the predicted derivations
       ensureExecuted();
@@ -260,7 +248,7 @@ class BeamParserState extends ChartParserState {
       }
     }
   }
-  
+
   // -- Coarse state pruning --
 
   // Remove any (cat, start, end) which isn't reachable from the

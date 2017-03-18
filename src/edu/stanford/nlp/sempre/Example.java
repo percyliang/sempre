@@ -10,7 +10,6 @@ import fig.basic.Evaluation;
 import fig.basic.LispTree;
 import fig.basic.LogInfo;
 
-import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -37,11 +36,8 @@ public class Example {
 
   // What we should try to predict.
   @JsonProperty public Formula targetFormula;  // Logical form (e.g., database query)
-  @JsonProperty public Value targetValue;  // Denotation (e.g., answer)
-  @JsonProperty public int NBestInd = -1;  // Position on the NBEST list
-  @JsonProperty public String timeStamp;
-  @JsonProperty public String definition;
   public List<Formula> alternativeFormulas;    // Alternative logical form (less canonical)
+  @JsonProperty public Value targetValue;      // Denotation (e.g., answer)
 
   //// Information after preprocessing (e.g., tokenization, POS tagging, NER, syntactic parsing, etc.).
   public LanguageInfo languageInfo = null;
@@ -50,9 +46,6 @@ public class Example {
 
   // Predicted derivations (sorted by score).
   public List<Derivation> predDerivations;
-  
-  // chart status in case we are supporting partial parses for definitions
-  public List<Derivation> chartDerivations;
 
   // Temporary state while parsing an Example (see Derivation.java for analogous structure).
   private Map<String, Object> tempState;
@@ -67,9 +60,6 @@ public class Example {
     private Formula targetFormula;
     private Value targetValue;
     private LanguageInfo languageInfo;
-    private int NbestInd = -1;
-    private String timeStamp;
-    private String definition;
 
     public Builder setId(String id) { this.id = id; return this; }
     public Builder setUtterance(String utterance) { this.utterance = utterance; return this; }
@@ -77,9 +67,6 @@ public class Example {
     public Builder setTargetFormula(Formula targetFormula) { this.targetFormula = targetFormula; return this; }
     public Builder setTargetValue(Value targetValue) { this.targetValue = targetValue; return this; }
     public Builder setLanguageInfo(LanguageInfo languageInfo) { this.languageInfo = languageInfo; return this; }
-    public Builder setNBestInd(int NbestInd) { this.NbestInd = NbestInd; return this; }
-    public Builder setTimeStamp(String timeStamp) { this.timeStamp = timeStamp; return this; }
-    public Builder setDefinition(String definition) { this.definition = definition; return this; }
     public Builder withExample(Example ex) {
       setId(ex.id);
       setUtterance(ex.utterance);
@@ -89,7 +76,7 @@ public class Example {
       return this;
     }
     public Example createExample() {
-      return new Example(id, utterance, context, targetFormula, targetValue, languageInfo, NbestInd, timeStamp, definition);
+      return new Example(id, utterance, context, targetFormula, targetValue, languageInfo);
     }
   }
 
@@ -99,19 +86,13 @@ public class Example {
                  @JsonProperty("context") ContextValue context,
                  @JsonProperty("targetFormula") Formula targetFormula,
                  @JsonProperty("targetValue") Value targetValue,
-                 @JsonProperty("languageInfo") LanguageInfo languageInfo,
-                 @JsonProperty("NBestInd") int NBestInd,
-                 @JsonProperty("timeStamp") String timeStamp,
-                 @JsonProperty("definition") String definition) {
+                 @JsonProperty("languageInfo") LanguageInfo languageInfo) {
     this.id = id;
     this.utterance = utterance;
     this.context = context;
     this.targetFormula = targetFormula;
     this.targetValue = targetValue;
     this.languageInfo = languageInfo;
-    this.NBestInd = NBestInd;
-    this.timeStamp = timeStamp;
-    this.definition = definition;
   }
 
   // Accessors
@@ -129,8 +110,6 @@ public class Example {
     this.alternativeFormulas.add(alternativeFormula);
   }
   public void setTargetValue(Value targetValue) { this.targetValue = targetValue; }
-  public void setNBestInd(int index) { this.NBestInd = index; }
-  public void setTimeStamp(String timeStamp) { this.timeStamp = timeStamp; }
 
   public String spanString(int start, int end) {
     return String.format("%d:%d[%s]", start, end, start != -1 ? phraseString(start, end) : "...");
@@ -171,12 +150,6 @@ public class Example {
         b.setTargetValue(Values.fromLispTree(arg.child(1)));
       } else if ("context".equals(label)) {
         b.setContext(new ContextValue(arg));
-      } else if ("NBestInd".equals(label)) {
-        b.setNBestInd(Integer.parseInt(arg.child(1).value));
-      } else if ("timeStamp".equals(label)) {
-        b.setTimeStamp(arg.child(1).value);
-      } else if ("definition".equals(label)) {
-        b.setDefinition(arg.child(1).value);
       }
     }
     b.setLanguageInfo(new LanguageInfo());
@@ -215,8 +188,7 @@ public class Example {
         ex.predDerivations = new ArrayList<>();
         for (int j = 1; j < arg.children.size(); j++)
           ex.predDerivations.add(rawDerivationFromLispTree(arg.child(j)));
-      } else if (!Sets.newHashSet("id", "utterance", "targetFormula", "targetValue", 
-          "targetValues", "context", "original", "timeStamp", "NBestInd", "definition").contains(label)) {
+      } else if (!Sets.newHashSet("id", "utterance", "targetFormula", "targetValue", "targetValues", "context", "original").contains(label)) {
         throw new RuntimeException("Invalid example argument: " + arg);
       }
     }
@@ -278,9 +250,6 @@ public class Example {
 
     if (id != null)
       tree.addChild(LispTree.proto.newList("id", id));
-    if (context != null)
-      tree.addChild(context.toLispTree());
-     
     if (utterance != null)
       tree.addChild(LispTree.proto.newList("utterance", utterance));
     if (targetFormula != null)
@@ -307,13 +276,6 @@ public class Example {
         list.addChild(derivationToLispTree(deriv));
       tree.addChild(list);
     }
-    
-    // interactive stuff
-    if (definition != null)
-      tree.addChild(LispTree.proto.newList("definition", definition));
-    tree.addChild(LispTree.proto.newList("timeStamp", LocalDateTime.now().toString()));
-    tree.addChild(LispTree.proto.newList("NBestInd", Integer.toString(NBestInd)));
-    
 
     return tree;
   }

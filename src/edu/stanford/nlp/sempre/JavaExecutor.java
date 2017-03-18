@@ -5,7 +5,6 @@ import com.google.common.collect.Maps;
 
 import fig.basic.MapUtils;
 import fig.basic.Option;
-import fig.basic.Ref;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -103,8 +102,8 @@ public class JavaExecutor extends Executor {
         return (String) x;
       else if (x instanceof Value)
         return (x instanceof NameValue) ? ((NameValue) x).id : ((StringValue) x).value;
-        else
-          return null;
+      else
+        return null;
     }
 
     // Apply func to each element of |list| and return the resulting list.
@@ -170,7 +169,6 @@ public class JavaExecutor extends Executor {
       return new Response(ErrorValue.badJava(e.toString()));
     }
   }
-
 
   private Object processFormula(Formula formula, ContextValue context) {
     if (formula instanceof ValueFormula)  // Unpack value and convert to object (e.g., for ints)
