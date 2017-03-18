@@ -50,6 +50,7 @@ public class Rule {
   @Override
   public String toString() {
     if (stringRepn == null) {
+      if (sem == null) return "NoSemanticFunction";
       String semStr = sem.toString();
       // stop printing very long rules
       int maxLength = 100;

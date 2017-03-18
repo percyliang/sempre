@@ -18,6 +18,7 @@ import org.testng.collections.Lists;
  * Test the parser, and some floating examples
  * @author Sida Wang
  */
+@Test(groups = { "InteractiveLearning" })
 public class FloatingParsingTest {
   Predicate<Example> contains(String formula) {
     Formula answer = Formulas.fromLispTree(LispTree.proto.parseFromString(formula));
@@ -96,7 +97,7 @@ public class FloatingParsingTest {
     return ContextValue.fromString(String.format("(context (graph NaiveKnowledgeGraph ((string \"%s\") (name b) (name c))))", strigify2));
   }
 
-  @Test public void basicTest() {
+  public void basicTest() {
     String defaultBlocks = "[[1,1,1,\"Green\",[]],[1,2,1,\"Blue\",[]],[2,2,1,\"Red\",[]],[3,2,2,\"Yellow\",[]]]";
     ContextValue context = getContext(defaultBlocks);
     LogInfo.begin_track("testJoin");
@@ -115,7 +116,7 @@ public class FloatingParsingTest {
     LogInfo.end_track();
   }
 
-  @Test public void advanced() {
+  public void advanced() {
     String defaultBlocks = "[[1,1,1,\"Green\",[]],[1,2,1,\"Blue\",[]],[2,2,1,\"Red\",[]],[3,2,2,\"Yellow\",[]]]";
     ContextValue context = getContext(defaultBlocks);
     LogInfo.begin_track("testJoin");

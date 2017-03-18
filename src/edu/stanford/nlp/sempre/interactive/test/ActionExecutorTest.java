@@ -1,26 +1,31 @@
 package edu.stanford.nlp.sempre.interactive.test;
 
-import static org.testng.AssertJUnit.assertEquals;
-
-import java.util.*;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import fig.basic.*;
-import edu.stanford.nlp.sempre.*;
-import edu.stanford.nlp.sempre.interactive.ActionExecutor;
-import edu.stanford.nlp.sempre.interactive.World;
-import edu.stanford.nlp.sempre.interactive.Item;
-import edu.stanford.nlp.sempre.interactive.voxelurn.Color;
-import edu.stanford.nlp.sempre.interactive.voxelurn.Voxel;
-
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import edu.stanford.nlp.sempre.ContextValue;
+import edu.stanford.nlp.sempre.Executor;
+import edu.stanford.nlp.sempre.Formulas;
+import edu.stanford.nlp.sempre.Json;
+import edu.stanford.nlp.sempre.NaiveKnowledgeGraph;
+import edu.stanford.nlp.sempre.StringValue;
+import edu.stanford.nlp.sempre.interactive.ActionExecutor;
+import edu.stanford.nlp.sempre.interactive.Item;
+import edu.stanford.nlp.sempre.interactive.World;
+import edu.stanford.nlp.sempre.interactive.voxelurn.Color;
+import edu.stanford.nlp.sempre.interactive.voxelurn.Voxel;
+import fig.basic.LispTree;
+import fig.basic.LogInfo;
 
 /**
  * Test the ActionExecutor
  * @author Sida Wang
  */
+
 public class ActionExecutorTest {
   ActionExecutor executor = new ActionExecutor();
 
@@ -54,7 +59,8 @@ public class ActionExecutorTest {
     return x -> {LogInfo.logs("Got %d, expected %d", x.selected().size(), n); return x.selected().size()==n;};
   }
 
-  @Test public void testJoin() {
+  @Test(groups = { "Interactive" })
+  public void testJoin() {
     String defaultBlocks = "[[1,1,1,\"Green\",[]],[1,2,1,\"Blue\",[]],[2,2,1,\"Red\",[]],[3,2,2,\"Yellow\",[]]]";
     ContextValue context = getContext(defaultBlocks);
     LogInfo.begin_track("testJoin");
@@ -71,7 +77,8 @@ public class ActionExecutorTest {
     LogInfo.end_track();
 
   }
-  @Test public void testSpecialSets() {
+  @Test(groups = { "Interactive" })
+  public void testSpecialSets() {
     String defaultBlocks = "[[1,1,1,\"Green\",[\"S\"]],[1,2,1,\"Blue\",[\"S\"]],[2,2,1,\"Red\",[\"S\"]],[2,2,2,\"Yellow\",[]]]";
     ContextValue context = getContext(defaultBlocks);
     LogInfo.begin_track("testSpecial");
@@ -84,7 +91,8 @@ public class ActionExecutorTest {
     LogInfo.end_track();
   }
 
-  @Test public void testMerge() {
+  @Test(groups = { "Interactive" })
+  public void testMerge() {
     {
       String defaultBlocks = "[[1,1,1,\"Green\",[]],[1,2,1,\"Blue\",[]],[2,2,1,\"Red\",[]],[2,2,2,\"Yellow\",[]]]";
       ContextValue context = getContext(defaultBlocks);
@@ -96,7 +104,8 @@ public class ActionExecutorTest {
     } 
     LogInfo.end_track();
   }
-  @Test public void testBasicActions() {
+  @Test(groups = { "Interactive" })
+  public void testBasicActions() {
     String defaultBlocks = "[[1,1,1,\"Green\",[]],[1,2,1,\"Blue\",[]],[2,2,1,\"Red\",[]],[2,2,3,\"Yellow\",[]]]";
     ContextValue context = getContext(defaultBlocks);
     LogInfo.begin_track("testBasicActions");
@@ -116,7 +125,8 @@ public class ActionExecutorTest {
   private Set<Item> real(Set<Item> all) {
     return all.stream().filter(c -> ((Voxel)c).color != Color.Fake).collect(Collectors.toSet());
   }
-  @Test public void testRemove() {
+  @Test(groups = { "Interactive" })
+  public void testRemove() {
     // this is a green stick
     String defaultBlocks = "[[1,1,1,\"Green\",[]],[1,1,2,\"Green\",[\"S\"]],[1,1,3,\"Red\",[\"S\"]],[1,1,4,\"Green\",[]]]";
     ContextValue context = getContext(defaultBlocks);
@@ -131,7 +141,8 @@ public class ActionExecutorTest {
     LogInfo.end_track();
   }
 
-  @Test public void testMoreActions() {
+  @Test(groups = { "Interactive" })
+  public void testMoreActions() {
     // this is a green stick
     String defaultBlocks = "[[1,1,1,\"Green\",[]],[1,1,2,\"Green\",[]],[1,1,3,\"Green\",[]],[1,1,4,\"Green\",[]]]";
     ContextValue context = getContext(defaultBlocks);
@@ -147,7 +158,8 @@ public class ActionExecutorTest {
     LogInfo.end_track();
   }
 
-  @Test public void troubleCases() {
+  @Test(groups = { "Interactive" })
+  public void troubleCases() {
     // this is a green stick
     String defaultBlocks = "[[1,1,1,\"Green\",[\"S\"]],[1,1,2,\"Green\",[]],[1,1,3,\"Green\",[]],[1,1,4,\"Green\",[]]]";
     ContextValue context = getContext(defaultBlocks);
@@ -159,7 +171,8 @@ public class ActionExecutorTest {
     LogInfo.end_track();
   }
 
-  @Test public void testFake() {
+  @Test(groups = { "Interactive" })
+  public void testFake() {
     // this is a green stick
     String defaultBlocks = "[[1,1,0,\"Fake\",[\"S\"]]]";
     ContextValue context = getContext(defaultBlocks);
@@ -174,7 +187,8 @@ public class ActionExecutorTest {
     LogInfo.end_track();
   }
 
-  @Test public void testIsolation() {
+  @Test(groups = { "Interactive" })
+  public void testIsolation() {
     // this is a green stick
     String defaultBlocks = "[[1,1,1,\"Green\",[\"S\"]],[1,1,2,\"Green\",[]],[1,1,3,\"Green\",[]],[1,1,4,\"Green\",[]]]";
     ContextValue context = getContext(defaultBlocks);
@@ -186,7 +200,8 @@ public class ActionExecutorTest {
     LogInfo.end_track();
   }
 
-  @Test public void testUpdate() {
+  @Test(groups = { "Interactive" })
+  public void testUpdate() {
     String defaultBlocks = "[[1,1,1,\"Green\",[\"S\"]],[1,1,2,\"Red\",[]],[1,1,3,\"Green\",[]],[1,1,4,\"Green\",[]]]";
     ContextValue context = getContext(defaultBlocks);
     LogInfo.begin_track("testUpdate");
@@ -197,7 +212,8 @@ public class ActionExecutorTest {
     LogInfo.end_track();
   }
 
-  @Test public void testScoping() {
+  @Test(groups = { "Interactive" })
+  public void testScoping() {
     // this is a green stick
     String defaultBlocks = "[[1,1,1,\"Green\",[\"S\"]],[1,1,2,\"Green\",[]],[1,1,3,\"Green\",[]],[1,1,4,\"Green\",[]]]";
     ContextValue context = getContext(defaultBlocks);
