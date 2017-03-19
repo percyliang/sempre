@@ -65,22 +65,22 @@ def figOpts; l(selo(:pooldir, 'execDir', 'exec', '_OUTPATH_'), o('overwriteExecD
 addMode('backup', 'small commands like run community server, backup, or simulator', lambda { |e| l(
   lambda { |e| system 'echo "backing up with mv"'},
   lambda { |e| system 'mkdir -p ./int-backup/'},
-	letDefault(:msg, 'backing up, no message'),
-	lambda { |e| l('echo ', :msg, '> ./int-backup/message')},
-	lambda { |e| l('echo ', '`date +%Y-%m-%d.%H:%M:%S`', '>> ./int-backup/message')},
+  letDefault(:msg, 'backing up, no message'),
+  lambda { |e| l('echo ', :msg, '> ./int-backup/message')},
+  lambda { |e| l('echo ', '`date +%Y-%m-%d.%H:%M:%S`', '>> ./int-backup/message')},
   lambda { |e| system 'mv int-output int-backup/`date +%Y-%m-%d.%H:%M:%S`'},
   lambda { |e| system 'mkdir -p ./int-output'},
 nil)})
 
 addMode('backup-data', 'put community-server into trash with time stamp', lambda { |e| l(
-	lambda { |e| system 'echo "backing up data with mv"'},
+  lambda { |e| system 'echo "backing up data with mv"'},
   lambda { |e| system 'mkdir -p ./community-server/data-backup'},
   lambda { |e| system 'mv ./community-server/data ./community-server/data-backup/`date +%Y-%m-%d.%H:%M:%S`'},
 nil)})
 
 addMode('trash', 'put int-output into trash with time stamp', lambda { |e| l(
   lambda { |e| system 'echo "trashing int-output with time stamp"'},
-	lambda { |e| system 'mv int-output int-output-trash-`date +%Y-%m-%d.%H:%M:%S`'},
+  lambda { |e| system 'mv int-output int-output-trash-`date +%Y-%m-%d.%H:%M:%S`'},
   lambda { |e| system 'rm -rf int-output-trash-*'},
   lambda { |e| system 'mkdir -p ./int-output'},
 nil)})
@@ -109,42 +109,42 @@ l('python community-server/server.py -- port 8403'),
 nil)})
 
 addMode('simulator', 'run the simulator', lambda { |e| l(
-	# rlwrap,
-	header('core,interactive'),
-	'edu.stanford.nlp.sempre.interactive.Simulator',
-	figOpts,
-	letDefault(:server, 'local'),
-	sel(:server, {
-		'local' => o('serverURL', 'http://localhost:8410'),
-		'remote' => o('serverURL', 'http://jonsson.stanford.edu:8410')
-	}),
-	# set to 0 to enable logging
-	o('numThreads', 1),
-	letDefault(:sandbox, 'full'),
-	sel(:sandbox, {
-		'all' => o('reqParams', 'grammar=0\&cite=0\&learn=0\&logging=0'),
-		'nolog' => o('reqParams', 'grammar=0\&cite=0\&learn=1\&logging=0'),
-		'nolearn' => o('reqParams', 'grammar=1\&cite=1\&learn=0\&logging=0'),
-		'none' => o('reqParams', 'grammar=1\&cite=1\&learn=1\&logging=0'),
-		'nocite' => o('reqParams', 'grammar=1\&cite=0\&learn=1\&logging=0'),
-	}),
-	letDefault(:task, 'sidaw'),
-	sel(:task, {
-		'freebig' => o('logFiles', './shrdlurn/queries/freebuildbig-0206.json.gz'),
-		'freebigcontext' => o('logFiles', './shrdlurn/queries/freebuildbig-0206.context.json.gz'),
+  # rlwrap,
+  header('core,interactive'),
+  'edu.stanford.nlp.sempre.interactive.Simulator',
+  figOpts,
+  letDefault(:server, 'local'),
+  sel(:server, {
+    'local' => o('serverURL', 'http://localhost:8410'),
+    'remote' => o('serverURL', 'http://jonsson.stanford.edu:8410')
+  }),
+  # set to 0 to enable logging
+  o('numThreads', 1),
+  letDefault(:sandbox, 'full'),
+  sel(:sandbox, {
+    'all' => o('reqParams', 'grammar=0\&cite=0\&learn=0\&logging=0'),
+    'nolog' => o('reqParams', 'grammar=0\&cite=0\&learn=1\&logging=0'),
+    'nolearn' => o('reqParams', 'grammar=1\&cite=1\&learn=0\&logging=0'),
+    'none' => o('reqParams', 'grammar=1\&cite=1\&learn=1\&logging=0'),
+    'nocite' => o('reqParams', 'grammar=1\&cite=0\&learn=1\&logging=0'),
+  }),
+  letDefault(:task, 'sidaw'),
+  sel(:task, {
+    'freebig' => o('logFiles', './shrdlurn/queries/freebuildbig-0206.json.gz'),
+    'freebigcontext' => o('logFiles', './shrdlurn/queries/freebuildbig-0206.context.json.gz'),
 
-		'qual1' => o('logFiles', './shrdlurn/queries/qualifier1-0118.json.gz'),
-		'qual2' => o('logFiles', './shrdlurn/queries/qualifier2-0129.json.gz'),
-		'qual3' => o('logFiles', './shrdlurn/queries/qualifier3-0201.json.gz'), #  both 2 and 3
-		'free1' => o('logFiles', './shrdlurn/queries/freebuild1-0121.json.gz'),
-		'free2' => o('logFiles', './shrdlurn/queries/freebuild2-0127.json.gz'),
-		'sidaw' => o('logFiles', './shrdlurn/queries/sidaw.json'),
-		}),
+    'qual1' => o('logFiles', './shrdlurn/queries/qualifier1-0118.json.gz'),
+    'qual2' => o('logFiles', './shrdlurn/queries/qualifier2-0129.json.gz'),
+    'qual3' => o('logFiles', './shrdlurn/queries/qualifier3-0201.json.gz'), #  both 2 and 3
+    'free1' => o('logFiles', './shrdlurn/queries/freebuild1-0121.json.gz'),
+    'free2' => o('logFiles', './shrdlurn/queries/freebuild2-0127.json.gz'),
+    'sidaw' => o('logFiles', './shrdlurn/queries/sidaw.json'),
+    }),
 nil)})
 
 ############################################################
 # {2016-07-02} [Sida Wang]: interactive semantic parsing
-addMode('interactive', 'interactive semantic parsing in a VoxelWorld', lambda { |e| l(
+addMode('voxelurn', 'interactive semantic parsing in a VoxelWorld', lambda { |e| l(
   #rlwrap,
   header('core,interactive'),
   'edu.stanford.nlp.sempre.Main',
@@ -155,8 +155,8 @@ addMode('interactive', 'interactive semantic parsing in a VoxelWorld', lambda { 
   o('ActionExecutor.convertNumberValues', true),
   o('ActionExecutor.printStackTrace', true),
   o('VoxelWorld.maxBlocks', 3000),
-  selo(0, 'ActionExecutor.FlatWorldType', 'BlocksWorld', 'CalendarWorld'),
-  selo(0, 'Grammar.inPaths', './shrdlurn/blocksworld.grammar', './shrdlurn/calendar.grammar'),
+  selo(0, 'ActionExecutor.worldType', 'VoxelWorld', 'CalendarWorld', 'Otherworld'),
+  selo(0, 'Grammar.inPaths', './shrdlurn/voxelurn.grammar', './shrdlurn/calendar.grammar'),
 
   o('Params.initWeightsRandomly', false),
   o('Grammar.binarizeRules', false),
@@ -169,55 +169,55 @@ addMode('interactive', 'interactive semantic parsing in a VoxelWorld', lambda { 
   o('FloatingParser.defaultIsFloating', true),
 
   selo(0, 'BeamFloatingParser.floatStrategy', 'Never', 'NoParse', 'Always'),
-	o('BeamFloatingParser.trackedCats', 'Number', 'Numbers', 'Color',  'Direction', 'Set', 'Sets', 'Action', 'Actions'),
+  o('BeamFloatingParser.trackedCats', 'Number', 'Numbers', 'Color',  'Direction', 'Set', 'Sets', 'Action', 'Actions'),
 
-	o('ParserState.customExpectedCounts', 'None'),
-	o('Params.l1Reg', 'nonlazy'),
-	o('Params.l1RegCoeff', 0.0001),
-	o('Parser.beamSize', 25),
-	o('Params.initStepSize', 0.1),
-	o('Params.adaptiveStepSize', true),
-	#o('Params.stepSizeReduction', 0.25),
+  o('ParserState.customExpectedCounts', 'None'),
+  o('Params.l1Reg', 'nonlazy'),
+  o('Params.l1RegCoeff', 0.0001),
+  o('Parser.beamSize', 25),
+  o('Params.initStepSize', 0.1),
+  o('Params.adaptiveStepSize', true),
+  #o('Params.stepSizeReduction', 0.25),
 
-	o('FeatureExtractor.featureComputers', 'interactive.ActionFeatureComputer'),
-	o('FeatureExtractor.featureDomains', ':rule', ':span', ':stats', ':scope', ':social', ':window'),
-	# o('FeatureExtractor.featureDomains', ':rule'),
+  o('FeatureExtractor.featureComputers', 'interactive.ActionFeatureComputer'),
+  o('FeatureExtractor.featureDomains', ':rule', ':span', ':stats', ':scope', ':social', ':window'),
+  # o('FeatureExtractor.featureDomains', ':rule'),
 
-	o('Master.intOutputPath', './int-output/'),
-	o('ILUtils.citationPath', './int-output/citation/'),
+  o('Master.intOutputPath', './int-output/'),
+  o('ILUtils.citationPath', './int-output/citation/'),
 
-	o('ILUtils.useAligner', true),
-	o('ILUtils.maxSequence', 20),
+  o('ILUtils.useAligner', true),
+  o('ILUtils.maxSequence', 20),
 
-	o('DefinitionAligner.strategies', 'ExactExclusion'),
+  o('DefinitionAligner.strategies', 'ExactExclusion'),
 
-	o('Master.onlineLearnExamples', true),
-	o('Master.independentSessions', false),
+  o('Master.onlineLearnExamples', true),
+  o('Master.independentSessions', false),
 
-	o('Master.onlyInteractive', true),
+  o('Master.onlyInteractive', true),
 
-	o('jsonServer', true),
+  o('jsonServer', true),
 
-	o('JsonServer.numThreads', 16),
-	o('JsonServer.maxCandidates', 50),
-	o('JsonServer.queryLogPath', './int-output/query.log'),
-	o('JsonServer.responseLogPath', './int-output/response.log'),
-	o('JsonServer.port', 8410),
+  o('JsonServer.numThreads', 16),
+  o('JsonServer.maxCandidates', 50),
+  o('JsonServer.queryLogPath', './int-output/query.log'),
+  o('JsonServer.responseLogPath', './int-output/response.log'),
+  o('JsonServer.port', 8410),
 
-	o('GrammarInducer.useBestPacking', true),
-	o('GrammarInducer.useSimplePacking', true),
+  o('GrammarInducer.useBestPacking', true),
+  o('GrammarInducer.useSimplePacking', true),
 
-	o('Derivation.showTypes', false),
-	o('Derivation.showValues', false),
-	o('Derivation.showRules', false),
+  o('Derivation.showTypes', false),
+  o('Derivation.showValues', false),
+  o('Derivation.showRules', false),
 
-	lambda { |e| system 'mkdir -p ./int-output/'; nil},
-	lambda { |e| system 'mkdir -p ./int-output/log/'; nil},
-	lambda { |e| system 'mkdir -p ./int-output/citation/'; nil},
-	lambda { |e| system 'mkdir -p server.exec';
-		l(o('execDir', 'server.exec/'),
-		o('overwriteExecDir'))
-	 },
+  lambda { |e| system 'mkdir -p ./int-output/'; nil},
+  lambda { |e| system 'mkdir -p ./int-output/log/'; nil},
+  lambda { |e| system 'mkdir -p ./int-output/citation/'; nil},
+  lambda { |e| system 'mkdir -p server.exec';
+    l(o('execDir', 'server.exec/'),
+    o('overwriteExecDir'))
+   },
 nil) })
 ############################################################
 

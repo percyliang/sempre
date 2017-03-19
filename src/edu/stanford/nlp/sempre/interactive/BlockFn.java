@@ -1,7 +1,6 @@
 package edu.stanford.nlp.sempre.interactive;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.testng.collections.Lists;
 
@@ -11,17 +10,16 @@ import edu.stanford.nlp.sempre.DerivationStream;
 import edu.stanford.nlp.sempre.Example;
 import edu.stanford.nlp.sempre.FeatureExtractor;
 import edu.stanford.nlp.sempre.FeatureVector;
-import edu.stanford.nlp.sempre.Formula;
 import edu.stanford.nlp.sempre.ILUtils;
 import edu.stanford.nlp.sempre.SemanticFn;
 import edu.stanford.nlp.sempre.SingleDerivationStream;
 import fig.basic.LispTree;
-import fig.basic.LogInfo;
 import fig.basic.Option;
 
 /**
  * return a (scoping) block sequencing all the children
- * Block here refers to a block of code, not the a voxel..
+ * where selection has similar behavior as in blocked
+ * structured programming.
  * @author sidaw
  */
 public class BlockFn extends SemanticFn {
@@ -66,6 +64,7 @@ public class BlockFn extends SemanticFn {
           // do not do anything to the core language
           if (onlyChild.allAnchored()) return null;
           //if (!ILUtils.stripBlock(onlyChild).rule.isInduced()) return null;
+          
           // if already blocked explicitly, do not do anything
           if ( scopingModes.contains(((ActionFormula)onlyChild.formula).mode)) return null;
 
@@ -86,16 +85,6 @@ public class BlockFn extends SemanticFn {
               .createDerivation();
           return deriv;
         } else return null;
-
-//        // not used for now
-//        Formula f = new ActionFormula(mode, 
-//            args.stream().map(d -> d.formula).collect(Collectors.toList()));
-//        Derivation res = new Derivation.Builder()
-//            .formula(f)
-//            .withCallable(c)
-//            .createDerivation();
-//        
-//        return res;
       }
     };
   }

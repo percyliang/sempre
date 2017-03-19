@@ -30,7 +30,7 @@ public class Rule {
   public final List<String> rhs;  // Right-hand side: sequence of categories (have $ prefix) and tokens.
   public final SemanticFn sem;  // Takes derivations corresponding to RHS categories and produces a set of derivations corresponding to LHS.
   public List<Pair<String, Double>> info;  // Extra info
-  public RuleSource source = null;
+  public RuleSource source = null; // for tracking where the rule comes from when they are induced
   
   // Cache the semanticRepn
   public String getSemRepn() {
@@ -50,11 +50,10 @@ public class Rule {
   @Override
   public String toString() {
     if (stringRepn == null) {
-      if (sem == null) return "NoSemanticFunction";
-      String semStr = sem.toString();
-      // stop printing very long rules
+      String semStr = sem == null? "NullSemanticFn" : sem.toString();
       int maxLength = 100;
-      if (semStr.length() > maxLength) semStr = semStr.substring(0,maxLength) + "..."; 
+      if (semStr.length() > maxLength)
+        semStr = semStr.substring(0,maxLength) + "..."; 
       stringRepn = lhs + " -> " + (rhs == null ? "" : Joiner.on(' ').join(rhs)) + " " + semStr;
     }
     return stringRepn;
@@ -104,7 +103,7 @@ public class Rule {
       for (Pair<String, Double> p : info)
         tree.addChild(LispTree.proto.newList(p.getFirst(), "" + p.getSecond()));
     }
-    if (source!=null)
+    if (source != null)
       tree.addChild(source.toJson());
     return tree;
   }

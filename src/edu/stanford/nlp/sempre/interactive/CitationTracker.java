@@ -23,9 +23,9 @@ import fig.basic.LogInfo;
 import fig.basic.Pair;
 
 /**
- * A rule specifies how to take a right hand of terminals and non-terminals.
- *
- * @author Percy Liang
+ * Tracks rule usage via a citation system.
+ * A rule is cited when a user makes use of that rule in a derivation.
+ * @author sidaw
  */
 public class CitationTracker {
   public static final String IDPrefix = "id:";

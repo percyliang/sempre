@@ -16,7 +16,7 @@ public abstract class World {
   public Set<Item> previous;
   
   public static World fromContext(String worldname, ContextValue context) {
-    if (worldname.equals("BlocksWorld"))
+    if (worldname.equals("VoxelWorld"))
       return VoxelWorld.fromContext(context);
     throw new RuntimeException("World does not exist: " + worldname);
   }

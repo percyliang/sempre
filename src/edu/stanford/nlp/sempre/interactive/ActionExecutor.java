@@ -34,7 +34,7 @@ public class ActionExecutor extends Executor {
     public String classPathPrefix = "edu.stanford.nlp.sempre";
 
     @Option(gloss = "The type of FlatWorld used")
-    public String FlatWorldType = "BlocksWorld";
+    public String worldType = "BlocksWorld";
     
     @Option(gloss = "the maximum number of primitive calls until we stop executing")
     public int maxSteps= 1000;
@@ -47,7 +47,7 @@ public class ActionExecutor extends Executor {
   public Response execute(Formula formula, ContextValue context) {
     // We can do beta reduction here since macro substitution preserves the
     // denotation (unlike for lambda DCS).
-    World world = World.fromContext(opts.FlatWorldType, context);
+    World world = World.fromContext(opts.worldType, context);
     formula = Formulas.betaReduction(formula);
     try {
       performActions((ActionFormula)formula, world);

@@ -52,13 +52,13 @@ public class FloatingParsingTest {
     FloatingParser.opts.defaultIsFloating = true;
     ActionExecutor.opts.convertNumberValues  = true;
     ActionExecutor.opts.printStackTrace = true;
-    ActionExecutor.opts.FlatWorldType = "BlocksWorld";
-    Grammar.opts.inPaths = Lists.newArrayList("./shrdlurn/blocksworld.grammar");
+    ActionExecutor.opts.worldType = "BlocksWorld";
+    Grammar.opts.inPaths = Lists.newArrayList("./shrdlurn/voxelurn.grammar");
     Grammar.opts.useApplyFn = "interactive.ApplyFn";
     Grammar.opts.binarizeRules = false;
 
     ActionExecutor executor = new ActionExecutor();
-    ActionExecutor.opts.FlatWorldType = "BlocksWorld";
+    ActionExecutor.opts.worldType = "BlocksWorld";
     FeatureExtractor extractor = new FeatureExtractor(executor);
     FeatureExtractor.opts.featureDomains.add("rule");
     ValueEvaluator valueEvaluator = new ExactValueEvaluator();

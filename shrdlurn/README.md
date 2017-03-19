@@ -1,5 +1,5 @@
-Experimental work following
-1) ./shrdlurn/runServer.sh to start both servers
+To run a experiment
+1) ./shrdlurn/run @mode=server
 2) Blast the server with simulator on previous logs, under sandbox mode, to get the server into state
 3) Collect and append to more logs
 4) For any particular experiment, save the previous log

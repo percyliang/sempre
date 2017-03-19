@@ -45,14 +45,14 @@ public class GrammarInducerTest {
     FloatingParser.opts.defaultIsFloating = true;
     ActionExecutor.opts.convertNumberValues  = true;
     ActionExecutor.opts.printStackTrace = true;
-    ActionExecutor.opts.FlatWorldType = "BlocksWorld";
+    ActionExecutor.opts.worldType = "BlocksWorld";
 
     Derivation.opts.showTypes = false;
     Derivation.opts.showRules = false;
     Derivation.opts.showCat = true;
 
     LanguageAnalyzer.opts.languageAnalyzer = "interactive.ActionLanguageAnalyzer";
-    Grammar.opts.inPaths = Lists.newArrayList("./shrdlurn/blocksworld.grammar");
+    Grammar.opts.inPaths = Lists.newArrayList("./shrdlurn/voxelurn.grammar");
     Grammar.opts.useApplyFn = "interactive.ApplyFn";
     Grammar.opts.binarizeRules = false;
 

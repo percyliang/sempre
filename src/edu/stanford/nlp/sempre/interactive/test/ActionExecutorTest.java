@@ -31,7 +31,7 @@ public class ActionExecutorTest {
 
   protected static void runFormula(ActionExecutor executor, String formula, ContextValue context, Predicate<World> checker) {
     LogInfo.begin_track("formula: %s", formula);
-    executor.opts.FlatWorldType = "BlocksWorld";
+    executor.opts.worldType = "BlocksWorld";
     Executor.Response response = executor.execute(Formulas.fromLispTree(LispTree.proto.parseFromString(formula)), context);
 
     NaiveKnowledgeGraph graph = (NaiveKnowledgeGraph)context.graph;
