@@ -1,14 +1,15 @@
-To run a experiment
-1) ./shrdlurn/run @mode=server
+
+## Basics
+
+1) Start the server
+    ./interactive/run @mode=voxlurn -Server.port 8410
+    ./interactive/run @mode=voxlurn -Server.port 8410
 2) Blast the server with simulator on previous logs, under sandbox mode, to get the server into state
 3) Collect and append to more logs
 4) For any particular experiment, save the previous log
-	- ./run @mode=int-utils @cmd=backup-mv
-  - reset the log
-potentially reset citation and grammar information as well?
-5) blast server with non-sandbox call to get previous citations
+    ./interactive/run @mode=backup # save previous data logs
+    ./interactive/run @mode=trash # deletes previous data logs
 
-Default port: 8410 for sempre, 8406 for user
-Run: ./run @mode=interactive -Server.port 8410
-Test command : .shrdlurn/run @mode=test @class=interactive.test.ActionExecutorTest -verbose 5
-Test command : .shrdlurn/run @mode=test -verbose 5
+## Tests
+    ./shrdlurn/run @mode=test
+    ./shrdlurn/run @mode=test @class=ActionExecutorTest -verbose 5

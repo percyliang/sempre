@@ -11,7 +11,7 @@ import fig.exec.Execution;
 public class Main implements Runnable {
   @Option public boolean interactive = false;
   @Option public boolean server = false;
-  @Option public boolean jsonServer = false;
+  @Option public boolean interactiveServer = false;
 
   public void run() {
     Builder builder = new Builder();
@@ -29,8 +29,8 @@ public class Main implements Runnable {
       server.run();
     }
     
-    if (jsonServer) {
-      Master master = new Master(builder);
+    if (interactiveServer) {
+      Master master = new InteractiveMaster(builder);
       JsonServer server = new JsonServer(master);
       server.run();
     }

@@ -3,17 +3,14 @@ package edu.stanford.nlp.sempre;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-
 import fig.basic.*;
 import jline.console.ConsoleReader;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.reflect.Field;
-import java.nio.file.Paths;
-import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * A Master manages multiple sessions. Currently, they all share the same model,
@@ -41,16 +38,8 @@ public class Master {
     @Option(gloss = "Write out new parameters to this directory")
     public String newParamsPath;
 
-    // Interactive stuff
     @Option(gloss = "Write out new grammar rules")
-    public String intOutputPath;
-    @Option(gloss = "make sessions independent")
-    public boolean independentSessions = false;
-    @Option(gloss = "number of utterances to return for autocomplete")
-    public int autocompleteCount = 5;
-    @Option(gloss = "only allow interactive commands")
-    public boolean onlyInteractive = false;
-
+    public String newGrammarPath;
   }
 
   public static Options opts = new Options();
@@ -96,9 +85,9 @@ public class Master {
     }
   }
 
-  private Builder builder;
-  private Learner learner;
-  private HashMap<String, Session> sessions = new LinkedHashMap<>();
+  protected Builder builder;
+  protected Learner learner;
+  protected HashMap<String, Session> sessions = new LinkedHashMap<>();
 
   public Master(Builder builder) {
     this.builder = builder;
@@ -113,11 +102,6 @@ public class Master {
     Session session = sessions.get(id);
     if (session == null) {
       session = new Session(id);
-
-      if (opts.independentSessions) {
-        session.useIndependentLearner(builder);
-      }
-
       for (String path : opts.scriptPaths)
         processScript(session, path);
       for (String command : opts.commands)
@@ -125,8 +109,6 @@ public class Master {
       if (id != null)
         sessions.put(id, session);
     }
-    if (opts.independentSessions)
-      builder.params = session.params;
     return session;
   }
 
@@ -147,10 +129,6 @@ public class Master {
     LogInfo.log("  (execute |logical form|): execute the logical form (e.g., (execute (call + (number 3) (number 4))))");
     LogInfo.log("  (def |key| |value|): define a macro to replace |key| with |value| in all commands (e.g., (def type fb:type.object type)))");
     LogInfo.log("  (context [(user |user|) (date |date|) (exchange |exchange|) (graph |graph|)]): prints out or set the context");
-    // interactive commands, starting with the :
-    LogInfo.log("  (:uttdef head [[body,bodyformula],[]]): provide a definition for the original utterance");
-    LogInfo.log("  (:autocomplete |prefix|): provide a definition for the original utterance");
-    LogInfo.log("  (:action |utternace|): commandline utility for performing an action on the world");
     LogInfo.log("Press Ctrl-D to exit.");
   }
 
@@ -191,18 +169,15 @@ public class Master {
   // Currently, synchronize a very crude level.
   // In the future, refine this.
   // Currently need the synchronization because of writing to stdout.
-  public Response processQuery(Session session, String line) {
+  public synchronized Response processQuery(Session session, String line) {
     line = line.trim();
     Response response = new Response();
-
-    if (!line.startsWith("(:") && opts.onlyInteractive)
-      response.lines.add("command disabled for security: " + line);
 
     // Capture log output and put it into response.
     // Hack: modifying a static variable to capture the logging.
     // Make sure we're synchronized!
-    // StringWriter stringOut = new StringWriter();
-    // LogInfo.setFileOut(new PrintWriter(stringOut));
+    StringWriter stringOut = new StringWriter();
+    LogInfo.setFileOut(new PrintWriter(stringOut));
 
     if (line.startsWith("("))
       handleCommand(session, line, response);
@@ -210,14 +185,13 @@ public class Master {
       handleUtterance(session, line, response);
 
     // Clean up
-    // for (String outLine : stringOut.toString().split("\n"))
-    //  response.lines.add(outLine);
+    for (String outLine : stringOut.toString().split("\n"))
+      response.lines.add(outLine);
+    LogInfo.setFileOut(null);
 
     // Log interaction to disk
     if (!Strings.isNullOrEmpty(opts.logPath)) {
-      PrintWriter out;
-      out = IOUtils.openOutAppendHard(
-          Paths.get(opts.logPath, session.id + ".log").toString());
+      PrintWriter out = IOUtils.openOutAppendHard(opts.logPath);
       out.println(
           Joiner.on("\t").join(
               Lists.newArrayList(
@@ -234,14 +208,10 @@ public class Master {
   }
 
   String summaryString(Response response) {
-    try {
     if (response.getExample() != null)
       return response.getFormulaAnswer();
     if (response.getLines().size() > 0)
       return response.getLines().get(0);
-    } catch (Exception e) {
-      return null;
-    }
     return null;
   }
 
@@ -258,8 +228,7 @@ public class Master {
     ex.preprocess();
 
     // Parse!
-    ParserState state;
-    state = builder.parser.parse(builder.params, ex, false);
+    builder.parser.parse(builder.params, ex, false);
 
     response.ex = ex;
     ex.logWithoutContext();
@@ -292,7 +261,7 @@ public class Master {
     }
   }
 
-  void handleCommand(Session session, String line, Response response) {
+  private void handleCommand(Session session, String line, Response response) {
     LispTree tree = LispTree.proto.parseFromString(line);
     tree = builder.grammar.applyMacros(tree);
 
@@ -336,7 +305,7 @@ public class Master {
       if (!getOptionsParser().parse(new String[] {"-" + option, value}))
         LogInfo.log("Unknown option: " + option);
     } else if (command.equals("select") || command.equals("accept") ||
-        command.equals("s") || command.equals("a")) {
+               command.equals("s") || command.equals("a")) {
       // Select an answer
       if (tree.children.size() != 2) {
         LogInfo.logs("Invalid usage: (%s |candidate index|)", command);
@@ -417,187 +386,9 @@ public class Master {
       session.context = new ContextValue(session.context.user, session.context.date,
         session.context.exchanges, graph);
     }
-
-    // Start of interactive commands
-    else if (command.equals(":q")) {
-      // Create example
-      String utt = tree.children.get(1).value;
-      Example ex = exampleFromUtterance(utt, session);
-
-      //if (approxSeq >= 8)
-      //  response.lines.add("You are taking many actions in one step, consider defining some of steps as one single step.");
-      ILUtils.sanitize(ex);
-
-      builder.parser.parse(builder.params, ex, false);
-
-      if (session.isStatsing()) {
-        response.stats.put("type", "q");
-        response.stats.put("size", ex.predDerivations!=null? ex.predDerivations.size() : 0);
-        response.stats.put("status", ILUtils.getParseStatus(ex));
-      }
-      response.ex = ex;
-
-    } else if (command.equals(":qdebug")) {
-      // Create example
-      String utt = tree.children.get(1).value;
-      Example ex = exampleFromUtterance(utt, session);
-
-      builder.parser.parse(builder.params, ex, false);
-
-      Derivation.opts.showCat = true;
-      Derivation.opts.showRules = true;
-      for (Derivation d : ex.predDerivations) {
-         response.lines.add(d.toLispTree().toString());
-      }
-      Derivation.opts.showCat = false;
-      Derivation.opts.showRules = false;
-      response.ex = ex;
-    } else if (command.equals(":reject")) {
-      if (session.isStatsing()) {
-        response.stats.put("type", "reject");
-        response.stats.put("rejectsize", tree.children.size()-2);
-      }
-    } else if (command.equals(":accept")) {
-      String utt = tree.children.get(1).value;
-
-      List<Formula> targetFormulas = new ArrayList<>();
-      try {
-        targetFormulas = tree.children.subList(2, tree.children.size()).stream()
-            .map(t -> Formulas.fromLispTree(LispTree.proto.parseFromString(t.value)))
-            .collect(Collectors.toList());
-      } catch (Exception e) {
-        e.printStackTrace();
-        response.lines.add("cannot accept formula: ");
-      }
-
-      Example ex = exampleFromUtterance(utt, session);
-      response.ex = ex;
-
-      // Parse!
-      ParserState state;
-      state = builder.parser.parse(builder.params, ex, true);
-      state.ensureExecuted();
-
-
-      //Derivation match = ex.predDerivations.stream()
-      //    .filter(d -> d.formula.equals(targetFormulaFinal)).findFirst().orElse(null);
-
-      int rank = -1;
-      Derivation match = null;
-      for (int i = 0; i < ex.predDerivations.size(); i++) {
-        Derivation derivi = ex.predDerivations.get(i);
-        if (targetFormulas.contains(derivi.formula)) {
-          rank = i; match = derivi; break;
-        }
-      }
-
-      if (session.isStatsing()) {
-        response.stats.put("type", "accept");
-        response.stats.put("rank", rank);
-        response.stats.put("status", ILUtils.getParseStatus(ex));
-        response.stats.put("size", ex.predDerivations.size());
-        response.stats.put("formulas.size", targetFormulas.size());
-        response.stats.put("rank", rank);
-
-        response.stats.put("len_formula", targetFormulas.get(0).toLispTree().numNodes());
-        response.stats.put("len_utterance", ex.getTokens().size());
-      }
-
-      if (match!=null) {
-        LogInfo.logs(":accept successful: %s", response.stats);
-
-        if (session.isWritingCitation()) {
-          ILUtils.cite(match, ex);
-        }
-
-        // ex.setTargetValue(match.value); // this is just for logging, not actually used for learning
-        if (session.isLearning()) {
-          LogInfo.begin_track("Updating parameters");
-          learner.onlineLearnExampleByFormula(ex, targetFormulas);
-          LogInfo.end_track();
-        }
-      }
-    } else if (command.startsWith(":def")) {
-      if (tree.children.size() == 3) {
-        String head = tree.children.get(1).value;
-        String jsonDef = tree.children.get(2).value;
-
-        Ref<Example> refExHead = new Ref<>();
-        List<Rule> inducedRules = ILUtils.induceRulesHelper(command, head, jsonDef,
-            builder.parser, builder.params, session.id, refExHead);
-
-        if (inducedRules.size() > 0) {
-          if (session.isLearning()) {
-            for (Rule rule : inducedRules) {
-                ILUtils.addRuleInteractive(rule, builder.parser);
-            }
-          }
-          // TODO : should not have to parse again, I guess just set the formula or something
-          // builder.parser.parse(builder.params, refExHead.value, false);
-          response.ex = refExHead.value;
-          // write out the grammar
-          if (session.isWritingGrammar()) {
-            PrintWriter out = IOUtils.openOutAppendHard(Paths.get(Master.opts.intOutputPath, "grammar.log.json").toString());
-            for (Rule rule : inducedRules) {
-              out.println(rule.toJson());
-            }
-            out.close();
-          }
-        } else {
-          LogInfo.logs("No rule induced for head %s", head);
-        }
-
-        if (session.isStatsing()) {
-          response.stats.put("type", "def");
-          response.stats.put("numRules", inducedRules.size());
-        }
-      } else {
-        LogInfo.logs("Invalid format for def");
-      }
-    } else if (command.equals(":admin")) {
-      if (!tree.child(1).value.equals("withcrappysecurity")) return;
-      LogInfo.logs("Printing and overriding grammar and parameters...");
-      builder.params.write(Paths.get(Master.opts.intOutputPath, "params.params").toString());
-      PrintWriter out = IOUtils.openOutAppendHard(Paths.get(Master.opts.intOutputPath + "grammar.final.json").toString());
-      for (Rule rule : builder.grammar.rules) {
-        out.println(rule.toJson());
-      }
-      out.close();
-      LogInfo.logs("Done printing and overriding grammar and parameters...");
-    } else if (command.equals(":action")) {
-      // test code for mutating worlds, updates the context
-      String query = tree.children.get(1).value;
-      this.handleUtterance(session, query, response);
-      LogInfo.logs("%s : %s", query, response.getAnswer());
-      String blocks = ((StringValue)Values.fromString(response.getAnswer())).value;
-      String strigify2 = Json.writeValueAsStringHard(blocks); // some parsing issue inside lisptree parser
-      session.context = ContextValue.fromString(String.format("(context (graph NaiveKnowledgeGraph ((string \"%s\") (name b) (name c))))", strigify2));
-    } else if (command.equals(":context")) {
-      if (tree.children.size() == 1) {
-        LogInfo.logs("%s", session.context);
-      } else {
-        session.context = ContextValue.fromString(
-            String.format("(context (graph NaiveKnowledgeGraph ((string \"%s\") (name b) (name c))))",
-                tree.children.get(1).toString()));
-        if (session.isStatsing())
-          response.stats.put("context-length", tree.children.get(1).toString().length());
-      }
-
-    }
     else {
       LogInfo.log("Invalid command: " + tree);
     }
-
-  }
-
-  private Example exampleFromUtterance(String utt, Session session) {
-    Example.Builder b = new Example.Builder();
-    b.setId(session.id);
-    b.setUtterance(utt);
-    b.setContext(session.context);
-    Example ex = b.createExample();
-    ex.preprocess();
-    return ex;
   }
 
   void addNewExample(Example origEx) {

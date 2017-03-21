@@ -1,39 +1,40 @@
 package edu.stanford.nlp.sempre;
 
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
-import fig.basic.*;
-import fig.html.HtmlElement;
-import fig.html.HtmlUtils;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpCookie;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.nio.file.Paths;
-import java.net.HttpCookie;
-import com.sun.net.httpserver.HttpServer;
-
-import edu.stanford.nlp.sempre.Master.Response;
-import edu.stanford.nlp.sempre.interactive.BadInteractionException;
-
-import com.sun.net.httpserver.HttpHandler;
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.Headers;
-
-import java.io.*;
-import java.util.*;
-import java.util.concurrent.Executors;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.ExecutorService;
-import java.math.BigInteger;
-import java.security.SecureRandom;
-import java.time.LocalDateTime;
+
+import com.google.common.base.Strings;
+import com.sun.net.httpserver.Headers;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
+import com.sun.net.httpserver.HttpServer;
+
+import edu.stanford.nlp.sempre.interactive.BadInteractionException;
+import fig.basic.IOUtils;
+import fig.basic.LogInfo;
+import fig.basic.MapUtils;
+import fig.basic.Option;
 
 
 /**
- * JsonServer, most of the interactive stuff run through this. Handles log instead of master.
+ * JsonServer, interactive learning queries run through this. All the logs are handled here.
  *
  * @author Sida Wang
  */

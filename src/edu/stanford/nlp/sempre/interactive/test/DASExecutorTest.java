@@ -13,7 +13,7 @@ import edu.stanford.nlp.sempre.Formulas;
 import edu.stanford.nlp.sempre.Json;
 import edu.stanford.nlp.sempre.NaiveKnowledgeGraph;
 import edu.stanford.nlp.sempre.StringValue;
-import edu.stanford.nlp.sempre.interactive.ActionExecutor;
+import edu.stanford.nlp.sempre.interactive.DASExecutor;
 import edu.stanford.nlp.sempre.interactive.Item;
 import edu.stanford.nlp.sempre.interactive.World;
 import edu.stanford.nlp.sempre.interactive.voxelurn.Color;
@@ -26,12 +26,12 @@ import fig.basic.LogInfo;
  * @author Sida Wang
  */
 
-public class ActionExecutorTest {
-  ActionExecutor executor = new ActionExecutor();
+public class DASExecutorTest {
+  DASExecutor executor = new DASExecutor();
 
-  protected static void runFormula(ActionExecutor executor, String formula, ContextValue context, Predicate<World> checker) {
+  protected static void runFormula(DASExecutor executor, String formula, ContextValue context, Predicate<World> checker) {
     LogInfo.begin_track("formula: %s", formula);
-    executor.opts.worldType = "BlocksWorld";
+    executor.opts.worldType = "VoxelWorld";
     Executor.Response response = executor.execute(Formulas.fromLispTree(LispTree.proto.parseFromString(formula)), context);
 
     NaiveKnowledgeGraph graph = (NaiveKnowledgeGraph)context.graph;
@@ -42,7 +42,7 @@ public class ActionExecutorTest {
     LogInfo.end_track();
 
     if (checker != null) {
-      if (!checker.test(World.fromContext("BlocksWorld", getContext(jsonStr)))) {
+      if (!checker.test(World.fromContext("VoxelWorld", getContext(jsonStr)))) {
         LogInfo.end_track();
         Assert.fail(jsonStr);
       }

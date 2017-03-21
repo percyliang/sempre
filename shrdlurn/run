@@ -150,12 +150,12 @@ addMode('voxelurn', 'interactive semantic parsing in a VoxelWorld', lambda { |e|
   'edu.stanford.nlp.sempre.Main',
   #figOpts,
 
-  o('Executor', 'interactive.ActionExecutor'),
-  o('LanguageAnalyzer', 'interactive.ActionLanguageAnalyzer'),
-  o('ActionExecutor.convertNumberValues', true),
-  o('ActionExecutor.printStackTrace', true),
+  o('Executor', 'interactive.DASExecutor'),
+  o('LanguageAnalyzer', 'interactive.DASLanguageAnalyzer'),
+  o('DASExecutor.convertNumberValues', true),
+  o('DASExecutor.printStackTrace', true),
   o('VoxelWorld.maxBlocks', 3000),
-  selo(0, 'ActionExecutor.worldType', 'VoxelWorld', 'CalendarWorld', 'Otherworld'),
+  selo(0, 'DASExecutor.worldType', 'VoxelWorld', 'CalendarWorld', 'Otherworld'),
   selo(0, 'Grammar.inPaths', './shrdlurn/voxelurn.grammar', './shrdlurn/calendar.grammar'),
 
   o('Params.initWeightsRandomly', false),
@@ -179,11 +179,11 @@ addMode('voxelurn', 'interactive semantic parsing in a VoxelWorld', lambda { |e|
   o('Params.adaptiveStepSize', true),
   #o('Params.stepSizeReduction', 0.25),
 
-  o('FeatureExtractor.featureComputers', 'interactive.ActionFeatureComputer'),
+  o('FeatureExtractor.featureComputers', 'interactive.DASFeatureComputer'),
   o('FeatureExtractor.featureDomains', ':rule', ':span', ':stats', ':scope', ':social', ':window'),
   # o('FeatureExtractor.featureDomains', ':rule'),
 
-  o('Master.intOutputPath', './int-output/'),
+  o('InteractiveMaster.intOutputPath', './int-output/'),
   o('ILUtils.citationPath', './int-output/citation/'),
 
   o('ILUtils.useAligner', true),

@@ -23,7 +23,7 @@ import fig.basic.Option;
  * supports ActionFormula here, and does conversions of singleton sets
  * @author Sida Wang
  */
-public class ActionExecutor extends Executor {
+public class DASExecutor extends Executor {
   public static class Options {
     @Option(gloss = "Whether to convert NumberValue to int/double") public boolean convertNumberValues = true;
     @Option(gloss = "Whether to convert name values to string literal") public boolean convertNameValues = true;
@@ -33,17 +33,17 @@ public class ActionExecutor extends Executor {
     @Option(gloss = "Reduce verbosity by automatically appending, for example, edu.stanford.nlp.sempre to java calls")
     public String classPathPrefix = "edu.stanford.nlp.sempre";
 
-    @Option(gloss = "The type of FlatWorld used")
-    public String worldType = "BlocksWorld";
-    
+    @Option(gloss = "The type of world used")
+    public String worldType = "VoxelWorld";
+
     @Option(gloss = "the maximum number of primitive calls until we stop executing")
     public int maxSteps= 1000;
-    
+
     @Option(gloss = "The maximum number of while calls")
     public int maxWhile = 20;
   }
   public static Options opts = new Options();
- 
+
   public Response execute(Formula formula, ContextValue context) {
     // We can do beta reduction here since macro substitution preserves the
     // denotation (unlike for lambda DCS).
@@ -60,7 +60,7 @@ public class ActionExecutor extends Executor {
       }
       return new Response(ErrorValue.badJava(e.toString()));
     }
-  }  
+  }
 
   @SuppressWarnings("rawtypes")
   private void performActions(ActionFormula f, World world) {
@@ -81,7 +81,7 @@ public class ActionExecutor extends Executor {
       int times;
       if (!opts.convertNumberValues)
         times = (int)((NumberValue)arg.iterator().next()).value;
-      else 
+      else
         times = (int)arg.iterator().next();
 
       for (int i = 0; i < times; i++)
@@ -105,7 +105,7 @@ public class ActionExecutor extends Executor {
 
       world.selected = toItemSet(selected);
       performActions((ActionFormula)f.args.get(1), world);
-      
+
       world.selected = prevSelected;
       world.merge();
     } else if (f.mode == ActionFormula.Mode.foreach) {
@@ -119,33 +119,33 @@ public class ActionExecutor extends Executor {
       }
       world.selected = prevSelected;
       world.merge();
-      
+
     } else if (f.mode == ActionFormula.Mode.isolate) {
       Set<Item> prevAll = world.allItems;
       //Set<Item> prevSelected = world.selected;
       //Set<Item> prevPrevious = world.previous;
       if (f.args.size() > 1) throw new RuntimeException("No longer supporting this isolate formula: " + f);
-      
+
       world.allItems = Sets.newHashSet(world.selected);
       //world.selected = scope;
       //world.previous = scope;
       performActions((ActionFormula)f.args.get(0), world);
-      
+
       world.allItems.addAll(prevAll); // merge, overriding;
       //world.selected = prevSelected;
       //world.previous = prevPrevious;
       world.merge();
-      
+
     } else if (f.mode == ActionFormula.Mode.block || f.mode == ActionFormula.Mode.blockr) {
       // we should never mutate selected in actions
       Set<Item> prevSelected = world.selected;
       Set<Item> prevPrevious = world.previous;
       world.previous = world.selected;
-      
+
       for (Formula child : f.args) {
         performActions((ActionFormula)child, world);
       }
-      
+
       // restore on default blocks
       if (f.mode == ActionFormula.Mode.block) {
         world.selected = prevSelected;
@@ -171,9 +171,9 @@ public class ActionExecutor extends Executor {
 //      world.variables.get(varname).clear();
 //      world.variables.get(varname).addAll(varset);
 //    }
-      
+
   }
-  
+
   @SuppressWarnings("unchecked")
   private Set<Object> toSet(Object maybeSet) {
     if (maybeSet instanceof Set) return (Set<Object>) maybeSet;
@@ -185,7 +185,7 @@ public class ActionExecutor extends Executor {
     }
     return set;
   }
-  
+
   private Set<Item> toItemSet(Set<Object> maybeItems) {
     Set<Item> itemset = maybeItems.stream().map(i -> (Item)i)
         .collect(Collectors.toSet());
@@ -219,10 +219,10 @@ public class ActionExecutor extends Executor {
           return world.empty();
         if (id.equals(SpecialSets.Previous))
           return world.previous();
-      } 
+      }
       return toObject(((ValueFormula<?>) formula).value);
     }
-    
+
     if (formula instanceof JoinFormula) {
       JoinFormula joinFormula = (JoinFormula)formula;
       if (joinFormula.relation instanceof ValueFormula) {
@@ -238,29 +238,29 @@ public class ActionExecutor extends Executor {
         throw new RuntimeException("relation can either be a value, or its reverse");
       }
     }
-    
+
     if (formula instanceof MergeFormula)  {
       MergeFormula mergeFormula = (MergeFormula)formula;
       MergeFormula.Mode mode = mergeFormula.mode;
-      Set<Object> set1 = toSet(processSetFormula(mergeFormula.child1, world)); 
+      Set<Object> set1 = toSet(processSetFormula(mergeFormula.child1, world));
       Set<Object> set2 = toSet(processSetFormula(mergeFormula.child2, world));
-      
+
       if (mode == MergeFormula.Mode.or)
         return Sets.union(set1, set2);
       if (mode == MergeFormula.Mode.and)
         return Sets.intersection(set1, set2);
-      
+
     }
-    
+
     if (formula instanceof NotFormula)  {
       NotFormula notFormula = (NotFormula)formula;
-      Set<Item> set1 = toItemSet(toSet(processSetFormula(notFormula.child, world))); 
+      Set<Item> set1 = toItemSet(toSet(processSetFormula(notFormula.child, world)));
       return Sets.difference(world.allItems, set1);
     }
 
     if (formula instanceof AggregateFormula)  {
       AggregateFormula aggregateFormula = (AggregateFormula)formula;
-      Set<Object> set = toSet(processSetFormula(aggregateFormula.child, world)); 
+      Set<Object> set = toSet(processSetFormula(aggregateFormula.child, world));
       AggregateFormula.Mode mode = aggregateFormula.mode;
       if (mode == AggregateFormula.Mode.count)
         return Sets.newHashSet(set.size());
@@ -269,7 +269,7 @@ public class ActionExecutor extends Executor {
       if (mode == AggregateFormula.Mode.min)
         return Sets.newHashSet(set.stream().max((s,t) -> ((NumberValue)s).value < ((NumberValue)t).value ? 1 : -1));
     }
-    
+
     if (formula instanceof ArithmeticFormula)  {
       ArithmeticFormula arithmeticFormula = (ArithmeticFormula)formula;
       Integer arg1 = (Integer)processSetFormula(arithmeticFormula.child1, world);
@@ -284,7 +284,7 @@ public class ActionExecutor extends Executor {
       if (mode == ArithmeticFormula.Mode.div)
         return arg1 / arg2;
     }
-    
+
     if (formula instanceof CallFormula)  {
       CallFormula callFormula = (CallFormula)formula;
       @SuppressWarnings("rawtypes")
@@ -337,13 +337,13 @@ public class ActionExecutor extends Executor {
       nameMatches.add(m);
       if (isStatic != Modifier.isStatic(m.getModifiers())) continue;
       int cost = typeCastCost(m.getParameterTypes(), args);
-      
+
       // append optional selected parameter when needed:
       if (cost == INVALID_TYPE_COST && args.length + 1 == m.getParameterCount()) {
         args = ObjectArrays.concat(args, thisObj.selected);
         cost = typeCastCost(m.getParameterTypes(), args);
       }
-      
+
       if (cost < bestCost) {
         bestCost = cost;
         bestMethod = m;
@@ -377,7 +377,7 @@ public class ActionExecutor extends Executor {
       if (types[i] != Set.class && args[i].getClass() == Set.class) {
         args[i] = toElement((Set<Object>)args[i]);
       }
-        
+
       cost += typeCastCost(types[i], args[i]);
       if (cost >= INVALID_TYPE_COST) {
         LogInfo.dbgs("NOT COMPATIBLE: want %s, got %s with type %s", types[i], args[i], args[i].getClass());

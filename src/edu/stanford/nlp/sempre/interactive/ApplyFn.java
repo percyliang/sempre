@@ -1,16 +1,16 @@
 package edu.stanford.nlp.sempre.interactive;
 
-import java.util.*;
+import java.util.List;
 
-import org.testng.collections.Lists;
-
-import com.google.common.collect.ImmutableList;
-
-import edu.stanford.nlp.sempre.*;
-import edu.stanford.nlp.sempre.SemanticFn.Callable;
 import edu.stanford.nlp.sempre.Derivation;
+import edu.stanford.nlp.sempre.DerivationStream;
+import edu.stanford.nlp.sempre.Example;
+import edu.stanford.nlp.sempre.Formula;
+import edu.stanford.nlp.sempre.Formulas;
+import edu.stanford.nlp.sempre.LambdaFormula;
+import edu.stanford.nlp.sempre.SemanticFn;
+import edu.stanford.nlp.sempre.SingleDerivationStream;
 import fig.basic.LispTree;
-import fig.basic.MapUtils;
 import fig.basic.Option;
 
 /**

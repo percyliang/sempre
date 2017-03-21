@@ -28,7 +28,7 @@ import edu.stanford.nlp.sempre.Parser.Spec;
 import edu.stanford.nlp.sempre.ParserState;
 import edu.stanford.nlp.sempre.Rule;
 import edu.stanford.nlp.sempre.ValueEvaluator;
-import edu.stanford.nlp.sempre.interactive.ActionExecutor;
+import edu.stanford.nlp.sempre.interactive.DASExecutor;
 import edu.stanford.nlp.sempre.interactive.DefinitionAligner;
 import edu.stanford.nlp.sempre.interactive.GrammarInducer;
 import fig.basic.LogInfo;
@@ -43,9 +43,9 @@ public class GrammarInducerTest {
 
   private static Spec defaultSpec() {
     FloatingParser.opts.defaultIsFloating = true;
-    ActionExecutor.opts.convertNumberValues  = true;
-    ActionExecutor.opts.printStackTrace = true;
-    ActionExecutor.opts.worldType = "BlocksWorld";
+    DASExecutor.opts.convertNumberValues  = true;
+    DASExecutor.opts.printStackTrace = true;
+    DASExecutor.opts.worldType = "VoxelWorld";
 
     Derivation.opts.showTypes = false;
     Derivation.opts.showRules = false;
@@ -63,7 +63,7 @@ public class GrammarInducerTest {
     DefinitionAligner.opts.verbose = 2;
     GrammarInducer.opts.verbose = 2;
 
-    ActionExecutor executor = new ActionExecutor();
+    DASExecutor executor = new DASExecutor();
 
     FeatureExtractor extractor = new FeatureExtractor(executor);
 
