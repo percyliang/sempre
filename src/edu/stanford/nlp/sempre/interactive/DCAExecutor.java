@@ -23,7 +23,7 @@ import fig.basic.Option;
  * supports ActionFormula here, and does conversions of singleton sets
  * @author Sida Wang
  */
-public class DASExecutor extends Executor {
+public class DCAExecutor extends Executor {
   public static class Options {
     @Option(gloss = "Whether to convert NumberValue to int/double") public boolean convertNumberValues = true;
     @Option(gloss = "Whether to convert name values to string literal") public boolean convertNameValues = true;

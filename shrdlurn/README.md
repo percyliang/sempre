@@ -1,15 +1,28 @@
+# Readme
 
-## Basics
+## Running an experiment
 
 1) Start the server
-    ./interactive/run @mode=voxlurn -Server.port 8410
-    ./interactive/run @mode=voxlurn -Server.port 8410
-2) Blast the server with simulator on previous logs, under sandbox mode, to get the server into state
-3) Collect and append to more logs
-4) For any particular experiment, save the previous log
+    ./interactive/run @mode=voxelurn -Server.port 8410
+2) last the server with previous logs to get the server into state
+    ./interactive/run @mode=simulator @server=local @sandbox=none @task=freebig
+2) Run analysis script to get results
+    ./interactive/run @mode=analyze -execNumber 1
+0) (Optional) clean up
     ./interactive/run @mode=backup # save previous data logs
     ./interactive/run @mode=trash # deletes previous data logs
 
 ## Tests
-    ./shrdlurn/run @mode=test
-    ./shrdlurn/run @mode=test @class=ActionExecutorTest -verbose 5
+
+There are many units for interactive learning
+    ./interactive/run @mode=test
+    ./interactive/run @mode=test @class=DACExecutorTest -verbose 5
+
+## Running the server for voxelurn
+
+1) Start the sempre server
+    ./interactive/run @mode=voxelurn -Server.port 8410
+1) Start the client server
+    ./interactive/run @mode=community
+2) (optionallly) Blast the server with previous logs to get the server into state
+    ./interactive/run @mode=simulator @server=local @sandbox=none @task=freebig

@@ -15,7 +15,7 @@ import edu.stanford.nlp.sempre.*;
  * - control what categories to abstract out
  * - efficiency improvement, right now use all members of the cross product
  */
-public class DASFeatureComputer implements FeatureComputer {
+public class DCAFeatureComputer implements FeatureComputer {
   public static class Options {
     @Option(gloss = "Verbosity")
     public int verbose = 0;

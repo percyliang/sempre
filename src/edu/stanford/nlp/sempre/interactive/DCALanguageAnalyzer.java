@@ -10,7 +10,7 @@ import edu.stanford.nlp.sempre.LanguageInfo;
  *
  * @author sidaw
  */
-public class DASLanguageAnalyzer extends LanguageAnalyzer {
+public class DCALanguageAnalyzer extends LanguageAnalyzer {
   // Stanford tokenizer doesn't break hyphens.
   // Replace hypens with spaces for utterances like
   // "Spanish-speaking countries" but not for "2012-03-28".

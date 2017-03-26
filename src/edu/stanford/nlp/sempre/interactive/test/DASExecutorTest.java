@@ -13,7 +13,7 @@ import edu.stanford.nlp.sempre.Formulas;
 import edu.stanford.nlp.sempre.Json;
 import edu.stanford.nlp.sempre.NaiveKnowledgeGraph;
 import edu.stanford.nlp.sempre.StringValue;
-import edu.stanford.nlp.sempre.interactive.DASExecutor;
+import edu.stanford.nlp.sempre.interactive.DCAExecutor;
 import edu.stanford.nlp.sempre.interactive.Item;
 import edu.stanford.nlp.sempre.interactive.World;
 import edu.stanford.nlp.sempre.interactive.voxelurn.Color;
@@ -27,9 +27,9 @@ import fig.basic.LogInfo;
  */
 
 public class DASExecutorTest {
-  DASExecutor executor = new DASExecutor();
+  DCAExecutor executor = new DCAExecutor();
 
-  protected static void runFormula(DASExecutor executor, String formula, ContextValue context, Predicate<World> checker) {
+  protected static void runFormula(DCAExecutor executor, String formula, ContextValue context, Predicate<World> checker) {
     LogInfo.begin_track("formula: %s", formula);
     executor.opts.worldType = "VoxelWorld";
     Executor.Response response = executor.execute(Formulas.fromLispTree(LispTree.proto.parseFromString(formula)), context);
