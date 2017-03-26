@@ -15,7 +15,6 @@ import com.google.common.base.Strings;
 
 import edu.stanford.nlp.sempre.Derivation;
 import edu.stanford.nlp.sempre.Example;
-import edu.stanford.nlp.sempre.ILUtils;
 import edu.stanford.nlp.sempre.Json;
 import edu.stanford.nlp.sempre.Rule;
 import fig.basic.IOUtils;

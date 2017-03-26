@@ -10,7 +10,6 @@ import edu.stanford.nlp.sempre.DerivationStream;
 import edu.stanford.nlp.sempre.Example;
 import edu.stanford.nlp.sempre.FeatureExtractor;
 import edu.stanford.nlp.sempre.FeatureVector;
-import edu.stanford.nlp.sempre.ILUtils;
 import edu.stanford.nlp.sempre.SemanticFn;
 import edu.stanford.nlp.sempre.SingleDerivationStream;
 import fig.basic.LispTree;

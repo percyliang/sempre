@@ -53,7 +53,7 @@ public class Rule {
       String semStr = sem == null? "NullSemanticFn" : sem.toString();
       int maxLength = 100;
       if (semStr.length() > maxLength)
-        semStr = semStr.substring(0,maxLength) + "..."; 
+        semStr = String.format("%s...(%d total)", semStr.substring(0,maxLength), semStr.length());
       stringRepn = lhs + " -> " + (rhs == null ? "" : Joiner.on(' ').join(rhs)) + " " + semStr;
     }
     return stringRepn;

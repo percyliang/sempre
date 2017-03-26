@@ -25,7 +25,6 @@ import edu.stanford.nlp.sempre.LambdaFormula;
 import edu.stanford.nlp.sempre.Rule;
 import edu.stanford.nlp.sempre.SemanticFn;
 import edu.stanford.nlp.sempre.VariableFormula;
-import edu.stanford.nlp.sempre.interactive.GrammarInducer.ParseStatus;
 import fig.basic.LispTree;
 import fig.basic.LogInfo;
 import fig.basic.Option;
@@ -60,7 +59,6 @@ public class GrammarInducer {
   public List<Derivation> matches;
   Derivation def;
 
-  
   // induce rule is possible,
   // otherwise set the correct status
   public GrammarInducer(List<String> headTokens, Derivation def, List<Derivation> chartList) {

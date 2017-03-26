@@ -37,7 +37,7 @@ DATA_FOLDER = "community-server/data/"
 LOG_FOLDER = os.path.join(DATA_FOLDER, "log/")
 STRUCTS_FOLDER = os.path.join(DATA_FOLDER, "structs/")
 
-CITATION_FOLDER = "int-output/citation"
+CITATION_FOLDER = "../int-output/citation"
 
 # Scoring function parameters
 GRAVITY = 1.1  # higher the gravity, the faster old structs lose score

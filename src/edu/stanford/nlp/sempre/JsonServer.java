@@ -16,9 +16,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 import com.google.common.base.Strings;
 import com.sun.net.httpserver.Headers;
@@ -26,7 +29,6 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
-import edu.stanford.nlp.sempre.interactive.BadInteractionException;
 import fig.basic.IOUtils;
 import fig.basic.LogInfo;
 import fig.basic.MapUtils;
@@ -47,9 +49,12 @@ public class JsonServer {
     @Option public String queryLogPath = "./int-output/query.log";
     @Option public String responseLogPath = "./int-output/response.log";
     @Option public String fullResponseLogPath;
+    @Option public int maxExecutionTime = 10; // in seconds
   }
   public static Options opts = new Options();
-
+  private static Object queryLogLock = new Object();
+  private static Object responseLogLock = new Object();
+  private static AtomicLong queryCounter = new AtomicLong();
   Master master;
 
   class Handler implements HttpHandler {
@@ -71,8 +76,7 @@ public class JsonServer {
     // For header
     HttpCookie cookie;
     boolean isNewSession;
-    private Object queryLogLock = new Object();
-    private Object responseLogLock = new Object();
+    
     // For writing main content
 
     public ExchangeState(HttpExchange exchange) throws IOException {
@@ -138,14 +142,14 @@ public class JsonServer {
 
     Map<String, Object> makeJson(Master.Response response) {
       Map<String, Object> json = new HashMap<String, Object>();
-
+      json.put("stats", response.stats);
+      
       if (response.lines != null) {
         json.put("lines", response.lines);
       }
       if (response.getExample()!=null) {
         List<Object> items = new ArrayList<Object>();
         json.put("candidates", items);
-        json.put("stats", response.stats);
         List<Derivation> allCandidates = response.getExample().getPredDerivations();
 
         if (allCandidates != null) {
@@ -180,35 +184,34 @@ public class JsonServer {
       return json;
     }
 
-    // Catch exception if any.
+    // This should be concurrent
     Master.Response processQuery(Session session, String query) {
       String message = null;
       Master.Response response = master.new Response();
+      ExecutorService executor = Executors.newSingleThreadExecutor();
+      Future<Master.Response> future = executor.submit(() -> master.processQuery(session, query));
+      long startTime = System.nanoTime();
       try {
-        response = master.processQuery(session, query);
-      } catch (StringIndexOutOfBoundsException e) {
+        // most exceptions should be handled in InteractiveMaster
+        // so the response can be more specific
+        response = future.get(opts.maxExecutionTime, TimeUnit.SECONDS); 
+      } catch (Throwable e) {
         e.printStackTrace();
         message = e.toString();
-        LogInfo.writeToStdout = false;
-        LogInfo.init();
-      } catch (BadInteractionException e) {
-        message = e.getMessage() + " (BadInteractionException)";
-      } catch (Throwable t) {
-        t.printStackTrace();
-        message = t.toString();
+        response.lines.add(message);
+        response.stats.put("uncaught_error", message);
+        LogInfo.flush();
+        LogInfo.resetInfos();
       } finally {
-        if (!Strings.isNullOrEmpty(message)) {
-          response.lines.add(message);
-          response.stats.put("error", message);
-          LogInfo.resetInfos();
-        }
+        long endTime = System.nanoTime();
+        response.stats.put("time", (endTime - startTime) / 1.0e9);
       }
       return response;
     }
 
     void handleQuery(String sessionId) throws IOException {
       String query = reqParams.get("q");
-
+      long queryNumber = queryCounter.incrementAndGet();
       Session session = master.getSession(sessionId);
       session.reqParams = reqParams;
       session.remoteHost = remoteHost;
@@ -221,6 +224,7 @@ public class JsonServer {
         jsonMap.put("q", query);
         jsonMap.put("remote", remoteHost); 
         jsonMap.put("time", queryTime.toString());
+        jsonMap.put("query", queryNumber);
         jsonMap.put("sessionId", sessionId);
         reqParams.remove("q");
         jsonMap.putAll(reqParams);
@@ -263,7 +267,7 @@ public class JsonServer {
         jsonMap.put("time", queryTime.toString());
         jsonMap.put("ms", String.format("%.3f", java.time.Duration.between(queryTime, responseTime).toNanos()/1.0e6));
         jsonMap.put("sessionId", sessionId);
-        jsonMap.put("q", query); // backwards compatability...
+        jsonMap.put("q", query); // backwards compatibility...
         jsonMap.put("lines", responseMap.get("lines"));
         if (session.isLogging()) {
           logLine(opts.responseLogPath, Json.writeValueAsStringHard(jsonMap));
@@ -305,7 +309,6 @@ public class JsonServer {
     try {
       String hostname = fig.basic.SysInfoUtils.getHostName();
       HttpServer server = HttpServer.create(new InetSocketAddress(opts.port), 10);
-
       ExecutorService pool = new ThreadPoolExecutor(opts.numThreads, opts.numThreads,
           5000, TimeUnit.MILLISECONDS,
           new LinkedBlockingQueue<Runnable>());

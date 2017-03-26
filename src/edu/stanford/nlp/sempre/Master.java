@@ -52,8 +52,8 @@ public class Master {
     int candidateIndex = -1;
 
     // Detailed information
-    Map<String, Object> stats = new LinkedHashMap<>();
-    List<String> lines = new ArrayList<>();
+    public Map<String, Object> stats = new LinkedHashMap<>();
+    public List<String> lines = new ArrayList<>();
 
     public String getFormulaAnswer() {
       if (ex.getPredDerivations().size() == 0 )

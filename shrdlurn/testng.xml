@@ -5,7 +5,7 @@
     <classes>
       <class name="edu.stanford.nlp.sempre.interactive.test.GrammarInducerTest">
       </class>
-			<class name="edu.stanford.nlp.sempre.interactive.test.ActionExecutorTest">
+			<class name="edu.stanford.nlp.sempre.interactive.test.DASExecutorTest">
       </class>
 
 			<!--

@@ -56,6 +56,9 @@ public abstract class Parser {
 
     @Option(gloss = "Dump all features (for debugging)")
     public boolean dumpAllFeatures = false;
+    
+    @Option(gloss = "Call SetEvaluation during parsing")
+    public boolean callSetEvaluation = true;
   }
 
   public static final Options opts = new Options();
@@ -174,9 +177,10 @@ public abstract class Parser {
     Derivation.sortByScore(ex.predDerivations);
 
     // Evaluate
-    ex.evaluation = new Evaluation();
-    addToEvaluation(state, ex.evaluation);
-
+    if (opts.callSetEvaluation) {
+      ex.evaluation = new Evaluation();
+      addToEvaluation(state, ex.evaluation);
+    }
     // Clean up temporary state used during parsing
     ex.clearTempState();
     for (Derivation deriv : ex.predDerivations)

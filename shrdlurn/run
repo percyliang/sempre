@@ -131,6 +131,7 @@ addMode('simulator', 'run the simulator', lambda { |e| l(
   letDefault(:task, 'sidaw'),
   sel(:task, {
     'freebig' => o('logFiles', './shrdlurn/queries/freebuildbig-0206.json.gz'),
+    'freebigdef' => o('logFiles', './shrdlurn/queries/freebuildbig-0206.def.json.gz'),
     'freebigcontext' => o('logFiles', './shrdlurn/queries/freebuildbig-0206.context.json.gz'),
 
     'qual1' => o('logFiles', './shrdlurn/queries/qualifier1-0118.json.gz'),
@@ -139,6 +140,7 @@ addMode('simulator', 'run the simulator', lambda { |e| l(
     'free1' => o('logFiles', './shrdlurn/queries/freebuild1-0121.json.gz'),
     'free2' => o('logFiles', './shrdlurn/queries/freebuild2-0127.json.gz'),
     'sidaw' => o('logFiles', './shrdlurn/queries/sidaw.json'),
+
     }),
 nil)})
 
@@ -149,12 +151,13 @@ addMode('voxelurn', 'interactive semantic parsing in a VoxelWorld', lambda { |e|
   header('core,interactive'),
   'edu.stanford.nlp.sempre.Main',
   #figOpts,
+  o('interactiveLearning', true),
 
   o('Executor', 'interactive.DASExecutor'),
   o('LanguageAnalyzer', 'interactive.DASLanguageAnalyzer'),
   o('DASExecutor.convertNumberValues', true),
   o('DASExecutor.printStackTrace', true),
-  o('VoxelWorld.maxBlocks', 3000),
+  o('VoxelWorld.maxBlocks', 100000),
   selo(0, 'DASExecutor.worldType', 'VoxelWorld', 'CalendarWorld', 'Otherworld'),
   selo(0, 'Grammar.inPaths', './shrdlurn/voxelurn.grammar', './shrdlurn/calendar.grammar'),
 
@@ -166,15 +169,18 @@ addMode('voxelurn', 'interactive semantic parsing in a VoxelWorld', lambda { |e|
 
   o('Parser.pruneErrorValues', true),
   o('Parser', 'BeamFloatingParser'),
-  o('FloatingParser.defaultIsFloating', true),
+  o('Parser.callSetEvaluation', false),
+  o('Parser.beamSize', 100),
+  o('ParserState.customExpectedCounts', 'None'),
 
   selo(0, 'BeamFloatingParser.floatStrategy', 'Never', 'NoParse', 'Always'),
   o('BeamFloatingParser.trackedCats', 'Number', 'Numbers', 'Color',  'Direction', 'Set', 'Sets', 'Action', 'Actions'),
 
-  o('ParserState.customExpectedCounts', 'None'),
+  o('BeamFloatingParser.maxNewTreesPerSpan', 1000),
+
   o('Params.l1Reg', 'nonlazy'),
   o('Params.l1RegCoeff', 0.0001),
-  o('Parser.beamSize', 25),
+
   o('Params.initStepSize', 0.1),
   o('Params.adaptiveStepSize', true),
   #o('Params.stepSizeReduction', 0.25),
@@ -184,19 +190,14 @@ addMode('voxelurn', 'interactive semantic parsing in a VoxelWorld', lambda { |e|
   # o('FeatureExtractor.featureDomains', ':rule'),
 
   o('InteractiveMaster.intOutputPath', './int-output/'),
+  o('InteractiveMaster.onlyInteractive', true),
   o('ILUtils.citationPath', './int-output/citation/'),
 
-  o('ILUtils.useAligner', true),
-  o('ILUtils.maxSequence', 20),
+  o('InteractiveMaster.useAligner', false),
+  o('InteractiveMaster.maxSequence', 20),
+  o('InteractiveMaster.maxChars', 200),
 
   o('DefinitionAligner.strategies', 'ExactExclusion'),
-
-  o('Master.onlineLearnExamples', true),
-  o('Master.independentSessions', false),
-
-  o('Master.onlyInteractive', true),
-
-  o('jsonServer', true),
 
   o('JsonServer.numThreads', 16),
   o('JsonServer.maxCandidates', 50),

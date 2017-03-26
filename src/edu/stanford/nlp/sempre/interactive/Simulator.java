@@ -17,11 +17,15 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 
@@ -89,14 +93,9 @@ public class Simulator implements Runnable {
   @Option public static List<String> logFiles = Lists.newArrayList("./shrdlurn/commandInputs/sidaw.json.log");
 
   public void readQueries() {
-    LogInfo.begin_track("setsTest");
     //T.printAllRules();
     //A.assertAll();
     for (String fileName : logFiles) {
-      ExecutorService executor = new ThreadPoolExecutor(numThreads, numThreads,
-          5000, TimeUnit.MILLISECONDS,
-          new LinkedBlockingQueue<Runnable>());
-
       long startTime = System.nanoTime();
       Stream<String> stream;
       try {
@@ -105,54 +104,62 @@ public class Simulator implements Runnable {
         else
           stream = Files.lines(Paths.get(fileName));
 
-        LogInfo.logs("Reading %s", fileName);
-
-        stream.forEach(l -> 
-        executor.execute(() -> {
-          long startTimeQ = System.nanoTime();
-          Map<String, Object> json = Json.readMapHard(l);
-          Object command = json.get("q");
-          if (command == null) // to be backwards compatible
-            command = json.get("log"); 
-          Object sessionId = json.get("sessionId");
-          if (sessionId == null) // to be backwards compatible
-            sessionId = json.get("id"); 
+        List<String> lines = stream.collect(Collectors.toList());
+        LogInfo.logs("Reading %s (%d lines)", fileName, lines.size());
+        int numLinesRead = 0;
+//        ExecutorService executor = new ThreadPoolExecutor(numThreads, numThreads,
+//            15000, TimeUnit.MILLISECONDS,
+//            new LinkedBlockingQueue<Runnable>());
+        
+        for (String l : lines) {
+          LogInfo.logs("Line %d", numLinesRead);
+          ExecutorService executor = Executors.newSingleThreadExecutor();
+          Future<?> future = executor.submit(() -> executeLine(l));
           try {
-            String response = sempreQuery(command.toString(), sessionId.toString());
-            SimulationAnalyzer.addStats(json, response);
-            //Thread.sleep(10);
-          } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+             future.get(10, TimeUnit.MINUTES); 
+          } catch (Throwable t) {
+            t.printStackTrace();
+          } finally {
+            future.cancel(true); // may or may not desire this
+            long endTime = System.nanoTime();
+            LogInfo.logs("Took %d ns or %.4f s", (endTime - startTime), (endTime - startTime)/1.0e9);
+            numLinesRead++;
           }
-          long endTimeQ = System.nanoTime();
-          double queryTime = (endTimeQ - startTimeQ)/1.0e9;
-          // evaluation.add("queryTime",queryTime);
-          if (queryTime > 0.1) {
-            // LogInfo.logs("slow query (%f): %s", queryTime, l);
-          }
-        }));
-        executor.shutdown();
-        try {
-          boolean finshed = executor.awaitTermination(5, TimeUnit.MINUTES);
-        } catch (InterruptedException e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
         }
       } catch (IOException e) {
         e.printStackTrace();
       }
 
-      long endTime = System.nanoTime();
-      LogInfo.logs("Took %d ns or %.4f s", (endTime - startTime), (endTime - startTime)/1.0e9);
     }
     SimulationAnalyzer.flush();
-    LogInfo.end_track();
+    //    try {
+    //      sempreQuery("(:admin withcrappysecurityWRONG)", "simulator");
+    //    } catch (UnsupportedEncodingException e) {
+    //      // TODO Auto-generated catch block
+    //      e.printStackTrace();
+    //    }
+  }
+  
+  static void executeLine(String l) {
+    Map<String, Object> json = null;
     try {
-      sempreQuery("(:admin withcrappysecurityWRONG)", "simulator");
-    } catch (UnsupportedEncodingException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      json = Json.readMapHard(l);
+    } catch (RuntimeException e) {
+      LogInfo.logs("Json cannot be read from %s: %s", l, e.toString());
+      return;
+    }
+    Object command = json.get("q");
+    if (command == null) // to be backwards compatible
+      command = json.get("log"); 
+    Object sessionId = json.get("sessionId");
+    if (sessionId == null) // to be backwards compatible
+      sessionId = json.get("id");
+    
+    try {
+      String response = sempreQuery(command.toString(), sessionId.toString());
+      SimulationAnalyzer.addStats(json, response);
+    } catch (Throwable t) {
+      t.printStackTrace();
     }
   }
 

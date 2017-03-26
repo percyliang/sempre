@@ -67,12 +67,8 @@ public class VoxelWorld extends World {
   // we only use names S to communicate with the client, internally its just the select variable
   public String toJSON() {
     // selected thats no longer in the world gets nothing
-    
-    if (allItems.size() > opts.maxBlocks)
-      throw new RuntimeException("Number of blocks exceeds the upperlimit: " + opts.maxBlocks);
     //allitems.removeIf(c -> ((Block)c).color == CubeColor.Fake && !this.selected.contains(c));
     //allitems.stream().filter(c -> selected.contains(c)).forEach(i -> i.names.add(SELECT));
-    
     
     return Json.writeValueAsStringHard(allItems.stream()
         .map(c -> {
@@ -122,6 +118,11 @@ public class VoxelWorld extends World {
     Sets.difference(selected, allItems).forEach(i -> ((Voxel)i).color = Color.Fake);
     allItems.removeIf(c -> ((Voxel)c).color == Color.Fake && !this.selected.contains(c));
     allItems.addAll(selected);
+    if (allItems.size() > opts.maxBlocks) {
+      throw new RuntimeException(
+          String.format("Number of blocks (%d) exceeds the upperlimit %d", allItems.size(), opts.maxBlocks)
+          );
+    }
     // keyConsistency();
   }
 
@@ -213,7 +214,7 @@ public class VoxelWorld extends World {
     set.addAll(s);
   }
   
-  private synchronized void keyConsistency() {
+  private void keyConsistency() {
     refreshSet(allItems);
     refreshSet(selected);
     refreshSet(previous);
