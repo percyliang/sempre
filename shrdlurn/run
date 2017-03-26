@@ -145,7 +145,7 @@ addMode('simulator', 'run the simulator', lambda { |e| l(
 nil)})
 
 ############################################################
-# {2016-07-02} [Sida Wang]: interactive semantic parsing
+# {2016-07-02} [sidaw]: interactive semantic parsing
 addMode('voxelurn', 'interactive semantic parsing in a VoxelWorld', lambda { |e| l(
   #rlwrap,
   header('core,interactive'),
@@ -170,13 +170,12 @@ addMode('voxelurn', 'interactive semantic parsing in a VoxelWorld', lambda { |e|
   o('Parser.pruneErrorValues', true),
   o('Parser', 'BeamFloatingParser'),
   o('Parser.callSetEvaluation', false),
-  o('Parser.beamSize', 25),
+  o('Parser.beamSize', 10),
   o('ParserState.customExpectedCounts', 'None'),
 
+  o('BeamFloatingParser.maxNewTreesPerSpan', 20),
   selo(0, 'BeamFloatingParser.floatStrategy', 'Never', 'NoParse', 'Always'),
   o('BeamFloatingParser.trackedCats', 'Number', 'Numbers', 'Color',  'Direction', 'Set', 'Sets', 'Action', 'Actions'),
-
-  o('BeamFloatingParser.maxNewTreesPerSpan', 100),
 
   o('Params.l1Reg', 'nonlazy'),
   o('Params.l1RegCoeff', 0.0001),
@@ -191,7 +190,7 @@ addMode('voxelurn', 'interactive semantic parsing in a VoxelWorld', lambda { |e|
 
   o('InteractiveMaster.intOutputPath', './int-output/'),
   o('InteractiveMaster.onlyInteractive', true),
-  o('ILUtils.citationPath', './int-output/citation/'),
+  o('InteractiveUtils.citationPath', './int-output/citation/'),
 
   o('InteractiveMaster.useAligner', false),
   o('InteractiveMaster.maxSequence', 20),
@@ -199,11 +198,11 @@ addMode('voxelurn', 'interactive semantic parsing in a VoxelWorld', lambda { |e|
 
   o('DefinitionAligner.strategies', 'ExactExclusion'),
 
-  o('JsonServer.numThreads', 16),
-  o('JsonServer.maxCandidates', 50),
-  o('JsonServer.queryLogPath', './int-output/query.log'),
-  o('JsonServer.responseLogPath', './int-output/response.log'),
-  o('JsonServer.port', 8410),
+  o('InteractiveServer.numThreads', 16),
+  o('InteractiveServer.maxCandidates', 50),
+  o('InteractiveServer.queryLogPath', './int-output/query.log'),
+  o('InteractiveServer.responseLogPath', './int-output/response.log'),
+  o('InteractiveServer.port', 8410),
 
   o('GrammarInducer.useBestPacking', true),
   o('GrammarInducer.useSimplePacking', true),
@@ -211,6 +210,10 @@ addMode('voxelurn', 'interactive semantic parsing in a VoxelWorld', lambda { |e|
   o('Derivation.showTypes', false),
   o('Derivation.showValues', false),
   o('Derivation.showRules', false),
+
+  #o('NumberFn.allowedRange', 0, 100),
+  #o('SimpleLexicon.inPaths', 'shrdlurn/csscolors.lexicon'),
+  #o('Grammar.tags', 'morenumbers', 'morecolors'),
 
   lambda { |e| system 'mkdir -p ./int-output/'; nil},
   lambda { |e| system 'mkdir -p ./int-output/log/'; nil},

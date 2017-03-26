@@ -9,7 +9,7 @@ import edu.stanford.nlp.sempre.NaiveKnowledgeGraph.KnowledgeGraphTriple;
 import edu.stanford.nlp.sempre.interactive.BadInteractionException;
 import edu.stanford.nlp.sempre.interactive.DefinitionAligner;
 import edu.stanford.nlp.sempre.interactive.GrammarInducer;
-import edu.stanford.nlp.sempre.interactive.ILUtils;
+import edu.stanford.nlp.sempre.interactive.InteractiveUtils;
 import edu.stanford.nlp.sempre.interactive.QueryStats;
 import edu.stanford.nlp.sempre.interactive.QueryStats.QueryType;
 import fig.basic.*;
@@ -31,7 +31,7 @@ public class InteractiveMaster extends Master {
   public static class Options {
     @Option(gloss = "Write out new grammar rules")
     public String intOutputPath;
-    @Option(gloss = "make sessions independent")
+    @Option(gloss = "each session gets a different model with its own parameters")
     public boolean independentSessions = false;
     @Option(gloss = "number of utterances to return for autocomplete")
     public int autocompleteCount = 5;
@@ -54,13 +54,14 @@ public class InteractiveMaster extends Master {
 
   @Override
   void printHelp() {
-    super.printHelp();
-    // interactive commands, starting with the :
+    // interactive commands
+    LogInfo.log("Interactive commands");
     LogInfo.log("  (:def head [[body1,bodyformula1],[body2,bodyformula2]]): provide a definition for the original utterance");
     LogInfo.log("  (:q |utterance|): provide a definition for the original utterance");
     LogInfo.log("  (:accept |formula1| |formula2|): accept any derivation with those corresponding formula");
-    LogInfo.log("  (:accept |formula1| |formula2|): accept any derivation with those corresponding formula");
-    LogInfo.log("Press Ctrl-D to exit.");
+    LogInfo.log("  (:reject |formula1| |formula2|): reject any derivations with those corresponding formula");
+    LogInfo.log("Main commands");
+    super.printHelp();
   }
 
   @Override
@@ -70,9 +71,10 @@ public class InteractiveMaster extends Master {
     LogInfo.logs("query %s", line);
     line = line.trim();
     Response response = new Response();
-
-    handleCommand(session, line, response);
-
+    if (line.startsWith("(:"))
+      handleCommand(session, line, response);
+    else
+      handleCommand(session, String.format("(:q \"%s\")", line), response);
     LogInfo.end_track();
     return response;
   }
@@ -92,13 +94,13 @@ public class InteractiveMaster extends Master {
       if (!utteranceAllowed(ex, response)) {
         stats.error("utterance_too_expensive");
         // returns with size and error message
-        // return; parse anyways, there is a time limit
+        return;
       }
 
       builder.parser.parse(builder.params, ex, false);
 
       stats.size(ex.predDerivations!=null? ex.predDerivations.size() : 0);
-      stats.status(ILUtils.getParseStatus(ex));
+      stats.status(InteractiveUtils.getParseStatus(ex));
 
       LogInfo.logs("parse stats: %s", response.stats);
       response.ex = ex;
@@ -151,7 +153,7 @@ public class InteractiveMaster extends Master {
         stats.error("unable to match on accept");
       }
       stats.rank(rank);
-      stats.status(ILUtils.getParseStatus(ex));
+      stats.status(InteractiveUtils.getParseStatus(ex));
       stats.size(ex.predDerivations.size());
 
       stats.put("formulas.size", targetFormulas.size());
@@ -160,7 +162,7 @@ public class InteractiveMaster extends Master {
 
       if (match!=null) {
         if (session.isWritingCitation()) {
-          ILUtils.cite(match, ex);
+          InteractiveUtils.cite(match, ex);
         }
         // ex.setTargetValue(match.value); // this is just for logging, not actually used for learning
         if (session.isLearning()) {
@@ -191,7 +193,7 @@ public class InteractiveMaster extends Master {
         if (inducedRules.size() > 0) {
           if (session.isLearning()) {
             for (Rule rule : inducedRules) {
-              ILUtils.addRuleInteractive(rule, builder.parser);
+              InteractiveUtils.addRuleInteractive(rule, builder.parser);
             }
           }
           // TODO : should not have to parse again, I guess just set the formula or something
@@ -265,10 +267,10 @@ public class InteractiveMaster extends Master {
       throw BadInteractionException.headIsCore(head);
     
     LogInfo.logs("num anchored: %d", state.chartList.size());
-    List<String> bodyList = ILUtils.utterancefromJson(jsonDef, false);
+    List<String> bodyList = InteractiveUtils.utterancefromJson(jsonDef, false);
     LogInfo.logs("bodyutterance:\n %s", String.join("\n",bodyList));
 
-    Derivation bodyDeriv = ILUtils.combine(ILUtils.derivsfromJson(jsonDef, parser, params, refResponse));
+    Derivation bodyDeriv = InteractiveUtils.combine(InteractiveUtils.derivsfromJson(jsonDef, parser, params, refResponse));
     if (refResponse != null) {
       refResponse.value.ex = exHead;
     }
@@ -285,7 +287,7 @@ public class InteractiveMaster extends Master {
     if (opts.useAligner && bodyList.size() == 1){
       LogInfo.logs("testing Aligner2");
       List<Rule> alignedRules = DefinitionAligner.getRules(exHead.getTokens(), 
-          ILUtils.utterancefromJson(jsonDef, true), bodyDeriv, state.chartList);
+          InteractiveUtils.utterancefromJson(jsonDef, true), bodyDeriv, state.chartList);
       for (Rule rule : alignedRules) {
         rule.source = new RuleSource(session.id, head, bodyList);
         rule.source.align = true;

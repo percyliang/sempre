@@ -35,7 +35,7 @@ public class Grammar {
     @Option(gloss = "Variables which are used to interpret the grammar file")
     public List<String> tags = new ArrayList<>();
     @Option public boolean binarizeRules = true;
-    @Option(gloss = "use JoinFn as ApplyFn by default")
+    @Option(gloss = "Specifiy which ApplyFn to use: defaults to JoinFn when null")
     public String useApplyFn = null;
   }
 
@@ -536,7 +536,7 @@ public class Grammar {
       tree = newTree;
       name = tree.child(0).value;
     }
-    // Syntactic sugar: (lambda x (var x)) => (interactive.ApplyFn (arg0 (lambda x (var x))))
+    // Syntactic sugar: (lambda x (f (var x))) => (useApplyFn (lambda x (f (var x))))
     if (name.equals("lambda") && Grammar.opts.useApplyFn != null) {
       LispTree newTree = LispTree.proto.newList();
       newTree.addChild(Grammar.opts.useApplyFn);

@@ -56,7 +56,7 @@ public class Master {
     public List<String> lines = new ArrayList<>();
 
     public String getFormulaAnswer() {
-      if (ex.getPredDerivations().size() == 0 )
+      if (ex.getPredDerivations().size() == 0)
         return "(no answer)";
       else if (candidateIndex == -1)
         return "(not selected)";

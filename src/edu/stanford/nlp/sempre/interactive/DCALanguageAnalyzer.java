@@ -23,7 +23,7 @@ public class DCALanguageAnalyzer extends LanguageAnalyzer {
     return buf.toString();
   }
 
-  private static final String[] numbers = {"zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "many"};
+  private static final String[] numbers = {"zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"};
   private static final String[] determiners = {"the", "a", "an", "that"};
 
   public LanguageInfo analyze(String utterance) {
@@ -93,13 +93,6 @@ public class DCALanguageAnalyzer extends LanguageAnalyzer {
           continue;
         }
         
-        x = Arrays.asList(determiners).indexOf(token);
-        if (x != -1) {
-          languageInfo.posTags.add("DET");
-          languageInfo.nerTags.add("UNK");
-          continue;
-        }
-
         try {
           Double.parseDouble(token);
           languageInfo.posTags.add("CD");

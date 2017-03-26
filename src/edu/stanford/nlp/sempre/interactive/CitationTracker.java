@@ -45,7 +45,7 @@ public class CitationTracker {
   // The summary is ONE SINGLE line of json, has cite, self, and head
   private synchronized void writeSummary(Rule rule) {
     String author = getAuthor(rule);
-    String summaryPath = Paths.get(ILUtils.opts.citationPath, encode(author), encode(getHead(rule)) + ".json").toString();
+    String summaryPath = Paths.get(InteractiveUtils.opts.citationPath, encode(author), encode(getHead(rule)) + ".json").toString();
     File file = new File(summaryPath);
     file.getParentFile().mkdirs();
     
@@ -89,7 +89,7 @@ public class CitationTracker {
   private synchronized void writeLog(Rule rule) {
     String head = getHead(rule);
     String author = getAuthor(rule);
-    String logPath = Paths.get(ILUtils.opts.citationPath, encode(author), encode(head) + ".json.log").toString();
+    String logPath = Paths.get(InteractiveUtils.opts.citationPath, encode(author), encode(head) + ".json.log").toString();
     File file = new File(logPath);
     file.getParentFile().mkdirs();
     

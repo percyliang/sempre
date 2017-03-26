@@ -31,7 +31,7 @@ public class Main implements Runnable {
     
     if (interactiveLearning) {
       Master master = new InteractiveMaster(builder);
-      JsonServer server = new JsonServer(master);
+      InteractiveServer server = new InteractiveServer(master);
       server.run();
       master.runInteractivePrompt();
     }

@@ -23,10 +23,10 @@ import fig.basic.LogInfo;
 
 /**
  * Test the ActionExecutor
- * @author Sida Wang
+ * @author sidaw
  */
 
-public class DASExecutorTest {
+public class DCAExecutorTest {
   DCAExecutor executor = new DCAExecutor();
 
   protected static void runFormula(DCAExecutor executor, String formula, ContextValue context, Predicate<World> checker) {

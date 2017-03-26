@@ -9,13 +9,14 @@ import fig.basic.LogInfo;
 import java.util.List;
 
 /**
- * Formula represents actions and their combinations. : is used as a prefix to denote an ActionFormula
+ * An ActionFormula represent a compositional action used in the interactive package
+ * : is used as a prefix to denote an ActionFormula
  * primitive (: actioname args)
  * sequential (:s ActionFormula ActionFormula ...)
  * repeat (:loop Number ActionFormula)
  * conditional (:if Set ActionFormula)
  * block scoping (:blk ActionFormula)
- * @author Sida Wang
+ * @author sidaw
  */
 public class ActionFormula extends Formula {
   public enum Mode {
@@ -27,13 +28,14 @@ public class ActionFormula extends Formula {
     forset(":for"), // (:for (and this (color red)) (:s (: add red top) (: add yellow top) (: remove)))
     foreach(":foreach"), // (:foreach * (add ((reverse color) this) top))
     
-    // primitives to handle variable scoping
+    // primitives for declaring variables
     //let(":let"), // (:let X *), 
     //set(":set"), // (:set X *)
-    block(":blk"),
-    blockr(":blkr"),
+    
+    block(":blk"), // start a block of code (like {}) with a new scope
+    blockr(":blkr"), // also return a result after finishing the block
     isolate(":isolate"),
-    other(":?");  // (:scope this (blah))
+    other(":?");
     
     private final String value;
     Mode(String value) {this.value = value;}

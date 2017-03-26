@@ -14,18 +14,6 @@ import fig.basic.*;
  */
 public class Derivation implements SemanticFn.Callable, HasScore {
   public static class Options {
-    // Used to compare derivations by compatibility.
-	public static class CompatibilityDerivationComparator implements Comparator<Derivation> {
-	  @Override
-	  public int compare(Derivation deriv1, Derivation deriv2) {
-	    if (deriv1.compatibility > deriv2.compatibility) return -1;
-	    if (deriv1.compatibility < deriv2.compatibility) return +1;
-	    // Ensure reproducible randomness
-	    if (deriv1.creationIndex < deriv2.creationIndex) return -1;
-	    if (deriv1.creationIndex > deriv2.creationIndex) return +1;
-	    return 0;
-	  }
-	}
     @Option(gloss = "When printing derivations, to show values (could be quite verbose)")
     public boolean showValues = true;
     @Option(gloss = "When printing derivations, to show the first value (ignored when showValues is set)")
@@ -57,7 +45,12 @@ public class Derivation implements SemanticFn.Callable, HasScore {
   public boolean allAnchored = true;
   private int[] numAnchors;     // Number of times each token was anchored
   
-  // information for grammar induction
+  /**
+  * Information for grammar induction.
+  * For each descendant derivation of the body, this class tracks where in the head it matches
+  * GrammarInfo.start, GrammarInfo.end refer to matching positions in the head, as opposed to the body
+  * @author sidaw
+  **/
   public class GrammarInfo {
     public boolean anchored = false;
     public boolean matched = false;

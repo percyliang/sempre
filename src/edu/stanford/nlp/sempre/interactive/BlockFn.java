@@ -73,7 +73,7 @@ public class BlockFn extends SemanticFn {
           
           FeatureVector features = new FeatureVector();
           if (FeatureExtractor.containsDomain(":scope")) {
-            features.add(":scope", BlockFn.this.mode.toString() + "::" + !ILUtils.stripBlock(onlyChild).rule.isInduced());
+            features.add(":scope", BlockFn.this.mode.toString() + "::" + !InteractiveUtils.stripBlock(onlyChild).rule.isInduced());
             features.add(":scope", BlockFn.this.mode.toString() + "::" + ex.id);
           }
           

@@ -38,9 +38,9 @@ import fig.basic.Option;
 /**
  * JsonServer, interactive learning queries run through this. All the logs are handled here.
  *
- * @author Sida Wang
+ * @author sidaw
  */
-public class JsonServer {
+public class InteractiveServer {
   public static class Options {
     @Option public int port = 8400;
     @Option public int numThreads = 4;
@@ -55,6 +55,7 @@ public class JsonServer {
   private static Object queryLogLock = new Object();
   private static Object responseLogLock = new Object();
   private static AtomicLong queryCounter = new AtomicLong();
+  ExecutorService executor = Executors.newSingleThreadExecutor();
   Master master;
 
   class Handler implements HttpHandler {
@@ -153,11 +154,11 @@ public class JsonServer {
         List<Derivation> allCandidates = response.getExample().getPredDerivations();
 
         if (allCandidates != null) {
-          if (allCandidates.size() >= JsonServer.opts.maxCandidates) {
-            allCandidates = allCandidates.subList(0, JsonServer.opts.maxCandidates);
+          if (allCandidates.size() >= InteractiveServer.opts.maxCandidates) {
+            allCandidates = allCandidates.subList(0, InteractiveServer.opts.maxCandidates);
             response.lines.add(
                 String.format("Exceeded max options: (current: %d / max: %d) ", 
-                    allCandidates.size(), JsonServer.opts.maxCandidates)
+                    allCandidates.size(), InteractiveServer.opts.maxCandidates)
                 );
           }
 
@@ -184,11 +185,11 @@ public class JsonServer {
       return json;
     }
 
+    
     // This should be concurrent
     Master.Response processQuery(Session session, String query) {
       String message = null;
       Master.Response response = master.new Response();
-      ExecutorService executor = Executors.newSingleThreadExecutor();
       Future<Master.Response> future = executor.submit(() -> master.processQuery(session, query));
       long startTime = System.nanoTime();
       try {
@@ -203,6 +204,7 @@ public class JsonServer {
         LogInfo.flush();
         LogInfo.resetInfos();
       } finally {
+        future.cancel(true);
         long endTime = System.nanoTime();
         response.stats.put("time", (endTime - startTime) / 1.0e9);
       }
@@ -301,7 +303,7 @@ public class JsonServer {
   
   private void logs(String s, Object... args) {};
 
-  public JsonServer(Master master) {
+  public InteractiveServer(Master master) {
     this.master = master;
   }
 

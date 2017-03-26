@@ -30,9 +30,9 @@ import fig.basic.LogInfo;
 import fig.basic.Option;
 
 /**
- * Takes two examples, and induce some Rules
+ * Takes two examples, and induce Rules
  *
- * @author Sida Wang
+ * @author sidaw
  */
 
 public class GrammarInducer {

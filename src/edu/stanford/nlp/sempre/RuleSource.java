@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Tracking where the rule comes from in the grammar induction process.
  *
- * @author Sida Wang
+ * @author sidaw
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)

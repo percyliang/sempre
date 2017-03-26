@@ -32,7 +32,7 @@ import java.util.zip.GZIPInputStream;
 import org.testng.collections.Lists;
 
 import edu.stanford.nlp.sempre.Json;
-import edu.stanford.nlp.sempre.JsonServer;
+import edu.stanford.nlp.sempre.InteractiveServer;
 import fig.basic.LogInfo;
 import fig.basic.Option;
 import fig.basic.OptionsParser;
@@ -41,7 +41,7 @@ import fig.basic.Evaluation;
 
 /**
  * utilites for simulating a session through the server
- * @author Sida Wang
+ * @author sidaw
  */
 
 class GZIPFiles {
@@ -89,6 +89,7 @@ public class Simulator implements Runnable {
   @Option public static String serverURL = "http://localhost:8410";
   @Option public static int numThreads = 1;
   @Option public static int verbose = 1;
+  @Option public static boolean useThreads = false;
   @Option public static String reqParams = "grammar=0&cite=0&learn=0";
   @Option public static List<String> logFiles = Lists.newArrayList("./shrdlurn/commandInputs/sidaw.json.log");
 
@@ -107,23 +108,27 @@ public class Simulator implements Runnable {
         List<String> lines = stream.collect(Collectors.toList());
         LogInfo.logs("Reading %s (%d lines)", fileName, lines.size());
         int numLinesRead = 0;
-//        ExecutorService executor = new ThreadPoolExecutor(numThreads, numThreads,
-//            15000, TimeUnit.MILLISECONDS,
-//            new LinkedBlockingQueue<Runnable>());
-        
+        //        ExecutorService executor = new ThreadPoolExecutor(numThreads, numThreads,
+        //            15000, TimeUnit.MILLISECONDS,
+        //            new LinkedBlockingQueue<Runnable>());
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+
         for (String l : lines) {
+          numLinesRead++;
           LogInfo.logs("Line %d", numLinesRead);
-          ExecutorService executor = Executors.newSingleThreadExecutor();
-          Future<?> future = executor.submit(() -> executeLine(l));
-          try {
-             future.get(10, TimeUnit.MINUTES); 
-          } catch (Throwable t) {
-            t.printStackTrace();
-          } finally {
-            future.cancel(true); // may or may not desire this
-            long endTime = System.nanoTime();
-            LogInfo.logs("Took %d ns or %.4f s", (endTime - startTime), (endTime - startTime)/1.0e9);
-            numLinesRead++;
+          if (!useThreads) {
+            executeLine(l);
+          } else {
+            Future<?> future = executor.submit(() -> executeLine(l));
+            try {
+              future.get(10, TimeUnit.MINUTES); 
+            } catch (Throwable t) {
+              t.printStackTrace();
+            } finally {
+              future.cancel(true); // may or may not desire this
+              long endTime = System.nanoTime();
+              LogInfo.logs("Took %d ns or %.4f s", (endTime - startTime), (endTime - startTime)/1.0e9);
+            }
           }
         }
       } catch (IOException e) {
@@ -139,7 +144,7 @@ public class Simulator implements Runnable {
     //      e.printStackTrace();
     //    }
   }
-  
+
   static void executeLine(String l) {
     Map<String, Object> json = null;
     try {
@@ -154,7 +159,7 @@ public class Simulator implements Runnable {
     Object sessionId = json.get("sessionId");
     if (sessionId == null) // to be backwards compatible
       sessionId = json.get("id");
-    
+
     try {
       String response = sempreQuery(command.toString(), sessionId.toString());
       SimulationAnalyzer.addStats(json, response);

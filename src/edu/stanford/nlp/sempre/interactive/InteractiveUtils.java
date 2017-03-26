@@ -15,11 +15,11 @@ import fig.basic.Option;
 import fig.basic.Ref;
 
 /**
- * Utilities for grammar induction
+ * Utilities for interactive learning
  * 
  * @author sidaw
  */
-public final class ILUtils {
+public final class InteractiveUtils {
   public static class Options {
     @Option(gloss = "use the best formula when no match or not provided")
     public boolean useBestFormula = false;
@@ -33,7 +33,7 @@ public final class ILUtils {
 
   public static Options opts = new Options();
 
-  private ILUtils() {
+  private InteractiveUtils() {
   }
 
   // dont spam my log when reading things in the beginning...

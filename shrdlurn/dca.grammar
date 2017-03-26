@@ -1,3 +1,7 @@
+# Grammar for Dependency-based Compositions Actions (DCA)
+# which is based on lambda DCS, and designed to interpolate
+# well with NL
+
 (def @select select)
 (def @update update)
 (def @remove remove)

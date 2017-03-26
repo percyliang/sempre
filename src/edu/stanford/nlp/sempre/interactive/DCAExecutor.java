@@ -21,7 +21,7 @@ import fig.basic.Option;
  * Handles action lambda DCS
  * where the world has a flat structure, i.e. a list of allitems all supporting the same operations
  * supports ActionFormula here, and does conversions of singleton sets
- * @author Sida Wang
+ * @author sidaw
  */
 public class DCAExecutor extends Executor {
   public static class Options {

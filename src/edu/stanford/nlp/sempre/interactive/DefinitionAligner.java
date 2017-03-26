@@ -22,7 +22,7 @@ import fig.basic.Pair;
 /**
  * Takes the definition and the head,
  * then induce rules through alignment
- * @author Sida Wang
+ * @author sidaw
  */
 
 public class DefinitionAligner {

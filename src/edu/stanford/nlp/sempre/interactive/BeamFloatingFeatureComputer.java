@@ -7,11 +7,11 @@ import com.beust.jcommander.internal.Lists;
 import edu.stanford.nlp.sempre.*;
 
 /**
- * Sida Wang
  * Feature computer for the BeamFloatingParser
  * TODOs:
  * - control what categories to abstract out
  * - efficiency improvement, right now use all members of the cross product
+ * @author sidaw
  */
 public class BeamFloatingFeatureComputer implements FeatureComputer {
   public static class Options {

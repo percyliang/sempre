@@ -59,7 +59,7 @@ public class SimulationAnalyzer {
       qEval.add("def.time", (Double)stats.get("time"));
     }
     
-    if (stats.get("type").equals("q")) {
+    if (stats.get("type").equals("q") && !stats.containsKey("error")) {
       GrammarInducer.ParseStatus status = GrammarInducer.ParseStatus.fromString(stats.get("status").toString());
       int size = (Integer)stats.get("size");
       qEval.add("q.size", size);
@@ -67,7 +67,7 @@ public class SimulationAnalyzer {
       qEval.add("q.isInduced", status == GrammarInducer.ParseStatus.Induced);
     }
     
-    if (stats.get("type").equals("accept")) {
+    if (stats.get("type").equals("accept") && !stats.containsKey("error")) {
       GrammarInducer.ParseStatus status = GrammarInducer.ParseStatus.fromString(stats.get("status").toString());
       int size = (Integer)stats.get("size");
       int rank = (Integer)stats.get("rank");

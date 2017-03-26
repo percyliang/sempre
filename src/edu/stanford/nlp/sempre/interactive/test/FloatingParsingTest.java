@@ -16,7 +16,7 @@ import org.testng.collections.Lists;
 
 /**
  * Test the parser, and some floating examples
- * @author Sida Wang
+ * @author sidaw
  */
 @Test(groups = { "InteractiveLearning" })
 public class FloatingParsingTest {

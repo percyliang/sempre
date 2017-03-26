@@ -32,12 +32,12 @@ import edu.stanford.nlp.sempre.ValueEvaluator;
 import edu.stanford.nlp.sempre.interactive.DCAExecutor;
 import edu.stanford.nlp.sempre.interactive.DefinitionAligner;
 import edu.stanford.nlp.sempre.interactive.GrammarInducer;
-import edu.stanford.nlp.sempre.interactive.ILUtils;
+import edu.stanford.nlp.sempre.interactive.InteractiveUtils;
 import fig.basic.LogInfo;
 
 /**
  * Test the grammar induction
- * @author Sida Wang
+ * @author sidaw
  */
 public class GrammarInducerTest {
   Assertion hard = new Assertion();
@@ -53,12 +53,12 @@ public class GrammarInducerTest {
     Derivation.opts.showRules = false;
     Derivation.opts.showCat = true;
 
-    LanguageAnalyzer.opts.languageAnalyzer = "interactive.DASLanguageAnalyzer";
+    LanguageAnalyzer.opts.languageAnalyzer = "interactive.DCALanguageAnalyzer";
     Grammar.opts.inPaths = Lists.newArrayList("./shrdlurn/voxelurn.grammar");
     Grammar.opts.useApplyFn = "interactive.ApplyFn";
     Grammar.opts.binarizeRules = false;
 
-    FeatureExtractor.opts.featureComputers = Sets.newHashSet("interactive.DASFeatureComputer");
+    FeatureExtractor.opts.featureComputers = Sets.newHashSet("interactive.DCAFeatureComputer");
     FeatureExtractor.opts.featureDomains =  Sets.newHashSet(":rule", ":stats", ":window");
 
     DefinitionAligner.opts.strategies = Sets.newHashSet(DefinitionAligner.Strategies.ExactExclusion);
@@ -98,7 +98,7 @@ public class GrammarInducerTest {
       List<Rule> induced = InteractiveMaster.induceRulesHelper(":def", head, def, parser, params, new Session("testsession"), null);
       allRules.addAll(induced);
       LogInfo.logs("Defining %s := %s, added %s", head, def, induced);
-      induced.forEach(r -> ILUtils.addRuleInteractive(r, parser));
+      induced.forEach(r -> InteractiveUtils.addRuleInteractive(r, parser));
     }
     public boolean match(String head, String def) {
       Example.Builder b = new Example.Builder();
@@ -109,14 +109,14 @@ public class GrammarInducerTest {
       // LogInfo.logs("Parsing definition: %s", ex.utterance);
       parser.parse(params, exHead, true);
 
-      Derivation defDeriv = ILUtils.combine(ILUtils.derivsfromJson(def, parser, params, null));
+      Derivation defDeriv = InteractiveUtils.combine(InteractiveUtils.derivsfromJson(def, parser, params, null));
 
       boolean found = false; 
       int ind = 0;
       for (Derivation d : exHead.predDerivations) {
         //LogInfo.logs("considering: %s", d.formula.toString());
-        LogInfo.logs("Comparing %s vs %s", ILUtils.stripBlock(d).formula.toString(), ILUtils.stripBlock(defDeriv).formula.toString());
-        if (ILUtils.stripBlock(d).formula.toString().equals(ILUtils.stripBlock(defDeriv).formula.toString())) {
+        LogInfo.logs("Comparing %s vs %s", InteractiveUtils.stripBlock(d).formula.toString(), InteractiveUtils.stripBlock(defDeriv).formula.toString());
+        if (InteractiveUtils.stripBlock(d).formula.toString().equals(InteractiveUtils.stripBlock(defDeriv).formula.toString())) {
           found = true;
           LogInfo.logs("found %s at %d", d.formula, ind);
         }
@@ -136,7 +136,7 @@ public class GrammarInducerTest {
       Example exHead = b.createExample();
       exHead.preprocess();
 
-      Derivation defDeriv = ILUtils.combine(ILUtils.derivsfromJson(def, parser, params, null));
+      Derivation defDeriv = InteractiveUtils.combine(InteractiveUtils.derivsfromJson(def, parser, params, null));
 
       // LogInfo.logs("Parsing definition: %s", ex.utterance);
       parser.parse(params, exHead, true);

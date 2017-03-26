@@ -19,10 +19,8 @@ import org.testng.collections.Sets;
  *
  * Note that this code does not rely on the Grammar being binarized,
  * which makes it more complex.
- * 
- * Sida: basically from BeamParser, but can float a little bit.
- * 
- * @author Percy Liang, Sida Wang
+ *  
+ * @author Percy Liang, sidaw
  */
 public class BeamFloatingParser extends Parser {
   public static class Options {
