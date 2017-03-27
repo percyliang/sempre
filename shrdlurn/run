@@ -170,10 +170,11 @@ addMode('voxelurn', 'interactive semantic parsing in a VoxelWorld', lambda { |e|
   o('Parser.pruneErrorValues', true),
   o('Parser', 'BeamFloatingParser'),
   o('Parser.callSetEvaluation', false),
-  o('Parser.beamSize', 10),
   o('ParserState.customExpectedCounts', 'None'),
 
-  o('BeamFloatingParser.maxNewTreesPerSpan', 20),
+  o('Parser.beamSize', 25),
+  o('BeamFloatingParser.maxNewTreesPerSpan', 100),
+
   selo(0, 'BeamFloatingParser.floatStrategy', 'Never', 'NoParse', 'Always'),
   o('BeamFloatingParser.trackedCats', 'Number', 'Numbers', 'Color',  'Direction', 'Set', 'Sets', 'Action', 'Actions'),
 
@@ -211,9 +212,10 @@ addMode('voxelurn', 'interactive semantic parsing in a VoxelWorld', lambda { |e|
   o('Derivation.showValues', false),
   o('Derivation.showRules', false),
 
-  #o('NumberFn.allowedRange', 0, 100),
-  #o('SimpleLexicon.inPaths', 'shrdlurn/csscolors.lexicon'),
-  #o('Grammar.tags', 'morenumbers', 'morecolors'),
+  o('NumberFn.allowedRange', 0, 100),
+  o('SimpleLexicon.inPaths', 'shrdlurn/csscolors.lexicon'),
+  # o('Grammar.tags', 'morecolors'),
+  # o('Grammar.tags', 'morenumbers', 'morecolors'),
 
   lambda { |e| system 'mkdir -p ./int-output/'; nil},
   lambda { |e| system 'mkdir -p ./int-output/log/'; nil},
