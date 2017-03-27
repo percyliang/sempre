@@ -46,6 +46,8 @@ TIME_INTERVAL = 7200.0  # break off by every 30 minutes
 # Default port for the server
 DEFAULT_PORT = 8406
 
+# JWT_SECRET = "hello world this is a secret"
+# SLACK_SECRET = "a1ccf3fcde6b249b7ad4855214c37663"
 JWT_SECRET = os.environ['SEMPRE_JWT_SECRET']
 SLACK_SECRET = os.environ['SLACK_OAUTH_SECRET']
 
