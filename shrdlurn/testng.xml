@@ -1,0 +1,19 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+
+<suite name="SempreInteractiveTestSuite" verbose="10">
+  <test name="InteractiveTests">
+    <classes>
+      <class name="edu.stanford.nlp.sempre.interactive.test.GrammarInducerTest">
+      </class>
+			<class name="edu.stanford.nlp.sempre.interactive.test.DCAExecutorTest">
+      </class>
+
+			<!--
+			<class name="edu.stanford.nlp.sempre.interactive.test.BlocksParsingTest">
+			</class>
+			<class name="edu.stanford.nlp.sempre.interactive.test.StressTest">
+      </class>
+			-->
+    </classes>
+  </test>
+</suite>

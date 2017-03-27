@@ -1,6 +1,6 @@
 #!/usr/bin/ruby
 
-# This is the main entry point for running all SEMPRE programs.  See
+# This is the main entry point for running SHRDLURN.  See
 # fig/lib/execrunner.rb for more documentation for how commands are generated.
 # There are a bunch of modes that this script can be invoked with, which
 # loosely correspond to the modules.
@@ -57,85 +57,174 @@ def header(modules='core', codalabDependencies=nil)
   nil)
 end
 
-def rlwrap; system('which rlwrap') ? 'rlwrap' : nil end
-
-def unbalancedTrainDevSplit
-  l(o('Dataset.trainFrac', 0.8), o('Dataset.devFrac', 0.2))
-end
-def balancedTrainDevSplit
-  l(o('Dataset.trainFrac', 0.5), o('Dataset.devFrac', 0.5))
-end
-
 def figOpts; l(selo(:pooldir, 'execDir', 'exec', '_OUTPATH_'), o('overwriteExecDir'), o('addToView', 0)) end
 
 ############################################################
 # Unit tests
-# Community Server
-
 
 addMode('backup', 'small commands like run community server, backup, or simulator', lambda { |e| l(
   lambda { |e| system 'echo "backing up with mv"'},
   lambda { |e| system 'mkdir -p ./int-backup/'},
-	letDefault(:msg, 'backing up, no message'),
-	lambda { |e| l('echo ', :msg, '> ./int-backup/message')},
-	lambda { |e| l('echo ', '`date +%Y-%m-%d.%H:%M:%S`', '>> ./int-backup/message')},
+  letDefault(:msg, 'backing up, no message'),
+  lambda { |e| l('echo ', :msg, '> ./int-backup/message')},
+  lambda { |e| l('echo ', '`date +%Y-%m-%d.%H:%M:%S`', '>> ./int-backup/message')},
   lambda { |e| system 'mv int-output int-backup/`date +%Y-%m-%d.%H:%M:%S`'},
   lambda { |e| system 'mkdir -p ./int-output'},
 nil)})
 
 addMode('backup-data', 'put community-server into trash with time stamp', lambda { |e| l(
-	lambda { |e| system 'echo "backing up data with mv"'},
+  lambda { |e| system 'echo "backing up data with mv"'},
   lambda { |e| system 'mkdir -p ./community-server/data-backup'},
   lambda { |e| system 'mv ./community-server/data ./community-server/data-backup/`date +%Y-%m-%d.%H:%M:%S`'},
 nil)})
 
 addMode('trash', 'put int-output into trash with time stamp', lambda { |e| l(
   lambda { |e| system 'echo "trashing int-output with time stamp"'},
-	lambda { |e| system 'mv int-output int-output-trash-`date +%Y-%m-%d.%H:%M:%S`'},
+  lambda { |e| system 'mv int-output int-output-trash-`date +%Y-%m-%d.%H:%M:%S`'},
   lambda { |e| system 'rm -rf int-output-trash-*'},
   lambda { |e| system 'mkdir -p ./int-output'},
 nil)})
 
+addMode('test', 'Run unit tests for interactive stuff', lambda { |e|
+  l(
+    'java', '-ea', '-Xmx12g', '-cp', 'libsempre/*:lib/*',
+    letDefault(:debug, 0), sel(:debug, l(), l('-Xdebug', '-Xrunjdwp:server=y,transport=dt_socket,suspend=y,address=8898')),
+    'org.testng.TestNG',
+    lambda { |e|
+      if e[:class]
+        l('-testclass', 'edu.stanford.nlp.sempre.interactive.test.' + e[:class])
+      else
+        'shrdlurn/testng.xml'
+      end
+    },
+  nil)
+})
+
+addMode('community-dep', 'dependencies for the community server', lambda { |e| l(
+l('python ./community-server/install-deps.py'),
+nil)})
 
 addMode('community', 'start the community server', lambda { |e| l(
 l('python community-server/server.py -- port 8403'),
 nil)})
 
-addMode('others', 'print out common commands', lambda { |e| l(
-	lambda { |e| system 'echo mv folder folder-`date +%Y-%m-%d.%H:%M:%S`'},
-nil)})
-
 addMode('simulator', 'run the simulator', lambda { |e| l(
-	# rlwrap,
-	header('core,interactive'),
-	'edu.stanford.nlp.sempre.interactive.Simulator',
-	figOpts,
-	letDefault(:server, 'local'),
-	sel(:server, {
-		'local' => o('serverURL', 'http://localhost:8410'),
-		'remote' => o('serverURL', 'http://jonsson.stanford.edu:8410')
-	}),
-	# set to 0 to enable logging
-	o('numThreads', 4),
-	letDefault(:sandbox, 'full'),
-	sel(:sandbox, {
-		'all' => o('reqParams', 'grammar=0\&cite=0\&learn=0\&logging=0'),
-		'nolog' => o('reqParams', 'grammar=0\&cite=0\&learn=1\&logging=0'),
-		'nolearn' => o('reqParams', 'grammar=1\&cite=1\&learn=0\&logging=0'),
-		'none' => o('reqParams', 'grammar=1\&cite=1\&learn=1\&logging=0')
-	}),
-	letDefault(:task, 'sidaw'),
-	sel(:task, {
-		'qual1' => o('logFiles', './shrdlurn/queries/qualifier1-0118.json'),
-		'qual2' => o('logFiles', './shrdlurn/queries/qualifier2-0129.json'),
-		'free1' => o('logFiles', './shrdlurn/queries/freebuild1-0121.json'),
-		'free2' => o('logFiles', './shrdlurn/queries/freebuild2-0127.json'),
-		'sidaw' => o('logFiles', './shrdlurn/queries/sidaw.json.log'),
-		'all' => o('logFiles', './shrdlurn/queries/sidaw.json.log',
-		'./shrdlurn/queries/freebuild1-0121.json', './shrdlurn/queries/qualifier20-0118.json')
-		}),
+  # rlwrap,
+  header('core,interactive'),
+  'edu.stanford.nlp.sempre.interactive.Simulator',
+  figOpts,
+  letDefault(:server, 'local'),
+  sel(:server, {
+    'local' => o('serverURL', 'http://localhost:8410'),
+    'remote' => o('serverURL', 'http://jonsson.stanford.edu:8410')
+  }),
+  # set to 0 to enable logging
+  o('numThreads', 1),
+  letDefault(:sandbox, 'full'),
+  sel(:sandbox, {
+    'all' => o('reqParams', 'grammar=0\&cite=0\&learn=0\&logging=0'),
+    'nolog' => o('reqParams', 'grammar=0\&cite=0\&learn=1\&logging=0'),
+    'nolearn' => o('reqParams', 'grammar=1\&cite=1\&learn=0\&logging=0'),
+    'none' => o('reqParams', 'grammar=1\&cite=1\&learn=1\&logging=0'),
+    'nocite' => o('reqParams', 'grammar=1\&cite=0\&learn=1\&logging=0'),
+  }),
+  letDefault(:task, 'sidaw'),
+  sel(:task, {
+    'freebig' => o('logFiles', './shrdlurn/queries/freebuildbig-0206.json.gz'),
+    'freebigdef' => o('logFiles', './shrdlurn/queries/freebuildbig-0206.def.json.gz'),
+    'freebigcontext' => o('logFiles', './shrdlurn/queries/freebuildbig-0206.context.json.gz'),
+
+    'qual1' => o('logFiles', './shrdlurn/queries/qualifier1-0118.json.gz'),
+    'qual2' => o('logFiles', './shrdlurn/queries/qualifier2-0129.json.gz'),
+    'qual3' => o('logFiles', './shrdlurn/queries/qualifier3-0201.json.gz'), #  both 2 and 3
+    'free1' => o('logFiles', './shrdlurn/queries/freebuild1-0121.json.gz'),
+    'free2' => o('logFiles', './shrdlurn/queries/freebuild2-0127.json.gz'),
+    'sidaw' => o('logFiles', './shrdlurn/queries/sidaw.json'),
+
+    }),
 nil)})
 
+############################################################
+# {2016-07-02} [sidaw]: interactive semantic parsing
+addMode('voxelurn', 'interactive semantic parsing in a VoxelWorld', lambda { |e| l(
+  #rlwrap,
+  header('core,interactive'),
+  'edu.stanford.nlp.sempre.Main',
+  #figOpts,
+  o('masterType', 'Master'),
+
+  o('Executor', 'interactive.DALExecutor'),
+  o('LanguageAnalyzer', 'interactive.DALAnalyzer'),
+  o('DALExecutor.convertNumberValues', true),
+  o('DALExecutor.printStackTrace', true),
+  o('VoxelWorld.maxBlocks', 100000),
+  selo(0, 'DALExecutor.worldType', 'VoxelWorld', 'CalendarWorld', 'Otherworld'),
+  selo(0, 'Grammar.inPaths', './shrdlurn/voxelurn.grammar', './shrdlurn/calendar.grammar'),
+
+  o('Params.initWeightsRandomly', false),
+  o('Grammar.binarizeRules', false),
+  o('Grammar.useApplyFn', 'interactive.ApplyFn'),
+
+  o('LanguageAnalyzer.lowerCaseTokens', true),
+
+  o('Parser.pruneErrorValues', true),
+  o('Parser', 'BeamFloatingParser'),
+  o('Parser.callSetEvaluation', false),
+  o('ParserState.customExpectedCounts', 'None'),
+
+  o('Parser.beamSize', 25),
+  o('BeamFloatingParser.maxNewTreesPerSpan', 200),
+
+  selo(0, 'BeamFloatingParser.floatStrategy', 'Never', 'NoParse', 'Always'),
+  o('BeamFloatingParser.trackedCats', 'Number', 'Numbers', 'Color',  'Direction', 'Set', 'Sets', 'Action', 'Actions'),
+
+  o('Params.l1Reg', 'nonlazy'),
+  o('Params.l1RegCoeff', 0.0001),
+
+  o('Params.initStepSize', 0.1),
+  o('Params.adaptiveStepSize', true),
+  #o('Params.stepSizeReduction', 0.25),
+
+  o('FeatureExtractor.featureComputers', 'interactive.DALFeatureComputer'),
+  o('FeatureExtractor.featureDomains', ':rule', ':span', ':stats', ':scope', ':social', ':window'),
+  # o('FeatureExtractor.featureDomains', ':rule'),
+
+  o('InteractiveMaster.intOutputPath', './int-output/'),
+  o('InteractiveMaster.onlyInteractive', true),
+  o('InteractiveUtils.citationPath', './int-output/citation/'),
+
+  o('InteractiveMaster.useAligner', false),
+  o('InteractiveMaster.maxSequence', 20),
+  o('InteractiveMaster.maxChars', 200),
+
+  o('DefinitionAligner.strategies', 'ExactExclusion'),
+
+  o('InteractiveServer.numThreads', 16),
+  o('InteractiveServer.maxCandidates', 50),
+  o('InteractiveServer.queryLogPath', './int-output/query.log'),
+  o('InteractiveServer.responseLogPath', './int-output/response.log'),
+  o('InteractiveServer.port', 8410),
+
+  o('GrammarInducer.useBestPacking', true),
+  o('GrammarInducer.useSimplePacking', true),
+
+  o('Derivation.showTypes', false),
+  o('Derivation.showValues', false),
+  o('Derivation.showRules', false),
+
+  o('NumberFn.allowedRange', 0, 100),
+  o('SimpleLexicon.inPaths', 'shrdlurn/csscolors.lexicon'),
+  # o('Grammar.tags', 'morecolors'),
+  # o('Grammar.tags', 'morenumbers', 'morecolors'),
+
+  lambda { |e| system 'mkdir -p ./int-output/'; nil},
+  lambda { |e| system 'mkdir -p ./int-output/log/'; nil},
+  lambda { |e| system 'mkdir -p ./int-output/citation/'; nil},
+  lambda { |e| system 'mkdir -p server.exec';
+    l(o('execDir', 'server.exec/'),
+    o('overwriteExecDir'))
+   },
+nil) })
 ############################################################
 
 if ARGV.size == 0

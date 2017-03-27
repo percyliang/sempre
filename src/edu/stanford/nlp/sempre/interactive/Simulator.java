@@ -1,29 +1,37 @@
 package edu.stanford.nlp.sempre.interactive;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.Closeable;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.zip.GZIPInputStream;
 
 import org.testng.collections.Lists;
 
 import edu.stanford.nlp.sempre.Json;
-import edu.stanford.nlp.sempre.JsonServer;
 import fig.basic.LogInfo;
 import fig.basic.Option;
 import fig.basic.OptionsParser;
@@ -32,71 +40,125 @@ import fig.basic.Evaluation;
 
 /**
  * utilites for simulating a session through the server
- * @author Sida Wang
+ * @author sidaw
  */
+
+class GZIPFiles {
+  /**
+   * Get a lazily loaded stream of lines from a gzipped file, similar to
+   * {@link Files#lines(java.nio.file.Path)}.
+   * 
+   * @param path
+   *          The path to the gzipped file.
+   * @return stream with lines.
+   */
+  public static Stream<String> lines(Path path) {
+    InputStream fileIs = null;
+    BufferedInputStream bufferedIs = null;
+    GZIPInputStream gzipIs = null;
+    try {
+      fileIs = Files.newInputStream(path);
+      // Even though GZIPInputStream has a buffer it reads individual bytes
+      // when processing the header, better add a buffer in-between
+      bufferedIs = new BufferedInputStream(fileIs, 65535);
+      gzipIs = new GZIPInputStream(bufferedIs);
+    } catch (IOException e) {
+      closeSafely(gzipIs);
+      closeSafely(bufferedIs);
+      closeSafely(fileIs);
+      throw new UncheckedIOException(e);
+    }
+    BufferedReader reader = new BufferedReader(new InputStreamReader(gzipIs));
+    return reader.lines().onClose(() -> closeSafely(reader));
+  }
+
+  private static void closeSafely(Closeable closeable) {
+    if (closeable != null) {
+      try {
+        closeable.close();
+      } catch (IOException e) {
+        // Ignore
+      }
+    }
+  }
+}
+
 public class Simulator implements Runnable {
 
   @Option public static String serverURL = "http://localhost:8410";
-  @Option public static int numThreads = 4;
+  @Option public static int numThreads = 1;
   @Option public static int verbose = 1;
+  @Option public static boolean useThreads = false;
   @Option public static String reqParams = "grammar=0&cite=0&learn=0";
   @Option public static List<String> logFiles = Lists.newArrayList("./shrdlurn/commandInputs/sidaw.json.log");
 
   public void readQueries() {
-    LogInfo.begin_track("setsTest");
     //T.printAllRules();
     //A.assertAll();
-    ExecutorService executor = new ThreadPoolExecutor(JsonServer.opts.numThreads, JsonServer.opts.numThreads,
-        5000, TimeUnit.MILLISECONDS,
-        new LinkedBlockingQueue<Runnable>());
-    
-    long startTime = System.nanoTime();
     for (String fileName : logFiles) {
-      try (Stream<String> stream = Files.lines(Paths.get(fileName))) {
-        LogInfo.logs("Reading %s", fileName);
+      long startTime = System.nanoTime();
+      Stream<String> stream;
+      try {
+        if (fileName.endsWith(".gz"))
+          stream = GZIPFiles.lines(Paths.get(fileName));
+        else
+          stream = Files.lines(Paths.get(fileName));
 
-        stream.forEach(l -> 
-        executor.execute(() -> {
-          long startTimeQ = System.nanoTime();
-          Map<String, Object> json = Json.readMapHard(l);
-          Object command = json.get("q");
-          if (command == null) // to be backwards compatible
-            command = json.get("log"); 
-          Object sessionId = json.get("sessionId");
-          if (sessionId == null) // to be backwards compatible
-            sessionId = json.get("id"); 
-          try {
-            String response = sempreQuery(command.toString(), sessionId.toString());
-            SimulationAnalyzer.addStats(json, response);
-            //Thread.sleep(10);
-          } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        List<String> lines = stream.collect(Collectors.toList());
+        LogInfo.logs("Reading %s (%d lines)", fileName, lines.size());
+        int numLinesRead = 0;
+        //        ExecutorService executor = new ThreadPoolExecutor(numThreads, numThreads,
+        //            15000, TimeUnit.MILLISECONDS,
+        //            new LinkedBlockingQueue<Runnable>());
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+
+        for (String l : lines) {
+          numLinesRead++;
+          LogInfo.logs("Line %d", numLinesRead);
+          if (!useThreads) {
+            executeLine(l);
+          } else {
+            Future<?> future = executor.submit(() -> executeLine(l));
+            try {
+              future.get(10, TimeUnit.MINUTES); 
+            } catch (Throwable t) {
+              t.printStackTrace();
+            } finally {
+              future.cancel(true); // may or may not desire this
+              long endTime = System.nanoTime();
+              LogInfo.logs("Took %d ns or %.4f s", (endTime - startTime), (endTime - startTime)/1.0e9);
+            }
           }
-          long endTimeQ = System.nanoTime();
-          double queryTime = (endTimeQ - startTimeQ)/1.0e9;
-          // evaluation.add("queryTime",queryTime);
-          if (queryTime > 0.1) {
-            LogInfo.logs("slow query (%f): %s", queryTime, l);
-          }
-        }));
-        executor.shutdown();
-        try {
-          boolean finshed = executor.awaitTermination(5, TimeUnit.MINUTES);
-        } catch (InterruptedException e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
         }
-
       } catch (IOException e) {
         e.printStackTrace();
       }
-      
-      long endTime = System.nanoTime();
-      LogInfo.logs("Took %d ns or %.4f s", (endTime - startTime), (endTime - startTime)/1.0e9); 
+
     }
     SimulationAnalyzer.flush();
-    LogInfo.end_track();
+  }
+
+  static void executeLine(String l) {
+    Map<String, Object> json = null;
+    try {
+      json = Json.readMapHard(l);
+    } catch (RuntimeException e) {
+      LogInfo.logs("Json cannot be read from %s: %s", l, e.toString());
+      return;
+    }
+    Object command = json.get("q");
+    if (command == null) // to be backwards compatible
+      command = json.get("log"); 
+    Object sessionId = json.get("sessionId");
+    if (sessionId == null) // to be backwards compatible
+      sessionId = json.get("id");
+
+    try {
+      String response = sempreQuery(command.toString(), sessionId.toString());
+      SimulationAnalyzer.addStats(json, response);
+    } catch (Throwable t) {
+      t.printStackTrace();
+    }
   }
 
   public static String sempreQuery(String query, String sessionId) throws UnsupportedEncodingException {
@@ -107,7 +169,7 @@ public class Simulator implements Runnable {
     // LogInfo.log(params);
     // LogInfo.log(query);
     String response  = executePost(url + params, "");
-    //LogInfo.log(response);
+    // LogInfo.log(response);
     return response;
   }
 

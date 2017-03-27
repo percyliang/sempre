@@ -5,7 +5,7 @@
 If the file is tab-separated, only process the first column.
 """
 
-import sys, os, shutil, re, argparse, json
+import sys, os, shutil, re, argparse, json, gzip
 from codecs import open
 from itertools import izip
 from collections import defaultdict

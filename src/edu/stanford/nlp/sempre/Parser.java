@@ -5,8 +5,6 @@ import fig.basic.*;
 import java.io.PrintWriter;
 import java.util.*;
 
-import com.beust.jcommander.internal.Lists;
-
 ////////////////////////////////////////////////////////////
 
 /**
@@ -58,9 +56,9 @@ public abstract class Parser {
 
     @Option(gloss = "Dump all features (for debugging)")
     public boolean dumpAllFeatures = false;
-
-    @Option(gloss = "keep tracks of these categories")
-    public List<String> trackedCats;
+    
+    @Option(gloss = "Call SetEvaluation during parsing")
+    public boolean callSetEvaluation = true;
   }
 
   public static final Options opts = new Options();
@@ -117,7 +115,7 @@ public abstract class Parser {
     catUnaryRules = new ArrayList<>();
     Map<String, List<Rule>> graph = new HashMap<>();  // Node from LHS to list of rules
     for (Rule rule : grammar.rules)
-      if (rule.isCatUnary() && rule.isAnchored())
+      if (rule.isCatUnary())
         MapUtils.addToList(graph, rule.lhs, rule);
 
     // Topologically sort catUnaryRules so that B->C occurs before A->B
@@ -167,22 +165,22 @@ public abstract class Parser {
     // Parse
     StopWatch watch = new StopWatch();
     watch.start();
-    // LogInfo.begin_track_printAll("Parser.parse: parse");
+    LogInfo.begin_track_printAll("Parser.parse: parse");
     ParserState state = newParserState(params, ex, computeExpectedCounts);
     state.infer();
-    // LogInfo.end_track();
+    LogInfo.end_track();
     watch.stop();
     state.parseTime = watch.getCurrTimeLong();
     state.setEvaluation();
 
     ex.predDerivations = state.predDerivations;
-
     Derivation.sortByScore(ex.predDerivations);
-    
-    // Evaluate
-    ex.evaluation = new Evaluation();
-    addToEvaluation(state, ex.evaluation);
 
+    // Evaluate
+    if (opts.callSetEvaluation) {
+      ex.evaluation = new Evaluation();
+      addToEvaluation(state, ex.evaluation);
+    }
     // Clean up temporary state used during parsing
     ex.clearTempState();
     for (Derivation deriv : ex.predDerivations)
@@ -210,7 +208,6 @@ public abstract class Parser {
     // Did we get the answer correct?
     int correctIndex = -1;  // Index of first correct derivation
     int correctIndexAfterParse = -1;
-    int correctIndexAfterParsePrag = -1;
     double maxCompatibility = 0.0;
     double[] compatibilities = null;
 
@@ -226,7 +223,6 @@ public abstract class Parser {
         maxCompatibility = Math.max(compatibilities[i], maxCompatibility);
       }
       // What if we only had parsed bottom up?
-      Derivation.sortByScore(predDerivations);
       for (int i = 0; i < numCandidates; i++) {
         if (compatibilities[i] == 1) {
           correctIndexAfterParse = i;
@@ -234,8 +230,13 @@ public abstract class Parser {
         }
       }
     }
+
     // Compute probabilities
     double[] probs = Derivation.getProbs(predDerivations, 1);
+    for (int i = 0; i < numCandidates; i++) {
+      Derivation deriv = predDerivations.get(i);
+      deriv.prob = probs[i];
+    }
 
     // Number of derivations which have the same top score
     int numTop = 0;
@@ -322,20 +323,8 @@ public abstract class Parser {
     evaluation.add("oracle", correctIndex != -1);
     evaluation.add("partCorrect", partCorrect);
     evaluation.add("partOracle", maxCompatibility);
-    if (correctIndexAfterParse != -1) {
+    if (correctIndexAfterParse != -1)
       evaluation.add("correctIndexAfterParse", correctIndexAfterParse);
-
-      evaluation.add("correctIndexAfterParsePrag", correctIndexAfterParsePrag);
-      evaluation.add("correctBaseline", correctIndexAfterParse == 0? 1:0);
-//      evaluation.add("pragBetter", correctIndexAfterParsePrag <= correctIndexAfterParse? 1: 0);
-//      evaluation.add("pragWorse",  correctIndexAfterParsePrag >= correctIndexAfterParse? 1: 0);
-//
-//      evaluation.add("Top3Prag", correctIndexAfterParsePrag < 3?  1: 0);
-//      evaluation.add("Top3Normal",  correctIndexAfterParse < 3? 1: 0);
-//
-//      evaluation.add("Top5Prag", correctIndexAfterParsePrag < 5?  1: 0);
-//      evaluation.add("Top5Normal",  correctIndexAfterParse < 5? 1: 0);
-    }
 
     if (correctIndex != -1) {
       evaluation.add("correctMaxBeamPosition", predDerivations.get(correctIndex).maxBeamPosition);

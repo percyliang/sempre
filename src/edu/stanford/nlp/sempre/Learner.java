@@ -2,18 +2,14 @@ package edu.stanford.nlp.sempre;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Maps;
-
-
 import fig.basic.*;
 import fig.exec.Execution;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * The main learning loop.  Goes over a dataset multiple times, calling the
@@ -49,10 +45,6 @@ public class Learner {
     public boolean updateWeights = true;
     @Option(gloss = "Whether to check gradient")
     public boolean checkGradient = false;
-    
-    @Option(gloss = "count correct examples in an online fashion")
-    public boolean onlineEvaluation = false;
-    public boolean skipSeen = false;
 
     @Option(gloss = "Whether to skip the 'train' group in the last iteration and non-'train' groups in other iterations")
     public boolean skipUnnecessaryGroups = false;
@@ -106,23 +98,21 @@ public class Learner {
       sortOnFeedback();
     // For each iteration, go through the groups and parse (updating if train).
     for (int iter = 0; iter <= numIters; iter++) {
-      if (opts.onlineEvaluation && iter==numIters) break;
-      
+
       LogInfo.begin_track("Iteration %s/%s", iter, numIters);
       Execution.putOutput("iter", iter);
 
       // Averaged over all iterations
       // Group -> evaluation for that group.
       Map<String, Evaluation> meanEvaluations = Maps.newHashMap();
+
       // Clear
       for (String group : dataset.groups())
         meanEvaluations.put(group, new Evaluation());
 
       // Test and train
       for (String group : dataset.groups()) {
-        // boolean isDef = group.startsWith("def");
         boolean lastIter = (iter == numIters);
-
         boolean updateWeights = opts.updateWeights && group.equals("train") && !lastIter;  // Don't train on last iteration
         if (opts.skipUnnecessaryGroups) {
           if ((group.equals("train") && lastIter) || (!group.equals("train") && !lastIter))
@@ -136,7 +126,6 @@ public class Learner {
         StopWatchSet.logStats();
         writeParams(iter);
       }
-
       LogInfo.end_track();
     }
     LogInfo.end_track();
@@ -160,20 +149,18 @@ public class Learner {
     LogInfo.end_track();
   }
   
-  public void onlineLearnExampleByFormula(Example ex) {
-    LogInfo.begin_track("onlineLearnExample: %s derivations", ex.predDerivations.size());
+  public void onlineLearnExampleByFormula(Example ex, List<Formula> formulas) {
     HashMap<String, Double> counts = new HashMap<>();
     for (Derivation deriv : ex.predDerivations)
-      deriv.compatibility = ex.targetFormula.equals(deriv.formula)? 1 : 0;
+      deriv.compatibility = formulas.contains(deriv.formula)? 1 : 0;
     ParserState.computeExpectedCounts(ex.predDerivations, counts);
     params.update(counts);
-    LogInfo.end_track();
   }
 
   private Evaluation processExamples(int iter, String group,
       List<Example> examples, boolean computeExpectedCounts) {
     Evaluation evaluation = new Evaluation();
-    Set<String> seen = new HashSet<>();
+
     if (examples.size() == 0)
       return evaluation;
 
@@ -208,9 +195,6 @@ public class Learner {
         Execution.putOutput("example", e);
 
         ParserState state = parseExample(params, ex, computeExpectedCounts);
-        // training for definitions for interative stuff
-        addToAutocomplete(ex, params);
-        
         if (computeExpectedCounts) {
           if (opts.checkGradient) {
             LogInfo.begin_track("Checking gradient");
@@ -245,6 +229,10 @@ public class Learner {
         // To save memory
         ex.predDerivations.clear();
       }
+
+      if (computeExpectedCounts && batchSize > 0)
+        updateWeights(counts);
+
     }
 
     params.finalizeWeights();
@@ -360,25 +348,13 @@ public class Learner {
   private void printLearnerEventsSummary(Evaluation evaluation,
                                          int iter,
                                          String group) {
-    if (eventsOut == null) {
+    if (eventsOut == null)
       return;
-    }
     List<String> fields = new ArrayList<>();
     fields.add("iter=" + iter);
     fields.add("group=" + group);
     fields.add(evaluation.summary("\t"));
     eventsOut.println(Joiner.on('\t').join(fields));
     eventsOut.flush();
-  }
-  
-  public static boolean addToAutocomplete(Example ex, Params params) {
-    int num = ex.predDerivations.size();
-    // i guess or if it's in core
-    if (num > 0) {
-      params.autocompleteTrie.add(ex.getTokens());
-      LogInfo.logs("added %s to trie %s", ex.getTokens(), params.autocompleteTrie.toLispTree(1));
-      return true;
-    }
-    return false;
   }
 }

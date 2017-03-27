@@ -52,12 +52,8 @@ def header(modules='core', codalabDependencies=nil)
     '-cp', 'libsempre/*:lib/*',
     # Profiling
     letDefault(:prof, 0), sel(:prof, l(), '-Xrunhprof:cpu=samples,depth=100,file=_OUTPATH_/java.hprof.txt'),
-    # debugging
-    letDefault(:debug, 0), sel(:debug, l(), l('-Xdebug', '-Xrunjdwp:server=y,transport=dt_socket,suspend=y,address=8898')),
   nil)
 end
-
-def rlwrap; system('which rlwrap') ? 'rlwrap' : nil end
 
 def unbalancedTrainDevSplit
   l(o('Dataset.trainFrac', 0.8), o('Dataset.devFrac', 0.2))
@@ -77,7 +73,6 @@ addMode('test', 'Run unit tests', lambda { |e|
     lambda { |e|
       e.key?(:sparqlserver) ? "-Dsparqlserver=http://#{e[:sparqlserver]}/sparql" : l()
     },
-    letDefault(:debug, 0), sel(:debug, l(), l('-Xdebug', '-Xrunjdwp:server=y,transport=dt_socket,suspend=y,address=8898')),
     'org.testng.TestNG',
     lambda { |e|
       if e[:class]
@@ -86,7 +81,6 @@ addMode('test', 'Run unit tests', lambda { |e|
         'testng.xml'
       end
     },
-
     lambda { |e|
       if e[:fast]
         o('excludegroups', 'sparql,corenlp')
@@ -219,7 +213,7 @@ def free917
 
     # Grammar
     o('Grammar.inPaths', 'freebase/data/emnlp2013.grammar'),
-    o('Parser.beamSize', 500),
+    o('Parser.beamSize', 500), 
 
     emnlp2013AblationExperiments('free917'),
 
@@ -301,7 +295,7 @@ addMode('freebase', 'Freebase (for EMNLP 2013, ACL 2014, TACL 2014)', lambda { |
     l('nlpsub', '-d/scr/yonatan/sandbox/blackhole', '-nyonatan', '-qjag', '-c3'),
     l('nlpsub', '-d/scr/yonatan/sandbox/blackhole', '-nyonatan', '-qjohn', '-c3'),
   nil),
-  sel(:interact, l(), rlwrap),
+  sel(:interact, l()),
   freebaseHeader,
   'edu.stanford.nlp.sempre.Main',
   freebaseOpts,
@@ -450,19 +444,27 @@ nil) })
 
 # Just start a simple interactive shell to try out SEMPRE commands
 addMode('simple', 'Simple shell', lambda { |e| l(
-  codalab, rlwrap, 'java', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.Main',
+  codalab, 'java', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.Main',
   o('Main.interactive'),
 nil) })
 
 addMode('simple-sparql', 'Simple shell for querying SPARQL', lambda { |e| l(
-  codalab, rlwrap, 'java', '-Dmodules=core,freebase', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.Main',
+  codalab, 'java', '-Dmodules=core,freebase', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.Main',
   o('executor', 'freebase.SparqlExecutor'),
   sparqlOpts,
   o('Main.interactive'),
 nil) })
 
+addMode('simple-lambdadcs', 'Simple shell for querying with the LambdaDCSExecutor', lambda { |e| l(
+  codalab, 'java', '-Dmodules=core,tables,corenlp', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.Main',
+  o('executor', 'tables.lambdadcs.LambdaDCSExecutor'),
+  o('FeatureExtractor.featureDomains', 'denotation lexAlign joinPos skipPos'.split),
+  o('LanguageAnalyzer.languageAnalyzer', 'corenlp.CoreNLPAnalyzer'),
+  o('Main.interactive'),
+nil) })
+
 addMode('simple-freebase', 'Simple shell for using Freebase', lambda { |e| l(
-  rlwrap, 'java', '-Dmodules=core,freebase', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.Main',
+  'java', '-Dmodules=core,freebase', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.Main',
   o('executor', 'freebase.SparqlExecutor'),
   letDefault(:sparqlserver, 'freebase.cloudapp.net:3093'),
   letDefault(:cacheserver, 'freebase.cloudapp.net:4000'),
@@ -487,6 +489,22 @@ addMode('simple-freebase', 'Simple shell for using Freebase', lambda { |e| l(
   o('Main.interactive'),
 nil) })
 
+addMode('simple-freebase-nocache', 'Simple shell for using Freebase (without a cache server)', lambda { |e| l(
+  'java', '-Dmodules=core,freebase', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.Main',
+  o('executor', 'freebase.SparqlExecutor'),
+  letDefault(:sparqlserver, 'freebase.cloudapp.net:3093'),
+  sparqlOpts,
+  o('FeatureExtractor.featureDomains', 'rule'),
+  o('Parser.coarsePrune'),
+  o('JoinFn.typeInference'),
+  o('UnaryLexicon.unaryLexiconFilePath', '/dev/null'),
+  o('BinaryLexicon.binaryLexiconFilesPath', '/dev/null'),
+  #o('JoinFn.showTypeCheckFailures'),  # Use this to debug
+  o('Grammar.inPaths', 'freebase/data/demo1.grammar'),  # Override with your own custom grammar
+  #o('SparqlExecutor.includeSupportingInfo'),  # Show full information
+  o('Main.interactive'),
+nil) })
+
 
 ############################################################
 # {2014-12-27} [Percy]: Overnight semantic parsing
@@ -505,7 +523,6 @@ def overnightFeatureDomains
 end
 
 addMode('overnight', 'Overnight semantic parsing', l(
-  rlwrap,
   header('core,freebase,overnight'),
   'edu.stanford.nlp.sempre.Main',
   figOpts,
@@ -529,7 +546,7 @@ addMode('overnight', 'Overnight semantic parsing', l(
 
   # Features
   o('FeatureExtractor.featureDomains', 'denotation'), # denotation features from general feature extractor
-  o('FeatureExtractor.featureComputers', 'overnight.OvernightFeatureComputer'), #
+  o('FeatureExtractor.featureComputers', 'overnight.OvernightFeatureComputer'), # 
   o('OvernightFeatureComputer.featureDomains', *overnightFeatureDomains),
   #o('initialization', 'paraphrase :: match,1', 'paraphrase :: size,-0.1', 'paraphrase :: ppdb,0.3',
   #  'paraphrase :: skip-bigram,0.8', 'paraphrase :: skip-ppdb,0.2','denotation :: error,-1000'),
@@ -549,14 +566,14 @@ addMode('overnight', 'Overnight semantic parsing', l(
   o('FloatingParser.maxDepth', 11),
   o('Parser.beamSize', 20),
   letDefault(:alignment, 1),
-  sel(:alignment,
-    o('wordAlignmentPath', lambda { |e| 'lib/data/overnight/' + e[:domain] + '.word_alignments.heuristic' }),
+  sel(:alignment, 
+    o('wordAlignmentPath', lambda { |e| 'lib/data/overnight/' + e[:domain] + '.word_alignments.heuristic' }), 
     o('wordAlignmentPath', lambda { |e| 'lib/data/overnight/' + e[:domain] + '.word_alignments.berkeley' }),
   nil),
   o('phraseAlignmentPath', lambda { |e| 'lib/data/overnight/' + e[:domain] + '.phrase_alignments' }),
   o('PPDBModel.ppdbModelPath', lambda { |e| 'lib/data/overnight/' + e[:domain] + '-ppdb.txt' }),
   o('DerivationPruner.pruningComputers', ['overnight.OvernightDerivationPruningComputer']),
-  o('Dataset.inPaths',
+  o('Dataset.inPaths', 
     lambda { |e| 'train:lib/data/overnight/' + e[:domain] + '.paraphrases.train.examples' },
     lambda { |e| 'test:lib/data/overnight/' + e[:domain] + '.paraphrases.test.examples' }),
   sel(:domain, {
@@ -617,7 +634,7 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
   # Add @cldir=1 to use CodaLab's directory paths
   letDefault(:cldir, 0),
   # Usual header
-  rlwrap, header('core,tables,corenlp'),
+  header('core,tables,corenlp'),
   # Select class
   letDefault(:class, 'main'),
   sel(:class, {
@@ -627,10 +644,11 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
     'dump' => 'edu.stanford.nlp.sempre.tables.serialize.SerializedDumper',
     'load' => l('edu.stanford.nlp.sempre.tables.serialize.SerializedLoader', let(:parser, 'serialized')),
     'stats' => 'edu.stanford.nlp.sempre.tables.test.TableStatsComputer',
-    'ann-data' => 'edu.stanford.nlp.sempre.tables.serialize.AnnotatedDatasetGenerator',
-    'ann-table' => 'edu.stanford.nlp.sempre.tables.serialize.AnnotatedTableGenerator',
+    'tag-data' => 'edu.stanford.nlp.sempre.tables.serialize.TaggedDatasetGenerator',
+    'tag-table' => 'edu.stanford.nlp.sempre.tables.serialize.TaggedTableGenerator',
     'alter' => l('edu.stanford.nlp.sempre.tables.alter.BatchTableAlterer', let(:parser, 'serialized')),
     'alter-ex' => l('edu.stanford.nlp.sempre.tables.alter.AlteredTablesExecutor', let(:parser, 'serialized')),
+    'filter' => 'edu.stanford.nlp.sempre.tables.serialize.DumpFilterer',
   }),
   # Fig parameters
   selo(:cldir, 'execDir', '_OUTPATH_', 'output'),
@@ -653,7 +671,7 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
     nil),
   }),
   # Parser
-  letDefault(:parser, 'floatsize'),
+  letDefault(:parser, 'old-floatsize'),
   sel(:parser, {
     'old-floatsize' => l(
       o('Builder.parser', 'FloatingParser'),
@@ -864,13 +882,11 @@ def tablesDataPaths
     csvDir = ['lib/data/tables/', 'WikiTableQuestions/'][e[:cldir]]
     datasets = {
       'none' => l(),
+      'train' => o('Dataset.inPaths', "train,#{baseDir}training.examples"),
       # Pristine test test
-      'test' => l(
-        o('Dataset.inPaths',
-          "train,#{baseDir}training.examples",
-          "test,#{baseDir}pristine-unseen-tables.examples"),
-        o('Dataset.trainFrac', 1), o('Dataset.devFrac', 0),
-      nil),
+      'test' => o('Dataset.inPaths',
+        "train,#{baseDir}training.examples",
+        "test,#{baseDir}pristine-unseen-tables.examples"),
       # @data=annotated can be used with @class=check only
       'annotated' => o('Dataset.inPaths', "train,#{baseDir}annotated-all.examples"),
       'before300' => o('Dataset.inPaths', "train,#{baseDir}training-before300.examples"),
@@ -918,7 +934,7 @@ end
 addMode('genovernight', 'Generate utterances for overnight semantic parsing', lambda { |e| l(
   'fig/bin/qcreate',
   letDefault(:gen, 0),
-  sel(:gen, rlwrap, l()),
+  sel(:gen, l()),
   'java', '-Dmodules=core,overnight', '-Xmx10g', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.overnight.GenerationMain',
   figOpts,
   o('JoinFn.typeInference', true),
@@ -977,79 +993,73 @@ addMode('genovernight-wrapper', 'Generate utterances for overnight semantic pars
   lambda { |e| system 'mkdir -p genovernight.out'; o('execDir', 'genovernight.out/' + e[:domain]) },
 nil) })
 
-
-############################################################
-# {2016-07-02} [Sida Wang]: interactive semantic parsing
-addMode('interactive', 'interactive semantic parsing in a blocksworld', lambda { |e| l(
-  #rlwrap,
-  header('core,interactive'),
+addMode('geo880', 'Semantic parsing on the geo880 dataset', lambda { |e| l(
+  # Usual header
+  header('core,tables,corenlp,geo880'),
   'edu.stanford.nlp.sempre.Main',
-  #figOpts,
+  # Fig parameters
+  figOpts,
+  o('executor', 'tables.lambdadcs.LambdaDCSExecutor'),
+  o('JoinFn.specializedTypeCheck', false), o('JoinFn.typeInference', false),
+  # Parser
+  o('Builder.parser', 'BeamParser'),
+  o('Parser.coarsePrune'),
+ 
+  # Evaluation
+  o('Builder.valueEvaluator', 'geo880.Geo880ValueEvaluator'),
 
-  o('Executor', 'interactive.ActionExecutor'),
-  o('LanguageAnalyzer', 'interactive.ActionLanguageAnalyzer'),
-  o('ActionExecutor.convertNumberValues', true),
-  o('ActionExecutor.printStackTrace', true),
-  o('BlocksWorld.maxBlocks', 1000),
-  selo(0, 'ActionExecutor.FlatWorldType', 'BlocksWorld', 'CalendarWorld'),
-  selo(0, 'Grammar.inPaths', './shrdlurn/blocksworld.grammar', './shrdlurn/calendar.grammar'),
+  # Grammar
+  o('Grammar.inPaths','lib/data/geo880/geo880.grammar'),
 
-  o('Params.initWeightsRandomly', false),
-  o('Grammar.binarizeRules', false),
-  o('Grammar.useApplyFn', 'interactive.ApplyFn'),
+  # Type hierarchy
+  o('Geo880TypeLookup.typeHierarchyPath', 'lib/data/geo880/geo880.type_hierarchy'),
+  o('TypeInference.typeLookup','geo880.Geo880TypeLookup'),
 
-  o('LanguageAnalyzer.lowerCaseTokens', true),
-  o('LanguageAnalyzer.useLemmaTokens', false),
+  # Yrkvpba
+  o('SimpleLexicon.inPaths', 'lib/data/geo880/geo880.lexicon'),
+  
+  # Learner
+  o('Learner.maxTrainIters', 3),
 
-  o('Parser.pruneErrorValues', true),
-  o('Parser', 'BeamFloatingParser'),
-  o('Parser.trackedCats', 'Number', 'Numbers', 'Color',  'Direction', 'Set', 'Sets', 'Action', 'Actions'),
-  o('FloatingParser.defaultIsFloating', true),
-  selo(0, 'BeamFloatingParser.floatStrategy', 'Never', 'NoParse', 'Always'),
-
-o('ParserState.customExpectedCounts', 'None'),
-o('Params.l1Reg', 'lazy'),
-o('Params.l1RegCoeff', 0.001),
-o('Parser.beamSize', 20),
-o('Params.initStepSize', 0.2),
-o('Params.adaptiveStepSize', false),
-o('Params.stepSizeReduction', 0.1),
-
-o('FeatureExtractor.featureComputers', 'interactive.ActionFeatureComputer'),
-o('FeatureExtractor.featureDomains', 'rule', 'stats'),
-
-lambda { |e| system 'mkdir -p ./int-output/'},
-lambda { |e| system 'mkdir -p ./int-output/log/'},
-lambda { |e| system 'mkdir -p ./int-output/citation/'},
-
-# o('Master.newExamplesPath', './int-output/examples/'),
-# o('Master.logPath', './int-output/logs/'),
-o('Master.newGrammarPath', './int-output/grammar.json'),
-
-# o('ILUtils.JSONLogPath', './int-output/json/'),
-o('ILUtils.citationPath', './int-output/citation/'),
-o('ILUtils.useAligner', false),
-o('ILUtils.maxSequence', 20),
-
-o('DefinitionAligner.strategies', 'ExactExclusion'),
-
-o('Master.onlineLearnExamples', true),
-o('Master.independentSessions', false),
-
-o('Master.onlyInteractive', true),
-
-o('server', true),
-
-o('JsonServer.numThreads', 16),
-o('JsonServer.maxCandidates', 50),
-o('JsonServer.queryLogPath', './int-output/query.log'),
-o('JsonServer.responseLogPath', './int-output/response.log'),
-o('JsonServer.port', 8410),
-
-o('Derivation.showTypes', false),
-o('Derivation.showValues', false),
-o('Derivation.showRules', false),
+  # Dataset
+  letDefault(:data, 0),
+  sel(:data,
+    l(o('Dataset.inPaths', 'train,lib/data/geo880/geo880-train.preprocessed.examples'), unbalancedTrainDevSplit), # (0) train 0.8, dev 0.2
+    l(o('Dataset.inPaths', 'train,lib/data/geo880/geo880-train.examples', 'test,lib/data/geo880/geo880-test.preprocessed/examples')), # (1) Don't run on test yet!
+  nil),
+  # Load the graph
+  o('Dataset.globalGraphPath', 'lib/data/geo880/geo880.kg'),
+  # Verbosity
+  letDefault(:verbose, 0),
+  sel(:verbose,
+    l(),
+    l(
+      o('showRules'),
+      o('Parser.verbose', 2),
+      o('JoinFn.verbose', 3),
+      o('JoinFn.showTypeCheckFailures'),
+    nil),
+  nil),
+  # Language Analyzer
+  l(o('LanguageAnalyzer', 'corenlp.CoreNLPAnalyzer'), o('annotators', *'tokenize ssplit pos lemma ner'.split)),
+  # Regularization
+  letDefault(:l1, 0),
+  sel(:l1,
+    l(),
+    l(o('Params.l1Reg','lazy'), o('Params.l1RegCoeff', '3e-5')),
+    l(o('Params.l1Reg','lazy'), selo(nil, 'Params.l1RegCoeff', 0, 0.00001, 0.0001, 0.001, 0.01)),
+  nil),
+  # Features
+  letDefault(:feat, 'freebase'),
+  sel(:feat, {
+    'none' => l(),   # No features (random)
+    'freebase' => l(
+      o('FeatureExtractor.featureDomains', 'rule opCount constant whType span lemmaAndBinaries denotation lexAlign joinPos skipPos'.split),
+#      o('FeatureExtractor.featureDomains', 'rule opCount constant whType lemmaAndBinaries denotation lexAlign joinPos skipPos'.split),
+    nil),
+  }),
 nil) })
+
 ############################################################
 
 if ARGV.size == 0

@@ -43,7 +43,11 @@ def pull(sourcePath, dir=nil, opts={})
 
   if not $isLocal and not $isRelease
     # Download url => localPath
-    url = 'http://nlp.stanford.edu/software/sempre/dependencies-' + $version + sourcePath + ext
+    if sourcePath.start_with?('http://') || sourcePath.start_with?('https://')
+      url = sourcePath
+    else
+      url = 'http://nlp.stanford.edu/software/sempre/dependencies-' + $version + sourcePath + ext
+    end
     localPath = destDir + '/' + name + ext
     system "mkdir -p #{File.dirname(localPath)}" or exit 1
     system "wget -c '#{url}' -O #{localPath}" or exit 1
@@ -133,6 +137,9 @@ addModule('core', 'Core utilities (need to compile)', lambda {
   pull('/u/nlp/data/semparse/resources/jackson-core-2.2.0.jar')
   pull('/u/nlp/data/semparse/resources/jackson-annotations-2.2.0.jar')
   pull('/u/nlp/data/semparse/resources/jackson-databind-2.2.0.jar')
+
+  # jLine from maven central
+  pull('http://central.maven.org/maven2/jline/jline/2.14.2/jline-2.14.2.jar')
 })
 
 addModule('corenlp', 'Stanford CoreNLP 3.6.0', lambda {
@@ -150,7 +157,11 @@ addModule('corenlp', 'Stanford CoreNLP 3.6.0', lambda {
    'stanford-corenlp-3.6.0-models.jar' => 'stanford-corenlp-models.jar',
    'stanford-corenlp-caseless-2015-04-20-models.jar' => 'stanford-corenlp-caseless-models.jar',
    'joda-time.jar' => 'joda-time.jar',
-   'jollyday.jar' => 'jollyday.jar'}.each { |key, value|
+   'jollyday.jar' => 'jollyday.jar',
+   'ejml-0.23.jar' => 'ejml.jar',
+   'slf4j-api.jar' => 'slf4j-api.jar',
+   'slf4j-simple.jar' => 'slf4j-simple.jar',
+  }.each { |key, value|
     system "ln -sfv stanford-corenlp-full-2015-12-09/#{key} lib/#{value}" or exit 1
   }
 })
@@ -170,7 +181,8 @@ addModule('corenlp-3.2.0', 'Stanford CoreNLP 3.2.0 (for backward reproducibility
    'stanford-corenlp-3.2.0-models.jar' => 'stanford-corenlp-models.jar',
    'stanford-corenlp-caseless-2013-06-07-models.jar' => 'stanford-corenlp-caseless-models.jar',
    'joda-time.jar' => 'joda-time.jar',
-   'jollyday.jar' => 'jollyday.jar'}.each { |key, value|
+   'jollyday.jar' => 'jollyday.jar'
+  }.each { |key, value|
     system "ln -sfv stanford-corenlp-full-2013-06-20/#{key} lib/#{value}" or exit 1
   }
 })
@@ -265,12 +277,19 @@ addModule('overnight', 'Creating a parser for multiple domains', lambda {
   pull('/u/nlp/data/semparse/overnight/calendar/eval/calendar.test.turk.examples', 'data/overnight/', {:symlink => true})
 })
 
-# Community server
-addModule('community', 'Community Server', lambda {
-  exec('./community-server/install-deps.py')
-  })
+addModule('esslli_2016', 'Data for ESSLLI 2016 semantic parsing class', lambda {
+  pull('/u/nlp/data/semparse/esslli_2016', 'data/esslli_2016/', {:symlink => true})
+})
 
-
+addModule('geo880', 'Data, lexicon, grammars and KB for geo880', lambda {
+  pull('/u/nlp/data/semparse/geo880/geo880-test.examples', 'data/geo880', {:symlink => true})
+  pull('/u/nlp/data/semparse/geo880/geo880-test.preprocessed.examples', 'data/geo880', {:symlink => true})
+  pull('/u/nlp/data/semparse/geo880/geo880-train.preprocessed.examples', 'data/geo880', {:symlink => true})
+  pull('/u/nlp/data/semparse/geo880/geo880.grammar', 'data/geo880', {:symlink => true})
+  pull('/u/nlp/data/semparse/geo880/geo880.lexicon', 'data/geo880', {:symlink => true})
+  pull('/u/nlp/data/semparse/geo880/geo880.kg', 'data/geo880', {:symlink => true})
+  pull('/u/nlp/data/semparse/geo880/geo880.type_hierarchy', 'data/geo880', {:symlink => true})
+})
 ############################################################
 
 if ARGV.size == 0
@@ -280,6 +299,10 @@ if ARGV.size == 0
   $modules.each { |name,description,func|
     puts "  #{name}: #{description}"
   }
+  puts
+  puts "Internal use (Stanford NLP only):"
+  puts "  #{$0} -l <module-1> ...: Get the files from the local Stanford NLP server instead"
+  puts "  #{$0} -l -r <module-1> ...: Release to the public www directory on the server"
 end
 
 $modules.each { |name,description,func|

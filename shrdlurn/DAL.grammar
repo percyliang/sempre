@@ -1,0 +1,104 @@
+# Grammar for Dependency-based Action Language (DAL)
+# which is based on lambda DCS, and designed to interpolate
+# well with NL
+
+(def @select select)
+(def @update update)
+(def @remove remove)
+(def @R reverse)
+
+(rule $ROOT ($Actions) (IdentityFn) (anchored 1))
+(rule $ROOT ($Actions) (interactive.BlockFn isolate) (anchored 1))
+(rule $ROOT ($Actions) (interactive.BlockFn block) (anchored 1))
+
+(rule $Actions ($Actions ; $Action) (lambda a1 (lambda a2 (:s (var a1) (var a2)))) (anchored 1))
+(rule $Actions ($Action) (IdentityFn) (anchored 1))
+(rule $Action ({ $Actions }) (lambda a (:blk (var a))) (anchored 1))
+(rule $Action (return { $Actions }) (lambda a (:blkr (var a))) (anchored 1))
+(rule $Action ([ $Actions ]) (IdentityFn) (anchored 1))
+
+(rule $Action (repeat $Numbers $Action) (lambda n (lambda a (:loop (var n) (var a)))) (anchored 1))
+(rule $Action (if $ValueSets $Action) (lambda b (lambda a (:if (var b) (var a)))) (anchored 1))
+(rule $Action (if $Sets $Action) (lambda b (lambda a (:if (var b) (var a)))) (anchored 1))
+
+# basic actions, local scope "for has color red [add red left; add red top]"
+# (rule $Action (for $Sets $Action ) (lambda s (lambda a (:for (var s) (var a)))) (anchored 1))
+(rule $Action (foreach $Sets $Action ) (lambda s (lambda a (:foreach (var s) (var a)))) (anchored 1))
+(rule $Action (foreach $Action ) (lambda a (:foreach this (var a))) (anchored 1))
+(rule $Action (isolate $Action ) (lambda a (:isolate (var a))) (anchored 1))
+(rule $Action (while $Sets $Action ) (lambda s (lambda a (:while (var s) (var a)))) (anchored 1))
+
+# global actions
+(rule $Action (select $Sets) (lambda s (: @select (var s))) (anchored 1))
+(rule $Action (select) (ConstantFn (: @select)) (anchored 1))
+(rule $Action (update $Rel $ValueSets) (lambda r (lambda v (: @update (var r) (var v)))) (anchored 1))
+(rule $Action (remove) (ConstantFn (: @remove)) (anchored 1))
+(rule $Action (remove $Sets) (lambda s (: @remove (var s))) (anchored 1))
+
+############### unary sets
+(rule $Set (selected) this (anchored 1))
+(rule $Set (previous) prev (anchored 1))
+(rule $Set (this) this (anchored 1))
+(rule $Set (all) * (anchored 1))
+(rule $Set (nothing) nothing (anchored 1))
+(rule $Set (none) nothing (anchored 1))
+
+############### basic set operations
+# just use or and filter, which does and
+(for @op (or and)
+(rule $Sets ($Sets @op $Set) (lambda s1 (lambda s2
+					(@op (var s1) (var s2)))) (anchored 1))
+(rule $ValueSets ($ValueSets @op $ValueSet) (lambda s1 (lambda s2
+					(@op (var s1) (var s2)))) (anchored 1))
+)
+
+# this would require universe of each type
+# (rule $ValueSet (not $ValueSet) (lambda s (not (var s))) (anchored 1))
+
+(rule $Set (not $Sets) (lambda s (not (var s))) (anchored 1))
+
+(rule $ValueSets ($ValueSet) (IdentityFn) (anchored 1))
+(rule $ValueSet ([ $ValueSets ]) (IdentityFn) (anchored 1))
+
+(rule $Sets ($Set) (IdentityFn) (anchored 1))
+(rule $Set ([ $Sets ]) (IdentityFn) (anchored 1))
+
+############### Joins
+(rule $ValueSet ($Rel of $Set) (lambda r (lambda s
+			   ((@R (var r)) (var s)))) (anchored 1))
+
+(rule $Set (has $Rel $ValueSet) (lambda r (lambda s
+			   ((var r) (var s)))) (anchored 1))
+
+############### Arithmetic
+(for @op (+ -)
+(rule $Numbers ($Numbers @op $Number) (lambda n1  (lambda n2
+(@op (var n1) (var n2)))) (anchored 1))
+)
+
+(rule $Number ([ $Numbers ]) (IdentityFn) (anchored 1))
+(rule $Numbers ( $Number ) (IdentityFn) (anchored 1))
+
+#############################
+# Floating rules
+#############################
+
+# (rule $Action ($Numbers $Actions) (lambda n (lambda a (:loop (var n) (var a)))) (floating 1)) # do add red top 3 times
+# (rule $Action ($Sets $Actions) (lambda s (lambda a (:foreach (var s) (var a)))) (floating 1))
+# (rule $Action ($Actions $Actions) (lambda a1 (lambda a2 (:s (var a1) (var a2)))) (floating 1)) # add red top then remove them
+
+# let floating rules continue to propagate, and generate a lot of candidates
+# (rule $Actions ($Action) (IdentityFn) (floating 1))
+
+# (rule $ValueSets ($Rel $Sets) (lambda r (lambda s
+#			   ((reverse (var r)) (var s)))) (floating 1))
+
+# (rule $Action ($Sets) (lambda s (: @select (var s))) (floating 1))
+
+# (rule $Set ($Rel $ValueSets) (lambda r (lambda s
+# 			   ((var r) (var s)))) (floating 1))
+# (rule $Action ($Rel $ValueSets) (lambda r (lambda v (: @update (var r) (var v)))) (floating 1))
+# (rule $Action (nothing) (ConstantFn (: @remove)) (floating 1))
+
+# (rule $FROOT ($Action) (IdentityFn) (floating 1))
+# (rule $FROOT ($Actions) (IdentityFn) (floating 1))

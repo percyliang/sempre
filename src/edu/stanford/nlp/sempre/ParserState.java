@@ -230,7 +230,7 @@ public abstract class ParserState {
   }
 
   // Ensure that all the logical forms are executed and compatibilities are computed.
-  public void ensureExecuted() {
+  protected void ensureExecuted() {
     LogInfo.begin_track("Parser.ensureExecuted");
     // Execute predicted derivations to get value.
     for (Derivation deriv : predDerivations) {
@@ -273,7 +273,7 @@ public abstract class ParserState {
 
     trueScores = new double[n];
     predScores = new double[n];
-    // Experimental (ice): For update schemas that choose one good and one bad candidate to update
+    // For update schemas that choose one good and one bad candidate to update
     int[] goodAndBad = null;
     if (opts.customExpectedCounts == CustomExpectedCount.TOP) {
       goodAndBad = getTopDerivations(derivations);
@@ -283,7 +283,6 @@ public abstract class ParserState {
       if (goodAndBad == null) return;
     }
 
-    boolean hasPostive = opts.customExpectedCounts != CustomExpectedCount.NONE;
     for (int i = 0; i < n; i++) {
       Derivation deriv = derivations.get(i);
       double logReward = Math.log(compatibilityToReward(deriv.compatibility));
@@ -292,7 +291,6 @@ public abstract class ParserState {
         case NONE:
           trueScores[i] = deriv.score + logReward;
           predScores[i] = deriv.score;
-          if (logReward > Double.NEGATIVE_INFINITY) hasPostive = true;
           break;
         case UNIFORM:
           trueScores[i] = logReward;
@@ -308,13 +306,7 @@ public abstract class ParserState {
     }
 
     // Usually this happens when there are no derivations.
-    // sidaw: allow rejection updates of everything
-    if (hasPostive) {
-      if(!NumUtils.expNormalize(trueScores)) return;
-    } else {
-      for (int i = 0; i < n; i++) trueScores[i] = 0;
-    }
-      
+    if (!NumUtils.expNormalize(trueScores)) return;
     if (!NumUtils.expNormalize(predScores)) return;
 
     // Update parameters

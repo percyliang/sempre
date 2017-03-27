@@ -68,7 +68,7 @@ public class ContextValue extends Value {
   }
 
   public ContextValue(KnowledgeGraph graph) {
-    this(null, null, null, graph);
+    this(null, null, new ArrayList(), graph);
   }
 
   // Example:
@@ -107,8 +107,11 @@ public class ContextValue extends Value {
       tree.addChild(LispTree.proto.newList("user", user));
     if (date != null)
       tree.addChild(date.toLispTree());
+		// When logging examples, logging the entire graph takes too much screen space.
+		// I don't think that we ever deserialize a graph from a serialized context,
+		// so this should be fine.
     if (graph != null)
-      tree.addChild(graph.toLispTree());
+      tree.addChild(graph.toShortLispTree());
     for (Exchange e : exchanges)
       tree.addChild(LispTree.proto.newList("exchange", e.toLispTree()));
     return tree;

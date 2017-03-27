@@ -282,7 +282,10 @@ public final class DenotationUtils {
    * Processor for each data type.
    */
   public abstract static class TypeProcessor {
+    // Is the value v compatible with this processor?
     public abstract boolean isCompatible(Value v);
+    // Is the collection sortable? (Is there a total order on the elements?)
+    public abstract boolean isSortable(Collection<Value> values);
     // positive if v1 > v2 | negative if v1 < v2 | 0 if v1 == v2
     public int compareValues(Value v1, Value v2) { throw new LambdaDCSException(Type.typeMismatch, "Cannot compare values with " + getClass().getSimpleName()); }
     public Value sum(Collection<Value> values) { throw new LambdaDCSException(Type.typeMismatch, "Cannot compute sum with " + getClass().getSimpleName()); }
@@ -293,6 +296,8 @@ public final class DenotationUtils {
     public Value div(Value v1, Value v2) { throw new LambdaDCSException(Type.typeMismatch, "Cannot compute div with " + getClass().getSimpleName()); }
 
     public Value max(Collection<Value> values) {
+      if (!isSortable(values))
+        throw new LambdaDCSException(Type.typeMismatch, "Values cannot be sorted.");
       Value max = null;
       for (Value value : values) {
         if (max == null || compareValues(max, value) < 0)
@@ -302,6 +307,8 @@ public final class DenotationUtils {
     }
 
     public Value min(Collection<Value> values) {
+      if (!isSortable(values))
+        throw new LambdaDCSException(Type.typeMismatch, "Values cannot be sorted.");
       Value min = null;
       for (Value value : values) {
         if (min == null || compareValues(min, value) > 0)
@@ -311,6 +318,8 @@ public final class DenotationUtils {
     }
 
     public List<Integer> argsort(List<Value> values) {
+      if (!isSortable(values))
+        throw new LambdaDCSException(Type.typeMismatch, "Values cannot be sorted.");
       List<Integer> indices = new ArrayList<>();
       for (int i = 0; i < values.size(); i++)
         indices.add(i);
@@ -333,6 +342,11 @@ public final class DenotationUtils {
     @Override
     public boolean isCompatible(Value v) {
       return v instanceof NumberValue;
+    }
+    
+    @Override
+    public boolean isSortable(Collection<Value> values) {
+      return true;
     }
 
     @Override
@@ -372,6 +386,22 @@ public final class DenotationUtils {
     @Override
     public boolean isCompatible(Value v) {
       return v instanceof DateValue;
+    }
+    
+    @Override
+    public boolean isSortable(Collection<Value> values) {
+      DateValue firstDate = null;
+      for (Value value : values) {
+        DateValue date = (DateValue) value; 
+        if (firstDate == null) {
+          firstDate = date;
+        } else {
+          if ((firstDate.year == -1) != (date.year == -1)) return false;
+          if ((firstDate.month == -1) != (date.month == -1)) return false;
+          if ((firstDate.day == -1) != (date.day == -1)) return false;
+        }  
+      }
+      return true;
     }
 
     @Override
@@ -435,4 +465,5 @@ public final class DenotationUtils {
       throw new LambdaDCSException(Type.typeMismatch, "Cannot compare values");
     }
   }
+ 
 }

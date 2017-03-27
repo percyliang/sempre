@@ -1,4 +1,5 @@
 package edu.stanford.nlp.sempre.interactive;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -12,9 +13,7 @@ import fig.basic.LogInfo;
 import fig.basic.Option;
 import fig.exec.Execution;
 
-public class SimulationAnalyzer {
-  public static List<String> plotInfo = new ArrayList<>();
-  
+public class SimulationAnalyzer {  
   @SuppressWarnings("unchecked")
   public static Map<String, Object> getStats(String jsonResponse) {
     Map<String, Object> response = Json.readMapHard(jsonResponse);
@@ -28,30 +27,47 @@ public class SimulationAnalyzer {
   static Evaluation dEval = new Evaluation();
   static int queryCount = 0;
 
+  // add stats to the query.
   public synchronized static void addStats(Map<String, Object> query, String jsonResponse) {
     Map<String, Object> stats = getStats(jsonResponse);
-    LogInfo.logs("stats: %s query: %s", stats, query);
-    
     Map<String, Object> line = new LinkedHashMap<String, Object>(query);
-    
-    if (stats == null) return;
+    LogInfo.logs("stats: %s", stats);
+    if (stats == null) {
+      LogInfo.log(query);
+      LogInfo.log(jsonResponse);
+      return;
+    }
     
     // make sure no key conflict
     for (Entry<String, Object> entry : stats.entrySet()) {
       line.put("stats."+entry.getKey(), entry.getValue());
     }
     line.put("queryCount", ++queryCount);
-    plotInfo.add(Json.writeValueAsStringHard(line));
+    PrintWriter infoFile = IOUtils.openOutAppendHard(Execution.getFile("plotInfo.json"));
+    infoFile.println(Json.writeValueAsStringHard(line));
+    infoFile.close();
     
-    if (stats.get("type").equals("q")) {
-      GrammarInducer.ParseStatus status = GrammarInducer.ParseStatus.fromString(stats.get("status").toString());
-      int size = (Integer)stats.get("size");
-      qEval.add("size", size);
-      qEval.add("isCore", status == GrammarInducer.ParseStatus.Core);
-      qEval.add("isInduced", status == GrammarInducer.ParseStatus.Induced);
+    if (!stats.containsKey("type"))
+      return;
+    
+    if (stats.get("type").equals("def") && !stats.containsKey("error")) {
+      qEval.add("def.head_len", (Integer)stats.get("head_len"));
+      qEval.add("def.json_len", (Integer)stats.get("json_len"));
+      qEval.add("def.num_failed", (Integer)stats.get("num_failed"));
+      qEval.add("def.num_body", (Integer)stats.get("num_body"));
+      qEval.add("def.num_rules", (Integer)stats.get("num_rules"));
+      qEval.add("def.time", (Double)stats.get("time"));
     }
     
-    if (stats.get("type").equals("accept")) {
+    if (stats.get("type").equals("q") && !stats.containsKey("error")) {
+      GrammarInducer.ParseStatus status = GrammarInducer.ParseStatus.fromString(stats.get("status").toString());
+      int size = (Integer)stats.get("size");
+      qEval.add("q.size", size);
+      qEval.add("q.isCore", status == GrammarInducer.ParseStatus.Core);
+      qEval.add("q.isInduced", status == GrammarInducer.ParseStatus.Induced);
+    }
+    
+    if (stats.get("type").equals("accept") && !stats.containsKey("error")) {
       GrammarInducer.ParseStatus status = GrammarInducer.ParseStatus.fromString(stats.get("status").toString());
       int size = (Integer)stats.get("size");
       int rank = (Integer)stats.get("rank");
@@ -62,14 +78,8 @@ public class SimulationAnalyzer {
       acceptEval.add("isCore", status == GrammarInducer.ParseStatus.Core);
       acceptEval.add("isInduced", status == GrammarInducer.ParseStatus.Induced);
     }
-    
-    if (stats.get("type").equals("def")) {
-      int numRules = (Integer)stats.get("numRules");
-    }
-    
-    
   }
-  public static void flush() {
+  public synchronized static void flush() {
     // TODO Auto-generated method stub
     qEval.logStats("q");
     qEval.putOutput("q");
@@ -77,8 +87,7 @@ public class SimulationAnalyzer {
     acceptEval.logStats("accept");
     acceptEval.putOutput("accept");
     
-    LogInfo.logs("Printing plotInfo to %s", Execution.getFile("plotInfo.json"));
-    IOUtils.writeLinesHard(Execution.getFile("plotInfo.json"), plotInfo);
+    // LogInfo.logs("Printing plotInfo to %s", Execution.getFile("plotInfo.json"));
+    
   }
-
 }

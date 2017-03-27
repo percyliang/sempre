@@ -23,9 +23,6 @@
   <!-- Compile -->
   <target name="compile" depends="init">
     <antcall target="compile.released"/>
-    <!-- BEGIN_HIDE -->
-    <antcall target="compile.internal"/>
-    <!-- END_HIDE -->
   </target>
 
   <target name="compile.released" depends="init,core,cache,corenlp,freebase,tables,overnight"/>
@@ -91,71 +88,7 @@
     <jar destfile="${libsempre}/sempre-overnight.jar" basedir="${classes}/overnight"/>
   </target>
 
-  <!-- BEGIN_HIDE -->
-
-  <target name="compile.internal" depends="fbalignment,paraphrase,clojure,regex,jungle,logicpuzzles"/>
-
-  <!-- Compile fbalignment -->
-  <target name="fbalignment" depends="init,freebase">
-    <echo message="Compiling ${ant.project.name}: fbalignment"/>
-    <mkdir dir="${classes}/fbalignment"/>
-    <javac srcdir="${src}" destdir="${classes}/fbalignment" classpathref="lib.path" debug="true" includeantruntime="false" source="${source}" target="${target}">
-      <include name="edu/stanford/nlp/sempre/fbalignment/"/>
-    </javac>
-    <jar destfile="${libsempre}/sempre-fbalignment.jar" basedir="${classes}/fbalignment"/>
-  </target>
-
-  <!-- Compile paraphrase -->
-  <target name="paraphrase" depends="init,fbalignment">
-    <echo message="Compiling ${ant.project.name}: paraphrase"/>
-    <mkdir dir="${classes}/paraphrase"/>
-    <javac srcdir="${src}" destdir="${classes}/paraphrase" classpathref="lib.path" debug="true" includeantruntime="false" source="${source}" target="${target}">
-      <include name="edu/stanford/nlp/sempre/paraphrase/"/>
-    </javac>
-    <jar destfile="${libsempre}/sempre-paraphrase.jar" basedir="${classes}/paraphrase"/>
-  </target>
-
-  <!-- Compile clojure -->
-  <target name="clojure" depends="init,core">
-    <echo message="Compiling ${ant.project.name}: clojure"/>
-    <mkdir dir="${classes}/clojure"/>
-    <javac srcdir="${src}" destdir="${classes}/clojure" classpathref="lib.path" debug="true" includeantruntime="false" source="${source}" target="${target}">
-      <include name="edu/stanford/nlp/sempre/clojure/"/>
-    </javac>
-    <jar destfile="${libsempre}/sempre-clojure.jar" basedir="${classes}/clojure"/>
-  </target>
-
-  <!-- Compile regex -->
-  <target name="regex" depends="init,core">
-    <echo message="Compiling ${ant.project.name}: regex"/>
-    <mkdir dir="${classes}/regex"/>
-    <javac srcdir="${src}" destdir="${classes}/regex" classpathref="lib.path" debug="true" includeantruntime="false" source="${source}" target="${target}">
-      <include name="edu/stanford/nlp/sempre/regex/"/>
-    </javac>
-    <jar destfile="${libsempre}/sempre-regex.jar" basedir="${classes}/regex"/>
-  </target>
-
-  <!-- Compile jungle -->
-  <target name="jungle" depends="init,core,cache">
-    <echo message="Compiling ${ant.project.name}: jungle"/>
-    <mkdir dir="${classes}/jungle"/>
-    <javac srcdir="${src}" destdir="${classes}/jungle" classpathref="lib.path" debug="true" includeantruntime="false" source="${source}" target="${target}">
-      <include name="edu/stanford/nlp/sempre/jungle/"/>
-    </javac>
-    <jar destfile="${libsempre}/sempre-jungle.jar" basedir="${classes}/jungle"/>
-  </target>
-
-  <!-- Compile logicpuzzles -->
-  <target name="logicpuzzles" depends="init,core">
-    <echo message="Compiling ${ant.project.name}: logicpuzzles"/>
-    <mkdir dir="${classes}/logicpuzzles"/>
-    <javac srcdir="${src}" destdir="${classes}/logicpuzzles" classpathref="lib.path" debug="true" includeantruntime="false" source="${source}" target="${target}">
-      <include name="edu/stanford/nlp/sempre/logicpuzzles/"/>
-    </javac>
-    <jar destfile="${libsempre}/sempre-logicpuzzles.jar" basedir="${classes}/logicpuzzles"/>
-  </target>
-
-    <!-- Compile interactive -->
+  <!-- Compile interactive -->
   <target name="interactive" depends="init,core">
     <echo message="Compiling ${ant.project.name}: interactive"/>
     <mkdir dir="${classes}/interactive"/>
@@ -165,7 +98,15 @@
     <jar destfile="${libsempre}/sempre-interactive.jar" basedir="${classes}/interactive"/>
   </target>
 
-  <!-- END_HIDE -->
+  <!-- Compile geo880 -->
+  <target name="geo880" depends="init,core,corenlp,tables">
+    <echo message="Compiling ${ant.project.name}: geo880"/>
+    <mkdir dir="${classes}/geo880"/>
+    <javac srcdir="${src}" destdir="${classes}/geo880" classpathref="lib.path" debug="true" includeantruntime="false" source="${source}" target="${target}">
+      <include name="edu/stanford/nlp/sempre/geo880/"/>
+    </javac>
+    <jar destfile="${libsempre}/sempre-geo880.jar" basedir="${classes}/geo880"/>
+  </target>
 
   <!-- Clean up -->
   <target name="clean">

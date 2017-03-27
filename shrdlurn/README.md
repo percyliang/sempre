@@ -1,13 +1,44 @@
-Experimental work following
-1) ./shrdlurn/runServer.sh to start both servers
-2) Blast the server with simulator on previous logs, under sandbox mode, to get the server into state
-3) Collect and append to more logs
-4) For any particular experiment, save the previous log
-	- ./run @mode=int-utils @cmd=backup-mv
-  - reset the log
-potentially reset citation and grammar information as well?
-5) blast server with non-sandbox call to get previous citations
+# README
 
-Default port: 8410 for sempre, 8406 for user
-Run: ./run @mode=interactive -Server.port 8410
-Test command : ./run @mode=test @class=interactive.actions.ActionExecutorTest -verbose 5
+## Running the server for voxelurn
+
+1) Start the sempre server
+
+    ./interactive/run @mode=voxelurn -Server.port 8410
+
+1) Start the client server
+
+    ./interactive/run @mode=community
+
+2) (optionally) Blast the server with previous logs to get the server into state
+
+    ./interactive/run @mode=simulator @server=local @sandbox=none @task=freebig
+
+## Running an experiment
+
+1) Start the server
+
+    ./interactive/run @mode=voxelurn -Server.port 8410
+
+2) Blast the server with previous logs to get the server into state
+
+    ./interactive/run @mode=simulator @server=local @sandbox=none @task=freebig
+
+2) Run analysis script to get results
+
+    ./interactive/run @mode=analyze -execNumber 1
+
+0) (Optional) clean up
+
+    ./interactive/run @mode=backup # save previous data logs
+    ./interactive/run @mode=trash # deletes previous data logs
+
+## Tests
+
+There are many units for interactive learning
+
+    ./interactive/run @mode=test
+
+To specify a specific test class and verbosity
+
+    ./interactive/run @mode=test @class=DACExecutorTest -verbose 5

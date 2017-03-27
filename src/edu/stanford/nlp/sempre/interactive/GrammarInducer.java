@@ -14,6 +14,7 @@ import org.testng.collections.Sets;
 import com.beust.jcommander.internal.Lists;
 import com.google.common.base.Function;
 
+import edu.stanford.nlp.sempre.ActionFormula;
 import edu.stanford.nlp.sempre.ConstantFn;
 import edu.stanford.nlp.sempre.Derivation;
 import edu.stanford.nlp.sempre.Example;
@@ -24,23 +25,28 @@ import edu.stanford.nlp.sempre.LambdaFormula;
 import edu.stanford.nlp.sempre.Rule;
 import edu.stanford.nlp.sempre.SemanticFn;
 import edu.stanford.nlp.sempre.VariableFormula;
-import edu.stanford.nlp.sempre.interactive.GrammarInducer.ParseStatus;
 import fig.basic.LispTree;
 import fig.basic.LogInfo;
 import fig.basic.Option;
 
 /**
- * Takes two examples, and induce some Rules
+ * Takes two examples, and induce Rules
  *
- * @author Sida Wang
+ * @author sidaw
  */
 
 public class GrammarInducer {
   public static class Options {
     @Option(gloss = "categories that can serve as rules")
     public Set<String> filteredCats = new HashSet<String>();
-    @Option(gloss = "add bias")
-    public int addBias = 1;
+    @Option(gloss = "verbose")
+    public int verbose = 0;
+    @Option(gloss = "cats that never overlaps, and always save to replace")
+    public List<String> simpleCats = Lists.newArrayList("$Color", "$Number", "$Direction");
+    @Option(gloss = "use best packing")
+    public boolean useBestPacking = true;
+    @Option(gloss = "use simple packing")
+    public boolean useSimplePacking = true;
   }
 
   public static Options opts = new Options();
@@ -53,20 +59,22 @@ public class GrammarInducer {
   public List<Derivation> matches;
   Derivation def;
 
-  
   // induce rule is possible,
   // otherwise set the correct status
   public GrammarInducer(List<String> headTokens, Derivation def, List<Derivation> chartList) {
+    // grammarInfo start and end is used to indicate partial, when using aligner
+    boolean allHead = false;
     if (def.grammarInfo.start == -1) {
       def.grammarInfo.start = 0;
       def.grammarInfo.end = headTokens.size();
+      allHead = true;
     }
     
     // dont want weird cat unary rules with strange semantics
     if (headTokens == null || headTokens.isEmpty() ) {
       throw new RuntimeException("The head is empty, refusing to define.");
     }
-    chartList.removeIf(d -> d.start == 0 && d.end == headTokens.size());
+    chartList.removeIf(d -> d.start == def.grammarInfo.start && d.end == def.grammarInfo.end);
     this.def = def;
     
     this.headTokens = headTokens;
@@ -75,22 +83,70 @@ public class GrammarInducer {
     this.matches = new ArrayList<>();
     addMatches(def, makeChartMap(chartList));
     Collections.reverse(this.matches);
+   
+
+    inducedRules = new ArrayList<>();
+    if (allHead && opts.useSimplePacking) {
+      List<Derivation> filteredMatches = this.matches.stream().filter( d -> {
+        return opts.simpleCats.contains(d.cat) && d.allAnchored() && d.end - d.start == 1;
+      }).collect(Collectors.toList());
+      
+      List<Derivation> packing = new ArrayList<>();
+      for (int i = 0; i<=headTokens.size(); i++) {
+        for (Derivation d : filteredMatches) {
+          if (d.start == i) {
+            packing.add(d);
+            break;
+          }
+        }
+      }
+      
+      HashMap<String, String> formulaToCat = new HashMap<>();
+      packing.forEach(d -> formulaToCat.put(catFormulaKey(d), varName(d)));
+      buildFormula(def, formulaToCat);
+      List<Rule> simpleInduced = induceRules(packing, def);
+      for (Rule rule : simpleInduced) {
+        rule.addInfo("simple_packing", 1.0);
+        addRuleDedupByRHS(rule);
+      }
+      
+      if (opts.verbose > 1) {
+        LogInfo.logs("Simple Packing", chartList.size());
+        LogInfo.logs("chartList.size = %d", chartList.size());
+        LogInfo.log("Potential packings: " );
+        this.matches.forEach(d -> LogInfo.logs("%f: %s\t", d.getScore(), d.formula));
+        LogInfo.logs("packing: %s", packing);
+        LogInfo.logs("formulaToCat: %s", formulaToCat);
+      }
+    }
+    if (opts.useBestPacking) {
+      List<Derivation> bestPacking = bestPackingDP(this.matches, numTokens);
+      
+      HashMap<String, String> formulaToCat = new HashMap<>();
+      bestPacking.forEach(d -> formulaToCat.put(catFormulaKey(d), varName(d)));
+      buildFormula(def, formulaToCat);
+      for (Rule rule : induceRules(bestPacking, def)) {
+        if (rule.rhs.stream().allMatch(s -> Rule.isCat(s))) continue;
+        addRuleDedupByRHS(rule);
+      }
+      
+      if (opts.verbose > 1) {
+        LogInfo.logs("chartList.size = %d", chartList.size());
+        LogInfo.log("Potential packings: " );
+        this.matches.forEach(d -> LogInfo.logs("%f: %s\t", d.getScore(), d.formula));
+        LogInfo.logs("BestPacking: %s", bestPacking);
+        LogInfo.logs("formulaToCat: %s", formulaToCat);
+      }
+    }
     
-    List<Derivation> bestPacking = bestPackingDP(this.matches, numTokens);
-    
-    HashMap<String, String> formulaToCat = new HashMap<>();
-    bestPacking.forEach(d -> formulaToCat.put(catFormulaKey(d), varName(d)));
-    
-    LogInfo.logs("chartList.size = %d", chartList.size());
-    LogInfo.log("Potential packings: " );
-    this.matches.forEach(d -> LogInfo.logs("%f: %s\t", d.getScore(), d.formula));
-    LogInfo.logs("BestPacking: %s", bestPacking);
-    
-    LogInfo.logs("formulaToCat: %s", formulaToCat);
-    
-    buildFormula(def, formulaToCat);
-    
-    inducedRules = new ArrayList<>(induceRules(bestPacking, def));
+  }
+  
+  Set<String> RHSs = new HashSet<>();
+  private void addRuleDedupByRHS(Rule rule) {
+    if (!RHSs.contains(rule.rhs.toString())) {
+       inducedRules.add(rule);
+       RHSs.add(rule.rhs.toString());
+    }
   }
     
   static Map<String, List<Derivation>> makeChartMap(List<Derivation> chartList) {
@@ -197,14 +253,13 @@ public class GrammarInducer {
         if (bestEndsAtI.get(j).score >= bestOverall.score)
           bestOverall = bestEndsAtI.get(j);
       }
-      LogInfo.dbgs("maximalAtI[%d] = %f: %s, BlockingIndex: %d", i, bestOverall.score, bestOverall.packing, blockingIndex(matches, i));
+      if (opts.verbose > 1) LogInfo.logs("maximalAtI[%d] = %f: %s, BlockingIndex: %d", i, bestOverall.score, bestOverall.packing, blockingIndex(matches, i));
       if (bestOverall.score > Double.NEGATIVE_INFINITY)
         maximalAtI.add(i, bestOverall);
       else {
         maximalAtI.add(i, new Packing(0, new ArrayList<>()));
       }
     }
-    
     return maximalAtI.get(length).packing;
   }
 
@@ -270,7 +325,6 @@ public class GrammarInducer {
     } else {
       deriv.grammarInfo.formula = deriv.formula;
     }
-    
     // LogInfo.logs("BUILT %s for %s", deriv.grammarInfo.formula, deriv.formula);
     // LogInfo.log("built " + deriv.grammarInfo.formula);
   }
@@ -299,6 +353,7 @@ public class GrammarInducer {
  
   private SemanticFn getSemantics(final Derivation def, List<Derivation> packings) {
     Formula baseFormula = def.grammarInfo.formula;
+    if (opts.verbose > 0) LogInfo.logs("getSemantics %s", baseFormula);
     if (packings.size() == 0) {
       SemanticFn constantFn = new ConstantFn();
       LispTree newTree = LispTree.proto.newList();
@@ -345,8 +400,12 @@ public class GrammarInducer {
   }
 
   public static ParseStatus getParseStatus(Example ex) {
-    if (ex.predDerivations.size() > 0) {
-      for (Derivation deriv : ex.predDerivations) {
+   return getParseStatus(ex.predDerivations);
+  }
+  
+  public static ParseStatus getParseStatus(List<Derivation> derivs) {
+    if (derivs.size() > 0) {
+      for (Derivation deriv : derivs) {
         if (deriv.allAnchored()) {
           return ParseStatus.Core;
         }

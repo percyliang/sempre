@@ -1,0 +1,105 @@
+# domain specific grammar for voxelurn
+
+(include DAL.grammar)
+
+# domain specific actions:
+(def @put put)
+(def @base base)
+(def @add add)
+(def @move move)
+
+# syntactic sugar
+(def @veryx veryx)
+
+# typed lambdas
+# Action a, ItemSet i, ValueSet v, Rel r, Direction d, Color c, Number n
+# This grammar should have Rule.defaultIsFloating false
+
+# utilities
+(rule $Action (base $Number $Number) (lambda x (lambda y (: @base (var x) (var y)))) (anchored 1))
+(rule $Action (noop) (ConstantFn (: noop)) (anchored 1))
+
+(rule $Set (origin) (ConstantFn (call origin)) (anchored 1))
+
+# primitive actions
+(rule $Action (add $Color) (lambda c (: @add (var c) here)) (anchored 1))
+(rule $Action (add $Color $Direction) (lambda c (lambda d (: @add (var c) (var d)))) (anchored 1))
+(rule $Action (move $Direction) (lambda d (: @move (var d))) (anchored 1))
+
+# primitive actions with arguments
+
+# cube to cube relations
+(rule $Set ($Direction of $Set) (lambda d (lambda s
+			   (call adj (var d) (var s)))) (anchored 1))
+(rule $Set ($Extreme of $Set) (lambda e (lambda s
+			   (call @veryx (var e) (var s)))) (anchored 1))
+(rule $Set ($Direction) (lambda d
+			   (call adj (var d))) (anchored 1))
+(rule $Set ($Extreme) (lambda e
+			   (call @veryx (var e))) (anchored 1))
+
+(for @dir (top bot left right front back)
+  (rule $Direction (@dir) @dir (anchored 1))
+)
+(rule $Extreme (very $Direction) (IdentityFn) (anchored 1))
+
+(for @rel (col row height color name age)
+  (rule $Rel (@rel) (ConstantFn @rel) (anchored 1))
+)
+
+(rule $ValueSet ($Color) (IdentityFn) (anchored 1))
+(rule $ValueSet ($Number) (IdentityFn) (anchored 1))
+
+# set the range via NumberFn options
+
+(when morenumbers
+  (rule $Number ($TOKEN) (NumberFn) (anchored 1)))
+
+(when morecolors
+  (rule $Color ($TOKEN) (SimpleLexiconFn (type color)) (anchored 1)))
+
+(when (not morenumbers)
+  (for @num (0 1 2 3 4 5 6 7 8 9 10)
+    (rule $Number (@num) (ConstantFn (number @num)) (anchored 1)))
+  (rule $Number (zero) (ConstantFn (number 0)) (anchored 1))
+  (rule $Number (one) (ConstantFn (number 1)) (anchored 1))
+  (rule $Number (two) (ConstantFn (number 2)) (anchored 1))
+  (rule $Number (three) (ConstantFn (number 3)) (anchored 1))
+  (rule $Number (four) (ConstantFn (number 4)) (anchored 1))
+  (rule $Number (five) (ConstantFn (number 5)) (anchored 1))
+  (rule $Number (six) (ConstantFn (number 6)) (anchored 1))
+  (rule $Number (seven) (ConstantFn (number 7)) (anchored 1))
+  (rule $Number (eight) (ConstantFn (number 8)) (anchored 1))
+  (rule $Number (nine) (ConstantFn (number 9)) (anchored 1))
+  (rule $Number (ten) (ConstantFn (number 10)) (anchored 1))
+)
+
+(when (not morecolors)
+  (rule $Color (red) red (anchored 1))
+  (rule $Color (orange) orange (anchored 1))
+  (rule $Color (yellow) yellow (anchored 1))
+  (rule $Color (green) green (anchored 1))
+  (rule $Color (blue) blue (anchored 1))
+  (rule $Color (white) white (anchored 1))
+  (rule $Color (black) black (anchored 1))
+  (rule $Color (pink) pink (anchored 1))
+  (rule $Color (brown) brown (anchored 1))
+)
+
+####### domain specific floating rules
+# red means has color red
+# (rule $Sets ($Color) (lambda c (color (var c))))
+
+# various actions can be performed
+# (rule $Action ($Color) (lambda c (: @add (var c) here)))
+# (rule $Action ($Color $Direction) (lambda c (lambda d (: @add (var c) (var d)))))
+# (rule $Action ($Direction) (lambda d (: @move (var d))))
+
+# (rule $Set ($Direction $Sets) (lambda d (lambda s
+#			   (call adj (var d) (var s)))))
+# (rule $Set ($Extreme $Sets) (lambda e (lambda s
+#			   (call @veryx (var e) (var s)))))
+# (rule $Set ($Direction) (lambda d
+#			   (call adj (var d))))
+# (rule $Set ($Extreme) (lambda e
+#			   (call @veryx (var e))))

@@ -170,6 +170,10 @@ public class NaiveKnowledgeGraph extends KnowledgeGraph {
     return new NaiveKnowledgeGraph(triples);
   }
 
+  public static KnowledgeGraph fromFile(String path) {
+    return fromLispTree(LispTree.proto.parseFromFile(path).next());
+  }
+
   @Override
   public LispTree toLispTree() {
     LispTree tree = LispTree.proto.newList();
@@ -179,5 +183,17 @@ public class NaiveKnowledgeGraph extends KnowledgeGraph {
       tree.addChild(triple.toLispTree());
     }
     return tree;
+  }
+
+  @Override
+  public LispTree toShortLispTree() {
+    if (triples.size() > 1000) {
+      LispTree tree = LispTree.proto.newList();
+      tree.addChild("graph");
+      tree.addChild("NaiveKnowledgeGraph");
+      tree.addChild(("TooManyTriples"));
+      return tree;
+    }
+    return toLispTree();
   }
 }

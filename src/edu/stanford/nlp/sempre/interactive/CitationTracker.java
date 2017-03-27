@@ -15,7 +15,6 @@ import com.google.common.base.Strings;
 
 import edu.stanford.nlp.sempre.Derivation;
 import edu.stanford.nlp.sempre.Example;
-import edu.stanford.nlp.sempre.ILUtils;
 import edu.stanford.nlp.sempre.Json;
 import edu.stanford.nlp.sempre.Rule;
 import fig.basic.IOUtils;
@@ -23,9 +22,9 @@ import fig.basic.LogInfo;
 import fig.basic.Pair;
 
 /**
- * A rule specifies how to take a right hand of terminals and non-terminals.
- *
- * @author Percy Liang
+ * Tracks rule usage via a citation system.
+ * A rule is cited when a user makes use of that rule in a derivation.
+ * @author sidaw
  */
 public class CitationTracker {
   public static final String IDPrefix = "id:";
@@ -46,7 +45,7 @@ public class CitationTracker {
   // The summary is ONE SINGLE line of json, has cite, self, and head
   private synchronized void writeSummary(Rule rule) {
     String author = getAuthor(rule);
-    String summaryPath = Paths.get(ILUtils.opts.citationPath, encode(author), encode(getHead(rule)) + ".json").toString();
+    String summaryPath = Paths.get(InteractiveUtils.opts.citationPath, encode(author), encode(getHead(rule)) + ".json").toString();
     File file = new File(summaryPath);
     file.getParentFile().mkdirs();
     
@@ -61,9 +60,12 @@ public class CitationTracker {
       boolean selfcite = author.equals(uid);
       if (!selfcite) {
         summary.put("cite", (Integer)summary.get("cite") + 1);
+        rule.source.cite++;
       } else {
         summary.put("self", (Integer)summary.get("self") + 1);
+        rule.source.self++;
       }
+      
     } catch (Exception e) {
       summary = defaultMap(rule);
       e.printStackTrace();
@@ -87,7 +89,7 @@ public class CitationTracker {
   private synchronized void writeLog(Rule rule) {
     String head = getHead(rule);
     String author = getAuthor(rule);
-    String logPath = Paths.get(ILUtils.opts.citationPath, encode(author), encode(head) + ".json.log").toString();
+    String logPath = Paths.get(InteractiveUtils.opts.citationPath, encode(author), encode(head) + ".json.log").toString();
     File file = new File(logPath);
     file.getParentFile().mkdirs();
     

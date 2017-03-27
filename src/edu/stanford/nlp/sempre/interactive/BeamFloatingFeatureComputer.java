@@ -7,11 +7,11 @@ import com.beust.jcommander.internal.Lists;
 import edu.stanford.nlp.sempre.*;
 
 /**
- * Sida Wang
  * Feature computer for the BeamFloatingParser
  * TODOs:
  * - control what categories to abstract out
  * - efficiency improvement, right now use all members of the cross product
+ * @author sidaw
  */
 public class BeamFloatingFeatureComputer implements FeatureComputer {
   public static class Options {
@@ -105,7 +105,7 @@ public class BeamFloatingFeatureComputer implements FeatureComputer {
     newTokens.addAll(tokens.subList(deriv.end, tokens.size()));
     return newTokens;
   }
-  
+
   private void processUtterance(Derivation deriv, List<String> tokens) {
     if (deriv == null || deriv.start == -1) 
       return;
@@ -151,11 +151,11 @@ public class BeamFloatingFeatureComputer implements FeatureComputer {
   }
 
   private List<String> breakUtterance(List<String> currentTokens, Derivation deriv) {
-    
-  
+
+
     // List<String> span = currentTokens.subList(deriv.start, deriv.end);
     List<String> span = currentTokens;
-    
+
     List<String> retval = new ArrayList<String>();
     String current = "";
     for (String tok : span) {
@@ -166,8 +166,8 @@ public class BeamFloatingFeatureComputer implements FeatureComputer {
         current += " " + tok;
       }
     }
-    
-    if (current.length()>0) {
+
+    if (current.length() > 0) {
       retval.add(current);
     }
     return retval;
@@ -179,7 +179,7 @@ public class BeamFloatingFeatureComputer implements FeatureComputer {
         List<String> anchorAbstractTokens = Lists.newArrayList(ex.languageInfo.tokens);
         processUtterance(deriv, anchorAbstractTokens);
         //List<String> anchorAbstractTokens = ex.languageInfo.tokens;
-        
+
         for (String part : breakUtterance(anchorAbstractTokens, deriv)) {
           deriv.addFeature("bff", getSubtreeFeature(deriv.formula, 2) + " :: " + part);
           deriv.addFeature("bff", getSubtreeFeature(deriv.formula, 3) + " :: " + part);

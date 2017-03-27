@@ -38,6 +38,9 @@ public class Dataset {
 
     @Option(gloss = "Only keep examples which have at most this number of tokens")
     public int maxTokens = Integer.MAX_VALUE;
+
+    @Option(gloss = "Path to a knowledge graph that will be uploaded as global context")
+    public String globalGraphPath;
   }
 
   public static Options opts = new Options();
@@ -97,7 +100,20 @@ public class Dataset {
       }
     }
     readLispTreeFromPathPairs(pathPairs);
+    updateGlobalContext();
   }
+
+  private void updateGlobalContext() {
+    if (opts.globalGraphPath != null) {
+      KnowledgeGraph graph = NaiveKnowledgeGraph.fromFile(opts.globalGraphPath);
+      for (String group : allExamples.keySet()) {
+        for (Example ex : allExamples.get(group)) {
+          ex.setContext(new ContextValue(graph));
+        }
+      }
+    }
+  }
+
 
   private void readJsonFromPathPairs(List<Pair<String, String>> pathPairs) {
     List<GroupInfo> groups = Lists.newArrayListWithCapacity(pathPairs.size());
@@ -233,17 +249,6 @@ public class Dataset {
     LogInfo.end_track();
   }
 
-  public Map<String, String> getDatasetSummary() {
-    Map<String, String> summary = new HashMap<>();
-    summary.put("numTokenTypes", Integer.toString(tokenTypes.size()));
-    summary.put("numTokensPerExample", numTokensFig.toString());
-
-    for (Map.Entry<String, List<Example>> e : allExamples.entrySet())
-      summary.put("numExamples." + e.getKey(), Integer.toString(e.getValue().size()));
-    return summary;
-
-  }
-  
   private void collectStats() {
     LogInfo.begin_track_printAll("Dataset stats");
     Execution.putLogRec("numTokenTypes", tokenTypes.size());
@@ -264,26 +269,15 @@ public class Dataset {
   public static void appendExampleToFile(String path, Example ex) {
     // JSON is an annoying format because we can't just append.
     // So currently we have to read the entire file in and write it out.
-    if (path.endsWith(".json")) {
-      List<Example> examples;
-      if (new File(path).exists()) {
-        examples = Json.readValueHard(
-            IOUtils.openInHard(path),
-            new TypeReference<List<Example>>() { });
-      } else {
-        examples = new ArrayList<Example>();
-      }
-      examples.add(ex);
-      Json.prettyWriteValueHard(new File(path), examples);
-    } else { // writes lisptree by just appending
-      try {
-        PrintWriter out = IOUtils.openOutAppend(path);
-        out.println(ex.toLispTree(false).toStringWrap());
-        out.flush();
-        out.close();
-      } catch (IOException e) {
-        LogInfo.logs(e.getMessage());
-      }
+    List<Example> examples;
+    if (new File(path).exists()) {
+      examples = Json.readValueHard(
+          IOUtils.openInHard(path),
+          new TypeReference<List<Example>>() { });
+    } else {
+      examples = new ArrayList<Example>();
     }
+    examples.add(ex);
+    Json.prettyWriteValueHard(new File(path), examples);
   }
 }

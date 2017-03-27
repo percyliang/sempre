@@ -2,8 +2,6 @@ package edu.stanford.nlp.sempre;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
-
-import edu.stanford.nlp.sempre.interactive.ActionFormula;
 import fig.basic.LispTree;
 
 import java.util.HashSet;

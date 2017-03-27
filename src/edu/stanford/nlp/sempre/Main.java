@@ -1,13 +1,7 @@
 package edu.stanford.nlp.sempre;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.lang.reflect.Constructor;
 
-import fig.basic.LogInfo;
 import fig.basic.Option;
 import fig.exec.Execution;
 
@@ -19,6 +13,7 @@ import fig.exec.Execution;
 public class Main implements Runnable {
   @Option public boolean interactive = false;
   @Option public boolean server = false;
+  @Option public String masterType = "edu.stanford.nlp.sempre.Master";
 
   public void run() {
     Builder builder = new Builder();
@@ -30,16 +25,18 @@ public class Main implements Runnable {
     Learner learner = new Learner(builder.parser, builder.params, dataset);
     learner.learn();
 
-    if (server) {
-      Master master = new Master(builder);
-      JsonServer server = new JsonServer(master);
-      server.run();
-    }
-        
-    if (interactive) {
-      LogInfo.msPerLine = 0;
-      Master master = new Master(builder);
-      master.runInteractivePrompt();
+    if (server || interactive) {
+      try {
+        Class<?> masterClass = Class.forName(masterType);
+        Constructor<?> constructor = masterClass.getConstructor(Builder.class);
+        Master master = (Master)constructor.newInstance(builder);
+        if (server)
+          master.runServer();
+        else if (interactive)
+          master.runInteractivePrompt();
+      } catch (Throwable t) {
+        t.printStackTrace();
+      }
     }
   }
 
