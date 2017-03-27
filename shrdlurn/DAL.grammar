@@ -1,4 +1,4 @@
-# Grammar for Dependency-based Compositions Actions (DCA)
+# Grammar for Dependency-based Action Language (DAL)
 # which is based on lambda DCS, and designed to interpolate
 # well with NL
 
@@ -70,7 +70,7 @@
 (rule $Set (has $Rel $ValueSet) (lambda r (lambda s
 			   ((var r) (var s)))) (anchored 1))
 
-############### arithmetics
+############### Arithmetic
 (for @op (+ -)
 (rule $Numbers ($Numbers @op $Number) (lambda n1  (lambda n2
 (@op (var n1) (var n2)))) (anchored 1))
@@ -78,15 +78,6 @@
 
 (rule $Number ([ $Numbers ]) (IdentityFn) (anchored 1))
 (rule $Numbers ( $Number ) (IdentityFn) (anchored 1))
-
-###### Keywords
-#(rule $Keyword (add) (ConstantFn (string keyword))  (anchored 1))
-#(rule $Keyword (remove) (ConstantFn (string keyword))  (anchored 1))
-#(rule $Keyword (repeat) (ConstantFn (string keyword))  (anchored 1))
-#(rule $Keyword (has) (ConstantFn (string keyword))  (anchored 1))
-#(rule $Keyword (of) (ConstantFn (string keyword))  (anchored 1))
-#(rule $Keyword (and) (ConstantFn (string keyword))  (anchored 1))
-#(rule $Keyword (or) (ConstantFn (string keyword))  (anchored 1))
 
 #############################
 # Floating rules

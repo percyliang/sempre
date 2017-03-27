@@ -16,9 +16,11 @@ import fig.basic.LispTree;
 import fig.basic.Option;
 
 /**
- * return a (scoping) block sequencing all the children
- * where selection has similar behavior as in blocked
- * structured programming.
+ * Generates formula scoped in various modes
+ * sequential: just perform in sequence, no scoping
+ * block: basic scoping block
+ * blockr: returns selected
+ * isolate: scopes allItems instead of selected
  * @author sidaw
  */
 public class BlockFn extends SemanticFn {

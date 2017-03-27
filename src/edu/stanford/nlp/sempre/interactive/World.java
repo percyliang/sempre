@@ -7,8 +7,13 @@ import java.util.stream.Collectors;
 import edu.stanford.nlp.sempre.ContextValue;
 import edu.stanford.nlp.sempre.interactive.voxelurn.VoxelWorld;
 
-// flat world is just a list of allitems where actions can be performed on them
-
+/** The world consists of Items, and tracks
+ * allItems: the whole world
+ * selected: the set of items in focus, usually, but not necessarily a subset of allItems
+ * previous: previously selected items, to handle more without variables
+ * implementation: voxelurn.VoxelWorld
+ * @author sidaw
+**/
 public abstract class World {
   // supports variables, and perhaps scoping
   public Set<Item> allItems;

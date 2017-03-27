@@ -22,15 +22,15 @@ public class Session {
     // path for default parameters, if using a different set for each session
     @Option public String inParamsPath;
   }
-  String remoteHost;  // Where we connected from
-  String format;  // html or json
-  ContextValue context;  // Current context used to create new examples
+  public String remoteHost;  // Where we connected from
+  public String format;  // html or json
+  public ContextValue context;  // Current context used to create new examples
   Example lastEx;  // Last example that we processed
   
   // if every user have their own model
   Params params;
   Learner learner;
-  Map<String,String> reqParams;
+  public Map<String,String> reqParams;
   
   public static Options opts = new Options();
   

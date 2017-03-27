@@ -8,7 +8,7 @@ import java.util.function.Predicate;
 import fig.basic.*;
 import edu.stanford.nlp.sempre.*;
 import edu.stanford.nlp.sempre.Parser.Spec;
-import edu.stanford.nlp.sempre.interactive.DCAExecutor;
+import edu.stanford.nlp.sempre.interactive.DALExecutor;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -50,15 +50,15 @@ public class FloatingParsingTest {
 
   private static Spec defaultSpec() {
     FloatingParser.opts.defaultIsFloating = true;
-    DCAExecutor.opts.convertNumberValues  = true;
-    DCAExecutor.opts.printStackTrace = true;
-    DCAExecutor.opts.worldType = "VoxelWorld";
+    DALExecutor.opts.convertNumberValues  = true;
+    DALExecutor.opts.printStackTrace = true;
+    DALExecutor.opts.worldType = "VoxelWorld";
     Grammar.opts.inPaths = Lists.newArrayList("./shrdlurn/voxelurn.grammar");
     Grammar.opts.useApplyFn = "interactive.ApplyFn";
     Grammar.opts.binarizeRules = false;
 
-    DCAExecutor executor = new DCAExecutor();
-    DCAExecutor.opts.worldType = "BlocksWorld";
+    DALExecutor executor = new DALExecutor();
+    DALExecutor.opts.worldType = "BlocksWorld";
     FeatureExtractor extractor = new FeatureExtractor(executor);
     FeatureExtractor.opts.featureDomains.add("rule");
     ValueEvaluator valueEvaluator = new ExactValueEvaluator();

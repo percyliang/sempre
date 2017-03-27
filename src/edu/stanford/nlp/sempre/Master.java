@@ -41,9 +41,8 @@ public class Master {
     @Option(gloss = "Write out new grammar rules")
     public String newGrammarPath;
   }
-
   public static Options opts = new Options();
-
+  
   public class Response {
     // Example that was parsed, if any.
     Example ex;
@@ -132,6 +131,11 @@ public class Master {
     LogInfo.log("Press Ctrl-D to exit.");
   }
 
+  public void runServer() {
+    Server server = new Server(this);
+    server.run();;
+  }
+  
   public void runInteractivePrompt() {
     Session session = getSession("stdin");
 

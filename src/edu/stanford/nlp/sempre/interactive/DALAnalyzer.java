@@ -6,11 +6,11 @@ import edu.stanford.nlp.sempre.LanguageAnalyzer;
 import edu.stanford.nlp.sempre.LanguageInfo;
 
 /**
- * supporting the interactive language
+ * LanguageAnalyzer for DAL, basically a lexer
  *
  * @author sidaw
  */
-public class DCALanguageAnalyzer extends LanguageAnalyzer {
+public class DALAnalyzer extends LanguageAnalyzer {
   // Stanford tokenizer doesn't break hyphens.
   // Replace hypens with spaces for utterances like
   // "Spanish-speaking countries" but not for "2012-03-28".

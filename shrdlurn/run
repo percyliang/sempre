@@ -151,14 +151,14 @@ addMode('voxelurn', 'interactive semantic parsing in a VoxelWorld', lambda { |e|
   header('core,interactive'),
   'edu.stanford.nlp.sempre.Main',
   #figOpts,
-  o('interactiveLearning', true),
+  o('masterType', 'Master'),
 
-  o('Executor', 'interactive.DCAExecutor'),
-  o('LanguageAnalyzer', 'interactive.DCALanguageAnalyzer'),
-  o('DCAExecutor.convertNumberValues', true),
-  o('DCAExecutor.printStackTrace', true),
+  o('Executor', 'interactive.DALExecutor'),
+  o('LanguageAnalyzer', 'interactive.DALAnalyzer'),
+  o('DALExecutor.convertNumberValues', true),
+  o('DALExecutor.printStackTrace', true),
   o('VoxelWorld.maxBlocks', 100000),
-  selo(0, 'DCAExecutor.worldType', 'VoxelWorld', 'CalendarWorld', 'Otherworld'),
+  selo(0, 'DALExecutor.worldType', 'VoxelWorld', 'CalendarWorld', 'Otherworld'),
   selo(0, 'Grammar.inPaths', './shrdlurn/voxelurn.grammar', './shrdlurn/calendar.grammar'),
 
   o('Params.initWeightsRandomly', false),
@@ -173,7 +173,7 @@ addMode('voxelurn', 'interactive semantic parsing in a VoxelWorld', lambda { |e|
   o('ParserState.customExpectedCounts', 'None'),
 
   o('Parser.beamSize', 25),
-  o('BeamFloatingParser.maxNewTreesPerSpan', 100),
+  o('BeamFloatingParser.maxNewTreesPerSpan', 200),
 
   selo(0, 'BeamFloatingParser.floatStrategy', 'Never', 'NoParse', 'Always'),
   o('BeamFloatingParser.trackedCats', 'Number', 'Numbers', 'Color',  'Direction', 'Set', 'Sets', 'Action', 'Actions'),
@@ -185,7 +185,7 @@ addMode('voxelurn', 'interactive semantic parsing in a VoxelWorld', lambda { |e|
   o('Params.adaptiveStepSize', true),
   #o('Params.stepSizeReduction', 0.25),
 
-  o('FeatureExtractor.featureComputers', 'interactive.DCAFeatureComputer'),
+  o('FeatureExtractor.featureComputers', 'interactive.DALFeatureComputer'),
   o('FeatureExtractor.featureDomains', ':rule', ':span', ':stats', ':scope', ':social', ':window'),
   # o('FeatureExtractor.featureDomains', ':rule'),
 

@@ -1,5 +1,7 @@
 package edu.stanford.nlp.sempre;
 
+import java.lang.reflect.Constructor;
+
 import fig.basic.Option;
 import fig.exec.Execution;
 
@@ -11,7 +13,7 @@ import fig.exec.Execution;
 public class Main implements Runnable {
   @Option public boolean interactive = false;
   @Option public boolean server = false;
-  @Option public boolean interactiveLearning = false;
+  @Option public String masterType = "edu.stanford.nlp.sempre.Master";
 
   public void run() {
     Builder builder = new Builder();
@@ -23,22 +25,18 @@ public class Main implements Runnable {
     Learner learner = new Learner(builder.parser, builder.params, dataset);
     learner.learn();
 
-    if (server) {
-      Master master = new Master(builder);
-      Server server = new Server(master);
-      server.run();
-    }
-    
-    if (interactiveLearning) {
-      Master master = new InteractiveMaster(builder);
-      InteractiveServer server = new InteractiveServer(master);
-      server.run();
-      master.runInteractivePrompt();
-    }
-
-    if (interactive) {
-      Master master = new InteractiveMaster(builder);
-      master.runInteractivePrompt();
+    if (server || interactive) {
+      try {
+        Class<?> masterClass = Class.forName(masterType);
+        Constructor<?> constructor = masterClass.getConstructor(Builder.class);
+        Master master = (Master)constructor.newInstance(builder);
+        if (server)
+          master.runServer();
+        else if (interactive)
+          master.runInteractivePrompt();
+      } catch (Throwable t) {
+        t.printStackTrace();
+      }
     }
   }
 

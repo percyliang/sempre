@@ -1,4 +1,4 @@
-package edu.stanford.nlp.sempre;
+package edu.stanford.nlp.sempre.interactive;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -29,6 +29,15 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
+import edu.stanford.nlp.sempre.Derivation;
+import edu.stanford.nlp.sempre.ErrorValue;
+import edu.stanford.nlp.sempre.Example;
+import edu.stanford.nlp.sempre.Json;
+import edu.stanford.nlp.sempre.Master;
+import edu.stanford.nlp.sempre.Session;
+import edu.stanford.nlp.sempre.StringValue;
+import edu.stanford.nlp.sempre.Value;
+import edu.stanford.nlp.sempre.Master.Response;
 import fig.basic.IOUtils;
 import fig.basic.LogInfo;
 import fig.basic.MapUtils;

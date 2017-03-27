@@ -176,5 +176,5 @@ public class Voxel extends Item {
   @Override
   public String toString() {
     return this.toJSON().toString();
-  }
+  } 
 }

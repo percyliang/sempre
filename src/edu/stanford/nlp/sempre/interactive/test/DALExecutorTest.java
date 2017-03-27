@@ -13,7 +13,7 @@ import edu.stanford.nlp.sempre.Formulas;
 import edu.stanford.nlp.sempre.Json;
 import edu.stanford.nlp.sempre.NaiveKnowledgeGraph;
 import edu.stanford.nlp.sempre.StringValue;
-import edu.stanford.nlp.sempre.interactive.DCAExecutor;
+import edu.stanford.nlp.sempre.interactive.DALExecutor;
 import edu.stanford.nlp.sempre.interactive.Item;
 import edu.stanford.nlp.sempre.interactive.World;
 import edu.stanford.nlp.sempre.interactive.voxelurn.Color;
@@ -22,14 +22,14 @@ import fig.basic.LispTree;
 import fig.basic.LogInfo;
 
 /**
- * Test the ActionExecutor
+ * Tests the DALExecutor
  * @author sidaw
  */
 
-public class DCAExecutorTest {
-  DCAExecutor executor = new DCAExecutor();
+public class DALExecutorTest {
+  DALExecutor executor = new DALExecutor();
 
-  protected static void runFormula(DCAExecutor executor, String formula, ContextValue context, Predicate<World> checker) {
+  protected static void runFormula(DALExecutor executor, String formula, ContextValue context, Predicate<World> checker) {
     LogInfo.begin_track("formula: %s", formula);
     executor.opts.worldType = "VoxelWorld";
     Executor.Response response = executor.execute(Formulas.fromLispTree(LispTree.proto.parseFromString(formula)), context);
@@ -123,7 +123,7 @@ public class DCAExecutorTest {
   }
 
   private Set<Item> real(Set<Item> all) {
-    return all.stream().filter(c -> ((Voxel)c).color != Color.Fake).collect(Collectors.toSet());
+    return all.stream().filter(c -> !((Voxel)c).color.equals(Color.Fake)).collect(Collectors.toSet());
   }
   @Test(groups = { "Interactive" })
   public void testRemove() {
@@ -148,7 +148,7 @@ public class DCAExecutorTest {
     ContextValue context = getContext(defaultBlocks);
     LogInfo.begin_track("testMoreActions");
     runFormula(executor, "(:s (: select *) (:for (call veryx left this) (: remove)))", context,
-        x -> x.allItems.stream().allMatch(c -> ((Voxel)c).color == Color.Fake) );
+        x -> x.allItems.stream().allMatch(c -> ((Voxel)c).color.equals(Color.Fake)) );
     runFormula(executor, "(:for * (:for (call veryx bot) (:loop (number 2) (:s (: add red left) (: select (call adj top))))))", context, 
         x -> x.allItems.size() == 6);
     runFormula(executor, "(:s (: select *) (: select (call veryx bot selected)) (: remove selected) )", context, x -> real(x.allItems).size() == 3);

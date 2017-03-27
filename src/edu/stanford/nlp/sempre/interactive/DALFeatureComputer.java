@@ -15,7 +15,7 @@ import edu.stanford.nlp.sempre.*;
  * - efficiency improvement, right now use all members of the cross product
  * @author sidaw
  */
-public class DCAFeatureComputer implements FeatureComputer {
+public class DALFeatureComputer implements FeatureComputer {
   public static class Options {
     @Option(gloss = "Verbosity")
     public int verbose = 0;

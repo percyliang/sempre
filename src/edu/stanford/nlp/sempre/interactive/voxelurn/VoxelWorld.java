@@ -116,7 +116,7 @@ public class VoxelWorld extends World {
   @Override
   public void merge() {
     Sets.difference(selected, allItems).forEach(i -> ((Voxel)i).color = Color.Fake);
-    allItems.removeIf(c -> ((Voxel)c).color == Color.Fake && !this.selected.contains(c));
+    allItems.removeIf(c -> ((Voxel)c).color.equals(Color.Fake) && !this.selected.contains(c));
     allItems.addAll(selected);
     if (allItems.size() > opts.maxBlocks) {
       throw new RuntimeException(
@@ -221,7 +221,7 @@ public class VoxelWorld extends World {
   }
   
   private Set<Item> realBlocks(Set<Item> all) {
-    return all.stream().filter(b-> ((Voxel)b).color != Color.Fake)
+    return all.stream().filter(b-> !((Voxel)b).color.equals(Color.Fake))
         .collect(Collectors.toSet());
   }
 }

@@ -16,6 +16,7 @@ enum Direction {
       return Direction.Front;
     if (dir.equals("back"))
       return Direction.Back;
+
     return Direction.None;
   }
 }

@@ -29,7 +29,7 @@ import edu.stanford.nlp.sempre.ParserState;
 import edu.stanford.nlp.sempre.Rule;
 import edu.stanford.nlp.sempre.Session;
 import edu.stanford.nlp.sempre.ValueEvaluator;
-import edu.stanford.nlp.sempre.interactive.DCAExecutor;
+import edu.stanford.nlp.sempre.interactive.DALExecutor;
 import edu.stanford.nlp.sempre.interactive.DefinitionAligner;
 import edu.stanford.nlp.sempre.interactive.GrammarInducer;
 import edu.stanford.nlp.sempre.interactive.InteractiveUtils;
@@ -45,9 +45,9 @@ public class GrammarInducerTest {
 
   private static Spec defaultSpec() {
     FloatingParser.opts.defaultIsFloating = true;
-    DCAExecutor.opts.convertNumberValues  = true;
-    DCAExecutor.opts.printStackTrace = true;
-    DCAExecutor.opts.worldType = "VoxelWorld";
+    DALExecutor.opts.convertNumberValues  = true;
+    DALExecutor.opts.printStackTrace = true;
+    DALExecutor.opts.worldType = "VoxelWorld";
 
     Derivation.opts.showTypes = false;
     Derivation.opts.showRules = false;
@@ -66,7 +66,7 @@ public class GrammarInducerTest {
     GrammarInducer.opts.verbose = 2;
     InteractiveMaster.opts.useAligner = true;
 
-    DCAExecutor executor = new DCAExecutor();
+    DALExecutor executor = new DALExecutor();
 
     FeatureExtractor extractor = new FeatureExtractor(executor);
 

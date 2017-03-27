@@ -4,14 +4,13 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 
-import edu.stanford.nlp.sempre.ActionFormula.Mode;
-import edu.stanford.nlp.sempre.NaiveKnowledgeGraph.KnowledgeGraphTriple;
 import edu.stanford.nlp.sempre.interactive.BadInteractionException;
 import edu.stanford.nlp.sempre.interactive.DefinitionAligner;
 import edu.stanford.nlp.sempre.interactive.GrammarInducer;
+import edu.stanford.nlp.sempre.interactive.InteractiveServer;
 import edu.stanford.nlp.sempre.interactive.InteractiveUtils;
 import edu.stanford.nlp.sempre.interactive.QueryStats;
-import edu.stanford.nlp.sempre.interactive.QueryStats.QueryType;
+import edu.stanford.nlp.sempre.interactive.GrammarInducer.ParseStatus;
 import fig.basic.*;
 import jline.console.ConsoleReader;
 
@@ -24,8 +23,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * A Master manages multiple sessions. Currently, they all share the same model,
- * but they need not in the future.
+ * An InteractiveMaster supports interactive commands, and grammar induction methods.
  */
 public class InteractiveMaster extends Master {
   public static class Options {
@@ -62,6 +60,12 @@ public class InteractiveMaster extends Master {
     LogInfo.log("  (:reject |formula1| |formula2|): reject any derivations with those corresponding formula");
     LogInfo.log("Main commands");
     super.printHelp();
+  }
+  
+  @Override
+  public void runServer() {
+    InteractiveServer server = new InteractiveServer(this);
+    server.run();
   }
 
   @Override
@@ -160,7 +164,7 @@ public class InteractiveMaster extends Master {
       stats.put("len_formula", targetFormulas.get(0).toLispTree().toString().length());
       stats.put("len_utterance", ex.utterance.length());
 
-      if (match!=null) {
+      if (match != null) {
         if (session.isWritingCitation()) {
           InteractiveUtils.cite(match, ex);
         }
@@ -225,20 +229,12 @@ public class InteractiveMaster extends Master {
       if (tree.children.size() == 1) {
         LogInfo.logs("%s", session.context);
       } else {
-        //        KnowledgeGraphTriple triple = new KnowledgeGraphTriple(
-        //            new StringValue(String.format("\"%s\"", tree.children.get(1).toString())),
-        //            new NameValue("r"),
-        //            new NameValue("e2")
-        //            );
-        //        session.context = new ContextValue(new NaiveKnowledgeGraph(Lists.newArrayList(triple)));
         session.context = ContextValue.fromString(
             String.format("(context (graph NaiveKnowledgeGraph ((string \"%s\") (name b) (name c))))",
                 tree.children.get(1).toString()));
-        if (session.isStatsing())
-          response.stats.put("context-length", tree.children.get(1).toString().length());
-      }
-    }
-    else {
+        response.stats.put("context_length", tree.children.get(1).toString().length());
+     }
+    } else {
       LogInfo.log("Invalid command: " + tree);
     }
   }

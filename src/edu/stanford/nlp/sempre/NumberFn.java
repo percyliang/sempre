@@ -3,8 +3,6 @@ package edu.stanford.nlp.sempre;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.beust.jcommander.internal.Lists;
-
 import fig.basic.*;
 
 /**
@@ -84,7 +82,7 @@ public class NumberFn extends SemanticFn {
           if (value != null) {
             try {
               NumberValue numberValue = new NumberValue(Double.parseDouble(value));
-              if (opts.allowedRange!=null) {
+              if (opts.allowedRange != null) {
                 if (numberValue.value < opts.allowedRange.get(0) || numberValue.value > opts.allowedRange.get(1)) {
                   LogInfo.warnings("NumberFn: %f is outside of the allowed range %s", numberValue.value, opts.allowedRange);
                   return null;

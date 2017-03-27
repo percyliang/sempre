@@ -32,7 +32,6 @@ import java.util.zip.GZIPInputStream;
 import org.testng.collections.Lists;
 
 import edu.stanford.nlp.sempre.Json;
-import edu.stanford.nlp.sempre.InteractiveServer;
 import fig.basic.LogInfo;
 import fig.basic.Option;
 import fig.basic.OptionsParser;
@@ -137,12 +136,6 @@ public class Simulator implements Runnable {
 
     }
     SimulationAnalyzer.flush();
-    //    try {
-    //      sempreQuery("(:admin withcrappysecurityWRONG)", "simulator");
-    //    } catch (UnsupportedEncodingException e) {
-    //      // TODO Auto-generated catch block
-    //      e.printStackTrace();
-    //    }
   }
 
   static void executeLine(String l) {
