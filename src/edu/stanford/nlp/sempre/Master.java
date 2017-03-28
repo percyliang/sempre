@@ -45,7 +45,7 @@ public class Master {
   
   public class Response {
     // Example that was parsed, if any.
-    Example ex;
+    public Example ex;
 
     // Which derivation we're selecting to show
     int candidateIndex = -1;
@@ -111,7 +111,7 @@ public class Master {
     return session;
   }
 
-  void printHelp() {
+  protected void printHelp() {
     LogInfo.log("Enter an utterance to parse or one of the following commands:");
     LogInfo.log("  (help): show this help message");
     LogInfo.log("  (status): prints out status of the system");

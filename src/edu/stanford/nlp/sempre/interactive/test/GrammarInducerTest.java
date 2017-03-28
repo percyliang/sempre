@@ -12,14 +12,12 @@ import org.testng.collections.Lists;
 import com.google.common.collect.Sets;
 
 import edu.stanford.nlp.sempre.ActionFormula;
-import edu.stanford.nlp.sempre.BeamFloatingParser;
 import edu.stanford.nlp.sempre.Derivation;
 import edu.stanford.nlp.sempre.ExactValueEvaluator;
 import edu.stanford.nlp.sempre.Example;
 import edu.stanford.nlp.sempre.FeatureExtractor;
 import edu.stanford.nlp.sempre.FloatingParser;
 import edu.stanford.nlp.sempre.Grammar;
-import edu.stanford.nlp.sempre.InteractiveMaster;
 import edu.stanford.nlp.sempre.Json;
 import edu.stanford.nlp.sempre.LanguageAnalyzer;
 import edu.stanford.nlp.sempre.Params;
@@ -29,9 +27,11 @@ import edu.stanford.nlp.sempre.ParserState;
 import edu.stanford.nlp.sempre.Rule;
 import edu.stanford.nlp.sempre.Session;
 import edu.stanford.nlp.sempre.ValueEvaluator;
+import edu.stanford.nlp.sempre.interactive.BeamFloatingParser;
 import edu.stanford.nlp.sempre.interactive.DALExecutor;
 import edu.stanford.nlp.sempre.interactive.DefinitionAligner;
 import edu.stanford.nlp.sempre.interactive.GrammarInducer;
+import edu.stanford.nlp.sempre.interactive.InteractiveMaster;
 import edu.stanford.nlp.sempre.interactive.InteractiveUtils;
 import fig.basic.LogInfo;
 
@@ -53,12 +53,12 @@ public class GrammarInducerTest {
     Derivation.opts.showRules = false;
     Derivation.opts.showCat = true;
 
-    LanguageAnalyzer.opts.languageAnalyzer = "interactive.DCALanguageAnalyzer";
+    LanguageAnalyzer.opts.languageAnalyzer = "interactive.DALAnalyzer";
     Grammar.opts.inPaths = Lists.newArrayList("./shrdlurn/voxelurn.grammar");
     Grammar.opts.useApplyFn = "interactive.ApplyFn";
     Grammar.opts.binarizeRules = false;
 
-    FeatureExtractor.opts.featureComputers = Sets.newHashSet("interactive.DCAFeatureComputer");
+    FeatureExtractor.opts.featureComputers = Sets.newHashSet("interactive.DALFeatureComputer");
     FeatureExtractor.opts.featureDomains =  Sets.newHashSet(":rule", ":stats", ":window");
 
     DefinitionAligner.opts.strategies = Sets.newHashSet(DefinitionAligner.Strategies.ExactExclusion);

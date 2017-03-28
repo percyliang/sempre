@@ -8,6 +8,7 @@ import java.util.function.Predicate;
 import fig.basic.*;
 import edu.stanford.nlp.sempre.*;
 import edu.stanford.nlp.sempre.Parser.Spec;
+import edu.stanford.nlp.sempre.interactive.BeamFloatingParser;
 import edu.stanford.nlp.sempre.interactive.DALExecutor;
 
 import org.testng.Assert;

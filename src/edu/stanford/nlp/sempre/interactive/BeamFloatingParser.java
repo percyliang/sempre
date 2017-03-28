@@ -1,9 +1,25 @@
-package edu.stanford.nlp.sempre;
+package edu.stanford.nlp.sempre.interactive;
 
 import com.beust.jcommander.internal.Lists;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 
+import edu.stanford.nlp.sempre.ChartParserState;
+import edu.stanford.nlp.sempre.Derivation;
+import edu.stanford.nlp.sempre.DerivationStream;
+import edu.stanford.nlp.sempre.Example;
+import edu.stanford.nlp.sempre.Formula;
+import edu.stanford.nlp.sempre.Json;
+import edu.stanford.nlp.sempre.Params;
+import edu.stanford.nlp.sempre.Parser;
+import edu.stanford.nlp.sempre.ParserState;
+import edu.stanford.nlp.sempre.Rule;
+import edu.stanford.nlp.sempre.SemanticFn;
+import edu.stanford.nlp.sempre.Trie;
+import edu.stanford.nlp.sempre.ChartParserState.ChartFillingData;
+import edu.stanford.nlp.sempre.Derivation.Builder;
+import edu.stanford.nlp.sempre.Parser.Spec;
+import edu.stanford.nlp.sempre.SemanticFn.CallInfo;
 import fig.basic.*;
 import fig.exec.Execution;
 
@@ -43,7 +59,7 @@ public class BeamFloatingParser extends Parser {
     }
     // Index the non-cat-unary rules
     trie = new Trie();
-    for (Rule rule : grammar.rules) {
+    for (Rule rule : grammar.getRules()) {
       if (!rule.isFloating())
         addRule(rule);
     }
@@ -147,7 +163,7 @@ class BeamFloatingParserState extends ChartParserState {
     if (parseFloat) {
       /* For every base span of the chart, add the derivations from nothing rules */
       List<Rule> nothingRules = new ArrayList<Rule>();
-      for (Rule rule : parser.grammar.rules)
+      for (Rule rule : parser.grammar.getRules())
         if (rule.isFloating() && rule.rhs.size() == 1 && rule.isRhsTerminals()) nothingRules.add(rule);
       for (int i = 0; i < numTokens; i++)
         for (Rule rule : nothingRules)
@@ -260,7 +276,7 @@ class BeamFloatingParserState extends ChartParserState {
   // Before applying each unary rule (rule.lhs -> rhsCat), we can prune the cell of rhsCat
   // because we assume acyclicity, so rhsCat's cell will never grow.
   private void applyCatUnaryRules(int start, int end, Set<String> cellsPruned) {
-    for (Rule rule : parser.catUnaryRules) {
+    for (Rule rule : parser.getCatUnaryRules()) {
       if (!coarseAllows(rule.lhs, start, end))
         continue;
       String rhsCat = rule.rhs.get(0);
@@ -336,7 +352,7 @@ class BeamFloatingParserState extends ChartParserState {
 
   /* For each span, apply applicable floating rules */
   protected void buildFloating(int start, int end) {
-    for (Rule rule : parser.grammar.rules) {
+    for (Rule rule : parser.grammar.getRules()) {
       if (!rule.isFloating() || !coarseAllows(rule.lhs, start, end)) continue;
 
       if (rule.rhs.size() == 1) {

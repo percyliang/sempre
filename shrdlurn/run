@@ -151,7 +151,7 @@ addMode('voxelurn', 'interactive semantic parsing in a VoxelWorld', lambda { |e|
   header('core,interactive'),
   'edu.stanford.nlp.sempre.Main',
   #figOpts,
-  o('masterType', 'Master'),
+  o('masterType', 'edu.stanford.nlp.sempre.interactive.InteractiveMaster'),
 
   o('Executor', 'interactive.DALExecutor'),
   o('LanguageAnalyzer', 'interactive.DALAnalyzer'),
@@ -168,7 +168,7 @@ addMode('voxelurn', 'interactive semantic parsing in a VoxelWorld', lambda { |e|
   o('LanguageAnalyzer.lowerCaseTokens', true),
 
   o('Parser.pruneErrorValues', true),
-  o('Parser', 'BeamFloatingParser'),
+  o('Parser', 'interactive.BeamFloatingParser'),
   o('Parser.callSetEvaluation', false),
   o('ParserState.customExpectedCounts', 'None'),
 

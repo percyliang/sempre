@@ -9,7 +9,7 @@ import com.google.common.base.Joiner;
 import edu.stanford.nlp.sempre.*;
 
 /**
- * Feature computer for the BeamFloatingParser
+ * Feature computer for the the dependency-based action language
  * TODOs:
  * - control what categories to abstract out
  * - efficiency improvement, right now use all members of the cross product

@@ -10,14 +10,14 @@ import java.util.Set;
  * @author Percy Liang
  */
 public class Trie {
-  ArrayList<Rule> rules = new ArrayList<>();
+  public ArrayList<Rule> rules = new ArrayList<>();
   HashMap<String, Trie> children = new HashMap<>();
   // Set of LHS categories of all rules in this subtree
-  Set<String> cats = new HashSet<>();
+  public Set<String> cats = new HashSet<>();
 
-  Trie next(String item) { return children.get(item); }
+  public Trie next(String item) { return children.get(item); }
 
-  void add(Rule rule) { add(rule, 0); }
+  public void add(Rule rule) { add(rule, 0); }
   private void add(Rule rule, int i) {
     cats.add(rule.lhs);
 

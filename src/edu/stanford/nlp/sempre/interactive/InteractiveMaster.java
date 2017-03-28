@@ -1,16 +1,23 @@
-package edu.stanford.nlp.sempre;
+package edu.stanford.nlp.sempre.interactive;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 
-import edu.stanford.nlp.sempre.interactive.BadInteractionException;
-import edu.stanford.nlp.sempre.interactive.DefinitionAligner;
-import edu.stanford.nlp.sempre.interactive.GrammarInducer;
-import edu.stanford.nlp.sempre.interactive.InteractiveServer;
-import edu.stanford.nlp.sempre.interactive.InteractiveUtils;
-import edu.stanford.nlp.sempre.interactive.QueryStats;
-import edu.stanford.nlp.sempre.interactive.GrammarInducer.ParseStatus;
+import edu.stanford.nlp.sempre.ContextValue;
+import edu.stanford.nlp.sempre.Derivation;
+import edu.stanford.nlp.sempre.Example;
+import edu.stanford.nlp.sempre.Builder;
+import edu.stanford.nlp.sempre.Formula;
+import edu.stanford.nlp.sempre.Formulas;
+import edu.stanford.nlp.sempre.Master;
+import edu.stanford.nlp.sempre.Params;
+import edu.stanford.nlp.sempre.Parser;
+import edu.stanford.nlp.sempre.ParserState;
+import edu.stanford.nlp.sempre.Rule;
+import edu.stanford.nlp.sempre.RuleSource;
+import edu.stanford.nlp.sempre.Session;
+import edu.stanford.nlp.sempre.Master.Response;
 import fig.basic.*;
 import jline.console.ConsoleReader;
 
@@ -51,7 +58,7 @@ public class InteractiveMaster extends Master {
   }
 
   @Override
-  void printHelp() {
+  protected void printHelp() {
     // interactive commands
     LogInfo.log("Interactive commands");
     LogInfo.log("  (:def head [[body1,bodyformula1],[body2,bodyformula2]]): provide a definition for the original utterance");
@@ -220,7 +227,7 @@ public class InteractiveMaster extends Master {
       LogInfo.logs("Printing and overriding grammar and parameters...");
       builder.params.write(Paths.get(InteractiveMaster.opts.intOutputPath, "params.params").toString());
       PrintWriter out = IOUtils.openOutAppendHard(Paths.get(InteractiveMaster.opts.intOutputPath + "grammar.final.json").toString());
-      for (Rule rule : builder.grammar.rules) {
+      for (Rule rule : builder.grammar.getRules()) {
         out.println(rule.toJson());
       }
       out.close();

@@ -91,7 +91,7 @@ public abstract class Parser {
   public List<Rule> getCatUnaryRules() { return catUnaryRules; }
 
   // TODO(joberant): move this to a separate class in charge of visualizing charts
-  PrintWriter chartFillOut = null;  // For printing a machine-readable json file
+  public PrintWriter chartFillOut = null;  // For printing a machine-readable json file
 
   public Parser(Spec spec) {
     this.grammar = spec.grammar;

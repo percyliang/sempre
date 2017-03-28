@@ -201,7 +201,7 @@ public class VoxelWorld extends World {
     Set<Item> realCubes = realBlocks(allItems);
     return selected.stream().map(c -> {
       Voxel d = (Voxel)c;
-      while(realCubes.contains(d.copy(dir)))
+      while (realCubes.contains(d.copy(dir)))
         d = d.copy(dir);
       return d;
     }).collect(Collectors.toSet());
@@ -221,7 +221,7 @@ public class VoxelWorld extends World {
   }
   
   private Set<Item> realBlocks(Set<Item> all) {
-    return all.stream().filter(b-> !((Voxel)b).color.equals(Color.Fake))
+    return all.stream().filter(b -> !((Voxel)b).color.equals(Color.Fake))
         .collect(Collectors.toSet());
   }
 }

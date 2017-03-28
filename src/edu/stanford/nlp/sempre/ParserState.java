@@ -230,7 +230,7 @@ public abstract class ParserState {
   }
 
   // Ensure that all the logical forms are executed and compatibilities are computed.
-  protected void ensureExecuted() {
+  public void ensureExecuted() {
     LogInfo.begin_track("Parser.ensureExecuted");
     // Execute predicted derivations to get value.
     for (Derivation deriv : predDerivations) {

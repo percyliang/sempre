@@ -526,21 +526,20 @@ public class Grammar {
 
     String name = tree.child(0).value;
 
-    // Syntactic sugar: (lambda x (var x)) => (JoinFn betaReduce forward (arg0 (lambda x (var x))))
-    if (name.equals("lambda") && Grammar.opts.useApplyFn == null) {
-      LispTree newTree = LispTree.proto.newList();
-      newTree.addChild("JoinFn");
-      newTree.addChild("betaReduce");
-      newTree.addChild("forward");
-      newTree.addChild(LispTree.proto.newList("arg0", tree));
-      tree = newTree;
-      name = tree.child(0).value;
-    }
     // Syntactic sugar: (lambda x (f (var x))) => (useApplyFn (lambda x (f (var x))))
-    if (name.equals("lambda") && Grammar.opts.useApplyFn != null) {
+    // defaults to (lambda x (var x)) => (JoinFn betaReduce forward (arg0 (lambda x (var x))))
+    if (name.equals("lambda")) {
       LispTree newTree = LispTree.proto.newList();
-      newTree.addChild(Grammar.opts.useApplyFn);
-      newTree.addChild(tree);
+
+      if (Grammar.opts.useApplyFn == null) {
+        newTree.addChild("JoinFn");
+        newTree.addChild("betaReduce");
+        newTree.addChild("forward");
+        newTree.addChild(LispTree.proto.newList("arg0", tree));
+      } else {
+        newTree.addChild(Grammar.opts.useApplyFn);
+        newTree.addChild(tree);
+      }
       tree = newTree;
       name = tree.child(0).value;
     }
