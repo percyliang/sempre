@@ -92,7 +92,7 @@ public class Simulator implements Runnable {
   @Option
   public static String reqParams = "grammar=0&cite=0&learn=0";
   @Option
-  public static List<String> logFiles = Lists.newArrayList("./shrdlurn/commandInputs/sidaw.json.log");
+  public static List<String> logFiles = null;
 
   public void readQueries() {
     // T.printAllRules();

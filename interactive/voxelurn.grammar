@@ -1,6 +1,6 @@
 # domain specific grammar for voxelurn
 
-(include DAL.grammar)
+(include dal.grammar)
 
 # domain specific actions:
 (def @put put)

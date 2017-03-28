@@ -54,7 +54,7 @@ public class GrammarInducerTest {
     Derivation.opts.showCat = true;
 
     LanguageAnalyzer.opts.languageAnalyzer = "interactive.DALAnalyzer";
-    Grammar.opts.inPaths = Lists.newArrayList("./shrdlurn/voxelurn.grammar");
+    Grammar.opts.inPaths = Lists.newArrayList("./interactive/voxelurn.grammar");
     Grammar.opts.useApplyFn = "interactive.ApplyFn";
     Grammar.opts.binarizeRules = false;
 

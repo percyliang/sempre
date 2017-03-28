@@ -2,6 +2,7 @@ package edu.stanford.nlp.sempre;
 
 import java.lang.reflect.Constructor;
 
+
 import fig.basic.Option;
 import fig.exec.Execution;
 
@@ -26,18 +27,23 @@ public class Main implements Runnable {
     learner.learn();
 
     if (server || interactive) {
-      try {
-        Class<?> masterClass = Class.forName(masterType);
-        Constructor<?> constructor = masterClass.getConstructor(Builder.class);
-        Master master = (Master)constructor.newInstance(builder);
-        if (server)
-          master.runServer();
-        else if (interactive)
-          master.runInteractivePrompt();
-      } catch (Throwable t) {
-        t.printStackTrace();
-      }
+      Master master = createMaster(masterType, builder);
+      if (server)
+        master.runServer();
+      else if (interactive)
+        master.runInteractivePrompt();
     }
+  }
+
+  public Master createMaster(String masterType, Builder builder) {
+    try {
+      Class<?> masterClass = Class.forName(masterType);
+      Constructor<?> constructor = masterClass.getConstructor(Builder.class);
+      return (Master)constructor.newInstance(builder);
+    } catch (Throwable t) {
+      t.printStackTrace();
+    }
+    return null;
   }
 
   public static void main(String[] args) {

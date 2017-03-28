@@ -47,7 +47,7 @@ public class Derivation implements SemanticFn.Callable, HasScore {
   
   /**
   * Information for grammar induction.
-  * For each descendant derivation of the body, this class tracks where in the head it matches
+  * For each descendant derivation of the body, this class tracks where and what in the head it matches
   * GrammarInfo.start, GrammarInfo.end refer to matching positions in the head, as opposed to the body
   * @author sidaw
   **/
@@ -81,8 +81,8 @@ public class Derivation implements SemanticFn.Callable, HasScore {
 
   // Information for scoring
   private final FeatureVector localFeatureVector;  // Features
-  public double score = Double.NaN;  // Weighted combination of features
-  public double prob = Double.NaN;  // Probability (normalized exp of score).
+  double score = Double.NaN;  // Weighted combination of features
+  double prob = Double.NaN;  // Probability (normalized exp of score).
 
   // Used during parsing (by FeatureExtractor, SemanticFn) to cache arbitrary
   // computation across different sub-Derivations.

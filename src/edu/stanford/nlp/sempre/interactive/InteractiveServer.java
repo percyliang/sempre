@@ -194,8 +194,8 @@ public class InteractiveServer {
               item.put("value", value.sortString());
             else
               item.put("value", "[[]]");
-            item.put("score", deriv.score);
-            item.put("prob", deriv.prob);
+            item.put("score", deriv.getScore());
+            item.put("prob", deriv.getProb());
             item.put("anchored", deriv.allAnchored); // used only anchored rules
             item.put("formula", deriv.formula.toLispTree().toString());
             items.add(item);

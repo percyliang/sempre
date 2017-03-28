@@ -54,7 +54,7 @@ public class FloatingParsingTest {
     DALExecutor.opts.convertNumberValues  = true;
     DALExecutor.opts.printStackTrace = true;
     DALExecutor.opts.worldType = "VoxelWorld";
-    Grammar.opts.inPaths = Lists.newArrayList("./shrdlurn/voxelurn.grammar");
+    Grammar.opts.inPaths = Lists.newArrayList("./interactive/voxelurn.grammar");
     Grammar.opts.useApplyFn = "interactive.ApplyFn";
     Grammar.opts.binarizeRules = false;
 

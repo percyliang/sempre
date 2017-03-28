@@ -106,7 +106,7 @@ similar your system is.
         ./run @mode=simple
 
     You should be able to type the following into the shell and get the answer `(number 7)`:
-   
+
         (execute (call + (number 3) (number 4)))
 
 To go further, check out the [tutorial](TUTORIAL.md) and then the [full
@@ -133,7 +133,7 @@ For Ubuntu, follow this:
     make install
     cd ..
 
-on OS/X you can install virtuoso using homebrew by following the instructions 
+on OS/X you can install virtuoso using homebrew by following the instructions
 [here](http://carsten.io/virtuoso-os-on-mac-os/)
 
 To have SEMPRE interact with Virtuoso, the required modules need to be compiled as follow:
@@ -166,3 +166,7 @@ Changes from SEMPRE 2.0 to SEMPRE 2.1:
 
 - Added the `tables` package for the paper *Compositional semantic parsing on semi-structured tables* (ACL 2015).
 - Add and `overnight` package for the paper *Building a semantic parser overnight* (ACL 2015).
+
+Changes from SEMPRE 2.1 to SEMPRE 2.2:
+
+- Added the `interactive` package for the paper *Naturalizing a programming language through interaction* (ACL 2017).

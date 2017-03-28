@@ -7,6 +7,7 @@
 
 $: << 'fig/lib'
 require 'execrunner'
+$path = 'interactive'
 
 $modes = []
 def addMode(name, description, func)
@@ -94,18 +95,18 @@ addMode('test', 'Run unit tests for interactive stuff', lambda { |e|
       if e[:class]
         l('-testclass', 'edu.stanford.nlp.sempre.interactive.test.' + e[:class])
       else
-        'shrdlurn/testng.xml'
+        "./#{$path}/testng.xml"
       end
     },
   nil)
 })
 
 addMode('community-dep', 'dependencies for the community server', lambda { |e| l(
-l('python ./shrdlurn/community-server/install-deps.py'),
+l('python ./#{$path}/community-server/install-deps.py'),
 nil)})
 
 addMode('community', 'start the community server', lambda { |e| l(
-l('python ./shrdlurn/community-server/server.py -- port 8403'),
+l('python ./#{$path}/community-server/server.py -- port 8403'),
 nil)})
 
 addMode('simulator', 'run the simulator', lambda { |e| l(
@@ -130,16 +131,16 @@ addMode('simulator', 'run the simulator', lambda { |e| l(
   }),
   letDefault(:task, 'sidaw'),
   sel(:task, {
-    'freebig' => o('logFiles', './shrdlurn/queries/freebuildbig-0206.json.gz'),
-    'freebigdef' => o('logFiles', './shrdlurn/queries/freebuildbig-0206.def.json.gz'),
-    'freebigcontext' => o('logFiles', './shrdlurn/queries/freebuildbig-0206.context.json.gz'),
+    'freebig' => o('logFiles', "./#{$path}/queries/freebuildbig-0206.json.gz"),
+    'freebigdef' => o('logFiles', "./#{$path}/queries/freebuildbig-0206.def.json.gz"),
+    'freebigcontext' => o('logFiles', "./#{$path}/queries/freebuildbig-0206.context.json.gz"),
 
-    'qual1' => o('logFiles', './shrdlurn/queries/qualifier1-0118.json.gz'),
-    'qual2' => o('logFiles', './shrdlurn/queries/qualifier2-0129.json.gz'),
-    'qual3' => o('logFiles', './shrdlurn/queries/qualifier3-0201.json.gz'), #  both 2 and 3
-    'free1' => o('logFiles', './shrdlurn/queries/freebuild1-0121.json.gz'),
-    'free2' => o('logFiles', './shrdlurn/queries/freebuild2-0127.json.gz'),
-    'sidaw' => o('logFiles', './shrdlurn/queries/sidaw.json'),
+    'qual1' => o('logFiles', "./#{$path}/queries/qualifier1-0118.json.gz"),
+    'qual2' => o('logFiles', "./#{$path}/queries/qualifier2-0129.json.gz"),
+    'qual3' => o('logFiles', "./#{$path}/queries/qualifier3-0201.json.gz"), #  both 2 and 3
+    'free1' => o('logFiles', "./#{$path}/queries/freebuild1-0121.json.gz"),
+    'free2' => o('logFiles', "./#{$path}/queries/freebuild2-0127.json.gz"),
+    'sidaw' => o('logFiles', "./#{$path}/queries/sidaw.json"),
 
     }),
 nil)})
@@ -159,7 +160,7 @@ addMode('voxelurn', 'interactive semantic parsing in a VoxelWorld', lambda { |e|
   o('DALExecutor.printStackTrace', true),
   o('VoxelWorld.maxBlocks', 100000),
   selo(0, 'DALExecutor.worldType', 'VoxelWorld', 'CalendarWorld', 'Otherworld'),
-  selo(0, 'Grammar.inPaths', './shrdlurn/voxelurn.grammar', './shrdlurn/calendar.grammar'),
+  selo(0, 'Grammar.inPaths', "./#{$path}/voxelurn.grammar"),
 
   o('Params.initWeightsRandomly', false),
   o('Grammar.binarizeRules', false),
@@ -213,7 +214,7 @@ addMode('voxelurn', 'interactive semantic parsing in a VoxelWorld', lambda { |e|
   o('Derivation.showRules', false),
 
   o('NumberFn.allowedRange', 0, 100),
-  o('SimpleLexicon.inPaths', 'shrdlurn/csscolors.lexicon'),
+  o('SimpleLexicon.inPaths', "./#{$path}/csscolors.lexicon"),
   # o('Grammar.tags', 'morecolors'),
   # o('Grammar.tags', 'morenumbers', 'morecolors'),
 
