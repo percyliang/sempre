@@ -1,21 +1,19 @@
 package edu.stanford.nlp.sempre;
 
+import java.util.List;
+
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 
 import fig.basic.LispTree;
-import fig.basic.LogInfo;
-
-import java.util.List;
 
 /**
- * An ActionFormula represent a compositional action used in the interactive package
- * : is used as a prefix to denote an ActionFormula
- * primitive (: actioname args)
- * sequential (:s ActionFormula ActionFormula ...)
- * repeat (:loop Number ActionFormula)
- * conditional (:if Set ActionFormula)
- * block scoping (:blk ActionFormula)
+ * An ActionFormula represent a compositional action used in the interactive
+ * package : is used as a prefix to denote an ActionFormula primitive (:
+ * actioname args) sequential (:s ActionFormula ActionFormula ...) repeat (:loop
+ * Number ActionFormula) conditional (:if Set ActionFormula) block scoping (:blk
+ * ActionFormula)
+ * 
  * @author sidaw
  */
 public class ActionFormula extends Formula {
@@ -25,25 +23,30 @@ public class ActionFormula extends Formula {
     repeat(":loop"), // (:loop (count (has color green)) (: add red top))
     conditional(":if"), // (:if (count (has color green)) (: add red top))
     whileloop(":while"), // (:while (count (has color green)) (: add red top))
-    forset(":for"), // (:for (and this (color red)) (:s (: add red top) (: add yellow top) (: remove)))
+    forset(":for"), // (:for (and this (color red)) (:s (: add red top) (: add
+                    // yellow top) (: remove)))
     foreach(":foreach"), // (:foreach * (add ((reverse color) this) top))
-    
+
     // primitives for declaring variables
-    //let(":let"), // (:let X *), 
-    //set(":set"), // (:set X *)
-    
+    // let(":let"), // (:let X *),
+    // set(":set"), // (:set X *)
+
     block(":blk"), // start a block of code (like {}) with a new scope
     blockr(":blkr"), // also return a result after finishing the block
-    isolate(":isolate"),
-    other(":?");
-    
+    isolate(":isolate"), other(":?");
+
     private final String value;
-    Mode(String value) {this.value = value;}
+
+    Mode(String value) {
+      this.value = value;
+    }
+
     @Override
     public String toString() {
       return this.value;
     }
   };
+
   public final Mode mode;
   public final List<Formula> args;
 
@@ -53,9 +56,11 @@ public class ActionFormula extends Formula {
   }
 
   public static Mode parseMode(String mode) {
-    if (mode == null) return null;
+    if (mode == null)
+      return null;
     for (Mode m : Mode.values()) {
-      // LogInfo.logs("mode string %s \t== %s \t!= %s", m.toString(), mode, m.name());
+      // LogInfo.logs("mode string %s \t== %s \t!= %s", m.toString(), mode,
+      // m.name());
       if (m.toString().equals(mode))
         return m;
     }
@@ -64,6 +69,7 @@ public class ActionFormula extends Formula {
     return null;
   }
 
+  @Override
   public LispTree toLispTree() {
     LispTree tree = LispTree.proto.newList();
     tree.addChild(this.mode.toString());
@@ -75,7 +81,7 @@ public class ActionFormula extends Formula {
   @Override
   public void forEach(Function<Formula, Boolean> func) {
     if (!func.apply(this)) {
-      for (Formula arg: args)
+      for (Formula arg : args)
         arg.forEach(func);
     }
   }
@@ -83,7 +89,8 @@ public class ActionFormula extends Formula {
   @Override
   public Formula map(Function<Formula, Formula> transform) {
     Formula result = transform.apply(this);
-    if (result != null) return result;
+    if (result != null)
+      return result;
     List<Formula> newArgs = Lists.newArrayList();
     for (Formula arg : args)
       newArgs.add(arg.map(transform));
@@ -100,16 +107,20 @@ public class ActionFormula extends Formula {
     return res;
   }
 
-  @SuppressWarnings({"equalshashcode"})
+  @SuppressWarnings({ "equalshashcode" })
   @Override
   public boolean equals(Object thatObj) {
-    if (!(thatObj instanceof ActionFormula)) return false;
+    if (!(thatObj instanceof ActionFormula))
+      return false;
     ActionFormula that = (ActionFormula) thatObj;
-    if (!this.mode.equals(that.mode)) return false;
-    if (!this.args.equals(that.args)) return false;
+    if (!this.mode.equals(that.mode))
+      return false;
+    if (!this.args.equals(that.args))
+      return false;
     return true;
   }
 
+  @Override
   public int computeHashCode() {
     int hash = 0x7ed55d16;
     hash = hash * 0xd3a2646c + mode.hashCode();

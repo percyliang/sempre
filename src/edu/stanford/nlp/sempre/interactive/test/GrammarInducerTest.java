@@ -11,7 +11,6 @@ import org.testng.collections.Lists;
 
 import com.google.common.collect.Sets;
 
-import edu.stanford.nlp.sempre.ActionFormula;
 import edu.stanford.nlp.sempre.Derivation;
 import edu.stanford.nlp.sempre.ExactValueEvaluator;
 import edu.stanford.nlp.sempre.Example;
@@ -37,6 +36,7 @@ import fig.basic.LogInfo;
 
 /**
  * Test the grammar induction
+ * 
  * @author sidaw
  */
 public class GrammarInducerTest {
@@ -45,7 +45,7 @@ public class GrammarInducerTest {
 
   private static Spec defaultSpec() {
     FloatingParser.opts.defaultIsFloating = true;
-    DALExecutor.opts.convertNumberValues  = true;
+    DALExecutor.opts.convertNumberValues = true;
     DALExecutor.opts.printStackTrace = true;
     DALExecutor.opts.worldType = "VoxelWorld";
 
@@ -59,7 +59,7 @@ public class GrammarInducerTest {
     Grammar.opts.binarizeRules = false;
 
     FeatureExtractor.opts.featureComputers = Sets.newHashSet("interactive.DALFeatureComputer");
-    FeatureExtractor.opts.featureDomains =  Sets.newHashSet(":rule", ":stats", ":window");
+    FeatureExtractor.opts.featureDomains = Sets.newHashSet(":rule", ":stats", ":window");
 
     DefinitionAligner.opts.strategies = Sets.newHashSet(DefinitionAligner.Strategies.ExactExclusion);
     DefinitionAligner.opts.verbose = 2;
@@ -89,17 +89,21 @@ public class GrammarInducerTest {
     Parser parser;
     Params params;
     List<Rule> allRules;
+
     public ParseTester() {
       parser = new BeamFloatingParser(defaultSpec());
       params = new Params();
-      allRules = new ArrayList<>(); 
+      allRules = new ArrayList<>();
     }
+
     public void def(String head, String def) {
-      List<Rule> induced = InteractiveMaster.induceRulesHelper(":def", head, def, parser, params, new Session("testsession"), null);
+      List<Rule> induced = InteractiveMaster.induceRulesHelper(":def", head, def, parser, params,
+          new Session("testsession"), null);
       allRules.addAll(induced);
       LogInfo.logs("Defining %s := %s, added %s", head, def, induced);
       induced.forEach(r -> InteractiveUtils.addRuleInteractive(r, parser));
     }
+
     public boolean match(String head, String def) {
       Example.Builder b = new Example.Builder();
       b.setUtterance(head);
@@ -111,12 +115,14 @@ public class GrammarInducerTest {
 
       Derivation defDeriv = InteractiveUtils.combine(InteractiveUtils.derivsfromJson(def, parser, params, null));
 
-      boolean found = false; 
+      boolean found = false;
       int ind = 0;
       for (Derivation d : exHead.predDerivations) {
-        //LogInfo.logs("considering: %s", d.formula.toString());
-        LogInfo.logs("Comparing %s vs %s", InteractiveUtils.stripBlock(d).formula.toString(), InteractiveUtils.stripBlock(defDeriv).formula.toString());
-        if (InteractiveUtils.stripBlock(d).formula.toString().equals(InteractiveUtils.stripBlock(defDeriv).formula.toString())) {
+        // LogInfo.logs("considering: %s", d.formula.toString());
+        LogInfo.logs("Comparing %s vs %s", InteractiveUtils.stripBlock(d).formula.toString(),
+            InteractiveUtils.stripBlock(defDeriv).formula.toString());
+        if (InteractiveUtils.stripBlock(d).formula.toString()
+            .equals(InteractiveUtils.stripBlock(defDeriv).formula.toString())) {
           found = true;
           LogInfo.logs("found %s at %d", d.formula, ind);
         }
@@ -142,7 +148,7 @@ public class GrammarInducerTest {
       parser.parse(params, exHead, true);
 
       for (Derivation deriv : exHead.predDerivations) {
-        deriv.compatibility = defDeriv.formula.equals(deriv.formula)? 1 : 0;
+        deriv.compatibility = defDeriv.formula.equals(deriv.formula) ? 1 : 0;
       }
       exHead.predDerivations.forEach(d -> LogInfo.logs("Compatibility %s : %f", d.formula, d.compatibility));
 
@@ -161,6 +167,7 @@ public class GrammarInducerTest {
       LogInfo.end_track();
     }
   }
+
   // tests simple substitutions
   @Test(groups = { "Interactive" })
   public void simpleTest() {
@@ -168,8 +175,8 @@ public class GrammarInducerTest {
     ParseTester T = new ParseTester();
     Assertion A = hard;
 
-    T.def("add red twice", d("add red top","add red top"));
-    A.assertTrue(T.match("add blue twice", d("add blue top","add blue top")));
+    T.def("add red twice", d("add red top", "add red top"));
+    A.assertTrue(T.match("add blue twice", d("add blue top", "add blue top")));
 
     T.def("add red 3 times", d("repeat 3 [add red]"));
     A.assertTrue(T.match("add yellow 5 times", d("repeat 5 [add yellow]")));
@@ -198,8 +205,8 @@ public class GrammarInducerTest {
     T.def("add a yellow block on top of red blocks", d("select has color red; add yellow top"));
     A.assertTrue(T.match("add a green block on top of blue blocks", d("select has color blue ; add green top")));
 
-    //T.printAllRules();
-    //A.assertAll();
+    // T.printAllRules();
+    // A.assertAll();
 
     LogInfo.end_track();
   }
@@ -212,7 +219,8 @@ public class GrammarInducerTest {
 
     // by default, we prefer higher level abstractions
     T.def("add red twice", d("repeat 2 [add red]"));
-    // T.def("select has color red twice", d("repeat 2 [select has color red]"));
+    // T.def("select has color red twice", d("repeat 2 [select has color
+    // red]"));
     A.assertTrue(T.match("add blue top twice", d("repeat 2 [add blue top]")));
 
     T.def("add red 3 times", d("repeat 3 [add red]"));
@@ -221,8 +229,8 @@ public class GrammarInducerTest {
     T.def("add red then add yellow left", d("add red; add yellow left"));
     A.assertTrue(T.match("remove has color red then add brown", d("remove has color red; add brown")));
 
-    //T.printAllRules();
-    //A.assertAll();
+    // T.printAllRules();
+    // A.assertAll();
 
     LogInfo.end_track();
   }
@@ -235,14 +243,13 @@ public class GrammarInducerTest {
 
     T.def("add red top twice", d("add red; add red top"));
     T.accept("add yellow top twice", d("add yellow; add yellow top"));
-    //T.accept("add yellow bot twice", d("add yellow; add yellow bot"));
+    // T.accept("add yellow bot twice", d("add yellow; add yellow bot"));
     // T.accept("add brown left twice", d("add brown; add brown left"));
     T.def("add red top twice", d("add red; add red top"));
     A.assertTrue(T.match("add blue right twice", d("add blue; add blue right")));
 
-
-    //T.printAllRules();
-    //A.assertAll();
+    // T.printAllRules();
+    // A.assertAll();
 
     LogInfo.end_track();
   }
@@ -275,8 +282,8 @@ public class GrammarInducerTest {
     T.def("select the top most of has color red", d("select very top of has color red"));
     A.assertTrue(T.match("remove the bot most of all", d("remove very bot of all")));
 
-    //T.printAllRules();
-    //A.assertAll();
+    // T.printAllRules();
+    // A.assertAll();
 
     LogInfo.end_track();
   }
@@ -295,8 +302,8 @@ public class GrammarInducerTest {
     A.assertTrue(T.match("blue plate of size 4", d("{repeat 4 [blue stick of size 4; select left]}")));
     A.assertTrue(T.match("blue cube of size 5", d("{repeat 5 [blue plate of size 5; select back]}")));
 
-    //T.printAllRules();
-    //A.assertAll();
+    // T.printAllRules();
+    // A.assertAll();
 
     LogInfo.end_track();
   }
@@ -314,8 +321,8 @@ public class GrammarInducerTest {
     A.assertTrue(T.match("red plate of size 1 by 2", d("{repeat 1 [red stick of size 2; select left]}")));
     A.assertTrue(T.match("red cube of size 1 by 2 by 3", d("{repeat 1 [red plate of size 2 by 3; select back]}")));
 
-    //T.printAllRules();
-    //A.assertAll();
+    // T.printAllRules();
+    // A.assertAll();
 
     LogInfo.end_track();
   }
@@ -332,11 +339,10 @@ public class GrammarInducerTest {
     T.def("remove the leftmost red block", d("remove very left of has color red"));
     A.assertTrue(T.match("select the leftmost red block", d("select very left of has color red")));
 
-    //T.printAllRules();
-    //A.assertAll();
+    // T.printAllRules();
+    // A.assertAll();
 
     LogInfo.end_track();
   }
-
 
 }

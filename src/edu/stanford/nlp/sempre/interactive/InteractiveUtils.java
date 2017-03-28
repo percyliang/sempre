@@ -8,7 +8,19 @@ import org.testng.collections.Lists;
 
 import com.google.common.collect.ImmutableList;
 
-import edu.stanford.nlp.sempre.*;
+import edu.stanford.nlp.sempre.ActionFormula;
+import edu.stanford.nlp.sempre.BeamParser;
+import edu.stanford.nlp.sempre.Derivation;
+import edu.stanford.nlp.sempre.Example;
+import edu.stanford.nlp.sempre.Formula;
+import edu.stanford.nlp.sempre.Formulas;
+import edu.stanford.nlp.sempre.IdentityFn;
+import edu.stanford.nlp.sempre.Json;
+import edu.stanford.nlp.sempre.Master;
+import edu.stanford.nlp.sempre.Params;
+import edu.stanford.nlp.sempre.Parser;
+import edu.stanford.nlp.sempre.Rule;
+import edu.stanford.nlp.sempre.SemanticFn;
 import fig.basic.LispTree;
 import fig.basic.LogInfo;
 import fig.basic.Option;
@@ -16,7 +28,7 @@ import fig.basic.Ref;
 
 /**
  * Utilities for interactive learning
- * 
+ *
  * @author sidaw
  */
 public final class InteractiveUtils {
@@ -55,7 +67,8 @@ public final class InteractiveUtils {
     return deriv;
   }
 
-  public static List<Derivation> derivsfromJson(String jsonDef, Parser parser, Params params, Ref<Master.Response> refResponse) {
+  public static List<Derivation> derivsfromJson(String jsonDef, Parser parser, Params params,
+      Ref<Master.Response> refResponse) {
     @SuppressWarnings("unchecked")
     List<Object> body = Json.readValueHard(jsonDef, List.class);
     // string together the body definition
@@ -93,7 +106,7 @@ public final class InteractiveUtils {
       }
       if (!found && !formula.equals("?")) {
         LogInfo.errors("matching formula not found: %s :: %s", utt, formula);
-        numFailed ++;
+        numFailed++;
       }
       // just making testing easier, use top derivation when we formula is not
       // given
@@ -174,7 +187,6 @@ public final class InteractiveUtils {
         .createDerivation();
     return res;
   }
-
 
   public static String getParseStatus(Example ex) {
     return GrammarInducer.getParseStatus(ex).toString();

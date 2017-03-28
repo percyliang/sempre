@@ -14,18 +14,22 @@ import fig.basic.LispTree;
 import fig.basic.Option;
 
 /**
- * Take any number of arguments and apply them to the lambda expression given in this SemanticFn
- * TODO: type inference, some function applications
+ * Take any number of arguments and apply them to the lambda expression given in
+ * this SemanticFn TODO: type inference, some function applications
+ * 
  * @author sidaw
  */
 public class ApplyFn extends SemanticFn {
   public static class Options {
-    @Option(gloss = "verbosity") public int verbose = 0;
+    @Option(gloss = "verbosity")
+    public int verbose = 0;
   }
+
   public static Options opts = new Options();
 
   Formula formula;
 
+  @Override
   public void init(LispTree tree) {
     super.init(tree);
     formula = Formulas.fromLispTree(tree.child(1));
@@ -35,12 +39,14 @@ public class ApplyFn extends SemanticFn {
     return formula;
   }
 
-  public ApplyFn() {}
-  
+  public ApplyFn() {
+  }
+
   public ApplyFn(Formula f) {
     formula = f;
   }
 
+  @Override
   public DerivationStream call(final Example ex, final Callable c) {
     return new SingleDerivationStream() {
       @Override
@@ -50,12 +56,9 @@ public class ApplyFn extends SemanticFn {
         for (Derivation arg : args) {
           if (!(f instanceof LambdaFormula))
             throw new RuntimeException("Expected LambdaFormula, but got " + f + "; initial: " + formula);
-          f = Formulas.lambdaApply((LambdaFormula)f, arg.getFormula());
+          f = Formulas.lambdaApply((LambdaFormula) f, arg.getFormula());
         }
-        Derivation res = new Derivation.Builder()
-                .withCallable(c)
-                .formula(f)
-                .createDerivation();
+        Derivation res = new Derivation.Builder().withCallable(c).formula(f).createDerivation();
         return res;
       }
     };

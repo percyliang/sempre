@@ -37,29 +37,37 @@ import edu.stanford.nlp.sempre.Master;
 import edu.stanford.nlp.sempre.Session;
 import edu.stanford.nlp.sempre.StringValue;
 import edu.stanford.nlp.sempre.Value;
-import edu.stanford.nlp.sempre.Master.Response;
 import fig.basic.IOUtils;
 import fig.basic.LogInfo;
 import fig.basic.MapUtils;
 import fig.basic.Option;
 
-
 /**
- * JsonServer, interactive learning queries run through this. All the logs are handled here.
+ * JsonServer, interactive learning queries run through this. All the logs are
+ * handled here.
  *
  * @author sidaw
  */
 public class InteractiveServer {
   public static class Options {
-    @Option public int port = 8400;
-    @Option public int numThreads = 4;
-    @Option public int verbose = 1;
-    @Option public int maxCandidates = Integer.MAX_VALUE;
-    @Option public String queryLogPath = "./int-output/query.log";
-    @Option public String responseLogPath = "./int-output/response.log";
-    @Option public String fullResponseLogPath;
-    @Option public int maxExecutionTime = 10; // in seconds
+    @Option
+    public int port = 8400;
+    @Option
+    public int numThreads = 4;
+    @Option
+    public int verbose = 1;
+    @Option
+    public int maxCandidates = Integer.MAX_VALUE;
+    @Option
+    public String queryLogPath = "./int-output/query.log";
+    @Option
+    public String responseLogPath = "./int-output/response.log";
+    @Option
+    public String fullResponseLogPath;
+    @Option
+    public int maxExecutionTime = 10; // in seconds
   }
+
   public static Options opts = new Options();
   private static Object queryLogLock = new Object();
   private static Object responseLogLock = new Object();
@@ -68,6 +76,7 @@ public class InteractiveServer {
   Master master;
 
   class Handler implements HttpHandler {
+    @Override
     public void handle(HttpExchange exchange) {
       try {
         new ExchangeState(exchange);
@@ -86,7 +95,7 @@ public class InteractiveServer {
     // For header
     HttpCookie cookie;
     boolean isNewSession;
-    
+
     // For writing main content
 
     public ExchangeState(HttpExchange exchange) throws IOException {
@@ -111,18 +120,19 @@ public class InteractiveServer {
         }
       }
       // do not decode sessionId, keep it filename and lisptree friendly
-      String sessionId = URLEncoder.encode(MapUtils.get(reqParams, "sessionId", ""),  "UTF-8");
-      if (sessionId != null) { 
+      String sessionId = URLEncoder.encode(MapUtils.get(reqParams, "sessionId", ""), "UTF-8");
+      if (sessionId != null) {
         isNewSession = false;
       } else {
-        isNewSession = true; 
+        isNewSession = true;
       }
 
       if (opts.verbose >= 2)
         logs("GET %s from %s (%ssessionId=%s)", uri, remoteHost, isNewSession ? "new " : "", sessionId);
 
       String uriPath = uri.getPath();
-      if (uriPath.equals("/")) uriPath += "index.html";
+      if (uriPath.equals("/"))
+        uriPath += "index.html";
       if (uriPath.equals("/sempre")) {
         handleQuery(sessionId);
       } else {
@@ -134,10 +144,14 @@ public class InteractiveServer {
     String getMimeType(String path) {
       String[] tokens = path.split("\\.");
       String ext = tokens[tokens.length - 1];
-      if (ext.equals("html")) return "text/html";
-      if (ext.equals("css")) return "text/css";
-      if (ext.equals("jpeg")) return "image/jpeg";
-      if (ext.equals("gif")) return "image/gif";
+      if (ext.equals("html"))
+        return "text/html";
+      if (ext.equals("css"))
+        return "text/css";
+      if (ext.equals("jpeg"))
+        return "image/jpeg";
+      if (ext.equals("gif"))
+        return "image/gif";
       return "text/plain";
     }
 
@@ -153,11 +167,11 @@ public class InteractiveServer {
     Map<String, Object> makeJson(Master.Response response) {
       Map<String, Object> json = new HashMap<String, Object>();
       json.put("stats", response.stats);
-      
+
       if (response.lines != null) {
         json.put("lines", response.lines);
       }
-      if (response.getExample()!=null) {
+      if (response.getExample() != null) {
         List<Object> items = new ArrayList<Object>();
         json.put("candidates", items);
         List<Derivation> allCandidates = response.getExample().getPredDerivations();
@@ -165,19 +179,17 @@ public class InteractiveServer {
         if (allCandidates != null) {
           if (allCandidates.size() >= InteractiveServer.opts.maxCandidates) {
             allCandidates = allCandidates.subList(0, InteractiveServer.opts.maxCandidates);
-            response.lines.add(
-                String.format("Exceeded max options: (current: %d / max: %d) ", 
-                    allCandidates.size(), InteractiveServer.opts.maxCandidates)
-                );
+            response.lines.add(String.format("Exceeded max options: (current: %d / max: %d) ", allCandidates.size(),
+                InteractiveServer.opts.maxCandidates));
           }
 
           for (Derivation deriv : allCandidates) {
             Map<String, Object> item = new HashMap<String, Object>();
             Value value = deriv.getValue();
             if (value instanceof StringValue)
-              item.put("value", ((StringValue)value).value);
+              item.put("value", ((StringValue) value).value);
             else if (value instanceof ErrorValue)
-              item.put("value", ((ErrorValue)value).sortString());
+              item.put("value", ((ErrorValue) value).sortString());
             else if (value != null)
               item.put("value", value.sortString());
             else
@@ -194,7 +206,6 @@ public class InteractiveServer {
       return json;
     }
 
-    
     // This should be concurrent
     Master.Response processQuery(Session session, String query) {
       String message = null;
@@ -204,7 +215,7 @@ public class InteractiveServer {
       try {
         // most exceptions should be handled in InteractiveMaster
         // so the response can be more specific
-        response = future.get(opts.maxExecutionTime, TimeUnit.SECONDS); 
+        response = future.get(opts.maxExecutionTime, TimeUnit.SECONDS);
       } catch (Throwable e) {
         e.printStackTrace();
         message = e.toString();
@@ -227,13 +238,12 @@ public class InteractiveServer {
       session.reqParams = reqParams;
       session.remoteHost = remoteHost;
       session.format = "json";
-      
-      
+
       LocalDateTime queryTime = LocalDateTime.now();
       synchronized (queryLogLock) { // write the query log
         Map<String, Object> jsonMap = new LinkedHashMap<>();
         jsonMap.put("q", query);
-        jsonMap.put("remote", remoteHost); 
+        jsonMap.put("remote", remoteHost);
         jsonMap.put("time", queryTime.toString());
         jsonMap.put("query", queryNumber);
         jsonMap.put("sessionId", sessionId);
@@ -247,16 +257,17 @@ public class InteractiveServer {
       }
 
       // If JSON, don't store cookies.
-     
-      if (query == null) query = "null";
-        logs("Server.handleQuery %s: %s", session.id, query);
+
+      if (query == null)
+        query = "null";
+      logs("Server.handleQuery %s: %s", session.id, query);
 
       // Print header
       setHeaders("application/json");
 
       Master.Response masterResponse = null;
       if (query != null) {
-         masterResponse = processQuery(session, query);
+        masterResponse = processQuery(session, query);
       }
 
       Map<String, Object> responseMap = null;
@@ -276,7 +287,7 @@ public class InteractiveServer {
         LocalDateTime responseTime = LocalDateTime.now();
         // jsonMap.put("responseTime", responseTime.toString());
         jsonMap.put("time", queryTime.toString());
-        jsonMap.put("ms", String.format("%.3f", java.time.Duration.between(queryTime, responseTime).toNanos()/1.0e6));
+        jsonMap.put("ms", String.format("%.3f", java.time.Duration.between(queryTime, responseTime).toNanos() / 1.0e6));
         jsonMap.put("sessionId", sessionId);
         jsonMap.put("q", query); // backwards compatibility...
         jsonMap.put("lines", responseMap.get("lines"));
@@ -296,7 +307,7 @@ public class InteractiveServer {
         }
       }
     }
-    
+
     void logLine(String path, String line) {
       PrintWriter out;
       try {
@@ -309,8 +320,9 @@ public class InteractiveServer {
       }
     }
   }
-  
-  private void logs(String s, Object... args) {};
+
+  private void logs(String s, Object... args) {
+  };
 
   public InteractiveServer(Master master) {
     this.master = master;
@@ -320,17 +332,17 @@ public class InteractiveServer {
     try {
       String hostname = fig.basic.SysInfoUtils.getHostName();
       HttpServer server = HttpServer.create(new InetSocketAddress(opts.port), 10);
-      ExecutorService pool = new ThreadPoolExecutor(opts.numThreads, opts.numThreads,
-          5000, TimeUnit.MILLISECONDS,
+      ExecutorService pool = new ThreadPoolExecutor(opts.numThreads, opts.numThreads, 5000, TimeUnit.MILLISECONDS,
           new LinkedBlockingQueue<Runnable>());
-      //Executors.newFixedThreadPool(opts.numThreads);
+      // Executors.newFixedThreadPool(opts.numThreads);
       server.createContext("/", new Handler());
       server.setExecutor(pool);
       server.start();
       LogInfo.logs("JSON Server (%d threads) started at http://%s:%s/sempre", opts.numThreads, hostname, opts.port);
       LogInfo.log("Press Ctrl-D to terminate.");
       LogInfo.begin_threads();
-      while (LogInfo.stdin.readLine() != null) { }
+      while (LogInfo.stdin.readLine() != null) {
+      }
       LogInfo.log("Shutting down server...");
       server.stop(0);
       LogInfo.log("Shutting down executor pool...");

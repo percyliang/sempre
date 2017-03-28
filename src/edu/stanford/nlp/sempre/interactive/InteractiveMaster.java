@@ -1,13 +1,17 @@
 package edu.stanford.nlp.sempre.interactive;
 
-import com.google.common.base.Joiner;
-import com.google.common.base.Strings;
+import java.io.PrintWriter;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.google.common.collect.Lists;
 
+import edu.stanford.nlp.sempre.Builder;
 import edu.stanford.nlp.sempre.ContextValue;
 import edu.stanford.nlp.sempre.Derivation;
 import edu.stanford.nlp.sempre.Example;
-import edu.stanford.nlp.sempre.Builder;
 import edu.stanford.nlp.sempre.Formula;
 import edu.stanford.nlp.sempre.Formulas;
 import edu.stanford.nlp.sempre.Master;
@@ -17,20 +21,15 @@ import edu.stanford.nlp.sempre.ParserState;
 import edu.stanford.nlp.sempre.Rule;
 import edu.stanford.nlp.sempre.RuleSource;
 import edu.stanford.nlp.sempre.Session;
-import edu.stanford.nlp.sempre.Master.Response;
-import fig.basic.*;
-import jline.console.ConsoleReader;
-
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.lang.reflect.Field;
-import java.nio.file.Paths;
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
+import fig.basic.IOUtils;
+import fig.basic.LispTree;
+import fig.basic.LogInfo;
+import fig.basic.Option;
+import fig.basic.Ref;
 
 /**
- * An InteractiveMaster supports interactive commands, and grammar induction methods.
+ * An InteractiveMaster supports interactive commands, and grammar induction
+ * methods.
  */
 public class InteractiveMaster extends Master {
   public static class Options {
@@ -45,12 +44,13 @@ public class InteractiveMaster extends Master {
 
     @Option(gloss = "try partial matches")
     public boolean useAligner = true;
-    
+
     @Option(gloss = "use the best formula when no match or not provided")
     public int maxSequence = 20;
     @Option(gloss = "path to the citations")
     public int maxChars = 200;
   }
+
   public static Options opts = new Options();
 
   public InteractiveMaster(Builder builder) {
@@ -61,14 +61,15 @@ public class InteractiveMaster extends Master {
   protected void printHelp() {
     // interactive commands
     LogInfo.log("Interactive commands");
-    LogInfo.log("  (:def head [[body1,bodyformula1],[body2,bodyformula2]]): provide a definition for the original utterance");
+    LogInfo.log(
+        "  (:def head [[body1,bodyformula1],[body2,bodyformula2]]): provide a definition for the original utterance");
     LogInfo.log("  (:q |utterance|): provide a definition for the original utterance");
     LogInfo.log("  (:accept |formula1| |formula2|): accept any derivation with those corresponding formula");
     LogInfo.log("  (:reject |formula1| |formula2|): reject any derivations with those corresponding formula");
     LogInfo.log("Main commands");
     super.printHelp();
   }
-  
+
   @Override
   public void runServer() {
     InteractiveServer server = new InteractiveServer(this);
@@ -110,7 +111,7 @@ public class InteractiveMaster extends Master {
 
       builder.parser.parse(builder.params, ex, false);
 
-      stats.size(ex.predDerivations!=null? ex.predDerivations.size() : 0);
+      stats.size(ex.predDerivations != null ? ex.predDerivations.size() : 0);
       stats.status(InteractiveUtils.getParseStatus(ex));
 
       LogInfo.logs("parse stats: %s", response.stats);
@@ -137,8 +138,7 @@ public class InteractiveMaster extends Master {
       List<Formula> targetFormulas = new ArrayList<>();
       try {
         targetFormulas = tree.children.subList(2, tree.children.size()).stream()
-            .map(t -> Formulas.fromLispTree(LispTree.proto.parseFromString(t.value)))
-            .collect(Collectors.toList());
+            .map(t -> Formulas.fromLispTree(LispTree.proto.parseFromString(t.value))).collect(Collectors.toList());
       } catch (Exception e) {
         e.printStackTrace();
         response.lines.add("cannot accept formula: ");
@@ -157,7 +157,9 @@ public class InteractiveMaster extends Master {
       for (int i = 0; i < ex.predDerivations.size(); i++) {
         Derivation derivi = ex.predDerivations.get(i);
         if (targetFormulas.contains(derivi.formula)) {
-          rank = i; match = derivi; break;
+          rank = i;
+          match = derivi;
+          break;
         }
       }
       if (rank == -1) {
@@ -175,7 +177,8 @@ public class InteractiveMaster extends Master {
         if (session.isWritingCitation()) {
           InteractiveUtils.cite(match, ex);
         }
-        // ex.setTargetValue(match.value); // this is just for logging, not actually used for learning
+        // ex.setTargetValue(match.value); // this is just for logging, not
+        // actually used for learning
         if (session.isLearning()) {
           LogInfo.begin_track("Updating parameters");
           learner.onlineLearnExampleByFormula(ex, targetFormulas);
@@ -192,8 +195,8 @@ public class InteractiveMaster extends Master {
         stats.put("head_len", head.length());
         stats.put("json_len", jsonDef.length());
         try {
-          inducedRules.addAll(induceRulesHelper(command, head, jsonDef,
-              builder.parser, builder.params, session, new Ref<Response>(response)));
+          inducedRules.addAll(induceRulesHelper(command, head, jsonDef, builder.parser, builder.params, session,
+              new Ref<Response>(response)));
           stats.put("num_rules", inducedRules.size());
         } catch (BadInteractionException e) {
           stats.put("num_rules", 0);
@@ -207,11 +210,13 @@ public class InteractiveMaster extends Master {
               InteractiveUtils.addRuleInteractive(rule, builder.parser);
             }
           }
-          // TODO : should not have to parse again, I guess just set the formula or something
+          // TODO : should not have to parse again, I guess just set the formula
+          // or something
           // builder.parser.parse(builder.params, refExHead.value, false);
           // write out the grammar
           if (session.isWritingGrammar()) {
-            PrintWriter out = IOUtils.openOutAppendHard(Paths.get(InteractiveMaster.opts.intOutputPath, "grammar.log.json").toString());
+            PrintWriter out = IOUtils
+                .openOutAppendHard(Paths.get(InteractiveMaster.opts.intOutputPath, "grammar.log.json").toString());
             for (Rule rule : inducedRules) {
               out.println(rule.toJson());
             }
@@ -226,7 +231,8 @@ public class InteractiveMaster extends Master {
     } else if (command.equals(":printInfo")) {
       LogInfo.logs("Printing and overriding grammar and parameters...");
       builder.params.write(Paths.get(InteractiveMaster.opts.intOutputPath, "params.params").toString());
-      PrintWriter out = IOUtils.openOutAppendHard(Paths.get(InteractiveMaster.opts.intOutputPath + "grammar.final.json").toString());
+      PrintWriter out = IOUtils
+          .openOutAppendHard(Paths.get(InteractiveMaster.opts.intOutputPath + "grammar.final.json").toString());
       for (Rule rule : builder.grammar.getRules()) {
         out.println(rule.toJson());
       }
@@ -236,11 +242,11 @@ public class InteractiveMaster extends Master {
       if (tree.children.size() == 1) {
         LogInfo.logs("%s", session.context);
       } else {
-        session.context = ContextValue.fromString(
-            String.format("(context (graph NaiveKnowledgeGraph ((string \"%s\") (name b) (name c))))",
+        session.context = ContextValue
+            .fromString(String.format("(context (graph NaiveKnowledgeGraph ((string \"%s\") (name b) (name c))))",
                 tree.children.get(1).toString()));
         response.stats.put("context_length", tree.children.get(1).toString().length());
-     }
+      }
     } else {
       LogInfo.log("Invalid command: " + tree);
     }
@@ -260,7 +266,7 @@ public class InteractiveMaster extends Master {
       Session session, Ref<Response> refResponse) throws BadInteractionException {
     Example exHead = exampleFromUtterance(head, session);
     LogInfo.logs("head: %s", exHead.getTokens());
-    
+
     if (exHead.getTokens() == null || exHead.getTokens().size() == 0)
       throw BadInteractionException.headIsEmpty(head);
     if (isNonsense(exHead))
@@ -268,12 +274,13 @@ public class InteractiveMaster extends Master {
     BeamFloatingParserState state = (BeamFloatingParserState) parser.parse(params, exHead, true);
     if (GrammarInducer.getParseStatus(exHead) == GrammarInducer.ParseStatus.Core)
       throw BadInteractionException.headIsCore(head);
-    
+
     LogInfo.logs("num anchored: %d", state.chartList.size());
     List<String> bodyList = InteractiveUtils.utterancefromJson(jsonDef, false);
-    LogInfo.logs("bodyutterance:\n %s", String.join("\n",bodyList));
+    LogInfo.logs("bodyutterance:\n %s", String.join("\n", bodyList));
 
-    Derivation bodyDeriv = InteractiveUtils.combine(InteractiveUtils.derivsfromJson(jsonDef, parser, params, refResponse));
+    Derivation bodyDeriv = InteractiveUtils
+        .combine(InteractiveUtils.derivsfromJson(jsonDef, parser, params, refResponse));
     if (refResponse != null) {
       refResponse.value.ex = exHead;
     }
@@ -287,9 +294,9 @@ public class InteractiveMaster extends Master {
     }
 
     LogInfo.logs("testing Aligner, %b, %d", opts.useAligner, bodyList.size());
-    if (opts.useAligner && bodyList.size() == 1){
+    if (opts.useAligner && bodyList.size() == 1) {
       LogInfo.logs("testing Aligner2");
-      List<Rule> alignedRules = DefinitionAligner.getRules(exHead.getTokens(), 
+      List<Rule> alignedRules = DefinitionAligner.getRules(exHead.getTokens(),
           InteractiveUtils.utterancefromJson(jsonDef, true), bodyDeriv, state.chartList);
       for (Rule rule : alignedRules) {
         rule.source = new RuleSource(session.id, head, bodyList);
@@ -304,25 +311,25 @@ public class InteractiveMaster extends Master {
 
   private static boolean isNonsense(Example exHead) {
     List<String> tokens = exHead.getTokens();
-    if (tokens.size() > 10) return true;
-    if (tokens.size() == 0) return true;
+    if (tokens.size() > 10)
+      return true;
+    if (tokens.size() == 0)
+      return true;
     return tokens.stream().anyMatch(s -> s.length() > 15);
   }
 
   private boolean utteranceAllowed(Example ex, Response response) {
     if (ex.utterance.length() > opts.maxChars) {
-      response.lines.add(String.format(
-          "refused to execute: too many characters in one command (current: %d, max: %d)", ex.utterance.length(), opts.maxChars)
-          );
+      response.lines.add(String.format("refused to execute: too many characters in one command (current: %d, max: %d)",
+          ex.utterance.length(), opts.maxChars));
       return false;
     }
     long approxSeq = ex.getLemmaTokens().stream().filter(s -> s.contains(";")).count();
     if (approxSeq >= opts.maxSequence) {
       response.lines.add(String.format(
-          "refused to execute: too many steps in one command -- " +
-              "consider defining some of steps as one single step.  (current: %d, max: %d)",
-              approxSeq, opts.maxSequence)
-          );
+          "refused to execute: too many steps in one command -- "
+              + "consider defining some of steps as one single step.  (current: %d, max: %d)",
+          approxSeq, opts.maxSequence));
       return false;
     }
     return true;

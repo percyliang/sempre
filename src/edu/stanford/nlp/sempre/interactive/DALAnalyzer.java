@@ -23,9 +23,11 @@ public class DALAnalyzer extends LanguageAnalyzer {
     return buf.toString();
   }
 
-  private static final String[] numbers = {"zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"};
-  private static final String[] determiners = {"the", "a", "an", "that"};
+  private static final String[] numbers = { "zero", "one", "two", "three", "four", "five", "six", "seven", "eight",
+      "nine", "ten" };
+  private static final String[] determiners = { "the", "a", "an", "that" };
 
+  @Override
   public LanguageInfo analyze(String utterance) {
     LanguageInfo languageInfo = new LanguageInfo();
 
@@ -48,30 +50,34 @@ public class DALAnalyzer extends LanguageAnalyzer {
       boolean boundaryBefore = !(i - 1 >= 0) || utterance.charAt(i - 1) == ' ';
       boolean boundaryAfter = !(i + 1 < utterance.length()) || utterance.charAt(i + 1) == ' ';
       boolean separate = false;
-      if (c == '.') // Break off period if already space around it (to preserve numbers like 3.5)
+      if (c == '.') // Break off period if already space around it (to preserve
+                    // numbers like 3.5)
         separate = boundaryBefore || boundaryAfter;
       else if (c == '=') // separate all >, =, < except >=, <=
-        separate = !(i - 1 >= 0) || 
-        ((utterance.charAt(i - 1) != '>' && utterance.charAt(i - 1) != '<'));
+        separate = !(i - 1 >= 0) || ((utterance.charAt(i - 1) != '>' && utterance.charAt(i - 1) != '<'));
       else if (c == '>' || c == '<')
-        separate = !(i + 1 < utterance.length()) ||
-        ((utterance.charAt(i + 1) != '=' && utterance.charAt(i + 1) != '='));
+        separate = !(i + 1 < utterance.length())
+            || ((utterance.charAt(i + 1) != '=' && utterance.charAt(i + 1) != '='));
       else
         separate = (",?'\"[];{}+-".indexOf(c) != -1);
 
-      if (separate) buf.append(' ');
+      if (separate)
+        buf.append(' ');
       // Convert quotes
       if (c == '"')
         buf.append(boundaryBefore ? "``" : "''");
       else if (c == '\'')
         buf.append(boundaryBefore ? "`" : "'");
       else if (c == '>' || c == '<') {
-        buf.append(' '); buf.append(c);
+        buf.append(' ');
+        buf.append(c);
       } else if (c == '=') {
-        buf.append(c); buf.append(' '); 
+        buf.append(c);
+        buf.append(' ');
       } else
         buf.append(c);
-      if (separate) buf.append(' ');
+      if (separate)
+        buf.append(' ');
     }
     utterance = buf.toString().trim();
     if (!utterance.equals("")) {
@@ -80,7 +86,7 @@ public class DALAnalyzer extends LanguageAnalyzer {
         String lemma = token;
         if (token.endsWith("s") && token.length() > 1)
           lemma = token.substring(0, token.length() - 1);
-        
+
         languageInfo.tokens.add(LanguageAnalyzer.opts.lowerCaseTokens ? token.toLowerCase() : token);
         languageInfo.lemmaTokens.add(LanguageAnalyzer.opts.lowerCaseTokens ? lemma.toLowerCase() : lemma);
 
@@ -92,7 +98,7 @@ public class DALAnalyzer extends LanguageAnalyzer {
           languageInfo.nerValues.add(x + "");
           continue;
         }
-        
+
         try {
           Double.parseDouble(token);
           languageInfo.posTags.add("CD");

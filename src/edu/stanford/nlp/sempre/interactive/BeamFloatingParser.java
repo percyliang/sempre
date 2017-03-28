@@ -1,5 +1,16 @@
 package edu.stanford.nlp.sempre.interactive;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import com.beust.jcommander.internal.Lists;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
@@ -16,45 +27,46 @@ import edu.stanford.nlp.sempre.ParserState;
 import edu.stanford.nlp.sempre.Rule;
 import edu.stanford.nlp.sempre.SemanticFn;
 import edu.stanford.nlp.sempre.Trie;
-import edu.stanford.nlp.sempre.ChartParserState.ChartFillingData;
-import edu.stanford.nlp.sempre.Derivation.Builder;
-import edu.stanford.nlp.sempre.Parser.Spec;
-import edu.stanford.nlp.sempre.SemanticFn.CallInfo;
-import fig.basic.*;
+import fig.basic.IOUtils;
+import fig.basic.IntRef;
+import fig.basic.LogInfo;
+import fig.basic.Option;
+import fig.basic.SetUtils;
+import fig.basic.StopWatchSet;
 import fig.exec.Execution;
-
-import java.util.*;
-import java.util.stream.Collectors;
-
-import org.testng.collections.Sets;
 
 /**
  * A simple bottom-up chart-based parser that keeps the |BeamFloatingSize| top
- * derivations for each chart cell (cat, start, end).  Also supports fast
+ * derivations for each chart cell (cat, start, end). Also supports fast
  * indexing of lexicalized rules using a trie.
  *
- * Note that this code does not rely on the Grammar being binarized,
- * which makes it more complex.
- *  
+ * Note that this code does not rely on the Grammar being binarized, which makes
+ * it more complex.
+ * 
  * @author Percy Liang, sidaw
  */
 public class BeamFloatingParser extends Parser {
   public static class Options {
-    @Option public int maxNewTreesPerSpan = Integer.MAX_VALUE;
-    @Option public FloatStrategy floatStrategy = FloatStrategy.Never;
+    @Option
+    public int maxNewTreesPerSpan = Integer.MAX_VALUE;
+    @Option
+    public FloatStrategy floatStrategy = FloatStrategy.Never;
     @Option(gloss = "track these categories")
     public List<String> trackedCats;
   }
-  public enum FloatStrategy {Always, Never, NoParse};
+
+  public enum FloatStrategy {
+    Always, Never, NoParse
+  };
+
   public static Options opts = new Options();
 
-  Trie trie;  // For non-cat-unary rules
+  Trie trie; // For non-cat-unary rules
 
   public BeamFloatingParser(Spec spec) {
     super(spec);
     if (opts.trackedCats != null) {
-      opts.trackedCats = opts.trackedCats.stream()
-          .map(s -> "$" + s).collect(Collectors.toList());
+      opts.trackedCats = opts.trackedCats.stream().map(s -> "$" + s).collect(Collectors.toList());
       LogInfo.logs("Mapped trackedCats to: %s", opts.trackedCats);
     }
     // Index the non-cat-unary rules
@@ -67,6 +79,7 @@ public class BeamFloatingParser extends Parser {
       this.chartFillOut = IOUtils.openOutAppendEasy(Execution.getFile("chartfill"));
   }
 
+  @Override
   public synchronized void addRule(Rule rule) {
     if (!rule.isCatUnary()) {
       if (rule.isAnchored())
@@ -77,51 +90,60 @@ public class BeamFloatingParser extends Parser {
     }
   }
 
+  @Override
   public ParserState newParserState(Params params, Example ex, boolean computeExpectedCounts) {
     BeamFloatingParserState coarseState = null;
     if (Parser.opts.coarsePrune) {
       LogInfo.begin_track("Parser.coarsePrune");
-      coarseState = new BeamFloatingParserState(this, params, ex, computeExpectedCounts, BeamFloatingParserState.Mode.bool, null);
+      coarseState = new BeamFloatingParserState(this, params, ex, computeExpectedCounts,
+          BeamFloatingParserState.Mode.bool, null);
       coarseState.infer();
       coarseState.keepTopDownReachable();
       LogInfo.end_track();
     }
-    return new BeamFloatingParserState(this, params, ex, computeExpectedCounts, BeamFloatingParserState.Mode.full, coarseState);
+    return new BeamFloatingParserState(this, params, ex, computeExpectedCounts, BeamFloatingParserState.Mode.full,
+        coarseState);
   }
 }
 
 /**
- * Stores BeamFloatingParser information about parsing a particular example. The actual
- * parsing code lives here.
+ * Stores BeamFloatingParser information about parsing a particular example. The
+ * actual parsing code lives here.
  *
  * @author Percy Liang
  * @author Roy Frostig
  */
 class BeamFloatingParserState extends ChartParserState {
   public final Mode mode;
+
   // Modes:
-  // 1) Bool: just check if cells (cat, start, end) are reachable (to prune chart)
+  // 1) Bool: just check if cells (cat, start, end) are reachable (to prune
+  // chart)
   // 2) Full: compute everything
-  public enum Mode { bool, full }
+  public enum Mode {
+    bool, full
+  }
 
   private final BeamFloatingParser parser;
-  private final BeamFloatingParserState coarseState;  // Used to prune
-  
+  private final BeamFloatingParserState coarseState; // Used to prune
+
   public List<Derivation> chartList;
 
   public BeamFloatingParserState(BeamFloatingParser parser, Params params, Example ex, boolean computeExpectedCounts,
-                         Mode mode, BeamFloatingParserState coarseState) {
+      Mode mode, BeamFloatingParserState coarseState) {
     super(parser, params, ex, computeExpectedCounts);
     this.parser = parser;
     this.mode = mode;
     this.coarseState = coarseState;
   }
 
+  @Override
   public void infer() {
     if (numTokens == 0)
       return;
 
-    if (parser.verbose(2)) LogInfo.begin_track("ParserState.infer");
+    if (parser.verbose(2))
+      LogInfo.begin_track("ParserState.infer");
 
     // Base case
     for (Derivation deriv : gatherTokenAndPhraseDerivations()) {
@@ -134,21 +156,22 @@ class BeamFloatingParserState extends ChartParserState {
       for (int i = 0; i + len <= numTokens; i++)
         build(i, i + len);
 
-    if (parser.verbose(2)) LogInfo.end_track();
+    if (parser.verbose(2))
+      LogInfo.end_track();
 
     // Visualize
     if (parser.chartFillOut != null && Parser.opts.visualizeChartFilling && this.mode != Mode.bool) {
-      parser.chartFillOut.println(Json.writeValueAsStringHard(new ChartFillingData(ex.id, chartFillingList,
-              ex.utterance, ex.numTokens())));
+      parser.chartFillOut.println(
+          Json.writeValueAsStringHard(new ChartFillingData(ex.id, chartFillingList, ex.utterance, ex.numTokens())));
       parser.chartFillOut.flush();
     }
 
     setPredDerivations();
-    
+
     for (Derivation deriv : predDerivations) {
       deriv.getAnchoredTokens();
     }
-    
+
     this.chartList = this.collectChart();
 
     boolean parseFloat = false;
@@ -158,16 +181,20 @@ class BeamFloatingParserState extends ChartParserState {
       parseFloat = predDerivations.size() == 0;
     else
       parseFloat = false;
-    
+
     /* If Beam Parser failed to find derivations, try a floating parser */
     if (parseFloat) {
-      /* For every base span of the chart, add the derivations from nothing rules */
+      /*
+       * For every base span of the chart, add the derivations from nothing
+       * rules
+       */
       List<Rule> nothingRules = new ArrayList<Rule>();
       for (Rule rule : parser.grammar.getRules())
-        if (rule.isFloating() && rule.rhs.size() == 1 && rule.isRhsTerminals()) nothingRules.add(rule);
+        if (rule.isFloating() && rule.rhs.size() == 1 && rule.isRhsTerminals())
+          nothingRules.add(rule);
       for (int i = 0; i < numTokens; i++)
         for (Rule rule : nothingRules)
-          applyRule(i, i + 1, rule, chart[i][i+1].get("$TOKEN"));
+          applyRule(i, i + 1, rule, chart[i][i + 1].get("$TOKEN"));
 
       /* Traverse the chart bottom up */
       for (int len = 1; len <= numTokens; len++) {
@@ -178,7 +205,8 @@ class BeamFloatingParserState extends ChartParserState {
 
       /* Add unique derivations to predDerivations */
       List<Derivation> rootDerivs = chart[0][numTokens].get("$FROOT");
-      if (rootDerivs == null) rootDerivs = new ArrayList<Derivation>(Derivation.emptyList);
+      if (rootDerivs == null)
+        rootDerivs = new ArrayList<Derivation>(Derivation.emptyList);
 
       List<Derivation> actionDerivs = new ArrayList<Derivation>(Derivation.emptyList);
       if (actionDerivs != null) {
@@ -202,14 +230,15 @@ class BeamFloatingParserState extends ChartParserState {
       }
     }
   }
-  
+
   private List<Derivation> collectChart() {
     List<Derivation> chartList = Lists.newArrayList();
     for (int len = 1; len <= numTokens; ++len) {
       for (int i = 0; i + len <= numTokens; ++i) {
         for (String cat : chart[i][i + len].keySet()) {
-          if (Rule.specialCats.contains(cat)) continue;
-            chartList.addAll(chart[i][i + len].get(cat));
+          if (Rule.specialCats.contains(cat))
+            continue;
+          chartList.addAll(chart[i][i + len].get(cat));
         }
       }
     }
@@ -233,7 +262,8 @@ class BeamFloatingParserState extends ChartParserState {
 
   // Return number of new derivations added
   private int applyRule(int start, int end, Rule rule, List<Derivation> children) {
-    if (Parser.opts.verbose >= 5) LogInfo.logs("applyRule %s %s %s %s", start, end, rule, children);
+    if (Parser.opts.verbose >= 5)
+      LogInfo.logs("applyRule %s %s %s %s", start, end, rule, children);
     try {
       if (mode == Mode.full) {
         StopWatchSet.begin(rule.getSemRepn());
@@ -247,11 +277,8 @@ class BeamFloatingParserState extends ChartParserState {
         }
         return results.estimatedSize();
       } else if (mode == Mode.bool) {
-        Derivation deriv = new Derivation.Builder()
-            .cat(rule.lhs).start(start).end(end).rule(rule)
-            .children(ImmutableList.copyOf(children))
-            .formula(Formula.nullFormula)
-            .createDerivation();
+        Derivation deriv = new Derivation.Builder().cat(rule.lhs).start(start).end(end).rule(rule)
+            .children(ImmutableList.copyOf(children)).formula(Formula.nullFormula).createDerivation();
         addToChart(deriv);
         return 1;
       } else {
@@ -267,13 +294,15 @@ class BeamFloatingParserState extends ChartParserState {
   // Don't prune the same cell more than once.
   protected void pruneCell(Set<String> cellsPruned, String cat, int start, int end, List<Derivation> derivations) {
     String cell = cellString(cat, start, end);
-    if (cellsPruned.contains(cell)) return;
+    if (cellsPruned.contains(cell))
+      return;
     cellsPruned.add(cell);
     pruneCell(cell, derivations);
   }
 
   // Apply all unary rules with RHS category.
-  // Before applying each unary rule (rule.lhs -> rhsCat), we can prune the cell of rhsCat
+  // Before applying each unary rule (rule.lhs -> rhsCat), we can prune the cell
+  // of rhsCat
   // because we assume acyclicity, so rhsCat's cell will never grow.
   private void applyCatUnaryRules(int start, int end, Set<String> cellsPruned) {
     for (Rule rule : parser.getCatUnaryRules()) {
@@ -283,9 +312,13 @@ class BeamFloatingParserState extends ChartParserState {
       List<Derivation> derivations = chart[start][end].get(rhsCat);
       if (Parser.opts.verbose >= 5)
         LogInfo.logs("applyCatUnaryRules %s %s %s %s", start, end, rule, chart[start][end]);
-      if (derivations == null) continue;
+      if (derivations == null)
+        continue;
 
-      pruneCell(cellsPruned, rhsCat, start, end, derivations);  // Prune before applying rules to eliminate cruft!
+      pruneCell(cellsPruned, rhsCat, start, end, derivations); // Prune before
+                                                               // applying rules
+                                                               // to eliminate
+                                                               // cruft!
 
       for (Derivation deriv : derivations) {
         applyRule(start, end, rule, Collections.singletonList(deriv));
@@ -300,19 +333,16 @@ class BeamFloatingParserState extends ChartParserState {
   // node: contains a link to the RHS that could apply.
   // children: the derivations that't we're building up.
   // numNew: Keep track of number of new derivations created
-  private void applyNonCatUnaryRules(int start,
-      int end,
-      int i,
-      Trie node,
-      ArrayList<Derivation> children,
+  private void applyNonCatUnaryRules(int start, int end, int i, Trie node, ArrayList<Derivation> children,
       IntRef numNew) {
-    if (node == null) return;
-    if (!coarseAllows(node, start, end)) return;
+    if (node == null)
+      return;
+    if (!coarseAllows(node, start, end))
+      return;
 
     if (Parser.opts.verbose >= 5) {
-      LogInfo.logs(
-          "applyNonCatUnaryRules(start=%d, end=%d, i=%d, children=[%s], %s rules)",
-          start, end, i, Joiner.on(", ").join(children), node.rules.size());
+      LogInfo.logs("applyNonCatUnaryRules(start=%d, end=%d, i=%d, children=[%s], %s rules)", start, end, i,
+          Joiner.on(", ").join(children), node.rules.size());
     }
 
     // Base case: our fencepost has walked to the end of the span, so
@@ -329,11 +359,7 @@ class BeamFloatingParserState extends ChartParserState {
     }
 
     // Advance terminal token
-    applyNonCatUnaryRules(
-        start, end, i + 1,
-        node.next(ex.token(i)),
-        children,
-        numNew);
+    applyNonCatUnaryRules(start, end, i + 1, node.next(ex.token(i)), children, numNew);
 
     // Advance non-terminal category
     for (int j = i + 1; j <= end; j++) {
@@ -343,8 +369,10 @@ class BeamFloatingParserState extends ChartParserState {
           children.add(arg);
           applyNonCatUnaryRules(start, end, j, nextNode, children, numNew);
           children.remove(children.size() - 1);
-          if (mode != Mode.full) break;  // Only need one hypothesis
-          if (numNew.value >= BeamFloatingParser.opts.maxNewTreesPerSpan) return;
+          if (mode != Mode.full)
+            break; // Only need one hypothesis
+          if (numNew.value >= BeamFloatingParser.opts.maxNewTreesPerSpan)
+            return;
         }
       }
     }
@@ -353,14 +381,16 @@ class BeamFloatingParserState extends ChartParserState {
   /* For each span, apply applicable floating rules */
   protected void buildFloating(int start, int end) {
     for (Rule rule : parser.grammar.getRules()) {
-      if (!rule.isFloating() || !coarseAllows(rule.lhs, start, end)) continue;
+      if (!rule.isFloating() || !coarseAllows(rule.lhs, start, end))
+        continue;
 
       if (rule.rhs.size() == 1) {
         /* Apply cat unary rules simply */
         String rhsCat = rule.rhs.get(0);
         List<Derivation> derivs = chart[start][end].get(rhsCat);
 
-        if (derivs == null) continue;
+        if (derivs == null)
+          continue;
 
         for (Derivation deriv : derivs)
           applyRule(start, end, rule, Collections.singletonList(deriv));
@@ -386,11 +416,13 @@ class BeamFloatingParserState extends ChartParserState {
       pruneCell(cellsPruned, entry.getKey(), start, end, entry.getValue());
   }
 
-  protected int applyFloatingRule(Rule rule, int start, int end, Map<String, List<Derivation>> first, Map<String, List<Derivation>> second) {
+  protected int applyFloatingRule(Rule rule, int start, int end, Map<String, List<Derivation>> first,
+      Map<String, List<Derivation>> second) {
     List<Derivation> derivs1 = first.get(rule.rhs.get(0));
     List<Derivation> derivs2 = second.get(rule.rhs.get(1));
 
-    if (derivs1 == null || derivs2 == null) return 0;
+    if (derivs1 == null || derivs2 == null)
+      return 0;
 
     int derivsCreated = 0;
 
@@ -406,8 +438,9 @@ class BeamFloatingParserState extends ChartParserState {
     return derivsCreated;
   }
 
-  protected void copyDerivs(Map<String,List<Derivation>> source, Map<String,List<Derivation>> dest) {
-    if (source == null || dest == null) return;
+  protected void copyDerivs(Map<String, List<Derivation>> source, Map<String, List<Derivation>> dest) {
+    if (source == null || dest == null)
+      return;
 
     for (String cat : source.keySet()) {
       List<Derivation> derivations = dest.get(cat);
@@ -429,7 +462,8 @@ class BeamFloatingParserState extends ChartParserState {
   }
 
   protected void addDerivs(List<Derivation> source, List<Derivation> dest) {
-    if (dest == null || source == null) return;
+    if (dest == null || source == null)
+      return;
     dest.addAll(source);
   }
 
@@ -438,12 +472,14 @@ class BeamFloatingParserState extends ChartParserState {
   // Remove any (cat, start, end) which isn't reachable from the
   // (Rule.rootCat, 0, numTokens)
   public void keepTopDownReachable() {
-    if (numTokens == 0) return;
+    if (numTokens == 0)
+      return;
 
     Set<String> reachable = new HashSet<>();
     collectReachable(reachable, Rule.rootCat, 0, numTokens);
 
-    // Remove all derivations associated with (cat, start, end) that aren't reachable.
+    // Remove all derivations associated with (cat, start, end) that aren't
+    // reachable.
     for (int start = 0; start < numTokens; start++) {
       for (int end = start + 1; end <= numTokens; end++) {
         List<String> toRemoveCats = new LinkedList<>();
@@ -466,7 +502,8 @@ class BeamFloatingParserState extends ChartParserState {
 
   private void collectReachable(Set<String> reachable, String cat, int start, int end) {
     String key = catStartEndKey(cat, start, end);
-    if (reachable.contains(key)) return;
+    if (reachable.contains(key))
+      return;
 
     if (!chart[start][end].containsKey(cat)) {
       // This should only happen for the root when there are no parses.
@@ -487,13 +524,14 @@ class BeamFloatingParserState extends ChartParserState {
 
   // For pruning with the coarse state
   protected boolean coarseAllows(Trie node, int start, int end) {
-    if (coarseState == null) return true;
-    return SetUtils.intersects(
-            node.cats,
-            coarseState.chart[start][end].keySet());
+    if (coarseState == null)
+      return true;
+    return SetUtils.intersects(node.cats, coarseState.chart[start][end].keySet());
   }
+
   protected boolean coarseAllows(String cat, int start, int end) {
-    if (coarseState == null) return true;
+    if (coarseState == null)
+      return true;
     return coarseState.chart[start][end].containsKey(cat);
   }
 }

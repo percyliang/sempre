@@ -101,11 +101,11 @@ addMode('test', 'Run unit tests for interactive stuff', lambda { |e|
 })
 
 addMode('community-dep', 'dependencies for the community server', lambda { |e| l(
-l('python ./community-server/install-deps.py'),
+l('python ./shrdlurn/community-server/install-deps.py'),
 nil)})
 
 addMode('community', 'start the community server', lambda { |e| l(
-l('python community-server/server.py -- port 8403'),
+l('python ./shrdlurn/community-server/server.py -- port 8403'),
 nil)})
 
 addMode('simulator', 'run the simulator', lambda { |e| l(

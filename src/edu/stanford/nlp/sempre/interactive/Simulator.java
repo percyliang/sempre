@@ -17,14 +17,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
@@ -36,10 +32,10 @@ import fig.basic.LogInfo;
 import fig.basic.Option;
 import fig.basic.OptionsParser;
 import fig.exec.Execution;
-import fig.basic.Evaluation;
 
 /**
  * utilites for simulating a session through the server
+ * 
  * @author sidaw
  */
 
@@ -47,7 +43,7 @@ class GZIPFiles {
   /**
    * Get a lazily loaded stream of lines from a gzipped file, similar to
    * {@link Files#lines(java.nio.file.Path)}.
-   * 
+   *
    * @param path
    *          The path to the gzipped file.
    * @return stream with lines.
@@ -85,16 +81,22 @@ class GZIPFiles {
 
 public class Simulator implements Runnable {
 
-  @Option public static String serverURL = "http://localhost:8410";
-  @Option public static int numThreads = 1;
-  @Option public static int verbose = 1;
-  @Option public static boolean useThreads = false;
-  @Option public static String reqParams = "grammar=0&cite=0&learn=0";
-  @Option public static List<String> logFiles = Lists.newArrayList("./shrdlurn/commandInputs/sidaw.json.log");
+  @Option
+  public static String serverURL = "http://localhost:8410";
+  @Option
+  public static int numThreads = 1;
+  @Option
+  public static int verbose = 1;
+  @Option
+  public static boolean useThreads = false;
+  @Option
+  public static String reqParams = "grammar=0&cite=0&learn=0";
+  @Option
+  public static List<String> logFiles = Lists.newArrayList("./shrdlurn/commandInputs/sidaw.json.log");
 
   public void readQueries() {
-    //T.printAllRules();
-    //A.assertAll();
+    // T.printAllRules();
+    // A.assertAll();
     for (String fileName : logFiles) {
       long startTime = System.nanoTime();
       Stream<String> stream;
@@ -107,9 +109,10 @@ public class Simulator implements Runnable {
         List<String> lines = stream.collect(Collectors.toList());
         LogInfo.logs("Reading %s (%d lines)", fileName, lines.size());
         int numLinesRead = 0;
-        //        ExecutorService executor = new ThreadPoolExecutor(numThreads, numThreads,
-        //            15000, TimeUnit.MILLISECONDS,
-        //            new LinkedBlockingQueue<Runnable>());
+        // ExecutorService executor = new ThreadPoolExecutor(numThreads,
+        // numThreads,
+        // 15000, TimeUnit.MILLISECONDS,
+        // new LinkedBlockingQueue<Runnable>());
         ExecutorService executor = Executors.newSingleThreadExecutor();
 
         for (String l : lines) {
@@ -120,13 +123,13 @@ public class Simulator implements Runnable {
           } else {
             Future<?> future = executor.submit(() -> executeLine(l));
             try {
-              future.get(10, TimeUnit.MINUTES); 
+              future.get(10, TimeUnit.MINUTES);
             } catch (Throwable t) {
               t.printStackTrace();
             } finally {
               future.cancel(true); // may or may not desire this
               long endTime = System.nanoTime();
-              LogInfo.logs("Took %d ns or %.4f s", (endTime - startTime), (endTime - startTime)/1.0e9);
+              LogInfo.logs("Took %d ns or %.4f s", (endTime - startTime), (endTime - startTime) / 1.0e9);
             }
           }
         }
@@ -148,7 +151,7 @@ public class Simulator implements Runnable {
     }
     Object command = json.get("q");
     if (command == null) // to be backwards compatible
-      command = json.get("log"); 
+      command = json.get("log");
     Object sessionId = json.get("sessionId");
     if (sessionId == null) // to be backwards compatible
       sessionId = json.get("id");
@@ -168,7 +171,7 @@ public class Simulator implements Runnable {
     String url = String.format("%s/sempre?", serverURL);
     // LogInfo.log(params);
     // LogInfo.log(query);
-    String response  = executePost(url + params, "");
+    String response = executePost(url + params, "");
     // LogInfo.log(response);
     return response;
   }
@@ -177,30 +180,28 @@ public class Simulator implements Runnable {
     HttpURLConnection connection = null;
 
     try {
-      //Create connection
+      // Create connection
       URL url = new URL(targetURL);
       connection = (HttpURLConnection) url.openConnection();
       connection.setRequestMethod("POST");
-      connection.setRequestProperty("Content-Type", 
-          "application/x-www-form-urlencoded");
+      connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 
-      connection.setRequestProperty("Content-Length", 
-          Integer.toString(urlParameters.getBytes().length));
-      connection.setRequestProperty("Content-Language", "en-US");  
+      connection.setRequestProperty("Content-Length", Integer.toString(urlParameters.getBytes().length));
+      connection.setRequestProperty("Content-Language", "en-US");
 
       connection.setUseCaches(false);
       connection.setDoOutput(true);
 
-      //Send request
-      DataOutputStream wr = new DataOutputStream (
-          connection.getOutputStream());
+      // Send request
+      DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
       wr.writeBytes(urlParameters);
       wr.close();
 
-      //Get Response  
+      // Get Response
       InputStream is = connection.getInputStream();
       BufferedReader rd = new BufferedReader(new InputStreamReader(is));
-      StringBuilder response = new StringBuilder(); // or StringBuffer if Java version 5+
+      StringBuilder response = new StringBuilder(); // or StringBuffer if Java
+                                                    // version 5+
       String line;
       while ((line = rd.readLine()) != null) {
         response.append(line);
