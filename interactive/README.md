@@ -4,7 +4,7 @@
 
 1) Start the sempre server
 
-    ./interactive/run @mode=voxelurn -Server.port 8410
+    ./interactive/run @mode=voxelurn -server
 
 1) Start the client server
 
