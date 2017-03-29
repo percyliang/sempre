@@ -8,7 +8,7 @@
 $: << 'fig/lib'
 require 'execrunner'
 $path = 'interactive'
-
+$output = 'interactive/output'
 $modes = []
 def addMode(name, description, func)
   $modes << [name, description, func]
@@ -152,8 +152,8 @@ addMode('voxelurn', 'interactive semantic parsing in a VoxelWorld', lambda { |e|
   header('core,interactive'),
   'edu.stanford.nlp.sempre.Main',
   #figOpts,
+  o('server'),
   o('masterType', 'edu.stanford.nlp.sempre.interactive.InteractiveMaster'),
-
   o('Executor', 'interactive.DALExecutor'),
   o('LanguageAnalyzer', 'interactive.DALAnalyzer'),
   o('DALExecutor.convertNumberValues', true),
@@ -171,10 +171,11 @@ addMode('voxelurn', 'interactive semantic parsing in a VoxelWorld', lambda { |e|
   o('Parser.pruneErrorValues', true),
   o('Parser', 'interactive.BeamFloatingParser'),
   o('Parser.callSetEvaluation', false),
-  o('ParserState.customExpectedCounts', 'None'),
+  o('Parser.coarsePrune', 'false'),
 
-  o('Parser.beamSize', 25),
-  o('BeamFloatingParser.maxNewTreesPerSpan', 200),
+  o('Parser.beamSize', 50),
+  o('BeamFloatingParser.maxNewTreesPerSpan', 10000),
+  o('ParserState.customExpectedCounts', 'None'),
 
   selo(0, 'BeamFloatingParser.floatStrategy', 'Never', 'NoParse', 'Always'),
   o('BeamFloatingParser.trackedCats', 'Number', 'Numbers', 'Color',  'Direction', 'Set', 'Sets', 'Action', 'Actions'),

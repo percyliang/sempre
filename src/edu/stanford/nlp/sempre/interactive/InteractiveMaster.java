@@ -49,6 +49,9 @@ public class InteractiveMaster extends Master {
     public int maxSequence = 20;
     @Option(gloss = "path to the citations")
     public int maxChars = 200;
+    
+    @Option(gloss = "allow regular commands specified in Master")
+    public boolean allowRegularCommands = false;
   }
 
   public static Options opts = new Options();
@@ -66,7 +69,7 @@ public class InteractiveMaster extends Master {
     LogInfo.log("  (:q |utterance|): provide a definition for the original utterance");
     LogInfo.log("  (:accept |formula1| |formula2|): accept any derivation with those corresponding formula");
     LogInfo.log("  (:reject |formula1| |formula2|): reject any derivations with those corresponding formula");
-    LogInfo.log("Main commands");
+    LogInfo.log("Main commands:");
     super.printHelp();
   }
 
@@ -85,6 +88,8 @@ public class InteractiveMaster extends Master {
     Response response = new Response();
     if (line.startsWith("(:"))
       handleCommand(session, line, response);
+    else if (line.startsWith("(") && opts.allowRegularCommands)
+      super.processQuery(session, line);
     else
       handleCommand(session, String.format("(:q \"%s\")", line), response);
     LogInfo.end_track();

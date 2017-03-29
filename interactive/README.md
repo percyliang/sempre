@@ -41,4 +41,8 @@ There are many units for interactive learning
 
 To specify a specific test class and verbosity
 
-    ./interactive/run @mode=test @class=DACExecutorTest -verbose 5
+    ./interactive/run @mode=test @class=DALExecutorTest -verbose 5
+
+Test in interactive mode
+
+    ./interactive/run @mode=voxelurn -interactive
