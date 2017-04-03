@@ -711,7 +711,7 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
     l(
       o('combineFromFloatingParser'),
       sel(:unseen, unbalancedTrainDevSplit, l()),
-      o('maxTrainIters', 3),
+      o('Learner.maxTrainIters', 3),
       o('showValues', false), o('showFirstValue'),
     nil),
     l(

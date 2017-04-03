@@ -342,7 +342,7 @@ final class ReinforcementParserState extends AbstractReinforcementParserState {
           sampledDerivation.incrementLocalFeatureVector(-pdsAndProbability.getFirst().probSum, counts);
         if (parser.verbose(3))
           SempreUtils.logMap(counts, "agenda item gradient");
-        ReinforcementUtils.addToDoubleMap(stateSequenceExpectedCounts, counts, parser.searchPrefix); // upate the gradient incrementally
+        ReinforcementUtils.addToDoubleMap(stateSequenceExpectedCounts, counts, parser.searchPrefix); // update the gradient incrementally
       }
       // only after update of params we can change the chart and the agenda
       if (addToBoundedChart(sampledDerivation)) {
