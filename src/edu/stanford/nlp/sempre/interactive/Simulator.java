@@ -90,6 +90,8 @@ public class Simulator implements Runnable {
   @Option
   public static boolean useThreads = false;
   @Option
+  public static long maxQueries = Long.MAX_VALUE;
+  @Option
   public static String reqParams = "grammar=0&cite=0&learn=0";
   @Option
   public static List<String> logFiles = null;
@@ -117,6 +119,8 @@ public class Simulator implements Runnable {
 
         for (String l : lines) {
           numLinesRead++;
+          if (numLinesRead > maxQueries)
+            break;
           LogInfo.logs("Line %d", numLinesRead);
           if (!useThreads) {
             executeLine(l);

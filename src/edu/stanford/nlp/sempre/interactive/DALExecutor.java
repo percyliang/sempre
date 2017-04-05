@@ -13,27 +13,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.ObjectArrays;
 import com.google.common.collect.Sets;
 
-import edu.stanford.nlp.sempre.ActionFormula;
-import edu.stanford.nlp.sempre.AggregateFormula;
-import edu.stanford.nlp.sempre.ArithmeticFormula;
-import edu.stanford.nlp.sempre.BooleanValue;
-import edu.stanford.nlp.sempre.CallFormula;
-import edu.stanford.nlp.sempre.ContextValue;
-import edu.stanford.nlp.sempre.ErrorValue;
-import edu.stanford.nlp.sempre.Executor;
-import edu.stanford.nlp.sempre.Formula;
-import edu.stanford.nlp.sempre.Formulas;
-import edu.stanford.nlp.sempre.JoinFormula;
-import edu.stanford.nlp.sempre.ListValue;
-import edu.stanford.nlp.sempre.MergeFormula;
-import edu.stanford.nlp.sempre.NameValue;
-import edu.stanford.nlp.sempre.NotFormula;
-import edu.stanford.nlp.sempre.NumberValue;
-import edu.stanford.nlp.sempre.ReverseFormula;
-import edu.stanford.nlp.sempre.StringValue;
-import edu.stanford.nlp.sempre.SuperlativeFormula;
-import edu.stanford.nlp.sempre.Value;
-import edu.stanford.nlp.sempre.ValueFormula;
+import edu.stanford.nlp.sempre.*;
 import fig.basic.LogInfo;
 import fig.basic.Option;
 

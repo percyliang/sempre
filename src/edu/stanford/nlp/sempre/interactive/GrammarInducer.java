@@ -111,7 +111,7 @@ public class GrammarInducer {
         LogInfo.logs("Simple Packing", chartList.size());
         LogInfo.logs("chartList.size = %d", chartList.size());
         LogInfo.log("Potential packings: ");
-        this.matches.forEach(d -> LogInfo.logs("%f: %s\t", d.getScore(), d.formula));
+        this.matches.forEach(d -> LogInfo.logs("%f: %s\t %s", d.getScore(), d.formula, d.allAnchored()));
         LogInfo.logs("packing: %s", packing);
         LogInfo.logs("formulaToCat: %s", formulaToCat);
       }

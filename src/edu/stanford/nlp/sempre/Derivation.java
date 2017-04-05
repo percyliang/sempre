@@ -541,7 +541,7 @@ public class Derivation implements SemanticFn.Callable, HasScore {
   }
 
   public boolean allAnchored() {
-    if (rule.isFloating() || rule.isInduced() || !this.allAnchored) {
+    if (rule.isInduced() || !this.allAnchored) {
       this.allAnchored = false;
       return false;
     } else {

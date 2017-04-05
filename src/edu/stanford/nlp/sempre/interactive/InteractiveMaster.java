@@ -276,7 +276,12 @@ public class InteractiveMaster extends Master {
       throw BadInteractionException.headIsEmpty(head);
     if (isNonsense(exHead))
       throw BadInteractionException.nonSenseDefinition(head);
+    
+    boolean coarsePrune = Parser.opts.coarsePrune;
+    Parser.opts.coarsePrune = false;
     BeamFloatingParserState state = (BeamFloatingParserState) parser.parse(params, exHead, true);
+    Parser.opts.coarsePrune = coarsePrune;
+    
     if (GrammarInducer.getParseStatus(exHead) == GrammarInducer.ParseStatus.Core)
       throw BadInteractionException.headIsCore(head);
 

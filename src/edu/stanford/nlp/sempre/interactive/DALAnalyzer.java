@@ -25,7 +25,6 @@ public class DALAnalyzer extends LanguageAnalyzer {
 
   private static final String[] numbers = { "zero", "one", "two", "three", "four", "five", "six", "seven", "eight",
       "nine", "ten" };
-  private static final String[] determiners = { "the", "a", "an", "that" };
 
   @Override
   public LanguageInfo analyze(String utterance) {
