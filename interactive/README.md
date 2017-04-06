@@ -9,13 +9,13 @@
 
 2) Query the server with existing data
 
-    ./interactive/run @mode=simulator @server=local @sandbox=none @task=freebigdef
+    ./interactive/run @mode=simulator @server=local @sandbox=none @task=freebig
 
-2) Run analysis script to get results
+3) Run analysis script to get results
 
     ./interactive/run @mode=analyze
 
-0) (Optional) clean up
+4) (Optional) clean up
 
     ./interactive/run @mode=backup # save previous data logs
     ./interactive/run @mode=trash # deletes previous data logs
@@ -26,13 +26,13 @@
 
     ./interactive/run @mode=voxelurn -server
 
-1) Start the client server
+2) Start the client server
 
     ./interactive/run @mode=community
 
-2) (optionally) Blast the server with previous logs to get the server into state
+2) (Optionally) Query the server with existing data and use previous definitions
 
-    ./interactive/run @mode=simulator @server=local @sandbox=none @task=freebig
+    ./interactive/run @mode=simulator @server=local @sandbox=none @task=freebigdef
 
 
 ## Tests

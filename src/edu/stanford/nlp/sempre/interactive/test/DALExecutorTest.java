@@ -77,24 +77,9 @@ public class DALExecutorTest {
     runFormula(executor, "(: select *)", context, selectedSize(4));
     runFormula(executor, "(: select (or (color red) (color green)))", context, selectedSize(2));
     runFormula(executor, "(: select (or (row (number 1)) (row (number 2))))", context, selectedSize(3));
-    runFormula(executor, "(: select (col ((reverse row) (color red))))", context, null); // has
-                                                                                         // same
-                                                                                         // col
-                                                                                         // as
-                                                                                         // the
-                                                                                         // row
-                                                                                         // of
-                                                                                         // color
-                                                                                         // red
-    runFormula(executor, "(: select (color ((reverse color) (row 3))))", context, null); // color
-                                                                                         // of
-                                                                                         // the
-                                                                                         // color
-                                                                                         // of
-                                                                                         // cubes
-                                                                                         // in
-                                                                                         // row
-                                                                                         // 3
+    runFormula(executor, "(: select (col ((reverse row) (color red))))", context, null);
+    runFormula(executor, "(: select (color ((reverse color) (row 3))))", context, null);
+ 
     runFormula(executor, "(: select (color ((reverse color) (color ((reverse color) (color red))))))", context,
         x -> x.selected().iterator().next().get("color").equals("red"));
     runFormula(executor, "(: select (and (row 1) (not (color green))))", context, x -> x.selected().isEmpty());

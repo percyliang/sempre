@@ -23,13 +23,13 @@ public class Color {
   boolean isCode = false;
 
   public Color(String name) {
-    colorName = name;
+    colorName = name.toLowerCase();
     if (name.startsWith("0x") || name.startsWith("#"))
       isCode = true;
   }
 
   public static Color fromString(String color) {
-    return new Color(color);
+    return new Color(color.toLowerCase());
   }
 
   @Override

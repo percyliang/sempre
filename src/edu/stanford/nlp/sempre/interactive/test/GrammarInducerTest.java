@@ -25,6 +25,7 @@ import edu.stanford.nlp.sempre.Parser.Spec;
 import edu.stanford.nlp.sempre.ParserState;
 import edu.stanford.nlp.sempre.Rule;
 import edu.stanford.nlp.sempre.Session;
+import edu.stanford.nlp.sempre.SimpleLexicon;
 import edu.stanford.nlp.sempre.ValueEvaluator;
 import edu.stanford.nlp.sempre.interactive.BeamFloatingParser;
 import edu.stanford.nlp.sempre.interactive.DALExecutor;
@@ -57,6 +58,8 @@ public class GrammarInducerTest {
     Grammar.opts.inPaths = Lists.newArrayList("./interactive/voxelurn.grammar");
     Grammar.opts.useApplyFn = "interactive.ApplyFn";
     Grammar.opts.binarizeRules = false;
+    
+    SimpleLexicon.opts.inPaths = Lists.newArrayList("./interactive/csscolors.lexicon");
 
     FeatureExtractor.opts.featureComputers = Sets.newHashSet("interactive.DALFeatureComputer");
     FeatureExtractor.opts.featureDomains = Sets.newHashSet(":rule", ":stats", ":window");

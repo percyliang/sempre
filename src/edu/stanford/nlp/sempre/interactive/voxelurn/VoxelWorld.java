@@ -30,7 +30,7 @@ public class VoxelWorld extends World {
 
   public static VoxelWorld fromContext(ContextValue context) {
     if (context == null || context.graph == null) {
-      return fromJSON("[[3,3,1,\"Gray\",[\"S\"]],[4,4,1,\"Blue\",[]]]");
+      return fromJSON("[[3,3,1,\"gray\",[\"S\"]],[4,4,1,\"blue\",[]]]");
     }
     NaiveKnowledgeGraph graph = (NaiveKnowledgeGraph) context.graph;
     String wallString = ((StringValue) graph.triples.get(0).e1).value;
