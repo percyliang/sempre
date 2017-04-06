@@ -2,7 +2,7 @@ package edu.stanford.nlp.sempre;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -12,7 +12,7 @@ import java.util.Set;
  */
 public class Trie {
   public ArrayList<Rule> rules = new ArrayList<>();
-  Map<String, Trie> children = new LinkedHashMap<>();
+  Map<String, Trie> children = new HashMap<>();
   // Set of LHS categories of all rules in this subtree
   public Set<String> cats = new HashSet<>();
 
