@@ -1,5 +1,25 @@
 # README
 
+
+## Running an experiment
+
+1) Start the server
+
+    ./interactive/run @mode=voxelurn -server
+
+2) Query the server with existing data
+
+    ./interactive/run @mode=simulator @server=local @sandbox=none @task=freebigdef
+
+2) Run analysis script to get results
+
+    ./interactive/run @mode=analyze
+
+0) (Optional) clean up
+
+    ./interactive/run @mode=backup # save previous data logs
+    ./interactive/run @mode=trash # deletes previous data logs
+
 ## Running the server for voxelurn
 
 1) Start the sempre server
@@ -14,24 +34,6 @@
 
     ./interactive/run @mode=simulator @server=local @sandbox=none @task=freebig
 
-## Running an experiment
-
-1) Start the server
-
-    ./interactive/run @mode=voxelurn -Server.port 8410
-
-2) Blast the server with previous logs to get the server into state
-
-    ./interactive/run @mode=simulator @server=local @sandbox=none @task=freebig
-
-2) Run analysis script to get results
-
-    ./interactive/run @mode=analyze -execNumber 1
-
-0) (Optional) clean up
-
-    ./interactive/run @mode=backup # save previous data logs
-    ./interactive/run @mode=trash # deletes previous data logs
 
 ## Tests
 

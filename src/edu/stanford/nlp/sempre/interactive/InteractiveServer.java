@@ -72,7 +72,6 @@ public class InteractiveServer {
   private static Object queryLogLock = new Object();
   private static Object responseLogLock = new Object();
   private static AtomicLong queryCounter = new AtomicLong();
-  ExecutorService executor = Executors.newSingleThreadExecutor();
   Master master;
 
   class Handler implements HttpHandler {
@@ -210,6 +209,7 @@ public class InteractiveServer {
     Master.Response processQuery(Session session, String query) {
       String message = null;
       Master.Response response = master.new Response();
+      ExecutorService executor = Executors.newSingleThreadExecutor();
       Future<Master.Response> future = executor.submit(() -> master.processQuery(session, query));
       long startTime = System.nanoTime();
       try {
@@ -332,7 +332,8 @@ public class InteractiveServer {
     try {
       String hostname = fig.basic.SysInfoUtils.getHostName();
       HttpServer server = HttpServer.create(new InetSocketAddress(opts.port), 10);
-      ExecutorService pool = new ThreadPoolExecutor(opts.numThreads, opts.numThreads, 5000, TimeUnit.MILLISECONDS,
+      // generous timeout here
+      ExecutorService pool = new ThreadPoolExecutor(opts.numThreads, opts.numThreads, 120, TimeUnit.SECONDS,
           new LinkedBlockingQueue<Runnable>());
       // Executors.newFixedThreadPool(opts.numThreads);
       server.createContext("/", new Handler());
