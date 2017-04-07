@@ -39,16 +39,17 @@ After `npm install` and taking care of dependencies, run `npm start local` to st
 
     ./interactive/run @mode=voxelurn -server -interactive
 
-
 2. Feed the server all the query logs
 
     ./interactive/run @mode=simulator @server=local @sandbox=none @task=freebig -maxQueries 103876
 
-decrease maxQuery for shorter plots
+  This currently takes just under 30 minutes. Decrease maxQuery for a quicker experiment. This generate `plotInfo.json` in `../state/execs/${lastExec}.exec/` where `lastExec` is `cat ../state/lastExec`.
 
-3. Analyze the results and produce some numbers and graphs
+3. Taking `../state/execs/${lastExec}.exec/plotInfo.json` as input, we can analyze the data and produce some plots using the following ipython notebook
 
-   ./interactive/run @mode=voxelurn
+   ipython notebook analyze_data.ipynb
+
+  which prints out basic statistics and generates the plots used in our paper. The plots are saved at `../state/execs/${lastExec}.exec/`
 
 ## Client server (optional)
 

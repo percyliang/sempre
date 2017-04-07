@@ -85,9 +85,5 @@ public class SimulationAnalyzer {
 
     acceptEval.logStats("accept");
     acceptEval.putOutput("accept");
-
-    // LogInfo.logs("Printing plotInfo to %s",
-    // Execution.getFile("plotInfo.json"));
-
   }
 }
