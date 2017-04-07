@@ -88,7 +88,7 @@ public class InteractiveMaster extends Master {
     Response response = new Response();
     if (line.startsWith("(:"))
       handleCommand(session, line, response);
-    else if (line.startsWith("(") && opts.allowRegularCommands)
+    else if (line.startsWith("(") && opts.allowRegularCommands || session.id.equals("stdin"))
       super.processQuery(session, line);
     else
       handleCommand(session, String.format("(:q \"%s\")", line), response);
@@ -153,9 +153,7 @@ public class InteractiveMaster extends Master {
       response.ex = ex;
 
       // Parse!
-      ParserState state;
-      state = builder.parser.parse(builder.params, ex, true);
-      state.ensureExecuted();
+      ((BeamFloatingParser)builder.parser).justParse(builder.params, ex, false);
 
       int rank = -1;
       Derivation match = null;
@@ -277,17 +275,14 @@ public class InteractiveMaster extends Master {
     if (isNonsense(exHead))
       throw BadInteractionException.nonSenseDefinition(head);
     
-    boolean coarsePrune = Parser.opts.coarsePrune;
-    Parser.opts.coarsePrune = false;
-    BeamFloatingParserState state = (BeamFloatingParserState) parser.parse(params, exHead, true);
-    Parser.opts.coarsePrune = coarsePrune;
+    BeamFloatingParserState state = ((BeamFloatingParser)parser).justParse(params, exHead, false);
     
     if (GrammarInducer.getParseStatus(exHead) == GrammarInducer.ParseStatus.Core)
       throw BadInteractionException.headIsCore(head);
 
     LogInfo.logs("num anchored: %d", state.chartList.size());
     List<String> bodyList = InteractiveUtils.utterancefromJson(jsonDef, false);
-    LogInfo.logs("bodyutterance:\n %s", String.join("\n", bodyList));
+    LogInfo.logs("bodyutterances:\n %s", String.join("\t", bodyList));
 
     Derivation bodyDeriv = InteractiveUtils
         .combine(InteractiveUtils.derivsfromJson(jsonDef, parser, params, refResponse));
@@ -303,9 +298,7 @@ public class InteractiveMaster extends Master {
       rule.source = new RuleSource(session.id, head, bodyList);
     }
 
-    LogInfo.logs("testing Aligner, %b, %d", opts.useAligner, bodyList.size());
     if (opts.useAligner && bodyList.size() == 1) {
-      LogInfo.logs("testing Aligner2");
       List<Rule> alignedRules = DefinitionAligner.getRules(exHead.getTokens(),
           InteractiveUtils.utterancefromJson(jsonDef, true), bodyDeriv, state.chartList);
       for (Rule rule : alignedRules) {

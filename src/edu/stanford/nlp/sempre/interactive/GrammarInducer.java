@@ -45,6 +45,8 @@ public class GrammarInducer {
     public boolean useBestPacking = true;
     @Option(gloss = "use simple packing")
     public boolean useSimplePacking = true;
+    @Option(gloss = "maximum nonterminals in a rule")
+    public long maxNonterminals = 3;
   }
 
   public static Options opts = new Options();
@@ -104,7 +106,7 @@ public class GrammarInducer {
       List<Rule> simpleInduced = induceRules(packing, def);
       for (Rule rule : simpleInduced) {
         rule.addInfo("simple_packing", 1.0);
-        addRuleDedupByRHS(rule);
+        filterRule(rule);
       }
 
       if (opts.verbose > 1) {
@@ -125,7 +127,7 @@ public class GrammarInducer {
       for (Rule rule : induceRules(bestPacking, def)) {
         if (rule.rhs.stream().allMatch(s -> Rule.isCat(s)))
           continue;
-        addRuleDedupByRHS(rule);
+        filterRule(rule);
       }
 
       if (opts.verbose > 1) {
@@ -141,11 +143,24 @@ public class GrammarInducer {
 
   Set<String> RHSs = new HashSet<>();
 
-  private void addRuleDedupByRHS(Rule rule) {
-    if (!RHSs.contains(rule.rhs.toString())) {
-      inducedRules.add(rule);
-      RHSs.add(rule.rhs.toString());
+  private void filterRule(Rule rule) {
+    // 
+    if (RHSs.contains(rule.rhs.toString())) {
+      LogInfo.logs("GrammarInducer.filterRule: already have %s", rule.rhs.toString());
+      return;
     }
+    int numNT = 0;
+    for (String t : rule.rhs) {
+      if (Rule.isCat(t)) numNT++;
+    }
+    
+    if (numNT > GrammarInducer.opts.maxNonterminals ) {
+      LogInfo.logs("GrammarInducer.filterRule: too many nontermnimals (max %d) %s", GrammarInducer.opts.maxNonterminals, rule.rhs.toString());
+      return;
+    }
+    inducedRules.add(rule);
+    RHSs.add(rule.rhs.toString());
+   
   }
 
   static Map<String, List<Derivation>> makeChartMap(List<Derivation> chartList) {

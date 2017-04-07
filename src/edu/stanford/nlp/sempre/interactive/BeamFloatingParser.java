@@ -27,11 +27,13 @@ import edu.stanford.nlp.sempre.ParserState;
 import edu.stanford.nlp.sempre.Rule;
 import edu.stanford.nlp.sempre.SemanticFn;
 import edu.stanford.nlp.sempre.Trie;
+import fig.basic.Evaluation;
 import fig.basic.IOUtils;
 import fig.basic.IntRef;
 import fig.basic.LogInfo;
 import fig.basic.Option;
 import fig.basic.SetUtils;
+import fig.basic.StopWatch;
 import fig.basic.StopWatchSet;
 import fig.exec.Execution;
 
@@ -53,6 +55,8 @@ public class BeamFloatingParser extends Parser {
     public FloatStrategy floatStrategy = FloatStrategy.Never;
     @Option(gloss = "track these categories")
     public List<String> trackedCats;
+    @Option
+    public int maxNonterminals = Integer.MAX_VALUE;
   }
 
   public enum FloatStrategy {
@@ -79,6 +83,22 @@ public class BeamFloatingParser extends Parser {
       this.chartFillOut = IOUtils.openOutAppendEasy(Execution.getFile("chartfill"));
   }
 
+  // for grammar induction, just need the formula, do not execute
+  public BeamFloatingParserState justParse(Params params, Example ex, boolean computeExpectedCounts) {
+    // Parse
+    StopWatch watch = new StopWatch();
+    watch.start();
+    BeamFloatingParserState state = new BeamFloatingParserState(this, params, ex);
+    state.infer();
+    watch.stop();
+    state.parseTime = watch.getCurrTimeLong();
+    
+    ex.predDerivations = state.predDerivations;
+    Derivation.sortByScore(ex.predDerivations);
+    // Clean up temporary state used during parsing
+    return state;
+  }
+  
   @Override
   public synchronized void addRule(Rule rule) {
     if (!rule.isCatUnary()) {
@@ -126,15 +146,25 @@ class BeamFloatingParserState extends ChartParserState {
 
   private final BeamFloatingParser parser;
   private final BeamFloatingParserState coarseState; // Used to prune
+  private final boolean execute;
 
   public List<Derivation> chartList;
 
+  public BeamFloatingParserState(BeamFloatingParser parser, Params params, Example ex) {
+    super(parser, params, ex, false);
+    this.parser = parser;
+    this.mode = Mode.full;
+    this.coarseState = null;
+    this.execute = false;
+  }
+  
   public BeamFloatingParserState(BeamFloatingParser parser, Params params, Example ex, boolean computeExpectedCounts,
       Mode mode, BeamFloatingParserState coarseState) {
     super(parser, params, ex, computeExpectedCounts);
     this.parser = parser;
     this.mode = mode;
     this.coarseState = coarseState;
+    this.execute = true;
   }
 
   @Override
@@ -182,6 +212,16 @@ class BeamFloatingParserState extends ChartParserState {
     else
       parseFloat = false;
 
+    if (mode == Mode.full) {
+      // Compute gradient with respect to the predicted derivations
+      if (this.execute)
+        ensureExecuted();
+      if (computeExpectedCounts) {
+        expectedCounts = new HashMap<>();
+        ParserState.computeExpectedCounts(predDerivations, expectedCounts);
+      }
+    }
+    
     /* If Beam Parser failed to find derivations, try a floating parser */
     if (parseFloat) {
       /*
@@ -218,15 +258,6 @@ class BeamFloatingParserState extends ChartParserState {
             predDerivations.add(d);
           }
         }
-      }
-    }
-
-    if (mode == Mode.full) {
-      // Compute gradient with respect to the predicted derivations
-      ensureExecuted();
-      if (computeExpectedCounts) {
-        expectedCounts = new HashMap<>();
-        ParserState.computeExpectedCounts(predDerivations, expectedCounts);
       }
     }
   }
@@ -296,10 +327,12 @@ class BeamFloatingParserState extends ChartParserState {
     String cell = cellString(cat, start, end);
     if (cellsPruned.contains(cell))
       return;
+    
     cellsPruned.add(cell);
     pruneCell(cell, derivations);
   }
 
+  private boolean canBeRoot(int start, int end) {return start==0 && end==numTokens;};
   // Apply all unary rules with RHS category.
   // Before applying each unary rule (rule.lhs -> rhsCat), we can prune the cell
   // of rhsCat
@@ -308,17 +341,17 @@ class BeamFloatingParserState extends ChartParserState {
     for (Rule rule : parser.getCatUnaryRules()) {
       if (!coarseAllows(rule.lhs, start, end))
         continue;
+      if (rule.lhs.equals(Rule.rootCat) && !canBeRoot(start, end))
+        continue;
       String rhsCat = rule.rhs.get(0);
       List<Derivation> derivations = chart[start][end].get(rhsCat);
       if (Parser.opts.verbose >= 5)
         LogInfo.logs("applyCatUnaryRules %s %s %s %s", start, end, rule, chart[start][end]);
       if (derivations == null)
         continue;
-
-      pruneCell(cellsPruned, rhsCat, start, end, derivations); // Prune before
-                                                               // applying rules
-                                                               // to eliminate
-                                                               // cruft!
+      
+      // Prune before applying rules to eliminate cruft!
+      pruneCell(cellsPruned, rhsCat, start, end, derivations);
 
       for (Derivation deriv : derivations) {
         applyRule(start, end, rule, Collections.singletonList(deriv));
@@ -338,6 +371,8 @@ class BeamFloatingParserState extends ChartParserState {
     if (node == null)
       return;
     if (!coarseAllows(node, start, end))
+      return;
+    if (children.size() > BeamFloatingParser.opts.maxNonterminals)
       return;
 
     if (Parser.opts.verbose >= 5) {

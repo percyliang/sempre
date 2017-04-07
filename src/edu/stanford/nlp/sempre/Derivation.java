@@ -28,6 +28,8 @@ public class Derivation implements SemanticFn.Callable, HasScore {
     public boolean showCat = false;
     @Option(gloss = "When executing, show formulae (for debugging)")
     public boolean showExecutions = false;
+    @Option(gloss = "Pick the comparator used to sort derivations")
+    public String derivComparator = "ScoredDerivationComparator";
   }
 
   public static Options opts = new Options();
@@ -112,7 +114,9 @@ public class Derivation implements SemanticFn.Callable, HasScore {
   // we can break ties consistently for reproducible results.
   long creationIndex;
   public static long numCreated = 0;  // Incremented for each derivation we create.
-  public static final Comparator<Derivation> derivScoreComparator = new ScoredDerivationComparator();
+  @SuppressWarnings("unchecked")
+  public static final Comparator<Derivation> derivScoreComparator =
+      (Comparator<Derivation>)Utils.newInstanceHard(SempreUtils.resolveClassName("Derivation$" + opts.derivComparator));
 
   public static final List<Derivation> emptyList = Collections.emptyList();
 
@@ -447,6 +451,25 @@ public class Derivation implements SemanticFn.Callable, HasScore {
     public int compare(Derivation deriv1, Derivation deriv2) {
       if (deriv1.compatibility > deriv2.compatibility) return -1;
       if (deriv1.compatibility < deriv2.compatibility) return +1;
+      // Ensure reproducible randomness
+      if (deriv1.creationIndex < deriv2.creationIndex) return -1;
+      if (deriv1.creationIndex > deriv2.creationIndex) return +1;
+      return 0;
+    }
+  }
+  
+  //Used to compare derivations by score, prioritizing the fully anchored.
+  public static class AnchorPriorityScoreComparator implements Comparator<Derivation> {
+    @Override
+    public int compare(Derivation deriv1, Derivation deriv2) {
+      boolean deriv1Core = deriv1.allAnchored();
+      boolean deriv2Core = deriv2.allAnchored();
+    
+      if (deriv1Core && !deriv2Core) return -1;
+      if (deriv2Core && !deriv1Core) return +1;
+      
+      if (deriv1.score > deriv2.score) return -1;
+      if (deriv1.score < deriv2.score) return +1;
       // Ensure reproducible randomness
       if (deriv1.creationIndex < deriv2.creationIndex) return -1;
       if (deriv1.creationIndex > deriv2.creationIndex) return +1;

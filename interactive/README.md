@@ -1,43 +1,68 @@
 # README
 
+This `interactive` package is the code for our paper
+*Naturalizing a programming language through interaction* (ACL 2017)
 
-## Running an experiment
-
-1) Start the server
-
-    ./interactive/run @mode=voxelurn -server
-
-2) Query the server with existing data
-
-    ./interactive/run @mode=simulator @server=local @sandbox=none @task=freebig
-
-3) Run analysis script to get results
-
-    ./interactive/run @mode=analyze
-
-4) (Optional) clean up
-
-    ./interactive/run @mode=backup # save previous data logs
-    ./interactive/run @mode=trash # deletes previous data logs
-
-## Running the server for voxelurn
-
-1) Start the sempre server
-
-    ./interactive/run @mode=voxelurn -server
-
-2) Start the client server
-
-    ./interactive/run @mode=community
-
-2) (Optionally) Query the server with existing data and use previous definitions
-
-    ./interactive/run @mode=simulator @server=local @sandbox=none @task=freebigdef
+Voxelurn is a language interface to a voxel world.
+This server handles commands used to learn from definitions, and other interactive queries.
+In this setting, the system begin with the dependency-based action language (`dal.grammar`), and gradually expand the language through interacting with it users.
 
 
-## Tests
+## Running the Voxelurn server
 
-There are many units for interactive learning
+1. Start the server
+
+    ./interactive/run @mode=voxelurn -server -interactive
+
+  things in the core language such as `add red left`, `repeat 3 [select left]` should work.
+
+2. Feed the server existing definitions, which should take less than 2 minutes.
+
+    ./interactive/run @mode=simulator @server=local @sandbox=none @task=freebigdef -maxQueries 2496
+
+  try `add green monster`  now.
+
+### Interacting with the server
+
+There are 3 ways to interactive with the server
+
+* The visual way is to use our client at `https://github.com/sidaw/shrdlurn`, which has a more detailed [README.md](https://github.com/sidaw/shrdlurn/blob/master/README.md) for the client.
+After `npm install` and taking care of dependencies, run `npm start local` to start a client that queries localhost. Try `[add dancer; front 5] 3 times`
+
+* Hit `Ctrl-D` on the server terminal, and type `add red top`, or `add green monster`
+
+* On a browser, type `http://localhost:8410/sempre?q=(:q add green monster)`
+
+## Experiments in ACL2017
+
+1. Start the server
+
+    ./interactive/run @mode=voxelurn -server -interactive
+
+
+2. Feed the server all the query logs
+
+    ./interactive/run @mode=simulator @server=local @sandbox=none @task=freebig -maxQueries 103876
+
+decrease maxQuery for shorter plots
+
+3. Analyze the results and produce some numbers and graphs
+
+   ./interactive/run @mode=voxelurn
+
+## Client server (optional)
+
+This server helps with client side logging, leaderboard, authentication etc. basically anything that is not directly parsing.
+
+    cd interactive
+    python community-server/install-deps.py
+    export SEMPRE_JWT_SECRET=sdlfdsaklafsl
+    export SLACK_SECRET=somekeyyougetfromslack
+    python community-server/server.py --port 8403
+
+## Misc.
+
+There are some unit tests
 
     ./interactive/run @mode=test
 
@@ -45,6 +70,13 @@ To specify a specific test class and verbosity
 
     ./interactive/run @mode=test @class=DALExecutorTest -verbose 5
 
-Test in interactive mode
+Clean up or backup data
 
-    ./interactive/run @mode=voxelurn -interactive
+    ./interactive/run @mode=backup # save previous data logs
+    ./interactive/run @mode=trash # deletes previous data logs
+
+Data, in .gz can be found in queries.
+
+* `./interactive/queries/freebuildbig-0206.def.json.gz`
+has 2495 definitions combining just over 10k utterances.
+* `./interactive/queries/freebuildbig-0206.json.gz` has 103875 queries made during the main experiment.

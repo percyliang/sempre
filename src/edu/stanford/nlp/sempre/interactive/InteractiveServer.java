@@ -174,12 +174,12 @@ public class InteractiveServer {
         List<Object> items = new ArrayList<Object>();
         json.put("candidates", items);
         List<Derivation> allCandidates = response.getExample().getPredDerivations();
-
+        Derivation.sortByScore(allCandidates);
         if (allCandidates != null) {
           if (allCandidates.size() >= InteractiveServer.opts.maxCandidates) {
-            allCandidates = allCandidates.subList(0, InteractiveServer.opts.maxCandidates);
             response.lines.add(String.format("Exceeded max options: (current: %d / max: %d) ", allCandidates.size(),
                 InteractiveServer.opts.maxCandidates));
+            allCandidates = allCandidates.subList(0, InteractiveServer.opts.maxCandidates);
           }
 
           for (Derivation deriv : allCandidates) {
@@ -219,12 +219,13 @@ public class InteractiveServer {
       } catch (Throwable e) {
         e.printStackTrace();
         message = e.toString();
-        response.lines.add(message);
+        response.lines.add(String.format("Exceeded the maximum allowed time: %ss", opts.maxExecutionTime));
         response.stats.put("uncaught_error", message);
         LogInfo.flush();
         LogInfo.resetInfos();
       } finally {
         future.cancel(true);
+        executor.shutdown();
         long endTime = System.nanoTime();
         response.stats.put("time", (endTime - startTime) / 1.0e9);
       }

@@ -30,7 +30,7 @@ public class Main implements Runnable {
       Master master = createMaster(masterType, builder);
       if (server)
         master.runServer();
-      else if (interactive)
+      if (interactive)
         master.runInteractivePrompt();
     }
   }

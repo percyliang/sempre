@@ -91,8 +91,8 @@ public final class InteractiveUtils {
       Example ex = b.createExample();
       ex.preprocess();
 
-      // LogInfo.logs("Parsing definition: %s", ex.utterance);
-      parser.parse(params, ex, false);
+      LogInfo.logs("Parsing body: %s", ex.utterance);
+      ((BeamFloatingParser)parser).justParse(params, ex, false);
 
       boolean found = false;
       Formula targetFormula = Formulas.fromLispTree(LispTree.proto.parseFromString(formula));

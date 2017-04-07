@@ -101,18 +101,6 @@ addMode('test', 'Run unit tests for interactive stuff', lambda { |e|
   nil)
 })
 
-addMode('community-dep', 'dependencies for the community server', lambda { |e| l(
-l("python ./#{$path}/community-server/install-deps.py"),
-nil)})
-
-addMode('community', 'start the community server', lambda { |e| l(
-l("python ./#{$path}/community-server/server.py --port 8403"),
-nil)})
-
-addMode('analyze', 'analyze the latest run', lambda { |e| l(
-l("python ./#{$path}/analyze.py --port 8403"),
-nil)})
-
 addMode('simulator', 'run the simulator', lambda { |e| l(
   # rlwrap,
   header('core,interactive'),
@@ -177,13 +165,15 @@ addMode('voxelurn', 'interactive semantic parsing in a VoxelWorld', lambda { |e|
   o('Parser.callSetEvaluation', false),
   o('Parser.coarsePrune', 'true'),
 
-  o('Parser.beamSize', 50),
+  o('Parser.beamSize', 100),
   o('BeamFloatingParser.maxNewTreesPerSpan', 5001),
+  o('BeamFloatingParser.maxNonterminals', 5),
   o('ParserState.customExpectedCounts', 'None'),
 
   selo(0, 'BeamFloatingParser.floatStrategy', 'Never', 'NoParse', 'Always'),
   o('BeamFloatingParser.trackedCats', 'Number', 'Numbers', 'Color',  'Direction', 'Set', 'Sets', 'Action', 'Actions'),
 
+  o('Derivation.derivComparator', 'AnchorPriorityScoreComparator'),
   o('Params.l1Reg', 'nonlazy'),
   o('Params.l1RegCoeff', 0.0001),
 
@@ -213,6 +203,7 @@ addMode('voxelurn', 'interactive semantic parsing in a VoxelWorld', lambda { |e|
 
   o('GrammarInducer.useBestPacking', true),
   o('GrammarInducer.useSimplePacking', true),
+  o('GrammarInducer.maxNonterminals', 2),
 
   o('Derivation.showTypes', false),
   o('Derivation.showValues', false),
