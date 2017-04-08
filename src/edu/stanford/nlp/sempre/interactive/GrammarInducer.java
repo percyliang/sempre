@@ -46,7 +46,7 @@ public class GrammarInducer {
     @Option(gloss = "use simple packing")
     public boolean useSimplePacking = true;
     @Option(gloss = "maximum nonterminals in a rule")
-    public long maxNonterminals = 3;
+    public long maxNonterminals = 4;
   }
 
   public static Options opts = new Options();

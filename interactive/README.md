@@ -51,7 +51,7 @@ There are 3 ways to interact and try your own commands
 
 3. Taking `../state/execs/${lastExec}.exec/plotInfo.json` as input, we can analyze the data and produce some plots using the following ipython notebook
 
-       ipython notebook analyze_data.ipynb
+       ipython notebook interactive/analyze_data.ipynb 
 
   which prints out basic statistics and generates the plots used in our paper. The plots are saved at `../state/execs/${lastExec}.exec/`
 
