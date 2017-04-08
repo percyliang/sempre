@@ -144,9 +144,13 @@ public class GrammarInducer {
   Set<String> RHSs = new HashSet<>();
 
   private void filterRule(Rule rule) {
-    // 
+    if (rule.isCatUnary()) {
+      LogInfo.logs("GrammarInducer.filterRule: not allowing CatUnary rules %s", rule.toString());
+      return;
+    }
+      
     if (RHSs.contains(rule.rhs.toString())) {
-      LogInfo.logs("GrammarInducer.filterRule: already have %s", rule.rhs.toString());
+      LogInfo.logs("GrammarInducer.filterRule: already have %s", rule.toString());
       return;
     }
     int numNT = 0;
@@ -160,7 +164,6 @@ public class GrammarInducer {
     }
     inducedRules.add(rule);
     RHSs.add(rule.rhs.toString());
-   
   }
 
   static Map<String, List<Derivation>> makeChartMap(List<Derivation> chartList) {

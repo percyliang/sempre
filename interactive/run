@@ -165,9 +165,8 @@ addMode('voxelurn', 'interactive semantic parsing in a VoxelWorld', lambda { |e|
   o('Parser.callSetEvaluation', false),
   o('Parser.coarsePrune', 'true'),
 
-  o('Parser.beamSize', 100),
+  o('Parser.beamSize', 50),
   o('BeamFloatingParser.maxNewTreesPerSpan', 5001),
-  o('BeamFloatingParser.maxNonterminals', 5),
   o('ParserState.customExpectedCounts', 'None'),
 
   selo(0, 'BeamFloatingParser.floatStrategy', 'Never', 'NoParse', 'Always'),
@@ -203,7 +202,7 @@ addMode('voxelurn', 'interactive semantic parsing in a VoxelWorld', lambda { |e|
 
   o('GrammarInducer.useBestPacking', true),
   o('GrammarInducer.useSimplePacking', true),
-  o('GrammarInducer.maxNonterminals', 2),
+  o('GrammarInducer.maxNonterminals', 3),
 
   o('Derivation.showTypes', false),
   o('Derivation.showValues', false),
@@ -225,7 +224,7 @@ nil) })
 if ARGV.size == 0
   puts "#{$0} @mode=<mode> [options]"
   puts
-  puts 'This is the main entry point for all SHRDLRUN related runs.'
+  puts 'This is the main entry point for all interactive related modes.'
   puts "Modes:"
   $modes.each { |name,description,func|
     puts "  #{name}: #{description}"

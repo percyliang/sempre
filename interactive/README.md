@@ -9,16 +9,20 @@ In this setting, the system begin with the dependency-based action language (`da
 
 
 ## Running the Voxelurn server
+0. Setup SEMPRE dependencies and compile
+
+         ./pull-dependencies core
+         ant interactive
 
 1. Start the server
 
-    ./interactive/run @mode=voxelurn -server -interactive
+        ./interactive/run @mode=voxelurn -server -interactive
 
   things in the core language such as `add red left`, `repeat 3 [select left]` should work.
 
 2. Feed the server existing definitions, which should take less than 2 minutes.
 
-    ./interactive/run @mode=simulator @server=local @sandbox=none @task=freebigdef -maxQueries 2496
+        ./interactive/run @mode=simulator @server=local @sandbox=none @task=freebigdef -maxQueries 2496
 
   try `add green monster`  now.
 
@@ -26,12 +30,11 @@ In this setting, the system begin with the dependency-based action language (`da
 
 There are 3 ways to interactive with the server
 
-* The visual way is to use our client at `https://github.com/sidaw/shrdlurn`, which has a more detailed [README.md](https://github.com/sidaw/shrdlurn/blob/master/README.md) for the client.
-After `npm install` and taking care of dependencies, run `npm start local` to start a client that queries localhost. Try `[add dancer; front 5] 3 times`
-
 * Hit `Ctrl-D` on the server terminal, and type `add red top`, or `add green monster`
 
 * On a browser, type `http://localhost:8410/sempre?q=(:q add green monster)`
+
+* The visual way is to use our client at `https://github.com/sidaw/shrdlurn`, which has a more detailed [README.md](https://github.com/sidaw/shrdlurn/blob/master/README.md) for the client. Try `[add dancer; front 5] 3 times` after you set that up.
 
 ## Experiments in ACL2017
 
@@ -51,15 +54,6 @@ After `npm install` and taking care of dependencies, run `npm start local` to st
 
   which prints out basic statistics and generates the plots used in our paper. The plots are saved at `../state/execs/${lastExec}.exec/`
 
-## Client server (optional)
-
-This server helps with client side logging, leaderboard, authentication etc. basically anything that is not directly parsing.
-
-    cd interactive
-    python community-server/install-deps.py
-    export SEMPRE_JWT_SECRET=sdlfdsaklafsl
-    export SLACK_SECRET=somekeyyougetfromslack
-    python community-server/server.py --port 8403
 
 ## Misc.
 
@@ -81,3 +75,13 @@ Data, in .gz can be found in queries.
 * `./interactive/queries/freebuildbig-0206.def.json.gz`
 has 2495 definitions combining just over 10k utterances.
 * `./interactive/queries/freebuildbig-0206.json.gz` has 103875 queries made during the main experiment.
+
+## Client server (optional and in development)
+
+This server helps with client side logging, leaderboard, authentication etc. basically anything that is not directly parsing.
+
+    cd interactive
+    python community-server/install-deps.py
+    export SEMPRE_JWT_SECRET=sdlfdsaklafsl
+    export SLACK_SECRET=somekeyyougetfromslack
+    python community-server/server.py --port 8403

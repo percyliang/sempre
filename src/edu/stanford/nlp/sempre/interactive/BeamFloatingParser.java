@@ -55,8 +55,6 @@ public class BeamFloatingParser extends Parser {
     public FloatStrategy floatStrategy = FloatStrategy.Never;
     @Option(gloss = "track these categories")
     public List<String> trackedCats;
-    @Option
-    public int maxNonterminals = Integer.MAX_VALUE;
   }
 
   public enum FloatStrategy {
@@ -76,8 +74,7 @@ public class BeamFloatingParser extends Parser {
     // Index the non-cat-unary rules
     trie = new Trie();
     for (Rule rule : grammar.getRules()) {
-      if (!rule.isFloating())
-        addRule(rule);
+      addRule(rule);
     }
     if (Parser.opts.visualizeChartFilling)
       this.chartFillOut = IOUtils.openOutAppendEasy(Execution.getFile("chartfill"));
@@ -92,21 +89,17 @@ public class BeamFloatingParser extends Parser {
     state.infer();
     watch.stop();
     state.parseTime = watch.getCurrTimeLong();
-    
+
     ex.predDerivations = state.predDerivations;
     Derivation.sortByScore(ex.predDerivations);
     // Clean up temporary state used during parsing
     return state;
   }
-  
+
   @Override
   public synchronized void addRule(Rule rule) {
     if (!rule.isCatUnary()) {
-      if (rule.isAnchored())
-        trie.add(rule);
-      // induced grammar
-      else if (rule.isInduced())
-        trie.add(rule);
+      trie.add(rule);
     }
   }
 
@@ -157,7 +150,7 @@ class BeamFloatingParserState extends ChartParserState {
     this.coarseState = null;
     this.execute = false;
   }
-  
+
   public BeamFloatingParserState(BeamFloatingParser parser, Params params, Example ex, boolean computeExpectedCounts,
       Mode mode, BeamFloatingParserState coarseState) {
     super(parser, params, ex, computeExpectedCounts);
@@ -221,7 +214,7 @@ class BeamFloatingParserState extends ChartParserState {
         ParserState.computeExpectedCounts(predDerivations, expectedCounts);
       }
     }
-    
+
     /* If Beam Parser failed to find derivations, try a floating parser */
     if (parseFloat) {
       /*
@@ -327,7 +320,7 @@ class BeamFloatingParserState extends ChartParserState {
     String cell = cellString(cat, start, end);
     if (cellsPruned.contains(cell))
       return;
-    
+
     cellsPruned.add(cell);
     pruneCell(cell, derivations);
   }
@@ -349,7 +342,7 @@ class BeamFloatingParserState extends ChartParserState {
         LogInfo.logs("applyCatUnaryRules %s %s %s %s", start, end, rule, chart[start][end]);
       if (derivations == null)
         continue;
-      
+
       // Prune before applying rules to eliminate cruft!
       pruneCell(cellsPruned, rhsCat, start, end, derivations);
 
@@ -371,8 +364,6 @@ class BeamFloatingParserState extends ChartParserState {
     if (node == null)
       return;
     if (!coarseAllows(node, start, end))
-      return;
-    if (children.size() > BeamFloatingParser.opts.maxNonterminals)
       return;
 
     if (Parser.opts.verbose >= 5) {
