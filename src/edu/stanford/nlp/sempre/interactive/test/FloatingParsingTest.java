@@ -8,7 +8,7 @@ import java.util.function.Predicate;
 import fig.basic.*;
 import edu.stanford.nlp.sempre.*;
 import edu.stanford.nlp.sempre.Parser.Spec;
-import edu.stanford.nlp.sempre.interactive.BeamFloatingParser;
+import edu.stanford.nlp.sempre.interactive.InteractiveBeamParser;
 import edu.stanford.nlp.sempre.interactive.DALExecutor;
 
 import org.testng.Assert;
@@ -80,7 +80,7 @@ public class FloatingParsingTest {
     ex.preprocess();
 
     Spec defSpec = defaultSpec();
-    Parser parser = new BeamFloatingParser(defSpec);
+    Parser parser = new InteractiveBeamParser(defSpec);
     ParserState state = parser.parse(new Params(), ex, false);
     LogInfo.end_track();
 

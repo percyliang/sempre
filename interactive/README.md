@@ -9,6 +9,7 @@ In this setting, the system begin with the dependency-based action language (`da
 
 
 ## Running the Voxelurn server
+
 0. Setup SEMPRE dependencies and compile
 
          ./pull-dependencies core
@@ -22,35 +23,35 @@ In this setting, the system begin with the dependency-based action language (`da
 
 2. Feed the server existing definitions, which should take less than 2 minutes.
 
-        ./interactive/run @mode=simulator @server=local @sandbox=none @task=freebigdef -maxQueries 2496
+        ./interactive/run @mode=simulator @server=local @sandbox=none @task=freebuilddef -maxQueries 2496
 
-  try `add green monster`  now.
+  try `add dancer`  now.
 
 ### Interacting with the server
 
-There are 3 ways to interactive with the server
+There are 3 ways to interact and try your own commands
 
-* Hit `Ctrl-D` on the server terminal, and type `add red top`, or `add green monster`
+* Hit `Ctrl-D` on the terminal running the server, and type `add red top`, or `add green monster`
 
 * On a browser, type `http://localhost:8410/sempre?q=(:q add green monster)`
 
-* The visual way is to use our client at `https://github.com/sidaw/shrdlurn`, which has a more detailed [README.md](https://github.com/sidaw/shrdlurn/blob/master/README.md) for the client. Try `[add dancer; front 5] 3 times` after you set that up.
+* The visual way is to use our client at `https://github.com/sidaw/shrdlurn`, which has a more detailed [README.md](https://github.com/sidaw/shrdlurn/blob/master/README.md). Try `[add dancer; front 5] 3 times` after you run the client. A live version is at [voxelurn.com](http://www.voxelurn.com).
 
 ## Experiments in ACL2017
 
 1. Start the server
 
-    ./interactive/run @mode=voxelurn -server -interactive
+      ./interactive/run @mode=voxelurn -server -interactive
 
 2. Feed the server all the query logs
 
-    ./interactive/run @mode=simulator @server=local @sandbox=none @task=freebig -maxQueries 103876
+      ./interactive/run @mode=simulator @server=local @sandbox=none @task=freebuild -maxQueries 103876
 
   This currently takes just under 30 minutes. Decrease maxQuery for a quicker experiment. This generate `plotInfo.json` in `../state/execs/${lastExec}.exec/` where `lastExec` is `cat ../state/lastExec`.
 
 3. Taking `../state/execs/${lastExec}.exec/plotInfo.json` as input, we can analyze the data and produce some plots using the following ipython notebook
 
-   ipython notebook analyze_data.ipynb
+       ipython notebook analyze_data.ipynb
 
   which prints out basic statistics and generates the plots used in our paper. The plots are saved at `../state/execs/${lastExec}.exec/`
 

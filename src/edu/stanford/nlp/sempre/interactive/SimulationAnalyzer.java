@@ -31,6 +31,7 @@ public class SimulationAnalyzer {
     Map<String, Object> line = new LinkedHashMap<String, Object>(query);
     LogInfo.logs("stats: %s", stats);
     if (stats == null) {
+      LogInfo.logs("No stats");
       LogInfo.log(query);
       LogInfo.log(jsonResponse);
       return;
@@ -54,7 +55,7 @@ public class SimulationAnalyzer {
       qEval.add("def.num_failed", (Integer) stats.get("num_failed"));
       qEval.add("def.num_body", (Integer) stats.get("num_body"));
       qEval.add("def.num_rules", (Integer) stats.get("num_rules"));
-      qEval.add("def.time", (Double) stats.get("time"));
+      qEval.add("def.time",  (Integer) stats.get("count"));
     }
 
     if (stats.get("type").equals("q") && !stats.containsKey("error")) {

@@ -92,7 +92,7 @@ public final class InteractiveUtils {
       ex.preprocess();
 
       LogInfo.logs("Parsing body: %s", ex.utterance);
-      ((BeamFloatingParser)parser).justParse(params, ex, false);
+      ((InteractiveBeamParser)parser).parseWithoutExecuting(params, ex, false);
 
       boolean found = false;
       Formula targetFormula = Formulas.fromLispTree(LispTree.proto.parseFromString(formula));
@@ -161,10 +161,10 @@ public final class InteractiveUtils {
 
   public static synchronized void addRuleInteractive(Rule rule, Parser parser) {
     LogInfo.logs("addRuleInteractive: %s", rule);
-    parser.grammar.addRule(rule);
-
-    if (parser instanceof BeamParser || parser instanceof BeamFloatingParser) {
+    if (parser instanceof InteractiveBeamParser) {
       parser.addRule(rule);
+    } else {
+      throw new RuntimeException("interactively adding rule not supported for paser " + parser.getClass().toString());
     }
   }
 

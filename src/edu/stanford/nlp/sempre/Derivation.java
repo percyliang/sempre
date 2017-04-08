@@ -30,6 +30,8 @@ public class Derivation implements SemanticFn.Callable, HasScore {
     public boolean showExecutions = false;
     @Option(gloss = "Pick the comparator used to sort derivations")
     public String derivComparator = "ScoredDerivationComparator";
+    @Option(gloss = "bonus score for being all anchored")
+    public double anchoredBonus = 0.0;
   }
 
   public static Options opts = new Options();
@@ -264,7 +266,7 @@ public class Derivation implements SemanticFn.Callable, HasScore {
   public void addFeatures(FeatureVector fv) { this.localFeatureVector.add(fv); }
 
   public double localScore(Params params) {
-    return localFeatureVector.dotProduct(params);
+    return localFeatureVector.dotProduct(params) + (this.allAnchored()? opts.anchoredBonus : 0.0);
   }
 
   // SHOULD NOT BE USED except during test time if the memory is desperately needed.

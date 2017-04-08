@@ -123,17 +123,14 @@ addMode('simulator', 'run the simulator', lambda { |e| l(
   }),
   letDefault(:task, 'sidaw'),
   sel(:task, {
-    'freebig' => o('logFiles', "./#{$path}/queries/freebuildbig-0206.json.gz"),
-    'freebigdef' => o('logFiles', "./#{$path}/queries/freebuildbig-0206.def.json.gz"),
-    'freebigcontext' => o('logFiles', "./#{$path}/queries/freebuildbig-0206.context.json.gz"),
+    'freebuild' => o('logFiles', "./#{$path}/queries/freebuild.json.gz"),
+    'freebuilddef' => o('logFiles', "./#{$path}/queries/freebuild.def.json.gz"),
 
-    'qual1' => o('logFiles', "./#{$path}/queries/qualifier1-0118.json.gz"),
-    'qual2' => o('logFiles', "./#{$path}/queries/qualifier2-0129.json.gz"),
-    'qual3' => o('logFiles', "./#{$path}/queries/qualifier3-0201.json.gz"), #  both 2 and 3
-    'free1' => o('logFiles', "./#{$path}/queries/freebuild1-0121.json.gz"),
-    'free2' => o('logFiles', "./#{$path}/queries/freebuild2-0127.json.gz"),
-    'sidaw' => o('logFiles', "./#{$path}/queries/sidaw.json"),
-
+    'qual1' => o('logFiles', "./#{$path}/queries/rawqueries/qualifier1-0118.json.gz"),
+    'qual2' => o('logFiles', "./#{$path}/queries/rawqueries/qualifier2-0129.json.gz"),
+    'qual3' => o('logFiles', "./#{$path}/queries/rawqueries/qualifier3-0201.json.gz"), #  both 2 and 3
+    'free1' => o('logFiles', "./#{$path}/queries/rawqueries/freebuild1-0121.json.gz"),
+    'free2' => o('logFiles', "./#{$path}/queries/rawqueries/freebuild2-0127.json.gz"),
     }),
 nil)})
 
@@ -161,16 +158,16 @@ addMode('voxelurn', 'interactive semantic parsing in a VoxelWorld', lambda { |e|
   o('LanguageAnalyzer.lowerCaseTokens', true),
 
   o('Parser.pruneErrorValues', true),
-  o('Parser', 'interactive.BeamFloatingParser'),
+  o('Parser', 'interactive.InteractiveBeamParser'),
   o('Parser.callSetEvaluation', false),
-  o('Parser.coarsePrune', 'true'),
+  o('Parser.coarsePrune', true),
 
   o('Parser.beamSize', 50),
-  o('BeamFloatingParser.maxNewTreesPerSpan', 5001),
+  o('InteractiveBeamParser.maxNewTreesPerSpan', 5001),
   o('ParserState.customExpectedCounts', 'None'),
 
-  selo(0, 'BeamFloatingParser.floatStrategy', 'Never', 'NoParse', 'Always'),
-  o('BeamFloatingParser.trackedCats', 'Number', 'Numbers', 'Color',  'Direction', 'Set', 'Sets', 'Action', 'Actions'),
+  selo(0, 'InteractiveBeamParser.floatStrategy', 'Never', 'NoParse', 'Always'),
+  o('InteractiveBeamParser.trackedCats', 'Number', 'Numbers', 'Color',  'Direction', 'Set', 'Sets', 'Action', 'Actions'),
 
   o('Derivation.derivComparator', 'AnchorPriorityScoreComparator'),
   o('Params.l1Reg', 'nonlazy'),
@@ -207,6 +204,7 @@ addMode('voxelurn', 'interactive semantic parsing in a VoxelWorld', lambda { |e|
   o('Derivation.showTypes', false),
   o('Derivation.showValues', false),
   o('Derivation.showRules', false),
+  o('Derivation.anchoredBonus', 1.0),
 
   o('NumberFn.allowedRange', 0, 100),
   o('SimpleLexicon.inPaths', "./#{$path}/csscolors.lexicon"),
@@ -214,10 +212,6 @@ addMode('voxelurn', 'interactive semantic parsing in a VoxelWorld', lambda { |e|
   lambda { |e| system 'mkdir -p ./int-output/'; nil},
   lambda { |e| system 'mkdir -p ./int-output/log/'; nil},
   lambda { |e| system 'mkdir -p ./int-output/citation/'; nil},
-  lambda { |e| system 'mkdir -p server.exec';
-    l(o('execDir', 'server.exec/'),
-    o('overwriteExecDir'))
-   },
 nil) })
 ############################################################
 

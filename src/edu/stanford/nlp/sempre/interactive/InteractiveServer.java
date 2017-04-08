@@ -227,7 +227,8 @@ public class InteractiveServer {
         future.cancel(true);
         executor.shutdown();
         long endTime = System.nanoTime();
-        response.stats.put("time", (endTime - startTime) / 1.0e9);
+        response.stats.put("walltime", (endTime - startTime) / 1.0e9);
+        response.stats.put("count", queryCounter.get());
       }
       return response;
     }
@@ -243,10 +244,10 @@ public class InteractiveServer {
       LocalDateTime queryTime = LocalDateTime.now();
       synchronized (queryLogLock) { // write the query log
         Map<String, Object> jsonMap = new LinkedHashMap<>();
+        jsonMap.put("count", queryNumber);
         jsonMap.put("q", query);
-        jsonMap.put("remote", remoteHost);
-        jsonMap.put("time", queryTime.toString());
-        jsonMap.put("query", queryNumber);
+        // jsonMap.put("remote", remoteHost);
+        // jsonMap.put("time", queryTime.toString());
         jsonMap.put("sessionId", sessionId);
         reqParams.remove("q");
         jsonMap.putAll(reqParams);

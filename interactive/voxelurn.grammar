@@ -13,7 +13,7 @@
 
 # typed lambdas
 # Action a, ItemSet i, ValueSet v, Rel r, Direction d, Color c, Number n
-# This grammar should have Rule.defaultIsFloating false
+# Rule.defaultIsFloating should be false
 
 # utilities
 (rule $Action (base $Number $Number) (lambda x (lambda y (: @base (var x) (var y)))) (anchored 1))

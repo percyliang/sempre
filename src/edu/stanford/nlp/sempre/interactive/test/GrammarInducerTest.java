@@ -27,7 +27,7 @@ import edu.stanford.nlp.sempre.Rule;
 import edu.stanford.nlp.sempre.Session;
 import edu.stanford.nlp.sempre.SimpleLexicon;
 import edu.stanford.nlp.sempre.ValueEvaluator;
-import edu.stanford.nlp.sempre.interactive.BeamFloatingParser;
+import edu.stanford.nlp.sempre.interactive.InteractiveBeamParser;
 import edu.stanford.nlp.sempre.interactive.DALExecutor;
 import edu.stanford.nlp.sempre.interactive.DefinitionAligner;
 import edu.stanford.nlp.sempre.interactive.GrammarInducer;
@@ -94,7 +94,7 @@ public class GrammarInducerTest {
     List<Rule> allRules;
 
     public ParseTester() {
-      parser = new BeamFloatingParser(defaultSpec());
+      parser = new InteractiveBeamParser(defaultSpec());
       params = new Params();
       allRules = new ArrayList<>();
     }

@@ -153,7 +153,7 @@ public class InteractiveMaster extends Master {
       response.ex = ex;
 
       // Parse!
-      ((BeamFloatingParser)builder.parser).justParse(builder.params, ex, false);
+      ((InteractiveBeamParser)builder.parser).parseWithoutExecuting(builder.params, ex, false);
 
       int rank = -1;
       Derivation match = null;
@@ -212,6 +212,8 @@ public class InteractiveMaster extends Master {
             for (Rule rule : inducedRules) {
               InteractiveUtils.addRuleInteractive(rule, builder.parser);
             }
+            stats.put("total_rules", ((InteractiveBeamParser)builder.parser).allRules.size());
+            stats.put("total_unicat", ((InteractiveBeamParser)builder.parser).interactiveCatUnaryRules.size());
           }
           // TODO : should not have to parse again, I guess just set the formula
           // or something
@@ -275,7 +277,7 @@ public class InteractiveMaster extends Master {
     if (isNonsense(exHead))
       throw BadInteractionException.nonSenseDefinition(head);
     
-    BeamFloatingParserState state = ((BeamFloatingParser)parser).justParse(params, exHead, false);
+    InteractiveBeamParserState state = ((InteractiveBeamParser)parser).parseWithoutExecuting(params, exHead, false);
     
     if (GrammarInducer.getParseStatus(exHead) == GrammarInducer.ParseStatus.Core)
       throw BadInteractionException.headIsCore(head);

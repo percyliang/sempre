@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -38,16 +39,11 @@ import fig.basic.StopWatchSet;
 import fig.exec.Execution;
 
 /**
- * A simple bottom-up chart-based parser that keeps the |BeamFloatingSize| top
- * derivations for each chart cell (cat, start, end). Also supports fast
- * indexing of lexicalized rules using a trie.
- *
- * Note that this code does not rely on the Grammar being binarized, which makes
- * it more complex.
+ * A modified version of the BeamParser, with consideration for use in the interactive setting
  * 
  * @author Percy Liang, sidaw
  */
-public class BeamFloatingParser extends Parser {
+public class InteractiveBeamParser extends Parser {
   public static class Options {
     @Option
     public int maxNewTreesPerSpan = Integer.MAX_VALUE;
@@ -64,13 +60,17 @@ public class BeamFloatingParser extends Parser {
   public static Options opts = new Options();
 
   Trie trie; // For non-cat-unary rules
-
-  public BeamFloatingParser(Spec spec) {
+  // so that duplicated rules are never added
+  Set<Rule> allRules;
+  List<Rule> interactiveCatUnaryRules;
+  public InteractiveBeamParser(Spec spec) {
     super(spec);
     if (opts.trackedCats != null) {
       opts.trackedCats = opts.trackedCats.stream().map(s -> "$" + s).collect(Collectors.toList());
       LogInfo.logs("Mapped trackedCats to: %s", opts.trackedCats);
     }
+    interactiveCatUnaryRules = new LinkedList<>(super.catUnaryRules);
+    allRules = new LinkedHashSet<>(super.catUnaryRules);
     // Index the non-cat-unary rules
     trie = new Trie();
     for (Rule rule : grammar.getRules()) {
@@ -80,12 +80,31 @@ public class BeamFloatingParser extends Parser {
       this.chartFillOut = IOUtils.openOutAppendEasy(Execution.getFile("chartfill"));
   }
 
+  @Override
+  public synchronized void addRule(Rule rule) {
+    if (allRules.contains(rule))
+      return;
+    
+    allRules.add(rule);
+
+    if (!rule.isCatUnary()) {
+      trie.add(rule);
+    } else {
+      interactiveCatUnaryRules.add(rule);
+    }
+  }
+  
+  @Override
+  public List<Rule> getCatUnaryRules() {
+    return interactiveCatUnaryRules;
+  }
+  
   // for grammar induction, just need the formula, do not execute
-  public BeamFloatingParserState justParse(Params params, Example ex, boolean computeExpectedCounts) {
+  public InteractiveBeamParserState parseWithoutExecuting(Params params, Example ex, boolean computeExpectedCounts) {
     // Parse
     StopWatch watch = new StopWatch();
     watch.start();
-    BeamFloatingParserState state = new BeamFloatingParserState(this, params, ex);
+    InteractiveBeamParserState state = new InteractiveBeamParserState(this, params, ex);
     state.infer();
     watch.stop();
     state.parseTime = watch.getCurrTimeLong();
@@ -96,25 +115,19 @@ public class BeamFloatingParser extends Parser {
     return state;
   }
 
-  @Override
-  public synchronized void addRule(Rule rule) {
-    if (!rule.isCatUnary()) {
-      trie.add(rule);
-    }
-  }
 
   @Override
   public ParserState newParserState(Params params, Example ex, boolean computeExpectedCounts) {
-    BeamFloatingParserState coarseState = null;
+    InteractiveBeamParserState coarseState = null;
     if (Parser.opts.coarsePrune) {
       LogInfo.begin_track("Parser.coarsePrune");
-      coarseState = new BeamFloatingParserState(this, params, ex, computeExpectedCounts,
-          BeamFloatingParserState.Mode.bool, null);
+      coarseState = new InteractiveBeamParserState(this, params, ex, computeExpectedCounts,
+          InteractiveBeamParserState.Mode.bool, null);
       coarseState.infer();
       coarseState.keepTopDownReachable();
       LogInfo.end_track();
     }
-    return new BeamFloatingParserState(this, params, ex, computeExpectedCounts, BeamFloatingParserState.Mode.full,
+    return new InteractiveBeamParserState(this, params, ex, computeExpectedCounts, InteractiveBeamParserState.Mode.full,
         coarseState);
   }
 }
@@ -125,8 +138,9 @@ public class BeamFloatingParser extends Parser {
  *
  * @author Percy Liang
  * @author Roy Frostig
+ * @author sidaw
  */
-class BeamFloatingParserState extends ChartParserState {
+class InteractiveBeamParserState extends ChartParserState {
   public final Mode mode;
 
   // Modes:
@@ -137,13 +151,13 @@ class BeamFloatingParserState extends ChartParserState {
     bool, full
   }
 
-  private final BeamFloatingParser parser;
-  private final BeamFloatingParserState coarseState; // Used to prune
+  private final InteractiveBeamParser parser;
+  private final InteractiveBeamParserState coarseState; // Used to prune
   private final boolean execute;
 
   public List<Derivation> chartList;
 
-  public BeamFloatingParserState(BeamFloatingParser parser, Params params, Example ex) {
+  public InteractiveBeamParserState(InteractiveBeamParser parser, Params params, Example ex) {
     super(parser, params, ex, false);
     this.parser = parser;
     this.mode = Mode.full;
@@ -151,8 +165,8 @@ class BeamFloatingParserState extends ChartParserState {
     this.execute = false;
   }
 
-  public BeamFloatingParserState(BeamFloatingParser parser, Params params, Example ex, boolean computeExpectedCounts,
-      Mode mode, BeamFloatingParserState coarseState) {
+  public InteractiveBeamParserState(InteractiveBeamParser parser, Params params, Example ex, boolean computeExpectedCounts,
+      Mode mode, InteractiveBeamParserState coarseState) {
     super(parser, params, ex, computeExpectedCounts);
     this.parser = parser;
     this.mode = mode;
@@ -198,9 +212,9 @@ class BeamFloatingParserState extends ChartParserState {
     this.chartList = this.collectChart();
 
     boolean parseFloat = false;
-    if (BeamFloatingParser.opts.floatStrategy == BeamFloatingParser.FloatStrategy.Always)
+    if (InteractiveBeamParser.opts.floatStrategy == InteractiveBeamParser.FloatStrategy.Always)
       parseFloat = true;
-    else if (BeamFloatingParser.opts.floatStrategy == BeamFloatingParser.FloatStrategy.NoParse)
+    else if (InteractiveBeamParser.opts.floatStrategy == InteractiveBeamParser.FloatStrategy.NoParse)
       parseFloat = predDerivations.size() == 0;
     else
       parseFloat = false;
@@ -397,7 +411,7 @@ class BeamFloatingParserState extends ChartParserState {
           children.remove(children.size() - 1);
           if (mode != Mode.full)
             break; // Only need one hypothesis
-          if (numNew.value >= BeamFloatingParser.opts.maxNewTreesPerSpan)
+          if (numNew.value >= InteractiveBeamParser.opts.maxNewTreesPerSpan)
             return;
         }
       }
