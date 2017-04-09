@@ -71,7 +71,7 @@ After you run the above, there are 3 ways to interact and try your own commands.
 
        ./interactive/run @mode=simulator @server=local @sandbox=none @task=freebuild -maxQueries 103874
 
-  This currently takes just under 30 minutes. Decrease maxQuery for a quicker experiment. This generate `plotInfo.json` in `../state/execs/${lastExec}.exec/` where `lastExec` is `cat ../state/lastExec`.
+  This currently takes just under 30 minutes. Decrease maxQuery for a quicker experiment. This generate `plotInfo.json` in `./state/execs/${lastExec}.exec/` where `lastExec` is `cat ./state/lastExec`.
 
 3. Taking `../state/execs/${lastExec}.exec/plotInfo.json` as input, we can analyze the data and produce some plots using the following ipython notebook
 
