@@ -3,7 +3,10 @@
 <suite name="SempreTestSuite" verbose="10">
   <test name="AllTests">
     <packages>
-      <package name="edu.stanford.nlp.sempre" />
+      <package name="edu.stanford.nlp.sempre">
+				<exclude name="edu.stanford.nlp.sempre.interactive"></exclude>
+				<exclude name="edu.stanford.nlp.sempre.interactive.test"></exclude>
+			</package>
     </packages>
     <groups>
       <run>

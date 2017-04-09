@@ -2,6 +2,7 @@ package edu.stanford.nlp.sempre;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import fig.basic.*;
 
 /**
@@ -16,6 +17,8 @@ public class NumberFn extends SemanticFn {
     public boolean alsoTestByConversion = false;
     @Option(gloss = "Also test numbers by applying NER on just the phrase")
     public boolean alsoTestByIsolatedNER = false;
+    @Option(gloss = "range of allowed numbers. e.g. null: no limits, Lists.newArrayList(0,100): 0-100 inclusive")
+    public List<Double> allowedRange = null;
   }
   public static Options opts = new Options();
 
@@ -79,6 +82,13 @@ public class NumberFn extends SemanticFn {
           if (value != null) {
             try {
               NumberValue numberValue = new NumberValue(Double.parseDouble(value));
+              if (opts.allowedRange != null) {
+                if (numberValue.value < opts.allowedRange.get(0) || numberValue.value > opts.allowedRange.get(1)) {
+                  LogInfo.warnings("NumberFn: %f is outside of the allowed range %s", numberValue.value, opts.allowedRange);
+                  return null;
+                }
+              }
+
               SemType type = numberValue.value == (int) numberValue.value ? SemType.intType : SemType.floatType;
               return new Derivation.Builder()
                       .withCallable(c)

@@ -148,6 +148,14 @@ public class Learner {
     params.update(counts);
     LogInfo.end_track();
   }
+  
+  public void onlineLearnExampleByFormula(Example ex, List<Formula> formulas) {
+    HashMap<String, Double> counts = new HashMap<>();
+    for (Derivation deriv : ex.predDerivations)
+      deriv.compatibility = formulas.contains(deriv.formula)? 1 : 0;
+    ParserState.computeExpectedCounts(ex.predDerivations, counts);
+    params.update(counts);
+  }
 
   private Evaluation processExamples(int iter, String group,
       List<Example> examples, boolean computeExpectedCounts) {

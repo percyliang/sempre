@@ -88,6 +88,16 @@
     <jar destfile="${libsempre}/sempre-overnight.jar" basedir="${classes}/overnight"/>
   </target>
 
+  <!-- Compile interactive -->
+  <target name="interactive" depends="init,core">
+    <echo message="Compiling ${ant.project.name}: interactive"/>
+    <mkdir dir="${classes}/interactive"/>
+    <javac srcdir="${src}" destdir="${classes}/interactive" classpathref="lib.path" debug="true" includeantruntime="false" source="${source}" target="${target}">
+      <include name="edu/stanford/nlp/sempre/interactive/"/>
+    </javac>
+    <jar destfile="${libsempre}/sempre-interactive.jar" basedir="${classes}/interactive"/>
+  </target>
+
   <!-- Compile geo880 -->
   <target name="geo880" depends="init,core,corenlp,tables">
     <echo message="Compiling ${ant.project.name}: geo880"/>

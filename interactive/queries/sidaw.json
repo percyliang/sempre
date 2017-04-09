@@ -1,0 +1,185 @@
+{"time":"2017-01-22T00:14:52.709","sessionId":"sidaw","q":"(:q \"add red top 3 times\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:52.739","sessionId":"sidaw","q":"(:q \"add red top\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:52.786","sessionId":"sidaw","q":"(:accept \"add red top\" \"(: add red top)\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:52.797","sessionId":"sidaw","q":"(:q \"add red top 3 times\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:52.805","sessionId":"sidaw","q":"(:q \"repeat 3 [add red top]\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:52.812","sessionId":"sidaw","q":"(:accept \"repeat 3 [add red top]\" \"(:loop (number 3) (: add red top))\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:52.820","sessionId":"sidaw","q":"(:def_ret \"add red top 3 times\" \"[[\\\"repeat 3 [add red top]\\\",\\\"(:loop (number 3) (: add red top))\\\"]]\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:52.852","sessionId":"sidaw","q":"(:q \"add cardinal\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:52.858","sessionId":"sidaw","q":"(:q \"add red\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:52.863","sessionId":"sidaw","q":"(:accept \"add red\" \"(: add red here)\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:52.868","sessionId":"sidaw","q":"(:def_ret \"add cardinal\" \"[[\\\"add red\\\",\\\"(: add red here)\\\"]]\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:52.884","sessionId":"sidaw","q":"(:q \"yellow stick size 5\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:52.889","sessionId":"sidaw","q":"(:q \"repeat 5 [ add yellow; select top]\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:52.898","sessionId":"sidaw","q":"(:accept \"repeat 5 [ add yellow; select top]\" \"(:loop (number 5) (:s (: add yellow here) (: select (call adj top))))\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:52.905","sessionId":"sidaw","q":"(:def_ret \"yellow stick size 5\" \"[[\\\"repeat 5 [ add yellow; select top]\\\",\\\"(:loop (number 5) (:s (: add yellow here) (: select (call adj top))))\\\"]]\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:52.922","sessionId":"sidaw","q":"(:q \"yellow beam left 5\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:52.929","sessionId":"sidaw","q":"(:q \"{repeat  5 [ add yellow; select left]}\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:52.939","sessionId":"sidaw","q":"(:accept \"{repeat  5 [ add yellow; select left]}\" \"(:blk (:loop (number 5) (:s (: add yellow here) (: select (call adj left)))))\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:52.947","sessionId":"sidaw","q":"(:def_ret \"yellow beam left 5\" \"[[\\\"{repeat  5 [ add yellow; select left]}\\\",\\\"(:blk (:loop (number 5) (:s (: add yellow here) (: select (call adj left)))))\\\"]]\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:52.962","sessionId":"sidaw","q":"(:q \"move down\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:52.968","sessionId":"sidaw","q":"(:q \"move bot\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:52.978","sessionId":"sidaw","q":"(:q \"select bot\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:52.984","sessionId":"sidaw","q":"(:accept \"select bot\" \"(: select (call adj bot))\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:52.990","sessionId":"sidaw","q":"(:def_ret \"move down\" \"[[\\\"select bot\\\",\\\"(: select (call adj bot))\\\"]]\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:52.999","sessionId":"sidaw","q":"(:q \"move down\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.006","sessionId":"sidaw","q":"(:q \"move bot\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.012","sessionId":"sidaw","q":"(:q \"move right\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.015","sessionId":"sidaw","q":"(:accept \"move right\" \"(: move right)\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.021","sessionId":"sidaw","q":"(:q \"move up\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.028","sessionId":"sidaw","q":"(:q \"move top\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.032","sessionId":"sidaw","q":"(:accept \"move top\" \"(: move top)\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.036","sessionId":"sidaw","q":"(:def_ret \"move up\" \"[[\\\"move top\\\",\\\"(: move top)\\\"]]\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.046","sessionId":"sidaw","q":"(:q \"move up\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.051","sessionId":"sidaw","q":"(:accept \"move up\" \"(: move top)\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.057","sessionId":"sidaw","q":"(:accept \"move up\" \"(not *)\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.063","sessionId":"sidaw","q":"(:q \"select top\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.066","sessionId":"sidaw","q":"(:accept \"select top\" \"(: select (call adj top))\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.070","sessionId":"sidaw","q":"(:def_ret \"move up\" \"[[\\\"select top\\\",\\\"(: select (call adj top))\\\"]]\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.081","sessionId":"sidaw","q":"(:q \"move up\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.090","sessionId":"sidaw","q":"(:q \"select yellow\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.096","sessionId":"sidaw","q":"(:q \"select has color yellow\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.102","sessionId":"sidaw","q":"(:accept \"select has color yellow\" \"(: select (color yellow))\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.106","sessionId":"sidaw","q":"(:def_ret \"select yellow\" \"[[\\\"select has color yellow\\\",\\\"(: select (color yellow))\\\"]]\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.115","sessionId":"sidaw","q":"(:q \"update color red\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.119","sessionId":"sidaw","q":"(:accept \"update color red\" \"(: update color red)\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.124","sessionId":"sidaw","q":"(:q \"select origin\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.128","sessionId":"sidaw","q":"(:accept \"select origin\" \"(: select (call origin))\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.135","sessionId":"sidaw","q":"(:q \"select red\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.139","sessionId":"sidaw","q":"(:accept \"select red\" \"(: select (color red))\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.148","sessionId":"sidaw","q":"(:q \"foreach red [move right]\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.155","sessionId":"sidaw","q":"(:q \"foreach has color red [move right]\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.162","sessionId":"sidaw","q":"(:accept \"foreach has color red [move right]\" \"(:foreach (color red) (: move right))\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.169","sessionId":"sidaw","q":"(:def_ret \"foreach red [move right]\" \"[[\\\"foreach has color red [move right]\\\",\\\"(:foreach (color red) (: move right))\\\"]]\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.182","sessionId":"sidaw","q":"(:q \"remove red\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.187","sessionId":"sidaw","q":"(:q \"remove has color red\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.191","sessionId":"sidaw","q":"(:accept \"remove has color red\" \"(: remove (color red))\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.195","sessionId":"sidaw","q":"(:def_ret \"remove red\" \"[[\\\"remove has color red\\\",\\\"(: remove (color red))\\\"]]\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.204","sessionId":"sidaw","q":"(:q \"select none\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.207","sessionId":"sidaw","q":"(:accept \"select none\" \"(: select nothing)\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.213","sessionId":"sidaw","q":"(:q \"select origin\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.216","sessionId":"sidaw","q":"(:accept \"select origin\" \"(: select (call origin))\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.220","sessionId":"sidaw","q":"(:q \"yellow sq size 3\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.225","sessionId":"sidaw","q":"(:q \"yellow beam back 3\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.230","sessionId":"sidaw","q":"(:q \"repeat 3 [yellow beam back 3; select left]\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.238","sessionId":"sidaw","q":"(:accept \"repeat 3 [yellow beam back 3; select left]\" \"(:loop (number 3) (:s (:blk (:loop (number 3) (:s (: add yellow here) (: select (call adj back))))) (: select (call adj left))))\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.250","sessionId":"sidaw","q":"(:q \"select front\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.255","sessionId":"sidaw","q":"(:accept \"select front\" \"(: select (call adj front))\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.259","sessionId":"sidaw","q":"(:def \"yellow sq size 3\" \"[[\\\"repeat 3 [yellow beam back 3; select left]\\\",\\\"(:loop (number 3) (:s (:blk (:loop (number 3) (:s (: add yellow here) (: select (call adj back))))) (: select (call adj left))))\\\"],[\\\"select front\\\",\\\"(: select (call adj front))\\\"]]\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.276","sessionId":"sidaw","q":"(:q \"yellow sq size 3\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.281","sessionId":"sidaw","q":"(:accept \"yellow sq size 3\" \"(:blk (:loop (number 3) (:s (:blk (:loop (number 3) (:s (: add yellow here) (: select (call adj back))))) (: select (call adj left)))) (: select (call adj front)))\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.291","sessionId":"sidaw","q":"(:q \"select origin\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.295","sessionId":"sidaw","q":"(:accept \"select origin\" \"(: select (call origin))\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.303","sessionId":"sidaw","q":"(:q \"red sq size 4\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.311","sessionId":"sidaw","q":"(:accept \"red sq size 4\" \"(:blk (:loop (number 4) (:s (:blk (:loop (number 4) (:s (: add red here) (: select (call adj back))))) (: select (call adj left)))) (: select (call adj front)))\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.327","sessionId":"sidaw","q":"(:q \"red cube size 4\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.331","sessionId":"sidaw","q":"(:q \"red sq size 4\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.337","sessionId":"sidaw","q":"(:accept \"red sq size 4\" \"(:blk (:loop (number 4) (:s (:blk (:loop (number 4) (:s (: add red here) (: select (call adj back))))) (: select (call adj left)))) (: select (call adj front)))\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.345","sessionId":"sidaw","q":"(:q \"repeat 4-1 [select top; red sq size 4]\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.358","sessionId":"sidaw","q":"(:accept \"repeat 4-1 [select top; red sq size 4]\" \"(:loop (- (number 4) (number 1)) (:s (: select (call adj top)) (:blk (:loop (number 4) (:s (:blk (:loop (number 4) (:s (: add red here) (: select (call adj back))))) (: select (call adj left)))) (: select (call adj front)))))\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.377","sessionId":"sidaw","q":"(:def \"red cube size 4\" \"[[\\\"red sq size 4\\\",\\\"(:blk (:loop (number 4) (:s (:blk (:loop (number 4) (:s (: add red here) (: select (call adj back))))) (: select (call adj left)))) (: select (call adj front)))\\\"],[\\\"repeat 4-1 [select top; red sq size 4]\\\",\\\"(:loop (- (number 4) (number 1)) (:s (: select (call adj top)) (:blk (:loop (number 4) (:s (:blk (:loop (number 4) (:s (: add red here) (: select (call adj back))))) (: select (call adj left)))) (: select (call adj front)))))\\\"]]\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.412","sessionId":"sidaw","q":"(:q \"brown cube size 4\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.436","sessionId":"sidaw","q":"(:q \"brown cube size 5\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.462","sessionId":"sidaw","q":"(:q \"move back\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.471","sessionId":"sidaw","q":"(:accept \"move back\" \"(: move back)\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.490","sessionId":"sidaw","q":"(:q \"select very back of very top of red\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.498","sessionId":"sidaw","q":"(:q \"select very back of very top of has color red\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.508","sessionId":"sidaw","q":"(:accept \"select very back of very top of has color red\" \"(: select (call veryx back (call veryx top (color red))))\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.522","sessionId":"sidaw","q":"(:q \"add blue top\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.528","sessionId":"sidaw","q":"(:accept \"add blue top\" \"(: add blue top)\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.542","sessionId":"sidaw","q":"(:q \"select blue\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.549","sessionId":"sidaw","q":"(:accept \"select blue\" \"(: select (color blue))\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.561","sessionId":"sidaw","q":"(:q \"select this and not very left and not very right\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.573","sessionId":"sidaw","q":"(:accept \"select this and not very left and not very right\" \"(: select (and (and this (not (call veryx left))) (not (call veryx right))))\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.593","sessionId":"sidaw","q":"(:q \"add yellow top\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.599","sessionId":"sidaw","q":"(:accept \"add yellow top\" \"(: add yellow top)\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.605","sessionId":"sidaw","q":"(:q \"brown beam top 5\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.609","sessionId":"sidaw","q":"(:q \"brown beam top 10\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.613","sessionId":"sidaw","q":"(:q \"brown beam top 12\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.616","sessionId":"sidaw","q":"(:q \"brown beam top 9\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.621","sessionId":"sidaw","q":"(:q \"brown beam top 10\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.624","sessionId":"sidaw","q":"(:accept \"brown beam top 10\" \"(:blk (:loop (number 10) (:s (: add brown here) (: select (call adj top)))))\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.630","sessionId":"sidaw","q":"(:q \"green branch 3\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.637","sessionId":"sidaw","q":"(:q \"repeat 3 [add green left; add green right; add green front; add green back]\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.644","sessionId":"sidaw","q":"(:accept \"repeat 3 [add green left; add green right; add green front; add green back]\" \"(:loop (number 3) (:s (:s (:s (: add green left) (: add green right)) (: add green front)) (: add green back)))\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.651","sessionId":"sidaw","q":"(:def_ret \"green branch 3\" \"[[\\\"repeat 3 [add green left; add green right; add green front; add green back]\\\",\\\"(:loop (number 3) (:s (:s (:s (: add green left) (: add green right)) (: add green front)) (: add green back)))\\\"]]\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.664","sessionId":"sidaw","q":"(:q \"select top\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.666","sessionId":"sidaw","q":"(:accept \"select top\" \"(: select (call adj top))\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.672","sessionId":"sidaw","q":"(:q \"green branch 3\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.678","sessionId":"sidaw","q":"(:q \"green branch 4\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.682","sessionId":"sidaw","q":"(:accept \"green branch 4\" \"(:loop (number 4) (:s (:s (:s (: add green left) (: add green right)) (: add green front)) (: add green back)))\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.695","sessionId":"sidaw","q":"(:q \"select top of top\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.699","sessionId":"sidaw","q":"(:accept \"select top of top\" \"(: select (call adj top (call adj top)))\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.704","sessionId":"sidaw","q":"(:q \"yellow branch 5\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.712","sessionId":"sidaw","q":"(:q \"green branch 5\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.717","sessionId":"sidaw","q":"(:accept \"green branch 5\" \"(:loop (number 5) (:s (:s (:s (: add green left) (: add green right)) (: add green front)) (: add green back)))\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.728","sessionId":"sidaw","q":"(:q \"select top\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.734","sessionId":"sidaw","q":"(:accept \"select top\" \"(: select (call adj top))\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.745","sessionId":"sidaw","q":"(:q \"green branch 3\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.751","sessionId":"sidaw","q":"(:accept \"green branch 3\" \"(:loop (number 3) (:s (:s (:s (: add green left) (: add green right)) (: add green front)) (: add green back)))\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.763","sessionId":"sidaw","q":"(:q \"select top of top\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.769","sessionId":"sidaw","q":"(:accept \"select top of top\" \"(: select (call adj top (call adj top)))\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.780","sessionId":"sidaw","q":"(:q \"green branch 2\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.785","sessionId":"sidaw","q":"(:accept \"green branch 2\" \"(:loop (number 2) (:s (:s (:s (: add green left) (: add green right)) (: add green front)) (: add green back)))\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.801","sessionId":"sidaw","q":"(:q \"select top of top\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.808","sessionId":"sidaw","q":"(:accept \"select top of top\" \"(: select (call adj top (call adj top)))\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.818","sessionId":"sidaw","q":"(:q \"green branch\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.826","sessionId":"sidaw","q":"(:q \"green branch 1\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.831","sessionId":"sidaw","q":"(:accept \"green branch 1\" \"(:loop (number 1) (:s (:s (:s (: add green left) (: add green right)) (: add green front)) (: add green back)))\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.839","sessionId":"sidaw","q":"(:q \"brown beam top 10\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.844","sessionId":"sidaw","q":"(:accept \"brown beam top 10\" \"(:blk (:loop (number 10) (:s (: add brown here) (: select (call adj top)))))\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.850","sessionId":"sidaw","q":"(:q \"green branch 1; select top\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.854","sessionId":"sidaw","q":"(:accept \"green branch 1; select top\" \"(:s (:loop (number 1) (:s (:s (:s (: add green left) (: add green right)) (: add green front)) (: add green back))) (: select (call adj top)))\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.862","sessionId":"sidaw","q":"(:q \"green branch 2; select top\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.866","sessionId":"sidaw","q":"(:accept \"green branch 2; select top\" \"(:s (:loop (number 2) (:s (:s (:s (: add green left) (: add green right)) (: add green front)) (: add green back))) (: select (call adj top)))\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.872","sessionId":"sidaw","q":"(:q \"green branch 5; select top\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.876","sessionId":"sidaw","q":"(:accept \"green branch 5; select top\" \"(:s (:loop (number 5) (:s (:s (:s (: add green left) (: add green right)) (: add green front)) (: add green back))) (: select (call adj top)))\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.885","sessionId":"sidaw","q":"(:q \"green branch 4; select top\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.891","sessionId":"sidaw","q":"(:accept \"green branch 4; select top\" \"(:s (:loop (number 4) (:s (:s (:s (: add green left) (: add green right)) (: add green front)) (: add green back))) (: select (call adj top)))\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.903","sessionId":"sidaw","q":"(:q \"green branch 3; select top\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.909","sessionId":"sidaw","q":"(:accept \"green branch 3; select top\" \"(:s (:loop (number 3) (:s (:s (:s (: add green left) (: add green right)) (: add green front)) (: add green back))) (: select (call adj top)))\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.922","sessionId":"sidaw","q":"(:q \"green branch 2; select top\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.927","sessionId":"sidaw","q":"(:accept \"green branch 2; select top\" \"(:s (:loop (number 2) (:s (:s (:s (: add green left) (: add green right)) (: add green front)) (: add green back))) (: select (call adj top)))\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.941","sessionId":"sidaw","q":"(:q \"green branch 1; select top\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.946","sessionId":"sidaw","q":"(:accept \"green branch 1; select top\" \"(:s (:loop (number 1) (:s (:s (:s (: add green left) (: add green right)) (: add green front)) (: add green back))) (: select (call adj top)))\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.960","sessionId":"sidaw","q":"(:q \"red branch 1; select top\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.966","sessionId":"sidaw","q":"(:accept \"red branch 1; select top\" \"(:s (:loop (number 1) (:s (:s (:s (: add red left) (: add red right)) (: add red front)) (: add red back))) (: select (call adj top)))\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.980","sessionId":"sidaw","q":"(:q \"red branch 2; select top\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:53.988","sessionId":"sidaw","q":"(:accept \"red branch 2; select top\" \"(:s (:loop (number 2) (:s (:s (:s (: add red left) (: add red right)) (: add red front)) (: add red back))) (: select (call adj top)))\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:54.004","sessionId":"sidaw","q":"(:q \"red branch 3; select top\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:54.012","sessionId":"sidaw","q":"(:accept \"red branch 3; select top\" \"(:s (:loop (number 3) (:s (:s (:s (: add red left) (: add red right)) (: add red front)) (: add red back))) (: select (call adj top)))\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:54.030","sessionId":"sidaw","q":"(:q \"red branch 4; select top\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:54.041","sessionId":"sidaw","q":"(:accept \"red branch 4; select top\" \"(:s (:loop (number 4) (:s (:s (:s (: add red left) (: add red right)) (: add red front)) (: add red back))) (: select (call adj top)))\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:54.060","sessionId":"sidaw","q":"(:q \"red branch 5; select top\")","remote":"localhost"}
+{"time":"2017-01-22T00:14:54.073","sessionId":"sidaw","q":"(:accept \"red branch 5; select top\" \"(:s (:loop (number 5) (:s (:s (:s (: add red left) (: add red right)) (: add red front)) (: add red back))) (: select (call adj top)))\")","remote":"localhost"}
+{"time":"2017-01-22T00:16:42.444","sessionId":"w3nFZG1uYN","q":"(:q \"while [has color red] [select up; add yellow]\")","remote":"localhost"}
+{"time":"2017-01-22T00:16:45.576","sessionId":"w3nFZG1uYN","q":"(:accept \"while [has color red] [select up; add yellow]\" \"(:while (color red) (:s (: select (call adj top)) (: add yellow here)))\")","remote":"localhost"}
+{"time":"2017-01-22T00:17:16.687","sessionId":"w3nFZG1uYN","q":"(:q \"while [this and has color red] [select up; add yellow]\")","remote":"localhost"}
+{"time":"2017-01-22T00:17:25.866","sessionId":"w3nFZG1uYN","q":"(:q \"red cube size 5\")","remote":"localhost"}
+{"time":"2017-01-22T00:17:26.172","sessionId":"w3nFZG1uYN","q":"(:accept \"red cube size 5\" \"(:blk (:blk (:loop (number 5) (:s (:blk (:loop (number 5) (:s (: add red here) (: select (call adj back))))) (: select (call adj left)))) (: select (call adj front))) (:loop (- (number 5) (number 1)) (:s (: select (call adj top)) (:blk (:loop (number 5) (:s (:blk (:loop (number 5) (:s (: add red here) (: select (call adj back))))) (: select (call adj left)))) (: select (call adj front))))))\")","remote":"localhost"}
+{"time":"2017-01-22T00:17:27.580","sessionId":"w3nFZG1uYN","q":"(:q \"while [this and has color red] [select up; add yellow]\")","remote":"localhost"}
+{"time":"2017-01-22T00:17:42.205","sessionId":"w3nFZG1uYN","q":"(:q \"while [this and has color red] [add yellow; select up]\")","remote":"localhost"}
+{"time":"2017-01-22T00:17:43.220","sessionId":"w3nFZG1uYN","q":"(:accept \"while [this and has color red] [add yellow; select up]\" \"(:while (and this (color red)) (:s (: add yellow here) (: select (call adj top))))\")","remote":"localhost"}
+{"time":"2017-01-22T00:19:24.781","sessionId":"w3nFZG1uYN","q":"(:q \"replace the red with yellow\")","remote":"localhost"}
+{"time":"2017-01-22T00:19:33.117","sessionId":"w3nFZG1uYN","q":"(:def_ret \"replace the red with yellow\" \"[[\\\"while [this and has color red] [add yellow; select up]\\\",\\\"(:while (and this (color red)) (:s (: add yellow here) (: select (call adj top))))\\\"]]\")","remote":"localhost"}
+{"time":"2017-01-22T00:19:37.579","sessionId":"w3nFZG1uYN","q":"(:q \"select origin\")","remote":"localhost"}
+{"time":"2017-01-22T00:19:38.099","sessionId":"w3nFZG1uYN","q":"(:accept \"select origin\" \"(: select (call origin))\")","remote":"localhost"}
+{"time":"2017-01-22T00:19:41.179","sessionId":"w3nFZG1uYN","q":"(:q \"select right of right\")","remote":"localhost"}
+{"time":"2017-01-22T00:19:45.019","sessionId":"w3nFZG1uYN","q":"(:q \"select left of left\")","remote":"localhost"}
+{"time":"2017-01-22T00:19:45.439","sessionId":"w3nFZG1uYN","q":"(:accept \"select left of left\" \"(: select (call adj left (call adj left)))\")","remote":"localhost"}
+{"time":"2017-01-22T00:19:52.202","sessionId":"w3nFZG1uYN","q":"(:q \"replace the red with orange\")","remote":"localhost"}
+{"time":"2017-01-22T00:19:52.897","sessionId":"w3nFZG1uYN","q":"(:accept \"replace the red with orange\" \"(:while (and this (color red)) (:s (: add orange here) (: select (call adj top))))\")","remote":"localhost"}
+{"time":"2017-01-22T00:20:50.449","sessionId":"w3nFZG1uYN","q":"(:q \"add red\")","remote":"localhost"}
+{"time":"2017-01-22T00:20:50.777","sessionId":"w3nFZG1uYN","q":"(:accept \"add red\" \"(: add red here)\")","remote":"localhost"}
+{"time":"2017-01-22T00:20:55.194","sessionId":"w3nFZG1uYN","q":"(:q \"select left 6 times\")","remote":"localhost"}
+{"time":"2017-01-22T00:20:55.638","sessionId":"w3nFZG1uYN","q":"(:accept \"select left 6 times\" \"(:loop (number 6) (: select (call adj left)))\")","remote":"localhost"}
+{"time":"2017-01-22T00:21:07.717","sessionId":"w3nFZG1uYN","q":"(:q \"move right to the red block\")","remote":"localhost"}
+{"time":"2017-01-22T00:21:38.542","sessionId":"w3nFZG1uYN","q":"(:q \"while [has color red and not this] [move right]\")","remote":"localhost"}
+{"time":"2017-01-22T00:21:45.078","sessionId":"w3nFZG1uYN","q":"(:q \"while [has color red and not this] [select right]\")","remote":"localhost"}
+{"time":"2017-01-22T00:21:46.845","sessionId":"w3nFZG1uYN","q":"(:accept \"while [has color red and not this] [select right]\" \"(:while (and (color red) (not this)) (: select (call adj right)))\")","remote":"localhost"}
+{"time":"2017-01-22T00:21:53.183","sessionId":"w3nFZG1uYN","q":"(:def_ret \"move right to the red block\" \"[[\\\"while [has color red and not this] [select right]\\\",\\\"(:while (and (color red) (not this)) (: select (call adj right)))\\\"]]\")","remote":"localhost"}
+{"time":"2017-01-22T00:21:58.891","sessionId":"w3nFZG1uYN","q":"(:q \"move left 3 times\")","remote":"localhost"}
+{"time":"2017-01-22T00:22:03.707","sessionId":"w3nFZG1uYN","q":"(:q \"select left 3 times\")","remote":"localhost"}
+{"time":"2017-01-22T00:22:04.077","sessionId":"w3nFZG1uYN","q":"(:accept \"select left 3 times\" \"(:loop (number 3) (: select (call adj left)))\")","remote":"localhost"}
+{"time":"2017-01-22T00:22:07.389","sessionId":"w3nFZG1uYN","q":"(:q \"move right to the red block\")","remote":"localhost"}
+{"time":"2017-01-22T00:22:07.797","sessionId":"w3nFZG1uYN","q":"(:accept \"move right to the red block\" \"(:while (and (color red) (not this)) (: select (call adj right)))\")","remote":"localhost"}

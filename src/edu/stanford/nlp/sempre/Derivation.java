@@ -24,8 +24,14 @@ public class Derivation implements SemanticFn.Callable, HasScore {
     public boolean showRules = false;
     @Option(gloss = "When printing derivations, to show canonical utterance")
     public boolean showUtterance = false;
+    @Option(gloss = "When printing derivations, show the category")
+    public boolean showCat = false;
     @Option(gloss = "When executing, show formulae (for debugging)")
     public boolean showExecutions = false;
+    @Option(gloss = "Pick the comparator used to sort derivations")
+    public String derivComparator = "ScoredDerivationComparator";
+    @Option(gloss = "bonus score for being all anchored")
+    public double anchoredBonus = 0.0;
   }
 
   public static Options opts = new Options();
@@ -40,7 +46,24 @@ public class Derivation implements SemanticFn.Callable, HasScore {
   // Floating cell information
   // TODO(yushi): make fields final
   public String canonicalUtterance;
+  public boolean allAnchored = true;
   private int[] numAnchors;     // Number of times each token was anchored
+  
+  /**
+  * Information for grammar induction.
+  * For each descendant derivation of the body, this class tracks where and what in the head it matches
+  * GrammarInfo.start, GrammarInfo.end refer to matching positions in the head, as opposed to the body
+  * @author sidaw
+  **/
+  public class GrammarInfo {
+    public boolean anchored = false;
+    public boolean matched = false;
+    public int start = -1, end = -1;
+    public Formula formula;
+    public List<Derivation> matches = new ArrayList<>();
+  }
+  public GrammarInfo grammarInfo = new GrammarInfo();
+
 
   // If this derivation is composed of other derivations
   public final Rule rule;  // Which rule was used to produce this derivation?  Set to nullRule if not.
@@ -63,7 +86,7 @@ public class Derivation implements SemanticFn.Callable, HasScore {
   // Information for scoring
   private final FeatureVector localFeatureVector;  // Features
   double score = Double.NaN;  // Weighted combination of features
-  public double prob = Double.NaN;  // Probability (normalized exp of score).
+  double prob = Double.NaN;  // Probability (normalized exp of score).
 
   // Used during parsing (by FeatureExtractor, SemanticFn) to cache arbitrary
   // computation across different sub-Derivations.
@@ -93,7 +116,9 @@ public class Derivation implements SemanticFn.Callable, HasScore {
   // we can break ties consistently for reproducible results.
   long creationIndex;
   public static long numCreated = 0;  // Incremented for each derivation we create.
-  public static final Comparator<Derivation> derivScoreComparator = new ScoredDerivationComparator();
+  @SuppressWarnings("unchecked")
+  public static final Comparator<Derivation> derivScoreComparator =
+      (Comparator<Derivation>)Utils.newInstanceHard(SempreUtils.resolveClassName("Derivation$" + opts.derivComparator));
 
   public static final List<Derivation> emptyList = Collections.emptyList();
 
@@ -241,7 +266,7 @@ public class Derivation implements SemanticFn.Callable, HasScore {
   public void addFeatures(FeatureVector fv) { this.localFeatureVector.add(fv); }
 
   public double localScore(Params params) {
-    return localFeatureVector.dotProduct(params);
+    return localFeatureVector.dotProduct(params) + (this.allAnchored()? opts.anchoredBonus : 0.0);
   }
 
   // SHOULD NOT BE USED except during test time if the memory is desperately needed.
@@ -311,6 +336,9 @@ public class Derivation implements SemanticFn.Callable, HasScore {
     }
     if (opts.showUtterance && canonicalUtterance != null) {
       tree.addChild(LispTree.proto.newList("canonicalUtterance", canonicalUtterance));
+    }
+    if (opts.showCat && cat != null) {
+      tree.addChild(LispTree.proto.newList("cat", cat));
     }
     return tree;
   }
@@ -431,6 +459,25 @@ public class Derivation implements SemanticFn.Callable, HasScore {
       return 0;
     }
   }
+  
+  //Used to compare derivations by score, prioritizing the fully anchored.
+  public static class AnchorPriorityScoreComparator implements Comparator<Derivation> {
+    @Override
+    public int compare(Derivation deriv1, Derivation deriv2) {
+      boolean deriv1Core = deriv1.allAnchored();
+      boolean deriv2Core = deriv2.allAnchored();
+    
+      if (deriv1Core && !deriv2Core) return -1;
+      if (deriv2Core && !deriv1Core) return +1;
+      
+      if (deriv1.score > deriv2.score) return -1;
+      if (deriv1.score < deriv2.score) return +1;
+      // Ensure reproducible randomness
+      if (deriv1.creationIndex < deriv2.creationIndex) return -1;
+      if (deriv1.creationIndex > deriv2.creationIndex) return +1;
+      return 0;
+    }
+  }
 
   // for debugging
   public void printDerivationRecursively() {
@@ -516,5 +563,17 @@ public class Derivation implements SemanticFn.Callable, HasScore {
   public Derivation betaReduction() {
     Formula reduced = Formulas.betaReduction(formula);
     return new Builder().withAllFrom(this).formula(reduced).createDerivation();
+  }
+
+  public boolean allAnchored() {
+    if (rule.isInduced() || !this.allAnchored) {
+      this.allAnchored = false;
+      return false;
+    } else {
+      for (Derivation child : children) {
+        if (child.allAnchored() == false) return false;
+      }
+      return true;
+    }
   }
 }

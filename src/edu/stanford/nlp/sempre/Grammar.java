@@ -35,6 +35,8 @@ public class Grammar {
     @Option(gloss = "Variables which are used to interpret the grammar file")
     public List<String> tags = new ArrayList<>();
     @Option public boolean binarizeRules = true;
+    @Option(gloss = "Specifiy which ApplyFn to use: defaults to JoinFn when null")
+    public String useApplyFn = null;
   }
 
   public static Options opts = new Options();
@@ -524,13 +526,20 @@ public class Grammar {
 
     String name = tree.child(0).value;
 
-    // Syntactic sugar: (lambda x (var x)) => (JoinFn betaReduce forward (arg0 (lambda x (var x))))
+    // Syntactic sugar: (lambda x (f (var x))) => (useApplyFn (lambda x (f (var x))))
+    // defaults to (lambda x (var x)) => (JoinFn betaReduce forward (arg0 (lambda x (var x))))
     if (name.equals("lambda")) {
       LispTree newTree = LispTree.proto.newList();
-      newTree.addChild("JoinFn");
-      newTree.addChild("betaReduce");
-      newTree.addChild("forward");
-      newTree.addChild(LispTree.proto.newList("arg0", tree));
+
+      if (Grammar.opts.useApplyFn == null) {
+        newTree.addChild("JoinFn");
+        newTree.addChild("betaReduce");
+        newTree.addChild("forward");
+        newTree.addChild(LispTree.proto.newList("arg0", tree));
+      } else {
+        newTree.addChild(Grammar.opts.useApplyFn);
+        newTree.addChild(tree);
+      }
       tree = newTree;
       name = tree.child(0).value;
     }

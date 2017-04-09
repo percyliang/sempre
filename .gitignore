@@ -36,3 +36,11 @@ java.hprof.txt
 /x
 scr
 rdf
+
+# interactive outputs
+int-output*
+int-backup
+interactive/.ipynb_checkpoints
+# Community server logs
+community-server/data
+community-server/data-backup
