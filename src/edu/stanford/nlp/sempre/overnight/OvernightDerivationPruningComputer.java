@@ -20,7 +20,7 @@ public class OvernightDerivationPruningComputer extends DerivationPruningCompute
   }
 
   @Override
-  public String isPrunedGeneral(Derivation deriv) {
+  public String isPruned(Derivation deriv) {
     if (containsStrategy("violateHardConstraints") && violateHardConstraints(deriv)) return "violateHardConstraints";
     return null;
   }

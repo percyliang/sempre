@@ -41,14 +41,16 @@ public class TableDerivationPruningComputer extends DerivationPruningComputer {
   private final Formula IDENTITY = Formula.fromString("(reverse (lambda x (var x)))");
 
   @Override
-  public String isPrunedGeneral(Derivation deriv) {
+  public String isPruned(Derivation deriv) {
     // lambdaDCSError: Prune unrecoverable LambdaDCSException
     if (containsStrategy(lambdaDCSError)) {
+      deriv.ensureExecuted(parser.executor, ex.context);
       if (deriv.value instanceof ErrorValue && LambdaDCSException.isUnrecoverable(((ErrorValue) deriv.value).type))
         return lambdaDCSError;
     }
     // emptyDenotation: Prune if the denotation is empty (for ScopedValue)
     if (containsStrategy(emptyDenotation)) {
+      deriv.ensureExecuted(parser.executor, ex.context);
       if (deriv.value instanceof PairListValue && ((PairListValue) deriv.value).pairs.isEmpty()) {
         return emptyDenotation;
       }
@@ -61,6 +63,7 @@ public class TableDerivationPruningComputer extends DerivationPruningComputer {
     }
     // badSummarizerHead: Prune if the head of a ScopedValue is empty or is a single object
     if (containsStrategy(badSummarizerHead)) {
+      deriv.ensureExecuted(parser.executor, ex.context);
       if (deriv.value instanceof ScopedValue) {
         Value head = ((ScopedValue) deriv.value).head;
         if ((head instanceof ListValue) && ((ListValue) head).values.size() == 1)
@@ -84,18 +87,14 @@ public class TableDerivationPruningComputer extends DerivationPruningComputer {
         }
       }
     }
-    return null;
-  }
-
-  @Override
-  public String isPrunedRecursive(Derivation deriv, Formula subformula, Map<String, Object> state) {
     // Prune JoinFormulas
-    if (subformula instanceof JoinFormula) {
-      JoinFormula join1 = (JoinFormula) subformula;
-      if (join1.child instanceof JoinFormula) {
-        JoinFormula join2 = (JoinFormula) join1.child;
-        String rid1 = Formulas.getBinaryId(join1.relation),
-            rid2 = Formulas.getBinaryId(join2.relation);
+    if (containsStrategy(forwardBackward) || containsStrategy(doubleNext)
+        || containsStrategy(doubleCompares) || containsStrategy(emptyJoin)) {
+      Formula current = deriv.formula;
+      String rid1 = null, rid2 = null;
+      while (current instanceof JoinFormula) {
+        rid2 = rid1;
+        rid1 = Formulas.getBinaryId(((JoinFormula) current).relation);
         if (rid1 != null && rid2 != null) {
           // forwardBackward: Prune (!relation (relation (...)))
           if (containsStrategy(forwardBackward) && (rid1.equals("!" + rid2) || rid2.equals("!" + rid1)))
@@ -120,11 +119,12 @@ public class TableDerivationPruningComputer extends DerivationPruningComputer {
             }
           }
         }
+        current = ((JoinFormula) current).child;
       }
     }
     // Prune merge formulas
-    else if (subformula instanceof MergeFormula) {
-      MergeFormula merge = (MergeFormula) subformula;
+    if (containsStrategy(subsetMerge) && deriv.formula instanceof MergeFormula) {
+      MergeFormula merge = (MergeFormula) deriv.formula;
       Formula child1 = merge.child1, child2 = merge.child2;
       // subsetMerge: Prune merge formulas where one child is a subset of the other
       if (containsStrategy(subsetMerge)) {
@@ -145,8 +145,8 @@ public class TableDerivationPruningComputer extends DerivationPruningComputer {
         return typeRowMerge;
     }
     // Prune aggregate formulas
-    else if (subformula instanceof AggregateFormula) {
-      AggregateFormula aggregate = (AggregateFormula) subformula;
+    else if (deriv.formula instanceof AggregateFormula) {
+      AggregateFormula aggregate = (AggregateFormula) deriv.formula;
       Formula child = aggregate.child;
       // aggregateInfinite: Prune aggregates when the child is an infinite set
       if (containsStrategy(aggregateInfinite) && child instanceof JoinFormula) {
@@ -167,22 +167,23 @@ public class TableDerivationPruningComputer extends DerivationPruningComputer {
       }
     }
     // Prune superlative formulas
-    else if (subformula instanceof SuperlativeFormula) {
-      SuperlativeFormula superlative = (SuperlativeFormula) subformula;
+    else if (deriv.formula instanceof SuperlativeFormula) {
+      SuperlativeFormula superlative = (SuperlativeFormula) deriv.formula;
       Formula relation = superlative.relation;
       // superlativeIdentity: Prune superlatives when the relation is exactly (lambda x (var x))
       if (containsStrategy(superlativeIdentity) && IDENTITY.equals(relation)) {
         return superlativeIdentity;
       }
     }
-    // For ScopedFormula
-    if (!DerivationPruner.opts.recursivePruning && subformula instanceof ScopedFormula) {
-      Formula relation = ((ScopedFormula) subformula).relation;
+    // For ScopedFormula: recurse into the relation part
+    if (deriv.formula instanceof ScopedFormula) {
+      Formula relation = ((ScopedFormula) deriv.formula).relation;
       if (relation instanceof LambdaFormula) {
         relation = ((LambdaFormula) relation).body;
+        Derivation relationDeriv = new Derivation.Builder().formula(relation).createDerivation();
         String matchedStrategy;
         for (DerivationPruningComputer computer : pruner.getPruningComputers()) {
-          if ((matchedStrategy = computer.isPrunedRecursive(deriv, relation, new HashMap<>())) != null) {
+          if ((matchedStrategy = computer.isPruned(relationDeriv)) != null) {
             return matchedStrategy;
           }
         }

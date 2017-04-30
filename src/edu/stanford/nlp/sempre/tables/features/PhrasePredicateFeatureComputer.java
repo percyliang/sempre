@@ -43,8 +43,6 @@ public class PhrasePredicateFeatureComputer implements FeatureComputer {
   public PhrasePredicateFeatureComputer() {
     maxNforLexicalizeAllPairs = Math.min(opts.maxNforLexicalizeAllPairs, PhraseInfo.opts.maxPhraseLength);
   }
-  
-  @Override public void setExecutor(Executor executor) { }    // Do nothing
 
   @Override
   public void extractLocal(Example ex, Derivation deriv) {

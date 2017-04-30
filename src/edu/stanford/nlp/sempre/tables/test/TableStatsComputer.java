@@ -88,7 +88,7 @@ public class TableStatsComputer implements Runnable {
         outputFields.add("number");
         // (and (@type @cell) (@p.num ___))
         Formula formula = new MergeFormula(Mode.and,
-            new JoinFormula(Formula.fromString(CanonicalNames.TYPE), Formula.fromString(TableTypeSystem.CELL_TYPE)),
+            new JoinFormula(Formula.fromString(CanonicalNames.TYPE), Formula.fromString(TableTypeSystem.CELL_GENERIC_TYPE)),
             new JoinFormula(Formula.fromString(TableTypeSystem.CELL_NUMBER_VALUE.id), new ValueFormula<Value>(value)));
         Value result = builder.executor.execute(formula, ex.context).value;
         inTable = result instanceof ListValue && !((ListValue) result).values.isEmpty();
@@ -97,7 +97,7 @@ public class TableStatsComputer implements Runnable {
         outputFields.add("date");
         // (and (@type @cell) (@p.num ___))
         Formula formula = new MergeFormula(Mode.and,
-            new JoinFormula(Formula.fromString(CanonicalNames.TYPE), Formula.fromString(TableTypeSystem.CELL_TYPE)),
+            new JoinFormula(Formula.fromString(CanonicalNames.TYPE), Formula.fromString(TableTypeSystem.CELL_GENERIC_TYPE)),
             new JoinFormula(Formula.fromString(TableTypeSystem.CELL_DATE_VALUE.id), new ValueFormula<Value>(value)));
         Value result = builder.executor.execute(formula, ex.context).value;
         inTable = result instanceof ListValue && !((ListValue) result).values.isEmpty();

@@ -39,17 +39,13 @@ public final class StringNormalizationUtils {
    *
    * TODO(ice): Take the homogeneity of the cells into account.
    */
-  public static void analyzeColumn(TableColumn column, Map<String, String> originalStringToPartId) {
-    // Check if any cell contains a comma-separated list
-    int numLists = 0;
-    for (TableCell cell : column.children) {
-      String[] splitted = COMMA.split(cell.properties.originalString);
-      if (splitted.length > 1) numLists++;
-    }
+  public static void analyzeColumn(TableColumn column) {
+    // Parts in the same column with the same string content gets the same id.
+    Map<String, String> originalStringToPartId = new HashMap<>();
     for (TableCell cell : column.children) {
       if (!cell.properties.metadata.isEmpty()) continue;  // Already analyzed.
       analyzeString(cell.properties.originalString, cell.properties.metadata,
-          originalStringToPartId, numLists > 0);
+          column, originalStringToPartId);
     }
   }
 
@@ -62,7 +58,7 @@ public final class StringNormalizationUtils {
   public static final Pattern SPACE = Pattern.compile("\\s+");
 
   public static void analyzeString(String o, Multimap<Value, Value> metadata,
-      Map<String, String> originalStringToPartId, boolean alwaysGenerateParts) {
+      TableColumn column, Map<String, String> originalStringToPartId) {
     metadata.clear();
     Value value;
     LanguageAnalyzer analyzer = LanguageAnalyzer.getSingleton();
@@ -94,11 +90,18 @@ public final class StringNormalizationUtils {
     }
     // ===== List: "apple, banana, carrot" --> fb:part.apple, etc. =====
     String[] splitted = COMMA.split(o);
-    if (splitted.length > 1 || alwaysGenerateParts) {
-      for (String x : splitted) {
-        String id = TableTypeSystem.getOrCreateName(x, originalStringToPartId,
-            (String canonicalName) -> TableTypeSystem.getPartName(canonicalName));
-        metadata.put(TableTypeSystem.CELL_PART_VALUE, new NameValue(id, x));
+    if (splitted.length > 1) {
+      for (String partName : splitted) {
+        String normalizedPartName = StringNormalizationUtils.characterNormalize(partName).toLowerCase();
+        String id = originalStringToPartId.get(normalizedPartName);
+        if (id == null) {
+          String canonicalName = TableTypeSystem.canonicalizeName(normalizedPartName);
+          id = TableTypeSystem.getUnusedName(
+              TableTypeSystem.getPartName(canonicalName, column.columnName),
+              originalStringToPartId.values());
+          originalStringToPartId.put(normalizedPartName, id);
+        }
+        metadata.put(TableTypeSystem.CELL_PART_VALUE, new NameValue(id, partName));
       }
     }
   }
@@ -346,7 +349,8 @@ public final class StringNormalizationUtils {
 
   private static void unitTest(String o) {
     Multimap<Value, Value> metadata = ArrayListMultimap.create();
-    analyzeString(o, metadata, new HashMap<>(), false);
+    TableColumn column = new TableColumn("Test", "test", 0);
+    analyzeString(o, metadata, column, new HashMap<>());
     LogInfo.logs("%s %s", o, metadata);
   }
 

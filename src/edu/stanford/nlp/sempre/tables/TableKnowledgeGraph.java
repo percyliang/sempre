@@ -20,10 +20,16 @@ import fig.basic.*;
  *
  * - Each row becomes an entity
  * - Each cell becomes an entity
- * - Each column becomes a relation between a row and a cell
- *     e.g., (fb:row.r5 fb:row.row.nationality fb:cell.canada)
- * - Each cell has relations pointing to different normalization nodes
- *     e.g., (fb:cell.3_km fb:cell.cell.number (number 3))
+ * - Each column becomes a property between a row and a cell
+ *     e.g., (row5 nationality canada)
+ * - Rows have several special properties (next, index)
+ *
+ * === Special Row Properties ===
+ * - name = fb:row.row.next  | type = (-> fb:type.row fb:type.row)
+ * - name = fb:row.row.index | type = (-> fb:type.int fb:type.row)
+ *
+ * === Special Cell Properties ===
+ * - name = fb:cell.cell.number | type = (-> fb:type.number fb:type.cell)
  *
  * @author ppasupat
  */
@@ -80,10 +86,8 @@ public class TableKnowledgeGraph extends KnowledgeGraph implements FuzzyMatchabl
     this.filename = filename;
     // Used column names (no two columns have the same id)
     Set<String> usedColumnNames = new HashSet<>();
-    // Cells with the same string content gets the same id.
-    Map<String, String> originalStringToCellId = new HashMap<>();
-    // Parts with the same string content gets the same id.
-    Map<String, String> originalStringToPartId = new HashMap<>();
+    // Cells in the same column with the same string content gets the same id.
+    Map<Pair<TableColumn, String>, String> columnAndOriginalStringToCellId = new HashMap<>();
     // Go though the data
     for (String[] record : data) {
       if (columns == null) {
@@ -115,21 +119,27 @@ public class TableKnowledgeGraph extends KnowledgeGraph implements FuzzyMatchabl
         rows.add(currentRow);
         for (int i = 0; i < columns.size(); i++) {
           TableColumn column = columns.get(i);
-          String cellString = (i < record.length) ? record[i] : "";
+          String cellName = (i < record.length) ? record[i] : "";
           // Create a NameValue
-          String id = TableTypeSystem.getOrCreateName(cellString, originalStringToCellId,
-              (String canonicalName) -> TableTypeSystem.getCellName(canonicalName));
+          String normalizedCellName = StringNormalizationUtils.characterNormalize(cellName).toLowerCase();
+          Pair<TableColumn, String> columnAndOriginalString = new Pair<>(column, normalizedCellName);
+          String id = columnAndOriginalStringToCellId.get(columnAndOriginalString);
+          if (id == null) {
+            String canonicalName = TableTypeSystem.canonicalizeName(normalizedCellName);
+            id = TableTypeSystem.getUnusedName(
+                TableTypeSystem.getCellName(canonicalName, column.columnName),
+                cellIdToTableCellProperties.keySet());
+            columnAndOriginalStringToCellId.put(columnAndOriginalString, id);
+            cellIdToTableCellProperties.put(id, new TableCellProperties(id, cellName));
+          }
           TableCellProperties properties = cellIdToTableCellProperties.get(id);
-          if (properties == null)
-            cellIdToTableCellProperties.put(id, properties = new TableCellProperties(id, cellString));
           TableCell.createAndAddTo(properties, column, currentRow);
-          properties.columns.add(column);
         }
       }
     }
     // Generate cell properties by analyzing cell content in each column
     for (TableColumn column : columns)
-      StringNormalizationUtils.analyzeColumn(column, originalStringToPartId);
+      StringNormalizationUtils.analyzeColumn(column);
     // Collect cell properties for public access
     cellProperties = new HashSet<>(cellIdToTableCellProperties.values());
     cellParts = new HashSet<>();
@@ -317,8 +327,6 @@ public class TableKnowledgeGraph extends KnowledgeGraph implements FuzzyMatchabl
 
   public static final NameValue TYPE = new NameValue(CanonicalNames.TYPE);
   public static final NameValue ROW_TYPE = new NameValue(TableTypeSystem.ROW_TYPE);
-  public static final NameValue CELL_TYPE = new NameValue(TableTypeSystem.CELL_TYPE);
-  public static final NameValue PART_TYPE = new NameValue(TableTypeSystem.PART_TYPE);
 
   /** Return all y such that x in firsts and (x,r,y) in graph */
   @Override
@@ -348,6 +356,7 @@ public class TableKnowledgeGraph extends KnowledgeGraph implements FuzzyMatchabl
    *   X-Y = cell-row, primitive-cell
    */
   /** Return all (x,y) such that y in seconds and (x,r,y) in graph */
+  // TODO(ice): Check correctness
   @Override
   public List<Pair<Value, Value>> filterSecond(Value r, Collection<Value> seconds) {
     List<Pair<Value, Value>> answer = new ArrayList<>();
@@ -397,7 +406,7 @@ public class TableKnowledgeGraph extends KnowledgeGraph implements FuzzyMatchabl
         }
       } else if (TableTypeSystem.isCellProperty(r)) {
         ////////////////////////////////////////////////////////////
-        // (!fb:cell.cell.number fb:cell.5_dollars) --> (number 5)
+        // (!fb:cell.cell.number fb:cell_id.5) --> 5
         if (seconds.size() == Integer.MAX_VALUE) {
           for (TableColumn column : columns) {
             for (TableCell cell : column.children) {
@@ -466,12 +475,6 @@ public class TableKnowledgeGraph extends KnowledgeGraph implements FuzzyMatchabl
           if (second.equals(ROW_TYPE)) {
             for (TableRow row : rows)
               answer.add(new Pair<>(row.nameValue, second));
-          } else if (second.equals(CELL_TYPE)) {
-            for (TableCellProperties properties : cellProperties)
-              answer.add(new Pair<>(properties.nameValue, second));
-          } else if (second.equals(PART_TYPE)) {
-            for (NameValue part : cellParts)
-              answer.add(new Pair<>(part, second));
           }
         }
       } else if (r.equals(TableTypeSystem.ROW_NEXT_VALUE)) {
@@ -517,7 +520,7 @@ public class TableKnowledgeGraph extends KnowledgeGraph implements FuzzyMatchabl
         }
       } else if (TableTypeSystem.isCellProperty(r)) {
         ////////////////////////////////////////////////////////////
-        // (fb:cell.cell.number (number 5)) --> {fb:cell.5 fb:cell.5_dollars, ...}
+        // (fb:cell.cell.number (number 5)) --> {fb:cell_id.5 fb:cell_population.5, ...}
         // Possibly with repeated id (if there are multiple cells with that id)
         for (TableColumn column : columns) {
           for (TableCell cell : column.children) {
@@ -614,6 +617,11 @@ public class TableKnowledgeGraph extends KnowledgeGraph implements FuzzyMatchabl
       return cellIdToTableCellProperties.get(nameValueId).originalString;
     if (relationIdToTableColumn.containsKey(nameValueId))
       return relationIdToTableColumn.get(nameValueId).originalString;
+    if (nameValueId.startsWith(TableTypeSystem.CELL_SPECIFIC_TYPE_PREFIX)) {
+      String property = nameValueId.replace(TableTypeSystem.CELL_SPECIFIC_TYPE_PREFIX, TableTypeSystem.ROW_PROPERTY_NAME_PREFIX);
+      if (relationIdToTableColumn.containsKey(property))
+        return relationIdToTableColumn.get(property).originalString;
+    }
     return null;
   }
 
@@ -640,27 +648,14 @@ public class TableKnowledgeGraph extends KnowledgeGraph implements FuzzyMatchabl
    * Return a list of rows that contain a cell with the specified NameValue ID.
    */
   public List<Integer> getRowsOfCellId(String nameValueId) {
+    String property = TableTypeSystem.getPropertyOfEntity(nameValueId);
+    if (property == null) return null;
+    TableColumn column = relationIdToTableColumn.get(property);
+    if (column == null) return null;
     List<Integer> answer = new ArrayList<>();
-    TableCellProperties properties = cellIdToTableCellProperties.get(nameValueId);
-    if (properties == null) return answer;
-    for (TableColumn column : properties.columns) {
-      for (int i = 0; i < column.children.size(); i++) {
-        if (column.children.get(i).properties.id.equals(nameValueId))
-          answer.add(i);
-      }
-    }
-    return answer;
-  }
-
-  /**
-   * Return a list of columns that contain a cell with the specified NameValue ID.
-   */
-  public List<String> getColumnsOfCellId(String nameValueId) {
-    List<String> answer = new ArrayList<>();
-    TableCellProperties properties = cellIdToTableCellProperties.get(nameValueId);
-    if (properties == null) return answer;
-    for (TableColumn column : properties.columns) {
-      answer.add(column.columnName);
+    for (int i = 0; i < column.children.size(); i++) {
+      if (column.children.get(i).properties.id.equals(nameValueId))
+        answer.add(i);
     }
     return answer;
   }

@@ -52,15 +52,11 @@ public class TableBaselineFeatureComputer implements FeatureComputer {
     }
     // Define features
     for (String predicted : predictedEntities) {
-      List<String> pCols = graph.getColumnsOfCellId(predicted);
-      // TODO: use all columns in pCols
-      String pProp = pCols.get(0);
+      String pProp = TableTypeSystem.getPropertyOfEntity(predicted);
       List<Integer> pRows = graph.getRowsOfCellId(predicted);
-      if (opts.verbosity >= 2) LogInfo.logs("[p] %s %s %s", predicted, pCols, pRows);
+      if (opts.verbosity >= 2) LogInfo.logs("[p] %s %s %s", predicted, pProp, pRows);
       for (String mentioned : mentionedEntities) {
-        List<String> mCols = graph.getColumnsOfCellId(mentioned);
-        // TODO: use all columns in mCols
-        String mProp = mCols.get(0);
+        String mProp = TableTypeSystem.getPropertyOfEntity(mentioned);
         List<Integer> mRows = graph.getRowsOfCellId(mentioned);
         if (opts.verbosity >= 2) LogInfo.logs("[m] %s %s %s", mentioned, mProp, mRows);
         // Same column as ENTITY + offset

@@ -1,7 +1,6 @@
 package edu.stanford.nlp.sempre;
 
 import java.util.Collection;
-import java.util.Map;
 
 /**
  * Used to prune formulas during parsing.
@@ -34,38 +33,11 @@ public abstract class DerivationPruningComputer {
   }
 
   /**
-   * Prune the derivation without executing the formula.
+   * Prune the derivation.
    *
    * To add pruning strategies, override this method.
    * Return the strategy name to prune the formula, and null otherwise.
-   * This method should not execute the formula.
    */
-  public String isPrunedWithoutExecution(Derivation deriv) {
-    return null;
-  }
+  public abstract String isPruned(Derivation deriv);
 
-  /**
-   * Prune the derivation (general).
-   *
-   * The formula will already be executed (i.e., deriv.value is set).
-   *
-   * To add pruning strategies, override this method.
-   * Return the strategy name to prune the formula, and null otherwise.
-   */
-  public String isPrunedGeneral(Derivation deriv) {
-    return null;
-  }
-
-  /**
-   * Prune the derivation based on the subformula.
-   *
-   * DerivationPruner will traverse the formula and call this method on each subformula.
-   * The method can store temporary data in |state|.
-   *
-   * To add pruning strategies, override this method.
-   * Return the strategy name to prune the formula, and null otherwise.
-   */
-  public String isPrunedRecursive(Derivation deriv, Formula subformula, Map<String, Object> state) {
-    return null;
-  }
 }
