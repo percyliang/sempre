@@ -10,8 +10,6 @@ import fig.basic.IntPair;
  * @author ppasupat
  */
 public class FloatingFeatureComputer implements FeatureComputer {
-  
-  @Override public void setExecutor(Executor executor) { }    // Do nothing
 
   @Override
   public void extractLocal(Example ex, Derivation deriv) {

@@ -40,7 +40,7 @@ public class HeadwordInfo {
   public String headwordTuple() {
     return "H=" + headword;
   }
-  
+
   // Caching
   private static final LoadingCache<Example, HeadwordInfo> cache = CacheBuilder
       .newBuilder().maximumSize(20)

@@ -14,9 +14,13 @@ import java.util.Map;
 public abstract class DerivationPruningComputer {
 
   protected final DerivationPruner pruner;
+  protected final Parser parser;
+  protected final Example ex;
 
   public DerivationPruningComputer(DerivationPruner pruner) {
     this.pruner = pruner;
+    this.parser = pruner.parser;
+    this.ex = pruner.ex;
   }
 
   /**

@@ -33,7 +33,6 @@ public class PhraseInfo {
   public final List<String> lemmaTokens;
   public final List<String> posTags;
   public final List<String> nerTags;
-  public final String normalizedNerSpan;
   public final String canonicalPosSeq;
   public final List<String> fuzzyMatchedPredicates;
 
@@ -46,10 +45,6 @@ public class PhraseInfo {
     lemmaTokens = languageInfo.tokens.subList(start, end);
     posTags = languageInfo.posTags.subList(start, end);
     nerTags = languageInfo.nerTags.subList(start, end);
-    if (nerTags.get(0) == null)
-      normalizedNerSpan = null;
-    else
-      normalizedNerSpan = languageInfo.getNormalizedNerSpan(nerTags.get(0), start, end);
     text = languageInfo.phrase(start, end).toLowerCase();
     lemmaText = languageInfo.lemmaPhrase(start, end).toLowerCase();
     canonicalPosSeq = languageInfo.canonicalPosSeq(start, end);

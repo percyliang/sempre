@@ -5,7 +5,6 @@ import java.util.*;
 import edu.stanford.nlp.sempre.*;
 import edu.stanford.nlp.sempre.AggregateFormula.Mode;
 import edu.stanford.nlp.sempre.tables.lambdadcs.LambdaDCSException;
-import fig.basic.LogInfo;
 
 public class TableDerivationPruningComputer extends DerivationPruningComputer {
 
@@ -45,11 +44,8 @@ public class TableDerivationPruningComputer extends DerivationPruningComputer {
   public String isPrunedGeneral(Derivation deriv) {
     // lambdaDCSError: Prune unrecoverable LambdaDCSException
     if (containsStrategy(lambdaDCSError)) {
-      if (deriv.value instanceof ErrorValue && LambdaDCSException.isUnrecoverable(((ErrorValue) deriv.value).type)) {
-        if (DerivationPruner.opts.pruningVerbosity >= 5)
-          LogInfo.logs("lambdaDCSError: %s => %s", deriv.formula, deriv.value);
+      if (deriv.value instanceof ErrorValue && LambdaDCSException.isUnrecoverable(((ErrorValue) deriv.value).type))
         return lambdaDCSError;
-      }
     }
     // emptyDenotation: Prune if the denotation is empty (for ScopedValue)
     if (containsStrategy(emptyDenotation)) {
@@ -78,9 +74,9 @@ public class TableDerivationPruningComputer extends DerivationPruningComputer {
         if (merge.mode == MergeFormula.Mode.and) {
           Value head = null;
           if (merge.child1 instanceof MarkFormula) {
-            head = pruner.parser.executor.execute(merge.child2, pruner.ex.context).value;
+            head = parser.executor.execute(merge.child2, ex.context).value;
           } else if (merge.child2 instanceof MarkFormula) {
-            head = pruner.parser.executor.execute(merge.child1, pruner.ex.context).value;
+            head = parser.executor.execute(merge.child1, ex.context).value;
           }
           if (head != null && head.equals(deriv.value)) {
             return sameMark;
@@ -116,7 +112,7 @@ public class TableDerivationPruningComputer extends DerivationPruningComputer {
           if (containsStrategy(emptyJoin)) {
             Formula test = new JoinFormula(rid1, new JoinFormula(rid2, STAR));
             try {
-              Value value = pruner.parser.executor.execute(test, pruner.ex.context).value;
+              Value value = parser.executor.execute(test, ex.context).value;
               if (value instanceof ListValue && ((ListValue) value).values.isEmpty())
                 return emptyJoin;
             } catch (RuntimeException e) {
@@ -132,8 +128,8 @@ public class TableDerivationPruningComputer extends DerivationPruningComputer {
       Formula child1 = merge.child1, child2 = merge.child2;
       // subsetMerge: Prune merge formulas where one child is a subset of the other
       if (containsStrategy(subsetMerge)) {
-        Value d1 = pruner.parser.executor.execute(child1, pruner.ex.context).value;
-        Value d2 = pruner.parser.executor.execute(child2, pruner.ex.context).value;
+        Value d1 = parser.executor.execute(child1, ex.context).value;
+        Value d2 = parser.executor.execute(child2, ex.context).value;
         if (d1 instanceof ListValue && d2 instanceof ListValue) {
           Set<Value> v1 = new HashSet<>(((ListValue) d1).values);
           Set<Value> v2 = new HashSet<>(((ListValue) d2).values);

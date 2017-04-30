@@ -12,6 +12,11 @@ import fig.basic.LogInfo;
  * @author ppasupat
  */
 public class DefaultDerivationPruningComputer extends DerivationPruningComputer {
+  public static class Options {
+    @Option(gloss = "(for badSummarizerHead) allow count on sets of size 1")
+    public boolean allowCountOne = false;
+  }
+  public static Options opts = new Options();
 
   public DefaultDerivationPruningComputer(DerivationPruner pruner) {
     super(pruner);
@@ -44,7 +49,7 @@ public class DefaultDerivationPruningComputer extends DerivationPruningComputer 
     // atomic: Prune atomic formula at root.
     //   e.g., Prevent "Who was taller, Lincoln or Obama" --> fb:en.lincoln generated from lexicon without any computation   
     if (containsStrategy(atomic)) {
-      if (deriv.isRoot(pruner.ex.numTokens()) && deriv.formula instanceof ValueFormula)
+      if (deriv.isRoot(ex.numTokens()) && deriv.formula instanceof ValueFormula)
         return atomic;
     }
     return null;
@@ -63,14 +68,11 @@ public class DefaultDerivationPruningComputer extends DerivationPruningComputer 
     }
     // nonLambdaError: Prune if the denotation is an error and the formula is not a partial formula
     if (containsStrategy(nonLambdaError) && !isLambdaFormula(deriv.formula)) {
-      if (deriv.value instanceof ErrorValue) {
-        if (DerivationPruner.opts.pruningVerbosity >= 5)
-          LogInfo.logs("NonLambdaError: %s => %s", deriv.formula, deriv.value);
+      if (deriv.value instanceof ErrorValue)
         return nonLambdaError;
-      }
     }
     // tooManyValues: Prune if the denotation has too many values (at $ROOT only)
-    if (containsStrategy(tooManyValues) && deriv.isRoot(pruner.ex.numTokens())) {
+    if (containsStrategy(tooManyValues) && deriv.isRoot(ex.numTokens())) {
       if (!(deriv.value instanceof ListValue) ||
           ((ListValue) deriv.value).values.size() > DerivationPruner.opts.maxNumValues)
         return tooManyValues;
@@ -141,10 +143,10 @@ public class DefaultDerivationPruningComputer extends DerivationPruningComputer 
       if (innerFormula != null) {
         try {
           TypeInference.inferType(innerFormula);
-          Value innerValue = pruner.parser.executor.execute(innerFormula, pruner.ex.context).value;
+          Value innerValue = parser.executor.execute(innerFormula, ex.context).value;
           if (innerValue instanceof ListValue) {
             int size = ((ListValue) innerValue).values.size();
-            if (size == 0 || (size == 1 && !(DerivationPruner.opts.allowCountOne && isCount)))
+            if (size == 0 || (size == 1 && !(opts.allowCountOne && isCount)))
               return badSummarizerHead;
           }
         } catch (Exception e) {

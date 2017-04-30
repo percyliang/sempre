@@ -17,8 +17,6 @@ public class TableBaselineFeatureComputer implements FeatureComputer {
     @Option(gloss = "Verbosity") public int verbosity = 0;
   }
   public static Options opts = new Options();
-  
-  @Override public void setExecutor(Executor executor) { }    // Do nothing
 
   @Override
   public void extractLocal(Example ex, Derivation deriv) {

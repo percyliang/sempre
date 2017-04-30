@@ -24,8 +24,6 @@ public class DerivationPruner {
     @Option public int pruningVerbosity = 0;
     @Option(gloss = "(for tooManyValues) maximum denotation size of the final formula")
     public int maxNumValues = 10;
-    @Option(gloss = "(for badSummarizerHead) allow count on sets of size 1")
-    public boolean allowCountOne = false;
     @Option(gloss = "Ensure that deriv.value contains the executed denotation.")
     public boolean ensureExecuted = true;
     @Option(gloss = "If false, apply recursive pruning strategies only at the outermost layer of the formula")

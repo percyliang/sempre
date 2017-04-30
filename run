@@ -640,7 +640,6 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
   sel(:class, {
     'main' => 'edu.stanford.nlp.sempre.Main',
     'check' => 'edu.stanford.nlp.sempre.tables.test.DPDParserChecker',
-    'align' => l('edu.stanford.nlp.sempre.tables.alignment.AlignerMain', o('maxTrainIters', 11)),
     'dump' => 'edu.stanford.nlp.sempre.tables.serialize.SerializedDumper',
     'load' => l('edu.stanford.nlp.sempre.tables.serialize.SerializedLoader', let(:parser, 'serialized')),
     'stats' => 'edu.stanford.nlp.sempre.tables.test.TableStatsComputer',
@@ -652,7 +651,7 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
     'filter' => 'edu.stanford.nlp.sempre.tables.serialize.DumpFilterer',
   }),
   # Fig parameters
-  selo(:cldir, 'execDir', '_OUTPATH_', 'output'),
+  selo(:cldir, 'execDir', '_OUTPATH_', '.'),
   o('overwriteExecDir'), o('addToView', 13), o('jarFiles', 'libsempre/*'),
   sel(:cldir, l(), '>/dev/null'),
   # Set environment for table execution
@@ -672,14 +671,14 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
     nil),
   }),
   # Parser
-  letDefault(:parser, 'old-floatsize'),
+  letDefault(:parser, 'floatsize'),
   sel(:parser, {
-    'old-floatsize' => l(
+    'floatsize' => l(
       o('Builder.parser', 'FloatingParser'),
       o('useSizeInsteadOfDepth'),
       o('FloatingParser.maxDepth', 15),
     nil),
-    'old-baseline' => l(
+    'baseline' => l(
       o('Builder.parser', 'tables.baseline.TableBaselineParser'),
     nil),
     'serialized' => o('Builder.parser', 'tables.serialize.SerializedParser'),
@@ -797,12 +796,8 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
       o('FeatureExtractor.featureComputers', 'tables.features.PhrasePredicateFeatureComputer tables.features.PhraseDenotationFeatureComputer'.split),
     nil),
     'all' => l(      # All features
-      o('FeatureExtractor.featureDomains', 'custom-denotation phrase-predicate phrase-denotation headword-denotation'.split),
+      o('FeatureExtractor.featureDomains', 'custom-denotation phrase-predicate phrase-denotation headword-denotation missing-predicate'.split),
       o('FeatureExtractor.featureComputers', 'tables.features.PhrasePredicateFeatureComputer tables.features.PhraseDenotationFeatureComputer'.split),
-    nil),
-    'all-fragment' => l(
-      o('FeatureExtractor.featureDomains', 'custom-denotation phrase-denotation headword-denotation phrase-fragment'.split),
-      o('FeatureExtractor.featureComputers', 'tables.features.PhraseDenotationFeatureComputer tables.features.PhraseFragmentFeatureComputer'.split),
     nil),
     'baseline' => l( # For the baseline classifier
       o('FeatureExtractor.featureDomains', 'custom-denotation phrase-denotation headword-denotation table-baseline'.split),
@@ -854,7 +849,7 @@ def tablesGrammarPaths
         nil),
         'combined-more' => l(
           o('Grammar.inPaths', "#{baseDir}combined.grammar"),
-          o('Grammar.tags', *'alternative movement comparison count aggregate superlative arithmetic merge u-superlative neq'.split),
+          o('Grammar.tags', *'alternative movement comparison count aggregate superlative arithmetic merge v-superlative'.split),
         nil),
         'combined-trigger' => l(    # Use trigger words for operations
           o('Grammar.inPaths', "#{baseDir}combined.grammar"),
@@ -908,7 +903,6 @@ def tablesDataPaths
     end
     # That's it!
     l(
-      #o('splitDevFromTrain', false),
       o('TableKnowledgeGraph.baseCSVDir', csvDir),
       sel(:data, datasets),
     nil)

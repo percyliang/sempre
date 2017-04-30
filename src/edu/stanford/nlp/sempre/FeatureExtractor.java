@@ -44,10 +44,8 @@ public class FeatureExtractor {
 
   public FeatureExtractor(Executor executor) {
     this.executor = executor;
-    for (String computerName : opts.featureComputers) {
-      FeatureComputer computer = (FeatureComputer) Utils.newInstanceHard(SempreUtils.resolveClassName(computerName));
-      computer.setExecutor(executor);
-      featureComputers.add(computer);
+    for (String featureComputer : opts.featureComputers) {
+      featureComputers.add((FeatureComputer) Utils.newInstanceHard(SempreUtils.resolveClassName(featureComputer)));
     }
   }
 
