@@ -709,16 +709,23 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
     l(
       o('DerivationPruner.pruningStrategies', *tablesPruningStrategies),
       o('DerivationPruner.pruningComputers', 'tables.TableDerivationPruningComputer'),
-      o('recursivePruning', false),
     nil),
   nil),
   # Grammar
   tablesGrammarPaths,
-  letDefault(:fuzzy, 1),
-  sel(:fuzzy,
-    l(),
-    l(o('fuzzyMatchSubstring'), o('fuzzyMatchMaxEditDistanceRatio', 0.3), o('alsoReturnUnion'), o('alsoMatchPart')),
-  nil),
+  letDefault(:fuzzy, 'original'),
+  sel(:fuzzy, {
+    'original' => o('FuzzyMatcher.fuzzyMatcher', 'tables.match.OriginalMatcher'),
+    'editdist-exact' => l(
+      o('FuzzyMatcher.fuzzyMatcher', 'tables.match.EditDistanceFuzzyMatcher'),
+      o('fuzzyMatchMaxEditDistanceRatio', 0.0),
+    nil),
+    'editdist-fuzzy' => l(
+      o('FuzzyMatcher.fuzzyMatcher', 'tables.match.EditDistanceFuzzyMatcher'),
+      o('fuzzyMatchSubstring'), o('fuzzyMatchMaxEditDistanceRatio', 0.3),
+      o('alsoReturnUnion'), o('alsoMatchPart'),
+    nil),
+  }),
   letDefault(:normalize, 1),
   sel(:normalize,
     l(),
@@ -921,8 +928,9 @@ def tablesPruningStrategies
     "mistypedMerge",
     ### Strategies that depend on the children's formulas
     "doubleNext",
-    "doubleSummarizers",
+    "multipleSuperlatives",
     "sameMerge",
+    "forwardBackward",
     "unsortedMerge",
     "typeRowMerge",
   nil].compact
