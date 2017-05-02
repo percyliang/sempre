@@ -22,7 +22,7 @@ public abstract class ChartParserState extends ParserState {
   protected final Map<String, List<Derivation>>[][] chart;
 
   // For visualizing how chart is filled
-  List<CatSpan> chartFillingList = new ArrayList<>();
+  protected List<CatSpan> chartFillingList = new ArrayList<>();
 
   protected String[][] phrases; // the phrases in the example
 
@@ -74,7 +74,7 @@ public abstract class ChartParserState extends ParserState {
     }
   }
 
-  void addToChart(Derivation deriv) {
+  protected void addToChart(Derivation deriv) {
     if (parser.verbose(3)) LogInfo.logs("addToChart %s: %s", deriv.cat, deriv);
 
     if (Parser.opts.pruneErrorValues && deriv.value instanceof ErrorValue) return;
@@ -88,6 +88,10 @@ public abstract class ChartParserState extends ParserState {
     if (Parser.opts.visualizeChartFilling) {
       chartFillingList.add(new CatSpan(deriv.start, deriv.end, deriv.cat));
     }
+  }
+
+  public Map<String, List<Derivation>>[][] getChart() {
+    return chart;
   }
 
   // TODO(joberant): move to visualization utility class

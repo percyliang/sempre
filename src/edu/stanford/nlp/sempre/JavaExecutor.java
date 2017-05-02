@@ -1,5 +1,6 @@
 package edu.stanford.nlp.sempre;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -25,7 +26,10 @@ public class JavaExecutor extends Executor {
     @Option(gloss = "Whether to convert NumberValue to int/double") public boolean convertNumberValues = true;
     @Option(gloss = "Print stack trace on exception") public boolean printStackTrace = false;
     // the actual function will be called with the current ContextValue as its last argument if marked by contextPrefix
-    @Option(gloss = "Formula in the grammar whose name startsWith @ is context sensitive")  public String contextPrefix = "@";
+    @Option(gloss = "Formula in the grammar whose name startsWith contextPrefix is context sensitive") 
+    public String contextPrefix = "context:";
+    @Option(gloss = "Reduce verbosity by automatically appending, for example, edu.stanford.nlp.sempre to java calls")
+    public String classPathPrefix = ""; // e.g. "edu.stanford.nlp.sempre";
   }
   public static Options opts = new Options();
 
@@ -189,6 +193,11 @@ public class JavaExecutor extends Executor {
         id = id.replace(opts.contextPrefix, "");
       }
       id = MapUtils.get(shortcuts, id, id);
+      
+      // classPathPrefix, like edu.stanford.nlp.sempre.interactive
+      if (!Strings.isNullOrEmpty(opts.classPathPrefix) && !id.startsWith(".") && !id.startsWith(opts.classPathPrefix)) {
+        id = opts.classPathPrefix + "." + id;
+      }
 
       if (id.startsWith(".")) // Instance method
         return invoke(id.substring(1), args.get(0), args.subList(1, args.size()).toArray(new Object[0]));

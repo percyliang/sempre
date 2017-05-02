@@ -1,0 +1,74 @@
+# domain specific grammar for voxelurn
+
+(include dal.grammar)
+
+# domain specific actions:
+(def @put put)
+(def @base base)
+(def @add add)
+(def @move move)
+
+# syntactic sugar
+(def @veryx veryx)
+
+# typed lambdas
+# Action a, ItemSet i, ValueSet v, Rel r, Direction d, Color c, Number n
+# Rule.defaultIsFloating should be false
+
+# utilities
+(rule $Action (base $Number $Number) (lambda x (lambda y (: @base (var x) (var y)))) (anchored 1))
+(rule $Action (noop) (ConstantFn (: noop)) (anchored 1))
+
+(rule $Set (origin) (ConstantFn (call origin)) (anchored 1))
+
+# primitive actions
+(rule $Action (add $Color) (lambda c (: @add (var c) here)) (anchored 1))
+(rule $Action (add $Color $Direction) (lambda c (lambda d (: @add (var c) (var d)))) (anchored 1))
+(rule $Action (move $Direction) (lambda d (: @move (var d))) (anchored 1))
+
+# primitive actions with arguments
+
+# cube to cube relations
+(rule $Set ($Direction of $Set) (lambda d (lambda s
+			   (call adj (var d) (var s)))) (anchored 1))
+(rule $Set ($Extreme of $Set) (lambda e (lambda s
+			   (call @veryx (var e) (var s)))) (anchored 1))
+(rule $Set ($Direction) (lambda d
+			   (call adj (var d))) (anchored 1))
+(rule $Set ($Extreme) (lambda e
+			   (call @veryx (var e))) (anchored 1))
+
+(for @dir (top bot left right front back)
+  (rule $Direction (@dir) @dir (anchored 1))
+)
+(rule $Extreme (very $Direction) (IdentityFn) (anchored 1))
+
+(for @rel (col row height color name age)
+  (rule $Rel (@rel) (ConstantFn @rel) (anchored 1))
+)
+
+(rule $ValueSet ($Color) (IdentityFn) (anchored 1))
+(rule $ValueSet ($Number) (IdentityFn) (anchored 1))
+
+# set the range via NumberFn options
+
+(rule $Number ($TOKEN) (NumberFn) (anchored 1))
+(rule $Color ($TOKEN) (SimpleLexiconFn (type color)) (anchored 1))
+
+####### domain specific floating rules
+# red means has color red
+# (rule $Sets ($Color) (lambda c (color (var c))))
+
+# various actions can be performed
+# (rule $Action ($Color) (lambda c (: @add (var c) here)))
+# (rule $Action ($Color $Direction) (lambda c (lambda d (: @add (var c) (var d)))))
+# (rule $Action ($Direction) (lambda d (: @move (var d))))
+
+# (rule $Set ($Direction $Sets) (lambda d (lambda s
+#			   (call adj (var d) (var s)))))
+# (rule $Set ($Extreme $Sets) (lambda e (lambda s
+#			   (call @veryx (var e) (var s)))))
+# (rule $Set ($Direction) (lambda d
+#			   (call adj (var d))))
+# (rule $Set ($Extreme) (lambda e
+#			   (call @veryx (var e))))

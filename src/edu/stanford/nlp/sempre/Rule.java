@@ -5,7 +5,9 @@ import com.google.common.collect.Lists;
 import fig.basic.LispTree;
 import fig.basic.Pair;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A rule specifies how to take a right hand of terminals and non-terminals.
@@ -23,12 +25,13 @@ public class Rule {
   public static final String phraseCat = "$PHRASE";  // Sequence of tokens
   public static final String lemmaTokenCat = "$LEMMA_TOKEN";  // Lemmatized version
   public static final String lemmaPhraseCat = "$LEMMA_PHRASE";  // Lemmatized version
-
+  public static final List<String> specialCats = Lists.newArrayList(rootCat, tokenCat, phraseCat, lemmaTokenCat, lemmaPhraseCat);
   public final String lhs;  // Left-hand side: category.
   public final List<String> rhs;  // Right-hand side: sequence of categories (have $ prefix) and tokens.
   public final SemanticFn sem;  // Takes derivations corresponding to RHS categories and produces a set of derivations corresponding to LHS.
   public List<Pair<String, Double>> info;  // Extra info
-
+  public RuleSource source = null; // for tracking where the rule comes from when they are induced
+  
   // Cache the semanticRepn
   public String getSemRepn() {
     if (semRepn == null) semRepn = sem.getClass().getSimpleName();
@@ -46,8 +49,13 @@ public class Rule {
 
   @Override
   public String toString() {
-    if (stringRepn == null)
-      stringRepn = lhs + " -> " + (rhs == null ? "" : Joiner.on(' ').join(rhs)) + " " + sem;
+    if (stringRepn == null) {
+      String semStr = sem == null? "NullSemanticFn" : sem.toString();
+      int maxLength = 100;
+      if (semStr.length() > maxLength)
+        semStr = String.format("%s...(%d total)", semStr.substring(0,maxLength), semStr.length());
+      stringRepn = lhs + " -> " + (rhs == null ? "" : Joiner.on(' ').join(rhs)) + " " + semStr;
+    }
     return stringRepn;
   }
   private String stringRepn;  // Cache toString()
@@ -95,6 +103,8 @@ public class Rule {
       for (Pair<String, Double> p : info)
         tree.addChild(LispTree.proto.newList(p.getFirst(), "" + p.getSecond()));
     }
+    if (source != null)
+      tree.addChild(source.toJson());
     return tree;
   }
 
@@ -128,5 +138,36 @@ public class Rule {
       return false;
     else
       return f == 1.0 ? false : !FloatingParser.opts.defaultIsFloating;
+  }
+  
+  public boolean isInduced() {
+    double a = getInfoTag("induced");
+    if (a == 1.0) return true;
+    return false;
+  }
+  
+  @Override
+  public boolean equals(Object o) {
+    if (!(o instanceof Rule)) return false;
+    return ((Rule)o).toString().equals(this.toString());
+  }
+  @Override
+  public int hashCode() {
+    return this.toString().hashCode();
+  }
+  
+  public String toJson() {
+    Map<String, Object> jsonMap = new LinkedHashMap<>();
+    jsonMap.put("lhs", lhs);
+    jsonMap.put("rhs", rhs);
+    if (source != null) {
+      jsonMap.put("source", source);
+    }
+    if (info != null) {
+      for (Pair<String, Double> p : info)
+        jsonMap.put(p.getFirst(), p.getSecond());
+    }
+    jsonMap.put("sem", sem.toString());
+    return Json.writeValueAsStringHard(jsonMap);
   }
 }

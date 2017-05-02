@@ -130,15 +130,15 @@ public abstract class ParserState {
       for (Derivation deriv : derivations)
         deriv.score += Parser.opts.derivationScoreRandom.nextDouble() * Parser.opts.derivationScoreNoise;
     }
-
+    
     Derivation.sortByScore(derivations);
 
     // Print out information
     if (Parser.opts.verbose >= 3) {
       LogInfo.begin_track("ParserState.pruneCell(%s): %d derivations", cellDescription, derivations.size());
       for (Derivation deriv : derivations) {
-        LogInfo.logs("%s(%s,%s): %s %s, [score=%s]", deriv.cat, deriv.start, deriv.end, deriv.formula,
-            deriv.canonicalUtterance, deriv.score);
+        LogInfo.logs("%s(%s,%s): %s %s, [score=%s] allAnchored: %s", deriv.cat, deriv.start, deriv.end, deriv.formula,
+            deriv.canonicalUtterance, deriv.score, deriv.allAnchored());
       }
       LogInfo.end_track();
     }
@@ -230,7 +230,7 @@ public abstract class ParserState {
   }
 
   // Ensure that all the logical forms are executed and compatibilities are computed.
-  protected void ensureExecuted() {
+  public void ensureExecuted() {
     LogInfo.begin_track("Parser.ensureExecuted");
     // Execute predicted derivations to get value.
     for (Derivation deriv : predDerivations) {
