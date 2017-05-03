@@ -52,9 +52,11 @@
 # Set of all rows
 (rule $Set (nothing) (ConstantFn (@type @row)))
 
-(when closedclass
+(when (or closedclass closedclass-generic)
   # Generate things like "null"
   (rule $Set (nothing) (tables.match.ClosedClassFn generic))
+)
+(when (or closedclass closedclass-column)
   # If a column contains only a few unique things, generate them
   (rule $Set (nothing) (tables.match.ClosedClassFn column))
 )

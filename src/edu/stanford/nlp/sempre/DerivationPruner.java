@@ -2,8 +2,6 @@ package edu.stanford.nlp.sempre;
 
 import java.util.*;
 
-import com.google.common.base.Function;
-
 import fig.basic.*;
 
 /**
@@ -24,12 +22,6 @@ public class DerivationPruner {
     @Option public int pruningVerbosity = 0;
     @Option(gloss = "(for tooManyValues) maximum denotation size of the final formula")
     public int maxNumValues = 10;
-    @Option(gloss = "(for badSummarizerHead) allow count on sets of size 1")
-    public boolean allowCountOne = false;
-    @Option(gloss = "Ensure that deriv.value contains the executed denotation.")
-    public boolean ensureExecuted = true;
-    @Option(gloss = "If false, apply recursive pruning strategies only at the outermost layer of the formula")
-    public boolean recursivePruning = true;
   }
   public static Options opts = new Options();
 
@@ -92,85 +84,15 @@ public class DerivationPruner {
    */
   public boolean isPruned(Derivation deriv) {
     if (opts.pruningStrategies.isEmpty() && pruningComputers.isEmpty()) return false;
-    if (isPrunedWithoutExecution(deriv)) return true;
-    if (isPrunedGeneral(deriv)) return true;
-    if (isPrunedRecursive(deriv)) return true;
-    return false;
-  }
-
-  // Prune without executing the formula
-  boolean isPrunedWithoutExecution(Derivation deriv) {
     String matchedStrategy;
     for (DerivationPruningComputer computer : pruningComputers) {
-      if ((matchedStrategy = computer.isPrunedWithoutExecution(deriv)) != null) {
+      if ((matchedStrategy = computer.isPruned(deriv)) != null) {
         if (opts.pruningVerbosity >= 2)
           LogInfo.logs("PRUNED [%s] %s", matchedStrategy, deriv.formula);
         return true;
       }
     }
     return false;
-  }
-
-  // Prune based on the denotation (general)
-  boolean isPrunedGeneral(Derivation deriv) {
-    if (!opts.ensureExecuted) return false;
-    deriv.ensureExecuted(parser.executor, ex.context);
-    String matchedStrategy;
-    for (DerivationPruningComputer computer : pruningComputers) {
-      if ((matchedStrategy = computer.isPrunedGeneral(deriv)) != null) {
-        if (opts.pruningVerbosity >= 2)
-          LogInfo.logs("PRUNED [%s] %s", matchedStrategy, deriv.formula);
-        return true;
-      }
-    }
-    return false;
-  }
-
-  // Prune based on subformula
-  boolean isPrunedRecursive(Derivation deriv) {
-    if (!opts.recursivePruning) {
-      // If recursivePruning flag is turned off, only look at the outermost layer.
-      if (opts.ensureExecuted)
-        deriv.ensureExecuted(parser.executor, ex.context);
-      String matchedStrategy;
-      for (DerivationPruningComputer computer : pruningComputers) {
-        if ((matchedStrategy = computer.isPrunedRecursive(deriv, deriv.formula, new HashMap<>())) != null) {
-          if (opts.pruningVerbosity >= 2)
-            LogInfo.logs("PRUNED [%s] %s", matchedStrategy, deriv.formula);
-          return true;
-        }
-      }
-    } else {
-      PruningRecurser recurser = new PruningRecurser(deriv);
-      deriv.formula.forEach(recurser);
-      if (recurser.matchedStrategy != null) {
-        if (opts.pruningVerbosity >= 2)
-          LogInfo.logs("PRUNED [%s] %s", recurser.matchedStrategy, deriv.formula);
-        return true;
-      }
-    }
-    return false;
-  }
-
-  /**
-   * Helper class for traversing the formula recursively.
-   */
-  class PruningRecurser implements Function<Formula, Boolean> {
-    final Derivation deriv;
-    final Map<String, Object> state = new HashMap<>();
-    String matchedStrategy = null;
-
-    public PruningRecurser(Derivation deriv) { this.deriv = deriv; }
-
-    @Override
-    public Boolean apply(Formula f) {
-      if (matchedStrategy != null) return true;     // Don't process further
-      for (DerivationPruningComputer computer : pruningComputers) {
-        if ((matchedStrategy = computer.isPrunedRecursive(deriv, f, state)) != null)
-          return true;   // Don't process further
-      }
-      return false;   // Recurse
-    }
   }
 
   /**
