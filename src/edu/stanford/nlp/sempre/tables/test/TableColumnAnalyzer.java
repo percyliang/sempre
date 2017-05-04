@@ -2,6 +2,7 @@ package edu.stanford.nlp.sempre.tables.test;
 
 import java.io.*;
 import java.util.*;
+import java.util.regex.*;
 
 import edu.stanford.nlp.sempre.*;
 import edu.stanford.nlp.sempre.tables.*;
@@ -17,6 +18,8 @@ public class TableColumnAnalyzer implements Runnable {
   public static class Options {
     @Option(gloss = "Maximum number of tables to process (for debugging)")
     public int maxNumTables = Integer.MAX_VALUE;
+    @Option(gloss = "Load Wikipedia article titles from this file")
+    public String wikiTitles = null;
   }
   public static Options opts = new Options();
 
@@ -120,6 +123,8 @@ public class TableColumnAnalyzer implements Runnable {
   // Cell analysis
   // ============================================================
 
+  public static final Pattern ORDINAL = Pattern.compile("^(\\d+)(st|nd|rd|th)$");
+
   protected List<String> analyzeCell(String c) {
     List<String> types = new ArrayList<>();
     LanguageInfo languageInfo = LanguageAnalyzer.getSingleton().analyze(c);
@@ -142,7 +147,10 @@ public class TableColumnAnalyzer implements Runnable {
     }
     {
       // Ordinal
-
+      Matcher m = ORDINAL.matcher(c);
+      if (m.matches()) {
+        types.add("ordinal");
+      }
     }
     {
       // Integer-Integer
@@ -156,9 +164,73 @@ public class TableColumnAnalyzer implements Runnable {
       DateValue date = StringNormalizationUtils.parseDateWithLanguageAnalyzer(languageInfo);
       if (date != null) {
         types.add("date");
+        // Also more detailed date type
+        types.add("date-"
+            + (date.year != -1  ? "Y" : "")
+            + (date.month != -1 ? "M" : "")
+            + (date.day != -1   ? "D" : ""));
       }
+    }
+    {
+      // Quoted text
+      if (c.matches("^[“”\"].*[“”\"]$")) {
+        types.add("quoted");
+      }
+    }
+    if (opts.wikiTitles != null) {
+      // Wikipedia titles
+      WikipediaTitleLibrary library = WikipediaTitleLibrary.getSingleton();
+      if (library.contains(c)) {
+        types.add("wiki");
+      }
+    }
+    {
+      // POS and NER
+      types.add("POS=" + String.join("-", languageInfo.posTags));
+      types.add("NER=" + String.join("-", languageInfo.nerTags));
     }
     return types;
   }
+
+  // ============================================================
+  // Helper class: Wikipedia titles
+  // ============================================================
+
+  public static class WikipediaTitleLibrary {
+
+    private static WikipediaTitleLibrary _singleton = null;
+
+    public static WikipediaTitleLibrary getSingleton() {
+      if (_singleton == null)
+        _singleton = new WikipediaTitleLibrary();
+      return _singleton;
+    }
+
+    Set<String> titles = new HashSet<>();
+
+    private WikipediaTitleLibrary() {
+      assert opts.wikiTitles != null;
+      LogInfo.begin_track("Reading Wikipedia article titles from %s ...", opts.wikiTitles);
+      try {
+        BufferedReader reader = IOUtils.openIn(opts.wikiTitles);
+        String line;
+        while ((line = reader.readLine()) != null) {
+          titles.add(line);
+          if (titles.size() <= 10) {
+            LogInfo.logs("Example title: %s", line);
+          }
+        }
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+      LogInfo.logs("Read %d titles", titles.size());
+      LogInfo.end_track();
+    }
+
+    public boolean contains(String c) {
+      return titles.contains(c.toLowerCase().trim());
+    }
+  }
+
 
 }
