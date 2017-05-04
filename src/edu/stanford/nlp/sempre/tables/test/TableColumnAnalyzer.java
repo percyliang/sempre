@@ -37,6 +37,7 @@ public class TableColumnAnalyzer implements Runnable {
     Map<String, List<String>> tableIdToExIds = getTableIds();
     int tablesProcessed = 0;
     for (Map.Entry<String, List<String>> entry : tableIdToExIds.entrySet()) {
+      Execution.putOutput("example", tablesProcessed);
       String tableId = entry.getKey(),
           tableIdAbbrev = tableId.replaceAll("csv/(\\d+)-csv/(\\d+)\\.csv", "$1-$2");
       LogInfo.begin_track("Processing %s ...", tableId);
