@@ -649,6 +649,7 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
     'alter' => l('edu.stanford.nlp.sempre.tables.alter.BatchTableAlterer', let(:parser, 'serialized')),
     'alter-ex' => l('edu.stanford.nlp.sempre.tables.alter.AlteredTablesExecutor', let(:parser, 'serialized')),
     'filter' => 'edu.stanford.nlp.sempre.tables.serialize.DumpFilterer',
+    'column' => 'edu.stanford.nlp.sempre.tables.test.TableColumnAnalyzer',
   }),
   # Fig parameters
   selo(:cldir, 'execDir', '_OUTPATH_', '.'),

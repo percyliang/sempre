@@ -53,6 +53,7 @@ public final class StringNormalizationUtils {
   // Cell normalization
   // ============================================================
 
+  public static final Pattern STRICT_DASH = Pattern.compile("\\s*[-‐‑⁃‒–—―]\\s*");
   public static final Pattern DASH = Pattern.compile("\\s*[-‐‑⁃‒–—―/,:;]\\s*");
   public static final Pattern COMMA = Pattern.compile("\\s*(,\\s|\\n|/)\\s*");
   public static final Pattern SPACE = Pattern.compile("\\s+");
