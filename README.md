@@ -1,4 +1,4 @@
-# SEMPRE 2.3: Semantic Parsing with Execution
+# SEMPRE 2.3.1: Semantic Parsing with Execution
 
 ## What is semantic parsing?
 
@@ -174,3 +174,7 @@ Changes from SEMPRE 2.1 to SEMPRE 2.2:
 Changes from SEMPRE 2.2 to SEMPRE 2.3:
 
 - Added the `interactive` package for the paper *Naturalizing a programming language through interaction* (ACL 2017).
+
+Changes from SEMPRE 2.3 to SEMPRE 2.3.1:
+
+- Modified the `tables` module to resemble SEMPRE 2.1, effectively making it work again.
