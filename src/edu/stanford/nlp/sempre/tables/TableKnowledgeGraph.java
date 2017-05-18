@@ -665,18 +665,13 @@ public class TableKnowledgeGraph extends KnowledgeGraph implements FuzzyMatchabl
   // ============================================================
 
   public static void main(String[] args) {
-    //opts.baseCSVDir = "tables/toy-examples/random/";
-    //String filename = "nikos_machlas.csv";
     StringNormalizationUtils.opts.verbose = 5;
-    //LanguageAnalyzer.opts.languageAnalyzer = "corenlp.CoreNLPAnalyzer";
     StringNormalizationUtils.opts.numberCanStartAnywhere = true;
     StringNormalizationUtils.opts.num2CanStartAnywhere = true;
-    opts.baseCSVDir = "lib/data/tables/";
+    opts.baseCSVDir = "lib/data/WikiTableQuestions/";
     String filename = "csv/200-csv/0.csv";
     TableKnowledgeGraph graph = (TableKnowledgeGraph) KnowledgeGraph.fromLispTree(
         LispTree.proto.parseFromString("(graph tables.TableKnowledgeGraph " + filename + ")"));
-    //LogInfo.logs("%s", graph.toLispTree().toStringWrap());
-    //LogInfo.logs("%s", graph.toTableValue().toLispTree().toStringWrap(100));
     for (TableColumn column : graph.columns) {
       LogInfo.begin_track("%s (%s)", column.columnName, column.originalString);
       for (TableCell cell : column.children) {

@@ -110,7 +110,7 @@ public class SerializedDataset extends Dataset {
   // ============================================================
 
   public static void main(String[] args) {
-    TableKnowledgeGraph.opts.baseCSVDir = "lib/data/tables/";
+    TableKnowledgeGraph.opts.baseCSVDir = "lib/data/WikiTableQuestions/";
     SerializedDataset dataset = new SerializedDataset();
     dataset.readDir("out/sliced-dump-8-reps/representative-00-training-sliced-00000-00299/");
     LazyLoadedExampleList examples = dataset.examples("representative");

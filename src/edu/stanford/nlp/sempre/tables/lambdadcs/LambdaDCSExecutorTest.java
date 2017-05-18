@@ -150,11 +150,11 @@ public class LambdaDCSExecutorTest {
               "(fb:en.tampico fb:location.location.containedby fb:en.illinois)" +
           ")"));
     } else if ("csv".equals(name)) {
-      return TableKnowledgeGraph.fromFilename("tables/toy-examples/random/nikos_machlas.csv");
+      return TableKnowledgeGraph.fromFilename("tables/toy-examples/nikos_machlas.csv");
     } else if ("csv2".equals(name)) {
-      return TableKnowledgeGraph.fromFilename("lib/data/tables/csv/204-csv/495.tsv");
+      return TableKnowledgeGraph.fromFilename("tables/toy-examples/204-495.tsv");
     } else if ("csv3".equals(name)) {
-      return TableKnowledgeGraph.fromFilename("lib/data/tables/csv/203-csv/839.tsv");
+      return TableKnowledgeGraph.fromFilename("tables/toy-examples/203-839.tsv");
     }
     throw new RuntimeException("Unknown graph name: " + name);
   }
@@ -230,9 +230,9 @@ public class LambdaDCSExecutorTest {
   @Test(groups = "lambdaCSV") public void lambdaOnGraphCSVTest() {
     KnowledgeGraph graph = getKnowledgeGraph("csv");
     runFormula(executor, "(number 3)", graph, matches("(number 3)"));
-    runFormula(executor, "(!fb:row.row.score (fb:row.row.opponent fb:cell.austria))",
-        graph, matches("(name fb:cell.1_2)"));
-    runFormula(executor, "(count (fb:row.row.result fb:cell.win))",
+    runFormula(executor, "(!fb:row.row.score (fb:row.row.opponent fb:cell_opponent.austria))",
+        graph, matches("(name fb:cell_score.1_2)"));
+    runFormula(executor, "(count (fb:row.row.result fb:cell_result.win))",
         graph, matches("(number 16)"));
     // Depending on tie-breaking, one of these will be correct
     try {
@@ -247,12 +247,12 @@ public class LambdaDCSExecutorTest {
           graph, matches("(number 2)"));
     }
   }
-  
+
   @Test(groups = "lambdaCSV2") public void lambdaOnGraphCSV2Test() {
     KnowledgeGraph graph = getKnowledgeGraph("csv2");
     runFormula(executor,
-        "(and (!= (and (!= fb:cell.away) fb:cell.home)) ((reverse fb:row.row.opponent) (fb:row.row.index (- (number 2) (number 1)))))",
-        graph, matches("(name fb:cell.derby_county)"));
+        "(and (!= (and (!= fb:cell_venue.away) fb:cell_venue.home)) ((reverse fb:row.row.opponent) (fb:row.row.index (- (number 2) (number 1)))))",
+        graph, matches("(name fb:cell_opponent.derby_county)"));
   }
 
   @Test(groups = "lambdaCSV3") public void lambdaOnGraphCSV3Test() {
@@ -265,11 +265,9 @@ public class LambdaDCSExecutorTest {
         "(count (fb:row.row.opened (fb:cell.cell.date (< (date 1926 -1 -1)))))",
         graph, matches("(number 6)"));
     runFormula(executor,
-        "(sum (- (count ((reverse fb:row.row.index) (fb:type.object.type fb:type.row))) " +
-            "((reverse fb:row.row.index) (fb:row.row.latitude ((reverse fb:row.row.longitude) (fb:type.object.type fb:type.row))))))",
-        graph, matches("(number 3)"));
-    runFormula(executor,
-        "(- (number 1926) (argmax (number 1) (number 1) ((reverse fb:cell.cell.number) (or (or (or fb:cell.1920 fb:cell.1925) fb:cell.1926) fb:cell.1946)) (reverse (lambda x (sum ((reverse fb:cell.cell.number) (fb:cell.cell.number (var x))))))))",
+        "(- (number 1926) (argmax (number 1) (number 1) ((reverse fb:cell.cell.number) "
+        + "(or (or (or fb:cell_closed.1920 fb:cell_closed.1925) fb:cell_opened.1926) fb:cell_closed.1946)) "
+        + "(reverse (lambda x (sum ((reverse fb:cell.cell.number) (fb:cell.cell.number (var x))))))))",
         graph, matches("(number 6)"));
   }
 }

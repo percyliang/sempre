@@ -100,7 +100,7 @@ public class TaggedDatasetGenerator extends TSVGenerator implements Runnable {
       }
     }
     // Other information come from Example
-    fields[2] = serialize(((TableKnowledgeGraph) ex.context.graph).filename.replace("lib/data/tables/", ""));
+    fields[2] = serialize(((TableKnowledgeGraph) ex.context.graph).filename.replace("lib/data/WikiTableQuestions/", ""));
     fields[4] = serialize(ex.languageInfo.tokens);
     fields[5] = serialize(ex.languageInfo.lemmaTokens);
     fields[6] = serialize(ex.languageInfo.posTags);
