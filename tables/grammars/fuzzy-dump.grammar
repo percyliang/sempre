@@ -1,0 +1,25 @@
+# For dumping fuzzy matched objects
+
+################################################################
+# Macros
+
+(def @R reverse)
+(def @type fb:type.object.type)
+(def @row fb:type.row)
+(def @numdate (union fb:type.number fb:type.datetime))
+
+(def @next fb:row.row.next)
+(def @index fb:row.row.index)
+(def @p.num fb:cell.cell.number)
+(def @p.date fb:cell.cell.date)
+(def @p.num2 fb:cell.cell.num2)
+(def @p.part fb:cell.cell.part)
+
+################################################################
+# Anchored Rules
+
+(rule $ENTITY ($PHRASE) (FuzzyMatchFn entity) (anchored 1))
+(rule $BINARY ($PHRASE) (FuzzyMatchFn binary) (anchored 1))
+(rule $NUMBER ($PHRASE) (NumberFn) (anchored 1))
+(rule $DATE ($PHRASE) (DateFn) (anchored 1))
+(rule $DATERANGE ($PHRASE) (DateRangeFn) (anchored 1))

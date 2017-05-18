@@ -87,15 +87,16 @@ public class ClosedClassFn extends SemanticFn {
           .formula(formula).type(type).createDerivation();
     }
 
-    protected final String NULL = TableTypeSystem.getCellName("null");
-
     protected Collection<Formula> createGenericFormulas() {
       List<Formula> formulas = new ArrayList<>();
       // Find out if the table has a null cell
-      for (TableCellProperties properties : graph.cellProperties) {
-        if (NULL.equals(properties.id)) {
-          formulas.add(new ValueFormula<>(properties.nameValue));
-          break;
+      for (TableColumn column : graph.columns) {
+        for (TableCell cell : column.children) {
+          if (cell.properties.id.endsWith(".null")) {
+            formulas.add(new ValueFormula<>(cell.properties.nameValue));
+            break;
+            
+          }
         }
       }
       if (ClosedClassFn.opts.verbose >= 2) {
@@ -114,7 +115,7 @@ public class ClosedClassFn extends SemanticFn {
         boolean hasRepeats = false;
         Set<Value> values = new HashSet<>();
         for (TableCell cell : column.children) {
-          if (NULL.equals(cell.properties.id)) continue;
+          if (cell.properties.id.endsWith(".null")) continue;
           if (values.contains(cell.properties.nameValue))
             hasRepeats = true;
           else

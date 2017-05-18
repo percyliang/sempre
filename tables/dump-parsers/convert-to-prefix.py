@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""Convert LispTree formulas to Postfix.
+"""Convert LispTree formulas to Prefix encoding.
+
+Assume implicit join.
+Skip formulas that cannot be converted.
 
 If the file is tab-separated, only process the first column.
 """
@@ -22,7 +25,6 @@ SUPERLATIVE = ['argmin', 'argmax']
 
 def convert(tree, args):
     answer = []
-    u_stack = []
     def recurse(subtree):
         if isinstance(subtree, basestring):
             answer.append(subtree)
@@ -31,42 +33,38 @@ def convert(tree, args):
             opr = subtree[0]
             if opr in AGGREGATE:
                 assert len(subtree) == 2, str(subtree)
-                recurse(subtree[1])
                 answer.append(opr)
+                recurse(subtree[1])
             elif opr in MERGE_ARITH:
                 assert len(subtree) == 3, str(subtree)
+                if opr == '-':
+                    opr = 'diff'
+                answer.append(opr)
                 recurse(subtree[1])
                 recurse(subtree[2])
-                answer.append(opr)
             elif opr in SUPERLATIVE:
                 assert len(subtree) in (3, 5), str(subtree)
                 if len(subtree) == 3:
                     u, b = subtree[1], subtree[2]
                 else:
                     u, b = subtree[3], subtree[4]
-                if args.implicit_superlative_lambda:
-                    assert b[0] == 'reverse'
-                    assert b[1][0] == 'lambda'
-                    u_stack.append(convert(u, args))
-                    recurse(b[1][2])
-                    answer.append(opr)
-                    u_stack.pop()
-                else:
-                    recurse(u)
-                    recurse(b)
-                    answer.append(opr)
+                assert b[0] == 'reverse'
+                assert b[1][0] == 'lambda'
+                answer.append(opr)
+                recurse(u)
+                recurse(b[1][2])
             elif opr == 'lambda':
-                assert len(subtree) == 3, str(subtree)
-                recurse(subtree[2])
-                answer.append(opr)
+                assert False, 'Cannot convert lambda'
+                #assert len(subtree) == 3, str(subtree)
+                #answer.append(opr)
+                #recurse(subtree[2])
             elif opr == 'reverse':
-                assert len(subtree) == 2, str(subtree)
-                recurse(subtree[1])
-                answer.append(opr)
+                assert False, 'Cannot convert reverse'
+                #assert len(subtree) == 2, str(subtree)
+                #answer.append(opr)
+                #recurse(subtree[1])
             elif opr == 'var':
                 assert len(subtree) == 2, str(subtree)
-                if args.implicit_superlative_lambda:
-                    answer.extend(u_stack[-1])
                 answer.append(subtree[1])
             elif opr == 'number':
                 assert len(subtree) == 2, str(subtree)
@@ -77,40 +75,50 @@ def convert(tree, args):
                     'XX' if x == '-1' else x for x in subtree[1:4]))
             else:    # Join with a name
                 assert len(subtree) == 2, str(subtree)
-                if (args.collapse_type_row and
-                        'fb:type.object.type' == opr and
+                if ('fb:type.object.type' == opr and
                         'fb:type.row' == subtree[1]):
                     answer.append(TYPE_ROW)
                 else:
-                    recurse(subtree[1])
                     answer.append(opr)
-                    if not args.implicit_join:
-                        answer.append('join')
+                    recurse(subtree[1])
         else:   # Join with a complex construct
             assert len(subtree) == 2, str(subtree)
             # Only allows ((reverse ...) ...)
             assert subtree[0][0] == 'reverse', str(subtree)
             assert len(subtree[0]) == 2, str(subtree)
-            recurse(subtree[1])
             answer.append('!' + subtree[0][1])
-            if not args.implicit_join:
-                answer.append('join')
+            recurse(subtree[1])
     recurse(tree)
     return answer
 
+def prenormalize(lf, args):
+    lf = lf[:]
+    # Mark all normalization relations
+    for i in xrange(len(lf)):
+        if lf[i].startswith('fb:cell.cell.'):
+            assert lf[i-1].startswith('fb:row.row.')
+            lf[i-1] = 'fb:row.{}.{}'.format(
+                    lf[i][len('fb:cell.cell.'):],
+                    lf[i-1][len('fb:row.row.'):])
+            lf[i] = ''
+        elif lf[i].startswith('!fb:cell.cell.'):
+            assert lf[i+1].startswith('!fb:row.row.')
+            lf[i+1] = '!fb:row.{}.{}'.format(
+                    lf[i][len('!fb:cell.cell.'):],
+                    lf[i+1][len('!fb:row.row.'):])
+            lf[i] = ''
+    return [x for x in lf if x]
+
 def process(line, args):
     line = line.rstrip('\n').split('\t')
-    line[args.field] = ' '.join(convert(lisptree.parse(line[args.field]), args))
+    lf = lisptree.parse(line[args.field])
+    lf = convert(lf, args)
+    lf = prenormalize(lf, args)
+    line[args.field] = ' '.join(lf)
     print '\t'.join(line)
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-j', '--implicit-join', action='store_true',
-            help='Do not output "." for joins')
-    parser.add_argument('-s', '--implicit-superlative-lambda', action='store_true',
-            help='Do not output "lambda reverse" for superlatives')
-    parser.add_argument('-t', '--collapse-type-row', action='store_true',
-            help='Collapse "(type row)" into a single token')
     parser.add_argument('-f', '--field', type=int, default=0,
             help='Field index (tab-separated; 0-based) containing the logical form')
     parser.add_argument('infile')
@@ -123,7 +131,10 @@ def main():
                 process(line, args)
     else:
         for line in sys.stdin:
-            process(line, args)
+            try:
+                process(line, args)
+            except Exception as e:
+                print >> sys.stderr, 'ERROR:', line.rstrip()
 
 if __name__ == '__main__':
     main()

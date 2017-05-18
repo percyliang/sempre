@@ -21,13 +21,13 @@ Running the code
         ./pull-dependencies tables
         ./pull-dependencies tables-data
 
-  The dataset lives in `lib/data/tables/`
+  The dataset lives in `lib/data/WikiTableQuestions/`
 
 2. Compile the source:
 
         ant tables
 
-  This will produce JAR files in the `libsempre` directory as usual.
+  This will produce JAR files in the `libsempre` directory.
 
 3. The following command train and test on 100 development examples:
 
@@ -40,6 +40,27 @@ Running the code
   * The command above uses `u-1` (80:20 split of the development data).
   Other available sets include `u-2`, ..., `u-5` (four other development splits)
   and `test` (actual train-test split).
+
+Official evaluation
+-------------------
+
+The official evaluation script in the WikiTableQuestions dataset is slightly
+more lenient than the SEMPRE one (`tables.TableValueEvaluator`).
+In particular, the SEMPRE evaluator enforces that the type of the predicted
+denotation must match the correct answer type, while the official one allows
+type conversion.
+
+To get the official number of a trained model, run
+
+    ./run @mode=tables @data=u-1 @feat=all @train=0 -Derivation.showValues -Builder.inParamsPath path/to/params
+
+(Change the `@data` other options to match the ones used during training.)
+
+This should produce an execution directory (in `state/execs/` by default)
+with a log file in it. Then run
+
+    ./tables/log-parsers/get-predictions.py path/to/log > predictions
+    ./lib/data/WikiTableQuestions/evaluator.py -t ./lib/data/WikiTableQuestions/tagged-data predictions
 
 Other usages
 ------------

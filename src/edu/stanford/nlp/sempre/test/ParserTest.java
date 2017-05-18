@@ -107,21 +107,13 @@ public class ParserTest {
     // TODO(chaganty): test more thoroughly
   }
 
-  @Test public void checkFloatingNumDerivations() {
-    // Make it behave like the BeamParser
-    FloatingParser.opts.defaultIsFloating = false;
-    ParseTest p;
-    p = ABCTest();
-    p.test(new FloatingParser(p.getParserSpec()));
-    p = ArithmeticTest();
-    p.test(new FloatingParser(p.getParserSpec()));
-
-    // If floating, should get more hypotheses
+  @Test(groups = "floating") public void checkFloatingNumDerivations() {
     FloatingParser.opts.defaultIsFloating = true;
+    FloatingParser.opts.useSizeInsteadOfDepth = true;
     Parser parser = new FloatingParser(ABCTest().getParserSpec());
     FloatingParser.opts.maxDepth = 2;
     checkNumDerivations(parser, "ignore", null, 3);
-    FloatingParser.opts.maxDepth = 3;
+    FloatingParser.opts.maxDepth = 4;
     checkNumDerivations(parser, "ignore", null, 3 + 3 * 3);
   }
 
@@ -143,12 +135,35 @@ public class ParserTest {
   @Test void checkRankingSimple() {
     checkRankingArithmetic(new BeamParser(ArithmeticTest().getParserSpec()));
   }
-  @Test void checkRankingReinforcement() {
+  @Test(groups = "reinforcement") void checkRankingReinforcement() {
     checkRankingArithmetic(new ReinforcementParser(ArithmeticTest().getParserSpec()));
   }
-  @Test void checkRankingFloating() {
-    FloatingParser.opts.defaultIsFloating = false;
-    checkRankingArithmetic(new FloatingParser(ArithmeticTest().getParserSpec()));
+
+  @Test(groups = "floating") public void checkRankingFloating() {
+    FloatingParser.opts.defaultIsFloating = true;
+    FloatingParser.opts.maxDepth = 4;
+    FloatingParser.opts.useAnchorsOnce = true;
+    Parser parser = new FloatingParser(new ParseTest(TestUtils.makeArithmeticFloatingGrammar()) {
+      @Override public void test(Parser parser) {}
+    }.getParserSpec());
+    Params params = new Params();
+    Map<String, Double> features = new HashMap<>();
+    features.put("rule :: $Operator -> nothing (ConstantFn (lambda y (lambda x (call + (var x) (var y)))))", 1.0);
+    features.put("rule :: $Operator -> nothing (ConstantFn (lambda y (lambda x (call * (var x) (var y)))))", -1.0);
+    params.update(features);
+    /*
+     * Expected LFs:
+     *    2          3
+     *    2 + 3      3 + 2
+     *    2 * 3      3 * 2
+     */
+    checkNumDerivations(parser, params, "2 and 3", "(number 5)", 6);
+
+    params = new Params();
+    features.put("rule :: $Operator -> nothing (ConstantFn (lambda y (lambda x (call + (var x) (var y)))))", -1.0);
+    features.put("rule :: $Operator -> nothing (ConstantFn (lambda y (lambda x (call * (var x) (var y)))))", 1.0);
+    params.update(features);
+    checkNumDerivations(parser, params, "2 and 3", "(number 6)", 6);
   }
 
   // TODO(chaganty): verify the parser gradients

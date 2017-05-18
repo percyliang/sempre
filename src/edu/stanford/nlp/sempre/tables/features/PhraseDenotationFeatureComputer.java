@@ -16,10 +16,6 @@ public class PhraseDenotationFeatureComputer implements FeatureComputer {
   public static class Options {
     @Option(gloss = "Verbosity")
     public int verbose = 0;
-    @Option(gloss = "Look for the type under the first cell property")
-    public boolean lookUnderCellProperty = false;
-    @Option(gloss = "Define features for generic cell types too")
-    public boolean useGenericCellType = false;
   }
   public static Options opts = new Options();
 
@@ -41,14 +37,12 @@ public class PhraseDenotationFeatureComputer implements FeatureComputer {
     // Type based on SemType
     populateSemType("", deriv.type, denotationTypes);
     // Look for the type under the first cell property
-    if (opts.lookUnderCellProperty) {
-      Formula formula = deriv.formula;
-      if (formula instanceof JoinFormula) {
-        JoinFormula join = (JoinFormula) formula;
-        String property = getCellProperty(join.relation);
-        if (property != null) {
-          populateSemType(property + "/", TypeInference.inferType(join.child), denotationTypes);
-        }
+    Formula formula = deriv.formula;
+    if (formula instanceof JoinFormula) {
+      JoinFormula join = (JoinFormula) formula;
+      String property = getCellProperty(join.relation);
+      if (property != null) {
+        populateSemType(property + "/", TypeInference.inferType(join.child), denotationTypes);
       }
     }
     if (denotationTypes.isEmpty()) denotationTypes.add("OTHER");
@@ -62,11 +56,9 @@ public class PhraseDenotationFeatureComputer implements FeatureComputer {
     } else {
       for (LispTree subtree : tree.children) {
         if (!subtree.isLeaf()) continue;
-        // TODO: not sure if this is correct
-        if (subtree.value.startsWith(TableTypeSystem.CELL_TYPE)) {
+        if (subtree.value.startsWith(TableTypeSystem.CELL_SPECIFIC_TYPE_PREFIX)) {
           denotationTypes.add(prefix + subtree.value);
-          if (opts.useGenericCellType)
-            denotationTypes.add(prefix + TableTypeSystem.CELL_TYPE);
+          denotationTypes.add(prefix + TableTypeSystem.CELL_GENERIC_TYPE);
         }
       }
     }
@@ -146,8 +138,8 @@ public class PhraseDenotationFeatureComputer implements FeatureComputer {
 
   private void extractHeadwordDenotationFeatures(Example ex, Derivation deriv, Collection<String> denotationTypes) {
     if (!FeatureExtractor.containsDomain("headword-denotation")) return;
-    HeadwordInfo headwordInfo = HeadwordInfo.analyze(ex.languageInfo);
-    if (headwordInfo == null) return;
+    HeadwordInfo headwordInfo = HeadwordInfo.getHeadwordInfo(ex);
+    if (headwordInfo.questionWord.isEmpty() && headwordInfo.headword.isEmpty()) return;
     if (opts.verbose >= 2)
       LogInfo.logs("%s [%s] | %s %s %s", ex.utterance, headwordInfo, deriv.value, deriv.type, denotationTypes);
     for (String denotationType : denotationTypes) {

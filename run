@@ -640,19 +640,19 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
   sel(:class, {
     'main' => 'edu.stanford.nlp.sempre.Main',
     'check' => 'edu.stanford.nlp.sempre.tables.test.DPDParserChecker',
-    'align' => l('edu.stanford.nlp.sempre.tables.alignment.AlignerMain', o('maxTrainIters', 11)),
     'dump' => 'edu.stanford.nlp.sempre.tables.serialize.SerializedDumper',
     'load' => l('edu.stanford.nlp.sempre.tables.serialize.SerializedLoader', let(:parser, 'serialized')),
     'stats' => 'edu.stanford.nlp.sempre.tables.test.TableStatsComputer',
     'tag-data' => 'edu.stanford.nlp.sempre.tables.serialize.TaggedDatasetGenerator',
     'tag-table' => 'edu.stanford.nlp.sempre.tables.serialize.TaggedTableGenerator',
+    'tag-fuzzy' => 'edu.stanford.nlp.sempre.tables.serialize.TaggedFuzzyGenerator',
     'alter' => l('edu.stanford.nlp.sempre.tables.alter.BatchTableAlterer', let(:parser, 'serialized')),
     'alter-ex' => l('edu.stanford.nlp.sempre.tables.alter.AlteredTablesExecutor', let(:parser, 'serialized')),
     'filter' => 'edu.stanford.nlp.sempre.tables.serialize.DumpFilterer',
   }),
   # Fig parameters
-  selo(:cldir, 'execDir', '_OUTPATH_', 'output'),
-  o('overwriteExecDir'), o('addToView', 11), o('jarFiles', 'libsempre/*'),
+  selo(:cldir, 'execDir', '_OUTPATH_', '.'),
+  o('overwriteExecDir'), o('addToView', 13), o('jarFiles', 'libsempre/*'),
   sel(:cldir, l(), '>/dev/null'),
   # Set environment for table execution
   o('executor', 'tables.lambdadcs.LambdaDCSExecutor'),
@@ -671,14 +671,14 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
     nil),
   }),
   # Parser
-  letDefault(:parser, 'old-floatsize'),
+  letDefault(:parser, 'floatsize'),
   sel(:parser, {
-    'old-floatsize' => l(
+    'floatsize' => l(
       o('Builder.parser', 'FloatingParser'),
       o('useSizeInsteadOfDepth'),
       o('FloatingParser.maxDepth', 15),
     nil),
-    'old-baseline' => l(
+    'baseline' => l(
       o('Builder.parser', 'tables.baseline.TableBaselineParser'),
     nil),
     'serialized' => o('Builder.parser', 'tables.serialize.SerializedParser'),
@@ -702,23 +702,30 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
       o('FloatingParser.betaReduce'), o('initialFloatingHasZeroDepth'),
     nil),
   }),
-  o('Parser.verbose', 1),
+  o('Parser.verbose', 0),
   letDefault(:pruning, 1),
   sel(:pruning,
     l(),
     l(
       o('DerivationPruner.pruningStrategies', *tablesPruningStrategies),
       o('DerivationPruner.pruningComputers', 'tables.TableDerivationPruningComputer'),
-      o('recursivePruning', false),
     nil),
   nil),
   # Grammar
   tablesGrammarPaths,
-  letDefault(:fuzzy, 1),
-  sel(:fuzzy,
-    l(),
-    l(o('fuzzyMatchSubstring'), o('fuzzyMatchMaxEditDistanceRatio', 0.3), o('alsoReturnUnion'), o('alsoMatchPart')),
-  nil),
+  letDefault(:fuzzy, 'original'),
+  sel(:fuzzy, {
+    'original' => o('FuzzyMatcher.fuzzyMatcher', 'tables.match.OriginalMatcher'),
+    'editdist-exact' => l(
+      o('FuzzyMatcher.fuzzyMatcher', 'tables.match.EditDistanceFuzzyMatcher'),
+      o('fuzzyMatchMaxEditDistanceRatio', 0.0),
+    nil),
+    'editdist-fuzzy' => l(
+      o('FuzzyMatcher.fuzzyMatcher', 'tables.match.EditDistanceFuzzyMatcher'),
+      o('fuzzyMatchSubstring'), o('fuzzyMatchMaxEditDistanceRatio', 0.3),
+      o('alsoReturnUnion'), o('alsoMatchPart'),
+    nil),
+  }),
   letDefault(:normalize, 1),
   sel(:normalize,
     l(),
@@ -736,7 +743,7 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
   o('FeatureVector.ignoreZeroWeight'),
   o('maxPrintedPredictions', 10), o('maxPrintedTrue', 10), o('logFeaturesLimit', 10),
   o('LambdaDCSException.noErrorMessage'),
-  letDefault(:verbose, 2),
+  letDefault(:verbose, 0),
   sel(:verbose,
     l(),
     l(
@@ -799,10 +806,6 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
       o('FeatureExtractor.featureDomains', 'custom-denotation phrase-predicate phrase-denotation headword-denotation missing-predicate'.split),
       o('FeatureExtractor.featureComputers', 'tables.features.PhrasePredicateFeatureComputer tables.features.PhraseDenotationFeatureComputer'.split),
     nil),
-    'all-fragment' => l(
-      o('FeatureExtractor.featureDomains', 'custom-denotation phrase-denotation headword-denotation phrase-fragment'.split),
-      o('FeatureExtractor.featureComputers', 'tables.features.PhraseDenotationFeatureComputer tables.features.PhraseFragmentFeatureComputer'.split),
-    nil),
     'baseline' => l( # For the baseline classifier
       o('FeatureExtractor.featureDomains', 'custom-denotation phrase-denotation headword-denotation table-baseline'.split),
       o('FeatureExtractor.featureComputers', 'tables.baseline.TableBaselineFeatureComputer tables.features.PhraseDenotationFeatureComputer'.split),
@@ -824,7 +827,6 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
     'none' => l(),
     'careful' => l(
       o('maxNforLexicalizeAllPairs', 2),
-      o('lookUnderCellProperty'), o('useGenericCellType'),
       o('computeFuzzyMatchPredicates'),
     nil),
   }),
@@ -854,7 +856,7 @@ def tablesGrammarPaths
         nil),
         'combined-more' => l(
           o('Grammar.inPaths', "#{baseDir}combined.grammar"),
-          o('Grammar.tags', *'alternative movement comparison count aggregate superlative arithmetic merge u-superlative neq'.split),
+          o('Grammar.tags', *'alternative movement comparison count aggregate superlative arithmetic merge v-superlative'.split),
         nil),
         'combined-trigger' => l(    # Use trigger words for operations
           o('Grammar.inPaths', "#{baseDir}combined.grammar"),
@@ -871,6 +873,12 @@ def tablesGrammarPaths
           o('Grammar.tags', *'scoped merge-and arithmetic comparison alternative neq yearrange part closedclass scoped-2args-merge-and'.split),
           let(:anchor, 2),
         nil),
+        'grow-strict' => l(
+          o('Grammar.inPaths', "#{baseDir}grow.grammar"),
+          o('Grammar.binarizeRules', false),
+          o('Grammar.tags', *'scoped merge-and arithmetic comparison alternative neq yearrange part closedclass-generic scoped-2args-merge-and'.split),
+          let(:anchor, 2),
+        nil),
       }),
     nil)
   }
@@ -878,8 +886,8 @@ end
 
 def tablesDataPaths
   lambda { |e|
-    baseDir = ['lib/data/tables/data/', 'WikiTableQuestions/data/'][e[:cldir]]
-    csvDir = ['lib/data/tables/', 'WikiTableQuestions/'][e[:cldir]]
+    baseDir = ['lib/data/WikiTableQuestions/data/', 'WikiTableQuestions/data/'][e[:cldir]]
+    csvDir = ['lib/data/WikiTableQuestions/', 'WikiTableQuestions/'][e[:cldir]]
     datasets = {
       'none' => l(),
       'train' => o('Dataset.inPaths', "train,#{baseDir}training.examples"),
@@ -902,7 +910,6 @@ def tablesDataPaths
     end
     # That's it!
     l(
-      o('splitDevFromTrain', false),
       o('TableKnowledgeGraph.baseCSVDir', csvDir),
       sel(:data, datasets),
     nil)
@@ -921,8 +928,9 @@ def tablesPruningStrategies
     "mistypedMerge",
     ### Strategies that depend on the children's formulas
     "doubleNext",
-    "doubleSummarizers",
+    "multipleSuperlatives",
     "sameMerge",
+    "forwardBackward",
     "unsortedMerge",
     "typeRowMerge",
   nil].compact

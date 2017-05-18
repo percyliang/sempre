@@ -33,6 +33,16 @@ public final class TestUtils {
     return g;
   }
 
+  public static Grammar makeArithmeticFloatingGrammar() {
+    Grammar g = new Grammar();
+    g.addStatement("(rule $Expr ($TOKEN) (NumberFn) (anchored 1))");
+    g.addStatement("(rule $Expr ($Expr $Partial) (JoinFn backward))");
+    g.addStatement("(rule $Partial ($Operator $Expr) (JoinFn forward))");
+    g.addStatement("(rule $Operator (nothing) (ConstantFn (lambda y (lambda x (call + (var x) (var y))))))");
+    g.addStatement("(rule $Operator (nothing) (ConstantFn (lambda y (lambda x (call * (var x) (var y))))))");
+    g.addStatement("(rule $ROOT ($Expr) (IdentityFn))");
+    return g;
+  }
 
   public static Grammar makeNumberConcatGrammar() {
     Grammar g = new Grammar();

@@ -1,7 +1,5 @@
 package edu.stanford.nlp.sempre.tables;
 
-import java.util.*;
-
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 
@@ -19,14 +17,12 @@ public class TableCellProperties {
   public final String originalString;
   public final NameValue nameValue;
   public final Multimap<Value, Value> metadata;
-  public final Set<TableColumn> columns;
 
   public TableCellProperties(String id, String originalString) {
     this.id = id;
     this.originalString = originalString;
     this.nameValue = new NameValue(id, originalString);
     this.metadata = ArrayListMultimap.create();
-    this.columns = new HashSet<>();
   }
 
   /** Create a copy without the columns field. */
@@ -35,7 +31,6 @@ public class TableCellProperties {
     this.originalString = old.originalString;
     this.nameValue = old.nameValue;
     this.metadata = ArrayListMultimap.create(old.metadata);
-    this.columns = new HashSet<>();
   }
 
   @Override

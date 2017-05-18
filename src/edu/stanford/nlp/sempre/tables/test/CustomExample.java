@@ -108,10 +108,6 @@ public class CustomExample extends Example {
     formulaMacros.put("@!p.date", "!" + TableTypeSystem.CELL_DATE_VALUE.id);
     formulaMacros.put("@p.num2", TableTypeSystem.CELL_NUM2_VALUE.id);
     formulaMacros.put("@!p.num2", "!" + TableTypeSystem.CELL_NUM2_VALUE.id);
-    formulaMacros.put("@p.str1", TableTypeSystem.CELL_STR1_VALUE.id);
-    formulaMacros.put("@!p.str1", "!" + TableTypeSystem.CELL_STR1_VALUE.id);
-    formulaMacros.put("@p.str2", TableTypeSystem.CELL_STR2_VALUE.id);
-    formulaMacros.put("@!p.str2", "!" + TableTypeSystem.CELL_STR2_VALUE.id);
     formulaMacros.put("@p.part", TableTypeSystem.CELL_PART_VALUE.id);
     formulaMacros.put("@!p.part", "!" + TableTypeSystem.CELL_PART_VALUE.id);
   }
@@ -144,9 +140,9 @@ public class CustomExample extends Example {
       if ((match = regexReversedProperty.matcher(value)).matches())
         return LispTree.proto.newLeaf("!" + TableTypeSystem.getRowPropertyName(match.group(1)));
       if ((match = regexEntity.matcher(value)).matches())
-        return LispTree.proto.newLeaf(TableTypeSystem.getCellName(match.group(1)));
+        return LispTree.proto.newLeaf(TableTypeSystem.CELL_NAME_PREFIX + "." + match.group(1));
       if ((match = regexPart.matcher(value)).matches())
-        return LispTree.proto.newLeaf(TableTypeSystem.getPartName(match.group(1)));
+        return LispTree.proto.newLeaf(TableTypeSystem.PART_NAME_PREFIX + "." + match.group(1));
       if (value.contains(".") && !(value.startsWith("fb:") || value.startsWith("!fb:")))
         throw new RuntimeException("Unhandled '.': " + value);
       return orig;

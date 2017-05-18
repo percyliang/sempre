@@ -26,6 +26,8 @@ public class LambdaDCSExecutor extends Executor {
     public boolean executeBinary = false;
     @Option(gloss = "Generic DateValue: (date -1 5 -1) in formula also matches (date -1 5 12)")
     public boolean genericDateValue = false;
+    @Option(gloss = "If the result is empty, return an ErrorValue instead of an empty ListValue")
+    public boolean failOnEmptyLists = false;
     @Option(gloss = "Return all ties on (argmax 1 1 ...) and (argmin 1 1 ...)")
     public boolean superlativesReturnAllTopTies = true;
     @Option(gloss = "Aggregates (sum, avg, max, min) throw an error on empty lists")
@@ -148,6 +150,11 @@ class LambdaDCSCoreLogic {
           cache.put(graph, formula, denotation);
         }
         answer = denotation.toValue();
+        if (answer instanceof ListValue) {
+          answer = ((ListValue) answer).getUnique();
+          if (LambdaDCSExecutor.opts.failOnEmptyLists && ((ListValue) answer).values.isEmpty())
+            answer = ErrorValue.empty;
+        }
       } catch (LambdaDCSException e) {
         if (LambdaDCSExecutor.opts.executeBinary && e.type == Type.notUnary) {
           try {
