@@ -107,21 +107,13 @@ public class ParserTest {
     // TODO(chaganty): test more thoroughly
   }
 
-  @Test public void checkFloatingNumDerivations() {
-    // Make it behave like the BeamParser
-    FloatingParser.opts.defaultIsFloating = false;
-    ParseTest p;
-    p = ABCTest();
-    p.test(new FloatingParser(p.getParserSpec()));
-    p = ArithmeticTest();
-    p.test(new FloatingParser(p.getParserSpec()));
-
-    // If floating, should get more hypotheses
+  @Test(groups = "floating") public void checkFloatingNumDerivations() {
     FloatingParser.opts.defaultIsFloating = true;
+    FloatingParser.opts.useSizeInsteadOfDepth = true;
     Parser parser = new FloatingParser(ABCTest().getParserSpec());
     FloatingParser.opts.maxDepth = 2;
     checkNumDerivations(parser, "ignore", null, 3);
-    FloatingParser.opts.maxDepth = 3;
+    FloatingParser.opts.maxDepth = 4;
     checkNumDerivations(parser, "ignore", null, 3 + 3 * 3);
   }
 
@@ -143,12 +135,8 @@ public class ParserTest {
   @Test void checkRankingSimple() {
     checkRankingArithmetic(new BeamParser(ArithmeticTest().getParserSpec()));
   }
-  @Test void checkRankingReinforcement() {
+  @Test(groups = "reinforcement") void checkRankingReinforcement() {
     checkRankingArithmetic(new ReinforcementParser(ArithmeticTest().getParserSpec()));
-  }
-  @Test void checkRankingFloating() {
-    FloatingParser.opts.defaultIsFloating = false;
-    checkRankingArithmetic(new FloatingParser(ArithmeticTest().getParserSpec()));
   }
 
   // TODO(chaganty): verify the parser gradients

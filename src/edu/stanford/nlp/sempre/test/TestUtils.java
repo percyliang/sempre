@@ -33,7 +33,6 @@ public final class TestUtils {
     return g;
   }
 
-
   public static Grammar makeNumberConcatGrammar() {
     Grammar g = new Grammar();
     g.addStatement("(rule $Number ($TOKEN) (NumberFn))");
