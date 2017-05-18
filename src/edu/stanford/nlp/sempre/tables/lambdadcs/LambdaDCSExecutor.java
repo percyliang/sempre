@@ -149,9 +149,12 @@ class LambdaDCSCoreLogic {
         if (LambdaDCSExecutor.opts.useCache) {
           cache.put(graph, formula, denotation);
         }
-        answer = ((ListValue) denotation.toValue()).getUnique();
-        if (((ListValue) answer).values.isEmpty() && LambdaDCSExecutor.opts.failOnEmptyLists)
-          answer = ErrorValue.empty;
+        answer = denotation.toValue();
+        if (answer instanceof ListValue) {
+          answer = ((ListValue) answer).getUnique();
+          if (LambdaDCSExecutor.opts.failOnEmptyLists && ((ListValue) answer).values.isEmpty())
+            answer = ErrorValue.empty;
+        }
       } catch (LambdaDCSException e) {
         if (LambdaDCSExecutor.opts.executeBinary && e.type == Type.notUnary) {
           try {
