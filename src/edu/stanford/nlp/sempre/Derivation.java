@@ -48,7 +48,7 @@ public class Derivation implements SemanticFn.Callable, HasScore {
   public String canonicalUtterance;
   public boolean allAnchored = true;
   private int[] numAnchors;     // Number of times each token was anchored
-  
+
   /**
   * Information for grammar induction.
   * For each descendant derivation of the body, this class tracks where and what in the head it matches
@@ -459,17 +459,17 @@ public class Derivation implements SemanticFn.Callable, HasScore {
       return 0;
     }
   }
-  
+
   //Used to compare derivations by score, prioritizing the fully anchored.
   public static class AnchorPriorityScoreComparator implements Comparator<Derivation> {
     @Override
     public int compare(Derivation deriv1, Derivation deriv2) {
       boolean deriv1Core = deriv1.allAnchored();
       boolean deriv2Core = deriv2.allAnchored();
-    
+
       if (deriv1Core && !deriv2Core) return -1;
       if (deriv2Core && !deriv1Core) return +1;
-      
+
       if (deriv1.score > deriv2.score) return -1;
       if (deriv1.score < deriv2.score) return +1;
       // Ensure reproducible randomness

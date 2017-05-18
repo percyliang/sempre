@@ -114,8 +114,8 @@ public class CustomExample extends Example {
 
   static final Pattern regexProperty = Pattern.compile("r\\.(.*)");
   static final Pattern regexReversedProperty = Pattern.compile("!r\\.(.*)");
-  static final Pattern regexEntity = Pattern.compile("c_(.*)\\.(.*)");
-  static final Pattern regexPart = Pattern.compile("q_(.*)\\.(.*)");
+  static final Pattern regexEntity = Pattern.compile("c\\.(.*)");
+  static final Pattern regexPart = Pattern.compile("q\\.(.*)");
 
   /**
    * Return a new LispTree representing the canonicalized version of the original formula
@@ -140,9 +140,9 @@ public class CustomExample extends Example {
       if ((match = regexReversedProperty.matcher(value)).matches())
         return LispTree.proto.newLeaf("!" + TableTypeSystem.getRowPropertyName(match.group(1)));
       if ((match = regexEntity.matcher(value)).matches())
-        return LispTree.proto.newLeaf(TableTypeSystem.getCellName(match.group(2), match.group(1)));
+        return LispTree.proto.newLeaf(TableTypeSystem.CELL_NAME_PREFIX + "." + match.group(1));
       if ((match = regexPart.matcher(value)).matches())
-        return LispTree.proto.newLeaf(TableTypeSystem.getPartName(match.group(2), match.group(1)));
+        return LispTree.proto.newLeaf(TableTypeSystem.PART_NAME_PREFIX + "." + match.group(1));
       if (value.contains(".") && !(value.startsWith("fb:") || value.startsWith("!fb:")))
         throw new RuntimeException("Unhandled '.': " + value);
       return orig;
