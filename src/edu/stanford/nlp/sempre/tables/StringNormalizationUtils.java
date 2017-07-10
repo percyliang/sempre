@@ -317,8 +317,7 @@ public final class StringNormalizationUtils {
         .replaceAll("[‘’´`]", "'")
         .replaceAll("[“”«»]", "\"")
         .replaceAll("[•†‡]", "")
-        .replaceAll("[‐‑–—]", "-")
-        .replaceAll("[\\u2E00-\\uFFFF]", "");     // (Sorry Chinese people)
+        .replaceAll("[‐‑–—]", "-");
     return string.replaceAll("\\s+", " ").trim();
   }
 
@@ -330,13 +329,8 @@ public final class StringNormalizationUtils {
     // Citation
     string = string.replaceAll("\\[(nb ?)?\\d+\\]", "");
     string = string.replaceAll("\\*+$", "");
-    // Year in parentheses
-    string = string.replaceAll("\\(\\d* ?-? ?\\d*\\)", "");
     // Outside Quote
     string = string.replaceAll("^\"(.*)\"$", "$1");
-    // Numbering
-    if (!string.matches("^[0-9.]+$"))
-      string = string.replaceAll("^\\d+\\.", "");
     return string.replaceAll("\\s+", " ").trim();
   }
 
@@ -347,7 +341,6 @@ public final class StringNormalizationUtils {
     // Dashed / Parenthesized information
     string = simpleNormalize(string);
     string = string.replaceAll("\\[[^\\]]*\\]", "");
-    string = string.replaceAll("[\\u007F-\\uFFFF]", "");
     string = string.trim().replaceAll(" - .*$", "");
     string = string.trim().replaceAll("\\([^)]*\\)$", "");
     return string.replaceAll("\\s+", " ").trim();
