@@ -7,5 +7,5 @@ else
   echo "Usage: ./tables/view csv/XXX-csv/YYY.csv OR ./tables/view XXX YYY"
   exit 1
 fi
-[ -f filename ] || filename=lib/data/tables/$filename
+[ -f filename ] || filename=lib/data/WikiTableQuestions/$filename
 view -c "set nowrap" $filename
