@@ -27,10 +27,10 @@ public abstract class TargetValuePreprocessor {
   }
   public static void setSingleton(TargetValuePreprocessor processor) { singleton = processor; }
 
-  public abstract Value preprocess(Value value);
+  public abstract Value preprocess(Value value, Example ex);
 
 }
 
 class IdentityTargetValuePreprocessor extends TargetValuePreprocessor {
-  public Value preprocess(Value value) { return value; }
+  public Value preprocess(Value value, Example ex) { return value; }
 }

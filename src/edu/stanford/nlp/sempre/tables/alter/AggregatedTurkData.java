@@ -93,7 +93,7 @@ public class AggregatedTurkData {
     List<Value> values = new ArrayList<>();
     for (String x : response.split("\\|"))
       values.add(new DescriptionValue(StringNormalizationUtils.unescapeTSV(x)));
-    return TargetValuePreprocessor.getSingleton().preprocess(new ListValue(values));
+    return TargetValuePreprocessor.getSingleton().preprocess(new ListValue(values), null);
   }
 
 }

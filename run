@@ -917,6 +917,7 @@ def tablesDataPaths
     # That's it!
     l(
       o('TableKnowledgeGraph.baseCSVDir', csvDir),
+      o('TableValuePreprocessor.taggedFiles', "#{csvDir}/tagged/data/"),
       sel(:data, datasets),
     nil)
   }

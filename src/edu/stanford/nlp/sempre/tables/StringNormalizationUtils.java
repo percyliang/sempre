@@ -200,21 +200,30 @@ public final class StringNormalizationUtils {
     return null;
   }
 
-  public static final DateTimeFormatter dateFormat = DateTimeFormat.forPattern("MMM d, yyyy");
+  public static final DateTimeFormatter americanDateFormat = DateTimeFormat.forPattern("MMM d, yyyy");
+  public static final Pattern suTimeDateFormat = Pattern.compile("([0-9X]{4})(?:-([0-9X]{2}))?(?:-([0-9X]{2}))?");
 
   /**
    * Convert string to DateValue.
    */
   public static DateValue parseDate(String s) {
+    Matcher matcher = suTimeDateFormat.matcher(s.toUpperCase());
+    if (matcher.matches()) {
+      String yS = matcher.group(1), mS = matcher.group(2), dS = matcher.group(3);
+      int y = -1, m = -1, d = -1;
+      if (!(yS == null || yS.isEmpty() || yS.contains("X"))) y = Integer.parseInt(yS);
+      if (!(mS == null || mS.isEmpty() || mS.contains("X"))) m = Integer.parseInt(mS);
+      if (!(dS == null || dS.isEmpty() || dS.contains("X"))) d = Integer.parseInt(dS);
+      if (y == -1 && m == -1 && d == -1) return null;
+      return new DateValue(y, m, d);
+    }
     try {
-      DateTime date = dateFormat.parseDateTime(s);
+      DateTime date = americanDateFormat.parseDateTime(s);
       return new DateValue(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth());
     } catch (IllegalArgumentException e) {
       return null;
     }
   }
-
-  public static final Pattern suTimeDateFormat = Pattern.compile("([0-9X]{4})(?:-([0-9X]{2}))?(?:-([0-9X]{2}))?");
 
   public static DateValue parseDateWithLanguageAnalyzer(LanguageInfo languageInfo) {
     if (languageInfo.numTokens() == 0) return null;
