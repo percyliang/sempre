@@ -24,6 +24,9 @@ public abstract class Value {
   // (optional) String used for sorting Values. The default is to call toString()
   public String sortString() { return toString(); }
 
+  // (optional) String without the LispTree structure. The default is to call toString()
+  public String pureString() { return toString(); }
+
   @JsonCreator
   public static Value fromString(String str) {
     return Values.fromLispTree(LispTree.proto.parseFromString(str));

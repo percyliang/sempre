@@ -652,7 +652,7 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
   }),
   # Fig parameters
   selo(:cldir, 'execDir', '_OUTPATH_', '.'),
-  o('overwriteExecDir'), o('addToView', 13), o('jarFiles', 'libsempre/*'),
+  o('overwriteExecDir'), o('addToView', 15), o('jarFiles', 'libsempre/*'),
   sel(:cldir, l(), '>/dev/null'),
   # Set environment for table execution
   o('executor', 'tables.lambdadcs.LambdaDCSExecutor'),
@@ -660,6 +660,7 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
   o('NumberFn.unitless'), o('NumberFn.alsoTestByConversion'),
   o('TypeInference.typeLookup', 'tables.TableTypeLookup'),
   o('JoinFn.specializedTypeCheck', false), o('JoinFn.typeInference', true),
+  o('Learner.outputPredValues'),
   # Value Evaluator
   letDefault(:eval, 'value'),
   sel(:eval, {
@@ -741,19 +742,24 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
   tablesDataPaths,
   # Verbosity
   o('FeatureVector.ignoreZeroWeight'),
-  o('maxPrintedPredictions', 10), o('maxPrintedTrue', 10), o('logFeaturesLimit', 10),
+  o('logFeaturesLimit', 10),
   o('LambdaDCSException.noErrorMessage'),
   letDefault(:verbose, 0),
   sel(:verbose,
-    l(),
     l(
+      o('maxPrintedPredictions', 1), o('maxPrintedTrue', 1),
+    nil),
+    l(
+      o('maxPrintedPredictions', 10), o('maxPrintedTrue', 10),
       o('putCellNameInCanonicalUtterance'), o('showUtterance'),
     nil),
     l(
+      o('maxPrintedPredictions', 10), o('maxPrintedTrue', 10),
       o('putCellNameInCanonicalUtterance'), o('showUtterance'),
       o('summarizeRuleTime'), o('summarizeDenotations'),
     nil),
     l(
+      o('maxPrintedPredictions', 10), o('maxPrintedTrue', 10),
       o('putCellNameInCanonicalUtterance'), o('showUtterance'),
       o('summarizeRuleTime'), o('summarizeDenotations'),
       o('showRules'),

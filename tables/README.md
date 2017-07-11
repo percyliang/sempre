@@ -33,7 +33,7 @@ Running the code
 
         ./run @mode=tables @data=u-1 @feat=all @train=1 -maxex train,100 dev,100
 
-  The command should take less than an hour.
+  The command should take less than 30 minutes.
 
   * To train on the complete development set, remove `-maxex train,100 dev,100`
 

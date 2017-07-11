@@ -20,6 +20,7 @@ public class StringValue extends Value {
   }
 
   @Override public String sortString() { return "\"" + value + "\""; }
+  @Override public String pureString() { return value; }
 
   @Override public int hashCode() { return value.hashCode(); }
   @Override public boolean equals(Object o) {

@@ -119,6 +119,29 @@ public final class ExampleUtils {
     out.close();
   }
 
+  public static void writePredictionTSV(int iter, String group, Example ex) {
+    String basePath = "preds-iter" + iter + "-" + group + ".tsv";
+    String outPath = Execution.getFile(basePath);
+    if (outPath == null) return;
+    PrintWriter out = IOUtils.openOutAppendHard(outPath);
+
+    List<String> fields = new ArrayList<>();
+    fields.add(ex.id);
+
+    if (!ex.predDerivations.isEmpty()) {
+      Derivation deriv = ex.predDerivations.get(0);
+      if (deriv.value instanceof ListValue) {
+        List<Value> values = ((ListValue) deriv.value).values;
+        for (Value v : values) {
+          fields.add(v.pureString().replaceAll("\\s+", " ").trim());
+        }
+      }
+    }
+
+    out.println(String.join("\t", fields));
+    out.close();
+  }
+
   //read lisptree and write json
   public static void main(String[] args) {
     Dataset dataset = new Dataset();
