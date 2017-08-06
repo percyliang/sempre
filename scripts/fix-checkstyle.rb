@@ -1,4 +1,4 @@
-#!/usr/bin/ruby
+#!/usr/bin/env ruby
 
 # Hacky script for automatically fixing style errors.  This script is far from
 # perfect and you should manually inspect all changes before making changes.

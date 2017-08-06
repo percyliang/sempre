@@ -1,4 +1,4 @@
-#!/usr/bin/ruby
+#!/usr/bin/env ruby
 
 # Verifies that the codebase is sane (compiles, doesn't crash, gets reasonable
 # accuracy) every once in a while.  If something fails, an email is sent out
