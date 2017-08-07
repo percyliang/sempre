@@ -1,4 +1,4 @@
-#!/usr/bin/ruby
+#!/usr/bin/env ruby
 
 # This is the main entry point for running SHRDLURN.  See
 # fig/lib/execrunner.rb for more documentation for how commands are generated.

@@ -83,6 +83,7 @@ You must have the following already installed on your system.
 - Ruby 1.8.7 or 1.9
 - wget
 - make (for compiling fig and Virtuoso)
+- zip (for unzip downloaded dependencies)
 
 Other dependencies will be downloaded as you need them.  SEMPRE has been tested
 on Ubuntu Linux 12.04 and MacOS X.  Your mileage will vary depending on how
