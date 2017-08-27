@@ -352,6 +352,35 @@ public final class StringNormalizationUtils {
     return string.replaceAll("\\s+", " ").trim();
   }
 
+  /**
+   * Normalization scheme in the official Python evaluator.
+   */
+  public static String officialEvaluatorNormalize(String string) {
+    // Remove diacritics
+    string = Normalizer.normalize(string, Normalizer.Form.NFD).replaceAll("[\u0300-\u036F]", "");
+    // Normalize quotes and dashes
+    string = string
+        .replaceAll("[‘’´`]", "'")
+        .replaceAll("[“”]", "\"")
+        .replaceAll("[‐‑‒–—−]", "-");
+    String oldString;
+    do {
+      oldString = string;
+      // Remove citations
+      string = string.trim().replaceAll("((?<!^)\\[[^\\]]*\\]|\\[\\d+\\]|[•♦†‡*#+])*$", "");
+      // Remove details in parenthesis
+      string = string.trim().replaceAll("(?<!^)( \\([^)]*\\))*$", "");
+      // Remove outermost quotation mark
+      string = string.trim().replaceAll("^\"([^\"]*)\"$", "\\1");
+    } while (!oldString.equals(string));
+    // Remove final '.'
+    if (string.endsWith("."))
+      string = string.substring(0, string.length() - 1);
+    // Collapse whitespaces and convert to lower case
+    string = string.replaceAll("\\s+", " ").toLowerCase().trim();
+    return string;
+  }
+
   // ============================================================
   // Test
   // ============================================================

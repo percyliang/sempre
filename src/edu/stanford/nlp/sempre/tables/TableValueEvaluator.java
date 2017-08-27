@@ -69,8 +69,16 @@ public class TableValueEvaluator implements ValueEvaluator {
         String predText = (pred instanceof NameValue) ? ((NameValue) pred).description : ((DescriptionValue) pred).value;
         if (predText == null) predText = "";
         if (opts.allowNormalizedStringMatch) {
+          String targetTextOfficial = StringNormalizationUtils.officialEvaluatorNormalize(targetText);
           targetText = StringNormalizationUtils.aggressiveNormalize(targetText);
+          if (!targetTextOfficial.equals(targetText)) {
+            LogInfo.warnings("Different normalization: [%s][%s]", targetTextOfficial, targetText);
+          }
+          String predTextOfficial = StringNormalizationUtils.officialEvaluatorNormalize(predText);
           predText = StringNormalizationUtils.aggressiveNormalize(predText);
+          if (!predTextOfficial.equals(predText)) {
+            LogInfo.warnings("Different normalization: [%s][%s]", predTextOfficial, predText);
+          }
         }
         return targetText.equals(predText);
       } else if (pred instanceof NumberValue) {
