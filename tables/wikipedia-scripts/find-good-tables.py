@@ -49,10 +49,10 @@ class TableStat(object):
         self.num_min = min(table.num_rows, table.num_cols)
         self.num_max = max(table.num_rows, table.num_cols)
         self.num_cells = table.num_cells
-        self.num_empty_cells = len([x for x in table.cells if not x])
-        self.num_long = len([x for x in table.cells if len(x) >= 40])
+        self.num_empty_cells = len([x for x in table.cells if not x[1]])
+        self.num_long = len([x for x in table.cells if len(x[1]) >= 40])
         self.num_short_headers = len([x for x in table.rows[0] if len(x) <= 3])
-        self.num_numeric_cells = len([x for x in table.cells if re.search('[0-9]', x)])
+        self.num_numeric_cells = len([x for x in table.cells if re.search('[0-9]', x[1])])
         self.num_repetitive_cols = sum([self.is_repetitive(col) for col in table.cols], 0)
         self.num_similar_colpairs = sum([self.are_similar(col1, col2)
                                          for (col1, col2) in combinations(table.cols, 2)], 0)
@@ -61,11 +61,11 @@ class TableStat(object):
         self.get_scores()
 
     def is_repetitive(self, col):
-        return len(set(get_repeatable_token(x) for x in col)) < 0.5 * len(col)
+        return len(set(get_repeatable_token(x[1]) for x in col)) < 0.5 * len(col)
 
     def are_similar(self, col1, col2):
-        col1 = set(get_alpha(x) for x in col1) - set([''])
-        col2 = set(get_alpha(x) for x in col2) - set([''])
+        col1 = set(get_alpha(x[1]) for x in col1) - set([''])
+        col2 = set(get_alpha(x[1]) for x in col2) - set([''])
         return len(col1 & col2) >= 3
 
     def __str__(self):
@@ -119,6 +119,39 @@ def check_table(table, criterion):
             and stat.num_short_headers < stat.num_cols * 0.3):
             return stat
 
+def dump(i, page_id, table_id, stat, args):
+    with open(os.path.join(args.source_dir, '%d.json' % page_id), 'r', 'utf8') as fin:
+        meta = json.load(fin)
+    meta['tableIndex'] = table_id
+    if args.custom_filenames:
+        while True:
+            try:
+                i = int(raw_input('filename for "%s": ' % meta['title']))
+                break
+            except:
+                pass
+    with open(os.path.join(args.json_dir, '%d.json' % i), 'w', 'utf8') as fout:
+        json.dump(meta, fout)
+    if args.copy:
+        shutil.copy(os.path.join(args.source_dir, '%d.html' % page_id),
+                    os.path.join(args.page_dir, '%d.html' % i))
+    else:
+        os.symlink(os.path.relpath(os.path.join(args.source_dir, '%d.html' % page_id),
+                                   args.page_dir),
+                   os.path.join(args.page_dir, '%d.html' % i))
+    print '>' * 30, 'Written', i, page_id, table_id, '<' * 30
+    print stat
+
+def read_used_pages(json_files, args):
+    used_pages = set()
+    for filename in json_files:
+        with open(os.path.join(args.json_dir, filename)) as fin:
+            data = json.load(fin)
+            used_pages.add(data['id'])
+    print 'Found {} used pages'.format(len(used_pages))
+    return used_pages
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-n', '--amount', type=int, default=20,
@@ -130,26 +163,41 @@ def main():
                         help="criterion for finding tables (higher = more strict)")
     parser.add_argument('-d', '--dry-run', action='store_true',
                         help="do not copy files")
+    parser.add_argument('-C', '--copy', action='store_true',
+                        help='copy the html file instead of making a symlink')
     parser.add_argument('-i', '--fixed-id', type=int,
                         help="use this fixed page id")
     parser.add_argument('--custom-filenames', action='store_true',
                         help="set custom filename for each file")
+    parser.add_argument('-q', '--quick', action='store_true',
+                        help='dump the good tables immediately after they are found')
+    parser.add_argument('-r', '--resume-quick', action='store_true',
+                        help='continue the quick mode')
     parser.add_argument('outprefix')
     args = parser.parse_args()
 
-    json_dir = os.path.join(args.outprefix + '-json')
-    page_dir = os.path.join(args.outprefix + '-page')
-    if os.path.exists(json_dir) or os.path.exists(page_dir):
+    quick_index, quick_used_pages = 0, set()
+    args.json_dir = os.path.join(args.outprefix + '-json')
+    args.page_dir = os.path.join(args.outprefix + '-page')
+    if args.resume_quick:
+        # Read the highest number in json_dir
+        json_files = os.listdir(args.json_dir)
+        print 'Found {} JSON files'.format(len(json_files))
+        quick_index = max(int(x.replace('.json', '')) for x in json_files) + 1
+        quick_used_pages = read_used_pages(json_files, args)
+    elif os.path.exists(args.json_dir) or os.path.exists(args.page_dir):
         if raw_input('Path exists. Clobber? ')[0:].lower() != 'y':
             exit(1)
     elif not args.dry_run:
-        os.makedirs(json_dir)
-        os.makedirs(page_dir)
+        os.makedirs(args.json_dir)
+        os.makedirs(args.page_dir)
         
     if args.fixed_id is not None:
         filenames = [args.fixed_id]
     else:
         filenames = get_filenames(args.source_dir)
+    if args.quick:
+        filenames = sorted(set(filenames) - set(quick_used_pages))
     print >> sys.stderr, 'Got %d candidates' % len(filenames)
     random.shuffle(filenames)
     filenames = filenames[:args.limit]
@@ -171,6 +219,14 @@ def main():
                         print '%2d' % sum(stat.scores),
                         print 'SCORE %9d (ID %9d) table %2d' % (page_id, meta['id'], table_id),
                         print stat, stat.scores
+            if args.quick:
+                for table_id, stat in good_table_ids:
+                    dump(quick_index, page_id, table_id, stat, args)
+                    quick_index += 1
+
+    if args.quick:
+        return
+
     random.shuffle(good_tables)
     good_tables = good_tables[:args.amount]
     if args.dry_run:
@@ -178,22 +234,7 @@ def main():
 
     for i, (page_id, good_table_ids) in enumerate(good_tables):
         table_id, stat = random.choice(good_table_ids)
-        with open(os.path.join(args.source_dir, '%d.json' % page_id), 'r', 'utf8') as fin:
-            meta = json.load(fin)
-        meta['tableIndex'] = table_id
-        if args.custom_filenames:
-            while True:
-                try:
-                    i = int(raw_input('filename for "%s": ' % meta['title']))
-                    break
-                except:
-                    pass
-        with open(os.path.join(json_dir, '%d.json' % i), 'w', 'utf8') as fout:
-            json.dump(meta, fout)
-        shutil.copy(os.path.join(args.source_dir, '%d.html' % page_id),
-                    os.path.join(page_dir, '%d.html' % i))
-        print '>' * 30, 'Written', i, page_id, table_id, '<' * 30
-        print stat
+        dump(i, page_id, table_id, stat, args)
 
 if __name__ == '__main__':
     main()

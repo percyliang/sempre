@@ -12,7 +12,7 @@ html_parser = HTMLParser.HTMLParser()
 def is_sane(content, args):
     if content.startswith('#REDIRECT'):
         return False
-    if args.table and '{|' not in content:
+    if args.table and ('{|' not in content or 'wikitable' not in content):
         return False
     return True
 

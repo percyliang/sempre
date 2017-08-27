@@ -28,7 +28,7 @@ def download(data, i, outdir):
     hashcode = data['hashcode'] = CACHE.get_hashcode(url)
     data['url'] = url
     result = CACHE.get_page(url)
-    if result is not None:
+    if result is not None and not os.path.exists(os.path.join(outdir, str(data['id']) + '.html')):
         os.symlink(os.path.join('..', 'web.cache', hashcode),
                    os.path.join(outdir, str(data['id']) + '.html'))
         with open(os.path.join(outdir, str(data['id']) + '.json'), 'w') as fout:

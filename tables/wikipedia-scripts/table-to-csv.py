@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""Convert HTML table into CSV / TSV / pretty-printed table."""
 
 import sys, os, re, argparse, json
 from codecs import open
@@ -10,24 +11,40 @@ from itertools import izip_longest
 ################ Dump CSV
 
 def simple_normalize_text(text):
-    return text.replace('\\', '\\\\').replace('"', r'\"').replace('\n', r'\n').replace(u'\xa0', ' ').strip()
+    return text.replace('\\', '\\\\').replace('"', r'\"').replace('\n', r'\\n').replace(u'\xa0', ' ').strip()
 
 def dump_csv(rows, fout):
     for row in rows:
-        fout.write(','.join('"%s"' % simple_normalize_text(x) for x in row) + '\n')
+        fout.write(','.join('"%s"' % simple_normalize_text(x[1]) for x in row) + '\n')
 
 def tab_normalize_text(text):
-    return re.sub(r'\s+', ' ', text.replace('\n', r'\n'), re.U).strip()
+    return re.sub(r'\s+', ' ', text.replace('\\', '\\\\').replace('|', r'\p').replace('\n', r'\n'), re.U).strip()
 
 def dump_tsv(rows, fout):
     for row in rows:
-        fout.write('\t'.join('%s' % tab_normalize_text(x) for x in row) + '\n')
+        fout.write('\t'.join('%s' % tab_normalize_text(x[1]) for x in row) + '\n')
+
+def table_normalize_text(text):
+    return re.sub(r'\s+', ' ', text, re.U).strip()
+
+def dump_table(rows, fout):
+    widths = defaultdict(int)
+    for row in rows:
+        for i, cell in enumerate(row):
+            widths[i] = max(widths[i], len(table_normalize_text(cell[1])) + 1)
+    for row in rows:
+        fout.write('|')
+        for i, cell in enumerate(row):
+            # wow this is so hacky
+            fout.write((' %-' + str(widths[i]) + 's') % table_normalize_text(cell[1]))
+            fout.write('|')
+        fout.write('\n')
 
 ################ More table normalization
 
 def debug_print(stuff):
     for x in stuff:
-        print >> sys.stderr, [simple_normalize_text(y) for y in x]
+        print >> sys.stderr, [simple_normalize_text(y[1]) for y in x]
 
 def transpose(rows):
     cols = []
@@ -38,7 +55,7 @@ def transpose(rows):
             try:
                 col.append(row[i])
             except LookupError:
-                col.append(None)
+                col.append(('', ''))
         cols.append(col)
     return cols
 
@@ -53,7 +70,7 @@ def anti_transpose(cols):
             if col[i] is not None:
                 row.append(col[i])
             else:
-                row.append('')
+                row.append(('', ''))
         rows.append(row)
     return rows
 
@@ -65,7 +82,7 @@ def remove_empty_columns(orig_cols):
     """Remove columns with <= 1 non-empty cells."""
     cols = []
     for col in orig_cols:
-        non_empty = sum((bool(cell) for cell in col), 0)
+        non_empty = sum((bool(cell[1]) for cell in col), 0)
         if non_empty >= 2:
             cols.append(col)
     return cols
@@ -77,9 +94,9 @@ def are_mergeable(col1, col2):
     merged = []
     for i in xrange(len(col1)):
         c1, c2 = col1[i], col2[i]
-        if not c1:
+        if not c1[1]:
             merged.append(c2)
-        elif not c2 or c1 == c2:
+        elif not c2[1] or c1 == c2:
             merged.append(c1)
         else:
             return None
@@ -96,161 +113,93 @@ def merge_similar_columns(orig_cols):
             i += 1
     return orig_cols
 
-#### Split columns
+#### Merge header rows
 
-REGEX_NEWLINE = re.compile(ur'^([^\n]*)\n([^\n]*)$', re.U | re.DOTALL)
-REGEX_NEWLINE_PAREN = re.compile(ur'^(.*)\n(\(.*\))$', re.U | re.DOTALL)
-REGEX_SPLIT_PAREN = re.compile(ur'^(.*) +(\(.*\))$', re.U | re.DOTALL)
-
-def split_multiline_columns(orig_cols):
-    """Split columns with newline in each cell."""
-    i = 0
-    while i < len(orig_cols):
-        for regex, threshold in ((REGEX_NEWLINE, 0.5 * len(orig_cols[i])),
-                                 (REGEX_NEWLINE_PAREN, 1),
-                                 (REGEX_SPLIT_PAREN, 2)):
-            matches = [regex.match(cell or '') for cell in orig_cols[i]]
-            num_matches = sum((bool(match) for match in matches[1:]), 0)
-            if num_matches >= threshold:
-                splitted = [((None, None) if cell is None
-                             else (cell, '') if not match
-                             else (match.group(1), match.group(2)))
-                            for (cell, match) in zip(orig_cols[i], matches)]
-                orig_cols[i:i+1] = [[(None if x[0] is None else x[0].strip()) for x in splitted],
-                                    [(None if x[1] is None else x[1].strip()) for x in splitted]]
-                if not orig_cols[i+1][0]:
-                    orig_cols[i+1][0] = (orig_cols[i][0] or '') + '#n'
-                break
-        i += 1
-    return orig_cols
-
-REGEX_FROM_TO = re.compile(ur'^(.*)[-–—‒―](.*)$', re.U)
-
-def split_from_to_columns(orig_cols):
-    """Split columns with pattern '... - ...'."""
-    i = 0
-    while i < len(orig_cols):
-        matches = [REGEX_FROM_TO.match(cell or '') for cell in orig_cols[i]]
-        num_matches = sum((bool(match) for match in matches), 0)
-        if num_matches > 0.5 * len(orig_cols[i]):
-            splitted = [((None, None) if cell is None
-                         else (cell, '') if not match
-                         else (match.group(1), match.group(2)))
-                        for (cell, match) in zip(orig_cols[i], matches)]
-            orig_cols[i:i+1] = [[(None if x[0] is None else x[0].strip()) for x in splitted],
-                                [(None if x[1] is None else x[1].strip()) for x in splitted]]
-            if not orig_cols[i+1][0]:
-                orig_cols[i+1][0] = orig_cols[i][0]
-            orig_cols[i][0] += '#f'
-            orig_cols[i+1][0] += '#t'
-        i += 1
-    return orig_cols
-
-#### Normalize by column
-
-REGEX_NUMBERING = re.compile(ur'^([0-9]+)[.)]$', re.U)
-REGEX_REFERENCE = re.compile(ur'^(.*)[‡^†*]+$', re.U)
-REGEX_PARENS = re.compile(ur'^\((.*)\)$', re.U)
-REGEX_QUOTES = re.compile(ur'^"(.*)"$', re.U)
-
-def normalize_common_punctuations(orig_cols):
-    """Normalize some punctuations if they appear a lot in the same row."""
-    cols = []
-    for col in orig_cols:
-        for regex, threshold in ((REGEX_NUMBERING, 0.8 * len(col)),
-                                 (REGEX_REFERENCE, 0.2 * len(col)),
-                                 (REGEX_PARENS, 0.5 * len(col)),
-                                 (REGEX_QUOTES, 0.5 * len(col))):
-            matches = [regex.match(cell or '') for cell in col]
-            num_matches = sum((not cell or bool(match)
-                               for (cell, match) in zip(col, matches)), 0)
-            if num_matches >= threshold:
-                col = [(cell if not match else match.group(1))
-                       for (cell, match) in zip(col, matches)]
-        cols.append(col)
-    return cols
-
-#### Normalize by cell
-
-REGEX_COMMA = re.compile(ur'([0-9]),([0-9][0-9][0-9])', re.U)
-
-def remove_commas_from_single_number(x):
-    if not x:
-        return x
-    while REGEX_COMMA.search(x):
-        x = REGEX_COMMA.sub(r'\1\2', x)
-    return x
-
-def remove_commas_from_numbers(orig_stuff):
-    stuff = []
-    for slab in orig_stuff:
-        stuff.append([remove_commas_from_single_number(x) for x in slab])
-    return stuff
+def merge_header_rows(orig_rows):
+    """Merge all header rows together."""
+    header_rows, body_rows = [], []
+    still_header = True
+    for row in orig_rows:
+        if not still_header or any(cell[0] == 'td' for cell in row):
+            still_header = False
+            body_rows.append(row)
+        else:
+            header_rows.append(row)
+    if len(header_rows) < 2 or not body_rows:
+        return orig_rows
+    # Merge header rows with '\n'
+    header_cols = transpose(header_rows)
+    header_row = []
+    for col in header_cols:
+        texts = [None]
+        for cell in col:
+            if cell[1] != texts[-1]:
+                texts.append(cell[1])
+        header_row.append(('th', '\n'.join(texts[1:])))
+    return [header_row] + body_rows
 
 ################ Main function
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-s', '--source-dir', default='wikidump.cache/output',
-                        help="source directory")
-    group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument('-j', '--json',
-                        help="json metadata file specifying page and table id")
-    group.add_argument('-J', '--turk-json',
+    parser.add_argument('-j', '--turk-json',
                         help="json metadata file from MTurk task")
-    group.add_argument('-p', '--page-id', type=int,
-                        help="page index")
-    parser.add_argument('-t', '--table-id', type=int, default=0,
-                        help="table index (only used for -p / --page-id)")
     parser.add_argument('-o', '--outfile',
                         help="output filename (default = stdout)")
-    parser.add_argument('-n', '--normalize', action='count',
-                        help='degree of normalization')
     parser.add_argument('--tsv', action='store_true',
-                        help='output TSV instead of CSV')
+                        help='also print out tsv')
+    parser.add_argument('--human', action='store_true',
+                        help='also print out human-readable table')
+    parser.add_argument('--html', action='store_true',
+                        help='also print out cleaned html for the table')
+    parser.add_argument('--keep-hidden', action='store_true',
+                        help='keep hidden texts as is')
     args = parser.parse_args()
+    assert not args.tsv or args.outfile.endswith('.csv')
 
-    if args.json:
-        with open(args.json) as fin:
-            metadata = json.load(fin)
-            args.page_id = metadata['id']
-            args.table_id = metadata['tableIndex']
-        inhtml = os.path.join(args.source_dir, '%d.html' % args.page_id)
-    elif args.turk_json:
-        with open(args.turk_json) as fin:
-            metadata = json.load(fin)
-            args.page_id = metadata['id']
-            args.table_id = metadata['tableIndex']
-        # The following replacement is pretty hacky:
-        inhtml = args.turk_json.replace('-json', '-page').replace('.json', '.html')
-    else:
-        inhtml = os.path.join(args.source_dir, '%d.html' % args.page_id)
+    with open(args.turk_json) as fin:
+        metadata = json.load(fin)
+
+    # Get the path to the HTML file
+    # This is kind of hacky
+    match = re.match(r'^(?:json|page)/(\d+)-(?:json|page)/(\d+).json$', args.turk_json)
+    batch_id, data_id = match.groups()
+    inhtml = 'page/{}-page/{}.html'.format(batch_id, data_id)
 
     with open(inhtml, 'r', 'utf8') as fin:
-        table = Table.get_wikitable(fin.read(), args.table_id, normalization=Table.NORM_DUPLICATE)
+        raw = fin.read()
+    table = Table.get_wikitable(raw, metadata['tableIndex'],
+            normalization=Table.NORM_DUPLICATE,
+            remove_hidden=(not args.keep_hidden))
+    if args.html:
+        raw_table = Table.get_wikitable(raw, metadata['tableIndex'],
+                remove_hidden=False).table
+
     rows = table.rows
-    if args.normalize >= 1:
-        # Remove redundant rows and columns
-        rows = remove_full_rowspans(rows)
-        cols = transpose(rows)
-        cols = remove_empty_columns(cols)
-        cols = merge_similar_columns(cols)
-        rows = anti_transpose(cols)
-    if args.normalize >= 2:
-        # Split cells / Normalize texts
-        cols = transpose(rows)
-        cols = split_multiline_columns(cols)
-        cols = normalize_common_punctuations(cols)
-        cols = split_from_to_columns(cols)
-        cols = remove_commas_from_numbers(cols)
-        rows = anti_transpose(cols)
-    #debug_print(transpose(rows))
-    outputter = dump_tsv if args.tsv else dump_csv
+    # rows = list of columns; column = list of cells; cell = (tag, text)
+    # Remove redundant rows and columns
+    rows = remove_full_rowspans(rows)
+    cols = transpose(rows)
+    cols = remove_empty_columns(cols)
+    cols = merge_similar_columns(cols)
+    rows = anti_transpose(cols)
+    rows = merge_header_rows(rows)
+    # Dump
     if not args.outfile:
-        outputter(rows, sys.stdout)
+        dump_csv(rows, sys.stdout)
     else:
+        stem = re.sub('\.csv$', '', args.outfile)
         with open(args.outfile, 'w', 'utf8') as fout:
-            outputter(rows, fout)
+            dump_csv(rows, fout)
+        if args.tsv:
+            with open(stem + '.tsv', 'w', 'utf8') as fout:
+                dump_tsv(rows, fout)
+        if args.human:
+            with open(stem + '.table', 'w', 'utf8') as fout:
+                dump_table(rows, fout)
+        if args.html:
+            with open(stem + '.html', 'w', 'utf8') as fout:
+                print >> fout, unicode(raw_table)
 
 if __name__ == '__main__':
     main()
