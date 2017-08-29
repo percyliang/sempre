@@ -341,7 +341,6 @@ public final class StringNormalizationUtils {
     // Dashed / Parenthesized information
     string = simpleNormalize(string);
     string = string.replaceAll("\\[[^\\]]*\\]", "");
-    string = string.trim().replaceAll(" - .*$", "");
     string = string.trim().replaceAll("\\([^)]*\\)$", "");
     return string.replaceAll("\\s+", " ").trim();
   }
@@ -363,7 +362,7 @@ public final class StringNormalizationUtils {
       // Remove citations
       string = string.trim().replaceAll("((?<!^)\\[[^\\]]*\\]|\\[\\d+\\]|[•♦†‡*#+])*$", "");
       // Remove details in parenthesis
-      string = string.trim().replaceAll("(?<!^)( \\([^)]*\\))*$", "");
+      string = string.trim().replaceAll("(?<!^)(\\s+\\([^)]*\\))*$", "");
       // Remove outermost quotation mark
       string = string.trim().replaceAll("^\"([^\"]*)\"$", "\\1");
     } while (!oldString.equals(string));
@@ -383,7 +382,9 @@ public final class StringNormalizationUtils {
     Multimap<Value, Value> metadata = ArrayListMultimap.create();
     TableColumn column = new TableColumn("Test", "test", 0);
     analyzeString(o, metadata, column, new HashMap<>());
-    LogInfo.logs("%s %s", o, metadata);
+    String aggressive = aggressiveNormalize(o).toLowerCase();
+    String official = officialEvaluatorNormalize(o);
+    LogInfo.logs("%s %s | %s %s %s", o, metadata, official, aggressive, aggressive.equals(official));
   }
 
   public static void main(String[] args) {
@@ -395,6 +396,7 @@ public final class StringNormalizationUtils {
     unitTest("twenty three");
     unitTest("apple, banana, banana, BANANA");
     unitTest("apple\nbanana\norange");
+    unitTest("0-1\n(4-5 p)");
     unitTest("21st");
     unitTest("2001st");
     unitTest("2,000,000 ft.");

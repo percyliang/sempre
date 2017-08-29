@@ -71,12 +71,12 @@ public class TableValueEvaluator implements ValueEvaluator {
         if (opts.allowNormalizedStringMatch) {
           String targetTextOfficial = StringNormalizationUtils.officialEvaluatorNormalize(targetText);
           targetText = StringNormalizationUtils.aggressiveNormalize(targetText).toLowerCase();
-          if (!targetTextOfficial.equals(targetText)) {
+          if (!targetTextOfficial.equals(targetText) && !(targetTextOfficial + ".").equals(targetText)) {
             LogInfo.warnings("Different normalization: [%s][%s]", targetTextOfficial, targetText);
           }
           String predTextOfficial = StringNormalizationUtils.officialEvaluatorNormalize(predText);
           predText = StringNormalizationUtils.aggressiveNormalize(predText).toLowerCase();
-          if (!predTextOfficial.equals(predText)) {
+          if (!predTextOfficial.equals(predText) && !(predTextOfficial + ".").equals(predText)) {
             LogInfo.warnings("Different normalization: [%s][%s]", predTextOfficial, predText);
           }
         }
