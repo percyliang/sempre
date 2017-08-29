@@ -364,7 +364,7 @@ public final class StringNormalizationUtils {
       // Remove details in parenthesis
       string = string.trim().replaceAll("(?<!^)(\\s+\\([^)]*\\))*$", "");
       // Remove outermost quotation mark
-      string = string.trim().replaceAll("^\"([^\"]*)\"$", "\\1");
+      string = string.trim().replaceAll("^\"([^\"]*)\"$", "$1");
     } while (!oldString.equals(string));
     // Remove final '.'
     if (string.endsWith("."))
@@ -397,6 +397,7 @@ public final class StringNormalizationUtils {
     unitTest("apple, banana, banana, BANANA");
     unitTest("apple\nbanana\norange");
     unitTest("0-1\n(4-5 p)");
+    unitTest("\"HELLO\"");
     unitTest("21st");
     unitTest("2001st");
     unitTest("2,000,000 ft.");
