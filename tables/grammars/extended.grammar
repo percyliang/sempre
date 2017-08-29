@@ -1,0 +1,169 @@
+# (Extended) Generic Grammar
+# Use more generic compositional patterns.
+
+################################################################
+# Macros
+
+(def @R reverse)
+(def @type fb:type.object.type)
+(def @row fb:type.row)
+
+(def @next fb:row.row.next)
+(def @!next !fb:row.row.next)
+(def @index fb:row.row.index)
+(def @!index !fb:row.row.index)
+
+(def @p.num fb:cell.cell.number)
+(def @!p.num !fb:cell.cell.number)
+(def @p.date fb:cell.cell.date)
+(def @!p.date !fb:cell.cell.date)
+(def @p.second fb:cell.cell.second) 
+(def @!p.second !fb:cell.cell.second)
+
+################################################################
+# Lexicon
+
+################################
+# Anchored Rules: Entity, Unary, Binary
+(rule $Entity ($PHRASE) (FuzzyMatchFn entity) (anchored 1))
+#(rule $Binary ($PHRASE) (FuzzyMatchFn binary) (anchored 1))
+(rule $Entity ($PHRASE) (NumberFn) (anchored 1))
+(rule $Entity ($PHRASE) (DateFn) (anchored 1))
+
+################################
+# Create binary from thin air
+(rule $Binary (nothing) (FuzzyMatchFn any binary))
+(rule $Unary (nothing) (FuzzyMatchFn any unary))
+
+################################
+# Property
+(for @property (@p.num @p.date)
+  (rule $Property (nothing) (ConstantFn @property))
+)
+(when second
+  (rule $Property (nothing) (ConstantFn @p.second))
+)
+
+################################
+# Generic RowSet
+(rule $RowSet (nothing) (ConstantFn (@type @row)))
+
+################################
+# Anchored ValueSet
+(rule $ValueSet ($Entity) (IdentityFn))
+
+# [TAG] alternative: "X or Y" questions
+(when alternative
+  (rule $ValueSet ($Entity $Entity)
+    (lambda e1 (lambda e2 (or (var e1) (var e2))))
+  )
+)
+
+################################
+# Join
+
+(rule $RowSet ($Binary $ValueSet) (lambda b (lambda v ((var b) (var v)))))
+
+(rule $ValueSet ($Binary $RowSet) (lambda b (lambda r ((@R (var b)) (var r)))))
+
+(rule $RowSet ($Binary $Property $ValueSet)
+  (lambda b (lambda p (lambda v ((var b) ((var p) (var v))))))
+)
+
+(rule $ValueSet ($Binary $Property $RowSet)
+  (lambda b (lambda p (lambda r ((@R (var p)) ((@R (var b)) (var r))))))
+)
+
+# [TAG] movement: "next" / "previous"
+(when movement
+  (for @movement (@next @!next)
+    (rule $RowSet ($RowSet) (lambda r (@movement (var r))))
+  )
+)
+
+# [TAG] comparison: "at least" / "more than"
+(when comparison
+  (for @comparison (< > <= >=)
+    (rule $RowSet ($Binary $Property $Entity)
+      (lambda b (lambda p (lambda e ((var b) ((var p) (@comparison (var e)))))))
+    )
+  )
+)
+
+# [TAG] != : "not zero" / "same"
+(when neq
+  (rule $RowSet ($Binary $Entity) (lambda b (lambda e ((var b) (!= (var e))))))
+  (rule $RowSet ($Binary $Property $Entity)
+    (lambda b (lambda p (lambda e ((var b) ((var p) (!= (var e)))))))
+  )
+)
+
+################################
+# Aggregate
+
+(when count
+  (rule $SingleValue ($RowSet) (lambda r (count (var r))))
+)
+
+(when aggregate
+  (rule $SingleValue ($ValueSet) (lambda r (min (var r))))
+  (rule $SingleValue ($ValueSet) (lambda r (max (var r))))
+  (rule $SingleValue ($ValueSet) (lambda r (sum (var r))))
+  (rule $SingleValue ($ValueSet) (lambda r (avg (var r))))
+)
+
+################################
+# Superlative
+
+(rule $FnOnRow ($Binary $Property)
+  (lambda b (lambda p (lambda x ((@R (var p)) ((@R (var b)) (var x))))))
+)
+
+(when superlative
+  (for @argm (argmax argmin)
+    (rule $RowSet ($RowSet) (lambda r (@argm 1 1 (var r) @index)))
+    (rule $RowSet ($RowSet $FnOnRow) (lambda r (lambda f (@argm 1 1 (var r) (@R (var f))))))
+  )
+)
+
+################################
+# Merge
+
+(when merge
+  (rule $RowSet ($RowSet $RowSet)
+    (lambda r1 (lambda r2 (and (var r1) (var r2))))
+  )
+)
+
+################################
+# Arithmatic
+
+(rule $FnOnValue ($Binary $Binary $Property)
+  (lambda b1 (lambda b2 (lambda p (lambda x ((@R (var p)) ((@R (var b2)) ((var b1) (var x))))))))
+)
+(rule $FnOnValue ($Binary)
+  (lambda b (lambda x (count ((var b) (var x)))))
+)
+(rule $FnOnValue ($Binary $Property)
+  (lambda b (lambda p (lambda x (count ((var b) ((var p) (var x)))))))
+)
+
+(when arithmetic
+  (rule $SingleValue ($FnOnValue $Entity $Entity)
+    (lambda f (lambda e1 (lambda e2 (- ((var f) (var e1)) ((var f) (var e2))))))
+  )
+)
+
+################################
+# V-superlative
+
+(when v-superlative
+  (for @argm (argmax argmin)
+    (rule $ValueSet ($ValueSet $FnOnValue) (lambda v (lambda f (@argm 1 1 (var v) (reverse (var f))))))
+  )
+)
+
+################################
+# ROOT
+(rule $ROOT ($ValueSet) (IdentityFn))
+(rule $ROOT ($SingleValue) (IdentityFn))

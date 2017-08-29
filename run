@@ -634,7 +634,7 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
   # Add @cldir=1 to use CodaLab's directory paths
   letDefault(:cldir, 0),
   # Usual header
-  header('core,tables,corenlp'),
+  header('core,tables,corenlp,cprune'),
   # Select class
   letDefault(:class, 'main'),
   sel(:class, {
@@ -674,34 +674,37 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
   }),
   # Parser
   letDefault(:parser, 'floatsize'),
+  o('useSizeInsteadOfDepth'),
   sel(:parser, {
     'floatsize' => l(
       o('Builder.parser', 'FloatingParser'),
-      o('useSizeInsteadOfDepth'),
       o('FloatingParser.maxDepth', 15),
     nil),
-    'baseline' => l(
-      o('Builder.parser', 'tables.baseline.TableBaselineParser'),
-    nil),
+    'baseline' => o('Builder.parser', 'tables.baseline.TableBaselineParser'),
     'serialized' => o('Builder.parser', 'tables.serialize.SerializedParser'),
     # ACL 2016
     'grow-dpd' => l(
       o('Builder.parser', 'tables.dpd.DPDParser'),
-      o('useSizeInsteadOfDepth'),
       o('FloatingParser.maxDepth', 8),
     nil),
     'grow-float' => l(
       o('Builder.parser', 'FloatingParser'),
-      o('useSizeInsteadOfDepth'),
       o('FloatingParser.maxDepth', 8),
       o('FloatingParser.betaReduce'), o('initialFloatingHasZeroDepth'),
     nil),
     'grow-mix' => l(
       o('Builder.parser', 'MixParser'),
       o('MixParser.parsers', 'FloatingParser', 'tables.serialize.SerializedParser:train-0xc'),
-      o('useSizeInsteadOfDepth'),
       o('FloatingParser.maxDepth', 8),
       o('FloatingParser.betaReduce'), o('initialFloatingHasZeroDepth'),
+    nil),
+    # EMNLP 2017
+    'cprune' => l(
+      o('Builder.parser', 'cprune.CPruneFloatingParser'),
+      o('FloatingParser.maxDepth', 15),
+      o('beamSize', 100),
+      o('maxNumNeighbors', 40),
+      o('maxPredictedPatterns', 1000),
     nil),
   }),
   o('Parser.verbose', 0),
@@ -731,7 +734,7 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
   letDefault(:normalize, 1),
   sel(:normalize,
     l(),
-    l(o('genericDateValue'), o('numberCanStartAnywhere'), o('num2CanStartAnywhere'), o('NumberFn.alsoTestByIsolatedNER')),
+    l(o('genericDateValue'), o('numberCanStartAnywhere'), o('num2CanStartAnywhere')),
   nil),
   letDefault(:anchor, 1),
   sel(:anchor, {
@@ -786,6 +789,7 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
       o('combineFromFloatingParser'),
       o('maxTrainIters', 3),
       o('showValues', false), o('showFirstValue'),
+      o('customExpectedCounts', 'TOP'),
     nil),
     l(
       # for dumping derivations (@class=dump)
@@ -886,6 +890,11 @@ def tablesGrammarPaths
           o('Grammar.tags', *'scoped merge-and arithmetic comparison alternative neq yearrange part closedclass-generic scoped-2args-merge-and'.split),
           let(:anchor, 2),
         nil),
+        # EMNLP 2017
+        'extended' => l(
+          o('Grammar.inPaths', "#{baseDir}extended.grammar"),
+          o('Grammar.tags', *'alternative movement comparison count aggregate superlative arithmetic merge v-superlative'.split),
+        nil),
       }),
     nil)
   }
@@ -895,13 +904,17 @@ def tablesDataPaths
   lambda { |e|
     baseDir = ['lib/data/WikiTableQuestions/data/', 'WikiTableQuestions/data/'][e[:cldir]]
     csvDir = ['lib/data/WikiTableQuestions/', 'WikiTableQuestions/'][e[:cldir]]
+    nnDir = ['lib/data/nn_0/', 'nn_0/'][e[:cldir]]
     datasets = {
       'none' => l(),
       'train' => o('Dataset.inPaths', "train,#{baseDir}training.examples"),
       # Pristine test test
-      'test' => o('Dataset.inPaths',
-        "train,#{baseDir}training.examples",
-        "test,#{baseDir}pristine-unseen-tables.examples"),
+      'test' => l(
+        o('Dataset.inPaths',
+          "train,#{baseDir}training.examples",
+          "test,#{baseDir}pristine-unseen-tables.examples"),
+        o('neighborFilePath', "#{nnDir}/exact_nearest_neighbors.all"),
+      nil),
       # @data=annotated can be used with @class=check only
       'annotated' => o('Dataset.inPaths', "train,#{baseDir}annotated-all.examples"),
       'before300' => o('Dataset.inPaths', "train,#{baseDir}training-before300.examples"),
@@ -913,6 +926,7 @@ def tablesDataPaths
           "train,#{baseDir}random-split-#{x}-train.examples",
           "dev,#{baseDir}random-split-#{x}-dev.examples",
         nil),
+        o('neighborFilePath', "#{nnDir}/exact_nearest_neighbors.seed-#{x}.train"),
       nil)
     end
     # That's it!

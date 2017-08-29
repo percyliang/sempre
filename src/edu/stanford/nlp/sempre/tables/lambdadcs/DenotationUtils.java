@@ -238,6 +238,8 @@ public final class DenotationUtils {
    */
   public static UnaryDenotation superlativeUnary(int rank, int count, List<Pair<Value, Value>> pairs,
       SuperlativeFormula.Mode mode, TypeProcessor processor) {
+    if (rank <= 0 || count <= 0)
+      LogInfo.fails("Invalid superlative (rank = %d, count = %d)", rank, count);
     if (pairs.isEmpty()) {
       if (LambdaDCSExecutor.opts.superlativesFailOnEmptyLists)
         throw new LambdaDCSException(Type.emptyList, "Cannot call %s on an empty list.", mode);
@@ -343,7 +345,7 @@ public final class DenotationUtils {
     public boolean isCompatible(Value v) {
       return v instanceof NumberValue;
     }
-    
+
     @Override
     public boolean isSortable(Collection<Value> values) {
       return true;
@@ -387,19 +389,19 @@ public final class DenotationUtils {
     public boolean isCompatible(Value v) {
       return v instanceof DateValue;
     }
-    
+
     @Override
     public boolean isSortable(Collection<Value> values) {
       DateValue firstDate = null;
       for (Value value : values) {
-        DateValue date = (DateValue) value; 
+        DateValue date = (DateValue) value;
         if (firstDate == null) {
           firstDate = date;
         } else {
           if ((firstDate.year == -1) != (date.year == -1)) return false;
           if ((firstDate.month == -1) != (date.month == -1)) return false;
           if ((firstDate.day == -1) != (date.day == -1)) return false;
-        }  
+        }
       }
       return true;
     }
@@ -465,5 +467,5 @@ public final class DenotationUtils {
       throw new LambdaDCSException(Type.typeMismatch, "Cannot compare values");
     }
   }
- 
+
 }

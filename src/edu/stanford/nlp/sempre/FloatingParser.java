@@ -84,13 +84,10 @@ public class FloatingParser extends Parser {
     @Option(gloss = "DEBUG: Print amount of time spent on each rule")
     public boolean summarizeRuleTime = false;
     @Option(gloss = "Stop the parser if it has used more than this amount of time (in seconds)")
-    public int maxFloatingParsingTime = 600;
+    public int maxFloatingParsingTime = Integer.MAX_VALUE;
   }
 
   public static Options opts = new Options();
-
-  protected List<Rule> orderedFloatingRules;
-  public List<Rule> getOrderedFloatingRules() { return orderedFloatingRules; }
 
   public FloatingParser(Spec spec) {
     super(spec);

@@ -44,7 +44,7 @@ public class Grammar {
   // All the rules in the grammar.  Each parser can read these and transform
   // them however the parser wishes.
   // This contains binarized rules
-  ArrayList<Rule> rules = new ArrayList<>();
+  protected ArrayList<Rule> rules = new ArrayList<>();
   public List<Rule> getRules() { return rules; }
 
   Map<String, LispTree> macros = new HashMap<>();  // Map from macro name to its replacement value
@@ -260,7 +260,7 @@ public class Grammar {
     return cat;
   }
 
-  private void interpretRule(LispTree tree) {
+  protected void interpretRule(LispTree tree) {
     if (tree.children.size() < 4)
       throw new RuntimeException("Invalid rule: " + tree);
 
@@ -360,13 +360,16 @@ public class Grammar {
 
   // Generate intermediate categories for binarization.
   public static final String INTERMEDIATE_PREFIX = "$Intermediate";
-  private int freshCatIndex = 0;
+  protected int freshCatIndex = 0;
   private String generateFreshCat() {
     freshCatIndex++;
     return INTERMEDIATE_PREFIX + freshCatIndex;
   }
   public static boolean isIntermediate(String cat) {
     return cat.startsWith(INTERMEDIATE_PREFIX);
+  }
+  public int getFreshCatIndex() {
+    return freshCatIndex;
   }
 
   // Create multiple versions of this rule if there are optional RHS.

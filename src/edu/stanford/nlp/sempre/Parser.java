@@ -56,7 +56,7 @@ public abstract class Parser {
 
     @Option(gloss = "Dump all features (for debugging)")
     public boolean dumpAllFeatures = false;
-    
+
     @Option(gloss = "Call SetEvaluation during parsing")
     public boolean callSetEvaluation = true;
   }
@@ -100,8 +100,8 @@ public abstract class Parser {
     this.valueEvaluator = spec.valueEvaluator;
 
     computeCatUnaryRules();
-    LogInfo.logs("Parser: %d catUnaryRules (sorted), %d nonCatUnaryRules (in trie)",
-        catUnaryRules.size(), grammar.rules.size() - catUnaryRules.size());
+    LogInfo.logs("%s: %d catUnaryRules (sorted), %d nonCatUnaryRules (in trie)",
+        this.getClass().getSimpleName(), catUnaryRules.size(), grammar.rules.size() - catUnaryRules.size());
   }
 
   // If grammar changes, then we might need to update aspects of the parser.
