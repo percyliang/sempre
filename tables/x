@@ -16,6 +16,7 @@ if [ "$operation" == "up" ]; then
   ln -s ../module-classes.txt xxx/
   ln -s ../tables/grammars xxx/
   ln -s ../run xxx/
+  { hostname; readlink -f .; date; git log -1; git status; } > xxx/git-hash
   cl upload -L -n stuff xxx
   rm -rf xxx
   exit 0
