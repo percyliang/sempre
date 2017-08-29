@@ -341,7 +341,11 @@ public final class StringNormalizationUtils {
     // Dashed / Parenthesized information
     string = simpleNormalize(string);
     string = string.replaceAll("\\[[^\\]]*\\]", "");
-    string = string.trim().replaceAll("\\([^)]*\\)$", "");
+    String oldString;
+    do {
+      oldString = string;
+      string = string.trim().replaceAll("\\([^)]*\\)$", "");
+    } while (!oldString.equals(string));
     return string.replaceAll("\\s+", " ").trim();
   }
 
