@@ -269,7 +269,7 @@ public final class DenotationUtils {
         default: throw new LambdaDCSException(Type.invalidFormula, "Unknown superlative mode: %s", mode);
       }
       int from = Math.min(rank - 1, indices.size()),
-          to = Math.min(from + count, indices.size());
+          to = Math.min(Math.max(from, from + count), indices.size());
       for (int index : indices.subList(from, to))
         answer.add(pairs.get(index).getSecond());
     }
