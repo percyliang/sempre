@@ -362,7 +362,7 @@ public final class StringNormalizationUtils {
       // Remove citations
       string = string.trim().replaceAll("((?<!^)\\[[^\\]]*\\]|\\[\\d+\\]|[•♦†‡*#+])*$", "");
       // Remove details in parenthesis
-      string = string.trim().replaceAll("(?<!^)(\\s+\\([^)]*\\))*$", "");
+      string = string.trim().replaceAll("(?<!^)(\\s*\\([^)]*\\))*$", "");
       // Remove outermost quotation mark
       string = string.trim().replaceAll("^\"([^\"]*)\"$", "$1");
     } while (!oldString.equals(string));
