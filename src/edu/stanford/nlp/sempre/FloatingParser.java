@@ -89,8 +89,27 @@ public class FloatingParser extends Parser {
 
   public static Options opts = new Options();
 
+  public boolean earlyStopOnConsistent = false;
+  public int earlyStopOnNumDerivs = -1;
+
   public FloatingParser(Spec spec) {
     super(spec);
+  }
+
+  /**
+   * Set early stopping criteria
+   *
+   * @param onConsistent
+   *    Stop when a consistent derivation is found. (Only triggered when computeExpectedCounts = true)
+   * @param onNumDerivs
+   *    Stop when the number of featurized derivations exceed this number (set to -1 to disable)
+   * @return
+   *    this
+   */
+  public FloatingParser setEarlyStopping(boolean onConsistent, int onNumDerivs) {
+    this.earlyStopOnConsistent = onConsistent;
+    this.earlyStopOnNumDerivs = onNumDerivs;
+    return this;
   }
 
   /**
@@ -435,70 +454,107 @@ class FloatingParserState extends ParserState {
       derivations.addAll(myDerivations);
   }
 
+  /**
+   * Build derivations in a thread to allow timeout.
+   */
+  class DerivationBuilder implements Runnable {
+    @Override public void run() {
+      // Base case ($TOKEN, $PHRASE)
+      for (Derivation deriv : gatherTokenAndPhraseDerivations()) {
+        addToChart(anchoredCell(deriv.cat, deriv.start, deriv.end), deriv);
+        addToChart(floatingCell(deriv.cat, 0), deriv);
+      }
+
+      Set<String> categories = new HashSet<>();
+      for (Rule rule : parser.grammar.rules)
+        categories.add(rule.lhs);
+
+      if (Parser.opts.verbose >= 1)
+        LogInfo.begin_track_printAll("Anchored");
+      // Build up anchored derivations (like the BeamParser)
+      int numTokens = ex.numTokens();
+      for (int len = 1; len <= numTokens; len++) {
+        for (int i = 0; i + len <= numTokens; i++)  {
+          buildAnchored(i, i + len);
+          for (String cat : categories) {
+            String cell = anchoredCell(cat, i, i + len).toString();
+            pruneCell(cell, chart.get(cell));
+          }
+        }
+      }
+      if (Parser.opts.verbose >= 1)
+        LogInfo.end_track();
+
+      // Build up floating derivations
+      for (int depth = (FloatingParser.opts.initialFloatingHasZeroDepth ? 0 : 1); depth <= FloatingParser.opts.maxDepth; depth++) {
+        if (Parser.opts.verbose >= 1)
+          LogInfo.begin_track_printAll("%s = %d", FloatingParser.opts.useSizeInsteadOfDepth ? "SIZE" : "DEPTH", depth);
+        buildFloating(depth);
+        for (String cat : categories) {
+          String cell = floatingCell(cat, depth).toString();
+          pruneCell(cell, chart.get(cell));
+        }
+        if (Parser.opts.verbose >= 1)
+          LogInfo.end_track();
+        // Early stopping
+        if (computeExpectedCounts && ((FloatingParser) parser).earlyStopOnConsistent) {
+          // Consistent derivation found?
+          String cell = floatingCell(Rule.rootCat, depth).toString();
+          List<Derivation> rootDerivs = chart.get(cell);
+          if (rootDerivs != null) {
+            for (Derivation rootDeriv : rootDerivs) {
+              rootDeriv.ensureExecuted(parser.executor, ex.context);
+              if (parser.valueEvaluator.getCompatibility(ex.targetValue, rootDeriv.value) == 1) {
+                LogInfo.logs("Early stopped: consistent derivation found at depth = %d", depth);
+                return;
+              }
+            }
+          }
+        }
+        if (((FloatingParser) parser).earlyStopOnNumDerivs > 0) {
+          // Too many derivations generated?
+          if (numOfFeaturizedDerivs > ((FloatingParser) parser).earlyStopOnNumDerivs) {
+            LogInfo.logs("Early stopped: number of derivations exceeded at depth = %d", depth);
+            return;
+          }
+        }
+      }
+    }
+  }
+
+  public void buildDerivations() {
+    DerivationBuilder derivBuilder = new DerivationBuilder();
+    if (FloatingParser.opts.maxFloatingParsingTime == Integer.MAX_VALUE) {
+      derivBuilder.run();
+    } else {
+      Thread parsingThread = new Thread(derivBuilder);
+      parsingThread.start();
+      try {
+        parsingThread.join(FloatingParser.opts.maxFloatingParsingTime * 1000);
+        if (parsingThread.isAlive()) {
+          // This will only interrupt first or second passes, not the final candidate collection.
+          LogInfo.warnings("Parsing time exceeded %d seconds. Will now interrupt ...", FloatingParser.opts.maxFloatingParsingTime);
+          timeout = true;
+          parsingThread.interrupt();
+          parsingThread.join();
+        }
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+        LogInfo.fails("FloatingParser error: %s", e);
+      }
+    }
+    evaluation.add("timeout", timeout);
+  }
+
+  // ============================================================
+  // Main entry point
+  // ============================================================
+
   @Override public void infer() {
     LogInfo.begin_track_printAll("FloatingParser.infer()");
     ruleTime = new HashMap<>();
 
-    // Base case ($TOKEN, $PHRASE)
-    for (Derivation deriv : gatherTokenAndPhraseDerivations()) {
-      addToChart(anchoredCell(deriv.cat, deriv.start, deriv.end), deriv);
-      addToChart(floatingCell(deriv.cat, 0), deriv);
-    }
-
-    Set<String> categories = new HashSet<>();
-    for (Rule rule : parser.grammar.rules)
-      categories.add(rule.lhs);
-
-    if (Parser.opts.verbose >= 1)
-      LogInfo.begin_track_printAll("Anchored");
-    // Build up anchored derivations (like the BeamParser)
-    int numTokens = ex.numTokens();
-    for (int len = 1; len <= numTokens; len++) {
-      for (int i = 0; i + len <= numTokens; i++)  {
-        buildAnchored(i, i + len);
-        for (String cat : categories) {
-          String cell = anchoredCell(cat, i, i + len).toString();
-          pruneCell(cell, chart.get(cell));
-        }
-      }
-    }
-    if (Parser.opts.verbose >= 1)
-      LogInfo.end_track();
-
-    // Build up floating derivations
-    // Timeout if taking too long
-    timeout = false;
-    Thread parsingThread = new Thread(new Runnable() {
-      @Override
-      public void run() {
-        for (int depth = (FloatingParser.opts.initialFloatingHasZeroDepth ? 0 : 1); depth <= FloatingParser.opts.maxDepth; depth++) {
-          if (Parser.opts.verbose >= 1)
-            LogInfo.begin_track_printAll("%s = %d", FloatingParser.opts.useSizeInsteadOfDepth ? "SIZE" : "DEPTH", depth);
-          buildFloating(depth);
-          for (String cat : categories) {
-            String cell = floatingCell(cat, depth).toString();
-            pruneCell(cell, chart.get(cell));
-          }
-          if (Parser.opts.verbose >= 1)
-            LogInfo.end_track();
-        }
-      }
-    });
-    parsingThread.start();
-    try {
-      parsingThread.join(FloatingParser.opts.maxFloatingParsingTime * 1000);
-      if (parsingThread.isAlive()) {
-        // This will only interrupt first or second passes, not the final candidate collection.
-        LogInfo.warnings("Parsing time exceeded %d seconds. Will now interrupt ...", FloatingParser.opts.maxFloatingParsingTime);
-        timeout = true;
-        parsingThread.interrupt();
-        parsingThread.join();
-      }
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-      LogInfo.fails("DPParser error: %s", e);
-    }
-    evaluation.add("timeout", timeout);
+    buildDerivations();
 
     if (FloatingParser.opts.summarizeRuleTime) summarizeRuleTime();
 

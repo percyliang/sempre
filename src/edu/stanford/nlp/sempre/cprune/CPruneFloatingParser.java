@@ -11,7 +11,7 @@ public class CPruneFloatingParser extends FloatingParser {
 
   public CPruneFloatingParser(Spec spec) {
     super(spec);
-    exploreParser = new FloatingParser(spec);
+    exploreParser = new FloatingParser(spec).setEarlyStopping(true, CollaborativePruner.opts.maxDerivations);
   }
 
   @Override
@@ -64,6 +64,10 @@ class CPruneFloatingParserState extends ParserState {
     predDerivations.clear();
     predDerivations.addAll(exploreParserState.predDerivations);
     expectedCounts = exploreParserState.expectedCounts;
+    if (computeExpectedCounts) {
+      for (Derivation deriv : predDerivations)
+        CollaborativePruner.updateConsistentPattern(parser.valueEvaluator, ex, deriv);
+    }
     CollaborativePruner.stats.totalExplore += 1;
     if (CollaborativePruner.foundConsistentDerivation)
       CollaborativePruner.stats.successfulExplore += 1;
@@ -80,6 +84,10 @@ class CPruneFloatingParserState extends ParserState {
     predDerivations.clear();
     predDerivations.addAll(exploitParserState.predDerivations);
     expectedCounts = exploitParserState.expectedCounts;
+    if (computeExpectedCounts) {
+      for (Derivation deriv : predDerivations)
+        CollaborativePruner.updateConsistentPattern(parser.valueEvaluator, ex, deriv);
+    }
     boolean succeeds = CollaborativePruner.foundConsistentDerivation;
     CollaborativePruner.stats.totalExploit += 1;
     if (succeeds)
