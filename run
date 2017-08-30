@@ -650,6 +650,7 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
     'alter-ex' => l('edu.stanford.nlp.sempre.tables.alter.AlteredTablesExecutor', let(:parser, 'serialized')),
     'filter' => 'edu.stanford.nlp.sempre.tables.serialize.DumpFilterer',
     'column' => 'edu.stanford.nlp.sempre.tables.test.TableColumnAnalyzer',
+    'execute' => 'edu.stanford.nlp.sempre.tables.test.BatchTableExecutor',
   }),
   # Fig parameters
   selo(:cldir, 'execDir', '_OUTPATH_', '.'),
@@ -674,6 +675,7 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
   }),
   # Parser
   letDefault(:parser, 'floatsize'),
+  o('beamSize', 100),
   o('useSizeInsteadOfDepth'),
   sel(:parser, {
     'floatsize' => l(
@@ -702,7 +704,6 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
     'cprune' => l(
       o('Builder.parser', 'cprune.CPruneFloatingParser'),
       o('FloatingParser.maxDepth', 15),
-      o('beamSize', 100),
       o('maxNumNeighbors', 40),
       o('maxPredictedPatterns', 1000),
     nil),

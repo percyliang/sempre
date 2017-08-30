@@ -312,6 +312,7 @@ public class Learner {
     // evaluation.add(LexiconFn.lexEval);
     evaluation.logStats(prefix);
     evaluation.putOutput(prefix);
+    evaluation.putOutput(prefix.replaceAll("iter=", "").replace('.', '_'));
   }
 
   private void printLearnerEventsIter(Example ex, int iter, String group) {
