@@ -152,6 +152,10 @@ public class CollaborativePruner {
     customRules.get(patternString).addAll(parsedCustomRules);
   }
 
+  /**
+   * Get called when a (consistent) formula is found.
+   * Update the consistent patterns.
+   */
   public static void updateConsistentPattern(ValueEvaluator evaluator, Example ex, Derivation deriv) {
     String uid = ex.id;
     if (ex.targetValue != null)

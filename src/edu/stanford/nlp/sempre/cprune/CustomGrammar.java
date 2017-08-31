@@ -91,6 +91,9 @@ public class CustomGrammar extends Grammar {
     return getIndexedSymbolicFormula(deriv, deriv.formula.toString());
   }
 
+  /**
+   * Replace symbols (e.g., fb:row.row.name) with placeholders (e.g., Binary#1).
+   */
   public static String getIndexedSymbolicFormula(Derivation deriv, String formula) {
     CPruneDerivInfo derivInfo = aggregateSymbols(deriv);
     int index = 1;
@@ -126,6 +129,9 @@ public class CustomGrammar extends Grammar {
     return formula;
   }
 
+  /**
+   * Cache the symbols in deriv.tempState[cprune].treeSymbols
+   */
   private static CPruneDerivInfo aggregateSymbols(Derivation deriv) {
     Map<String, Object> tempState = deriv.getTempState();
     if (tempState.containsKey("cprune")) {

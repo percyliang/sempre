@@ -1,5 +1,10 @@
 package edu.stanford.nlp.sempre.cprune;
 
+/**
+ * Represents the leaf node of the parse tree.
+ *
+ * Any sub-derivation whose category is in CustomGrammar.baseCategories becomes a Symbol.
+ */
 public class Symbol implements Comparable<Symbol> {
   String category;
   String formula;
