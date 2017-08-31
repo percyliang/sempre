@@ -65,6 +65,8 @@ public class TableKnowledgeGraph extends KnowledgeGraph implements FuzzyMatchabl
   Map<String, TableColumn> relationIdToTableColumn;
   // "fb:cell.palo_alto_ca" --> TableCellProperties object
   Map<String, TableCellProperties> cellIdToTableCellProperties;
+  // "fb:part.palo_alto" --> String
+  Map<String, String> partIdToOriginalString;
 
   FuzzyMatcher fuzzyMatcher;
   public ExecutorCache executorCache;
@@ -143,9 +145,14 @@ public class TableKnowledgeGraph extends KnowledgeGraph implements FuzzyMatchabl
     // Collect cell properties for public access
     cellProperties = new HashSet<>(cellIdToTableCellProperties.values());
     cellParts = new HashSet<>();
-    for (TableCellProperties properties : cellProperties)
-      for (Value part : properties.metadata.get(TableTypeSystem.CELL_PART_VALUE))
-        cellParts.add((NameValue) part);
+    partIdToOriginalString = new HashMap<>();
+    for (TableCellProperties properties : cellProperties) {
+      for (Value part : properties.metadata.get(TableTypeSystem.CELL_PART_VALUE)) {
+        NameValue partNameValue = (NameValue) part;
+        cellParts.add(partNameValue);
+        partIdToOriginalString.put(partNameValue.id, partNameValue.description);
+      }
+    }
     // Precompute normalized strings for fuzzy matching
     fuzzyMatcher = FuzzyMatcher.getFuzzyMatcher(this);
     executorCache = opts.individualExecutorCache ? new ExecutorCache() : null;
@@ -615,6 +622,8 @@ public class TableKnowledgeGraph extends KnowledgeGraph implements FuzzyMatchabl
     if (nameValueId.startsWith("!")) nameValueId = nameValueId.substring(1);
     if (cellIdToTableCellProperties.containsKey(nameValueId))
       return cellIdToTableCellProperties.get(nameValueId).originalString;
+    if (partIdToOriginalString.containsKey(nameValueId))
+      return partIdToOriginalString.get(nameValueId);
     if (relationIdToTableColumn.containsKey(nameValueId))
       return relationIdToTableColumn.get(nameValueId).originalString;
     if (nameValueId.startsWith(TableTypeSystem.CELL_SPECIFIC_TYPE_PREFIX)) {

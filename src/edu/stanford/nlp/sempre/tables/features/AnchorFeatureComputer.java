@@ -25,9 +25,8 @@ public class AnchorFeatureComputer implements FeatureComputer {
 
   private void extractMatchingFeatures(TableKnowledgeGraph graph,
       Derivation deriv, String phrase, NameValue predicate) {
-    LogInfo.logs("%s -> %s", phrase, predicate);
-    // Type of match
     String predicateString = graph.getOriginalString(predicate);
+    LogInfo.logs("%s -> %s = %s", phrase, predicate, predicateString);
     predicateString = StringNormalizationUtils.simpleNormalize(predicateString).toLowerCase();
     if (predicateString.equals(phrase)) {
       deriv.addFeature("a-e", "exact");

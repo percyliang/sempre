@@ -106,7 +106,7 @@ class MiniGrammar extends Grammar {
   public MiniGrammar(List<Rule> rules) {
     this.rules.addAll(rules);
     LogInfo.begin_track("MiniGrammar Rules");
-    for (Rule rule : rules) LogInfo.logs("%s", rule);
+    for (Rule rule : rules) LogInfo.logs("%s %s", rule, rule.isAnchored() ? "[A]" : "[F]");
     LogInfo.end_track();
   }
 
