@@ -210,6 +210,7 @@ public abstract class Parser {
     int correctIndexAfterParse = -1;
     double maxCompatibility = 0.0;
     double[] compatibilities = null;
+    int numCorrect = 0, numPartialCorrect = 0, numIncorrect = 0;
 
     if (ex.targetValue != null) {
       compatibilities = new double[numCandidates];
@@ -221,6 +222,14 @@ public abstract class Parser {
           correctIndex = i;
         // record maximum compatibility for partial oracle
         maxCompatibility = Math.max(compatibilities[i], maxCompatibility);
+        // Count
+        if (compatibilities[i] == 1) {
+          numCorrect++;
+        } else if (compatibilities[i] == 0) {
+          numIncorrect++;
+        } else {
+          numPartialCorrect++;
+        }
       }
       // What if we only had parsed bottom up?
       for (int i = 0; i < numCandidates; i++) {
@@ -334,6 +343,9 @@ public abstract class Parser {
     evaluation.add("numCandidates", numCandidates);  // From this parse
     if (numCandidates > 0)
       evaluation.add("parsedNumCandidates", numCandidates);
+    evaluation.add("numCorrect", numCorrect);
+    evaluation.add("numPartialCorrect", numPartialCorrect);
+    evaluation.add("numIncorrect", numIncorrect);
 
     // Add parsing stats
     evaluation.add(state.evaluation);
