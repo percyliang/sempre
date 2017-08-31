@@ -16,7 +16,7 @@ public class CPruneFloatingParser extends FloatingParser {
 
   @Override
   public void onBeginDataGroup(int iter, int numIters, String group) {
-    if (CollaborativePruner.neighbors == null) {
+    if (CollaborativePruner.uidToCachedNeighbors == null) {
       CollaborativePruner.customGrammar.init(grammar);
       CollaborativePruner.loadNeighbors();
     }
@@ -77,8 +77,8 @@ class CPruneFloatingParserState extends ParserState {
   public boolean exploit() {
     LogInfo.begin_track("Exploit");
     CollaborativePruner.initialize(ex, CollaborativePruner.Mode.EXPLOIT);
-    Parser exploitParser = new FloatingParser(
-        new Parser.Spec(new MiniGrammar(CollaborativePruner.predictedRules), parser.extractor, parser.executor, parser.valueEvaluator));
+    Grammar miniGrammar = new MiniGrammar(CollaborativePruner.predictedRules);
+    Parser exploitParser = new FloatingParser(new Parser.Spec(miniGrammar, parser.extractor, parser.executor, parser.valueEvaluator));
     ParserState exploitParserState = exploitParser.newParserState(params, ex, computeExpectedCounts);
     exploitParserState.infer();
     predDerivations.clear();
@@ -105,6 +105,9 @@ class MiniGrammar extends Grammar {
 
   public MiniGrammar(List<Rule> rules) {
     this.rules.addAll(rules);
+    LogInfo.begin_track("MiniGrammar Rules");
+    for (Rule rule : rules) LogInfo.logs("%s", rule);
+    LogInfo.end_track();
   }
 
 }

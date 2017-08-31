@@ -13,10 +13,11 @@ public class CustomGrammar extends Grammar {
 
   public static Options opts = new Options();
 
-  public static final Set<String> baseCategories = new HashSet<String>(Arrays.asList("$Unary", "$Binary", "$Entity", "$Property"));
+  public static final Set<String> baseCategories = new HashSet<String>(Arrays.asList(
+      Rule.tokenCat, Rule.phraseCat, Rule.lemmaTokenCat, Rule.lemmaPhraseCat,
+      "$Unary", "$Binary", "$Entity", "$Property"));
 
   ArrayList<Rule> baseRules = new ArrayList<>();
-
   // symbolicFormulas => symbolicFormula ID
   Map<String, Integer> symbolicFormulas = new HashMap<>();
   // indexedSymbolicFormula => customRuleString
@@ -25,11 +26,6 @@ public class CustomGrammar extends Grammar {
   Map<String, Set<Rule>> customBinarizedRules = new HashMap<>();
 
   public void init(Grammar initGrammar) {
-    baseCategories.add(Rule.tokenCat);
-    baseCategories.add(Rule.phraseCat);
-    baseCategories.add(Rule.lemmaTokenCat);
-    baseCategories.add(Rule.lemmaPhraseCat);
-
     baseRules = new ArrayList<>();
     for (Rule rule : initGrammar.getRules()) {
       if (baseCategories.contains(rule.lhs)) {
@@ -116,8 +112,17 @@ public class CustomGrammar extends Grammar {
   // ============================================================
 
   private static String safeReplace(String formula, String target, String replacement) {
+    // (argmin 1 1 ...) and (argmax 1 1 ...) are troublesome
+    String before = formula, targetBefore = target;
+    formula = formula.replace("(argmin (number 1) (number 1)", "(ARGMIN");
+    formula = formula.replace("(argmax (number 1) (number 1)", "(ARGMAX");
+    target = target.replace("(argmin (number 1) (number 1)", "(ARGMIN");
+    target = target.replace("(argmax (number 1) (number 1)", "(ARGMAX");
     formula = formula.replace(target + ")", replacement + ")");
     formula = formula.replace(target + " ", replacement + " ");
+    formula = formula.replace("(ARGMIN", "(argmin (number 1) (number 1)");
+    formula = formula.replace("(ARGMAX", "(argmax (number 1) (number 1)");
+    LogInfo.logs("REPLACE: [%s | %s] %s | %s", targetBefore, replacement, before, formula);
     return formula;
   }
 

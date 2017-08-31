@@ -292,6 +292,9 @@ class LambdaDCSCoreLogic {
           computeUnary(superlative.rank, typeHint.unrestrictedUnary()).range());
       int count = DenotationUtils.getSinglePositiveInteger(
           computeUnary(superlative.count, typeHint.unrestrictedUnary()).range());
+      if (rank != 1 || count != 1) {
+        LogInfo.logs("Superlative WTF: %s | rank %d | count %d", formula, rank, count);
+      }
       Unarylike headD = computeUnary(superlative.head, typeHint);
       Binarylike relationD;
       if (superlative.relation instanceof ReverseFormula) {

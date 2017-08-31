@@ -5,7 +5,6 @@ import java.util.*;
 
 import fig.basic.*;
 import edu.stanford.nlp.sempre.*;
-import fig.basic.LogInfo;
 
 /**
  * Static class for collaborative pruning.
@@ -20,7 +19,7 @@ public class CollaborativePruner {
     public int maxPredictedPatterns = Integer.MAX_VALUE;
     @Option(gloss = "Maximum number of derivations per example")
     public int maxDerivations = 5000;
-    @Option(gloss = "Maximum number of exporation iterations")
+    @Option(gloss = "Maximum number of times to fall back to exploration")
     public int maxExplorationIters = Integer.MAX_VALUE;
   }
 
@@ -37,9 +36,9 @@ public class CollaborativePruner {
 
   // Global variables
   // Nearest neighbors
-  static Map<String, List<String>> neighbors;
+  static Map<String, List<String>> uidToCachedNeighbors;
   // uid => pattern
-  static Map<String, Pattern> consistentPattern = new HashMap<>();
+  static Map<String, FormulaPattern> consistentPattern = new HashMap<>();
   // patternString => customRuleString
   static Map<String, Set<String>> customRules = new HashMap<>();
   // set of patternStrings
@@ -47,7 +46,7 @@ public class CollaborativePruner {
 
   // Example-level variables
   public static boolean foundConsistentDerivation = false;
-  public static Map<String, Pattern> predictedPatterns;
+  public static Map<String, FormulaPattern> predictedPatterns;
   public static List<Rule> predictedRules;
 
   /**
@@ -59,8 +58,8 @@ public class CollaborativePruner {
       LogInfo.logs("neighborFilePath is null.");
       return;
     }
-    LogInfo.logs("loading Neighbors " + opts.neighborFilePath);
-    Map<String, List<String>> tmpMap = new HashMap<>();
+    LogInfo.begin_track("Loading cached neighbors from %s", opts.neighborFilePath);
+    uidToCachedNeighbors = new HashMap<>();
     try {
       BufferedReader reader = IOUtils.openIn(opts.neighborFilePath);
       String line;
@@ -68,28 +67,13 @@ public class CollaborativePruner {
         String[] tokens = line.split("\t");
         String uid = tokens[0];
         String[] nids = tokens[1].split(",");
-        tmpMap.put(uid, Arrays.asList(nids));
+        uidToCachedNeighbors.put(uid, Arrays.asList(nids));
       }
       reader.close();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
-    neighbors = tmpMap;
-  }
-
-  public static <K, V extends Comparable<? super V>> Map<K, V> sortByValue(Map<K, V> map) {
-    List<Map.Entry<K, V>> list = new LinkedList<Map.Entry<K, V>>(map.entrySet());
-    Collections.sort(list, new Comparator<Map.Entry<K, V>>() {
-      public int compare(Map.Entry<K, V> o1, Map.Entry<K, V> o2) {
-        return (o1.getValue()).compareTo(o2.getValue());
-      }
-    });
-
-    Map<K, V> result = new LinkedHashMap<K, V>();
-    for (Map.Entry<K, V> entry : list) {
-      result.put(entry.getKey(), entry.getValue());
-    }
-    return result;
+    LogInfo.end_track();
   }
 
   public static void initialize(Example ex, Mode mode) {
@@ -103,39 +87,42 @@ public class CollaborativePruner {
   }
 
   static void preprocessExample(Example ex) {
-    Map<String, Pattern> patternFreqMap = new HashMap<>();
-    List<String> cachedNeighbors = neighbors.get(ex.id);
+    Map<String, FormulaPattern> patternFreqMap = new HashMap<>();
+    List<String> cachedNeighbors = uidToCachedNeighbors.get(ex.id);
     int total = 0;
 
     // Gather the neighbors
     if (opts.maxNumNeighbors > 0) {
       for (String nid : cachedNeighbors) {
-        // Only get examples that have been previously processed
+        // Only get examples that have been previously processed + found a consistent formula
         if (!consistentPattern.containsKey(nid))
           continue;
 
         String neighborPattern = consistentPattern.get(nid).pattern;
         if (!patternFreqMap.containsKey(neighborPattern))
-          patternFreqMap.put(neighborPattern, new Pattern(neighborPattern, 0, 0));
-        patternFreqMap.get(neighborPattern).frequency += 1;
+          patternFreqMap.put(neighborPattern, new FormulaPattern(neighborPattern, 0));
+        patternFreqMap.get(neighborPattern).frequency++;
         total++;
         if (total >= opts.maxNumNeighbors)
           break;
       }
     } else {
       for (String patternString : allConsistentPatterns) {
-        patternFreqMap.put(patternString, new Pattern(patternString, 0, 1));
+        patternFreqMap.put(patternString, new FormulaPattern(patternString, 1));
       }
     }
 
+    // Sort by frequency (more frequent = smaller; see FormulaPattern.compareTo)
+    List<Map.Entry<String, FormulaPattern>> patternFreqEntries = new ArrayList<>(patternFreqMap.entrySet());
+    patternFreqEntries.sort(new ValueComparator<>(false));
+
     // Gather the patterns
-    patternFreqMap = sortByValue(patternFreqMap);
+    LogInfo.begin_track("Predicted patterns");
     int rank = 0;
     Set<String> predictedRulesStrings = new HashSet<>();
     predictedPatterns = new HashMap<>();
-    LogInfo.begin_track("Predicted patterns");
-    for (Map.Entry<String, Pattern> entry : patternFreqMap.entrySet()) {
-      Pattern newPattern = entry.getValue();
+    for (Map.Entry<String, FormulaPattern> entry : patternFreqEntries) {
+      FormulaPattern newPattern = entry.getValue();
       predictedPatterns.put(newPattern.pattern, newPattern);
       predictedRulesStrings.addAll(customRules.get(newPattern.pattern));
       LogInfo.logs((rank + 1) + ". " + newPattern.pattern + " (" + newPattern.frequency + ")");
@@ -143,7 +130,6 @@ public class CollaborativePruner {
       if (rank >= opts.maxPredictedPatterns)
         break;
     }
-
     // Gather the rules
     predictedRules = customGrammar.getRules(predictedRulesStrings);
     LogInfo.end_track();
@@ -154,7 +140,7 @@ public class CollaborativePruner {
         || deriv.cat.equals("$LEMMA_TOKEN") || deriv.cat.equals("$LEMMA_PHRASE")) {
       return deriv.cat;
     } else {
-      return PatternInfo.convertToIndexedPattern(deriv);
+      return FormulaPattern.convertToIndexedPattern(deriv);
     }
   }
 
@@ -176,33 +162,20 @@ public class CollaborativePruner {
       LogInfo.logs("Found consistent deriv: %s", deriv);
 
       String patternString = getPatternString(deriv);
-      Pattern newConsistentPattern = new Pattern(patternString, 0, 0);
+      FormulaPattern newConsistentPattern = new FormulaPattern(patternString, 0);
       newConsistentPattern.score = deriv.getScore();
 
-      if (!consistentPattern.containsKey(uid)) {
+      FormulaPattern oldConsistentPattern = consistentPattern.get(uid);
+      if (oldConsistentPattern == null || newConsistentPattern.score > oldConsistentPattern.score) {
         addRules(patternString, deriv, ex);
         consistentPattern.put(uid, newConsistentPattern);
         allConsistentPatterns.add(patternString);
-      } else {
-        Pattern oldConsistentPattern = consistentPattern.get(uid);
-        if (newConsistentPattern.score > oldConsistentPattern.score) {
-          addRules(patternString, deriv, ex);
-          consistentPattern.put(uid, newConsistentPattern);
-          allConsistentPatterns.add(patternString);
-        }
       }
     }
   }
 
-  public static Pattern getConsistentPattern(Example ex) {
+  public static FormulaPattern getConsistentPattern(Example ex) {
     return consistentPattern.get(ex.id);
   }
 
-  public static Pattern getPattern(Example ex, Derivation deriv) {
-    if (mode == Mode.EXPLORE)
-      return null;
-    if (!deriv.isRootCat())
-      return null;
-    return predictedPatterns.get(getPatternString(deriv));
-  }
 }
