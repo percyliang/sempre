@@ -675,7 +675,7 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
   }),
   # Parser
   letDefault(:parser, 'floatsize'),
-  o('beamSize', 100),
+  o('beamSize', 50),
   o('useSizeInsteadOfDepth'),
   sel(:parser, {
     'floatsize' => l(
@@ -728,8 +728,8 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
     nil),
     'editdist-fuzzy' => l(
       o('FuzzyMatcher.fuzzyMatcher', 'tables.match.EditDistanceFuzzyMatcher'),
-      o('fuzzyMatchSubstring'), o('fuzzyMatchMaxEditDistanceRatio', 0.3),
-      o('alsoReturnUnion'), o('alsoMatchPart'),
+      o('fuzzyMatchSubstring'), o('fuzzyMatchMaxEditDistanceRatio', 0.15),
+      o('alsoMatchPart'),
     nil),
   }),
   letDefault(:normalize, 1),
@@ -814,9 +814,13 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
     'some' => l(     # Add your own features! (only set up the feature computers)
       o('FeatureExtractor.featureComputers', 'tables.features.PhrasePredicateFeatureComputer tables.features.PhraseDenotationFeatureComputer'.split),
     nil),
-    'all' => l(      # All features
+    'all' => l(      # All ACL 2015 features
       o('FeatureExtractor.featureDomains', 'custom-denotation phrase-predicate phrase-denotation headword-denotation missing-predicate'.split),
       o('FeatureExtractor.featureComputers', 'tables.features.PhrasePredicateFeatureComputer tables.features.PhraseDenotationFeatureComputer'.split),
+    nil),
+    'more' => l(     # All ACL 2015 features + more experimental features
+      o('FeatureExtractor.featureDomains', 'custom-denotation phrase-predicate phrase-denotation headword-denotation missing-predicate anchored-entity'.split),
+      o('FeatureExtractor.featureComputers', 'tables.features.PhrasePredicateFeatureComputer tables.features.PhraseDenotationFeatureComputer tables.features.AnchorFeatureComputer'.split),
     nil),
     'baseline' => l( # For the baseline classifier
       o('FeatureExtractor.featureDomains', 'custom-denotation phrase-denotation headword-denotation table-baseline'.split),

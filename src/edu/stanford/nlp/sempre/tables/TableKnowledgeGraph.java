@@ -660,6 +660,18 @@ public class TableKnowledgeGraph extends KnowledgeGraph implements FuzzyMatchabl
     return answer;
   }
 
+  /**
+   * Return the index of the column with the specified ID. Return -1 if not found.
+   */
+  public int getColumnIndex(String nameValueId) {
+    if (nameValueId.startsWith("!"))
+      nameValueId = nameValueId.substring(1);
+    for (int j = 0; j < columns.size(); j++) {
+      if (columns.get(j).relationNameValue.id.equals(nameValueId)) return j;
+    }
+    return -1;
+  }
+
   // ============================================================
   // Test
   // ============================================================

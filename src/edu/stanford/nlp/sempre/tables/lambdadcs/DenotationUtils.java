@@ -238,7 +238,7 @@ public final class DenotationUtils {
    */
   public static UnaryDenotation superlativeUnary(int rank, int count, List<Pair<Value, Value>> pairs,
       SuperlativeFormula.Mode mode, TypeProcessor processor) {
-    if (rank <= 0 || count <= 0)
+    if (rank <= 0 || count <= 0 || rank >= 1000000 || count >= 100000)
       LogInfo.fails("Invalid superlative (rank = %d, count = %d)", rank, count);
     if (pairs.isEmpty()) {
       if (LambdaDCSExecutor.opts.superlativesFailOnEmptyLists)
@@ -269,7 +269,7 @@ public final class DenotationUtils {
         default: throw new LambdaDCSException(Type.invalidFormula, "Unknown superlative mode: %s", mode);
       }
       int from = Math.min(rank - 1, indices.size()),
-          to = Math.min(Math.max(from, from + count), indices.size());
+          to = Math.min(from + count, indices.size());
       for (int index : indices.subList(from, to))
         answer.add(pairs.get(index).getSecond());
     }
