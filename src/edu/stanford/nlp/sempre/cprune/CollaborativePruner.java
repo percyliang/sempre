@@ -11,6 +11,8 @@ import edu.stanford.nlp.sempre.*;
  */
 public class CollaborativePruner {
   public static class Options {
+    @Option(gloss = "Logging verbosity")
+    public int verbose = 0;
     @Option(gloss = "K = Maximum number of nearest-neighbor examples to consider (-1 to use all examples so far)")
     public int maxNumNeighbors = -1;
     @Option(gloss = "Load cached neighbors from this file")

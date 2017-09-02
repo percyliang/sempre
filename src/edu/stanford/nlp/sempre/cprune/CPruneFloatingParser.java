@@ -5,6 +5,9 @@ import java.util.List;
 import edu.stanford.nlp.sempre.*;
 import fig.basic.LogInfo;
 
+/**
+ * A parser that first tries to exploit the macro grammar and only fall back to full search when needed.
+ */
 public class CPruneFloatingParser extends FloatingParser {
 
   FloatingParser exploreParser;
@@ -105,9 +108,12 @@ class MiniGrammar extends Grammar {
 
   public MiniGrammar(List<Rule> rules) {
     this.rules.addAll(rules);
-    LogInfo.begin_track("MiniGrammar Rules");
-    for (Rule rule : rules) LogInfo.logs("%s %s", rule, rule.isAnchored() ? "[A]" : "[F]");
-    LogInfo.end_track();
+    if (CollaborativePruner.opts.verbose >= 2) {
+      LogInfo.begin_track("MiniGrammar Rules");
+      for (Rule rule : rules)
+        LogInfo.logs("%s %s", rule, rule.isAnchored() ? "[A]" : "[F]");
+      LogInfo.end_track();
+    }
   }
 
 }

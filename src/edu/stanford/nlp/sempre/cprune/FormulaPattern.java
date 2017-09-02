@@ -16,6 +16,7 @@ public class FormulaPattern implements Comparable<FormulaPattern> {
   }
 
   public Double complexity() {
+    // Roughly the number of predicates
     return (double) (pattern.length() - pattern.replace("(@R", "***").replace("(", "").length());
   }
 
@@ -42,6 +43,7 @@ public class FormulaPattern implements Comparable<FormulaPattern> {
   private static Pattern reverseRelation = Pattern.compile("!(fb:[._a-z0-9]+)");
   private static Pattern varName = Pattern.compile("\\((lambda|var) [a-z0-9]+");
   private static Pattern compare = Pattern.compile("(<=|>=|>|<)");
+  private static Pattern whitespace = Pattern.compile("\\s+");
 
   public static String convertToIndexedPattern(Derivation deriv) {
     String formula = deriv.formula.toString();
@@ -58,10 +60,12 @@ public class FormulaPattern implements Comparable<FormulaPattern> {
     formula = formula.replace("fb:row.row.index", "(reverse (lambda x ((reverse @index) (var x))))");
     formula = formula.replace("fb:row.row.next", "@next");
     formula = varName.matcher(formula).replaceAll("($1 x");
-    formula = formula.replaceAll("\\s+", " ");
     formula = formula.replace("reverse", "@R");
     formula = compare.matcher(formula).replaceAll("@compare");
-    LogInfo.logs("PATTERN: %s -> %s", deriv.formula, formula);
+    formula = whitespace.matcher(formula).replaceAll(" ");
+
+    if (CollaborativePruner.opts.verbose >= 2)
+      LogInfo.logs("PATTERN: %s -> %s", deriv.formula, formula);
     return formula;
   }
 

@@ -7,7 +7,7 @@ import fig.basic.*;
 
 public class CustomGrammar extends Grammar {
   public static class Options {
-    @Option
+    @Option(gloss = "Whether to decompose the templates into multiple rules")
     public boolean enableTemplateDecomposition = true;
   }
 
@@ -125,7 +125,8 @@ public class CustomGrammar extends Grammar {
     formula = formula.replace(target + " ", replacement + " ");
     formula = formula.replace("(ARGMIN", "(argmin (number 1) (number 1)");
     formula = formula.replace("(ARGMAX", "(argmax (number 1) (number 1)");
-    LogInfo.logs("REPLACE: [%s | %s] %s | %s", targetBefore, replacement, before, formula);
+    if (CollaborativePruner.opts.verbose >= 2)
+      LogInfo.logs("REPLACE: [%s | %s] %s | %s", targetBefore, replacement, before, formula);
     return formula;
   }
 
