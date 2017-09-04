@@ -317,7 +317,7 @@ public final class StringNormalizationUtils {
         .replaceAll("[‘’´`]", "'")
         .replaceAll("[“”«»]", "\"")
         .replaceAll("[•†‡]", "")
-        .replaceAll("[‐‑–—]", "-");
+        .replaceAll("[-‐‑–—]", "-");
     return string.replaceAll("\\s+", " ").trim();
   }
 
@@ -340,12 +340,17 @@ public final class StringNormalizationUtils {
   public static String aggressiveNormalize(String string) {
     // Dashed / Parenthesized information
     string = simpleNormalize(string);
-    string = string.replaceAll("\\[[^\\]]*\\]", "");
     String oldString;
     do {
       oldString = string;
-      string = string.trim().replaceAll("\\([^)]*\\)$", "");
+      // Remove citations
+      string = string.trim().replaceAll("((?<!^)\\[[^\\]]*\\]|\\[\\d+\\]|[•♦†‡*#+])*$", "");
+      // Remove details in parenthesis
+      string = string.trim().replaceAll("(?<!^)(\\s*\\([^)]*\\))*$", "");
+      // Remove outermost quotation mark
+      string = string.trim().replaceAll("^\"([^\"]*)\"$", "$1");
     } while (!oldString.equals(string));
+    // Collapse whitespaces
     return string.replaceAll("\\s+", " ").trim();
   }
 

@@ -26,23 +26,23 @@ public class AnchorFeatureComputer implements FeatureComputer {
   private void extractMatchingFeatures(TableKnowledgeGraph graph,
       Derivation deriv, String phrase, NameValue predicate) {
     String predicateString = graph.getOriginalString(predicate);
-    LogInfo.logs("%s -> %s = %s", phrase, predicate, predicateString);
+    //LogInfo.logs("%s -> %s = %s", phrase, predicate, predicateString);
     predicateString = StringNormalizationUtils.simpleNormalize(predicateString).toLowerCase();
     if (predicateString.equals(phrase)) {
       deriv.addFeature("a-e", "exact");
-      LogInfo.logs("%s %s exact", phrase, predicateString);
+      //LogInfo.logs("%s %s exact", phrase, predicateString);
     } else if (predicateString.startsWith(phrase + " ")) {
       deriv.addFeature("a-e", "prefix");
-      LogInfo.logs("%s %s prefix", phrase, predicateString);
+      //LogInfo.logs("%s %s prefix", phrase, predicateString);
     } else if (predicateString.endsWith(" " + phrase)) {
       deriv.addFeature("a-e", "suffix");
-      LogInfo.logs("%s %s suffix", phrase, predicateString);
+      //LogInfo.logs("%s %s suffix", phrase, predicateString);
     } else if (predicateString.contains(" " + phrase + " ")){
       deriv.addFeature("a-e", "substring");
-      LogInfo.logs("%s %s substring", phrase, predicateString);
+      //LogInfo.logs("%s %s substring", phrase, predicateString);
     } else {
       deriv.addFeature("a-e", "other");
-      LogInfo.logs("%s %s other", phrase, predicateString);
+      //LogInfo.logs("%s %s other", phrase, predicateString);
     }
     // Does the phrase match other cells?
     Set<String> matches = new HashSet<>();
@@ -54,7 +54,7 @@ public class AnchorFeatureComputer implements FeatureComputer {
         }
       }
     }
-    LogInfo.logs(">> %s", matches);
+    //LogInfo.logs(">> %s", matches);
     if (matches.size() == 0) {
       deriv.addFeature("a-e", "unique");
     } else if (matches.size() < 3) {
