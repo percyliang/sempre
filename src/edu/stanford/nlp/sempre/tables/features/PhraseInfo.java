@@ -25,7 +25,7 @@ public class PhraseInfo {
     @Option(gloss = "Fuzzy match predicates")
     public boolean computeFuzzyMatchPredicates = false;
     @Option(gloss = "Do not produce lexicalized features if the phrase begins or ends with a stop word")
-    public boolean forbidBorderStopWordInLexicalizedFeatures = false;
+    public boolean forbidBorderStopWordInLexicalizedFeatures = true;
   }
   public static Options opts = new Options();
 

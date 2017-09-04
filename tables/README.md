@@ -41,6 +41,22 @@ Running the code
   Other available sets include `u-2`, ..., `u-5` (four other development splits)
   and `test` (actual train-test split).
 
+Other options
+-------------
+
+### Macro Grammar (Experimental)
+
+Macro grammar can be used to significantly speed up the parser.
+To turn on macro grammar, run the following:
+
+    ./run @mode=tables @data=u-1 @feat=more @parser=cprune @grammar=extended @fuzzy=editdist-fuzzy @train=1
+
+Please refer to the following paper for more information:
+
+> Yuchen Zhang, Panupong Pasupat, Percy Liang.  
+> Macro Grammars and Holistic Triggering for Efficient Semantic Parsing  
+> Empirical Methods on Natural Language Processing (EMNLP), 2017.
+
 Official evaluation
 -------------------
 
