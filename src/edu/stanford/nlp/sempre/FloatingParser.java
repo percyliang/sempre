@@ -379,39 +379,53 @@ class FloatingParserState extends ParserState {
       StopWatch stopWatch = new StopWatch().start();
       String rhs1 = rule.rhs.get(0);
       String rhs2 = rule.rhs.get(1);
-      if (!Rule.isCat(rhs1) || !Rule.isCat(rhs2))
-        throw new RuntimeException("Floating rules with > 1 arguments cannot have tokens on the RHS: " + rule);
 
-      if (FloatingParser.opts.useSizeInsteadOfDepth) {
-        derivLoop:
-          for (int depth1 = 0; depth1 < depth; depth1++) {  // sizes must add up to depth-1 (actually size-1)
-            int depth2 = depth - 1 - depth1;
-            for (ChildDerivationsGroup group : getFilteredDerivations(rule, floatingCell(rhs1, depth1), floatingCell(rhs2, depth2)))
-              for (Derivation deriv1 : group.derivations1)
-                for (Derivation deriv2 : group.derivations2)
-                  if (!applyFloatingRule(rule, depth, deriv1, deriv2, deriv1.canonicalUtterance + " " + deriv2.canonicalUtterance))
-                    break derivLoop;
-          }
-      } else {
-        {
-          derivLoop:
-            for (int subDepth = 0; subDepth < depth; subDepth++) {  // depth-1 <=depth-1
-              for (ChildDerivationsGroup group : getFilteredDerivations(rule, floatingCell(rhs1, depth - 1), floatingCell(rhs2, subDepth)))
-                for (Derivation deriv1 : group.derivations1)
-                  for (Derivation deriv2 : group.derivations2)
-                    if (!applyFloatingRule(rule, depth, deriv1, deriv2, deriv1.canonicalUtterance + " " + deriv2.canonicalUtterance))
-                      break derivLoop;
-            }
+      if (!Rule.isCat(rhs1) && !Rule.isCat(rhs2)) {  // token token
+        if (depth == (FloatingParser.opts.initialFloatingHasZeroDepth ? 0 : 1)) {
+          applyFloatingRule(rule, depth, null, null, rhs1 + " " + rhs2);
         }
-        {
+      } else if (!Rule.isCat(rhs1) && Rule.isCat(rhs2)) {  // token $Cat
+        List<Derivation> derivations = getDerivations(floatingCell(rhs2, depth - 1));
+        for (Derivation deriv : derivations)
+          applyFloatingRule(rule, depth, deriv, null, rhs1 + " " + deriv.canonicalUtterance);
+
+      } else if (Rule.isCat(rhs1) && !Rule.isCat(rhs2)) {  // $Cat token
+        List<Derivation> derivations = getDerivations(floatingCell(rhs1, depth - 1));
+        for (Derivation deriv : derivations)
+          applyFloatingRule(rule, depth, deriv, null, deriv.canonicalUtterance + " " + rhs2);
+
+      } else {  // $Cat $Cat
+        if (FloatingParser.opts.useSizeInsteadOfDepth) {
           derivLoop:
-            for (int subDepth = 0; subDepth < depth - 1; subDepth++) {  // <depth-1 depth-1
-              for (ChildDerivationsGroup group : getFilteredDerivations(rule, floatingCell(rhs1, subDepth), floatingCell(rhs2, depth - 1)))
+            for (int depth1 = 0; depth1 < depth; depth1++) {  // sizes must add up to depth-1 (actually size-1)
+              int depth2 = depth - 1 - depth1;
+              for (ChildDerivationsGroup group : getFilteredDerivations(rule, floatingCell(rhs1, depth1), floatingCell(rhs2, depth2)))
                 for (Derivation deriv1 : group.derivations1)
                   for (Derivation deriv2 : group.derivations2)
                     if (!applyFloatingRule(rule, depth, deriv1, deriv2, deriv1.canonicalUtterance + " " + deriv2.canonicalUtterance))
                       break derivLoop;
             }
+        } else {
+          {
+            derivLoop:
+              for (int subDepth = 0; subDepth < depth; subDepth++) {  // depth-1 <=depth-1
+                for (ChildDerivationsGroup group : getFilteredDerivations(rule, floatingCell(rhs1, depth - 1), floatingCell(rhs2, subDepth)))
+                  for (Derivation deriv1 : group.derivations1)
+                    for (Derivation deriv2 : group.derivations2)
+                      if (!applyFloatingRule(rule, depth, deriv1, deriv2, deriv1.canonicalUtterance + " " + deriv2.canonicalUtterance))
+                        break derivLoop;
+              }
+          }
+          {
+            derivLoop:
+              for (int subDepth = 0; subDepth < depth - 1; subDepth++) {  // <depth-1 depth-1
+                for (ChildDerivationsGroup group : getFilteredDerivations(rule, floatingCell(rhs1, subDepth), floatingCell(rhs2, depth - 1)))
+                  for (Derivation deriv1 : group.derivations1)
+                    for (Derivation deriv2 : group.derivations2)
+                      if (!applyFloatingRule(rule, depth, deriv1, deriv2, deriv1.canonicalUtterance + " " + deriv2.canonicalUtterance))
+                        break derivLoop;
+              }
+          }
         }
       }
       ruleTime.put(rule, ruleTime.getOrDefault(rule, 0L) + stopWatch.stop().ms);

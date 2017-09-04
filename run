@@ -940,10 +940,8 @@ end
 ############################################################
 # {2015-01-18} Generate utterances [Percy]
 addMode('genovernight', 'Generate utterances for overnight semantic parsing', lambda { |e| l(
-  'fig/bin/qcreate',
-  letDefault(:gen, 0),
-  sel(:gen, l()),
-  'java', '-Dmodules=core,overnight', '-Xmx10g', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.overnight.GenerationMain',
+  header('core,overnight'),
+  'edu.stanford.nlp.sempre.overnight.GenerationMain',
   figOpts,
   o('JoinFn.typeInference', true),
   o('JoinFn.specializedTypeCheck', false),
@@ -959,6 +957,7 @@ addMode('genovernight', 'Generate utterances for overnight semantic parsing', la
   o('FeatureExtractor.featureComputers','overnight.OvernightFeatureComputer'),
   o('OvernightFeatureComputer.featureDomains', ''),
   o('OvernightFeatureComputer.itemAnalysis',false),
+  letDefault(:gen, 0),
   sel(:gen,
     l( # For debugging the grammar
       o('FeatureExtractor.featureDomains', 'denotation'),
