@@ -110,6 +110,18 @@ public class JavaExecutor extends Executor {
     public static String plus(String a, String b, String c, String d, String e, String f, String g, String h, String i, String j, String k) {
       return a + b + c + d + e + f + g + h + i + j + k;
     }
+    public static String plus(String a, String b, String c, String d, String e, String f, String g, String h, String i, String j, String k, String l) {
+      return a + b + c + d + e + f + g + h + i + j + k + l;
+    }
+    public static String plus(String a, String b, String c, String d, String e, String f, String g, String h, String i, String j, String k, String l, String m) {
+      return a + b + c + d + e + f + g + h + i + j + k + l + m;
+    }
+    public static String plus(String a, String b, String c, String d, String e, String f, String g, String h, String i, String j, String k, String l, String m, String n) {
+      return a + b + c + d + e + f + g + h + i + j + k + l + m + n;
+    }
+    public static String plus(String a, String b, String c, String d, String e, String f, String g, String h, String i, String j, String k, String l, String m, String n, String o) {
+      return a + b + c + d + e + f + g + h + i + j + k + l + m + n + o;
+    }
     private static String toString(Object x) {
       if (x instanceof String)
         return (String) x;
