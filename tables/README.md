@@ -57,6 +57,9 @@ Please refer to the following paper for more information:
 > Macro Grammars and Holistic Triggering for Efficient Semantic Parsing  
 > Empirical Methods on Natural Language Processing (EMNLP), 2017.
 
+Currently the module does not support model saving, and testing has to be done on the official test set.
+These features will be added in the future.
+
 Official evaluation
 -------------------
 
