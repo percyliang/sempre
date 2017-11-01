@@ -53,6 +53,7 @@ public final class StringNormalizationUtils {
   // Cell normalization
   // ============================================================
 
+  public static final Pattern STRICT_DASH = Pattern.compile("\\s*[-‐‑⁃‒–—―]\\s*");
   public static final Pattern DASH = Pattern.compile("\\s*[-‐‑⁃‒–—―/,:;]\\s*");
   public static final Pattern COMMA = Pattern.compile("\\s*(,\\s|\\n|/)\\s*");
   public static final Pattern SPACE = Pattern.compile("\\s+");
@@ -200,21 +201,30 @@ public final class StringNormalizationUtils {
     return null;
   }
 
-  public static final DateTimeFormatter dateFormat = DateTimeFormat.forPattern("MMM d, yyyy");
+  public static final DateTimeFormatter americanDateFormat = DateTimeFormat.forPattern("MMM d, yyyy");
+  public static final Pattern suTimeDateFormat = Pattern.compile("([0-9X]{4})(?:-([0-9X]{2}))?(?:-([0-9X]{2}))?");
 
   /**
    * Convert string to DateValue.
    */
   public static DateValue parseDate(String s) {
+    Matcher matcher = suTimeDateFormat.matcher(s.toUpperCase());
+    if (matcher.matches()) {
+      String yS = matcher.group(1), mS = matcher.group(2), dS = matcher.group(3);
+      int y = -1, m = -1, d = -1;
+      if (!(yS == null || yS.isEmpty() || yS.contains("X"))) y = Integer.parseInt(yS);
+      if (!(mS == null || mS.isEmpty() || mS.contains("X"))) m = Integer.parseInt(mS);
+      if (!(dS == null || dS.isEmpty() || dS.contains("X"))) d = Integer.parseInt(dS);
+      if (y == -1 && m == -1 && d == -1) return null;
+      return new DateValue(y, m, d);
+    }
     try {
-      DateTime date = dateFormat.parseDateTime(s);
+      DateTime date = americanDateFormat.parseDateTime(s);
       return new DateValue(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth());
     } catch (IllegalArgumentException e) {
       return null;
     }
   }
-
-  public static final Pattern suTimeDateFormat = Pattern.compile("([0-9X]{4})(?:-([0-9X]{2}))?(?:-([0-9X]{2}))?");
 
   public static DateValue parseDateWithLanguageAnalyzer(LanguageInfo languageInfo) {
     if (languageInfo.numTokens() == 0) return null;
@@ -307,8 +317,7 @@ public final class StringNormalizationUtils {
         .replaceAll("[‘’´`]", "'")
         .replaceAll("[“”«»]", "\"")
         .replaceAll("[•†‡]", "")
-        .replaceAll("[‐‑–—]", "-")
-        .replaceAll("[\\u2E00-\\uFFFF]", "");     // (Sorry Chinese people)
+        .replaceAll("[-‐‑–—]", "-");
     return string.replaceAll("\\s+", " ").trim();
   }
 
@@ -320,13 +329,8 @@ public final class StringNormalizationUtils {
     // Citation
     string = string.replaceAll("\\[(nb ?)?\\d+\\]", "");
     string = string.replaceAll("\\*+$", "");
-    // Year in parentheses
-    string = string.replaceAll("\\(\\d* ?-? ?\\d*\\)", "");
     // Outside Quote
     string = string.replaceAll("^\"(.*)\"$", "$1");
-    // Numbering
-    if (!string.matches("^[0-9.]+$"))
-      string = string.replaceAll("^\\d+\\.", "");
     return string.replaceAll("\\s+", " ").trim();
   }
 
@@ -336,11 +340,47 @@ public final class StringNormalizationUtils {
   public static String aggressiveNormalize(String string) {
     // Dashed / Parenthesized information
     string = simpleNormalize(string);
-    string = string.replaceAll("\\[[^\\]]*\\]", "");
-    string = string.replaceAll("[\\u007F-\\uFFFF]", "");
-    string = string.trim().replaceAll(" - .*$", "");
-    string = string.trim().replaceAll("\\([^)]*\\)$", "");
+    String oldString;
+    do {
+      oldString = string;
+      // Remove citations
+      string = string.trim().replaceAll("((?<!^)\\[[^\\]]*\\]|\\[\\d+\\]|[•♦†‡*#+])*$", "");
+      // Remove details in parenthesis
+      string = string.trim().replaceAll("(?<!^)(\\s*\\([^)]*\\))*$", "");
+      // Remove outermost quotation mark
+      string = string.trim().replaceAll("^\"([^\"]*)\"$", "$1");
+    } while (!oldString.equals(string));
+    // Collapse whitespaces
     return string.replaceAll("\\s+", " ").trim();
+  }
+
+  /**
+   * Normalization scheme in the official Python evaluator.
+   */
+  public static String officialEvaluatorNormalize(String string) {
+    // Remove diacritics
+    string = Normalizer.normalize(string, Normalizer.Form.NFD).replaceAll("[\u0300-\u036F]", "");
+    // Normalize quotes and dashes
+    string = string
+        .replaceAll("[‘’´`]", "'")
+        .replaceAll("[“”]", "\"")
+        .replaceAll("[‐‑‒–—−]", "-");
+    String oldString;
+    do {
+      oldString = string;
+      // Remove citations
+      string = string.trim().replaceAll("((?<!^)\\[[^\\]]*\\]|\\[\\d+\\]|[•♦†‡*#+])*$", "");
+      // Remove details in parenthesis
+      string = string.trim().replaceAll("(?<!^)(\\s*\\([^)]*\\))*$", "");
+      // Remove outermost quotation mark
+      string = string.trim().replaceAll("^\"([^\"]*)\"$", "$1");
+    } while (!oldString.equals(string));
+    // Remove final '.'
+    if (string.endsWith("."))
+      string = string.substring(0, string.length() - 1);
+    // Collapse whitespaces and convert to lower case
+    string = string.replaceAll("\\s+", " ").toLowerCase().trim();
+    return string;
   }
 
   // ============================================================
@@ -351,7 +391,9 @@ public final class StringNormalizationUtils {
     Multimap<Value, Value> metadata = ArrayListMultimap.create();
     TableColumn column = new TableColumn("Test", "test", 0);
     analyzeString(o, metadata, column, new HashMap<>());
-    LogInfo.logs("%s %s", o, metadata);
+    String aggressive = aggressiveNormalize(o).toLowerCase();
+    String official = officialEvaluatorNormalize(o);
+    LogInfo.logs("%s %s | %s %s %s", o, metadata, official, aggressive, aggressive.equals(official));
   }
 
   public static void main(String[] args) {
@@ -363,6 +405,8 @@ public final class StringNormalizationUtils {
     unitTest("twenty three");
     unitTest("apple, banana, banana, BANANA");
     unitTest("apple\nbanana\norange");
+    unitTest("0-1\n(4-5 p)");
+    unitTest("\"HELLO\"");
     unitTest("21st");
     unitTest("2001st");
     unitTest("2,000,000 ft.");

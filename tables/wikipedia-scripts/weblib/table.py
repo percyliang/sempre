@@ -7,7 +7,9 @@ Get statistics about a table and convert it to CSV.
 import sys, os, re, json
 from codecs import open
 from collections import defaultdict
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup as BeautifulSoupOriginal
+def BeautifulSoup(markup=""):
+    return BeautifulSoupOriginal(markup, 'html.parser')
 
 class Table(object):
     NORM_NONE = 0
@@ -21,14 +23,11 @@ class Table(object):
         self.table = table
         if remove_hidden:
             self.remove_hidden()
-        if normalization == Table.NORM_NONE:
-            self.get_cells()
-        elif normalization == Table.NORM_CORNER:
+        if normalization == Table.NORM_CORNER:
             self.normalize_table()
-            self.get_cells()
         elif normalization == Table.NORM_DUPLICATE:
             self.normalize_table(deep=True)
-            self.get_cells()
+        self.get_cells()
 
     @staticmethod
     def get_wikitable(raw_html, index=None, **kwargs):
@@ -53,11 +52,12 @@ class Table(object):
             tag.extract()
 
     def get_cells(self):
+        """Each cell is (tag, text)"""
         self.rows, self.cells = [], []
         for x in self.table.find_all('tr', recursive=False):
             row = []
             for y in x.find_all(['th', 'td'], recursive=False):
-                row.append(y.text.strip())
+                row.append((y.name, y.text.strip()))
             self.rows.append(row)
             self.cells.extend(row)
         self.num_rows = len(self.rows)
@@ -82,7 +82,7 @@ class Table(object):
     def get_cloned_cell(self, cell, rowspan=1, deep=False):
         if deep:
             # Hacky but works
-            return BeautifulSoup(unicode(cell)).body.contents[0]
+            return BeautifulSoup(unicode(cell)).contents[0]
         tag = Table.SOUP.new_tag(cell.name)
         if rowspan > 1:
             tag['rowspan'] = rowspan
@@ -152,4 +152,4 @@ def test():
     print table.table
 
 if __name__ == '__main__':
-    test()
+    test_wiki()

@@ -1,4 +1,4 @@
-# SEMPRE 2.3.1: Semantic Parsing with Execution
+# SEMPRE 2.4: Semantic Parsing with Execution
 
 ## What is semantic parsing?
 
@@ -61,6 +61,8 @@ SEMPRE has been used in the following papers:
   This paper also used SEMPRE 1.0.  The paraphrasing model is somewhat of a
   offshoot, and does not use many of the core learning and parsing utiltiies in
   SEMPRE.  To reproduce those results, check out SEMPRE 1.0.
+
+Please refer to the [project page](https://nlp.stanford.edu/software/sempre/) for a more complete list.
 
 ## Where do I go next?
 
@@ -180,3 +182,7 @@ Changes from SEMPRE 2.2 to SEMPRE 2.3:
 Changes from SEMPRE 2.3 to SEMPRE 2.3.1:
 
 - Modified the `tables` module to resemble SEMPRE 2.1, effectively making it work again.
+
+Changes from SEMPRE 2.3.1 to SEMPRE 2.4:
+
+- Added the `cprune` package for the paper *Macro Grammars and Holistic Triggering for Efficient Semantic Parsing* (EMNLP 2017).

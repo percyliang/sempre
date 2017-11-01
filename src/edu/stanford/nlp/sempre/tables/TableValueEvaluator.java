@@ -25,6 +25,8 @@ public class TableValueEvaluator implements ValueEvaluator {
     public boolean ignoreNumberValueUnits = true;
     @Option(gloss = "Strict date evaluation (year, month, and date all have to match)")
     public boolean strictDateEvaluation = false;
+    @Option(gloss = "Check if the normalized text matches the official evaluator")
+    public boolean checkStringNormalization = false;
   }
   public static Options opts = new Options();
 
@@ -69,8 +71,16 @@ public class TableValueEvaluator implements ValueEvaluator {
         String predText = (pred instanceof NameValue) ? ((NameValue) pred).description : ((DescriptionValue) pred).value;
         if (predText == null) predText = "";
         if (opts.allowNormalizedStringMatch) {
-          targetText = StringNormalizationUtils.aggressiveNormalize(targetText);
-          predText = StringNormalizationUtils.aggressiveNormalize(predText);
+          targetText = StringNormalizationUtils.aggressiveNormalize(targetText).toLowerCase();
+          predText = StringNormalizationUtils.aggressiveNormalize(predText).toLowerCase();
+          if (opts.checkStringNormalization) {
+            String targetTextOfficial = StringNormalizationUtils.officialEvaluatorNormalize(targetText);
+            String predTextOfficial = StringNormalizationUtils.officialEvaluatorNormalize(predText);
+            if (!targetTextOfficial.equals(targetText) && !(targetTextOfficial + ".").equals(targetText))
+              LogInfo.warnings("Different normalization: [%s][%s]", targetTextOfficial, targetText);
+            if (!predTextOfficial.equals(predText) && !(predTextOfficial + ".").equals(predText))
+              LogInfo.warnings("Different normalization: [%s][%s]", predTextOfficial, predText);
+          }
         }
         return targetText.equals(predText);
       } else if (pred instanceof NumberValue) {

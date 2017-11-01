@@ -39,6 +39,9 @@ public class FuzzyMatchFn extends SemanticFn {
     }
   }
 
+  public FuzzyMatchFnMode getMode() { return mode; }
+  public boolean getMatchAny() { return matchAny; }
+
   @Override
   public DerivationStream call(Example ex, Callable c) {
     return new LazyFuzzyMatchFnDerivs(ex, c, mode, matchAny);

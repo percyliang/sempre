@@ -113,6 +113,7 @@ public class PhraseDenotationFeatureComputer implements FeatureComputer {
       LogInfo.logs("%s %s %s", deriv.value, deriv.type, denotationTypes);
     for (String denotationType : denotationTypes) {
       for (PhraseInfo phraseInfo : phraseInfos) {
+        if (PhraseInfo.opts.forbidBorderStopWordInLexicalizedFeatures && phraseInfo.isBorderStopWord) continue;
         deriv.addFeature("p-d", phraseInfo.lemmaText + ";" + denotationType);
       }
       // Check original column text

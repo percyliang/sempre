@@ -27,6 +27,8 @@ public class Learner {
 
     @Option(gloss = "Write predDerivations to examples file (huge)")
     public boolean outputPredDerivations = false;
+    @Option(gloss = "Write predicted values to a TSV file")
+    public boolean outputPredValues = false;
 
     @Option(gloss = "Dump all features and compatibility scores")
     public boolean dumpFeaturesAndCompatibility = false;
@@ -148,7 +150,7 @@ public class Learner {
     params.update(counts);
     LogInfo.end_track();
   }
-  
+
   public void onlineLearnExampleByFormula(Example ex, List<Formula> formulas) {
     HashMap<String, Double> counts = new HashMap<>();
     for (Derivation deriv : ex.predDerivations)
@@ -222,8 +224,11 @@ public class Learner {
           addFeedback(ex);
 
         // Write out examples and predictions
-        if (opts.outputPredDerivations && Builder.opts.parser.equals("FloatingParser")) {
-          ExampleUtils.writeParaphraseSDF(iter, group, ex, opts.outputPredDerivations);
+        if (opts.outputPredDerivations) {
+          ExampleUtils.writeParaphraseSDF(iter, group, ex, true);
+        }
+        if (opts.outputPredValues) {
+          ExampleUtils.writePredictionTSV(iter, group, ex);
         }
 
         // To save memory
@@ -307,6 +312,7 @@ public class Learner {
     // evaluation.add(LexiconFn.lexEval);
     evaluation.logStats(prefix);
     evaluation.putOutput(prefix);
+    evaluation.putOutput(prefix.replaceAll("iter=", "").replace('.', '_'));
   }
 
   private void printLearnerEventsIter(Example ex, int iter, String group) {

@@ -84,16 +84,32 @@ public class FloatingParser extends Parser {
     @Option(gloss = "DEBUG: Print amount of time spent on each rule")
     public boolean summarizeRuleTime = false;
     @Option(gloss = "Stop the parser if it has used more than this amount of time (in seconds)")
-    public int maxFloatingParsingTime = 600;
+    public int maxFloatingParsingTime = Integer.MAX_VALUE;
   }
 
   public static Options opts = new Options();
 
-  protected List<Rule> orderedFloatingRules;
-  public List<Rule> getOrderedFloatingRules() { return orderedFloatingRules; }
+  public boolean earlyStopOnConsistent = false;
+  public int earlyStopOnNumDerivs = -1;
 
   public FloatingParser(Spec spec) {
     super(spec);
+  }
+
+  /**
+   * Set early stopping criteria
+   *
+   * @param onConsistent
+   *    Stop when a consistent derivation is found. (Only triggered when computeExpectedCounts = true)
+   * @param onNumDerivs
+   *    Stop when the number of featurized derivations exceed this number (set to -1 to disable)
+   * @return
+   *    this
+   */
+  public FloatingParser setEarlyStopping(boolean onConsistent, int onNumDerivs) {
+    this.earlyStopOnConsistent = onConsistent;
+    this.earlyStopOnNumDerivs = onNumDerivs;
+    return this;
   }
 
   /**
@@ -379,39 +395,54 @@ class FloatingParserState extends ParserState {
       StopWatch stopWatch = new StopWatch().start();
       String rhs1 = rule.rhs.get(0);
       String rhs2 = rule.rhs.get(1);
-      if (!Rule.isCat(rhs1) || !Rule.isCat(rhs2))
-        throw new RuntimeException("Floating rules with > 1 arguments cannot have tokens on the RHS: " + rule);
 
-      if (FloatingParser.opts.useSizeInsteadOfDepth) {
-        derivLoop:
-          for (int depth1 = 0; depth1 < depth; depth1++) {  // sizes must add up to depth-1 (actually size-1)
-            int depth2 = depth - 1 - depth1;
-            for (ChildDerivationsGroup group : getFilteredDerivations(rule, floatingCell(rhs1, depth1), floatingCell(rhs2, depth2)))
-              for (Derivation deriv1 : group.derivations1)
-                for (Derivation deriv2 : group.derivations2)
-                  if (!applyFloatingRule(rule, depth, deriv1, deriv2, deriv1.canonicalUtterance + " " + deriv2.canonicalUtterance))
-                    break derivLoop;
-          }
-      } else {
-        {
-          derivLoop:
-            for (int subDepth = 0; subDepth < depth; subDepth++) {  // depth-1 <=depth-1
-              for (ChildDerivationsGroup group : getFilteredDerivations(rule, floatingCell(rhs1, depth - 1), floatingCell(rhs2, subDepth)))
-                for (Derivation deriv1 : group.derivations1)
-                  for (Derivation deriv2 : group.derivations2)
-                    if (!applyFloatingRule(rule, depth, deriv1, deriv2, deriv1.canonicalUtterance + " " + deriv2.canonicalUtterance))
-                      break derivLoop;
-            }
+      if (!Rule.isCat(rhs1) && !Rule.isCat(rhs2)) {  // token token
+        if (depth == (FloatingParser.opts.initialFloatingHasZeroDepth ? 0 : 1)) {
+          applyFloatingRule(rule, depth, null, null, rhs1 + " " + rhs2);
         }
-        {
+
+      } else if (!Rule.isCat(rhs1) && Rule.isCat(rhs2)) {  // token $Cat
+        List<Derivation> derivations = getDerivations(floatingCell(rhs2, depth - 1));
+        for (Derivation deriv : derivations)
+          applyFloatingRule(rule, depth, deriv, null, rhs1 + " " + deriv.canonicalUtterance);
+
+      } else if (Rule.isCat(rhs1) && !Rule.isCat(rhs2)) {  // $Cat token
+        List<Derivation> derivations = getDerivations(floatingCell(rhs1, depth - 1));
+        for (Derivation deriv : derivations)
+          applyFloatingRule(rule, depth, deriv, null, deriv.canonicalUtterance + " " + rhs2);
+
+      } else {  // $Cat $Cat
+        if (FloatingParser.opts.useSizeInsteadOfDepth) {
           derivLoop:
-            for (int subDepth = 0; subDepth < depth - 1; subDepth++) {  // <depth-1 depth-1
-              for (ChildDerivationsGroup group : getFilteredDerivations(rule, floatingCell(rhs1, subDepth), floatingCell(rhs2, depth - 1)))
+            for (int depth1 = 0; depth1 < depth; depth1++) {  // sizes must add up to depth-1 (actually size-1)
+              int depth2 = depth - 1 - depth1;
+              for (ChildDerivationsGroup group : getFilteredDerivations(rule, floatingCell(rhs1, depth1), floatingCell(rhs2, depth2)))
                 for (Derivation deriv1 : group.derivations1)
                   for (Derivation deriv2 : group.derivations2)
                     if (!applyFloatingRule(rule, depth, deriv1, deriv2, deriv1.canonicalUtterance + " " + deriv2.canonicalUtterance))
                       break derivLoop;
             }
+        } else {
+          {
+            derivLoop:
+              for (int subDepth = 0; subDepth < depth; subDepth++) {  // depth-1 <=depth-1
+                for (ChildDerivationsGroup group : getFilteredDerivations(rule, floatingCell(rhs1, depth - 1), floatingCell(rhs2, subDepth)))
+                  for (Derivation deriv1 : group.derivations1)
+                    for (Derivation deriv2 : group.derivations2)
+                      if (!applyFloatingRule(rule, depth, deriv1, deriv2, deriv1.canonicalUtterance + " " + deriv2.canonicalUtterance))
+                        break derivLoop;
+              }
+          }
+          {
+            derivLoop:
+              for (int subDepth = 0; subDepth < depth - 1; subDepth++) {  // <depth-1 depth-1
+                for (ChildDerivationsGroup group : getFilteredDerivations(rule, floatingCell(rhs1, subDepth), floatingCell(rhs2, depth - 1)))
+                  for (Derivation deriv1 : group.derivations1)
+                    for (Derivation deriv2 : group.derivations2)
+                      if (!applyFloatingRule(rule, depth, deriv1, deriv2, deriv1.canonicalUtterance + " " + deriv2.canonicalUtterance))
+                        break derivLoop;
+              }
+          }
         }
       }
       ruleTime.put(rule, ruleTime.getOrDefault(rule, 0L) + stopWatch.stop().ms);
@@ -438,70 +469,107 @@ class FloatingParserState extends ParserState {
       derivations.addAll(myDerivations);
   }
 
+  /**
+   * Build derivations in a thread to allow timeout.
+   */
+  class DerivationBuilder implements Runnable {
+    @Override public void run() {
+      // Base case ($TOKEN, $PHRASE)
+      for (Derivation deriv : gatherTokenAndPhraseDerivations()) {
+        addToChart(anchoredCell(deriv.cat, deriv.start, deriv.end), deriv);
+        addToChart(floatingCell(deriv.cat, 0), deriv);
+      }
+
+      Set<String> categories = new HashSet<>();
+      for (Rule rule : parser.grammar.rules)
+        categories.add(rule.lhs);
+
+      if (Parser.opts.verbose >= 1)
+        LogInfo.begin_track_printAll("Anchored");
+      // Build up anchored derivations (like the BeamParser)
+      int numTokens = ex.numTokens();
+      for (int len = 1; len <= numTokens; len++) {
+        for (int i = 0; i + len <= numTokens; i++)  {
+          buildAnchored(i, i + len);
+          for (String cat : categories) {
+            String cell = anchoredCell(cat, i, i + len).toString();
+            pruneCell(cell, chart.get(cell));
+          }
+        }
+      }
+      if (Parser.opts.verbose >= 1)
+        LogInfo.end_track();
+
+      // Build up floating derivations
+      for (int depth = (FloatingParser.opts.initialFloatingHasZeroDepth ? 0 : 1); depth <= FloatingParser.opts.maxDepth; depth++) {
+        if (Parser.opts.verbose >= 1)
+          LogInfo.begin_track_printAll("%s = %d", FloatingParser.opts.useSizeInsteadOfDepth ? "SIZE" : "DEPTH", depth);
+        buildFloating(depth);
+        for (String cat : categories) {
+          String cell = floatingCell(cat, depth).toString();
+          pruneCell(cell, chart.get(cell));
+        }
+        if (Parser.opts.verbose >= 1)
+          LogInfo.end_track();
+        // Early stopping
+        if (computeExpectedCounts && ((FloatingParser) parser).earlyStopOnConsistent) {
+          // Consistent derivation found?
+          String cell = floatingCell(Rule.rootCat, depth).toString();
+          List<Derivation> rootDerivs = chart.get(cell);
+          if (rootDerivs != null) {
+            for (Derivation rootDeriv : rootDerivs) {
+              rootDeriv.ensureExecuted(parser.executor, ex.context);
+              if (parser.valueEvaluator.getCompatibility(ex.targetValue, rootDeriv.value) == 1) {
+                LogInfo.logs("Early stopped: consistent derivation found at depth = %d", depth);
+                return;
+              }
+            }
+          }
+        }
+        if (((FloatingParser) parser).earlyStopOnNumDerivs > 0) {
+          // Too many derivations generated?
+          if (numOfFeaturizedDerivs > ((FloatingParser) parser).earlyStopOnNumDerivs) {
+            LogInfo.logs("Early stopped: number of derivations exceeded at depth = %d", depth);
+            return;
+          }
+        }
+      }
+    }
+  }
+
+  public void buildDerivations() {
+    DerivationBuilder derivBuilder = new DerivationBuilder();
+    if (FloatingParser.opts.maxFloatingParsingTime == Integer.MAX_VALUE) {
+      derivBuilder.run();
+    } else {
+      Thread parsingThread = new Thread(derivBuilder);
+      parsingThread.start();
+      try {
+        parsingThread.join(FloatingParser.opts.maxFloatingParsingTime * 1000);
+        if (parsingThread.isAlive()) {
+          // This will only interrupt first or second passes, not the final candidate collection.
+          LogInfo.warnings("Parsing time exceeded %d seconds. Will now interrupt ...", FloatingParser.opts.maxFloatingParsingTime);
+          timeout = true;
+          parsingThread.interrupt();
+          parsingThread.join();
+        }
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+        LogInfo.fails("FloatingParser error: %s", e);
+      }
+    }
+    evaluation.add("timeout", timeout);
+  }
+
+  // ============================================================
+  // Main entry point
+  // ============================================================
+
   @Override public void infer() {
     LogInfo.begin_track_printAll("FloatingParser.infer()");
     ruleTime = new HashMap<>();
 
-    // Base case ($TOKEN, $PHRASE)
-    for (Derivation deriv : gatherTokenAndPhraseDerivations()) {
-      addToChart(anchoredCell(deriv.cat, deriv.start, deriv.end), deriv);
-      addToChart(floatingCell(deriv.cat, 0), deriv);
-    }
-
-    Set<String> categories = new HashSet<>();
-    for (Rule rule : parser.grammar.rules)
-      categories.add(rule.lhs);
-
-    if (Parser.opts.verbose >= 1)
-      LogInfo.begin_track_printAll("Anchored");
-    // Build up anchored derivations (like the BeamParser)
-    int numTokens = ex.numTokens();
-    for (int len = 1; len <= numTokens; len++) {
-      for (int i = 0; i + len <= numTokens; i++)  {
-        buildAnchored(i, i + len);
-        for (String cat : categories) {
-          String cell = anchoredCell(cat, i, i + len).toString();
-          pruneCell(cell, chart.get(cell));
-        }
-      }
-    }
-    if (Parser.opts.verbose >= 1)
-      LogInfo.end_track();
-
-    // Build up floating derivations
-    // Timeout if taking too long
-    timeout = false;
-    Thread parsingThread = new Thread(new Runnable() {
-      @Override
-      public void run() {
-        for (int depth = (FloatingParser.opts.initialFloatingHasZeroDepth ? 0 : 1); depth <= FloatingParser.opts.maxDepth; depth++) {
-          if (Parser.opts.verbose >= 1)
-            LogInfo.begin_track_printAll("%s = %d", FloatingParser.opts.useSizeInsteadOfDepth ? "SIZE" : "DEPTH", depth);
-          buildFloating(depth);
-          for (String cat : categories) {
-            String cell = floatingCell(cat, depth).toString();
-            pruneCell(cell, chart.get(cell));
-          }
-          if (Parser.opts.verbose >= 1)
-            LogInfo.end_track();
-        }
-      }
-    });
-    parsingThread.start();
-    try {
-      parsingThread.join(FloatingParser.opts.maxFloatingParsingTime * 1000);
-      if (parsingThread.isAlive()) {
-        // This will only interrupt first or second passes, not the final candidate collection.
-        LogInfo.warnings("Parsing time exceeded %d seconds. Will now interrupt ...", FloatingParser.opts.maxFloatingParsingTime);
-        timeout = true;
-        parsingThread.interrupt();
-        parsingThread.join();
-      }
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-      LogInfo.fails("DPParser error: %s", e);
-    }
-    evaluation.add("timeout", timeout);
+    buildDerivations();
 
     if (FloatingParser.opts.summarizeRuleTime) summarizeRuleTime();
 

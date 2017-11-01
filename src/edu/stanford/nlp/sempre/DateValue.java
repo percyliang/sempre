@@ -86,6 +86,7 @@ public class DateValue extends Value {
         + "-" + (month == -1 ? "xx" : String.format("%02d", month))
         + "-" + (day == -1 ? "xx" : String.format("%02d", day));
   }
+  @Override public String pureString() { return isoString(); }
 
   @Override public int hashCode() {
     int hash = 0x7ed55d16;

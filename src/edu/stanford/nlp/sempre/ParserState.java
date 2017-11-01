@@ -24,7 +24,7 @@ public abstract class ParserState {
   }
   public static Options opts = new Options();
 
-  public enum CustomExpectedCount { NONE, UNIFORM, TOP, RANDOM, }
+  public enum CustomExpectedCount { NONE, UNIFORM, TOP, TOPALT, RANDOM, }
 
   //// Input: specification of how to parse
 
@@ -130,7 +130,7 @@ public abstract class ParserState {
       for (Derivation deriv : derivations)
         deriv.score += Parser.opts.derivationScoreRandom.nextDouble() * Parser.opts.derivationScoreNoise;
     }
-    
+
     Derivation.sortByScore(derivations);
 
     // Print out information
@@ -275,7 +275,7 @@ public abstract class ParserState {
     predScores = new double[n];
     // For update schemas that choose one good and one bad candidate to update
     int[] goodAndBad = null;
-    if (opts.customExpectedCounts == CustomExpectedCount.TOP) {
+    if (opts.customExpectedCounts == CustomExpectedCount.TOP || opts.customExpectedCounts == CustomExpectedCount.TOPALT) {
       goodAndBad = getTopDerivations(derivations);
       if (goodAndBad == null) return;
     } else if (opts.customExpectedCounts == CustomExpectedCount.RANDOM) {
@@ -299,6 +299,10 @@ public abstract class ParserState {
         case TOP: case RANDOM:
           trueScores[i] = (i == goodAndBad[0]) ? 0 : Double.NEGATIVE_INFINITY;
           predScores[i] = (i == goodAndBad[1]) ? 0 : Double.NEGATIVE_INFINITY;
+          break;
+        case TOPALT:
+          trueScores[i] = (i == goodAndBad[0]) ? 0 : Double.NEGATIVE_INFINITY;
+          predScores[i] = (i == goodAndBad[0] || i == goodAndBad[1]) ? deriv.score : Double.NEGATIVE_INFINITY;
           break;
         default:
           throw new RuntimeException("Unknown customExpectedCounts: " + opts.customExpectedCounts);

@@ -31,7 +31,7 @@ public class Rule {
   public final SemanticFn sem;  // Takes derivations corresponding to RHS categories and produces a set of derivations corresponding to LHS.
   public List<Pair<String, Double>> info;  // Extra info
   public RuleSource source = null; // for tracking where the rule comes from when they are induced
-  
+
   // Cache the semanticRepn
   public String getSemRepn() {
     if (semRepn == null) semRepn = sem.getClass().getSimpleName();
@@ -51,9 +51,9 @@ public class Rule {
   public String toString() {
     if (stringRepn == null) {
       String semStr = sem == null? "NullSemanticFn" : sem.toString();
-      int maxLength = 100;
-      if (semStr.length() > maxLength)
-        semStr = String.format("%s...(%d total)", semStr.substring(0,maxLength), semStr.length());
+      //int maxLength = 100;
+      //if (semStr.length() > maxLength)
+      //  semStr = String.format("%s...(%d total)", semStr.substring(0,maxLength), semStr.length());
       stringRepn = lhs + " -> " + (rhs == null ? "" : Joiner.on(' ').join(rhs)) + " " + semStr;
     }
     return stringRepn;
@@ -139,13 +139,13 @@ public class Rule {
     else
       return f == 1.0 ? false : !FloatingParser.opts.defaultIsFloating;
   }
-  
+
   public boolean isInduced() {
     double a = getInfoTag("induced");
     if (a == 1.0) return true;
     return false;
   }
-  
+
   @Override
   public boolean equals(Object o) {
     if (!(o instanceof Rule)) return false;
@@ -155,7 +155,7 @@ public class Rule {
   public int hashCode() {
     return this.toString().hashCode();
   }
-  
+
   public String toJson() {
     Map<String, Object> jsonMap = new LinkedHashMap<>();
     jsonMap.put("lhs", lhs);

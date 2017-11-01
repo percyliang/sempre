@@ -198,7 +198,7 @@ public class Example {
 
   public void preprocess() {
     this.languageInfo = LanguageAnalyzer.getSingleton().analyze(this.utterance);
-    this.targetValue = TargetValuePreprocessor.getSingleton().preprocess(this.targetValue);
+    this.targetValue = TargetValuePreprocessor.getSingleton().preprocess(this.targetValue, this);
   }
 
   public void log() {

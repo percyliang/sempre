@@ -634,7 +634,7 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
   # Add @cldir=1 to use CodaLab's directory paths
   letDefault(:cldir, 0),
   # Usual header
-  header('core,tables,corenlp'),
+  header('core,tables,corenlp,cprune'),
   # Select class
   letDefault(:class, 'main'),
   sel(:class, {
@@ -649,10 +649,12 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
     'alter' => l('edu.stanford.nlp.sempre.tables.alter.BatchTableAlterer', let(:parser, 'serialized')),
     'alter-ex' => l('edu.stanford.nlp.sempre.tables.alter.AlteredTablesExecutor', let(:parser, 'serialized')),
     'filter' => 'edu.stanford.nlp.sempre.tables.serialize.DumpFilterer',
+    'column' => 'edu.stanford.nlp.sempre.tables.test.TableColumnAnalyzer',
+    'execute' => 'edu.stanford.nlp.sempre.tables.test.BatchTableExecutor',
   }),
   # Fig parameters
   selo(:cldir, 'execDir', '_OUTPATH_', '.'),
-  o('overwriteExecDir'), o('addToView', 13), o('jarFiles', 'libsempre/*'),
+  o('overwriteExecDir'), o('addToView', 15), o('jarFiles', 'libsempre/*'),
   sel(:cldir, l(), '>/dev/null'),
   # Set environment for table execution
   o('executor', 'tables.lambdadcs.LambdaDCSExecutor'),
@@ -660,6 +662,7 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
   o('NumberFn.unitless'), o('NumberFn.alsoTestByConversion'),
   o('TypeInference.typeLookup', 'tables.TableTypeLookup'),
   o('JoinFn.specializedTypeCheck', false), o('JoinFn.typeInference', true),
+  o('Learner.outputPredValues'),
   # Value Evaluator
   letDefault(:eval, 'value'),
   sel(:eval, {
@@ -672,34 +675,37 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
   }),
   # Parser
   letDefault(:parser, 'floatsize'),
+  o('beamSize', 50),
+  o('useSizeInsteadOfDepth'),
   sel(:parser, {
     'floatsize' => l(
       o('Builder.parser', 'FloatingParser'),
-      o('useSizeInsteadOfDepth'),
       o('FloatingParser.maxDepth', 15),
     nil),
-    'baseline' => l(
-      o('Builder.parser', 'tables.baseline.TableBaselineParser'),
-    nil),
+    'baseline' => o('Builder.parser', 'tables.baseline.TableBaselineParser'),
     'serialized' => o('Builder.parser', 'tables.serialize.SerializedParser'),
     # ACL 2016
     'grow-dpd' => l(
       o('Builder.parser', 'tables.dpd.DPDParser'),
-      o('useSizeInsteadOfDepth'),
       o('FloatingParser.maxDepth', 8),
     nil),
     'grow-float' => l(
       o('Builder.parser', 'FloatingParser'),
-      o('useSizeInsteadOfDepth'),
       o('FloatingParser.maxDepth', 8),
       o('FloatingParser.betaReduce'), o('initialFloatingHasZeroDepth'),
     nil),
     'grow-mix' => l(
       o('Builder.parser', 'MixParser'),
       o('MixParser.parsers', 'FloatingParser', 'tables.serialize.SerializedParser:train-0xc'),
-      o('useSizeInsteadOfDepth'),
       o('FloatingParser.maxDepth', 8),
       o('FloatingParser.betaReduce'), o('initialFloatingHasZeroDepth'),
+    nil),
+    # EMNLP 2017
+    'cprune' => l(
+      o('Builder.parser', 'cprune.CPruneFloatingParser'),
+      o('FloatingParser.maxDepth', 15),
+      o('maxNumNeighbors', 40),
+      o('maxPredictedPatterns', 1000),
     nil),
   }),
   o('Parser.verbose', 0),
@@ -722,14 +728,14 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
     nil),
     'editdist-fuzzy' => l(
       o('FuzzyMatcher.fuzzyMatcher', 'tables.match.EditDistanceFuzzyMatcher'),
-      o('fuzzyMatchSubstring'), o('fuzzyMatchMaxEditDistanceRatio', 0.3),
-      o('alsoReturnUnion'), o('alsoMatchPart'),
+      o('fuzzyMatchSubstring'), o('fuzzyMatchMaxEditDistanceRatio', 0.15),
+      o('alsoMatchPart'),
     nil),
   }),
   letDefault(:normalize, 1),
   sel(:normalize,
     l(),
-    l(o('genericDateValue'), o('numberCanStartAnywhere'), o('num2CanStartAnywhere'), o('NumberFn.alsoTestByIsolatedNER')),
+    l(o('genericDateValue'), o('numberCanStartAnywhere'), o('num2CanStartAnywhere')),
   nil),
   letDefault(:anchor, 1),
   sel(:anchor, {
@@ -741,19 +747,24 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
   tablesDataPaths,
   # Verbosity
   o('FeatureVector.ignoreZeroWeight'),
-  o('maxPrintedPredictions', 10), o('maxPrintedTrue', 10), o('logFeaturesLimit', 10),
+  o('logFeaturesLimit', 10),
   o('LambdaDCSException.noErrorMessage'),
   letDefault(:verbose, 0),
   sel(:verbose,
-    l(),
     l(
+      o('maxPrintedPredictions', 1), o('maxPrintedTrue', 1),
+    nil),
+    l(
+      o('maxPrintedPredictions', 10), o('maxPrintedTrue', 10),
       o('putCellNameInCanonicalUtterance'), o('showUtterance'),
     nil),
     l(
+      o('maxPrintedPredictions', 10), o('maxPrintedTrue', 10),
       o('putCellNameInCanonicalUtterance'), o('showUtterance'),
       o('summarizeRuleTime'), o('summarizeDenotations'),
     nil),
     l(
+      o('maxPrintedPredictions', 10), o('maxPrintedTrue', 10),
       o('putCellNameInCanonicalUtterance'), o('showUtterance'),
       o('summarizeRuleTime'), o('summarizeDenotations'),
       o('showRules'),
@@ -779,6 +790,7 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
       o('combineFromFloatingParser'),
       o('maxTrainIters', 3),
       o('showValues', false), o('showFirstValue'),
+      o('customExpectedCounts', 'TOP'),
     nil),
     l(
       # for dumping derivations (@class=dump)
@@ -802,9 +814,13 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
     'some' => l(     # Add your own features! (only set up the feature computers)
       o('FeatureExtractor.featureComputers', 'tables.features.PhrasePredicateFeatureComputer tables.features.PhraseDenotationFeatureComputer'.split),
     nil),
-    'all' => l(      # All features
+    'all' => l(      # All ACL 2015 features
       o('FeatureExtractor.featureDomains', 'custom-denotation phrase-predicate phrase-denotation headword-denotation missing-predicate'.split),
       o('FeatureExtractor.featureComputers', 'tables.features.PhrasePredicateFeatureComputer tables.features.PhraseDenotationFeatureComputer'.split),
+    nil),
+    'more' => l(     # All ACL 2015 features + more experimental features
+      o('FeatureExtractor.featureDomains', 'custom-denotation phrase-predicate phrase-denotation headword-denotation missing-predicate anchored-entity'.split),
+      o('FeatureExtractor.featureComputers', 'tables.features.PhrasePredicateFeatureComputer tables.features.PhraseDenotationFeatureComputer tables.features.AnchorFeatureComputer'.split),
     nil),
     'baseline' => l( # For the baseline classifier
       o('FeatureExtractor.featureDomains', 'custom-denotation phrase-denotation headword-denotation table-baseline'.split),
@@ -879,6 +895,11 @@ def tablesGrammarPaths
           o('Grammar.tags', *'scoped merge-and arithmetic comparison alternative neq yearrange part closedclass-generic scoped-2args-merge-and'.split),
           let(:anchor, 2),
         nil),
+        # EMNLP 2017
+        'extended' => l(
+          o('Grammar.inPaths', "#{baseDir}extended.grammar"),
+          o('Grammar.tags', *'alternative movement comparison count aggregate superlative arithmetic merge v-superlative'.split),
+        nil),
       }),
     nil)
   }
@@ -888,13 +909,17 @@ def tablesDataPaths
   lambda { |e|
     baseDir = ['lib/data/WikiTableQuestions/data/', 'WikiTableQuestions/data/'][e[:cldir]]
     csvDir = ['lib/data/WikiTableQuestions/', 'WikiTableQuestions/'][e[:cldir]]
+    nnDir = ['lib/data/nn_0/', 'nn_0/'][e[:cldir]]
     datasets = {
       'none' => l(),
       'train' => o('Dataset.inPaths', "train,#{baseDir}training.examples"),
       # Pristine test test
-      'test' => o('Dataset.inPaths',
-        "train,#{baseDir}training.examples",
-        "test,#{baseDir}pristine-unseen-tables.examples"),
+      'test' => l(
+        o('Dataset.inPaths',
+          "train,#{baseDir}training.examples",
+          "test,#{baseDir}pristine-unseen-tables.examples"),
+        o('neighborFilePath', "#{nnDir}/exact_nearest_neighbors.all"),
+      nil),
       # @data=annotated can be used with @class=check only
       'annotated' => o('Dataset.inPaths', "train,#{baseDir}annotated-all.examples"),
       'before300' => o('Dataset.inPaths', "train,#{baseDir}training-before300.examples"),
@@ -906,11 +931,13 @@ def tablesDataPaths
           "train,#{baseDir}random-split-#{x}-train.examples",
           "dev,#{baseDir}random-split-#{x}-dev.examples",
         nil),
+        o('neighborFilePath', "#{nnDir}/exact_nearest_neighbors.seed-#{x}.train"),
       nil)
     end
     # That's it!
     l(
       o('TableKnowledgeGraph.baseCSVDir', csvDir),
+      o('TableValuePreprocessor.taggedFiles', "#{csvDir}/tagged/data/"),
       sel(:data, datasets),
     nil)
   }
@@ -940,10 +967,8 @@ end
 ############################################################
 # {2015-01-18} Generate utterances [Percy]
 addMode('genovernight', 'Generate utterances for overnight semantic parsing', lambda { |e| l(
-  'fig/bin/qcreate',
-  letDefault(:gen, 0),
-  sel(:gen, l()),
-  'java', '-Dmodules=core,overnight', '-Xmx10g', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.overnight.GenerationMain',
+  header('core,overnight'),
+  'edu.stanford.nlp.sempre.overnight.GenerationMain',
   figOpts,
   o('JoinFn.typeInference', true),
   o('JoinFn.specializedTypeCheck', false),
@@ -959,6 +984,7 @@ addMode('genovernight', 'Generate utterances for overnight semantic parsing', la
   o('FeatureExtractor.featureComputers','overnight.OvernightFeatureComputer'),
   o('OvernightFeatureComputer.featureDomains', ''),
   o('OvernightFeatureComputer.itemAnalysis',false),
+  letDefault(:gen, 1),
   sel(:gen,
     l( # For debugging the grammar
       o('FeatureExtractor.featureDomains', 'denotation'),

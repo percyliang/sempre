@@ -20,6 +20,9 @@ public class UriValue extends Value {
     return tree;
   }
 
+  @Override public String sortString() { return "" + value; }
+  @Override public String pureString() { return "" + value; }
+
   @Override public int hashCode() { return value.hashCode(); }
   @Override public boolean equals(Object o) {
     if (this == o) return true;
