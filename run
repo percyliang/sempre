@@ -551,7 +551,6 @@ addMode('overnight', 'Overnight semantic parsing', l(
   #o('initialization', 'paraphrase :: match,1', 'paraphrase :: size,-0.1', 'paraphrase :: ppdb,0.3',
   #  'paraphrase :: skip-bigram,0.8', 'paraphrase :: skip-ppdb,0.2','denotation :: error,-1000'),
   o('coarsePrune'),
-  o('OvernightDerivationPruningComputer.applyHardConstraints'),
   sel(2,
     l(), # no reg
     l(o('Params.l1Reg','lazy'),o('Params.l1RegCoeff',0)),
@@ -573,6 +572,7 @@ addMode('overnight', 'Overnight semantic parsing', l(
   o('phraseAlignmentPath', lambda { |e| 'lib/data/overnight/' + e[:domain] + '.phrase_alignments' }),
   o('PPDBModel.ppdbModelPath', lambda { |e| 'lib/data/overnight/' + e[:domain] + '-ppdb.txt' }),
   o('DerivationPruner.pruningComputers', ['overnight.OvernightDerivationPruningComputer']),
+  o('DerivationPruner.pruningStrategies', ['violateHardConstraints']),
   o('Dataset.inPaths', 
     lambda { |e| 'train:lib/data/overnight/' + e[:domain] + '.paraphrases.train.examples' },
     lambda { |e| 'test:lib/data/overnight/' + e[:domain] + '.paraphrases.test.examples' }),
@@ -937,7 +937,8 @@ def tablesDataPaths
     # That's it!
     l(
       o('TableKnowledgeGraph.baseCSVDir', csvDir),
-      o('TableValuePreprocessor.taggedFiles', "#{csvDir}/tagged/data/"),
+      letDefault(:useTaggedFile, 0),
+      selo(:useTaggedFile, 'TableValuePreprocessor.taggedFiles', '', "#{csvDir}/tagged/data/"),
       sel(:data, datasets),
     nil)
   }
