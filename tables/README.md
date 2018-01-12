@@ -31,11 +31,11 @@ Running the code
 
 3. The following command train and test on 100 development examples:
 
-        ./run @mode=tables @data=u-1 @feat=all @train=1 -maxex train,100 dev,100
+        ./run @mode=tables @data=u-1 @feat=all @train=1 -maxExamples train:100 dev:100
 
   The command should take less than 30 minutes.
 
-  * To train on the complete development set, remove `-maxex train,100 dev,100`
+  * To train on the complete development set, remove `-maxExamples train:100 dev:100`
 
   * The command above uses `u-1` (80:20 split of the development data).
   Other available sets include `u-2`, ..., `u-5` (four other development splits)
