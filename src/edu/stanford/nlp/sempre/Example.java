@@ -42,6 +42,9 @@ public class Example {
   //// Information after preprocessing (e.g., tokenization, POS tagging, NER, syntactic parsing, etc.).
   public LanguageInfo languageInfo = null;
 
+  //// Information after Information Extraction step.
+  public RelationInfo relationInfo = null;
+
   //// Output of the parser.
 
   // Predicted derivations (sorted by score).
@@ -60,6 +63,7 @@ public class Example {
     private Formula targetFormula;
     private Value targetValue;
     private LanguageInfo languageInfo;
+    private RelationInfo relationInfo;
 
     public Builder setId(String id) { this.id = id; return this; }
     public Builder setUtterance(String utterance) { this.utterance = utterance; return this; }
@@ -67,6 +71,7 @@ public class Example {
     public Builder setTargetFormula(Formula targetFormula) { this.targetFormula = targetFormula; return this; }
     public Builder setTargetValue(Value targetValue) { this.targetValue = targetValue; return this; }
     public Builder setLanguageInfo(LanguageInfo languageInfo) { this.languageInfo = languageInfo; return this; }
+    public Builder setRelationInfo(RelationInfo relationInfo) { this.relationInfo = relationInfo; return this; }
     public Builder withExample(Example ex) {
       setId(ex.id);
       setUtterance(ex.utterance);
@@ -76,7 +81,7 @@ public class Example {
       return this;
     }
     public Example createExample() {
-      return new Example(id, utterance, context, targetFormula, targetValue, languageInfo);
+      return new Example(id, utterance, context, targetFormula, targetValue, languageInfo, relationInfo);
     }
   }
 
@@ -86,13 +91,15 @@ public class Example {
                  @JsonProperty("context") ContextValue context,
                  @JsonProperty("targetFormula") Formula targetFormula,
                  @JsonProperty("targetValue") Value targetValue,
-                 @JsonProperty("languageInfo") LanguageInfo languageInfo) {
+                 @JsonProperty("languageInfo") LanguageInfo languageInfo,
+                 @JsonProperty("languageInfo") RelationInfo relationInfo) {
     this.id = id;
     this.utterance = utterance;
     this.context = context;
     this.targetFormula = targetFormula;
     this.targetValue = targetValue;
     this.languageInfo = languageInfo;
+    this.relationInfo = relationInfo;
   }
 
   // Accessors
@@ -126,6 +133,7 @@ public class Example {
   public String posTag(int i) { return languageInfo.posTags.get(i); }
   public String phrase(int start, int end) { return languageInfo.phrase(start, end); }
   public String lemmaPhrase(int start, int end) { return languageInfo.lemmaPhrase(start, end); }
+  public Map<String,Double> relation() { return relationInfo.relations; }
 
   public String toJson() { return Json.writeValueAsStringHard(this); }
   public static Example fromJson(String json) { return Json.readValueHard(json, Example.class); }
@@ -153,6 +161,7 @@ public class Example {
       }
     }
     b.setLanguageInfo(new LanguageInfo());
+    b.setRelationInfo(new RelationInfo());
 
     Example ex = b.createExample();
 
@@ -198,6 +207,7 @@ public class Example {
 
   public void preprocess() {
     this.languageInfo = LanguageAnalyzer.getSingleton().analyze(this.utterance);
+    this.relationInfo = RelationAnalyzer.getSingleton().analyze(this.utterance);
     this.targetValue = TargetValuePreprocessor.getSingleton().preprocess(this.targetValue, this);
   }
 
@@ -215,6 +225,7 @@ public class Example {
     if (targetValue != null)
       LogInfo.logs("targetValue: %s", targetValue);
     LogInfo.logs("Dependency children: %s", languageInfo.dependencyChildren);
+    LogInfo.logs("Extracted relations: %s", relationInfo.relations.toString());
     LogInfo.end_track();
   }
 
