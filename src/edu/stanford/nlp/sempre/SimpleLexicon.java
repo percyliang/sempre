@@ -22,7 +22,13 @@ import java.util.*;
  * In the user query, we have phrase.
  *
  * @author Percy Liang
+ *
+ *
+ * Modified to handle comments and empty lines
+ * @maintainer Emilia Lozinska
  */
+
+
 public final class SimpleLexicon {
   public static class Entry {
     // rawPhrase was the original phrase in the Lexicon
@@ -70,45 +76,47 @@ public final class SimpleLexicon {
       int numLines = 0;
       int oldNumEntries = entries.size();
       while ((line = in.readLine()) != null) {
-        Map<String, Object> map = Json.readMapHard(line);
-        numLines++;
+        if ((!line.startsWith("#") && line.length() != 0) && (line.contains("{") && line.contains("}"))) {
+          Map<String, Object> map = Json.readMapHard(line);
+          numLines++;
 
-        String rawPhrase = (String) map.get("lexeme");
-        Formula formula = Formula.fromString((String) map.get("formula"));
+          String rawPhrase = (String) map.get("lexeme");
+          Formula formula = Formula.fromString((String) map.get("formula"));
 
-        // Type
-        String typeStr = (String) map.get("type");
-        SemType type = typeStr != null ? SemType.fromString(typeStr) : TypeInference.inferType(formula);
+          // Type
+          String typeStr = (String) map.get("type");
+          SemType type = typeStr != null ? SemType.fromString(typeStr) : TypeInference.inferType(formula);
 
-        // Features
-        StringDoubleVec features = null;
-        Map<String, Double> featureMap = (Map<String, Double>) map.get("features");
-        if (featureMap != null) {
-          features = new StringDoubleVec();
-          for (Map.Entry<String, Double> e : featureMap.entrySet())
-            features.add(e.getKey(), e.getValue());
-          features.trimToSize();
-        }
-
-        // Add verbatim feature
-        Entry entry = new Entry(rawPhrase, formula, type, features);
-        String phrase = entry.rawPhrase.toLowerCase();
-        MapUtils.addToList(entries, phrase, entry);
-
-        // For last names
-        String[] parts = phrase.split(" ");
-        if (opts.matchSuffixTypes != null && opts.matchSuffixTypes.contains(typeStr) && parts.length > 1) {
-          StringDoubleVec newFeatures = new StringDoubleVec();
-          if (features != null) {  // Copy over features
-            for (StringDoubleVec.Entry e : features)
-              newFeatures.add(e.getFirst(), e.getSecond());
+          // Features
+          StringDoubleVec features = null;
+          Map<String, Double> featureMap = (Map<String, Double>) map.get("features");
+          if (featureMap != null) {
+            features = new StringDoubleVec();
+            for (Map.Entry<String, Double> e : featureMap.entrySet())
+              features.add(e.getKey(), e.getValue());
+            features.trimToSize();
           }
-          newFeatures.add("isSuffix", 1);
-          newFeatures.trimToSize();
-          Entry newEntry = new Entry(rawPhrase, formula, type, newFeatures);
-          MapUtils.addToList(entries, parts[parts.length - 1], newEntry);
+
+          // Add verbatim feature
+          Entry entry = new Entry(rawPhrase, formula, type, features);
+          String phrase = entry.rawPhrase.toLowerCase();
+          MapUtils.addToList(entries, phrase, entry);
+
+          // For last names
+          String[] parts = phrase.split(" ");
+          if (opts.matchSuffixTypes != null && opts.matchSuffixTypes.contains(typeStr) && parts.length > 1) {
+            StringDoubleVec newFeatures = new StringDoubleVec();
+            if (features != null) {  // Copy over features
+              for (StringDoubleVec.Entry e : features)
+                newFeatures.add(e.getFirst(), e.getSecond());
+            }
+            newFeatures.add("isSuffix", 1);
+            newFeatures.trimToSize();
+            Entry newEntry = new Entry(rawPhrase, formula, type, newFeatures);
+            MapUtils.addToList(entries, parts[parts.length - 1], newEntry);
+          }
+          // In the future, add other mechanisms for lemmatization.
         }
-        // In the future, add other mechanisms for lemmatization.
       }
       LogInfo.logs("Read %s lines, generated %d entries (now %d total)", numLines, entries.size() - oldNumEntries, entries.size());
     } catch (IOException e) {

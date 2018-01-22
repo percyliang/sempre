@@ -1,0 +1,56 @@
+# Roboy Small Talk
+
+(def @active memory.people.person.active)
+(def @person memory.people.person)
+
+(rule $Verb ($TOKEN) (FilterPosTagFn token VB VBD VBN VBG VBP VBZ))
+(rule $Prep ($TOKEN) (FilterPosTagFn token IN))
+(rule $VerbPrep ($Verb $Prep) (ConcatFn " "))
+
+(rule $NUMBER ($TOKEN) (FilterNerSpanFn token NUMBER))
+(rule $Expr (i) (ConstantFn @active))
+(rule $Expr (me) (ConstantFn @active))
+
+# Expressions
+(rule $VerbPrep ($Verb $NUMBER) (ConcatFn ":"))
+#(rule $Expr (born in) (ConstantFn (lambda x (call .concat (string "memory.people.person.birth_date:") (var x)))))
+#(rule $Expr (born in) (ConstantFn (lambda x (call .concat (string "memory.people.person.birth_place:") (var x)))))
+(rule $Expr ($VerbPrep) (ConstantFn (lambda x (call .concat (string "memory.people.person.birth_place:") (var x)))))
+
+(rule $Expr (live in) (ConstantFn (lambda x (call .concat (string "memory.people.person.location:") (var x)))))
+
+(rule $Expr (like) (ConstantFn (lambda x (call .concat (string "memory.people.person.hobby:") (var x)))))
+
+(rule $Expr (from) (ConstantFn (lambda x (call .concat (string "memory.people.person.birth_place:") (var x)))))
+(rule $Expr (am) (ConstantFn (lambda x (call .concat (string "memory.people.person.name:") (var x)))))
+
+(rule $Expr (name is) (ConstantFn (lambda x (call .concat (string "memory.people.person.name:")  (var x)))))
+(rule $Expr (years old) (ConstantFn (lambda x (call .concat (string "memory.people.person.age:")  (var x)))))
+
+(rule $Expr ($PHRASE) (NumberFn))
+(rule $Expr (hello) (ConstantFn fb:type.greeting))
+(rule $Expr (hi) (ConstantFn fb:type.greeting))
+(rule $Expr (greetings) (ConstantFn fb:type.greeting))
+
+# Way of combining expressions with arguments
+(rule $Expr ($Expr $PHRASE) (JoinFn forward))
+(rule $Expr ($PHRASE $Expr) (JoinFn backward))
+(rule $Partial ($Operator $Expr) (JoinFn forward))
+(rule $Expr ($Expr $Partial) (JoinFn backward))
+
+# General sentence build
+(rule $ROOT ($Expr) (IdentityFn))
+(rule $ROOT ((am optional) $Expr) (IdentityFn))
+(rule $ROOT ($Expr) (IdentityFn))
+(rule $ROOT (was $Expr) (IdentityFn))
+(rule $ROOT ($PHRASE $Expr) (IdentityFn))
+(rule $ROOT (was born in $NUMBER) (ConstantFn (call .concat (string "memory.people.person.birth_date:") (string $NUMBER))))
+(rule $ROOT ((what optional) (is optional) $Expr (? optional)) (IdentityFn))
+
+# Example of ambiguity to demonstrate learning
+(rule $Operator (and) (ConstantFn (lambda y (lambda x (call * (var x) (var y))))))
+(rule $Operator (and) (ConstantFn (lambda y (lambda x (call + (var x) (var y))))))
+(rule $Operator (plus) (ConstantFn (lambda y (lambda x (call + (var x) (var y))))))
+(rule $Operator (times) (ConstantFn (lambda y (lambda x (call * (var x) (var y))))))
+
+

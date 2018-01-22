@@ -14,6 +14,7 @@ import fig.exec.Execution;
 public class Main implements Runnable {
   @Option public boolean interactive = false;
   @Option public boolean server = false;
+  @Option public boolean socket = false;
   @Option public String masterType = "edu.stanford.nlp.sempre.Master";
 
   public void run() {
@@ -26,12 +27,16 @@ public class Main implements Runnable {
     Learner learner = new Learner(builder.parser, builder.params, dataset);
     learner.learn();
 
-    if (server || interactive) {
+    if (server || interactive || socket) {
       Master master = createMaster(masterType, builder);
       if (server)
         master.runServer();
-      if (interactive)
+      if (interactive) {
         master.runInteractivePrompt();
+//        master.runSocketPrompt();
+      }
+      if (socket)
+        master.runSocketPrompt();
     }
   }
 

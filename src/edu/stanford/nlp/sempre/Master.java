@@ -9,8 +9,14 @@ import jline.console.ConsoleReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+
 import java.lang.reflect.Field;
 import java.util.*;
+import java.net.ServerSocket;
+import java.net.Socket;
 
 /**
  * A Master manages multiple sessions. Currently, they all share the same model,
@@ -135,7 +141,46 @@ public class Master {
     Server server = new Server(this);
     server.run();;
   }
-  
+
+  public void runSocketPrompt() {
+    Session session = getSession("stdin");
+    try
+    {
+      ServerSocket serverSocket = new ServerSocket(5000);
+      Socket clientSocket  = serverSocket.accept();
+      BufferedReader input = new BufferedReader(
+              new InputStreamReader(clientSocket.getInputStream()));
+      PrintWriter output = new PrintWriter(clientSocket.getOutputStream(), true);
+      try
+      {
+          String line;
+          while (clientSocket.isConnected()) {
+            line = input.readLine();
+            if (line!=null) {
+              LogInfo.logs("%s", line);
+              int indent = LogInfo.getIndLevel();
+              try {
+                Response res = processQuery(session, line);
+                System.out.println(res.getAnswer());
+                output.println(summaryString(res));
+              } catch (Throwable t) {
+                while (LogInfo.getIndLevel() > indent)
+                  LogInfo.end_track();
+                t.printStackTrace();
+              }
+            }
+          }
+      }
+      catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }
+    catch (IOException e)
+    {
+      e.printStackTrace();
+    }
+  }
+
   public void runInteractivePrompt() {
     Session session = getSession("stdin");
 

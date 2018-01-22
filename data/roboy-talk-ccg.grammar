@@ -1,0 +1,40 @@
+## Roboy Small Talk
+
+# CORENLP
+(rule $Det ($TOKEN) (FilterPosTagFn token DT))
+(rule $[S|NP]|[S|NP] ($LEMMA_TOKEN) (FilterPosTagFn token RB))
+(rule $[PP/NP] ($TOKEN) (FilterPosTagFn token IN))
+
+# LEXICON
+(rule $ADJ ($TOKEN) (SimpleLexiconFn (type adjective)))
+(rule $VERB ($PHRASE) (SimpleLexiconFn (type relationship)))
+(rule $NP ($TOKEN) (SimpleLexiconFn (type entity)))
+(rule $N ($TOKEN) (SimpleLexiconFn (type class)))
+
+# Basic categories
+(rule $[NP/N] ($Det) (ConstantFn (lambda x (var x))))
+(rule $NP ($Entity) (IdentityFn))
+(rule $N ($Noun) (IdentityFn))
+
+# Basic phrases
+(rule $[S|NP]/ADJ (is) (ConstantFn (lambda y (lambda x (and (var y) (var x))))))
+(rule $[S|NP]/NP (is) (ConstantFn (lambda y (lambda x (and (var y) (var x))))))
+
+# Forward application
+(rule $NP ($[NP/N] $N) (JoinFn forward))
+(rule $N ($[N/N] $N) (JoinFn forward))
+(rule $[S|NP] ($[S|NP]/ADJ $ADJ) (JoinFn forward))
+(rule $[S|NP] ($[S|NP]/NP $NP) (JoinFn forward))
+(rule $PP ($[PP/NP] $NP) (JoinFn forward))
+
+# Backward application
+(rule $S ($NP $[S|NP]) (JoinFn backward))
+(rule $S/ADJ ($NP $[S|NP]/ADJ) (JoinFn backward))
+(rule $[S|NP] ($[S|NP] $[S|NP]|[S|NP]) (JoinFn backward))
+
+# General sentence build
+(rule $ROOT ($[S|NP]/ADJ) (IdentityFn))
+(rule $ROOT ($ADJ) (IdentityFn))
+(rule $ROOT ($S) (IdentityFn))
+(rule $ROOT ($[S|NP]) (IdentityFn))
+(rule $ROOT ($NP) (IdentityFn))
