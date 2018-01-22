@@ -41,3 +41,8 @@ To run SEMPRE with Roboy grammar run in socket mode (port 5000):
 ```
 ./run @mode=socket -Grammar.inPaths data/roboy-talk.grammar -FeatureExtractor.featureDomains rule -Dataset.inPaths train:data/roboy-talk.examples -Learner.maxTrainIters 10 -languageAnalyzer corenlp.CoreNLPAnalyzer -SimpleLexicon.inPaths data/roboy-talk.lexicon
 ```
+
+or modify [quick_run](https://github.com/Roboy/roboy_parser/blob/devel/quick_run.sh) and use it:
+```
+./quick_run
+```
