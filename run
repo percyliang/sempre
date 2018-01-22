@@ -448,6 +448,12 @@ addMode('simple', 'Simple shell', lambda { |e| l(
   o('Main.interactive'),
 nil) })
 
+# Just start socket shell to try out SEMPRE commands
+addMode('socket', 'Simple shell', lambda { |e| l(
+  codalab, 'java', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.Main',
+  o('Main.socket'),
+nil) })
+
 addMode('simple-sparql', 'Simple shell for querying SPARQL', lambda { |e| l(
   codalab, 'java', '-Dmodules=core,freebase', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.Main',
   o('executor', 'freebase.SparqlExecutor'),
