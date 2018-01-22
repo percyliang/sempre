@@ -783,7 +783,7 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
   letDefault(:lang, 'corenlp'),
   sel(:lang, {
     'simple' => o('LanguageAnalyzer', 'SimpleAnalyzer'),
-    'corenlp' => l(o('LanguageAnalyzer', 'corenlp.CoreNLPAnalyzer'), o('annotators', *'tokenize ssplit pos lemma ner'.split)),
+    'corenlp' => l(o('LanguageAnalyzer', 'corenlp.CoreNLPAnalyzer'), o('RelationAnalyzer', 'corenlpOpenIEAnalyzer'), o('annotators', *'tokenize ssplit pos lemma ner'.split)),
     'fullcorenlp' => l(o('LanguageAnalyzer', 'corenlp.CoreNLPAnalyzer'), o('annotators', *'tokenize ssplit pos lemma ner parse'.split)),
   }),
   # Training

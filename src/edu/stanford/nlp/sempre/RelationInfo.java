@@ -19,10 +19,10 @@ import java.util.*;
  */
 public class RelationInfo implements MemUsage.Instrumented {
 
-    public final Map<String, Float> relations; /**< Map of relations with probability */
+    public final Map<String, Double> relations; /**< Map of relations with probability */
 
     public RelationInfo() {
-        this.relations = new HashMap<String,Float>();
+        this.relations = new HashMap<String,Double>();
     }
 
     @Override

@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.Properties;
 import java.io.*;
 import java.util.*;
+import java.lang.Object;
 
 /**
  * OpenIEAnalyzer uses Stanford OpenIE pipeline to analyze an input string utterance
@@ -22,8 +23,51 @@ import java.util.*;
  */
 public class OpenIEAnalyzer extends RelationAnalyzer {
 
+  // Function from CoreNLPAnalyzer.java
+  // Stanford tokenizer doesn't break hyphens.
+  // Replace hypens with spaces for utterances like
+  // "Spanish-speaking countries" but not for "2012-03-28".
+  public static String breakHyphens(String utterance) {
+    StringBuilder buf = new StringBuilder(utterance);
+    for (int i = 0; i < buf.length(); i++) {
+      if (buf.charAt(i) == '-' && (i + 1 < buf.length() && Character.isLetter(buf.charAt(i + 1))))
+        buf.setCharAt(i, ' ');
+    }
+    return buf.toString();
+  }
+
   public RelationInfo analyze(String utterance) {
-    return new RelationInfo();
+    RelationInfo relationInfo = new RelationInfo();
+
+    // Create the Stanford CoreNLP pipeline
+    Properties props = new Properties();
+    props.setProperty("annotators", "tokenize,ssplit,pos,lemma,depparse,natlog,openie");
+    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+    OpenIEAnalyzer analyzer = new OpenIEAnalyzer();
+    Annotation doc = new Annotation(utterance);
+    pipeline.annotate(doc);
+
+    // Loop over sentences in the document
+    for (CoreMap sentence : doc.get(CoreAnnotations.SentencesAnnotation.class)) {
+      // Get the OpenIE triples for the sentence
+      Collection<RelationTriple> triples =
+              sentence.get(NaturalLogicAnnotations.RelationTriplesAnnotation.class);
+      // Print the triples
+      System.out.println( "TRIPLES:");
+      for (RelationTriple triple : triples) {
+        System.out.println(triple.confidence + "\t" +
+                triple.subjectLemmaGloss() + "\t" +
+                triple.relationLemmaGloss() + "\t" +
+                triple.objectLemmaGloss());
+        StringBuilder sb= new StringBuilder();
+        sb.append("(").append(triple.subjectLemmaGloss()).append(",");
+        sb.append(triple.relationLemmaGloss()).append(",");
+        sb.append(triple.objectLemmaGloss()).append(")");
+        relationInfo.relations.put(sb.toString(),triple.confidence);
+      }
+
+    }
+    return relationInfo;
   }
 
   public static void main(String[] args) throws Exception {
