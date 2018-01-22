@@ -53,19 +53,20 @@ public class OpenIEAnalyzer extends RelationAnalyzer {
       Collection<RelationTriple> triples =
               sentence.get(NaturalLogicAnnotations.RelationTriplesAnnotation.class);
       // Print the triples
-      System.out.println( "TRIPLES:");
+      System.out.println( "\n[relation analyzer:] OpenIE triples:");
       for (RelationTriple triple : triples) {
-        System.out.println(triple.confidence + "\t" +
-                triple.subjectLemmaGloss() + "\t" +
-                triple.relationLemmaGloss() + "\t" +
-                triple.objectLemmaGloss());
+        System.out.println("(" +
+                triple.subjectLemmaGloss() + "," +
+                triple.relationLemmaGloss() + "," +
+                triple.objectLemmaGloss()+ ")");
+        System.out.println("Triple confidence: " + triple.confidence);
         StringBuilder sb= new StringBuilder();
         sb.append("(").append(triple.subjectLemmaGloss()).append(",");
         sb.append(triple.relationLemmaGloss()).append(",");
         sb.append(triple.objectLemmaGloss()).append(")");
         relationInfo.relations.put(sb.toString(),triple.confidence);
       }
-
+      System.out.println( "[relation analyzer:] No more triples \n");
     }
     return relationInfo;
   }
