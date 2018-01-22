@@ -23,9 +23,9 @@ import java.util.*;
  *
  * @author Percy Liang
  *
- *
+ * @modification
+ * -- by emlozin
  * Modified to handle comments and empty lines
- * @maintainer Emilia Lozinska
  */
 
 
