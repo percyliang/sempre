@@ -147,16 +147,16 @@ public class Master {
     try
     {
       ServerSocket serverSocket = new ServerSocket(5000);
-      Socket clientSocket  = serverSocket.accept();
-      BufferedReader input = new BufferedReader(
-              new InputStreamReader(clientSocket.getInputStream()));
-      PrintWriter output = new PrintWriter(clientSocket.getOutputStream(), true);
-      try
-      {
+      while (true) {
+        Socket clientSocket = serverSocket.accept();
+        BufferedReader input = new BufferedReader(
+                new InputStreamReader(clientSocket.getInputStream()));
+        PrintWriter output = new PrintWriter(clientSocket.getOutputStream(), true);
+        try {
           String line;
           while (clientSocket.isConnected()) {
             line = input.readLine();
-            if (line!=null) {
+            if (line != null) {
               LogInfo.logs("%s", line);
               int indent = LogInfo.getIndLevel();
               try {
@@ -170,9 +170,9 @@ public class Master {
               }
             }
           }
-      }
-      catch (IOException e) {
-        throw new RuntimeException(e);
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
       }
     }
     catch (IOException e)
