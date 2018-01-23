@@ -593,8 +593,6 @@ addMode('overnight', 'Overnight semantic parsing', l(
       o('FloatingParser.maxDepth', 11),
       o('Grammar.tags','generate','general', 'geo880'),
       o('SimpleLexicon.inPaths', 'lib/data/overnight/geo880.lexicon'),
-      o('OvernightDerivationPruningComputer.usePredicateDict'),
-      o('OvernightDerivationPruningComputer.predicateDictPath','lib/data/overnight/geo880.predicate.dict'),
     nil),
     'calendar' => l(
       o('Grammar.tags','generate','general'),
