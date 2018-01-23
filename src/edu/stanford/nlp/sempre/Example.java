@@ -92,7 +92,7 @@ public class Example {
                  @JsonProperty("targetFormula") Formula targetFormula,
                  @JsonProperty("targetValue") Value targetValue,
                  @JsonProperty("languageInfo") LanguageInfo languageInfo,
-                 @JsonProperty("languageInfo") RelationInfo relationInfo) {
+                 @JsonProperty("relationInfo") RelationInfo relationInfo) {
     this.id = id;
     this.utterance = utterance;
     this.context = context;
