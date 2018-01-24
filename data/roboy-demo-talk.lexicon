@@ -128,11 +128,19 @@
 {"lexeme": "like", "formula": "FRIEND_OF", "type" : "relationship"}
 {"lexeme": "likes", "formula": "FRIEND_OF", "type" : "relationship"}
 {"lexeme": "born in", "formula": "FROM", "type" : "relationship"}
+{"lexeme": "come from", "formula": "BORN_IN", "type" : "relationship"}
+{"lexeme": "am from", "formula": "BORN_IN", "type" : "relationship"}
+{"lexeme": "is from", "formula": "BORN_IN", "type" : "relationship"}
+{"lexeme": "are from", "formula": "BORN_IN", "type" : "relationship"}
 {"lexeme": "from", "formula": "BORN_IN", "type" : "relationship"}
+{"lexeme": "go to", "formula": "STUDY_AT", "type" : "relationship"}
 {"lexeme": "study", "formula": "STUDY_AT", "type" : "relationship"}
+{"lexeme": "study at", "formula": "STUDY_AT", "type" : "relationship"}
 {"lexeme": "studies", "formula": "STUDY_AT", "type" : "relationship"}
+{"lexeme": "studies at", "formula": "STUDY_AT", "type" : "relationship"}
 {"lexeme": "work for", "formula": "WORK_FOR", "type" : "relationship"}
 {"lexeme": "works for", "formula": "WORK_FOR", "type" : "relationship"}
+{"lexeme": "work as", "formula": "OCCUPIED_AS", "type" : "relationship"}
 {"lexeme": "live in", "formula": "LIVE_IN", "type" : "relationship"}
 {"lexeme": "lives in", "formula": "LIVE_IN", "type" : "relationship"}
 {"lexeme": "belong to", "formula": "MEMBER_OF", "type" : "relationship"}

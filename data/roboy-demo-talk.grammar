@@ -10,7 +10,7 @@
 (rule $Adj ($TOKEN) (FilterPosTagFn token JJ))
 (rule $Prep ($TOKEN) (FilterPosTagFn token IN))
 (rule $Conj ($TOKEN) (FilterPosTagFn token CC))
-(rule $Det ($TOKEN) (FilterPosTagFn token DET))
+(rule $Det ($TOKEN) (FilterPosTagFn token DET DT))
 (rule $To ($TOKEN) (FilterPosTagFn token TO))
 
 (rule $BE ($WordVerb) (SimpleLexiconFn (type verbs)))
@@ -73,8 +73,8 @@
 (rule $NounPhrase ($Noun) (IdentityFn))
 (rule $NounPhrase ($Det $Noun) (SelectFn 1))
 (rule $NounPhrase ($Negation $Noun) (ConcatFn " "))
-(rule $NounPhrase ($AdjPhrase $Noun) (ConcatFn "<-"))
-(rule $NounPhrase ($AdjPhrase $NounPhrase) (ConcatFn "<-"))
+# (rule $NounPhrase ($AdjPhrase $Noun) (ConcatFn "<-"))
+# (rule $NounPhrase ($AdjPhrase $NounPhrase) (ConcatFn "<-"))
 # (rule $NounPhrase ($ProNoun $NounPhrase) (ConcatFn "<-"))
 # (rule $NounPhrase ($ProNoun $NounPhrase) (ConcatFn "<-"))
 (rule $NounAnd (and $NounPhrase) (SelectFn 0))
@@ -87,8 +87,8 @@
 # VerbPhrase
 (rule $VerbPhrase ($VerbPrep) (IdentityFn))
 (rule $VerbPhrase ($Verb) (IdentityFn))
-(rule $VerbPhrase ($VerbTo $VerbPhrase) (SelectFn 1))
 (rule $VerbPhrase ($VerbTo) (IdentityFn))
+(rule $VerbPhrase ($VerbTo $VerbPhrase) (SelectFn 1))
 (rule $VerbPhrase ($Negation $Verb) (ConcatFn " "))
 (rule $VerbPhrase ($Negation $VerbPrep) (ConcatFn " "))
 (rule $VerbPhrase ($Negation $VerbTo) (ConcatFn " "))
@@ -104,15 +104,15 @@
 (rule $ROOT (($PHRASE optional) i am $WordEntity) (SelectFn 0))
 
 # Simple sentences
-(rule $Simple ($ProNoun ($PHRASE optional) $NounPhrase is $PHRASE) (ConcatFn "."))
-#(rule $Simple ($ProNoun (am optional) ($Det optional) $NounPhrase ($PHRASE optional)) (ConcatFn "."))
-#(rule $Simple ($ProNoun (is optional) ($Det optional) $NounPhrase ($PHRASE optional)) (ConcatFn "."))
-#(rule $Simple ($ProNoun (are optional) ($Det optional) $NounPhrase ($PHRASE optional)) (ConcatFn "."))
-#(rule $Simple ($ProNoun $VerbPhrase $TOKEN) (ConcatFn "."))
+(rule $Expr ($ProNoun ($PHRASE optional) $NounPhrase is $PHRASE) (ConcatFn "."))
+#(rule $Expr ($ProNoun am ($Det optional) $NounPhrase ($PHRASE optional)) (ConcatFn "."))
+#(rule $Expr ($ProNoun is ($Det optional) $NounPhrase ($PHRASE optional)) (ConcatFn "."))
+#(rule $Expr ($ProNoun are ($Det optional) $NounPhrase ($PHRASE optional)) (ConcatFn "."))
+(rule $Expr ($ProNoun $VerbPhrase ($Det optional) $TOKEN) (ConcatFn "."))
 
 # General sentence build
 (rule $ROOT ($Verb) (IdentityFn))
-(rule $ROOT ($Simple) (IdentityFn))
+(rule $ROOT ($Expr) (IdentityFn))
 
 (rule $ROOT ($Expr or $Expr) (ConcatFn ";"))
 (rule $ROOT ($Expr and $Expr) (ConcatFn ","))
