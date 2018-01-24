@@ -80,6 +80,19 @@
 {"lexeme": "yeah", "formula": "CONFIRM", "type" : "utterance"}
 {"lexeme": "right", "formula": "CONFIRM", "type" : "utterance"}
 {"lexeme": "confirm", "formula": "CONFIRM", "type" : "utterance"}
+{"lexeme": "good", "formula": "positive", "type" : "utterance"}
+{"lexeme": "well", "formula": "positive", "type" : "utterance"}
+{"lexeme": "nice", "formula": "positive", "type" : "utterance"}
+{"lexeme": "awesome", "formula": "positive", "type" : "utterance"}
+{"lexeme": "bad", "formula": "negative", "type" : "utterance"}
+{"lexeme": "not nice", "formula": "negative", "type" : "utterance"}
+{"lexeme": "not good", "formula": "negative", "type" : "utterance"}
+{"lexeme": "not well", "formula": "negative", "type" : "utterance"}
+
+{"lexeme": "not much", "formula": "quantity:low", "type" : "utterance"}
+{"lexeme": "little", "formula": "quantity:low", "type" : "utterance"}
+{"lexeme": "much", "formula": "quantity:high", "type" : "utterance"}
+{"lexeme": "a lot", "formula": "quantity:high", "type" : "utterance"}
 
 # OPERATOR
 {"lexeme": "i", "formula": "PERSON", "type" : "operator"}
