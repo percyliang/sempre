@@ -45,3 +45,8 @@
     (utterance "i like oceans or i like forests")
     (targetValue (string "(OPERATOR.LIKE.oceans);(OPERATOR.LIKE.forests)"))
 )
+
+(example
+    (utterance "where is california")
+    (targetValue (string "(fb:location.location fb:en.california)"))
+)

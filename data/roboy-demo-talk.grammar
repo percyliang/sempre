@@ -1,18 +1,10 @@
 # Roboy Small Talk
 
-# Lexicon
-#(rule $KnownOper ($ProNoun) (SimpleLexiconFn (type operator)))
-(rule $KnownPhrase ($PHRASE) (SimpleLexiconFn (type utterance)))
-#(rule $KnownVerb ($VerbPrep) (SimpleLexiconFn (type property)))
-#(rule $KnownVerb ($Verb) (SimpleLexiconFn (type property)))
-#(rule $KnownObj ($Noun) (SimpleLexiconFn (type object)))
-(rule $Negation ($PHRASE) (SimpleLexiconFn (type negation)))
-(rule $AdvTime ($PHRASE) (SimpleLexiconFn (type adverb.freq)))
-
 # CORENLP
-(rule $WordVerb ($TOKEN) (FilterPosTagFn token VB VBD VBN VBG VBP VBZ VBD-AUX))
+(rule $WordVerb ($LEMMA_TOKEN) (FilterPosTagFn token VB VBD VBN VBG VBP VBZ VBD-AUX))
 (rule $WordProNoun ($TOKEN) (FilterPosTagFn token PRP PRP$ DT))
 (rule $WordEntity ($TOKEN) (FilterPosTagFn token NNP NNPS))
+(rule $NamedEntity ($PHRASE) (FilterNerSpanFn PERSON ORGANIZATION LOCATION MISC))
 (rule $WordNoun ($TOKEN) (FilterPosTagFn token NN NNS NNP NNPS))
 (rule $WordAdv ($TOKEN) (FilterPosTagFn token RB))
 (rule $Adj ($TOKEN) (FilterPosTagFn token JJ))
@@ -21,34 +13,33 @@
 (rule $Det ($TOKEN) (FilterPosTagFn token DET))
 (rule $To ($TOKEN) (FilterPosTagFn token TO))
 
+(rule $BE ($WordVerb) (SimpleLexiconFn (type verbs)))
 (rule $NUMBER ($TOKEN) (FilterNerSpanFn token NUMBER))
 (rule $PhraseVerbPrep ($WordVerb $Prep) (ConcatFn " "))
 (rule $PhraseVerbTo ($WordVerb $To) (ConcatFn " "))
 (rule $PhraseVerbTo ($To $Verb) (SelectFn 1))
+(rule $Verb ($PhraseVerbTo $Verb) (SelectFn 1))
 
 # Lexicon
-(rule $Verb ($WordVerb) (SimpleLexiconFn (type relationship)))
+(rule $KnownPhrase ($PHRASE) (SimpleLexiconFn (type utterance)))
+(rule $Noun ($WordNoun) (SimpleLexiconFn (type class)))
+(rule $Noun ($PHRASE) (SimpleLexiconFn (type class)))
+(rule $Noun ($NamedEntity) (SimpleLexiconFn (type entity)))
+(rule $Verb ($LEMMA_TOKEN) (SimpleLexiconFn (type relationship)))
+(rule $Verb ($PHRASE) (SimpleLexiconFn (type relationship)))
 (rule $VerbPrep ($PhraseVerbPrep) (SimpleLexiconFn (type relationship)))
 (rule $VerbTo ($PhraseVerbTo) (SimpleLexiconFn (type relationship)))
 (rule $Verb ($WordVerb) (SimpleLexiconFn (type activity)))
 (rule $VerbPrep ($PhraseVerbPrep) (SimpleLexiconFn (type activity)))
 (rule $VerbTo ($PhraseVerbTo) (SimpleLexiconFn (type activity)))
 (rule $ProNoun ($LEMMA_TOKEN) (SimpleLexiconFn (type operator)))
-(rule $Noun ($LEMMA_TOKEN) (SimpleLexiconFn (type class)))
-(rule $Noun ($TOKEN) (SimpleLexiconFn (type class)))
 (rule $Adv ($TOKEN) (SimpleLexiconFn (type adverb.freq)))
+(rule $Verb ($WordVerb) (LexiconFn binary))
+(rule $Verb ($PhraseVerbPrep) (LexiconFn binary))
+(rule $Noun ($WordNoun) (LexiconFn unary))
 
-(rule $Verb ($WordVerb) (IdentityFn))
-(rule $VerbPrep ($PhraseVerbPrep) (IdentityFn))
-(rule $VerbTo ($PhraseVerbTo) (IdentityFn))
-(rule $ProNoun ($WordProNoun) (IdentityFn))
-(rule $Noun ($WordNoun) (IdentityFn))
-(rule $Adv ($WordAdv) (IdentityFn))
-(rule $ROOT ($Verb) (IdentityFn))
-
-# Inter
+# Inter - wow, uhm etc.
 (rule $Inter ($TOKEN) (FilterPosTagFn token UH))
-#(rule $IgnInter ($Inter) (ConstantFn null))
 (rule $ProNoun ($Inter $ProNoun) (SelectFn 1))
 (rule $Prep ($Inter $Prep) (SelectFn 1))
 (rule $Conj ($Inter $Conj) (SelectFn 1))
@@ -71,8 +62,8 @@
 # AdjPhrase
 (rule $AdjPhrase ($Adj) (IdentityFn))
 (rule $AdjPhrase ($Negation $Adj) (ConcatFn " "))
-(rule $AdjAnd (and $AdjPhrase) (SelectFn 1))
-(rule $AdjOr (or $AdjPhrase) (SelectFn 1))
+(rule $AdjAnd (and $AdjPhrase) (SelectFn 0))
+(rule $AdjOr (or $AdjPhrase) (SelectFn 0))
 (rule $AdjPhrase ($AdjAnd $AdjPhrase) (ConcatFn ","))
 (rule $AdjPhrase ($AdjOr $AdjPhrase) (ConcatFn ";"))
 (rule $AdjPhrase ($AdjPhrase $AdjPhrase) (ConcatFn ","))
@@ -84,91 +75,44 @@
 (rule $NounPhrase ($Negation $Noun) (ConcatFn " "))
 (rule $NounPhrase ($AdjPhrase $Noun) (ConcatFn "<-"))
 (rule $NounPhrase ($AdjPhrase $NounPhrase) (ConcatFn "<-"))
-(rule $NounPhrase ($ProNoun $NounPhrase) (ConcatFn "<-"))
-(rule $NounPhrase ($ProNoun $NounPhrase) (ConcatFn "<-"))
+# (rule $NounPhrase ($ProNoun $NounPhrase) (ConcatFn "<-"))
+# (rule $NounPhrase ($ProNoun $NounPhrase) (ConcatFn "<-"))
 (rule $NounAnd (and $NounPhrase) (SelectFn 0))
 (rule $NounOr (or $NounPhrase) (SelectFn 0))
 (rule $NounPhrase ($NounAnd $NounPhrase) (ConcatFn ","))
 (rule $NounPhrase ($NounOr $NounPhrase) (ConcatFn ";"))
 (rule $NounPhrase ($NounPhrase $NounPhrase) (ConcatFn " "))
-(rule $WordExpr ($NounPhrase) (IdentityFn))
+#(rule $WordExpr ($NounPhrase) (IdentityFn))
 
 # VerbPhrase
+(rule $VerbPhrase ($VerbPrep) (IdentityFn))
 (rule $VerbPhrase ($Verb) (IdentityFn))
 (rule $VerbPhrase ($VerbTo $VerbPhrase) (SelectFn 1))
 (rule $VerbPhrase ($VerbTo) (IdentityFn))
 (rule $VerbPhrase ($Negation $Verb) (ConcatFn " "))
 (rule $VerbPhrase ($Negation $VerbPrep) (ConcatFn " "))
 (rule $VerbPhrase ($Negation $VerbTo) (ConcatFn " "))
-(rule $VerbPhrase ($VerbPrep) (IdentityFn))
 #(rule $VerbPhrase ($VerbPhrase $Adv) (SelectFn 0))
 (rule $VerbPhrase ($VerbPhrase $VerbPhrase) (ConcatFn "+"))
 (rule $VerbPhrase ($AdvTime $VerbPhrase) (ConcatFn "<-"))
 (rule $VerbPhrase ($VerbPhrase $AdvTime) (ConcatFn "->"))
 (rule $WordExpr ($VerbPhrase) (IdentityFn))
 
-# Simple sentences
-(rule $Simple ($ProNoun $VerbPhrase $NounPhrase) (ConcatFn "."))
-(rule $Simple ($ProNoun $VerbPhrase $AdjPhrase) (ConcatFn "."))
-(rule $Simple ($ProNoun $VerbPhrase $VerbPhrase) (ConcatFn "."))
-(rule $Simple ($NounPhrase $VerbPhrase $AdjPhrase) (ConcatFn "."))
-(rule $Simple ($NounPhrase $VerbPhrase $ProNoun) (ConcatFn "."))
-(rule $Simple ($NounPhrase $VerbPhrase $NounPhrase) (ConcatFn "."))
-(rule $Simple ($ProNoun $VerbPhrase $ProNoun) (ConcatFn "."))
-(rule $Simple ($Simple $AdvTime) (ConcatFn ")->("))
-(rule $Simple ($AdvTime $Simple) (ConcatFn ")<-("))
-
-# Simple questions
-(rule $Quest ($PHRASE) (SimpleLexiconFn (type question)))
-(rule $Quest ($LEMMA_TOKEN) (SimpleLexiconFn (type question)))
-(rule $QuestAnd ($Quest and) (SelectFn 0))
-(rule $QuestOr ($Quest or) (SelectFn 0))
-(rule $Quest ($Quest $Quest) (SelectFn 0))
-(rule $Quest ($QuestAnd $Quest) (ConcatFn ","))
-(rule $Quest ($QuestOr $Quest) (ConcatFn ";"))
-(rule $SimpleQuest ($Quest $Simple) (ConcatFn "."))
-(rule $SimpleQuest ($Quest $VerbPhrase $NounPhrase) (ConcatFn "."))
-(rule $SimpleQuest ($Quest $VerbPhrase $AdjPhrase) (ConcatFn "."))
-(rule $SimpleQuest ($Quest $VerbPhrase $ProNoun) (ConcatFn "."))
-(rule $SimpleQuest ($Quest $VerbPhrase $ProNoun $VerbPhrase) (ConcatFn "."))
-(rule $SimpleQuest ($Quest $VerbPhrase $NounPhrase $AdjPhrase) (ConcatFn "."))
-(rule $SimpleQuest ($Quest $VerbPhrase $NounPhrase $VerbPhrase) (ConcatFn "."))
-(rule $SimpleQuest ($Quest $VerbPhrase $ProNoun $AdjPhrase) (ConcatFn "."))
-
-# Sentence
-(rule $Sentence ($SimpleQuest) (IdentityFn))
-(rule $Sentence ($Simple) (IdentityFn))
-
-# Coordinating conjunctions
-(rule $ConjOr (or $Sentence) (SelectFn 0))
-(rule $ConjMC ($Conj $Sentence) (SelectFn 1))
-(rule $Expr ($Sentence $ConjOr) (ConcatFn ");("))
-(rule $Expr ($Sentence $ConjMC) (ConcatFn ") ("))
-
-# Subordinating conjunctions I
-(rule $SubTime ($PHRASE) (SimpleLexiconFn (type subordinate.time)))
-(rule $SubPlace ($PHRASE) (SimpleLexiconFn (type subordinate.place)))
-(rule $SubEffect ($PHRASE) (SimpleLexiconFn (type subordinate.effect)))
-(rule $SubCause ($PHRASE) (SimpleLexiconFn (type subordinate.cause)))
-
-# Subordinating conjunctions II
-(rule $SubSen ($SubTime $Sentence) (ConcatFn ":"))
-(rule $SubSen ($SubPlace $Sentence) (ConcatFn ":"))
-(rule $SubSen ($SubEffect $Sentence) (ConcatFn ":"))
-(rule $SubSen ($SubCause $Sentence) (ConcatFn ":"))
-(rule $Expr ($Sentence $SubSen) (ConcatFn ")->("))
-(rule $Expr ($SubSen $Sentence) (ConcatFn ")<-("))
-
-# Expressions
-(rule $Expr ($WordExpr) (IdentityFn))
-(rule $Expr ($KnownPhrase) (IdentityFn))
-(rule $Expr ($SimpleQuest) (IdentityFn))
-(rule $Expr ($Sentence) (IdentityFn))
-
-(rule $Name ($PHRASE) (IdentityFn))
-
-# General sentence build
+# Name stuff
 (rule $ROOT (($PHRASE optional) my name is $Name) (SelectFn 0))
 (rule $ROOT (($PHRASE optional) call me $Name) (SelectFn 0))
 (rule $ROOT (($PHRASE optional) i am $WordEntity) (SelectFn 0))
-(rule $ROOT ($Expr) (IdentityFn))
+
+# Simple sentences
+(rule $Simple ($ProNoun ($PHRASE optional) $NounPhrase is $PHRASE) (ConcatFn "."))
+#(rule $Simple ($ProNoun (am optional) ($Det optional) $NounPhrase ($PHRASE optional)) (ConcatFn "."))
+#(rule $Simple ($ProNoun (is optional) ($Det optional) $NounPhrase ($PHRASE optional)) (ConcatFn "."))
+#(rule $Simple ($ProNoun (are optional) ($Det optional) $NounPhrase ($PHRASE optional)) (ConcatFn "."))
+#(rule $Simple ($ProNoun $VerbPhrase $TOKEN) (ConcatFn "."))
+
+# General sentence build
+(rule $ROOT ($Verb) (IdentityFn))
+(rule $ROOT ($Simple) (IdentityFn))
+
+(rule $ROOT ($Expr or $Expr) (ConcatFn ";"))
+(rule $ROOT ($Expr and $Expr) (ConcatFn ","))
