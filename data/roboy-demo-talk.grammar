@@ -99,8 +99,8 @@
 (rule $WordExpr ($VerbPhrase) (IdentityFn))
 
 # Name stuff
-(rule $ROOT (($PHRASE optional) my name is $Name) (SelectFn 0))
-(rule $ROOT (($PHRASE optional) call me $Name) (SelectFn 0))
+(rule $ROOT (($PHRASE optional) my name is $PHRASE) (SelectFn 0))
+(rule $ROOT (($PHRASE optional) call me $PHRASE) (SelectFn 0))
 (rule $ROOT (($PHRASE optional) i am $WordEntity) (SelectFn 0))
 
 # Simple sentences

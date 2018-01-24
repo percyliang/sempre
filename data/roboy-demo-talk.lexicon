@@ -74,7 +74,12 @@
 {"lexeme": "good day", "formula": "GREETING", "type" : "utterance"}
 {"lexeme": "good evening", "formula": "GREETING", "type" : "utterance"}
 {"lexeme": "no", "formula": "DECLINE", "type" : "utterance"}
+{"lexeme": "nope", "formula": "DECLINE", "type" : "utterance"}
+{"lexeme": "nah", "formula": "DECLINE", "type" : "utterance"}
 {"lexeme": "yes", "formula": "CONFIRM", "type" : "utterance"}
+{"lexeme": "yeah", "formula": "CONFIRM", "type" : "utterance"}
+{"lexeme": "right", "formula": "CONFIRM", "type" : "utterance"}
+{"lexeme": "confirm", "formula": "CONFIRM", "type" : "utterance"}
 
 # OPERATOR
 {"lexeme": "i", "formula": "PERSON", "type" : "operator"}
