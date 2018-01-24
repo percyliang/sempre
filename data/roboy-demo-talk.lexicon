@@ -144,6 +144,7 @@
 {"lexeme": "studies", "formula": "STUDY_AT", "type" : "relationship"}
 {"lexeme": "studies at", "formula": "STUDY_AT", "type" : "relationship"}
 {"lexeme": "work for", "formula": "WORK_FOR", "type" : "relationship"}
+{"lexeme": "work at", "formula": "WORK_FOR", "type" : "relationship"}
 {"lexeme": "works for", "formula": "WORK_FOR", "type" : "relationship"}
 {"lexeme": "work as", "formula": "OCCUPIED_AS", "type" : "relationship"}
 {"lexeme": "live in", "formula": "LIVE_IN", "type" : "relationship"}
