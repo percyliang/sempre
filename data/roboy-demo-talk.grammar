@@ -34,9 +34,9 @@
 (rule $VerbTo ($PhraseVerbTo) (SimpleLexiconFn (type activity)))
 (rule $ProNoun ($LEMMA_TOKEN) (SimpleLexiconFn (type operator)))
 (rule $Adv ($TOKEN) (SimpleLexiconFn (type adverb.freq)))
-(rule $Verb ($WordVerb) (LexiconFn binary))
-(rule $Verb ($PhraseVerbPrep) (LexiconFn binary))
-(rule $Noun ($WordNoun) (LexiconFn unary))
+#(rule $Verb ($WordVerb) (LexiconFn binary))
+#(rule $Verb ($PhraseVerbPrep) (LexiconFn binary))
+#(rule $Noun ($WordNoun) (LexiconFn unary))
 
 # Inter - wow, uhm etc.
 (rule $Inter ($TOKEN) (FilterPosTagFn token UH))
@@ -116,3 +116,17 @@
 
 (rule $ROOT ($Expr or $Expr) (ConcatFn ";"))
 (rule $ROOT ($Expr and $Expr) (ConcatFn ","))
+
+(rule $Expr ($PHRASE) (NumberFn))
+(rule $Operator (plus) (ConstantFn (lambda y (lambda x (call + (var x) (var y))))))
+(rule $Operator (times) (ConstantFn (lambda y (lambda x (call * (var x) (var y))))))
+(rule $Operator (divided by) (ConstantFn (lambda y (lambda x (call / (var x) (var y))))))
+(rule $Operator (multiplied by) (ConstantFn (lambda y (lambda x (call * (var x) (var y))))))
+(rule $Function (cosine of) (ConstantFn (lambda x (call java.lang.Math.cos (var x)))))
+(rule $Function (sine of) (ConstantFn (lambda x (call java.lang.Math.sin (var x)))))
+(rule $Function (square (root optional) of) (ConstantFn (lambda x (call java.lang.Math.sqrt (var x)))))
+(rule $Partial ($Operator $Expr) (JoinFn forward))
+(rule $Expr ($Expr $Partial) (JoinFn backward))
+(rule $Expr ($Function $Expr) (JoinFn forward))
+
+(rule $ROOT ((what optional) (is optional) $Expr (? optional)) (IdentityFn))
