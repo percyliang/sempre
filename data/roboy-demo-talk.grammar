@@ -132,4 +132,4 @@
 (rule $Expr ($Expr $Partial) (JoinFn backward))
 (rule $Expr ($Function $Expr) (JoinFn forward))
 
-(rule $ROOT ((what optional) (is optional) $Expr (? optional)) (IdentityFn))
+(rule $ROOT ((what optional) (is optional) ($Det optional) $Expr (? optional)) (IdentityFn))
