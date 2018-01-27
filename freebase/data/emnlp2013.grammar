@@ -115,7 +115,7 @@
 
 (when compositional
   (rule $Set ($BaseSet) (IdentityFn))
-  
+
   ### Combine set and binary
   (when join
     (rule $Set ($Binary ($Padding optional) $Set) (JoinFn binary,unary unaryCanBeArg0 unaryCanBeArg1))

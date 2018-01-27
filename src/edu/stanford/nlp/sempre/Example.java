@@ -241,6 +241,7 @@ public class Example {
     if (targetValue != null)
       LogInfo.logs("targetValue: %s", targetValue);
     LogInfo.logs("Dependency children: %s", languageInfo.dependencyChildren);
+    LogInfo.logs("Extracted relations: %s", relationInfo.relations.toString());
     LogInfo.end_track();
   }
 
