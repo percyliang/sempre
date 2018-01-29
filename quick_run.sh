@@ -1,28 +1,16 @@
-if  [[ $1 = "freebase" ]]; then
-    ./run @mode=simple -Grammar.inPaths data/roboy-freebase-talk.grammar \
+if [[ $1 = "web" ]]; then
+    ./run @mode=simple -Grammar.inPaths data/roboy-dbpedia.grammar \
 	-FeatureExtractor.featureDomains rule \
-	-Dataset.inPaths train:data/roboy-talk.examples \
+	-Dataset.inPaths train:data/roboy-dbpedia.examples \
 	-Learner.maxTrainIters 1 \
 	-languageAnalyzer corenlp.CoreNLPAnalyzer \
-	-SimpleLexicon.inPaths freebase/data/tutorial-freebase.lexicon \
-	-server true
-elif [[ $1 = "demo" ]]; then
-    ./run @mode=socket -Grammar.inPaths data/roboy-demo-talk.grammar \
-	-FeatureExtractor.featureDomains rule \
-	-Dataset.inPaths train:data/roboy-talk.examples \
-	-Learner.maxTrainIters 1 \
-	-languageAnalyzer corenlp.CoreNLPAnalyzer \
-	-SimpleLexicon.inPaths data/roboy-demo-talk.lexicon \
+	-SimpleLexicon.inPaths data/roboy-dbpedia.lexicon \
 	-server true
 else
-    ./run @mode=simple -Grammar.inPaths data/roboy-talk.grammar \
-	-FeatureExtractor.featureDomains rule \
-	-Dataset.inPaths train:data/roboy-talk.examples \
-	-Learner.maxTrainIters 1 \
-	-languageAnalyzer corenlp.CoreNLPAnalyzer \
-	-SimpleLexicon.inPaths data/roboy-demo-talk.lexicon \
-	-server true
+    ./run @mode=simple -Grammar.inPaths data/roboy-dbpedia.grammar \
+  -FeatureExtractor.featureDomains rule \
+  -Dataset.inPaths train:data/roboy-dbpedia.examples \
+  -Learner.maxTrainIters 1 \
+  -languageAnalyzer corenlp.CoreNLPAnalyzer \
+  -SimpleLexicon.inPaths data/roboy-dbpedia.lexicon
 fi
-
-
-

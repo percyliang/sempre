@@ -278,6 +278,11 @@ public class Example {
         tree.addChild(LispTree.proto.newList("nerTags", Joiner.on(' ').join(languageInfo.nerTags)));
     }
 
+    if (relationInfo != null) {
+      if (relationInfo.relations != null)
+        tree.addChild(LispTree.proto.newList("relations", LispTree.proto.newList(relationInfo.relations)));
+    }
+
     if (evaluation != null)
       tree.addChild(LispTree.proto.newList("evaluation", evaluation.toLispTree()));
 

@@ -42,12 +42,16 @@ public class CoreNLPAnalyzer extends LanguageAnalyzer {
   // for isContent which looks at posTag != "MD" && lemma != "be" && lemma !=
   // "have"
   // Need to update TextToTextMatcher
-  private static final String[] AUX_VERB_ARR = new String[] {"is", "are", "was",
-    "were", "am", "be", "been", "will", "shall", "have", "has", "had",
-    "would", "could", "should", "do", "does", "did", "can", "may", "might",
-    "must", "seem"};
+//  private static final String[] AUX_VERB_ARR = new String[] {"is", "are", "was",
+//    "were", "am", "be", "been", "will", "shall", "have", "has", "had",
+//    "would", "could", "should", "do", "does", "did", "can", "may", "might",
+//    "must", "seem"};
+//  private static final Set<String> AUX_VERBS = new HashSet<String>(Arrays.asList(AUX_VERB_ARR));
+//  private static final String AUX_VERB_TAG = "VBD-AUX";
+
+  private static final String[] AUX_VERB_ARR = new String[] {"is", "are", "am"};
   private static final Set<String> AUX_VERBS = new HashSet<String>(Arrays.asList(AUX_VERB_ARR));
-  private static final String AUX_VERB_TAG = "VBD-AUX";
+  private static final String AUX_VERB_TAG = "BE";
 
   public static StanfordCoreNLP pipeline = null;
 
