@@ -146,40 +146,22 @@ public class Master {
     Session session = getSession("stdin");
     try
     {
+
       ServerSocket serverSocket = new ServerSocket(5000);
-      Socket clientSocket  = serverSocket.accept();
-      BufferedReader input = new BufferedReader(
-              new InputStreamReader(clientSocket.getInputStream()));
-      PrintWriter output = new PrintWriter(clientSocket.getOutputStream(), true);
-      try
-      {
-          String line;
-          while (clientSocket.isConnected()) {
-            line = input.readLine();
-            if (line!=null) {
-              LogInfo.logs("%s", line);
-              int indent = LogInfo.getIndLevel();
-              try {
-                Response res = processQuery(session, line);
-                System.out.println(res.getAnswer());
-                output.println(summaryString(res));
-              } catch (Throwable t) {
-                while (LogInfo.getIndLevel() > indent)
-                  LogInfo.end_track();
-                t.printStackTrace();
-              }
-            }
-          }
-      }
-      catch (IOException e) {
-        throw new RuntimeException(e);
-      }
+      while (true) {
+        Socket clientSocket = serverSocket.accept();
+        Runnable connectionHandler = new SocketConnectionHandler(clientSocket, session, this);
+        new Thread(connectionHandler).start();
+      
+     }
     }
     catch (IOException e)
     {
       e.printStackTrace();
     }
   }
+
+
 
   public void runInteractivePrompt() {
     Session session = getSession("stdin");

@@ -1,0 +1,180 @@
+{"lexeme": "be", "formula": "BE", "type" : "verb"}
+
+# NEGATION
+{"lexeme": "do not", "formula": "fb:not", "type" : "negation"}
+{"lexeme": "dont", "formula": "fb:not", "type" : "negation"}
+{"lexeme": "don't", "formula": "fb:not", "type" : "negation"}
+{"lexeme": "does not", "formula": "fb:not", "type" : "negation"}
+{"lexeme": "doesnt", "formula": "fb:not", "type" : "negation"}
+{"lexeme": "doesn't", "formula": "fb:not", "type" : "negation"}
+{"lexeme": "not", "formula": "fb:not", "type" : "negation"}
+{"lexeme": "not really", "formula": "fb:not", "type" : "negation"}
+{"lexeme": "neither", "formula": "fb:not", "type" : "negation"}
+{"lexeme": "none of", "formula": "fb:not", "type" : "negation"}
+{"lexeme": "nor", "formula": "fb:not", "type" : "negation"}
+
+# ADVERB
+{"lexeme": "often", "formula": "often", "type" : "adverb.freq"}
+{"lexeme": "always", "formula": "always", "type" : "adverb.freq"}
+{"lexeme": "sometimes", "formula": "sometimes", "type" : "adverb.freq"}
+{"lexeme": "never", "formula": "never", "type" : "adverb.freq"}
+
+# SUBORDINATE
+{"lexeme": "when", "formula": "WHEN", "type" : "subordinate.time"}
+{"lexeme": "whenever", "formula": "WHEN", "type" : "subordinate.time"}
+{"lexeme": "as", "formula": "WHEN", "type" : "subordinate.time"}
+{"lexeme": "once", "formula": "WHEN", "type" : "subordinate.time"}
+{"lexeme": "while", "formula": "WHILE", "type" : "subordinate.time"}
+{"lexeme": "after", "formula": "AFTER", "type" : "subordinate.time"}
+{"lexeme": "before", "formula": "BEFORE", "type" : "subordinate.time"}
+{"lexeme": "since", "formula": "SINCE", "type" : "subordinate.time"}
+{"lexeme": "until", "formula": "UNTIL", "type" : "subordinate.time"}
+
+{"lexeme": "where", "formula": "WHERE", "type" : "subordinate.place"}
+{"lexeme": "whereas", "formula": "WHERE", "type" : "subordinate.place"}
+{"lexeme": "wherever", "formula": "WHERE", "type" : "subordinate.place"}
+
+{"lexeme": "although", "formula": "ALTHOUGH", "type" : "subordinate.cause"}
+{"lexeme": "even though", "formula": "ALTHOUGH", "type" : "subordinate.cause"}
+{"lexeme": "though", "formula": "ALTHOUGH", "type" : "subordinate.cause"}
+{"lexeme": "unless", "formula": "UNLESS", "type" : "subordinate.cause"}
+{"lexeme": "provided that", "formula": "CONDITION", "type" : "subordinate.cause"}
+{"lexeme": "because", "formula": "CONDITION", "type" : "subordinate.cause"}
+{"lexeme": "if", "formula": "CONDITION", "type" : "subordinate.cause"}
+{"lexeme": "even if", "formula": "CONDITION", "type" : "subordinate.cause"}
+{"lexeme": "whether", "formula": "WHETHER", "type" : "subordinate.cause"}
+
+{"lexeme": "in order that", "formula": "EFFECT", "type" : "subordinate.effect"}
+{"lexeme": "so that", "formula": "EFFECT", "type" : "subordinate.effect"}
+{"lexeme": "that", "formula": "EFFECT", "type" : "subordinate.effect"}
+{"lexeme": "this is why", "formula": "EFFECT", "type" : "subordinate.effect"}
+
+# QUESTION
+{"lexeme": "who", "formula": "fb:people.person", "type" : "unary"}
+{"lexeme": "who", "formula": "fb:organization.organization", "type" : "unary"}
+{"lexeme": "who", "formula": "fb:organization.company", "type" : "unary"}
+{"lexeme": "where", "formula": "!fb:location.location", "type" : "unary"}
+{"lexeme": "where", "formula": "!fb:organization.organization", "type" : "unary"}
+{"lexeme": "where", "formula": "!fb:education.educational_institution", "type" : "unary"}
+{"lexeme": "when", "formula": "!fb:type.datetime", "type" : "unary"}
+{"lexeme": "date", "formula": "!fb:type.datetime", "type" : "unary"}
+{"lexeme": "year", "formula": "!fb:type.datetime", "type" : "unary"}
+{"lexeme": "day", "formula": "!fb:type.datetime", "type" : "unary"}
+{"lexeme": "why", "formula": "!fb:type.event", "type" : "unary"}
+{"lexeme": "what for", "formula": "fb:type.event", "type" : "unary"}
+{"lexeme": "do", "formula": "question:activity", "type" : "question"}
+{"lexeme": "does", "formula": "question:activity", "type" : "question"}
+
+# UTTERANCES
+{"lexeme": "hello", "formula": "GREETING", "type" : "utterance"}
+{"lexeme": "hi", "formula": "GREETING", "type" : "utterance"}
+{"lexeme": "howdy", "formula": "GREETING", "type" : "utterance"}
+{"lexeme": "greetings", "formula": "GREETING", "type" : "utterance"}
+{"lexeme": "good morning", "formula": "GREETING", "type" : "utterance"}
+{"lexeme": "good day", "formula": "GREETING", "type" : "utterance"}
+{"lexeme": "good evening", "formula": "GREETING", "type" : "utterance"}
+{"lexeme": "no", "formula": "DECLINE", "type" : "utterance"}
+{"lexeme": "nope", "formula": "DECLINE", "type" : "utterance"}
+{"lexeme": "nah", "formula": "DECLINE", "type" : "utterance"}
+{"lexeme": "yes", "formula": "CONFIRM", "type" : "utterance"}
+{"lexeme": "yeah", "formula": "CONFIRM", "type" : "utterance"}
+{"lexeme": "right", "formula": "CONFIRM", "type" : "utterance"}
+{"lexeme": "confirm", "formula": "CONFIRM", "type" : "utterance"}
+{"lexeme": "good", "formula": "positive", "type" : "utterance"}
+{"lexeme": "well", "formula": "positive", "type" : "utterance"}
+{"lexeme": "nice", "formula": "positive", "type" : "utterance"}
+{"lexeme": "awesome", "formula": "positive", "type" : "utterance"}
+{"lexeme": "bad", "formula": "negative", "type" : "utterance"}
+{"lexeme": "not nice", "formula": "negative", "type" : "utterance"}
+{"lexeme": "not good", "formula": "negative", "type" : "utterance"}
+{"lexeme": "not well", "formula": "negative", "type" : "utterance"}
+
+{"lexeme": "not much", "formula": "quantity:low", "type" : "utterance"}
+{"lexeme": "little", "formula": "quantity:low", "type" : "utterance"}
+{"lexeme": "much", "formula": "quantity:high", "type" : "utterance"}
+{"lexeme": "a lot", "formula": "quantity:high", "type" : "utterance"}
+
+# OPERATOR
+{"lexeme": "i", "formula": "PERSON", "type" : "operator"}
+{"lexeme": "me", "formula": "PERSON", "type" : "operator"}
+{"lexeme": "my", "formula": "PERSON", "type" : "operator"}
+{"lexeme": "mine", "formula": "PERSON", "type" : "operator"}
+{"lexeme": "you", "formula": "ROBOY", "type" : "operator"}
+{"lexeme": "your", "formula": "ROBOY", "type" : "operator"}
+{"lexeme": "yours", "formula": "ROBOY", "type" : "operator"}
+
+{"lexeme": "california", "formula": "fb:en.california", "type" : "entity"}
+{"lexeme": "ohio", "formula": "fb:en.ohio", "type" : "entity"}
+{"lexeme": "seattle", "formula": "fb:en.seattle", "type" : "entity"}
+{"lexeme": "san_francisco", "formula": "fb:en.san_francisco", "type" : "entity"}
+{"lexeme": "los_angeles", "formula": "fb:en.los_angeles", "type" : "entity"}
+{"lexeme": "roboy", "formula": "fb:en.roboy", "type" : "entity"}
+
+# CLASSES
+{"lexeme": "city", "formula": "CITY", "type" : "class"}
+{"lexeme": "company", "formula": "COMPANY", "type" : "class"}
+{"lexeme": "continent", "formula": "CONTINENT", "type" : "class"}
+{"lexeme": "country", "formula": "COUNTRY", "type" : "class"}
+{"lexeme": "division", "formula": "DIVISION", "type" : "class"}
+{"lexeme": "hobby", "formula": "HAS_HOBBY", "type" : "class"}
+{"lexeme": "employer", "formula": "WORK_FOR", "type" : "class"}
+{"lexeme": "location", "formula": "LIVE_IN", "type" : "class"}
+{"lexeme": "home", "formula": "LIVE_IN", "type" : "class"}
+{"lexeme": "movie", "formula": "FAVORITE_MOVIE", "type" : "class"}
+{"lexeme": "object", "formula": "OBJECT", "type" : "class"}
+{"lexeme": "person", "formula": "PERSON", "type" : "class"}
+{"lexeme": "robot", "formula": "ROBOT", "type" : "class"}
+{"lexeme": "university", "formula": "STUDY_AT", "type" : "class"}
+{"lexeme": "child", "formula": "CHILD_OF", "type" : "class"}
+{"lexeme": "friend", "formula": "FRIEND_OF", "type" : "class"}
+{"lexeme": "friend of", "formula": "FRIEND_OF", "type" : "class"}
+{"lexeme": "name", "formula": "NAME", "type" : "class"}
+{"lexeme": "member", "formula": "MEMBER_OF", "type" : "class"}
+{"lexeme": "member of", "formula": "MEMBER_OF", "type" : "class"}
+{"lexeme": "part", "formula": "PART_OF", "type" : "class"}
+{"lexeme": "relative", "formula": "RELATIVE_OF", "type" : "class"}
+
+# ACTIVITY
+{"lexeme": "born in", "formula": "BIRTH_YEAR", "type" : "property"}
+{"lexeme": "years old", "formula": "AGE", "type" : "property"}
+{"lexeme": "swimming", "formula": "SWIMMING", "type" : "property"}
+{"lexeme": "reading", "formula": "READING", "type" : "property"}
+
+# RELATIONSHIPS
+{"lexeme": "like", "formula": "HAS_HOBBY", "type" : "relationship"}
+{"lexeme": "likes", "formula": "HAS_HOBBY", "type" : "relationship"}
+{"lexeme": "like", "formula": "FRIEND_OF", "type" : "relationship"}
+{"lexeme": "likes", "formula": "FRIEND_OF", "type" : "relationship"}
+{"lexeme": "born in", "formula": "FROM", "type" : "relationship"}
+{"lexeme": "come from", "formula": "BORN_IN", "type" : "relationship"}
+{"lexeme": "am from", "formula": "BORN_IN", "type" : "relationship"}
+{"lexeme": "is from", "formula": "BORN_IN", "type" : "relationship"}
+{"lexeme": "are from", "formula": "BORN_IN", "type" : "relationship"}
+{"lexeme": "from", "formula": "BORN_IN", "type" : "relationship"}
+{"lexeme": "go to", "formula": "STUDY_AT", "type" : "relationship"}
+{"lexeme": "study", "formula": "STUDY_AT", "type" : "relationship"}
+{"lexeme": "study at", "formula": "STUDY_AT", "type" : "relationship"}
+{"lexeme": "studies", "formula": "STUDY_AT", "type" : "relationship"}
+{"lexeme": "studies at", "formula": "STUDY_AT", "type" : "relationship"}
+{"lexeme": "work for", "formula": "WORK_FOR", "type" : "relationship"}
+{"lexeme": "work at", "formula": "WORK_FOR", "type" : "relationship"}
+{"lexeme": "works for", "formula": "WORK_FOR", "type" : "relationship"}
+{"lexeme": "work as", "formula": "OCCUPIED_AS", "type" : "relationship"}
+{"lexeme": "live in", "formula": "LIVE_IN", "type" : "relationship"}
+{"lexeme": "lives in", "formula": "LIVE_IN", "type" : "relationship"}
+{"lexeme": "belong to", "formula": "MEMBER_OF", "type" : "relationship"}
+
+# PROPERTIES
+{"lexeme": "am", "formula": "NAME:HAS_VALUE", "type" : "property"}
+{"lexeme": "am", "formula": "PROFESSION:HAS_VALUE", "type" : "property"}
+{"lexeme": "am", "formula": "HAS_PROPERTY", "type" : "property"}
+{"lexeme": "was", "formula": "PAST_PROPERTY", "type" : "property"}
+{"lexeme": "is", "formula": "HAS_VALUE", "type" : "property"}
+{"lexeme": "is", "formula": "HAS_PROPERTY", "type" : "property"}
+{"lexeme": "are", "formula": "HAS_VALUE", "type" : "property"}
+
+# ADJECTIVES
+{"lexeme": "blue", "formula": "BLUE", "type" : "adjective"}
+{"lexeme": "green", "formula": "GREEN", "type" : "adjective"}
+{"lexeme": "yellow", "formula": "YELLOW", "type" : "adjective"}
+{"lexeme": "nice", "formula": "NICE", "type" : "adjective"}

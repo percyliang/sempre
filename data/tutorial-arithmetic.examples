@@ -1,4 +1,0 @@
-(example
-  (utterance "three and four")
-  (targetValue (number 7))
-)
