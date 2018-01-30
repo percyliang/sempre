@@ -1,0 +1,9 @@
+(example
+   (utterance "the architect is gothic")
+   (targetValue (string dbpedia:Architect,dbpedia:architecturalStyle,resource:Gothic_architecture))
+)
+
+(example
+   (utterance "the the architect is very nice and not warm")
+   (targetValue (string "dbpedia:Architect,(nice;(not warm))"))
+)

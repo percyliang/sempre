@@ -241,6 +241,7 @@ public class Example {
     if (targetValue != null)
       LogInfo.logs("targetValue: %s", targetValue);
     LogInfo.logs("Dependency children: %s", languageInfo.dependencyChildren);
+    LogInfo.logs("Extracted relations: %s", relationInfo.relations.toString());
     LogInfo.end_track();
   }
 
@@ -275,6 +276,11 @@ public class Example {
         tree.addChild(LispTree.proto.newList("posTags", Joiner.on(' ').join(languageInfo.posTags)));
       if (languageInfo.nerTags != null)
         tree.addChild(LispTree.proto.newList("nerTags", Joiner.on(' ').join(languageInfo.nerTags)));
+    }
+
+    if (relationInfo != null) {
+      if (relationInfo.relations != null)
+        tree.addChild(LispTree.proto.newList("relations", LispTree.proto.newList(relationInfo.relations)));
     }
 
     if (evaluation != null)
