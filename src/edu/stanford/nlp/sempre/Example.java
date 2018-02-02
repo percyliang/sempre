@@ -40,10 +40,10 @@ public class Example {
   @JsonProperty public Value targetValue;      // Denotation (e.g., answer)
 
   //// Information after preprocessing (e.g., tokenization, POS tagging, NER, syntactic parsing, etc.).
-  public LanguageInfo languageInfo = null;
+  @JsonProperty public LanguageInfo languageInfo = null;
 
   //// Information after Information Extraction step.
-  public RelationInfo relationInfo = null;
+  @JsonProperty public RelationInfo relationInfo = null;
 
   //// Output of the parser.
 
@@ -128,13 +128,13 @@ public class Example {
   // Return a string representing the tokens between start and end.
   public List<String> getTokens() { return languageInfo.tokens; }
   public List<String> getLemmaTokens() { return languageInfo.lemmaTokens; }
+  public List<String> getPosTag() { return languageInfo.posTags; }
+  public Map<String,Double> getRelation() { return relationInfo.relations; }
   public String token(int i) { return languageInfo.tokens.get(i); }
   public String lemmaToken(int i) { return languageInfo.lemmaTokens.get(i); }
   public String posTag(int i) { return languageInfo.posTags.get(i); }
   public String phrase(int start, int end) { return languageInfo.phrase(start, end); }
-  public String lemmaPhrase(int start, int end) { return languageInfo.lemmaPhrase(start, end); }
-  public Map<String,Double> relation() { return relationInfo.relations; }
-
+  public String lemmaPhrase(int start, int end) { return languageInfo.lemmaPhrase(start, end);}
   public String toJson() { return Json.writeValueAsStringHard(this); }
   public static Example fromJson(String json) { return Json.readValueHard(json, Example.class); }
 
