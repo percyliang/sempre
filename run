@@ -937,9 +937,9 @@ def tablesDataPaths
     # That's it!
     l(
       o('TableKnowledgeGraph.baseCSVDir', csvDir),
-      # Default: use the normalized values from the tagged file, which were checked by hand.
-      # To turn this off, use @useTaggedFile=0
-      letDefault(:useTaggedFile, 1),
+      # To use the normalized values from the tagged file, which were checked by hand,
+      # add @useTaggedFile=1
+      letDefault(:useTaggedFile, 0),
       selo(:useTaggedFile, 'TableValuePreprocessor.taggedFiles', '', "#{csvDir}/tagged/data/"),
       sel(:data, datasets),
     nil)
