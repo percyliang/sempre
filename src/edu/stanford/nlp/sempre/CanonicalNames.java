@@ -9,6 +9,7 @@ import java.util.*;
  * (even though the names begin with "fb:").
  *
  * @author ppasupat
+ * @maintainer Emilia Lozinska
  */
 public final class CanonicalNames {
   private CanonicalNames() { }

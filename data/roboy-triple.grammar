@@ -112,7 +112,7 @@
 #(rule $Expr ($Subject ($BE optional) $AdjPhrase) (ConcatFn ","))
 #(rule $Expr ($Subject ($BE optional) $Noun) (ConcatFn ","))
 #(rule $Expr ($Subject ($BE optional) $Noun) (ConcatFn ","))
-(rule $Expr ($Subject $RelatClass is $Noun) (TripleFn "spo"))
+(rule $Expr ($Subject $Predicate is $Noun) (TripleFn "spo"))
 #(rule $Expr ($Subject $RelatClass are $Noun) (ConcatFn ","))
 #(rule $Expr ($Subject $RelatClass is $AdjPhrase) (ConcatFn ","))
 #(rule $Expr ($Subject $RelatClass are $AdjPhrase) (ConcatFn ","))
@@ -129,6 +129,7 @@
 (rule $Expr ($Quest $Predicate $Subject $Predicate) (ConcatFn "."))
 (rule $Expr ($Quest $Predicate $Subject $AdjPhrase) (ConcatFn "."))
 
+(rule $ROOT ($Expr) (IdentityFn))
 (rule $ROOT ($Expr or $Expr) (ConcatFn " or "))
 (rule $ROOT ($Not $Expr) (ConcatFn " "))
 (rule $ROOT ($Expr ($Conj optional) $Expr) (ConcatFn " and "))

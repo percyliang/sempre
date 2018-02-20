@@ -68,6 +68,16 @@
     <jar destfile="${libsempre}/sempre-freebase.jar" basedir="${classes}/freebase"/>
   </target>
 
+  <!-- Compile roboy -->
+  <target name="roboy" depends="init,core,cache,freebase">
+    <echo message="Compiling ${ant.project.name}: roboy"/>
+    <mkdir dir="${classes}/roboy"/>
+    <javac srcdir="${src}" destdir="${classes}/roboy" classpathref="lib.path" debug="true" includeantruntime="false" source="${source}" target="${target}">
+      <include name="edu/stanford/nlp/sempre/roboy/"/>
+    </javac>
+    <jar destfile="${libsempre}/sempre-roboy.jar" basedir="${classes}/roboy"/>
+  </target>
+
   <!-- Compile tables -->
   <target name="tables" depends="init,core,corenlp">
     <echo message="Compiling ${ant.project.name}: tables"/>

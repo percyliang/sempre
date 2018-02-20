@@ -1,0 +1,6 @@
+{
+  "ignore": [
+    "fb:user.",
+    "fb:base.",
+  ]
+}

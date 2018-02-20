@@ -18,13 +18,9 @@ import java.util.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import java.io.InputStream;
+import java.io.FileInputStream;
+import java.util.Properties;
 
 /**
  * A Master manages multiple sessions. Currently, they all share the same model,
@@ -56,7 +52,7 @@ public class Master {
     public String newGrammarPath;
   }
   public static Options opts = new Options();
-
+  
   public class Response {
     // Example that was parsed, if any.
     public Example ex;
@@ -79,47 +75,6 @@ public class Master {
       }
     }
     public String getAnswer() {
-      if (ex.getPredDerivations().size() == 0)
-        return "(no answer)";
-      else if (candidateIndex == -1)
-        return "(not selected)";
-      else {
-        Derivation deriv = getDerivation();
-        deriv.ensureExecuted(builder.executor, ex.context);
-        return deriv.getValue().toString();
-      }
-    }
-    public String getInfo() {
-      if (ex.getPredDerivations().size() == 0)
-        return "(no answer)";
-      else if (candidateIndex == -1)
-        return "(not selected)";
-      else {
-        Derivation deriv = getDerivation();
-        deriv.ensureExecuted(builder.executor, ex.context);
-        return deriv.getValue().toString();
-      }
-    }
-    public String getAll() {
-      Map<String,Object> interpretation = new HashMap<>();
-      interpretation.put("tokens",ex.getTokens());
-      interpretation.put("lemma_tokens",ex.getLemmaTokens());
-      interpretation.put("postags",ex.getPosTag());
-      interpretation.put("relations",ex.getRelation());
-
-      // Convert a Map into JSON string.
-      Gson gson = new Gson();
-      String json = gson.toJson(interpretation);
-      System.out.println("json = " + json);
-
-    /* // Convert JSON string back to Map.
-      Type type = new TypeToken<Map<String, String>>(){}.getType();
-      Map<String, String> map = gson.fromJson(json, type);
-      for (String key : map.keySet()) {
-        System.out.println("map.get = " + map.get(key));
-      }*/
-
-
       if (ex.getPredDerivations().size() == 0)
         return "(no answer)";
       else if (candidateIndex == -1)
@@ -195,8 +150,10 @@ public class Master {
     Session session = getSession("stdin");
     try
     {
-
-      ServerSocket serverSocket = new ServerSocket(5000);
+      Properties prop = new Properties();
+      InputStream input = new FileInputStream("config.properties");
+      prop.load(input);
+      ServerSocket serverSocket = new ServerSocket(Integer.parseInt(prop.getProperty("PARSER_PORT")));
       while (true) {
         Socket clientSocket = serverSocket.accept();
         Runnable connectionHandler = new SocketConnectionHandler(clientSocket, session, this);
@@ -224,8 +181,7 @@ public class Master {
       while ((line = reader.readLine()) != null) {
         int indent = LogInfo.getIndLevel();
         try {
-          Response res = processQuery(session, line);
-          res.getAll();
+          processQuery(session, line);
         } catch (Throwable t) {
           while (LogInfo.getIndLevel() > indent)
             LogInfo.end_track();

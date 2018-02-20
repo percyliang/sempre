@@ -81,6 +81,9 @@ public final class SimpleLexicon {
           numLines++;
 
           String rawPhrase = (String) map.get("lexeme");
+          if (((String) map.get("formula")).contains("(") && ((String) map.get("formula")).indexOf("(")>1)
+            continue;
+
           Formula formula = Formula.fromString((String) map.get("formula"));
 
           // Type
@@ -98,6 +101,9 @@ public final class SimpleLexicon {
           }
 
           // Add verbatim feature
+//          if (((String) map.get("formula")).contains("("))
+//            System.out.println("Formula: "+formula.toString());
+
           Entry entry = new Entry(rawPhrase, formula, type, features);
           String phrase = entry.rawPhrase.toLowerCase();
           MapUtils.addToList(entries, phrase, entry);
@@ -112,6 +118,7 @@ public final class SimpleLexicon {
             }
             newFeatures.add("isSuffix", 1);
             newFeatures.trimToSize();
+
             Entry newEntry = new Entry(rawPhrase, formula, type, newFeatures);
             MapUtils.addToList(entries, parts[parts.length - 1], newEntry);
           }

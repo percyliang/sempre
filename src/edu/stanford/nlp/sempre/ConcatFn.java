@@ -20,23 +20,23 @@ public class ConcatFn extends SemanticFn {
     delim = tree.child(1).value;
   }
 
+//  public DerivationStream call(Example ex, final Callable c) {
+//    return new SingleDerivationStream() {
+//      @Override
+//      public Derivation createDerivation() {
+//        StringBuilder out = new StringBuilder();
+//        for (int i = 0; i < c.getChildren().size(); i++) {
+//          if (i > 0) out.append(delim);
+//          out.append(c.childStringValue(i));
+//        }
+//        return new Derivation.Builder()
+//                .withCallable(c)
+//                .withStringFormulaFrom(out.toString())
+//                .createDerivation();
+//      }
+//    };
+//  }
   public DerivationStream call(Example ex, final Callable c) {
-    return new SingleDerivationStream() {
-      @Override
-      public Derivation createDerivation() {
-        StringBuilder out = new StringBuilder();
-        for (int i = 0; i < c.getChildren().size(); i++) {
-          if (i > 0) out.append(delim);
-          out.append(c.childStringValue(i));
-        }
-        return new Derivation.Builder()
-                .withCallable(c)
-                .withStringFormulaFrom(out.toString())
-                .createDerivation();
-      }
-    };
-  }
- /* public DerivationStream call(Example ex, final Callable c) {
     return new SingleDerivationStream() {
       @Override
       public Derivation createDerivation() {
@@ -57,5 +57,5 @@ public class ConcatFn extends SemanticFn {
                 .createDerivation();
       }
     };
-  }*/
+  }
 }

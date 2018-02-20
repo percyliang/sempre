@@ -1,5 +1,6 @@
 package edu.stanford.nlp.sempre;
 
+import edu.stanford.nlp.sempre.*;
 import java.util.*;
 import fig.basic.LispTree;
 import java.lang.reflect.Type;
@@ -7,7 +8,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 /**
- * Takes three strings and returns triple build from them
+ * Takes two strings and returns triple or partial triple build from them
  *
  * @author Emilia Lozinska
  */
@@ -27,6 +28,7 @@ public class TripleFn extends SemanticFn {
     }
 
     public String initial_formula(String string1, String string2) {
+        // TODO: Check types to form only with one database only
         Map<String,Object> triple = new HashMap<>();
         if (this.mode.equals("spo")) {
             triple.put("subject", string1);
@@ -56,7 +58,6 @@ public class TripleFn extends SemanticFn {
         // Convert a Map into JSON string.
         Gson gson = new Gson();
         String str_triple = gson.toJson(triple);
-        System.out.println("Triple = " + str_triple);
         return str_triple;
     }
 
@@ -75,26 +76,17 @@ public class TripleFn extends SemanticFn {
         for (Map.Entry<String, String> entry : triple2.entrySet())
         {
 
-            System.out.println("Entry:" + entry.toString());
-            System.out.println(entry.getValue() + " "+result.get(entry.getKey()));
             if(result.containsKey(entry.getKey()) && !(entry.getValue().equals(result.get(entry.getKey()))))
                 result.put(entry.getKey(),result.get(entry.getKey()).concat(","+entry.getValue()));
             else
                 result.put(entry.getKey(),entry.getValue());
         }
-        System.out.println(string2);
-        System.out.println(triple.toString());
-        System.out.println(triple2.toString());
-        System.out.println(result.toString());
-
         // Convert a Map into JSON string.
         String str_triple = gson.toJson(result);
-        System.out.println("MERGE triple = " + str_triple);
         return str_triple;
     }
 
     public String final_formula(String string1, String string2) {
-        System.out.println(string1);
         // Convert JSON string back to Map.
         Gson gson = new Gson();
         Type type = new TypeToken<Map<String, String>>(){}.getType();
@@ -106,6 +98,7 @@ public class TripleFn extends SemanticFn {
             triple.put("object", string2);
         }
         else if (this.mode.equals("sop")) {
+            System.out.println("Predicate SOP" + string2);
             triple.put("predicate", string2);
         }
         else if (this.mode.equals("pso")) {
@@ -115,6 +108,7 @@ public class TripleFn extends SemanticFn {
             triple.put("subject", string2);
         }
         else if (this.mode.equals("osp")) {
+            System.out.println("Predicate OSP" + string2);
             triple.put("predicate", string2);
         }
         else if (this.mode.equals("ops")) {
@@ -123,6 +117,8 @@ public class TripleFn extends SemanticFn {
         // split multiple subjects
         String[] subject = split(triple.get("subject").toString());
         String[] predicate = split(triple.get("predicate").toString());
+        System.out.println("Predicate full " + triple.get("predicate").toString());
+        System.out.println("Predicate full2 " + predicate.toString());
         String[] object = split(triple.get("object").toString());
 
         StringBuilder out = new StringBuilder();
@@ -143,6 +139,7 @@ public class TripleFn extends SemanticFn {
                 out.append("(");
             StringBuilder out2 = new StringBuilder();
             for (String p : predicate) {
+                System.out.println("Predicate in array " + p);
                 if (out2.toString().length() > 0 && triple.get("predicate").toString().contains(","))
                     out2.append(",");
                 if (out2.toString().length() > 0 && triple.get("predicate").toString().contains(";"))
@@ -160,13 +157,10 @@ public class TripleFn extends SemanticFn {
                     out3.append(",");
                     out3.append(o);
                     out3.append(")");
-                    System.out.println("Out3"+out3.toString());
-                }
+                    }
                 out2.append(out3.toString());
-                System.out.println("Out2"+out2.toString());
-            }
+                }
             out.append(out2.toString());
-            System.out.println("Out"+out.toString());
             if (triple.get("predicate").toString().contains(";")||triple.get("predicate").toString().contains(","))
                 out.append(")");
         }
@@ -204,7 +198,7 @@ public class TripleFn extends SemanticFn {
 
 
     public String[] split(String str){
-        if (str.contains("("))
+        if (str.startsWith("("))
             str = str.substring(str.indexOf("(")+1,str.indexOf(")"));
         if (str.contains(";")){
             return str.split(";");
