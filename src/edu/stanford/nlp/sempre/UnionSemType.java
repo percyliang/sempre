@@ -6,7 +6,7 @@ import java.util.*;
 // Represents the union of a set of base types.
 public class UnionSemType extends SemType {
   public final List<SemType> baseTypes;
-  public boolean isValid() { return baseTypes.size() > 0; }
+  public boolean isValid() { return true;}//return baseTypes.size() > 0; }
 
   // Constructors
   public UnionSemType() {

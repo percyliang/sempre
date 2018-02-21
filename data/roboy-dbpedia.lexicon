@@ -98,7 +98,7 @@
 {"lexeme": "does", "formula": "question:activity", "type" : "Question"}
 
 # DBpedia
-
+{"lexeme": "Abraham Lincoln", "formula": "resource:Abraham_Lincoln", "type": "ClassNoun"}
 {"lexeme": "anatomical structure", "formula": "dbpedia:AnatomicalStructure", "type": "ClassNoun"}
 {"lexeme": "brain", "formula": "dbpedia:Brain", "type": "ClassNoun"}
 {"lexeme": "bone", "formula": "dbpedia:Bone", "type": "ClassNoun"}

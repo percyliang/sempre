@@ -18,6 +18,10 @@ import java.util.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import java.io.InputStream;
+import java.io.FileInputStream;
+import java.util.Properties;
+
 /**
  * A Master manages multiple sessions. Currently, they all share the same model,
  * but they need not in the future.
@@ -146,8 +150,10 @@ public class Master {
     Session session = getSession("stdin");
     try
     {
-
-      ServerSocket serverSocket = new ServerSocket(5000);
+      Properties prop = new Properties();
+      InputStream input = new FileInputStream("config.properties");
+      prop.load(input);
+      ServerSocket serverSocket = new ServerSocket(Integer.parseInt(prop.getProperty("PARSER_PORT")));
       while (true) {
         Socket clientSocket = serverSocket.accept();
         Runnable connectionHandler = new SocketConnectionHandler(clientSocket, session, this);

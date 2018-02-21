@@ -125,6 +125,13 @@ def sparqlOpts
   nil)
 end
 
+def sparqlOptsNew
+  l(
+    required(:sparqlserver, 'host:port of the Sparql server'), # Example: jonsson:3093, etc.
+    o('SparqlExecutor.endpointUrl', lambda{|e| 'http://'+e[:sparqlserver]+'/sparql'}),
+  nil)
+end
+
 def freebaseOpts
   l(
     figOpts,
@@ -507,6 +514,22 @@ addMode('simple-freebase-nocache', 'Simple shell for using Freebase (without a c
   o('BinaryLexicon.binaryLexiconFilesPath', '/dev/null'),
   #o('JoinFn.showTypeCheckFailures'),  # Use this to debug
   o('Grammar.inPaths', 'freebase/data/demo1.grammar'),  # Override with your own custom grammar
+  #o('SparqlExecutor.includeSupportingInfo'),  # Show full information
+  o('Main.interactive'),
+nil) })
+
+addMode('database-server', 'Simple shell for using external Knowledge Base (without a cache server)', lambda { |e| l(
+  'java', '-Dmodules=core,roboy', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.Main',
+  o('executor', 'roboy.SparqlExecutor'),
+  letDefault(:sparqlserver, 'dbpedia.org'),
+  sparqlOptsNew,
+  o('FeatureExtractor.featureDomains', 'rule'),
+  o('Parser.coarsePrune'),
+  o('JoinFn.typeInference'),
+  o('UnaryLexicon.unaryLexiconFilePath', '/dev/null'),
+  o('BinaryLexicon.binaryLexiconFilesPath', '/dev/null'),
+  #o('JoinFn.showTypeCheckFailures'),  # Use this to debug
+  o('Grammar.inPaths', 'data/roboy-dbpedia.grammar'),  # Override with your own custom grammar
   #o('SparqlExecutor.includeSupportingInfo'),  # Show full information
   o('Main.interactive'),
 nil) })
