@@ -28,8 +28,6 @@ import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.*;
 
-//import org.apache.jena.query.*;
-//import org.apache.jena.rdf.model.*;
 
 /**
  * Convert a Formula into a SPARQL query and execute it against some RDF endpoint.

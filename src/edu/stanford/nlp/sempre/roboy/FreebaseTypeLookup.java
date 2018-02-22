@@ -22,7 +22,7 @@ public class FreebaseTypeLookup implements TypeLookup {
 
   public Set<String> getEntityTypes(String entity) {
     if (opts.entityTypesPath == null)
-      return Collections.singleton(FreebaseInfo.ENTITY);
+      return Collections.singleton(DatabaseInfo.getType("fb:","ENTITY"));
 
     // Read types from cache
     if (entityTypesCache == null) entityTypesCache = StringCacheUtils.create(opts.entityTypesPath);
@@ -31,7 +31,7 @@ public class FreebaseTypeLookup implements TypeLookup {
     if (typesStr != null) {
       Collections.addAll(types, typesStr.split(","));
     } else {
-      types.add(FreebaseInfo.ENTITY);
+      types.add(DatabaseInfo.getType("fb:","ENTITY"));
     }
     return types;
   }

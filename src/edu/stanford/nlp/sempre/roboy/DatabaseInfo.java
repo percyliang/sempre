@@ -331,8 +331,6 @@ public final class DatabaseInfo {
       return null;
     if (mapTypes.size() == 0){
       try {
-        InputStream input = new FileInputStream("config.properties");
-        prop.load(input);
         JsonReader reader = new JsonReader(new FileReader(prop.getProperty("TYPES")));
         Type type = new TypeToken<Map<String, Map<String, String>>>(){}.getType();
         mapTypes = gson.fromJson(reader, type);

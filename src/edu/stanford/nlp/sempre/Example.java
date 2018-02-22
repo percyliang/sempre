@@ -9,6 +9,7 @@ import com.google.common.collect.Sets;
 import fig.basic.Evaluation;
 import fig.basic.LispTree;
 import fig.basic.LogInfo;
+import edu.stanford.nlp.sempre.roboy.helpers.*;
 
 import java.util.*;
 
@@ -45,6 +46,9 @@ public class Example {
   //// Information after Information Extraction step.
   public RelationInfo relationInfo = null;
 
+  //// Information after postprocessing step
+  public ErrorInfo errorInfo = null;
+
   //// Output of the parser.
 
   // Predicted derivations (sorted by score).
@@ -64,6 +68,7 @@ public class Example {
     private Value targetValue;
     private LanguageInfo languageInfo;
     private RelationInfo relationInfo;
+    private ErrorInfo errorInfo;
 
     public Builder setId(String id) { this.id = id; return this; }
     public Builder setUtterance(String utterance) { this.utterance = utterance; return this; }
@@ -72,6 +77,7 @@ public class Example {
     public Builder setTargetValue(Value targetValue) { this.targetValue = targetValue; return this; }
     public Builder setLanguageInfo(LanguageInfo languageInfo) { this.languageInfo = languageInfo; return this; }
     public Builder setRelationInfo(RelationInfo relationInfo) { this.relationInfo = relationInfo; return this; }
+    public Builder setErrorInfo(ErrorInfo errorInfo) { this.errorInfo = errorInfo; return this; }
     public Builder withExample(Example ex) {
       setId(ex.id);
       setUtterance(ex.utterance);
@@ -81,7 +87,7 @@ public class Example {
       return this;
     }
     public Example createExample() {
-      return new Example(id, utterance, context, targetFormula, targetValue, languageInfo, relationInfo);
+      return new Example(id, utterance, context, targetFormula, targetValue, languageInfo, relationInfo, errorInfo);
     }
   }
 
@@ -92,7 +98,8 @@ public class Example {
                  @JsonProperty("targetFormula") Formula targetFormula,
                  @JsonProperty("targetValue") Value targetValue,
                  @JsonProperty("languageInfo") LanguageInfo languageInfo,
-                 @JsonProperty("relationInfo") RelationInfo relationInfo) {
+                 @JsonProperty("relationInfo") RelationInfo relationInfo,
+                 @JsonProperty("errorInfo") ErrorInfo errorInfo) {
     this.id = id;
     this.utterance = utterance;
     this.context = context;
@@ -100,6 +107,7 @@ public class Example {
     this.targetValue = targetValue;
     this.languageInfo = languageInfo;
     this.relationInfo = relationInfo;
+    this.errorInfo = errorInfo;
   }
 
   // Accessors
@@ -131,9 +139,10 @@ public class Example {
   public String token(int i) { return languageInfo.tokens.get(i); }
   public String lemmaToken(int i) { return languageInfo.lemmaTokens.get(i); }
   public String posTag(int i) { return languageInfo.posTags.get(i); }
+  public List<String> getPosTag() { return languageInfo.posTags; }
   public String phrase(int start, int end) { return languageInfo.phrase(start, end); }
   public String lemmaPhrase(int start, int end) { return languageInfo.lemmaPhrase(start, end); }
-  public Map<String,Double> relation() { return relationInfo.relations; }
+  public Map<String,Double> getRelation() { return relationInfo.relations; }
 
   public String toJson() { return Json.writeValueAsStringHard(this); }
   public static Example fromJson(String json) { return Json.readValueHard(json, Example.class); }
@@ -162,6 +171,7 @@ public class Example {
     }
     b.setLanguageInfo(new LanguageInfo());
     b.setRelationInfo(new RelationInfo());
+    b.setErrorInfo(new ErrorInfo());
 
     Example ex = b.createExample();
 
@@ -203,6 +213,15 @@ public class Example {
     }
 
     return ex;
+  }
+
+  public void postprocess() {
+    // TODO: Add analyzers
+    List<KnowledgeHelper> helpers = new ArrayList<>();
+    helpers.add(new EntityHelper());
+    for (KnowledgeHelper helper : helpers){
+      this.errorInfo = helper.analyze(this);
+    }
   }
 
   public void preprocess() {

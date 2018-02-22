@@ -5,7 +5,7 @@ import edu.stanford.nlp.sempre.*;
 import edu.stanford.nlp.sempre.roboy.DbFormulasInfo.BinaryFormulaInfo;
 import edu.stanford.nlp.sempre.MergeFormula.Mode;
 import edu.stanford.nlp.sempre.roboy.utils.FileUtils;
-import edu.stanford.nlp.sempre.roboy.utils.FormatConverter;
+import edu.stanford.nlp.sempre.roboy.utils.FbFormatConverter;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.StringUtils;
@@ -606,7 +606,7 @@ public class Free917Converter implements Runnable {
 
     List<String> res = new ArrayList<String>();
     if (predTokens[0].contains("&")) {
-      String relation = "!" + FormatConverter.fromSlashToDot(predTokens[0].substring(0, predTokens[0].indexOf('&')), true);
+      String relation = "!" + FbFormatConverter.fromSlashToDot(predTokens[0].substring(0, predTokens[0].indexOf('&')), true);
       res.add(relation);
     }
     for (int j = 1; j < predTokens.length; ++j)
@@ -616,8 +616,8 @@ public class Free917Converter implements Runnable {
 
   private String constructFbType(String predHead) {
     if (predHead.contains("&"))
-      return FormatConverter.fromSlashToDot(predHead.substring(predHead.indexOf('&') + 1), true);
-    return FormatConverter.fromSlashToDot(predHead, true);
+      return FbFormatConverter.fromSlashToDot(predHead.substring(predHead.indexOf('&') + 1), true);
+    return FbFormatConverter.fromSlashToDot(predHead, true);
 
   }
 
@@ -640,7 +640,7 @@ public class Free917Converter implements Runnable {
       String i = tokens[0].substring(tokens[0].lastIndexOf('/') + 1);
       return "TEXT::" + i;
     }
-    return FormatConverter.fromSlashToDot(value.substring(0, value.indexOf(':')), true);
+    return FbFormatConverter.fromSlashToDot(value.substring(0, value.indexOf(':')), true);
   }
 
   /** There is one example and this method is tailored for that */
@@ -650,7 +650,7 @@ public class Free917Converter implements Runnable {
     ValueFormula<NameValue> arg2 = Formulas.newNameFormula(parseEntity(tree.child(2).value));
     pred = pred.replace('@', '/');
     pred = pred.substring(0, pred.lastIndexOf(':'));
-    pred = FormatConverter.fromSlashToDot(pred, true);
+    pred = FbFormatConverter.fromSlashToDot(pred, true);
     ValueFormula<NameValue> predFormula = Formulas.newNameFormula(pred);
     JoinFormula pf = new JoinFormula(predFormula, arg2);
     MergeFormula mf = new MergeFormula(Mode.and, arg1, pf);
@@ -674,7 +674,7 @@ public class Free917Converter implements Runnable {
       String entry = tokens[1].trim();
       String[] entryTokens = entry.split(":");
       String id = entryTokens[1].trim();
-      id = FormatConverter.fromSlashToDot(id, true);
+      id = FbFormatConverter.fromSlashToDot(id, true);
 
       if (midToIdMap.containsKey(id))
         id = midToIdMap.get(id);

@@ -15,6 +15,7 @@ public class Main implements Runnable {
   @Option public boolean interactive = false;
   @Option public boolean server = false;
   @Option public boolean socket = false;
+  // TODO: Change to setting
   @Option public String masterType = "edu.stanford.nlp.sempre.Master";
 
   public void run() {

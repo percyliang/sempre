@@ -48,7 +48,7 @@ public class SocketConnectionHandler implements Runnable {
               int indent = LogInfo.getIndLevel();
               try {
                 Response res = master.processQuery(session, line);
-                System.out.println(res.getAnswer());
+                System.out.println(res.getAll());
                 output.println(master.summaryString(res));
               } catch (Throwable t) {
                 while (LogInfo.getIndLevel() > indent)

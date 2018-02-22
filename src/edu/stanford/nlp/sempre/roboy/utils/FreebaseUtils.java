@@ -169,12 +169,12 @@ public final class FreebaseUtils {
   }
 
   public static boolean isUnary(String property) {
-    property = FormatConverter.fromDotToSlash(property);
+    property = FbFormatConverter.fromDotToSlash(property);
     return (property.equals(TYPE_PROPERTY) || property.equals(PROFESSION_PROPERTY));
   }
 
   public static boolean isNameProperty(String property) {
-    property = FormatConverter.fromDotToSlash(property);
+    property = FbFormatConverter.fromDotToSlash(property);
     return (property.equals(ALIAS_PROPERTY) || property.equals(NAME_PROPERTY));
   }
 }
