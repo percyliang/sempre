@@ -3,6 +3,7 @@ package edu.stanford.nlp.sempre.roboy.helpers;
 import edu.stanford.nlp.sempre.ErrorInfo;
 import edu.stanford.nlp.sempre.ErrorValue;
 import edu.stanford.nlp.sempre.Example;
+import edu.stanford.nlp.sempre.SimpleLexicon;
 
 import java.net.SocketTimeoutException;
 import java.net.URL;
@@ -124,6 +125,26 @@ public class EntityHelper extends KnowledgeHelper {
         String json = gson.toJson(results.get(0));
         System.out.println("Underspecified " + entity + "=" + json);
         errorInfo.underspecified.put(entity,json);
+
+        if (results.size()>0){
+            for (int i = 0; i < results.size(); i++) {
+                Map<String, String> lexeme = new HashMap();
+                lexeme.put("lexeme", results.get(i).get("Label"));
+                lexeme.put("formula", results.get(i).get("URI"));
+                lexeme.put("type", "NamedEntity");
+                String lexical_entry = gson.toJson(lexeme);
+                System.out.println(lexeme);
+                errorInfo.underspecified.put(entity, json);
+                SimpleLexicon.getSingleton().add(lexical_entry);
+                lexeme.put("lexeme", entity);
+                lexical_entry = gson.toJson(lexeme);
+                System.out.println(lexeme);
+                errorInfo.underspecified.put(entity, json);
+                SimpleLexicon.getSingleton().add(lexical_entry);
+            }
+            List<SimpleLexicon.Entry> entries = SimpleLexicon.getSingleton().lookup(entity);
+            System.out.println(entries.toString());
+        }
         return errorInfo;
     }
 

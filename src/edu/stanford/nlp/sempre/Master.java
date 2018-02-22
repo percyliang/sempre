@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.io.FileInputStream;
 import java.util.Properties;
 
+import java.lang.reflect.Type;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 

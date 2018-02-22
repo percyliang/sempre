@@ -6,6 +6,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.*;
 
+import java.lang.reflect.Type;
+import com.google.gson.Gson;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.reflect.TypeToken;
+
 /**
  * A Lexicon maps phrases (e.g., born) to lexical entries, which contain a
  * formula (e.g., fb:people.person.place_of_birth) and a type.
@@ -130,6 +135,48 @@ public final class SimpleLexicon {
       throw new RuntimeException(e);
     }
     LogInfo.end_track();
+  }
+
+  public void add(String json) {
+      Type t = new TypeToken<Map<String, String>>(){}.getType();
+      Gson gson = new Gson();
+      Map<String, Object> map = gson.fromJson(json, t);
+      String rawPhrase = (String) map.get("lexeme");
+      if (((String) map.get("formula")).contains("(") && ((String) map.get("formula")).indexOf("(")>1)
+        return;
+      Formula formula = Formula.fromString((String) map.get("formula"));
+      // Type
+      String typeStr = (String) map.get("type");
+      SemType type = typeStr != null ? SemType.fromString(typeStr) : TypeInference.inferType(formula);
+
+      // Features
+      StringDoubleVec features = null;
+      Map<String, Double> featureMap = (Map<String, Double>) map.get("features");
+      if (featureMap != null) {
+        features = new StringDoubleVec();
+        for (Map.Entry<String, Double> e : featureMap.entrySet())
+          features.add(e.getKey(), e.getValue());
+        features.trimToSize();
+      }
+
+      Entry entry = new Entry(rawPhrase, formula, type, features);
+      String phrase = entry.rawPhrase.toLowerCase();
+      MapUtils.addToList(entries, phrase, entry);
+
+      // For last names
+      String[] parts = phrase.split(" ");
+      if (opts.matchSuffixTypes != null && opts.matchSuffixTypes.contains(typeStr) && parts.length > 1) {
+        StringDoubleVec newFeatures = new StringDoubleVec();
+        if (features != null) {  // Copy over features
+          for (StringDoubleVec.Entry e : features)
+            newFeatures.add(e.getFirst(), e.getSecond());
+        }
+        newFeatures.add("isSuffix", 1);
+        newFeatures.trimToSize();
+
+        Entry newEntry = new Entry(rawPhrase, formula, type, newFeatures);
+        MapUtils.addToList(entries, parts[parts.length - 1], newEntry);
+      }
   }
 
   public List<Entry> lookup(String phrase) {
