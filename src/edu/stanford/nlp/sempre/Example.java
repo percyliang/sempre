@@ -219,8 +219,15 @@ public class Example {
     // TODO: Add analyzers
     List<KnowledgeHelper> helpers = new ArrayList<>();
     helpers.add(new EntityHelper());
+    helpers.add(new MCGHelper());
+    this.errorInfo = new ErrorInfo();
     for (KnowledgeHelper helper : helpers){
-      this.errorInfo = helper.analyze(this);
+      helper.analyze(this);
+    }
+    System.out.println("Hej");
+    for (String key : this.errorInfo.underspecified.keySet()){
+      System.out.println(key + ":" + this.errorInfo.underspecified.get(key));
+      System.out.println(this.targetFormula.toString().replace(key,this.errorInfo.underspecified.get(key)));
     }
   }
 

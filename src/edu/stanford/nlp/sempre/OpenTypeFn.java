@@ -9,6 +9,7 @@ import fig.basic.LispTree;
 public class OpenTypeFn extends SemanticFn {
  boolean type = false;
  boolean rel= false;
+ boolean entity= false;
 
  public OpenTypeFn() { }
 
@@ -17,6 +18,8 @@ public class OpenTypeFn extends SemanticFn {
      type = true;
    else if (delim.equals("relation"))
      rel = true;
+   else if (delim.equals("entity"))
+     entity = true;
    else
      throw new RuntimeException("Wrong mode");
  }
@@ -27,6 +30,8 @@ public class OpenTypeFn extends SemanticFn {
       type = true;
     else if (tree.child(1).value.equals("relation"))
       rel = true;
+    else if (tree.child(1).value.equals("entity"))
+      entity = true;
     else
       throw new RuntimeException("Wrong mode");
   }
@@ -38,6 +43,7 @@ public class OpenTypeFn extends SemanticFn {
         StringBuilder out = new StringBuilder();
         if (type) out.append("OpenType(");
         if (rel) out.append("OpenRel(");
+        if (entity) out.append("OpenEntity(");
         for (int i = 0; i < c.getChildren().size(); i++) {
           if (i > 0)
             out.append(" ");

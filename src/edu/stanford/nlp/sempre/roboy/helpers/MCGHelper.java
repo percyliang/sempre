@@ -27,16 +27,17 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import edu.stanford.nlp.sempre.roboy.utils.XMLReader;
 
+import java.lang.reflect.Type;
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.reflect.TypeToken;
 
 /**
- * Entity Helper use Entity Searcher APIs to resolve underspecified entities in the lexicon
+ * Entity Helper use Microsoft Concept Graph APIs to resolve underspecified types in the lexicon
  *
  * @author emlozin
  */
-public class EntityHelper extends KnowledgeHelper {
+public class MCGHelper extends KnowledgeHelper {
     int connectTimeoutMs;
     int readTimeoutMs;
 
@@ -44,17 +45,16 @@ public class EntityHelper extends KnowledgeHelper {
     public static Gson gson = new Gson();
 
     private Map<String, String> entities;
-    public static XMLReader reader = new XMLReader();
 
     public static String endpointUrl = new String();
     public static List<String> keywords = new ArrayList();
 
-    public EntityHelper(){
+    public MCGHelper(){
         try {
             InputStream input = new FileInputStream("config.properties");
             prop.load(input);
-            endpointUrl = prop.getProperty("DB_SEARCH");
-            keywords = Arrays.asList(prop.getProperty("DB_KEYWORDS").split(","));
+            endpointUrl = prop.getProperty("MCG_SEARCH");
+            keywords = Arrays.asList(prop.getProperty("MCG_KEYWORDS").split(","));
         }
         catch (Exception e) {
             throw new RuntimeException(e);
@@ -75,8 +75,7 @@ public class EntityHelper extends KnowledgeHelper {
         if (entity == null)
             throw new RuntimeException("No entity specified");
         try {
-            String url = endpointUrl.concat(entity);
-            url = url.replace(" ","_");
+            String url = (endpointUrl.concat(entity)).concat("&topK=10");
             URLConnection conn = new URL(url).openConnection();
             conn.setConnectTimeout(this.connectTimeoutMs);
             conn.setReadTimeout(this.readTimeoutMs);
@@ -102,49 +101,49 @@ public class EntityHelper extends KnowledgeHelper {
     }
 
     public ErrorInfo analyze(Example ex) {
-        List <Map<String,String>> results = new ArrayList<Map<String, String>>();
+        ErrorInfo errorInfo = new ErrorInfo();
+        List <Map<String,Double>> results = new ArrayList<Map<String, Double>>();
         String entity = new String();
         for (int i = 0; i < ex.getPredDerivations().size(); i++){
             String formula = ex.getPredDerivations().get(i).getFormula().toString();
-            if (formula.contains("OpenEntity")){
-                int start = formula.indexOf("OpenEntity(")+"OpenEntity(".length();
-                int end = formula.indexOf(")");
-                entity = formula.substring(start,end);
-                System.out.println("Checking entity:" + entity);
+            if (formula.contains("OpenType")){
+                entity = formula.substring(formula.indexOf("OpenType("),formula.substring(formula.indexOf("OpenType(")).indexOf(")"));
+                makeRequest(entity);
                 // Extract the results from XML now.
                 ServerResponse response = makeRequest(entity);
-                results = reader.readEntityXml(response.xml,keywords);
+                System.out.println(response.xml);
+                Type t = new TypeToken<Map<String, Double>>(){}.getType();
+                results.add(gson.fromJson(response.xml, t));
 
             }
-//            else{
-//                entity = "berlin";
-//                // Extract the results from XML now.
-//                ServerResponse response = makeRequest(entity);
-//                results = reader.readEntityXml(response.xml,keywords);
-//            }
-
-
-            if (results.size() > 0){
-                String json = gson.toJson(results.get(0));
-                ex.errorInfo.underspecified.put(entity,json);
-                System.out.println(json);
-                for (int j = 0; j < results.size(); j++) {
-                    Map<String, String> lexeme = new HashMap();
-                    lexeme.put("lexeme", results.get(j).get("Label"));
-                    lexeme.put("formula", results.get(j).get("URI"));
-                    lexeme.put("type", "NamedEntity");
-                    String lexical_entry = gson.toJson(lexeme);
-                    //ex.errorInfo.underspecified.put(entity, json);
-                    SimpleLexicon.getSingleton().add(lexical_entry);
-                    lexeme.put("lexeme", entity);
-                    lexical_entry = gson.toJson(lexeme);
-                    //ex.errorInfo.underspecified.put(entity, json);
-                    SimpleLexicon.getSingleton().add(lexical_entry);
-                }
-                List<SimpleLexicon.Entry> entries = SimpleLexicon.getSingleton().lookup(entity);
+            else{
+                entity = "berlin";
+                // Extract the results from XML now.
+                ServerResponse response = makeRequest(entity);
+                Type t = new TypeToken<Map<String, String>>(){}.getType();
+                results.add(gson.fromJson(response.xml, t));
             }
         }
-        return ex.errorInfo;
+//        String json = gson.toJson(results.get(0));
+//        errorInfo.underspecified.put(entity,json);
+//
+//        if (results.size()>0){
+//            for (int i = 0; i < results.size(); i++) {
+//                Map<String, String> lexeme = new HashMap();
+//                lexeme.put("lexeme", results.get(i).get("Key"));
+//                lexeme.put("formula", results.get(i).get("Value"));
+//                lexeme.put("type", "ClassNoun");
+//                String lexical_entry = gson.toJson(lexeme);
+//                errorInfo.underspecified.put(entity, json);
+//                SimpleLexicon.getSingleton().add(lexical_entry);
+//                lexeme.put("lexeme", entity);
+//                lexical_entry = gson.toJson(lexeme);
+//                errorInfo.underspecified.put(entity, json);
+//                SimpleLexicon.getSingleton().add(lexical_entry);
+//            }
+//            List<SimpleLexicon.Entry> entries = SimpleLexicon.getSingleton().lookup(entity);
+//        }
+        return errorInfo;
     }
 
 }

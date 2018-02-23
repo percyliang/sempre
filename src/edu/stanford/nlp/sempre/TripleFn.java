@@ -54,10 +54,27 @@ public class TripleFn extends SemanticFn {
             triple.put("object", string1);
             triple.put("predicate", string2);
         }
+        else if (this.mode.equals("tp")) {
+            triple.put("type", string1);
+            triple.put("predicate", string2);
+        }
+        else if (this.mode.equals("pt")) {
+            triple.put("predicate", string1);
+            triple.put("type", string2);
+        }
+        else if (this.mode.equals("to")) {
+            triple.put("type", string1);
+            triple.put("object", string2);
+        }
+        else if (this.mode.equals("ot")) {
+            triple.put("object", string1);
+            triple.put("type", string2);
+        }
 
         // Convert a Map into JSON string.
         Gson gson = new Gson();
         String str_triple = gson.toJson(triple);
+        System.out.println("Init"+str_triple);
         return str_triple;
     }
 
@@ -75,7 +92,6 @@ public class TripleFn extends SemanticFn {
         result.putAll(triple);
         for (Map.Entry<String, String> entry : triple2.entrySet())
         {
-
             if(result.containsKey(entry.getKey()) && !(entry.getValue().equals(result.get(entry.getKey()))))
                 result.put(entry.getKey(),result.get(entry.getKey()).concat(","+entry.getValue()));
             else
@@ -83,6 +99,41 @@ public class TripleFn extends SemanticFn {
         }
         // Convert a Map into JSON string.
         String str_triple = gson.toJson(result);
+        System.out.println("Merge"+str_triple);
+        return str_triple;
+    }
+
+    public String concat_formula(String string1, String string2) {
+        // Convert JSON string back to Map.
+        Gson gson = new Gson();
+        Type type = new TypeToken<Map<String, String>>(){}.getType();
+        Map<String, String> triple = gson.fromJson(string1, type);
+/*        Map<String, String> triple = new HashMap<String,String>();
+        triple = (Map<String,String>) gson.fromJson(string1, triple.getClass());*/
+
+        if (this.mode.equals("spo")) {
+            triple.put("object", string2);
+        }
+        else if (this.mode.equals("sop")) {
+            System.out.println("Predicate SOP" + string2);
+            triple.put("predicate", string2);
+        }
+        else if (this.mode.equals("pso")) {
+            triple.put("object", string2);
+        }
+        else if (this.mode.equals("pos")) {
+            triple.put("subject", string2);
+        }
+        else if (this.mode.equals("osp")) {
+            System.out.println("Predicate OSP" + string2);
+            triple.put("predicate", string2);
+        }
+        else if (this.mode.equals("ops")) {
+            triple.put("subject", string2);
+        }
+
+        String str_triple = gson.toJson(triple);
+        System.out.println("Concat"+str_triple);
         return str_triple;
     }
 
@@ -115,12 +166,21 @@ public class TripleFn extends SemanticFn {
             triple.put("subject", string2);
         }
         // split multiple subjects
-        String[] subject = split(triple.get("subject").toString());
-        String[] predicate = split(triple.get("predicate").toString());
-        System.out.println("Predicate full " + triple.get("predicate").toString());
-        System.out.println("Predicate full2 " + predicate.toString());
-        String[] object = split(triple.get("object").toString());
-
+        String[] subject;
+        String[] predicate;
+        String[] object;
+        if(triple.containsKey("subject"))
+            subject = split(triple.get("subject").toString());
+        else
+            return concat_formula(string1,string2);
+        if(triple.containsKey("predicate"))
+            predicate = split(triple.get("predicate").toString());
+        else
+            return concat_formula(string1,string2);
+        if(triple.containsKey("object"))
+            object = split(triple.get("object").toString());
+        else
+            return concat_formula(string1,string2);
         StringBuilder out = new StringBuilder();
 
 
@@ -157,6 +217,14 @@ public class TripleFn extends SemanticFn {
                     out3.append(",");
                     out3.append(o);
                     out3.append(")");
+                    if (triple.containsKey("type")){
+                        out.append(",");
+                        out.append("(");
+                        out.append(o);
+                        out.append("has_type");
+                        out.append(triple.get("type"));
+                        out.append(")");
+                    }
                     }
                 out2.append(out3.toString());
                 }
@@ -170,7 +238,7 @@ public class TripleFn extends SemanticFn {
             out.append(")");
         if (triple.get("object").toString().contains(";")||triple.get("object").toString().contains(","))
             out.append(")");   */
-
+        System.out.println(out.toString());
         return out.toString();
     }
 

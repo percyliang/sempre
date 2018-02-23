@@ -49,17 +49,17 @@ public class XMLReader{
         long timeMs;
     }
 
-    public static NodeList extractResultsFromXml(ServerResponse response) {
-        return extractResultsFromXml(response.xml);
+    public static NodeList extractResultsFromXml(String keyword, ServerResponse response) {
+        return extractResultsFromXml(keyword, response.xml);
     }
 
-    private static NodeList extractResultsFromXml(String xml) {
+    private static NodeList extractResultsFromXml(String keyword, String xml) {
         DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
         NodeList results = null;
         try {
             DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
             Document doc = docBuilder.parse(new InputSource(new StringReader(xml)));
-            results = doc.getElementsByTagName("Result");
+            results = doc.getElementsByTagName(keyword);
         } catch (IOException e) {
             throw new RuntimeException(e);
         } catch (SAXException e) {
@@ -99,9 +99,9 @@ public class XMLReader{
 
     public static List<Map<String,String>> readEntityXml(String xml, List<String> keywords) {
         List<Map<String, String>> output = new ArrayList<Map<String, String>>();
-        NodeList results = extractResultsFromXml(xml);
+        NodeList results = extractResultsFromXml(keywords.get(0),xml);
         for (int i = 0; i < results.getLength(); i++) {
-            Map<String, String> result = getTagValue(keywords, results.item(i));
+            Map<String, String> result = getTagValue(keywords.subList(1, keywords.size()), results.item(i));
             if (result!=null && result.size() > 0)
                 output.add(result);
         }

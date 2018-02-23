@@ -241,6 +241,9 @@ public class SparqlExecutor extends Executor {
     String prefix = "exec-";
 
     Evaluation stats = new Evaluation();
+    if (formula.toString().contains("Open"))
+      return new Response(new StringValue(""),stats);
+
     // Convert to SPARQL
     Converter converter;
     try {
