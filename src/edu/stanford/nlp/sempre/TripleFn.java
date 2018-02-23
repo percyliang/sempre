@@ -74,7 +74,7 @@ public class TripleFn extends SemanticFn {
         // Convert a Map into JSON string.
         Gson gson = new Gson();
         String str_triple = gson.toJson(triple);
-        System.out.println("Init"+str_triple);
+        //System.out.println("Init"+str_triple);
         return str_triple;
     }
 
@@ -103,7 +103,7 @@ public class TripleFn extends SemanticFn {
             return final_string(result);
         }
         String str_triple = gson.toJson(result);
-        System.out.println("Merge"+str_triple);
+        //System.out.println("Merge"+str_triple);
         return str_triple;
     }
 
@@ -118,7 +118,6 @@ public class TripleFn extends SemanticFn {
                 triple.put("object", string2);
             }
             else if (this.mode.equals("sop")) {
-                System.out.println("Predicate SOP" + string2);
                 triple.put("predicate", string2);
             }
             else if (this.mode.equals("pso")) {
@@ -160,7 +159,7 @@ public class TripleFn extends SemanticFn {
             return final_string(triple);
         }
         String str_triple = gson.toJson(triple);
-        System.out.println("Concat"+str_triple);
+        //System.out.println("Concat"+str_triple);
         return str_triple;
     }
 
@@ -184,7 +183,6 @@ public class TripleFn extends SemanticFn {
                 out.append("(");
             StringBuilder out2 = new StringBuilder();
             for (String p : predicate) {
-                System.out.println("Predicate in array " + p);
                 if (out2.toString().length() > 0 && triple.get("predicate").toString().contains(","))
                     out2.append(",");
                 if (out2.toString().length() > 0 && triple.get("predicate").toString().contains(";"))
@@ -223,7 +221,7 @@ public class TripleFn extends SemanticFn {
             out.append(")");
         if (triple.get("object").toString().contains(";")||triple.get("object").toString().contains(","))
             out.append(")");   */
-        System.out.println(out.toString());
+        //System.out.println(out.toString());
         return out.toString();
     }
 
@@ -239,7 +237,6 @@ public class TripleFn extends SemanticFn {
             triple.put("object", string2);
         }
         else if (this.mode.equals("sop")) {
-            System.out.println("Predicate SOP" + string2);
             triple.put("predicate", string2);
         }
         else if (this.mode.equals("pso")) {
@@ -249,7 +246,6 @@ public class TripleFn extends SemanticFn {
             triple.put("subject", string2);
         }
         else if (this.mode.equals("osp")) {
-            System.out.println("Predicate OSP" + string2);
             triple.put("predicate", string2);
         }
         else if (this.mode.equals("ops")) {

@@ -234,7 +234,11 @@ public abstract class ParserState {
     LogInfo.begin_track("Parser.ensureExecuted");
     // Execute predicted derivations to get value.
     for (Derivation deriv : predDerivations) {
-      deriv.ensureExecuted(parser.executor, ex.context);
+      deriv.postprocess();
+      if (deriv.getFormula().toString().contains(","))
+        deriv.ensureExecuted(parser.simple_executor, ex.context);
+      else
+        deriv.ensureExecuted(parser.executor, ex.context);
       if (ex.targetValue != null)
         deriv.compatibility = parser.valueEvaluator.getCompatibility(ex.targetValue, deriv.value);
       if (!computeExpectedCounts && Parser.opts.executeTopFormulaOnly) break;

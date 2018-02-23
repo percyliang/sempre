@@ -4,6 +4,14 @@ import java.util.*;
 
 import fig.basic.*;
 
+import edu.stanford.nlp.sempre.roboy.helpers.*;
+import edu.stanford.nlp.sempre.NameValue;
+import edu.stanford.nlp.sempre.ValueFormula;
+
+import java.lang.reflect.Type;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
 /**
  * A Derivation corresponds to the production of a (partial) logical form
  * |formula| from a span of the utterance [start, end). Contains the formula and
@@ -74,8 +82,8 @@ public class Derivation implements SemanticFn.Callable, HasScore {
   // information.  This could be its own class, but expose more right now to
   // be more flexible.
 
-  public final Formula formula; // Logical form produced by this derivation
-  public final SemType type; // Type corresponding to that logical form
+  public Formula formula; // Logical form produced by this derivation
+  public SemType type; // Type corresponding to that logical form
 
   //// Fields produced by feature extractor, evaluation, etc.
 
@@ -112,6 +120,9 @@ public class Derivation implements SemanticFn.Callable, HasScore {
   // Cache the hash code
   int hashCode = -1;
 
+  // Error info about derivation
+  private ErrorInfo errorInfo;
+
   // Each derivation that gets created gets a unique ID in increasing order so that
   // we can break ties consistently for reproducible results.
   long creationIndex;
@@ -140,6 +151,7 @@ public class Derivation implements SemanticFn.Callable, HasScore {
     private double compatibility = Double.NaN;
     private double prob = Double.NaN;
     private String canonicalUtterance = "";
+    private ErrorInfo errorInfo;
 
     public Builder cat(String cat) { this.cat = cat; return this; }
     public Builder start(int start) { this.start = start; return this; }
@@ -228,6 +240,7 @@ public class Derivation implements SemanticFn.Callable, HasScore {
   public double getCompatibility() { return compatibility; }
   public List<Derivation> getChildren() { return children; }
   public Value getValue() { return value; }
+  public ErrorInfo getErrorInfo() { return errorInfo; }
 
   public boolean isFeaturizedAndScored() { return !Double.isNaN(score); }
   public boolean isExecuted() { return value != null; }
@@ -244,6 +257,9 @@ public class Derivation implements SemanticFn.Callable, HasScore {
   public String childStringValue(int i) {
     return Formulas.getString(children.get(i).formula);
   }
+
+  public void setFormula(Formula formula) { this.formula = formula; }
+  public void setType(SemType type) { this.type = type; }
 
   // Return whether |deriv| is built over the root Derivation.
   public boolean isRoot(int numTokens) {
@@ -574,6 +590,30 @@ public class Derivation implements SemanticFn.Callable, HasScore {
         if (child.allAnchored() == false) return false;
       }
       return true;
+    }
+  }
+
+  public void postprocess() {
+    // TODO: Add analyzers
+    List<KnowledgeHelper> helpers = new ArrayList<>();
+    helpers.add(new EntityHelper());
+    helpers.add(new MCGHelper());
+    this.errorInfo = new ErrorInfo();
+    for (KnowledgeHelper helper : helpers){
+      helper.analyze(this);
+    }
+    for (String key : this.errorInfo.underspecified.keySet()){
+      //System.out.println(key + ":" + this.errorInfo.underspecified.get(key));
+      Gson gson = new Gson();
+      Type type = new TypeToken<Map<String, String>>(){}.getType();
+      Map<String, String> triple = gson.fromJson(this.errorInfo.underspecified.get(key), type);
+      String formula = this.getFormula().toString();
+      String result = formula.replace("OpenEntity(".concat(key).concat(")"),triple.get("URI"));
+      result = result.replace("string","name");
+      //System.out.println(result);
+      this.setFormula(Formula.fromString(result));
+      this.setType(SemType.fromString("NamedEntity"));
+      //System.out.println(this.toString());
     }
   }
 }

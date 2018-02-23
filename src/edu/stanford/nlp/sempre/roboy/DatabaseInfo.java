@@ -299,7 +299,7 @@ public final class DatabaseInfo {
   public static String id2uri(String id) {
     for (String key : glossary.keySet()) {
       if (id.startsWith(key)) {
-        return glossary.get(key) + id.substring(3).replaceAll("\\.", "/");
+        return glossary.get(key) + id.substring(key.length()).replaceAll("\\.", "/");
       }
     }
     return id;
@@ -307,13 +307,13 @@ public final class DatabaseInfo {
 
   public static String uri2id(String uri) {
     for (String key : glossary.keySet()) {
-      if (uri.startsWith(glossary.get(key))) {
-        return key + ":" + uri.substring(glossary.get(key).length()).replaceAll("/", ".");
+      if (uri.contains(glossary.get(key))) {
+          uri = uri.replace(glossary.get(key),key + ":").replaceAll("/", ".");
       }
     }
-    LogInfo.logs("Warning: invalid Database uri!: %s", uri);
+    // LogInfo.logs("Warning: invalid Database uri!: %s", uri);
     // Don't do any conversion; this is not necessarily the best thing to do.
-     return uri;
+    return uri;
   }
 
   public static String getPrefixes(String query) {

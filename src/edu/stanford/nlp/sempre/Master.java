@@ -123,7 +123,7 @@ public class Master {
       // Convert a Map into JSON string.
       Gson gson = new Gson();
       String json = gson.toJson(interpretation);
-      System.out.println("json = " + json);
+      //System.out.println("json = " + json);
       return json;
     }
     public List<String> getLines() { return lines; }
@@ -309,7 +309,7 @@ public class Master {
     builder.parser.parse(builder.params, ex, false);
 
     // Postprocess and specify an underspecified query
-    ex.postprocess();
+    //ex.postprocess();
 
     response.ex = ex;
     ex.logWithoutContext();

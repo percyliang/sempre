@@ -106,6 +106,7 @@ public class SparqlExecutor extends Executor {
 
     try {
       String url = String.format("%s?query=%s&format=xml", endpointUrl, URLEncoder.encode(queryStr, "UTF-8"));
+      System.out.println(url);
       URLConnection conn = new URL(url).openConnection();
       conn.setConnectTimeout(opts.connectTimeoutMs);
       conn.setReadTimeout(opts.readTimeoutMs);

@@ -2,7 +2,7 @@ package edu.stanford.nlp.sempre.roboy.helpers;
 
 import edu.stanford.nlp.sempre.ErrorInfo;
 import edu.stanford.nlp.sempre.ErrorValue;
-import edu.stanford.nlp.sempre.Example;
+import edu.stanford.nlp.sempre.Derivation;
 import edu.stanford.nlp.sempre.SimpleLexicon;
 
 import java.net.SocketTimeoutException;
@@ -100,29 +100,27 @@ public class MCGHelper extends KnowledgeHelper {
         }
     }
 
-    public ErrorInfo analyze(Example ex) {
+    public ErrorInfo analyze(Derivation dev) {
         ErrorInfo errorInfo = new ErrorInfo();
         List <Map<String,Double>> results = new ArrayList<Map<String, Double>>();
         String entity = new String();
-        for (int i = 0; i < ex.getPredDerivations().size(); i++){
-            String formula = ex.getPredDerivations().get(i).getFormula().toString();
-            if (formula.contains("OpenType")){
-                entity = formula.substring(formula.indexOf("OpenType("),formula.substring(formula.indexOf("OpenType(")).indexOf(")"));
-                makeRequest(entity);
-                // Extract the results from XML now.
-                ServerResponse response = makeRequest(entity);
-                System.out.println(response.xml);
-                Type t = new TypeToken<Map<String, Double>>(){}.getType();
-                results.add(gson.fromJson(response.xml, t));
+        String formula = dev.getFormula().toString();
+        if (formula.contains("OpenType")){
+            entity = formula.substring(formula.indexOf("OpenType("),formula.substring(formula.indexOf("OpenType(")).indexOf(")"));
+            makeRequest(entity);
+            // Extract the results from XML now.
+            ServerResponse response = makeRequest(entity);
+            System.out.println(response.xml);
+            Type t = new TypeToken<Map<String, Double>>(){}.getType();
+            results.add(gson.fromJson(response.xml, t));
 
-            }
-            else{
-                entity = "berlin";
-                // Extract the results from XML now.
-                ServerResponse response = makeRequest(entity);
-                Type t = new TypeToken<Map<String, String>>(){}.getType();
-                results.add(gson.fromJson(response.xml, t));
-            }
+        }
+        else{
+            entity = "berlin";
+            // Extract the results from XML now.
+            ServerResponse response = makeRequest(entity);
+            Type t = new TypeToken<Map<String, String>>(){}.getType();
+            results.add(gson.fromJson(response.xml, t));
         }
 //        String json = gson.toJson(results.get(0));
 //        errorInfo.underspecified.put(entity,json);

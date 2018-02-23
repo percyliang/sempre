@@ -70,12 +70,14 @@ public abstract class Parser {
     public final Grammar grammar;
     public final FeatureExtractor extractor;
     public final Executor executor;
+    public final Executor simple_executor;
     public final ValueEvaluator valueEvaluator;
 
-    public Spec(Grammar grammar, FeatureExtractor extractor, Executor executor, ValueEvaluator valueEvaluator) {
+    public Spec(Grammar grammar, FeatureExtractor extractor, Executor executor, Executor simple_executor, ValueEvaluator valueEvaluator) {
       this.grammar = grammar;
       this.extractor = extractor;
       this.executor = executor;
+      this.simple_executor = simple_executor;
       this.valueEvaluator = valueEvaluator;
     }
   }
@@ -84,6 +86,7 @@ public abstract class Parser {
   public final Grammar grammar;
   public final FeatureExtractor extractor;
   public final Executor executor;
+  public final Executor simple_executor;
   public final ValueEvaluator valueEvaluator;
 
   // Precomputations to make looking up grammar rules faster.
@@ -97,6 +100,7 @@ public abstract class Parser {
     this.grammar = spec.grammar;
     this.extractor = spec.extractor;
     this.executor = spec.executor;
+    this.simple_executor = spec.simple_executor;
     this.valueEvaluator = spec.valueEvaluator;
 
     computeCatUnaryRules();
@@ -159,8 +163,15 @@ public abstract class Parser {
    */
   public ParserState parse(Params params, Example ex, boolean computeExpectedCounts) {
     // Execute target formula (if applicable).
-    if (ex.targetFormula != null && ex.targetValue == null)
-      ex.targetValue = executor.execute(ex.targetFormula, ex.context).value;
+    if (ex.targetFormula != null && ex.targetValue == null){
+      //TODO: Executor
+      if (ex.targetFormula.toString().contains(",")&&ex.targetFormula.toString().contains("(")) {
+        ex.targetValue = simple_executor.execute(ex.targetFormula, ex.context).value;
+      }
+      else {
+        ex.targetValue = executor.execute(ex.targetFormula, ex.context).value;
+      }
+    }
 
     // Parse
     StopWatch watch = new StopWatch();

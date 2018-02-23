@@ -3,6 +3,7 @@ package edu.stanford.nlp.sempre.roboy.utils;
 import edu.stanford.nlp.sempre.ErrorInfo;
 import edu.stanford.nlp.sempre.ErrorValue;
 import edu.stanford.nlp.sempre.Example;
+import edu.stanford.nlp.sempre.roboy.DatabaseInfo;
 
 import java.net.SocketTimeoutException;
 import java.net.URL;
@@ -30,7 +31,7 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.reflect.TypeToken;
 
 /**
- * Entity Helper use Entity Searcher APIs to resolve underspecified entities in the lexicon
+ * XML document reader for interpretation of server
  *
  * @author emlozin
  */
@@ -38,8 +39,14 @@ public class XMLReader{
     int connectTimeoutMs;
     int readTimeoutMs;
 
+    private static DatabaseInfo dbInfo;
+
     public static Properties prop = new Properties();
     public static Gson gson = new Gson();
+
+    public XMLReader() {
+        this.dbInfo = DatabaseInfo.getSingleton();
+    }
 
     public class ServerResponse {
         public ServerResponse(String xml) { this.xml = xml; }
@@ -75,6 +82,31 @@ public class XMLReader{
     // Helper for parsing DOM.
     // Return the inner text of of a child element of node with tag |tag|.
     public static Map<String, String> getTagValue(List<String> keywords, Node node) {
+        Map<String, String> result = new HashMap();
+        try {
+            NodeList child_nodes;
+            if (node.hasChildNodes()){
+                child_nodes = node.getChildNodes();
+                for (int j = 0; j < child_nodes.getLength(); j++) {
+                    if (child_nodes.item(j).getTextContent() != null
+                            && keywords.toString().contains(child_nodes.item(j).getNodeName())){
+                        result.put(child_nodes.item(j).getNodeName(),
+                                dbInfo.uri2id(child_nodes.item(j).getTextContent()));
+                    }
+                }
+            }
+            return result;
+
+        }
+        catch (RuntimeException exception){
+            System.out.println("Exception. Oops");
+            return null;
+        }
+    }
+
+    // Helper for parsing DOM.
+    // Return the inner text of of a child element of node with tag |tag|.
+    public static Map<String, String> getAttValue(List<String> keywords, Node node) {
         Map<String, String> result = new HashMap();
         try {
             NodeList child_nodes;

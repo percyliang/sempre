@@ -521,6 +521,7 @@ nil) })
 addMode('database-server', 'Simple shell for using external Knowledge Base (without a cache server)', lambda { |e| l(
   'java', '-Dmodules=core,roboy', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.Main',
   o('executor', 'roboy.SparqlExecutor'),
+  o('simple_executor', 'FormulaMatchExecutor'),
   letDefault(:sparqlserver, 'dbpedia.org'),
   sparqlOptsNew,
   o('FeatureExtractor.featureDomains', 'rule'),

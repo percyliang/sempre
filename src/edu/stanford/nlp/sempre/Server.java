@@ -1,5 +1,6 @@
 package edu.stanford.nlp.sempre;
 
+import edu.stanford.nlp.sempre.roboy.DatabaseInfo;
 import com.google.common.collect.Lists;
 import fig.basic.*;
 import fig.html.HtmlElement;
@@ -166,8 +167,7 @@ public class Server {
 
     public final String freebaseWebsite = "http://www.freebase.com/";
     public String id2website(String id) {
-      assert id.startsWith("fb:") : id;
-      return freebaseWebsite + id.substring(3).replaceAll("\\.", "/");
+      return DatabaseInfo.id2uri(id);
     }
 
     HtmlElement valueToElem(Value value) {

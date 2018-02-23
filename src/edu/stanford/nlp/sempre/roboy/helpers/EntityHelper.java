@@ -2,8 +2,9 @@ package edu.stanford.nlp.sempre.roboy.helpers;
 
 import edu.stanford.nlp.sempre.ErrorInfo;
 import edu.stanford.nlp.sempre.ErrorValue;
-import edu.stanford.nlp.sempre.Example;
+import edu.stanford.nlp.sempre.Derivation;
 import edu.stanford.nlp.sempre.SimpleLexicon;
+import edu.stanford.nlp.sempre.roboy.utils.SPARQLUtils;
 
 import java.net.SocketTimeoutException;
 import java.net.URL;
@@ -61,90 +62,49 @@ public class EntityHelper extends KnowledgeHelper {
         }
     }
 
-    public class ServerResponse {
-        public ServerResponse(String xml) { this.xml = xml; }
-        public ServerResponse(ErrorValue error) { this.error = error; }
-        String xml;
-        ErrorValue error;
-        long timeMs;
-    }
-
-    // Make a request to the given SPARQL endpoint.
-    // Return the XML.
-    public ServerResponse makeRequest(String entity) {
-        if (entity == null)
-            throw new RuntimeException("No entity specified");
-        try {
-            String url = endpointUrl.concat(entity);
-            url = url.replace(" ","_");
-            URLConnection conn = new URL(url).openConnection();
-            conn.setConnectTimeout(this.connectTimeoutMs);
-            conn.setReadTimeout(this.readTimeoutMs);
-            InputStream in = conn.getInputStream();
-
-            // Read the response
-            StringBuilder buf = new StringBuilder();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-            String line;
-            while ((line = reader.readLine()) != null)
-                buf.append(line);
-            return new ServerResponse(buf.toString());
-        } catch (SocketTimeoutException e) {
-            return new ServerResponse(ErrorValue.timeout);
-        } catch (IOException e) {
-            // Sometimes the SPARQL server throws a 408 to signify a server timeout.
-            if (e.toString().contains("HTTP response code: 408"))
-                return new ServerResponse(ErrorValue.server408);
-            if (e.toString().contains("HTTP response code: 500"))
-                return new ServerResponse(ErrorValue.server500);
-            throw new RuntimeException(e);  // Haven't seen this happen yet...
-        }
-    }
-
-    public ErrorInfo analyze(Example ex) {
+    public ErrorInfo analyze(Derivation dev) {
         List <Map<String,String>> results = new ArrayList<Map<String, String>>();
         String entity = new String();
-        for (int i = 0; i < ex.getPredDerivations().size(); i++){
-            String formula = ex.getPredDerivations().get(i).getFormula().toString();
-            if (formula.contains("OpenEntity")){
-                int start = formula.indexOf("OpenEntity(")+"OpenEntity(".length();
-                int end = formula.indexOf(")");
-                entity = formula.substring(start,end);
-                System.out.println("Checking entity:" + entity);
-                // Extract the results from XML now.
-                ServerResponse response = makeRequest(entity);
-                results = reader.readEntityXml(response.xml,keywords);
-
-            }
-//            else{
-//                entity = "berlin";
-//                // Extract the results from XML now.
-//                ServerResponse response = makeRequest(entity);
-//                results = reader.readEntityXml(response.xml,keywords);
-//            }
-
-
-            if (results.size() > 0){
-                String json = gson.toJson(results.get(0));
-                ex.errorInfo.underspecified.put(entity,json);
-                System.out.println(json);
-                for (int j = 0; j < results.size(); j++) {
-                    Map<String, String> lexeme = new HashMap();
-                    lexeme.put("lexeme", results.get(j).get("Label"));
-                    lexeme.put("formula", results.get(j).get("URI"));
-                    lexeme.put("type", "NamedEntity");
-                    String lexical_entry = gson.toJson(lexeme);
-                    //ex.errorInfo.underspecified.put(entity, json);
-                    SimpleLexicon.getSingleton().add(lexical_entry);
-                    lexeme.put("lexeme", entity);
-                    lexical_entry = gson.toJson(lexeme);
-                    //ex.errorInfo.underspecified.put(entity, json);
-                    SimpleLexicon.getSingleton().add(lexical_entry);
-                }
-                List<SimpleLexicon.Entry> entries = SimpleLexicon.getSingleton().lookup(entity);
-            }
+        String formula = dev.getFormula().toString();
+        if (formula.contains("OpenEntity")){
+            int start = formula.indexOf("OpenEntity(")+"OpenEntity(".length();
+            int end = formula.indexOf(")");
+            entity = formula.substring(start,end);
+            System.out.println("Checking entity:" + entity);
+            // Extract the results from XML now.
+            String url = endpointUrl.concat(entity);
+            url = url.replace(" ","_");
+            SPARQLUtils sparql = new SPARQLUtils();
+            SPARQLUtils.ServerResponse response = sparql.makeRequest(url);
+            results = reader.readEntityXml(response.getXml(),keywords);
         }
-        return ex.errorInfo;
+//        else{
+//            entity = "berlin";
+//            // Extract the results from XML now.
+//            ServerResponse response = makeRequest(entity);
+//            results = reader.readEntityXml(response.xml,keywords);
+//        }
+
+        if (results.size() > 0){
+            String json = gson.toJson(results.get(0));
+            dev.getErrorInfo().underspecified.put(entity,json);
+            System.out.println(json);
+            for (int j = 0; j < results.size(); j++) {
+                Map<String, String> lexeme = new HashMap();
+                lexeme.put("lexeme", results.get(j).get("Label"));
+                lexeme.put("formula", results.get(j).get("URI"));
+                lexeme.put("type", "NamedEntity");
+                String lexical_entry = gson.toJson(lexeme);
+                //dev.getErrorInfo().underspecified.put(entity, json);
+                SimpleLexicon.getSingleton().add(lexical_entry);
+                lexeme.put("lexeme", entity);
+                lexical_entry = gson.toJson(lexeme);
+                //dev.getErrorInfo().underspecified.put(entity, json);
+                SimpleLexicon.getSingleton().add(lexical_entry);
+            }
+            List<SimpleLexicon.Entry> entries = SimpleLexicon.getSingleton().lookup(entity);
+        }
+        return dev.getErrorInfo();
     }
 
 }

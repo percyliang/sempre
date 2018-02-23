@@ -25,10 +25,11 @@ public class ParserTest {
 
     public Parser.Spec getParserSpec() {
       Executor executor = new JavaExecutor();
+      Executor simple_executor = new JavaExecutor();
       FeatureExtractor extractor = new FeatureExtractor(executor);
       FeatureExtractor.opts.featureDomains.add("rule");
       ValueEvaluator valueEvaluator = new ExactValueEvaluator();
-      return new Parser.Spec(grammar, extractor, executor, valueEvaluator);
+      return new Parser.Spec(grammar, extractor, executor, simple_executor, valueEvaluator);
     }
 
     public abstract void test(Parser parser);

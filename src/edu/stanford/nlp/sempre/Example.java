@@ -9,7 +9,6 @@ import com.google.common.collect.Sets;
 import fig.basic.Evaluation;
 import fig.basic.LispTree;
 import fig.basic.LogInfo;
-import edu.stanford.nlp.sempre.roboy.helpers.*;
 
 import java.util.*;
 
@@ -68,7 +67,6 @@ public class Example {
     private Value targetValue;
     private LanguageInfo languageInfo;
     private RelationInfo relationInfo;
-    private ErrorInfo errorInfo;
 
     public Builder setId(String id) { this.id = id; return this; }
     public Builder setUtterance(String utterance) { this.utterance = utterance; return this; }
@@ -77,7 +75,6 @@ public class Example {
     public Builder setTargetValue(Value targetValue) { this.targetValue = targetValue; return this; }
     public Builder setLanguageInfo(LanguageInfo languageInfo) { this.languageInfo = languageInfo; return this; }
     public Builder setRelationInfo(RelationInfo relationInfo) { this.relationInfo = relationInfo; return this; }
-    public Builder setErrorInfo(ErrorInfo errorInfo) { this.errorInfo = errorInfo; return this; }
     public Builder withExample(Example ex) {
       setId(ex.id);
       setUtterance(ex.utterance);
@@ -87,7 +84,7 @@ public class Example {
       return this;
     }
     public Example createExample() {
-      return new Example(id, utterance, context, targetFormula, targetValue, languageInfo, relationInfo, errorInfo);
+      return new Example(id, utterance, context, targetFormula, targetValue, languageInfo, relationInfo);
     }
   }
 
@@ -98,8 +95,7 @@ public class Example {
                  @JsonProperty("targetFormula") Formula targetFormula,
                  @JsonProperty("targetValue") Value targetValue,
                  @JsonProperty("languageInfo") LanguageInfo languageInfo,
-                 @JsonProperty("relationInfo") RelationInfo relationInfo,
-                 @JsonProperty("errorInfo") ErrorInfo errorInfo) {
+                 @JsonProperty("relationInfo") RelationInfo relationInfo) {
     this.id = id;
     this.utterance = utterance;
     this.context = context;
@@ -107,7 +103,6 @@ public class Example {
     this.targetValue = targetValue;
     this.languageInfo = languageInfo;
     this.relationInfo = relationInfo;
-    this.errorInfo = errorInfo;
   }
 
   // Accessors
@@ -171,7 +166,6 @@ public class Example {
     }
     b.setLanguageInfo(new LanguageInfo());
     b.setRelationInfo(new RelationInfo());
-    b.setErrorInfo(new ErrorInfo());
 
     Example ex = b.createExample();
 
@@ -213,22 +207,6 @@ public class Example {
     }
 
     return ex;
-  }
-
-  public void postprocess() {
-    // TODO: Add analyzers
-    List<KnowledgeHelper> helpers = new ArrayList<>();
-    helpers.add(new EntityHelper());
-    helpers.add(new MCGHelper());
-    this.errorInfo = new ErrorInfo();
-    for (KnowledgeHelper helper : helpers){
-      helper.analyze(this);
-    }
-    System.out.println("Hej");
-    for (String key : this.errorInfo.underspecified.keySet()){
-      System.out.println(key + ":" + this.errorInfo.underspecified.get(key));
-      System.out.println(this.targetFormula.toString().replace(key,this.errorInfo.underspecified.get(key)));
-    }
   }
 
   public void preprocess() {

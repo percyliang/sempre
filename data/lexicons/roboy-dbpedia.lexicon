@@ -9,6 +9,9 @@
 {"lexeme": "your", "formula": "rb:Roboy", "type": "Person"}
 {"lexeme": "yours", "formula": "rb:Roboy", "type": "Person"}
 
+## Type relationships
+{"lexeme": "favorite", "formula": "rb:FAVORITE", "type" : "TypeProperty"}
+
 ## Relationships
 {"lexeme": "like", "formula": "rb:HAS_HOBBY", "type" : "Relationship"}
 {"lexeme": "like", "formula": "rb:FRIEND_OF", "type" : "Relationship"}
@@ -35,6 +38,8 @@
 {"lexeme": "country", "formula": "rb:COUNTRY", "type" : "ObjectClass"}
 {"lexeme": "division", "formula": "rb:DIVISION", "type" : "ObjectClass"}
 {"lexeme": "name", "formula": "rb:NAME", "type" : "ObjectClass"}
+{"lexeme": "color", "formula": "rb:COLOR", "type" : "ObjectClass"}
+{"lexeme": "animal", "formula": "rb:ANIMAL", "type" : "ObjectClass"}
 
 ## Relationship Classes
 {"lexeme": "hobby", "formula": "rb:HAS_HOBBY", "type" : "RelationClass"}
@@ -189,9 +194,9 @@
 {"lexeme": "lieutenant", "formula": "dbpedia:Lieutenant", "type": "ClassNoun"}
 {"lexeme": "chancellor", "formula": "dbpedia:Chancellor", "type": "ClassNoun"}
 {"lexeme": "mayor", "formula": "dbpedia:Mayor", "type": "ClassNoun"}
-{"lexeme": "mayor", "formula": "(dbpedia:leaderTitle 'Mayor')", "type": "DataPropertyNoun"}
+{"lexeme": "mayor", "formula": "(dbpedia:leaderTitle 'Mayor'@en)", "type": "DataPropertyNoun"}
 {"lexeme": "senator", "formula": "dbpedia:Senator", "type": "ClassNoun"}
-{"lexeme": "senator", "formula": "(dbpedia:office 'Senator')", "type": "DataPropertyNoun"}
+{"lexeme": "senator", "formula": "(dbpedia:office 'Senator@en)", "type": "DataPropertyNoun"}
 {"lexeme": "ambassador", "formula": "dbpedia:Ambassador", "type": "ClassNoun"}
 {"lexeme": "law firm", "formula": "dbpedia:LawFirm", "type": "ClassNoun"}
 {"lexeme": "case", "formula": "dbpedia:Case", "type": "ClassNoun"}

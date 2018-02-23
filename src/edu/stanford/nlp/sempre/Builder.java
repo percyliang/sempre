@@ -15,6 +15,7 @@ public class Builder {
   public static class Options {
     @Option public String inParamsPath;
     @Option public String executor = "JavaExecutor";
+    @Option public String simple_executor = "JavaExecutor";
     @Option public String valueEvaluator = "ExactValueEvaluator";
     @Option public String parser = "BeamParser";
   }
@@ -23,6 +24,7 @@ public class Builder {
 
   public Grammar grammar;
   public Executor executor;
+  public Executor simple_executor;
   public ValueEvaluator valueEvaluator;
   public FeatureExtractor extractor;
   public Parser parser;
@@ -31,7 +33,9 @@ public class Builder {
   public void build() {
     grammar = null;
     executor = null;
+    simple_executor = null;
     valueEvaluator = null;
+    extractor = null;
     extractor = null;
     parser = null;
     params = null;
@@ -50,6 +54,10 @@ public class Builder {
     if (executor == null)
       executor = (Executor) Utils.newInstanceHard(SempreUtils.resolveClassName(opts.executor));
 
+    // SimpleExecutor
+    if (simple_executor == null)
+      simple_executor = (Executor) Utils.newInstanceHard(SempreUtils.resolveClassName(opts.simple_executor));
+
     // Value evaluator
     if (valueEvaluator == null)
       valueEvaluator = (ValueEvaluator) Utils.newInstanceHard(SempreUtils.resolveClassName(opts.valueEvaluator));
@@ -60,7 +68,7 @@ public class Builder {
 
     // Parser
     if (parser == null)
-      parser = buildParser(new Parser.Spec(grammar, extractor, executor, valueEvaluator));
+      parser = buildParser(new Parser.Spec(grammar, extractor, executor, simple_executor, valueEvaluator));
 
     // Parameters
     if (params == null) {

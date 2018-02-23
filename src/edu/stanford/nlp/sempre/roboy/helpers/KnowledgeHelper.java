@@ -2,7 +2,7 @@ package edu.stanford.nlp.sempre.roboy.helpers;
 
 import fig.basic.*;
 import edu.stanford.nlp.sempre.SempreUtils;
-import edu.stanford.nlp.sempre.Example;
+import edu.stanford.nlp.sempre.Derivation;
 import edu.stanford.nlp.sempre.ErrorInfo;
 
 /**
@@ -17,5 +17,5 @@ public abstract class KnowledgeHelper {
     }
     public static Options opts = new Options();
 
-    public abstract ErrorInfo analyze(Example ex);
+    public abstract ErrorInfo analyze(Derivation dev);
 }
