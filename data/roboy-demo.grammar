@@ -12,6 +12,7 @@
 (rule $RelatClass ($PHRASE) (SimpleLexiconFn (type "RelationClass")))
 (rule $DatPropClass ($PHRASE) (SimpleLexiconFn (type "DataPropertyNoun")))
 (rule $ObjPropClass ($PHRASE) (SimpleLexiconFn (type "ObjectProperty")))
+(rule $ObjectClass ($PHRASE) (SimpleLexiconFn (type "ObjectClass")))
 (rule $TypeProperty ($Adjective) (SimpleLexiconFn (type "TypeProperty")))
 
 (rule $StateVerb ($LEMMA_PHRASE) (SimpleLexiconFn (type "StateVerb")))
@@ -102,8 +103,8 @@
 (rule $Predicate ($Not $Predicate) (ConcatFn " "))
 (rule $Predicate ($Predicate $Predicate) (ConcatFn ";"))
 #(rule $Predicate ($TypeProperty $PHRASE) (SelectFn 0))
-(rule $Predicate ($TypeProperty $PHRASE) (TripleFn "pt"))
-(rule $Pred ($TypeProperty $PHRASE) (TripleFn "pt"))
+(rule $Predicate ($TypeProperty $ObjectClass) (TripleFn "pt"))
+(rule $Pred ($TypeProperty $ObjectClass) (TripleFn "pt"))
 
 # Question Phrase
 (rule $Quest ($Wh) (SimpleLexiconFn (type Question)))

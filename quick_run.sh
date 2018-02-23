@@ -38,6 +38,14 @@ elif [[ $1 = "db_demo" ]]; then
 	-Dataset.inPaths train:data/short.examples \
 	-Learner.maxTrainIters 1 \
 	-languageAnalyzer corenlp.CoreNLPAnalyzer
+elif [[ $1 = "db_demo_interactive" ]]; then
+    ./run @mode=simple \
+	-Grammar.inPaths data/roboy-demo.grammar \
+	-SimpleLexicon.inPaths data/lexicons/* \
+	-Dataset.inPaths train:data/short.examples \
+	-Learner.maxTrainIters 1 \
+	-languageAnalyzer corenlp.CoreNLPAnalyzer \
+	-server true
 elif [[ $1 = "freebase" ]]; then
     ./run @mode=database-server \
 	@sparqlserver=localhost:3001 \

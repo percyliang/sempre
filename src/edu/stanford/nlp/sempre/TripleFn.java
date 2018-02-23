@@ -133,22 +133,22 @@ public class TripleFn extends SemanticFn {
         if (string2.contains("{")){
             triple = gson.fromJson(string2, type);
             if (this.mode.equals("spo")) {
-                triple.put("object", string1);
+                triple.put("subject", string1);
             }
             else if (this.mode.equals("sop")) {
-                triple.put("predicate", string1);
+                triple.put("subject", string1);
             }
             else if (this.mode.equals("pso")) {
-                triple.put("object", string1);
-            }
-            else if (this.mode.equals("pos")) {
-                triple.put("subject", string1);
-            }
-            else if (this.mode.equals("osp")) {
                 triple.put("predicate", string1);
             }
+            else if (this.mode.equals("pos")) {
+                triple.put("predicate", string1);
+            }
+            else if (this.mode.equals("osp")) {
+                triple.put("object", string1);
+            }
             else if (this.mode.equals("ops")) {
-                triple.put("subject", string1);
+                triple.put("object", string1);
             }
         }
 
@@ -239,12 +239,12 @@ public class TripleFn extends SemanticFn {
                     out3.append(o);
                     out3.append(")");
                     if (triple.containsKey("type")){
-                        out.append(",");
-                        out.append("(");
-                        out.append(o);
-                        out.append("has_type");
-                        out.append(triple.get("type"));
-                        out.append(")");
+                        out3.append(",");
+                        out3.append("(");
+                        out3.append(o);
+                        out3.append(",has_type,");
+                        out3.append(triple.get("type"));
+                        out3.append(")");
                     }
                     }
                 out2.append(out3.toString());
