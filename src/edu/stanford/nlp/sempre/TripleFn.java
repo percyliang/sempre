@@ -98,6 +98,10 @@ public class TripleFn extends SemanticFn {
                 result.put(entry.getKey(),entry.getValue());
         }
         // Convert a Map into JSON string.
+
+        if (result.containsKey("subject") && result.containsKey("predicate") && result.containsKey("object")){
+            return final_string(result);
+        }
         String str_triple = gson.toJson(result);
         System.out.println("Merge"+str_triple);
         return str_triple;
@@ -152,59 +156,19 @@ public class TripleFn extends SemanticFn {
             }
         }
 
+        if (triple.containsKey("subject") && triple.containsKey("predicate") && triple.containsKey("object")){
+            return final_string(triple);
+        }
         String str_triple = gson.toJson(triple);
         System.out.println("Concat"+str_triple);
         return str_triple;
     }
 
-
-    public String final_formula(String string1, String string2) {
-        // Convert JSON string back to Map.
-        Gson gson = new Gson();
-        Type type = new TypeToken<Map<String, String>>(){}.getType();
-        Map<String, String> triple = gson.fromJson(string1, type);
-/*        Map<String, String> triple = new HashMap<String,String>();
-        triple = (Map<String,String>) gson.fromJson(string1, triple.getClass());*/
-
-        if (this.mode.equals("spo")) {
-            triple.put("object", string2);
-        }
-        else if (this.mode.equals("sop")) {
-            System.out.println("Predicate SOP" + string2);
-            triple.put("predicate", string2);
-        }
-        else if (this.mode.equals("pso")) {
-            triple.put("object", string2);
-        }
-        else if (this.mode.equals("pos")) {
-            triple.put("subject", string2);
-        }
-        else if (this.mode.equals("osp")) {
-            System.out.println("Predicate OSP" + string2);
-            triple.put("predicate", string2);
-        }
-        else if (this.mode.equals("ops")) {
-            triple.put("subject", string2);
-        }
-        // split multiple subjects
-        String[] subject;
-        String[] predicate;
-        String[] object;
-        if(triple.containsKey("subject"))
-            subject = split(triple.get("subject").toString());
-        else
-            return concat_formula(string1,string2);
-        if(triple.containsKey("predicate"))
-            predicate = split(triple.get("predicate").toString());
-        else
-            return concat_formula(string1,string2);
-        if(triple.containsKey("object"))
-            object = split(triple.get("object").toString());
-        else
-            return concat_formula(string1,string2);
+    public String final_string(Map<String, String> triple){
+        String[] subject = split(triple.get("subject").toString());
+        String[] predicate = split(triple.get("predicate").toString());
+        String[] object = split(triple.get("object").toString());
         StringBuilder out = new StringBuilder();
-
-
         if (triple.get("subject").toString().contains(";")||triple.get("subject").toString().contains(","))
             out.append("(");
 /*        if (triple.get("predicate").toString().contains(";")||triple.get("predicate").toString().contains(","))
@@ -246,9 +210,9 @@ public class TripleFn extends SemanticFn {
                         out3.append(triple.get("type"));
                         out3.append(")");
                     }
-                    }
-                out2.append(out3.toString());
                 }
+                out2.append(out3.toString());
+            }
             out.append(out2.toString());
             if (triple.get("predicate").toString().contains(";")||triple.get("predicate").toString().contains(","))
                 out.append(")");
@@ -261,6 +225,45 @@ public class TripleFn extends SemanticFn {
             out.append(")");   */
         System.out.println(out.toString());
         return out.toString();
+    }
+
+    public String final_formula(String string1, String string2) {
+        // Convert JSON string back to Map.
+        Gson gson = new Gson();
+        Type type = new TypeToken<Map<String, String>>(){}.getType();
+        Map<String, String> triple = gson.fromJson(string1, type);
+/*        Map<String, String> triple = new HashMap<String,String>();
+        triple = (Map<String,String>) gson.fromJson(string1, triple.getClass());*/
+
+        if (this.mode.equals("spo")) {
+            triple.put("object", string2);
+        }
+        else if (this.mode.equals("sop")) {
+            System.out.println("Predicate SOP" + string2);
+            triple.put("predicate", string2);
+        }
+        else if (this.mode.equals("pso")) {
+            triple.put("object", string2);
+        }
+        else if (this.mode.equals("pos")) {
+            triple.put("subject", string2);
+        }
+        else if (this.mode.equals("osp")) {
+            System.out.println("Predicate OSP" + string2);
+            triple.put("predicate", string2);
+        }
+        else if (this.mode.equals("ops")) {
+            triple.put("subject", string2);
+        }
+        // split multiple subjects
+        if(!triple.containsKey("subject"))
+            return concat_formula(string1,string2);
+        if(!triple.containsKey("predicate"))
+            return concat_formula(string1,string2);
+        if(!triple.containsKey("object"))
+            return concat_formula(string1,string2);
+
+        return final_string(triple);
     }
 
     public DerivationStream call(Example ex, final Callable c) {

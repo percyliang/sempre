@@ -92,7 +92,7 @@
 (rule $AdjPhrase ($Not $AdjPhrase) (ConcatFn " "))
 (rule $AdjPhrase ($Adverb $AdjPhrase) (ConcatFn " "))
 (rule $AdjPhrase ($Conj $AdjPhrase) (SelectFn 1))
-(rule $AdjPhrase ($AdjPhrase $AdjPhrase) (ConcatFn ","))
+(rule $AdjPhrase ($AdjPhrase and $AdjPhrase) (ConcatFn ","))
 
 # Predicate Phrase
 #(rule $Predicate ($PHRASE) (OpenTypeFn relation))
