@@ -69,7 +69,7 @@
   </target>
 
   <!-- Compile roboy -->
-  <target name="roboy" depends="init,core,cache,freebase">
+  <target name="roboy" depends="init,core,corenlp,cache,freebase">
     <echo message="Compiling ${ant.project.name}: roboy"/>
     <mkdir dir="${classes}/roboy"/>
     <javac srcdir="${src}" destdir="${classes}/roboy" classpathref="lib.path" debug="true" includeantruntime="false" source="${source}" target="${target}">
