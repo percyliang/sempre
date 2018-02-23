@@ -12,7 +12,7 @@
 (rule $RelatClass ($PHRASE) (SimpleLexiconFn (type "RelationClass")))
 (rule $DatPropClass ($PHRASE) (SimpleLexiconFn (type "DataPropertyNoun")))
 (rule $ObjPropClass ($PHRASE) (SimpleLexiconFn (type "ObjectProperty")))
-(rule $ObjectClass ($PHRASE) (SimpleLexiconFn (type "ObjectClass")))
+(rule $ObjectClass ($LEMMA_PHRASE) (SimpleLexiconFn (type "ObjectClass")))
 (rule $TypeProperty ($Adjective) (SimpleLexiconFn (type "TypeProperty")))
 
 (rule $StateVerb ($LEMMA_PHRASE) (SimpleLexiconFn (type "StateVerb")))
@@ -92,7 +92,7 @@
 (rule $AdjPhrase ($Not $AdjPhrase) (ConcatFn " "))
 (rule $AdjPhrase ($Adverb $AdjPhrase) (ConcatFn " "))
 (rule $AdjPhrase ($Conj $AdjPhrase) (SelectFn 1))
-(rule $AdjPhrase ($AdjPhrase $AdjPhrase) (ConcatFn ";"))
+(rule $AdjPhrase ($AdjPhrase $AdjPhrase) (ConcatFn ","))
 
 # Predicate Phrase
 #(rule $Predicate ($PHRASE) (OpenTypeFn relation))
@@ -130,10 +130,10 @@
 #(rule $Expr ($Subject ($BE optional) $AdjPhrase) (ConcatFn ","))
 #(rule $Expr ($Subject ($BE optional) $Noun) (ConcatFn ","))
 #(rule $Expr ($Subject ($BE optional) $Noun) (ConcatFn ","))
-(rule $Expr ($Subject $Predicate is $Object) (TripleFn "spo"))
-(rule $Expr ($Noun is $Subject $Predicate) (TripleFn "osp"))
-(rule $Expr ($Subject $Predicate is $AdjPhrase) (TripleFn "spo"))
-(rule $Expr ($AdjPhrase is $Subject $Predicate) (TripleFn "osp"))
+(rule $Expr ($Subject $Predicate ($BE optional) $Object) (TripleFn "spo"))
+(rule $Expr ($Noun ($BE optional) $Subject $Predicate) (TripleFn "osp"))
+(rule $Expr ($Subject $Predicate ($BE optional) $AdjPhrase) (TripleFn "spo"))
+(rule $Expr ($AdjPhrase ($BE optional) $Subject $Predicate) (TripleFn "osp"))
 #(rule $Expr ($Noun is $Subject $Predicate) (TripleFn "osp"))
 #(rule $Expr ($Subject $Predicate $AdjPhrase) (TripleFn "spo"))
 #(rule $Expr ($Subject $Predicate $Subject) (ConcatFn ","))
