@@ -140,6 +140,9 @@ addModule('core', 'Core utilities (need to compile)', lambda {
 
   # jLine from maven central
   pull('http://central.maven.org/maven2/jline/jline/2.14.2/jline-2.14.2.jar')
+
+  # GSON
+  pull('https://repo1.maven.org/maven2/com/google/code/gson/gson/2.6.2/gson-2.6.2.jar')
 })
 
 addModule('corenlp', 'Stanford CoreNLP 3.6.0', lambda {
