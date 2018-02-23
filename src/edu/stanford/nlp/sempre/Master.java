@@ -98,11 +98,6 @@ public class Master {
       interpretation.put("postags",ex.getPosTag());
       interpretation.put("relations",ex.getRelation());
 
-      // Convert a Map into JSON string.
-      Gson gson = new Gson();
-      String json = gson.toJson(interpretation);
-      System.out.println("json = " + json);
-
     /* // Convert JSON string back to Map.
       Type type = new TypeToken<Map<String, String>>(){}.getType();
       Map<String, String> map = gson.fromJson(json, type);
@@ -110,15 +105,26 @@ public class Master {
         System.out.println("map.get = " + map.get(key));
       }*/
 
-      if (ex.getPredDerivations().size() == 0)
-        return "(no answer)";
-      else if (candidateIndex == -1)
-        return "(not selected)";
+      if (ex.getPredDerivations().size() == 0){
+        interpretation.put("parse","(no answer)");
+        interpretation.put("answer","(no answer)");
+      }
+      else if (candidateIndex == -1){
+        interpretation.put("parse","(not selected)");
+        interpretation.put("answer","(not selected)");
+      }
       else {
         Derivation deriv = getDerivation();
         deriv.ensureExecuted(builder.executor, ex.context);
-        return deriv.getValue().toString();
+        interpretation.put("parse",deriv.getFormula().toString());
+        interpretation.put("answer",deriv.getValue().toString());
       }
+
+      // Convert a Map into JSON string.
+      Gson gson = new Gson();
+      String json = gson.toJson(interpretation);
+      System.out.println("json = " + json);
+      return json;
     }
     public List<String> getLines() { return lines; }
     public Example getExample() { return ex; }

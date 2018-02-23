@@ -107,35 +107,56 @@ public class TripleFn extends SemanticFn {
         // Convert JSON string back to Map.
         Gson gson = new Gson();
         Type type = new TypeToken<Map<String, String>>(){}.getType();
-        Map<String, String> triple = gson.fromJson(string1, type);
-/*        Map<String, String> triple = new HashMap<String,String>();
-        triple = (Map<String,String>) gson.fromJson(string1, triple.getClass());*/
-
-        if (this.mode.equals("spo")) {
-            triple.put("object", string2);
+        Map<String, String> triple = new HashMap();
+        if (string1.contains("{")){
+            triple = gson.fromJson(string1, type);
+            if (this.mode.equals("spo")) {
+                triple.put("object", string2);
+            }
+            else if (this.mode.equals("sop")) {
+                System.out.println("Predicate SOP" + string2);
+                triple.put("predicate", string2);
+            }
+            else if (this.mode.equals("pso")) {
+                triple.put("object", string2);
+            }
+            else if (this.mode.equals("pos")) {
+                triple.put("subject", string2);
+            }
+            else if (this.mode.equals("osp")) {
+                triple.put("predicate", string2);
+            }
+            else if (this.mode.equals("ops")) {
+                triple.put("subject", string2);
+            }
         }
-        else if (this.mode.equals("sop")) {
-            System.out.println("Predicate SOP" + string2);
-            triple.put("predicate", string2);
-        }
-        else if (this.mode.equals("pso")) {
-            triple.put("object", string2);
-        }
-        else if (this.mode.equals("pos")) {
-            triple.put("subject", string2);
-        }
-        else if (this.mode.equals("osp")) {
-            System.out.println("Predicate OSP" + string2);
-            triple.put("predicate", string2);
-        }
-        else if (this.mode.equals("ops")) {
-            triple.put("subject", string2);
+        if (string2.contains("{")){
+            triple = gson.fromJson(string2, type);
+            if (this.mode.equals("spo")) {
+                triple.put("object", string1);
+            }
+            else if (this.mode.equals("sop")) {
+                triple.put("predicate", string1);
+            }
+            else if (this.mode.equals("pso")) {
+                triple.put("object", string1);
+            }
+            else if (this.mode.equals("pos")) {
+                triple.put("subject", string1);
+            }
+            else if (this.mode.equals("osp")) {
+                triple.put("predicate", string1);
+            }
+            else if (this.mode.equals("ops")) {
+                triple.put("subject", string1);
+            }
         }
 
         String str_triple = gson.toJson(triple);
         System.out.println("Concat"+str_triple);
         return str_triple;
     }
+
 
     public String final_formula(String string1, String string2) {
         // Convert JSON string back to Map.
@@ -252,6 +273,9 @@ public class TripleFn extends SemanticFn {
                 }
                 else if (c.childStringValue(0).contains("{")){
                     out = final_formula(c.childStringValue(0),c.childStringValue(1));
+                }
+                else if (c.childStringValue(1).contains("{")){
+                    out = concat_formula(c.childStringValue(0),c.childStringValue(1));
                 }
                 else{
                     out = initial_formula(c.childStringValue(0),c.childStringValue(1));

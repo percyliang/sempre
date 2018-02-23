@@ -32,13 +32,12 @@ elif [[ $1 = "db_simple" ]]; then
 	-languageAnalyzer corenlp.CoreNLPAnalyzer \
 	-server true
 elif [[ $1 = "db_demo" ]]; then
-    ./run @mode=simple \
+    ./run @mode=socket \
 	-Grammar.inPaths data/roboy-demo.grammar \
 	-SimpleLexicon.inPaths data/lexicons/* \
 	-Dataset.inPaths train:data/short.examples \
 	-Learner.maxTrainIters 1 \
-	-languageAnalyzer corenlp.CoreNLPAnalyzer \
-	-server true
+	-languageAnalyzer corenlp.CoreNLPAnalyzer
 elif [[ $1 = "freebase" ]]; then
     ./run @mode=database-server \
 	@sparqlserver=localhost:3001 \

@@ -50,7 +50,9 @@ public class SimpleLexiconFn extends SemanticFn {
     for (SimpleLexicon.Entry e : entries) {
       if (opts.verbose >= 3)
         LogInfo.logs("SimpleLexiconFn: %s => %s [type = %s meet-> %s]", phrase, e.formula, e.type, restrictType.meet(e.type));
-      if (!restrictType.meet(e.type).isValid()) continue;
+      if (!restrictType.toString().contains(e.type.toString())) {
+        continue;
+      }
       newEntries.add(e);
     }
     entries = newEntries;

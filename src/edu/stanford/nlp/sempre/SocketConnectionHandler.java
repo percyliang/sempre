@@ -49,7 +49,7 @@ public class SocketConnectionHandler implements Runnable {
               try {
                 Response res = master.processQuery(session, line);
                 System.out.println(res.getAll());
-                output.println(master.summaryString(res));
+                output.println(res.getAll());
               } catch (Throwable t) {
                 while (LogInfo.getIndLevel() > indent)
                   LogInfo.end_track();

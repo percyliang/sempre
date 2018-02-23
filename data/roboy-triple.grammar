@@ -12,6 +12,7 @@
 (rule $RelatClass ($PHRASE) (SimpleLexiconFn (type "RelationClass")))
 (rule $DatPropClass ($PHRASE) (SimpleLexiconFn (type "DataPropertyNoun")))
 (rule $ObjPropClass ($PHRASE) (SimpleLexiconFn (type "ObjectProperty")))
+(rule $TypeProperty ($PHRASE) (SimpleLexiconFn (type "TypeProperty")))
 
 (rule $StateVerb ($LEMMA_PHRASE) (SimpleLexiconFn (type "StateVerb")))
 (rule $Relat ($LEMMA_PHRASE) (SimpleLexiconFn (type "Relationship")))
@@ -67,6 +68,8 @@
 (rule $Subject ($Conj $Subject) (SelectFn 1))
 (rule $Subject ($Subject and $Subject) (ConcatFn ";"))
 (rule $Subject ($Subject , $Subject) (ConcatFn ";"))
+(rule $Subject ($Adjective $Subject) (TripleFn "to"))
+(rule $Subject ($Subject $Adjective) (TripleFn "ot"))
 
 # Adjective Phrase
 #(rule $AdjPhrase ($Adjective) (IdentityFn))
@@ -82,11 +85,14 @@
 (rule $AdjPhrase ($AdjPhrase $AdjPhrase) (ConcatFn ";"))
 
 # Predicate Phrase
+#(rule $Predicate ($PHRASE) (OpenTypeFn relation))
 (rule $Predicate ($StateVerb) (IdentityFn))
 (rule $Predicate ($ConsequenceVerb) (IdentityFn))
 (rule $Predicate ($Relat) (IdentityFn))
 (rule $Predicate ($Not $Predicate) (ConcatFn " "))
 (rule $Predicate ($Predicate $Predicate) (ConcatFn ";"))
+(rule $Predicate ($TypeProperty $Type) (TripleFn "tp"))
+(rule $Predicate ($Type $TypeProperty) (TripleFn "pt"))
 
 # Question Phrase
 (rule $Quest ($Wh) (SimpleLexiconFn (type Question)))
@@ -113,6 +119,7 @@
 #(rule $Expr ($Subject ($BE optional) $Noun) (ConcatFn ","))
 #(rule $Expr ($Subject ($BE optional) $Noun) (ConcatFn ","))
 (rule $Expr ($Subject $Predicate is $Noun) (TripleFn "spo"))
+(rule $Expr ($Noun is $Subject $Predicate) (TripleFn "osp"))
 #(rule $Expr ($Subject $RelatClass are $Noun) (ConcatFn ","))
 #(rule $Expr ($Subject $RelatClass is $AdjPhrase) (ConcatFn ","))
 #(rule $Expr ($Subject $RelatClass are $AdjPhrase) (ConcatFn ","))
@@ -137,4 +144,13 @@
 # Math expressions
 (include math.grammar)
 
-(rule $ROOT ($Expr) (IdentityFn))
+(rule $Entity ($NamedEntity) (SimpleLexiconFn (type "NamedEntity")))
+#(rule $Entity ($NamedEntity) (OpenTypeFn entity))
+(rule $Binary ($RelClass) (IdentityFn))
+(rule $Set ($Entity) (IdentityFn))
+(rule $Set ($Unary) (IdentityFn))
+(rule $Set ($Unary $Set) (MergeFn and))
+(rule $Set ($Binary $Entity) (JoinFn forward))
+(rule $Set ($Entity $Binary) (JoinFn backward))
+(rule $ROOT ($Binary) (IdentityFn))
+(rule $ROOT ($Set) (IdentityFn))
