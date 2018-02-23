@@ -25,7 +25,9 @@ In order to build application with all needed dependencies run:
 ```
 ./pull-dependencies core
 ./pull-dependencies corenlp
-ant corenlp
+./pull-dependencies freebase
+./pull-dependencies virtuoso
+ant roboy
 ```
 
 # Run
