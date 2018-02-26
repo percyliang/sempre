@@ -81,6 +81,17 @@ public class XMLReader{
 
     // Helper for parsing DOM.
     // Return the inner text of of a child element of node with tag |tag|.
+    public static String getTagValue(String tag, Element elem) {
+        NodeList nodes = elem.getElementsByTagName(tag);
+        if (nodes.getLength() == 0) return null;
+        if (nodes.getLength() > 1)
+            throw new RuntimeException("Multiple instances of " + tag);
+        nodes = nodes.item(0).getChildNodes();
+        if (nodes.getLength() == 0) return null;
+        Node value = nodes.item(0);
+        return value.getNodeValue();
+    }
+
     public static Map<String, String> getTagValue(List<String> keywords, Node node) {
         Map<String, String> result = new HashMap();
         try {
@@ -102,6 +113,24 @@ public class XMLReader{
             System.out.println("Exception. Oops");
             return null;
         }
+    }
+
+    private static Map<String,String> nodeToValue(Node result) {
+        Map<String,String> results = new HashMap();
+        // Read bindings
+        NodeList bindings = ((Element) result).getElementsByTagName("binding");
+
+        // For each binding j (contributes some information to one column)...
+        for (int j = 0; j < bindings.getLength(); j++) {
+            Element binding = (Element) bindings.item(j);
+
+            String var = "?" + binding.getAttribute("name");
+            String uri = getTagValue("uri", binding);
+            if (!(uri == null || (var.contains("_") || (uri.contains("#"))))){
+                results.put(var,uri);
+            }
+        }
+        return results;
     }
 
     // Helper for parsing DOM.
@@ -136,6 +165,19 @@ public class XMLReader{
             Map<String, String> result = getTagValue(keywords.subList(1, keywords.size()), results.item(i));
             if (result!=null && result.size() > 0)
                 output.add(result);
+        }
+        return output;
+    }
+
+    public static List<Map<String,String>> readArrayXml(String xml) {
+        List<Map<String, String>> output = new ArrayList<Map<String, String>>();
+        NodeList results = extractResultsFromXml("result",xml);
+        for (int i = 0; i < results.getLength(); i++) {
+            Map<String, String> result = nodeToValue(results.item(i));
+            if (result!=null && result.size() > 0 && !output.contains(result)) {
+                output.add(result);
+                //System.out.println(result.toString());
+            }
         }
         return output;
     }

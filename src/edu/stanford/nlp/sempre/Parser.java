@@ -165,7 +165,7 @@ public abstract class Parser {
     // Execute target formula (if applicable).
     if (ex.targetFormula != null && ex.targetValue == null){
       //TODO: Executor
-      if (ex.targetFormula.toString().contains(",")&&ex.targetFormula.toString().contains("(")) {
+      if (ex.targetFormula.toString().contains("triple")||ex.targetFormula.toString().contains("lambda")||ex.targetFormula.toString().contains("rb:")||ex.targetFormula.toString().contains("string")) {
         ex.targetValue = simple_executor.execute(ex.targetFormula, ex.context).value;
       }
       else {

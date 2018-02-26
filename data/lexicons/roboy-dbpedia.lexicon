@@ -52,55 +52,56 @@
 {"lexeme": "friend", "formula": "rb:FRIEND_OF", "type" : "RelationClass"}
 {"lexeme": "friend of", "formula": "rb:FRIEND_OF", "type" : "RelationClass"}
 {"lexeme": "name", "formula": "rb:NAME_OF", "type" : "RelationClass"}
+{"lexeme": "age", "formula": "rb:AGE", "type" : "RelationClass"}
 {"lexeme": "member", "formula": "rb:MEMBER_OF", "type" : "RelationClass"}
 {"lexeme": "member of", "formula": "rb:MEMBER_OF", "type" : "RelationClass"}
 {"lexeme": "part", "formula": "rb:PART_OF", "type" : "RelationClass"}
 {"lexeme": "relative", "formula": "rb:RELATIVE_OF", "type" : "RelationClass"}
 
-{"lexeme": "when", "formula": "WHEN", "type" : "subordinate.time"}
-{"lexeme": "whenever", "formula": "WHEN", "type" : "subordinate.time"}
-{"lexeme": "as", "formula": "WHEN", "type" : "subordinate.time"}
-{"lexeme": "once", "formula": "WHEN", "type" : "subordinate.time"}
-{"lexeme": "while", "formula": "WHILE", "type" : "subordinate.time"}
-{"lexeme": "after", "formula": "AFTER", "type" : "subordinate.time"}
-{"lexeme": "before", "formula": "BEFORE", "type" : "subordinate.time"}
-{"lexeme": "since", "formula": "SINCE", "type" : "subordinate.time"}
-{"lexeme": "until", "formula": "UNTIL", "type" : "subordinate.time"}
+{"lexeme": "when", "formula": "rb:WHEN", "type" : "subordinate.time"}
+{"lexeme": "whenever", "formula": "rb:WHEN", "type" : "subordinate.time"}
+{"lexeme": "as", "formula": "rb:WHEN", "type" : "subordinate.time"}
+{"lexeme": "once", "formula": "rb:WHEN", "type" : "subordinate.time"}
+{"lexeme": "while", "formula": "rb:WHILE", "type" : "subordinate.time"}
+{"lexeme": "after", "formula": "rb:AFTER", "type" : "subordinate.time"}
+{"lexeme": "before", "formula": "rb:BEFORE", "type" : "subordinate.time"}
+{"lexeme": "since", "formula": "rb:SINCE", "type" : "subordinate.time"}
+{"lexeme": "until", "formula": "rb:UNTIL", "type" : "subordinate.time"}
 
-{"lexeme": "where", "formula": "WHERE", "type" : "subordinate.place"}
-{"lexeme": "whereas", "formula": "WHERE", "type" : "subordinate.place"}
-{"lexeme": "wherever", "formula": "WHERE", "type" : "subordinate.place"}
+{"lexeme": "where", "formula": "rb:WHERE", "type" : "subordinate.place"}
+{"lexeme": "whereas", "formula": "rb:WHERE", "type" : "subordinate.place"}
+{"lexeme": "wherever", "formula": "rb:WHERE", "type" : "subordinate.place"}
 
-{"lexeme": "although", "formula": "ALTHOUGH", "type" : "subordinate.cause"}
-{"lexeme": "even though", "formula": "ALTHOUGH", "type" : "subordinate.cause"}
-{"lexeme": "though", "formula": "ALTHOUGH", "type" : "subordinate.cause"}
-{"lexeme": "unless", "formula": "UNLESS", "type" : "subordinate.cause"}
-{"lexeme": "provided that", "formula": "CONDITION", "type" : "subordinate.cause"}
-{"lexeme": "because", "formula": "CONDITION", "type" : "subordinate.cause"}
-{"lexeme": "if", "formula": "CONDITION", "type" : "subordinate.cause"}
-{"lexeme": "even if", "formula": "CONDITION", "type" : "subordinate.cause"}
-{"lexeme": "whether", "formula": "WHETHER", "type" : "subordinate.cause"}
+{"lexeme": "although", "formula": "rb:ALTHOUGH", "type" : "subordinate.cause"}
+{"lexeme": "even though", "formula": "rb:ALTHOUGH", "type" : "subordinate.cause"}
+{"lexeme": "though", "formula": "rb:ALTHOUGH", "type" : "subordinate.cause"}
+{"lexeme": "unless", "formula": "rb:UNLESS", "type" : "subordinate.cause"}
+{"lexeme": "provided that", "formula": "rb:CONDITION", "type" : "subordinate.cause"}
+{"lexeme": "because", "formula": "rb:CONDITION", "type" : "subordinate.cause"}
+{"lexeme": "if", "formula": "rb:CONDITION", "type" : "subordinate.cause"}
+{"lexeme": "even if", "formula": "rb:CONDITION", "type" : "subordinate.cause"}
+{"lexeme": "whether", "formula": "rb:WHETHER", "type" : "subordinate.cause"}
 
-{"lexeme": "in order that", "formula": "EFFECT", "type" : "subordinate.effect"}
-{"lexeme": "so that", "formula": "EFFECT", "type" : "subordinate.effect"}
-{"lexeme": "that", "formula": "EFFECT", "type" : "subordinate.effect"}
-{"lexeme": "this is why", "formula": "EFFECT", "type" : "subordinate.effect"}
+{"lexeme": "in order that", "formula": "rb:EFFECT", "type" : "subordinate.effect"}
+{"lexeme": "so that", "formula": "rb:EFFECT", "type" : "subordinate.effect"}
+{"lexeme": "that", "formula": "rb:EFFECT", "type" : "subordinate.effect"}
+{"lexeme": "this is why", "formula": "rb:EFFECT", "type" : "subordinate.effect"}
 
 # QUESTION
-{"lexeme": "who", "formula": "question:person", "type" : "Question"}
-{"lexeme": "who", "formula": "question:organization", "type" : "Question"}
-{"lexeme": "who", "formula": "question:business", "type" : "Question"}
-{"lexeme": "where", "formula": "question:location", "type" : "Question"}
-{"lexeme": "where", "formula": "question:organization", "type" : "Question"}
-{"lexeme": "where", "formula": "question:educational_institution", "type" : "Question"}
-{"lexeme": "when", "formula": "question:datetime", "type" : "Question"}
-{"lexeme": "why", "formula": "question:cause", "type" : "Question"}
-{"lexeme": "what for", "formula": "question:effect", "type" : "Question"}
-{"lexeme": "what", "formula": "question:object", "type" : "Question"}
-{"lexeme": "what kind of", "formula": "question:type", "type" : "Question"}
-{"lexeme": "how", "formula": "question:quantity", "type" : "Question"}
-{"lexeme": "do", "formula": "question:activity", "type" : "Question"}
-{"lexeme": "does", "formula": "question:activity", "type" : "Question"}
+{"lexeme": "who", "formula": "rb:question.person", "type" : "Question"}
+{"lexeme": "who", "formula": "rb:question.organization", "type" : "Question"}
+{"lexeme": "who", "formula": "rb:question.business", "type" : "Question"}
+{"lexeme": "where", "formula": "rb:question.location", "type" : "Question"}
+{"lexeme": "where", "formula": "rb:question.organization", "type" : "Question"}
+{"lexeme": "where", "formula": "rb:question.educational_institution", "type" : "Question"}
+{"lexeme": "when", "formula": "rb:question.datetime", "type" : "Question"}
+{"lexeme": "why", "formula": "rb:question.cause", "type" : "Question"}
+{"lexeme": "what for", "formula": "rb:question.effect", "type" : "Question"}
+{"lexeme": "what", "formula": "rb:question.object", "type" : "Question"}
+{"lexeme": "what kind of", "formula": "rb:question.type", "type" : "Question"}
+{"lexeme": "how", "formula": "rb:question.quantity", "type" : "Question"}
+{"lexeme": "do", "formula": "rb:question.activity", "type" : "Question"}
+{"lexeme": "does", "formula": "rb:question.activity", "type" : "Question"}
 
 # Freebase
 {"lexeme": "california", "formula": "fb:en.california"}

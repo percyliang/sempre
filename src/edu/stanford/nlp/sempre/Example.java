@@ -109,7 +109,13 @@ public class Example {
   public String getId() { return id; }
   public String getUtterance() { return utterance; }
   public int numTokens() { return languageInfo.tokens.size(); }
-  public List<Derivation> getPredDerivations() { return predDerivations; }
+  public List<Derivation> getPredDerivations() {
+    Set<Derivation> hs = new HashSet<>();
+    hs.addAll(predDerivations);
+    predDerivations.clear();
+    predDerivations.addAll(hs);
+    return predDerivations;
+  }
 
   public void setContext(ContextValue context) { this.context = context; }
   public void setTargetFormula(Formula targetFormula) { this.targetFormula = targetFormula; }

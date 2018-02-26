@@ -173,6 +173,13 @@ public class Derivation implements SemanticFn.Callable, HasScore {
       this.type = SemType.stringType;
       return this;
     }
+
+    public Builder withTripleFormulaFrom(String value) {
+      this.formula = new ValueFormula<>(new TripleValue(value));
+      this.type = SemType.tripleType;
+      return this;
+    }
+
     public Builder withFormulaFrom(Derivation deriv) {
       this.formula = deriv.formula;
       this.type = deriv.type;
@@ -235,6 +242,7 @@ public class Derivation implements SemanticFn.Callable, HasScore {
   }
 
   public Formula getFormula() { return formula; }
+  public SemType getType() { return type; }
   public double getScore() { return score; }
   public double getProb() { return prob; }
   public double getCompatibility() { return compatibility; }
@@ -603,7 +611,7 @@ public class Derivation implements SemanticFn.Callable, HasScore {
       helper.analyze(this);
     }
     for (String key : this.errorInfo.underspecified.keySet()){
-      //System.out.println(key + ":" + this.errorInfo.underspecified.get(key));
+      System.out.println(key + ":" + this.errorInfo.underspecified.get(key));
       Gson gson = new Gson();
       Type type = new TypeToken<Map<String, String>>(){}.getType();
       Map<String, String> triple = gson.fromJson(this.errorInfo.underspecified.get(key), type);

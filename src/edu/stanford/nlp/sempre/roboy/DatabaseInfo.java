@@ -16,6 +16,7 @@ import java.io.FileInputStream;
 import java.util.Properties;
 import java.io.FileReader;
 import java.lang.reflect.Type;
+import java.net.URLEncoder;
 
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
@@ -41,7 +42,7 @@ public final class DatabaseInfo {
     public static String defaultDB; //"lib/fb_data/93.exec/schema2.ttl";
 
     public static void setDefault(String formula){
-      LogInfo.logs("Default %s", formula);
+      //LogInfo.logs("Default %s", formula);
       defaultDB = formula;};
     public static String getDefault(){return defaultDB;};
   }
@@ -307,9 +308,19 @@ public final class DatabaseInfo {
 
   public static String uri2id(String uri) {
     for (String key : glossary.keySet()) {
-      if (uri.contains(glossary.get(key))) {
-          uri = uri.replace(glossary.get(key),key + ":").replaceAll("/", ".");
+      if (uri.contains(glossary.get(key)) && !uri.contains(",")) {
+          uri = uri.replaceAll(glossary.get(key),key + ":").replaceAll("/", ".");
       }
+//      if (uri.contains(",")) {
+//        try {
+//          uri = URLEncoder.encode(uri, "UTF-8");
+//        } catch(Exception e) {
+//          LogInfo.errors("Exception: %s", e);
+//        }
+//      }
+    }
+    if (uri.contains(",")) {
+       uri = "<".concat(uri).concat(">");
     }
     // LogInfo.logs("Warning: invalid Database uri!: %s", uri);
     // Don't do any conversion; this is not necessarily the best thing to do.
@@ -320,7 +331,7 @@ public final class DatabaseInfo {
     String prefix = new String();
     for (String key : glossary.keySet()) {
       if (query.contains(key)) {
-        prefix = prefix + "PREFIX " + key + ": <" + glossary.get(key) + "> ";
+        prefix = prefix + "PREFIX " + key + ": <" + glossary.get(key) + "> \n";
       }
     }
     return prefix;

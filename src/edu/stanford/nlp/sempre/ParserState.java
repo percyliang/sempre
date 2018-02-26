@@ -233,16 +233,29 @@ public abstract class ParserState {
   public void ensureExecuted() {
     LogInfo.begin_track("Parser.ensureExecuted");
     // Execute predicted derivations to get value.
+    List<Derivation> remove = new ArrayList();
+    List<String> formulas = new ArrayList();
     for (Derivation deriv : predDerivations) {
       deriv.postprocess();
-      if (deriv.getFormula().toString().contains(","))
+      if (!formulas.toString().contains(deriv.formula.toString()))
+        formulas.add(deriv.formula.toString());
+      else {
+        remove.add(deriv);
+        continue;
+      }
+      if (deriv.getType()==SemType.tripleType||deriv.getFormula().toString().contains("lambda")||deriv.getFormula().toString().contains("rb:")||deriv.getFormula().toString().contains("string")){
         deriv.ensureExecuted(parser.simple_executor, ex.context);
+      }
       else
         deriv.ensureExecuted(parser.executor, ex.context);
       if (ex.targetValue != null)
         deriv.compatibility = parser.valueEvaluator.getCompatibility(ex.targetValue, deriv.value);
       if (!computeExpectedCounts && Parser.opts.executeTopFormulaOnly) break;
+      if ((deriv.value==null || deriv.value.toString().equals("BADFORMAT") || deriv.value.toString().equals("(list)")) && !deriv.value.toString().contains("rb"))
+        remove.add(deriv);
     }
+    for (Derivation deriv : remove)
+      predDerivations.remove(deriv);
     LogInfo.end_track();
   }
 

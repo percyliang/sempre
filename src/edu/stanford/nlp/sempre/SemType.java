@@ -99,6 +99,7 @@ public abstract class SemType {
   public static final SemType topType = new TopSemType();
   public static final SemType bottomType = new UnionSemType();
   public static final SemType stringType = new AtomicSemType(CanonicalNames.TEXT);
+  public static final SemType tripleType = new AtomicSemType(CanonicalNames.TEXT);
   public static final SemType intType = new AtomicSemType(CanonicalNames.INT);
   public static final SemType floatType = new AtomicSemType(CanonicalNames.FLOAT);
   public static final SemType dateType = new AtomicSemType(CanonicalNames.DATE);

@@ -4,7 +4,7 @@ import edu.stanford.nlp.sempre.ErrorInfo;
 import edu.stanford.nlp.sempre.ErrorValue;
 import edu.stanford.nlp.sempre.Derivation;
 import edu.stanford.nlp.sempre.SimpleLexicon;
-import edu.stanford.nlp.sempre.roboy.utils.SPARQLUtils;
+import edu.stanford.nlp.sempre.roboy.utils.SparqlUtils;
 
 import java.net.SocketTimeoutException;
 import java.net.URL;
@@ -66,16 +66,19 @@ public class EntityHelper extends KnowledgeHelper {
         List <Map<String,String>> results = new ArrayList<Map<String, String>>();
         String entity = new String();
         String formula = dev.getFormula().toString();
+        //System.out.println("Formula:" + formula);
         if (formula.contains("OpenEntity")){
             int start = formula.indexOf("OpenEntity(")+"OpenEntity(".length();
-            int end = formula.indexOf(")");
+            int end = formula.indexOf(")",formula.indexOf("OpenEntity("));
+            if (start > formula.length() || start < 0 || end < 0 ||end > formula.length())
+                return dev.getErrorInfo();
             entity = formula.substring(start,end);
-            System.out.println("Checking entity:" + entity);
+            //System.out.println("Checking entity:" + entity);
             // Extract the results from XML now.
             String url = endpointUrl.concat(entity);
             url = url.replace(" ","_");
-            SPARQLUtils sparql = new SPARQLUtils();
-            SPARQLUtils.ServerResponse response = sparql.makeRequest(url);
+            SparqlUtils sparql = new SparqlUtils();
+            SparqlUtils.ServerResponse response = sparql.makeRequest(url);
             results = reader.readEntityXml(response.getXml(),keywords);
         }
 //        else{
@@ -88,7 +91,7 @@ public class EntityHelper extends KnowledgeHelper {
         if (results.size() > 0){
             String json = gson.toJson(results.get(0));
             dev.getErrorInfo().underspecified.put(entity,json);
-            System.out.println(json);
+            //System.out.println(json);
             for (int j = 0; j < results.size(); j++) {
                 Map<String, String> lexeme = new HashMap();
                 lexeme.put("lexeme", results.get(j).get("Label"));

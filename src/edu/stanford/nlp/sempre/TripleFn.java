@@ -168,29 +168,31 @@ public class TripleFn extends SemanticFn {
         String[] predicate = split(triple.get("predicate").toString());
         String[] object = split(triple.get("object").toString());
         StringBuilder out = new StringBuilder();
-        if (triple.get("subject").toString().contains(";")||triple.get("subject").toString().contains(","))
-            out.append("(");
+//        if (triple.get("subject").toString().contains(";")||triple.get("subject").toString().contains(","))
+//            out.append("|");
 /*        if (triple.get("predicate").toString().contains(";")||triple.get("predicate").toString().contains(","))
             out.append("(");
         if (triple.get("object").toString().contains(";")||triple.get("object").toString().contains(","))
             out.append("(");*/
         for (String s : subject){
             if (out.toString().length() > 1 && triple.get("subject").toString().contains(","))
-                out.append(",");
+                out.append("&");
             if (out.toString().length() > 1 && triple.get("subject").toString().contains(";"))
                 out.append(";");
             if (triple.get("predicate").toString().contains(";")||triple.get("predicate").toString().contains(","))
-                out.append("(");
+                out.append("{");
             StringBuilder out2 = new StringBuilder();
             for (String p : predicate) {
                 if (out2.toString().length() > 0 && triple.get("predicate").toString().contains(","))
-                    out2.append(",");
+                    out2.append("&");
                 if (out2.toString().length() > 0 && triple.get("predicate").toString().contains(";"))
                     out2.append(";");
+                if (triple.get("object").toString().contains(";")||triple.get("object").toString().contains(","))
+                    out2.append("[");
                 StringBuilder out3 = new StringBuilder();
                 for (String o : object) {
                     if (out3.toString().length() > 0 && triple.get("object").toString().contains(","))
-                        out3.append(",");
+                        out3.append("&");
                     if (out3.toString().length() > 0 && triple.get("object").toString().contains(";"))
                         out3.append(";");
                     out3.append("(");
@@ -201,7 +203,7 @@ public class TripleFn extends SemanticFn {
                     out3.append(o);
                     out3.append(")");
                     if (triple.containsKey("type")){
-                        out3.append(",");
+                        out3.append("&");
                         out3.append("(");
                         out3.append(o);
                         out3.append(",has_type,");
@@ -210,13 +212,15 @@ public class TripleFn extends SemanticFn {
                     }
                 }
                 out2.append(out3.toString());
+                if (triple.get("object").toString().contains(";")||triple.get("object").toString().contains(","))
+                    out2.append("]");
             }
             out.append(out2.toString());
             if (triple.get("predicate").toString().contains(";")||triple.get("predicate").toString().contains(","))
-                out.append(")");
+                out.append("}");
         }
-        if (triple.get("subject").toString().contains(";")||triple.get("subject").toString().contains(","))
-            out.append(")");
+//        if (triple.get("subject").toString().contains(";")||triple.get("subject").toString().contains(","))
+//            out.append("|");
 /*        if (triple.get("predicate").toString().contains(";")||triple.get("predicate").toString().contains(","))
             out.append(")");
         if (triple.get("object").toString().contains(";")||triple.get("object").toString().contains(","))
@@ -258,7 +262,6 @@ public class TripleFn extends SemanticFn {
             return concat_formula(string1,string2);
         if(!triple.containsKey("object"))
             return concat_formula(string1,string2);
-
         return final_string(triple);
     }
 
@@ -272,6 +275,11 @@ public class TripleFn extends SemanticFn {
                 }
                 else if (c.childStringValue(0).contains("{")){
                     out = final_formula(c.childStringValue(0),c.childStringValue(1));
+                    System.out.println("String -> "+out);
+                    return new Derivation.Builder()
+                            .withCallable(c)
+                            .withTripleFormulaFrom(out)
+                            .createDerivation();
                 }
                 else if (c.childStringValue(1).contains("{")){
                     out = concat_formula(c.childStringValue(0),c.childStringValue(1));
@@ -289,8 +297,8 @@ public class TripleFn extends SemanticFn {
 
 
     public String[] split(String str){
-        if (str.startsWith("("))
-            str = str.substring(str.indexOf("(")+1,str.indexOf(")"));
+        str = str.replaceAll("\\(","");
+        str = str.replaceAll("\\)","");
         if (str.contains(";")){
             return str.split(";");
         }

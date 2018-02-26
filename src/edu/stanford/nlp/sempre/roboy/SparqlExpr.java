@@ -9,6 +9,7 @@ import java.io.FileInputStream;
 import java.util.Properties;
 import java.io.FileReader;
 import java.lang.reflect.Type;
+import java.net.URLEncoder;
 
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
@@ -68,11 +69,16 @@ class SparqlBlock implements SparqlExpr {
     catch (Exception e) {
         throw new RuntimeException(e);
     }
-    for (String key : glossary.keySet()) {
-      if (property.startsWith(key)) {
-        correct_prefix = true;
+    try{
+      for (String key : glossary.keySet()) {
+        if (property.contains(key)) {//if (property.startsWith(URLEncoder.encode(key, "UTF-8"))) {
+          correct_prefix = true;
+        }
       }
+    } catch(Exception e) {
+      LogInfo.errors("Exception: %s", e);
     }
+
     if (!correct_prefix &&!SparqlStatement.isOperator(property) && !SparqlStatement.isSpecialFunction(property) && !SparqlStatement.isIndependent(property))
       throw new RuntimeException("Invalid SPARQL property: " + property);
     // Ignore statements like:

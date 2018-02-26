@@ -103,10 +103,8 @@ public class SparqlExecutor extends Executor {
   public ServerResponse makeRequest(String queryStr, String endpointUrl) {
     if (endpointUrl == null)
       throw new RuntimeException("No SPARQL endpoint url specified");
-
     try {
       String url = String.format("%s?query=%s&format=xml", endpointUrl, URLEncoder.encode(queryStr, "UTF-8"));
-      System.out.println(url);
       URLConnection conn = new URL(url).openConnection();
       conn.setConnectTimeout(opts.connectTimeoutMs);
       conn.setReadTimeout(opts.readTimeoutMs);
@@ -131,6 +129,8 @@ public class SparqlExecutor extends Executor {
       return new ServerResponse(ErrorValue.timeout);
     } catch (IOException e) {
       LogInfo.errors("Server exception: %s", e);
+      if (e.toString().contains("HTTP response code: 400"))
+        return new ServerResponse(ErrorValue.badFormat);
       // Sometimes the SPARQL server throws a 408 to signify a server timeout.
       if (e.toString().contains("HTTP response code: 408"))
         return new ServerResponse(ErrorValue.server408);
@@ -347,7 +347,7 @@ public class SparqlExecutor extends Executor {
         query.limit = maxResults;
 
       queryStr = DatabaseInfo.getPrefixes(query.toString()) + query;
-      LogInfo.logs("QueryStr = %s", queryStr);
+      //LogInfo.logs("QueryStr = %s", queryStr);
     }
 
     // Strip off lambdas and add the variables to the environment

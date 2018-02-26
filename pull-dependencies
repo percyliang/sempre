@@ -143,6 +143,10 @@ addModule('core', 'Core utilities (need to compile)', lambda {
 
   # GSON
   pull('https://repo1.maven.org/maven2/com/google/code/gson/gson/2.6.2/gson-2.6.2.jar')
+
+  # JENA
+  pull('http://central.maven.org/maven2/org/apache/jena/jena-core/3.6.0/jena-core-3.6.0.jar')
+  pull('http://central.maven.org/maven2/org/apache/jena/jena-arq/3.6.0/jena-arq-3.6.0.jar')
 })
 
 addModule('corenlp', 'Stanford CoreNLP 3.6.0', lambda {
