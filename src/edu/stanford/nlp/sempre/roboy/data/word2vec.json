@@ -1,0 +1,9 @@
+{
+  "dataDirectory": "./data/word2vec",
+  "dataFilePath": "./data/word2vec/enwik7.txt",
+  "dataInetURL": "https://raw.githubusercontent.com/deeplearning4j/dl4j-examples/master/dl4j-examples/src/main/resources/raw_sentences.txt",
+  "modelDirectory": "./src/edu/stanford/nlp/sempre/roboy/lexicons/word2vec/data",
+  "googleModelFilePath": "./data/word2vec/GoogleNews-vectors-negative300.bin.gz",
+  "roboyModelFilePath": "./data/word2vec/roboy_enwik7.txt",
+  "outputFilePath": "./data/word2vec/roboy_enwik7.txt"
+}

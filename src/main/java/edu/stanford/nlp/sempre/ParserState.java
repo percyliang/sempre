@@ -72,36 +72,10 @@ public abstract class ParserState {
     // TODO: Add analyzers
     try {
       this.vec = new Word2vec();
-      System.out.println("Word2Vec Added");
       this.helpers = new ArrayList<>();
       this.helpers.add(new EntityRetriever());
-      System.out.println("Added Entity Retriever");
       this.helpers.add(new MCGRetriever());
-      System.out.println("Added MCG Retriever");
       this.helpers.add(new Word2VecRetriever(this.vec));
-      System.out.println("Added Word2Vec Retriever");
-    }catch(Exception e){
-      System.out.println("Exception in Word2Vec: "+e.getMessage());
-    }
-  }
-
-  public ParserState(Parser parser, Params params, Example ex, boolean computeExpectedCounts, Word2vec vec) {
-    this.parser = parser;
-    this.params = params;
-    this.ex = ex;
-    this.computeExpectedCounts = computeExpectedCounts;
-    this.numTokens = ex.numTokens();
-    // TODO: Add analyzers
-    try {
-      this.vec = vec;
-      System.out.println("Word2Vec Added");
-      this.helpers = new ArrayList<>();
-      this.helpers.add(new EntityRetriever());
-      System.out.println("Added Entity Retriever");
-      this.helpers.add(new MCGRetriever());
-      System.out.println("Added MCG Retriever");
-      this.helpers.add(new Word2VecRetriever(this.vec));
-      System.out.println("Added Word2Vec Retriever");
     }catch(Exception e){
       System.out.println("Exception in Word2Vec: "+e.getMessage());
     }
@@ -282,21 +256,18 @@ public abstract class ParserState {
     for (KnowledgeRetriever helper : this.helpers){
       helper.analyze(deriv);
     }
-    for (String key : errorInfo.getCandidates().keySet()){
-      LogInfo.begin_track("Error retrieval candidates:");
-      for (String candidate: errorInfo.getCandidates().get(key))
-         LogInfo.logs("%s:%s", key, candidate);
-      LogInfo.end_track();
+    for (String key : errorInfo.underspecified.keySet()){
+      System.out.println(key + ":" + errorInfo.underspecified.get(key));
       Gson gson = new Gson();
       Type type = new TypeToken<Map<String, String>>(){}.getType();
-//      Map<String, String> triple = gson.fromJson(errorInfo.underspecified.get(key), type);
-//      String formula = deriv.getFormula().toString();
-//      String result = formula.replace("OpenEntity(".concat(key).concat(")"),triple.get("URI"));
-//      result = result.replace("string","name");
-//      //System.out.println(result);
-//      deriv.setFormula(Formula.fromString(result));
-//      deriv.setType(SemType.fromString("NamedEntity"));
-//      //System.out.println(deriv.toString());
+      Map<String, String> triple = gson.fromJson(errorInfo.underspecified.get(key), type);
+      String formula = deriv.getFormula().toString();
+      String result = formula.replace("OpenEntity(".concat(key).concat(")"),triple.get("URI"));
+      result = result.replace("string","name");
+      //System.out.println(result);
+      deriv.setFormula(Formula.fromString(result));
+      deriv.setType(SemType.fromString("NamedEntity"));
+      //System.out.println(deriv.toString());
     }
   }
 
