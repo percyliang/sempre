@@ -4,7 +4,7 @@
   <property name="target" value="1.8"/>
   <property name="source" value="1.8"/>
   <property name="root" value="."/>
-  <property name="src" location="${root}/src/"/>
+  <property name="src" location="${root}/src/main/java"/>
   <property name="classes" location="${root}/classes"/>
   <property name="lib" location="${root}/lib"/>
   <property name="libsempre" location="${root}/libsempre"/>

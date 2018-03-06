@@ -147,6 +147,27 @@ addModule('core', 'Core utilities (need to compile)', lambda {
   # JENA
   pull('http://central.maven.org/maven2/org/apache/jena/jena-core/3.6.0/jena-core-3.6.0.jar')
   pull('http://central.maven.org/maven2/org/apache/jena/jena-arq/3.6.0/jena-arq-3.6.0.jar')
+
+  # WORD2VEC
+  pull('http://central.maven.org/maven2/org/datavec/datavec-api/0.4.0/datavec-api-0.4.0.jar')
+
+})
+
+addModule('roboy', 'Roboy extra utilities (need to compile)', lambda {
+  # GSON
+  pull('https://repo1.maven.org/maven2/com/google/code/gson/gson/2.6.2/gson-2.6.2.jar')
+
+  # JENA
+  pull('http://central.maven.org/maven2/org/apache/jena/jena-core/3.6.0/jena-core-3.6.0.jar')
+  pull('http://central.maven.org/maven2/org/apache/jena/jena-arq/3.6.0/jena-arq-3.6.0.jar')
+
+  # WORD2VEC
+  pull('http://central.maven.org/maven2/org/datavec/datavec-api/0.4.0/datavec-api-0.4.0.jar')
+  pull('http://central.maven.org/maven2/org/deeplearning4j/deeplearning4j-core/0.9.1/deeplearning4j-core-0.9.1.jar')
+  pull('http://central.maven.org/maven2/org/deeplearning4j/deeplearning4j-nlp/0.9.1/deeplearning4j-nlp-0.9.1.jar')
+  pull('http://central.maven.org/maven2/org/nd4j/nd4j-api/0.9.1/nd4j-api-0.9.1.jar')
+  pull('http://central.maven.org/maven2/org/nd4j/nd4j-native/0.9.1/nd4j-native-0.9.1.jar')
+
 })
 
 addModule('corenlp', 'Stanford CoreNLP 3.6.0', lambda {

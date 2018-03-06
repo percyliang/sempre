@@ -15,7 +15,7 @@ end
 
 def codalab(dependencies=nil)
   # Set @cl=1 to run job on CodaLab
-  dependencies ||= l(':fig', ':lib', ':module-classes.txt', ':libsempre')
+  dependencies ||= l(':fig', ':lib', ':module-classes.txt', ':target')
   l(
     letDefault(:cl, 0),
     sel(:cl,
@@ -49,7 +49,7 @@ def header(modules='core', codalabDependencies=nil)
       'impressive' => l('-Xms75G', '-Xmx90G'),
     }),
     # Classpath
-    '-cp', 'libsempre/*:lib/*',
+    '-cp', 'target/*:lib/*',
     # Profiling
     letDefault(:prof, 0), sel(:prof, l(), '-Xrunhprof:cpu=samples,depth=100,file=_OUTPATH_/java.hprof.txt'),
   nil)
@@ -341,7 +341,7 @@ addMode('freebase', 'Freebase (for EMNLP 2013, ACL 2014, TACL 2014)', lambda { |
 
 addMode('cacheserver', 'Start the general-purpose cache server that serves files with key-value maps', lambda { |e|
   l(
-    'java', '-Xmx36g', '-ea', '-cp', 'libsempre/*:lib/fig.jar',
+    'java', '-Xmx36g', '-ea', '-cp', 'target/*.jar:lib/fig.jar',
     'edu.stanford.nlp.sempre.cache.StringCacheServer',
     letDefault(:port, 4000),
     lambda { |e| o('port', e[:port]) },
@@ -519,7 +519,7 @@ addMode('simple-freebase-nocache', 'Simple shell for using Freebase (without a c
 nil) })
 
 addMode('database-server', 'Simple shell for using external Knowledge Base (without a cache server)', lambda { |e| l(
-  'java', '-Dmodules=core,roboy', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.Main',
+  'java', '-Dmodules=core,roboy', '-cp', 'target/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.Main',
   o('executor', 'roboy.SparqlExecutor'),
   o('simple_executor', 'JavaExecutor'),
   letDefault(:sparqlserver, 'dbpedia.org'),
@@ -684,7 +684,7 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
   }),
   # Fig parameters
   selo(:cldir, 'execDir', '_OUTPATH_', '.'),
-  o('overwriteExecDir'), o('addToView', 15), o('jarFiles', 'libsempre/*'),
+  o('overwriteExecDir'), o('addToView', 15), o('jarFiles', 'target/*.jar'),
   sel(:cldir, l(), '>/dev/null'),
   # Set environment for table execution
   o('executor', 'tables.lambdadcs.LambdaDCSExecutor'),
