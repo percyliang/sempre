@@ -1,6 +1,6 @@
 package edu.stanford.nlp.sempre;
 
-import edu.stanford.nlp.sempre.roboy.lexicons.word2vec.Word2vec;
+import edu.stanford.nlp.sempre.roboy.ErrorRetrieval;
 import fig.basic.*;
 
 import java.io.PrintWriter;
@@ -98,7 +98,6 @@ public abstract class Parser {
   public final Executor executor;
   public final Executor simple_executor;
   public final ValueEvaluator valueEvaluator;
-  public Word2vec word2vec;
 
   // Precomputations to make looking up grammar rules faster.
   protected List<Rule> catUnaryRules;  // Unary rules with category on RHS ($A => $B)
@@ -113,11 +112,6 @@ public abstract class Parser {
     this.executor = spec.executor;
     this.simple_executor = spec.simple_executor;
     this.valueEvaluator = spec.valueEvaluator;
-    try{
-       this.word2vec = new Word2vec();
-    }catch(Exception e){
-      this.word2vec = null;
-    }
 
     computeCatUnaryRules();
     LogInfo.logs("%s: %d catUnaryRules (sorted), %d nonCatUnaryRules (in trie)",
@@ -169,7 +163,6 @@ public abstract class Parser {
   }
 
   // Main thing for parsers to implement.
-  public abstract ParserState newParserState(Params params, Example ex, boolean computeExpectedCounts, Word2vec vec);
   public abstract ParserState newParserState(Params params, Example ex, boolean computeExpectedCounts);
   public Params getSearchParams(Params params) { return params; }
 
@@ -181,7 +174,7 @@ public abstract class Parser {
   public ParserState parse(Params params, Example ex, boolean computeExpectedCounts) {
     // Execute target formula (if applicable).
     if (ex.targetFormula != null && ex.targetValue == null){
-      //TODO: Executor
+      //TODO: Executors
       if (ex.targetFormula.toString().contains("triple")||ex.targetFormula.toString().contains("lambda")||ex.targetFormula.toString().contains("rb:")||ex.targetFormula.toString().contains("string")) {
         ex.targetValue = simple_executor.execute(ex.targetFormula, ex.context).value;
       }
@@ -194,8 +187,57 @@ public abstract class Parser {
     StopWatch watch = new StopWatch();
     watch.start();
     LogInfo.begin_track_printAll("Parser.parse: parse");
-    ParserState state = newParserState(params, ex, computeExpectedCounts, word2vec);
+    ParserState state = newParserState(params, ex, computeExpectedCounts);
     state.infer();
+    LogInfo.end_track();
+    watch.stop();
+    state.parseTime = watch.getCurrTimeLong();
+    state.setEvaluation();
+
+    ex.predDerivations = state.predDerivations;
+    Derivation.sortByScore(ex.predDerivations);
+
+    // Evaluate
+    if (opts.callSetEvaluation) {
+      ex.evaluation = new Evaluation();
+      addToEvaluation(state, ex.evaluation);
+    }
+    // Clean up temporary state used during parsing
+    ex.clearTempState();
+    for (Derivation deriv : ex.predDerivations)
+      deriv.clearTempState();
+    return state;
+  }
+
+  /**
+   * Parse the given example |ex| using the given parameters |params|
+   * and populate the fields of |ex| (e.g., predDerivations).  Note:
+   * |ex| is modified in place. Involves error retrieval
+   */
+  public ParserState parse(Params params, Example ex, boolean computeExpectedCounts, ErrorRetrieval error) {
+    // Execute target formula (if applicable).
+    if (ex.targetFormula != null && ex.targetValue == null){
+      //TODO: Executors
+      if (ex.targetFormula.toString().contains("triple")||ex.targetFormula.toString().contains("lambda")||ex.targetFormula.toString().contains("rb:")||ex.targetFormula.toString().contains("string")) {
+        ex.targetValue = simple_executor.execute(ex.targetFormula, ex.context).value;
+      }
+      else {
+        ex.targetValue = executor.execute(ex.targetFormula, ex.context).value;
+      }
+    }
+
+    // Parse
+    StopWatch watch = new StopWatch();
+    watch.start();
+    LogInfo.begin_track_printAll("Parser.parse: parse");
+    ParserState state = newParserState(params, ex, computeExpectedCounts);
+    state.infer();
+
+    // Error retrieval
+    error.updateModule(ex.utterance, ex.context, state.predDerivations);
+    error.postprocess();
+
+    state.execute();
     LogInfo.end_track();
     watch.stop();
     state.parseTime = watch.getCurrTimeLong();

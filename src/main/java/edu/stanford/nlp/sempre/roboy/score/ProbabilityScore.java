@@ -11,32 +11,35 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.InputStream;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 /**
- * Word2VecScore creates a score based on word2vec similarity between labels
+ * ProbabilityScore creates a score based on its probability among other candidates of the same group
  *
  * @author emlozin
  */
-public class Word2VecScore extends ScoringFunction {
-    public static Properties prop = new Properties();   /**< Read properties */
-    public static Gson gson = new Gson();               /**< Gson object */
+public class ProbabilityScore extends ScoringFunction {
+    public static Properties prop = new Properties();       /**< Read properties */
+    public static Gson gson = new Gson();                   /**< Gson object */
 
     private double weight;                                  /**< Weight of the score in general score*/
-    private final Word2vec vec;                         /**< Word2Vec handler */
+    private final Word2vec vec;                             /**< Word2Vec handler */
 
     /**
      * A constructor.
      * Initializes Word2Vec needed to calculate scores
      */
-    public Word2VecScore(Word2vec vec){
+    public ProbabilityScore(Word2vec vec){
         try {
             InputStream input = new FileInputStream("config.properties");
             prop.load(input);
             JsonReader reader = new JsonReader(new FileReader(prop.getProperty("SCORE_WEIGHTS")));
-            Type type = new TypeToken<Map<String, Double>>() {}.getType();
+            Type type = new TypeToken<Map<String, Double>>(){}.getType();
             Map<String, Double> weights = gson.fromJson(reader, type);
-            this.weight = weights.get("Word2Vec");
+            this.weight = weights.get("Probability");
             this.vec = vec;
         }
         catch (Exception e) {
@@ -63,11 +66,8 @@ public class Word2VecScore extends ScoringFunction {
                 Map<String, String> c = new HashMap<>();
                 c = gson.fromJson(candidate, c.getClass());
                 // Check similarity
-                double score = this.vec.getSimilarity(key, c.get("Label"));
-                if (Double.isNaN(score))
-                    score = -1.0;
-                System.out.println("W2V:" + key + ":" + c.get("Label") + "->" + score);
-                key_scores.put(candidate,score*this.weight);
+                System.out.println("Probability:"+key+":" + c.get("Label") + "->" + c.get("Refcount"));
+                key_scores.put(candidate,Double.valueOf(c.get("Refcount"))*this.weight);
             }
             result.getScored().put(key,key_scores);
         }

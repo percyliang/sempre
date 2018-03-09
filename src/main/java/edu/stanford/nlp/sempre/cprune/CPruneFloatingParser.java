@@ -59,6 +59,10 @@ class CPruneFloatingParserState extends ParserState {
     LogInfo.end_track();
   }
 
+  @Override
+  public void execute() {
+  }
+
   public void explore() {
     LogInfo.begin_track("Explore");
     CollaborativePruner.initialize(ex, CollaborativePruner.Mode.EXPLORE);

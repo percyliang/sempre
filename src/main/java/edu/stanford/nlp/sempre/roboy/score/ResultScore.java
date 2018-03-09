@@ -2,7 +2,7 @@ package edu.stanford.nlp.sempre.roboy.score;
 
 import com.google.gson.Gson;
 import edu.stanford.nlp.sempre.ContextValue;
-import edu.stanford.nlp.sempre.ErrorInfo;
+import edu.stanford.nlp.sempre.roboy.ErrorInfo;
 import edu.stanford.nlp.sempre.roboy.lexicons.word2vec.Word2vec;
 
 import java.util.*;
@@ -12,7 +12,7 @@ import java.util.*;
  *
  * @author emlozin
  */
-public class ResultScore implements ScoringFunction {
+public class ResultScore extends ScoringFunction {
     public static Properties prop = new Properties();   /**< Read properties */
     public static Gson gson = new Gson();               /**< Gson object */
 
@@ -34,7 +34,7 @@ public class ResultScore implements ScoringFunction {
      * Takes ErrorInfo as well as ContextValue objects and calculates score of each
      * candidate for unknown terms.
      */
-    public Map<String, Map<String, Double>> score(ErrorInfo errorInfo, ContextValue context){
+    public ErrorInfo score(ErrorInfo errorInfo, ContextValue context){
         current_score.clear();
         for (String key: errorInfo.getCandidates().keySet()){
             Map<String, Double> key_scores = new HashMap<>();
@@ -48,7 +48,7 @@ public class ResultScore implements ScoringFunction {
             }
             current_score.put(key,key_scores);
         }
-        return current_score;
+        return errorInfo;
     }
 
 }

@@ -1,14 +1,6 @@
 package edu.stanford.nlp.sempre;
 
-import java.lang.reflect.Type;
 import java.util.*;
-
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import edu.stanford.nlp.sempre.roboy.error.*;
-import edu.stanford.nlp.sempre.roboy.error.KnowledgeRetriever;
-import edu.stanford.nlp.sempre.roboy.error.MCGRetriever;
-import edu.stanford.nlp.sempre.roboy.lexicons.word2vec.Word2vec;
 import fig.basic.*;
 
 /**
@@ -41,10 +33,6 @@ public abstract class ParserState {
   public final Example ex;
   public final boolean computeExpectedCounts;  // Whether we're learning
 
-  // Postprocessing analyzers
-  Word2vec vec;
-  List<KnowledgeRetriever> helpers;
-
   //// Output
 
   public final List<Derivation> predDerivations = new ArrayList<Derivation>();
@@ -69,48 +57,15 @@ public abstract class ParserState {
     this.ex = ex;
     this.computeExpectedCounts = computeExpectedCounts;
     this.numTokens = ex.numTokens();
-    // TODO: Add analyzers
-    try {
-      this.vec = new Word2vec();
-      System.out.println("Word2Vec Added");
-      this.helpers = new ArrayList<>();
-      this.helpers.add(new EntityRetriever());
-      System.out.println("Added Entity Retriever");
-      this.helpers.add(new MCGRetriever());
-      System.out.println("Added MCG Retriever");
-      this.helpers.add(new Word2VecRetriever(this.vec));
-      System.out.println("Added Word2Vec Retriever");
-    }catch(Exception e){
-      System.out.println("Exception in Word2Vec: "+e.getMessage());
-    }
-  }
-
-  public ParserState(Parser parser, Params params, Example ex, boolean computeExpectedCounts, Word2vec vec) {
-    this.parser = parser;
-    this.params = params;
-    this.ex = ex;
-    this.computeExpectedCounts = computeExpectedCounts;
-    this.numTokens = ex.numTokens();
-    // TODO: Add analyzers
-    try {
-      this.vec = vec;
-      System.out.println("Word2Vec Added");
-      this.helpers = new ArrayList<>();
-      this.helpers.add(new EntityRetriever());
-      System.out.println("Added Entity Retriever");
-      this.helpers.add(new MCGRetriever());
-      System.out.println("Added MCG Retriever");
-      this.helpers.add(new Word2VecRetriever(this.vec));
-      System.out.println("Added Word2Vec Retriever");
-    }catch(Exception e){
-      System.out.println("Exception in Word2Vec: "+e.getMessage());
-    }
   }
 
   protected int getBeamSize() { return Parser.opts.beamSize; }
 
   // Main entry point.  Should set all the output variables.
   public abstract void infer();
+
+  // Execution handling.
+  public abstract void execute();
 
   protected void featurizeAndScoreDerivation(Derivation deriv) {
     if (deriv.isFeaturizedAndScored()) {
@@ -277,29 +232,6 @@ public abstract class ParserState {
     return derivs;
   }
 
-  public void postprocess(Derivation deriv, ContextValue context) {
-    ErrorInfo errorInfo = deriv.getErrorInfo();
-    for (KnowledgeRetriever helper : this.helpers){
-      helper.analyze(deriv);
-    }
-    for (String key : errorInfo.getCandidates().keySet()){
-      LogInfo.begin_track("Error retrieval candidates:");
-      for (String candidate: errorInfo.getCandidates().get(key))
-         LogInfo.logs("%s:%s", key, candidate);
-      LogInfo.end_track();
-      Gson gson = new Gson();
-      Type type = new TypeToken<Map<String, String>>(){}.getType();
-//      Map<String, String> triple = gson.fromJson(errorInfo.underspecified.get(key), type);
-//      String formula = deriv.getFormula().toString();
-//      String result = formula.replace("OpenEntity(".concat(key).concat(")"),triple.get("URI"));
-//      result = result.replace("string","name");
-//      //System.out.println(result);
-//      deriv.setFormula(Formula.fromString(result));
-//      deriv.setType(SemType.fromString("NamedEntity"));
-//      //System.out.println(deriv.toString());
-    }
-  }
-
   // Ensure that all the logical forms are executed and compatibilities are computed.
   public void ensureExecuted() {
     LogInfo.begin_track("Parser.ensureExecuted");
@@ -307,7 +239,7 @@ public abstract class ParserState {
     List<Derivation> remove = new ArrayList();
     List<String> formulas = new ArrayList();
     for (Derivation deriv : predDerivations) {
-      postprocess(deriv, ex.context);
+      // TODO: Add postprocess(deriv, ex.context);
       if (!formulas.toString().contains(deriv.formula.toString()))
         formulas.add(deriv.formula.toString());
       else {

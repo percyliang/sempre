@@ -4,13 +4,6 @@ import java.util.*;
 
 import fig.basic.*;
 
-import edu.stanford.nlp.sempre.roboy.error.*;
-import edu.stanford.nlp.sempre.NameValue;
-import edu.stanford.nlp.sempre.ValueFormula;
-
-import java.lang.reflect.Type;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 /**
  * A Derivation corresponds to the production of a (partial) logical form
@@ -121,9 +114,6 @@ public class Derivation implements SemanticFn.Callable, HasScore {
   // Cache the hash code
   int hashCode = -1;
 
-  // Error info about derivation
-  private ErrorInfo errorInfo = new ErrorInfo();
-
   // Each derivation that gets created gets a unique ID in increasing order so that
   // we can break ties consistently for reproducible results.
   long creationIndex;
@@ -152,7 +142,6 @@ public class Derivation implements SemanticFn.Callable, HasScore {
     private double compatibility = Double.NaN;
     private double prob = Double.NaN;
     private String canonicalUtterance = "";
-    private ErrorInfo errorInfo = new ErrorInfo();
 
     public Builder cat(String cat) { this.cat = cat; return this; }
     public Builder start(int start) { this.start = start; return this; }
@@ -249,7 +238,6 @@ public class Derivation implements SemanticFn.Callable, HasScore {
   public double getCompatibility() { return compatibility; }
   public List<Derivation> getChildren() { return children; }
   public Value getValue() { return value; }
-  public ErrorInfo getErrorInfo() { return errorInfo; }
 
   public boolean isFeaturizedAndScored() { return !Double.isNaN(score); }
   public boolean isExecuted() { return value != null; }

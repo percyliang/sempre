@@ -92,7 +92,6 @@ public final class DatabaseInfo {
       reader = new JsonReader(new FileReader(prop.getProperty("TYPES")));
       type = new TypeToken<Map<String, Map<String,String>>>(){}.getType();
       mapTypes = gson.fromJson(reader, type);
-      LogInfo.logs("%s",mapTypes.toString());
     }
     catch (Exception e) {
       throw new RuntimeException(e);

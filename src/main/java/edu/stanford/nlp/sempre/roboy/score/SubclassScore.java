@@ -2,7 +2,7 @@ package edu.stanford.nlp.sempre.roboy.score;
 
 import com.google.gson.Gson;
 import edu.stanford.nlp.sempre.ContextValue;
-import edu.stanford.nlp.sempre.ErrorInfo;
+import edu.stanford.nlp.sempre.roboy.ErrorInfo;
 import edu.stanford.nlp.sempre.roboy.lexicons.word2vec.Word2vec;
 
 import java.util.*;
@@ -12,7 +12,7 @@ import java.util.*;
  *
  * @author emlozin
  */
-public class SubclassScore implements ScoringFunction {
+public class SubclassScore extends ScoringFunction {
     public static Properties prop = new Properties();   /**< Read properties */
     public static Gson gson = new Gson();               /**< Gson object */
 
@@ -34,21 +34,21 @@ public class SubclassScore implements ScoringFunction {
      * Takes ErrorInfo as well as ContextValue objects and calculates score of each
      * candidate for unknown terms.
      */
-    public Map<String, Map<String, Double>> score(ErrorInfo errorInfo, ContextValue context){
+    public ErrorInfo score(ErrorInfo errorInfo, ContextValue context){
         current_score.clear();
         for (String key: errorInfo.getCandidates().keySet()){
             Map<String, Double> key_scores = new HashMap<>();
             List<String> candidates = errorInfo.getCandidates().get(key);
             for (String candidate: candidates){
                 double score = this.vec.getSimilarity(key,candidate);
-                if (!Double.isNaN(score))
+                if (Double.isNaN(score))
                     key_scores.put(candidate,score);
                 else
                     key_scores.put(candidate,(double)-1);
             }
             current_score.put(key,key_scores);
         }
-        return current_score;
+        return errorInfo;
     }
 
 }

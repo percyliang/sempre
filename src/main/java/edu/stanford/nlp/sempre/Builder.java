@@ -2,6 +2,7 @@ package edu.stanford.nlp.sempre;
 
 import com.google.common.base.Strings;
 
+import edu.stanford.nlp.sempre.roboy.ErrorRetrieval;
 import fig.basic.Option;
 import fig.basic.Utils;
 
@@ -10,6 +11,7 @@ import fig.basic.Utils;
  * needed for semantic parsing.
  *
  * @author Percy Liang
+ * @maintainer emlozin
  */
 public class Builder {
   public static class Options {
@@ -24,11 +26,13 @@ public class Builder {
 
   public Grammar grammar;
   public Executor executor;
+  //TODO:remove
   public Executor simple_executor;
   public ValueEvaluator valueEvaluator;
   public FeatureExtractor extractor;
   public Parser parser;
   public Params params;
+  public ErrorRetrieval error_retrieval;
 
   public void build() {
     grammar = null;
@@ -36,9 +40,9 @@ public class Builder {
     simple_executor = null;
     valueEvaluator = null;
     extractor = null;
-    extractor = null;
     parser = null;
     params = null;
+    error_retrieval = null;
     buildUnspecified();
   }
 
@@ -69,6 +73,10 @@ public class Builder {
     // Parser
     if (parser == null)
       parser = buildParser(new Parser.Spec(grammar, extractor, executor, simple_executor, valueEvaluator));
+
+    // Error Retrieval
+    if (error_retrieval == null)
+      error_retrieval = new ErrorRetrieval();
 
     // Parameters
     if (params == null) {

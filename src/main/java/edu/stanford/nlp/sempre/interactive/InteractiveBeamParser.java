@@ -28,7 +28,6 @@ import edu.stanford.nlp.sempre.ParserState;
 import edu.stanford.nlp.sempre.Rule;
 import edu.stanford.nlp.sempre.SemanticFn;
 import edu.stanford.nlp.sempre.Trie;
-import edu.stanford.nlp.sempre.roboy.lexicons.word2vec.Word2vec;
 import fig.basic.Evaluation;
 import fig.basic.IOUtils;
 import fig.basic.IntRef;
@@ -131,19 +130,7 @@ public class InteractiveBeamParser extends Parser {
     return new InteractiveBeamParserState(this, params, ex, computeExpectedCounts, InteractiveBeamParserState.Mode.full,
         coarseState);
   }
-  public ParserState newParserState(Params params, Example ex, boolean computeExpectedCounts, Word2vec vec) {
-    InteractiveBeamParserState coarseState = null;
-    if (Parser.opts.coarsePrune) {
-      LogInfo.begin_track("Parser.coarsePrune");
-      coarseState = new InteractiveBeamParserState(this, params, ex, computeExpectedCounts,
-              InteractiveBeamParserState.Mode.bool, null);
-      coarseState.infer();
-      coarseState.keepTopDownReachable();
-      LogInfo.end_track();
-    }
-    return new InteractiveBeamParserState(this, params, ex, computeExpectedCounts, InteractiveBeamParserState.Mode.full,
-            coarseState);
-  }
+
 }
 
 /**
@@ -168,6 +155,8 @@ class InteractiveBeamParserState extends ChartParserState {
   private final InteractiveBeamParser parser;
   private final InteractiveBeamParserState coarseState; // Used to prune
   private final boolean execute;
+  private boolean parseFloat = false;
+
 
   public List<Derivation> chartList;
 
@@ -225,63 +214,65 @@ class InteractiveBeamParserState extends ChartParserState {
 
     this.chartList = this.collectChart();
 
-    boolean parseFloat = false;
     if (InteractiveBeamParser.opts.floatStrategy == InteractiveBeamParser.FloatStrategy.Always)
-      parseFloat = true;
+      this.parseFloat = true;
     else if (InteractiveBeamParser.opts.floatStrategy == InteractiveBeamParser.FloatStrategy.NoParse)
-      parseFloat = predDerivations.size() == 0;
+      this.parseFloat = predDerivations.size() == 0;
     else
-      parseFloat = false;
+      this.parseFloat = false;
 
-    if (mode == Mode.full) {
-      // Compute gradient with respect to the predicted derivations
-      if (this.execute)
-        ensureExecuted();
-      if (computeExpectedCounts) {
-        expectedCounts = new HashMap<>();
-        ParserState.computeExpectedCounts(predDerivations, expectedCounts);
-      }
-    }
-
-    /* If Beam Parser failed to find derivations, try a floating parser */
-    if (parseFloat) {
-      /*
-       * For every base span of the chart, add the derivations from nothing
-       * rules
-       */
-      List<Rule> nothingRules = new ArrayList<Rule>();
-      for (Rule rule : parser.grammar.getRules())
-        if (rule.isFloating() && rule.rhs.size() == 1 && rule.isRhsTerminals())
-          nothingRules.add(rule);
-      for (int i = 0; i < numTokens; i++)
-        for (Rule rule : nothingRules)
-          applyRule(i, i + 1, rule, chart[i][i + 1].get("$TOKEN"));
-
-      /* Traverse the chart bottom up */
-      for (int len = 1; len <= numTokens; len++) {
-        for (int i = 0; i + len <= numTokens; i++) {
-          buildFloating(i, i + len);
-        }
-      }
-
-      /* Add unique derivations to predDerivations */
-      List<Derivation> rootDerivs = chart[0][numTokens].get("$FROOT");
-      if (rootDerivs == null)
-        rootDerivs = new ArrayList<Derivation>(Derivation.emptyList);
-
-      List<Derivation> actionDerivs = new ArrayList<Derivation>(Derivation.emptyList);
-      if (actionDerivs != null) {
-        Set<Formula> formulas = new HashSet<Formula>();
-        for (Derivation d : rootDerivs) {
-          Formula f = d.getFormula();
-          if (!formulas.contains(f)) {
-            formulas.add(f);
-            predDerivations.add(d);
-          }
-        }
-      }
-    }
   }
+
+  public void execute() {
+     if (mode == Mode.full) {
+       // Compute gradient with respect to the predicted derivations
+       if (this.execute)
+         ensureExecuted();
+       if (computeExpectedCounts) {
+         expectedCounts = new HashMap<>();
+         ParserState.computeExpectedCounts(predDerivations, expectedCounts);
+       }
+     }
+
+     /* If Beam Parser failed to find derivations, try a floating parser */
+     if (this.parseFloat) {
+       /*
+        * For every base span of the chart, add the derivations from nothing
+        * rules
+        */
+       List<Rule> nothingRules = new ArrayList<Rule>();
+       for (Rule rule : parser.grammar.getRules())
+         if (rule.isFloating() && rule.rhs.size() == 1 && rule.isRhsTerminals())
+           nothingRules.add(rule);
+       for (int i = 0; i < numTokens; i++)
+         for (Rule rule : nothingRules)
+           applyRule(i, i + 1, rule, chart[i][i + 1].get("$TOKEN"));
+
+       /* Traverse the chart bottom up */
+       for (int len = 1; len <= numTokens; len++) {
+         for (int i = 0; i + len <= numTokens; i++) {
+           buildFloating(i, i + len);
+         }
+       }
+
+       /* Add unique derivations to predDerivations */
+       List<Derivation> rootDerivs = chart[0][numTokens].get("$FROOT");
+       if (rootDerivs == null)
+         rootDerivs = new ArrayList<Derivation>(Derivation.emptyList);
+
+       List<Derivation> actionDerivs = new ArrayList<Derivation>(Derivation.emptyList);
+       if (actionDerivs != null) {
+         Set<Formula> formulas = new HashSet<Formula>();
+         for (Derivation d : rootDerivs) {
+           Formula f = d.getFormula();
+           if (!formulas.contains(f)) {
+             formulas.add(f);
+             predDerivations.add(d);
+           }
+         }
+       }
+     }
+   }
 
   private List<Derivation> collectChart() {
     List<Derivation> chartList = Lists.newArrayList();

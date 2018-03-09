@@ -1,8 +1,9 @@
 package edu.stanford.nlp.sempre.roboy.score;
 
 import edu.stanford.nlp.sempre.ContextValue;
-import edu.stanford.nlp.sempre.ErrorInfo;
+import edu.stanford.nlp.sempre.roboy.ErrorInfo;
 
+import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -12,12 +13,13 @@ import java.util.HashMap;
  *
  * @author emlozin
  */
-public interface ScoringFunction {
-    public Map<String, Map<String, Double>> current_score = new HashMap<>();   /**< Current calculated scores */
+public abstract class ScoringFunction {
+    private double weight;          /**< Weight of the score in general score*/
+
     /**
      * Scoring function.
      * Takes ErrorInfo as well as ContextValue objects and calculates score of each
      * candidate for unknown terms.
      */
-    public Map<String, Map<String, Double>> score(ErrorInfo errorInfo, ContextValue context);
+    public abstract ErrorInfo score(ErrorInfo errorInfo, ContextValue context);
 }

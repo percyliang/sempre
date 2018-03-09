@@ -75,25 +75,36 @@ public class SparqlUtils {
     }
 
     // Form query based on triple form
-    public List<String> returnURI(String entity, String endpointUrl){
+    public Set<String> returnURI(String entity, String endpointUrl, boolean object){
         //System.out.println("Entity: "+entity);
         List<Map<String,String>> triples = new ArrayList();
         Map<String,String> t1 = new HashMap();
         t1.put("predicate","rdfs:label");
         t1.put("object","\"".concat(entity).concat("\"@en"));
         triples.add(t1);
-        Map<String,String> t2 = new HashMap();
-        t2.put("predicate","rdf:type");
-        t2.put("object","owl:Class");
-        triples.add(t2);
+        if (object == true) {
+            Map<String, String> t2 = new HashMap();
+            t2.put("predicate", "rdf:type");
+            t2.put("object", "owl:Class");
+            triples.add(t2);
+        }
         Gson gson = new Gson();
         String json = gson.toJson((triples));
         try {
-            String url = String.format("%s?query=%s&format=xml", endpointUrl, URLEncoder.encode(formQuery(json), "UTF-8"));
+            String url = String.format("%s?default-graph-uri=http://dbpedia.org&query=%s&format=xml", endpointUrl, URLEncoder.encode(formQuery(json), "UTF-8"));
+            //System.out.println("SPARQL query: "+formQuery(json));
+//            System.out.println("Query: "+url);
             ServerResponse response = makeRequest(url);
             List<Map<String,String>> list = reader.readArrayXml(response.getXml());
-            if (list.size()>0)
-                return new ArrayList<String>(list.get(0).values());
+//            System.out.println("Query: "+list.toString());
+
+            if (list.size()>0) {
+                Set<String> labels = new HashSet<>();
+                for (Map<String,String> map: list){
+                    labels.addAll(map.values());
+                }
+                return labels;
+            }
             else
                 return null;
         }
@@ -136,7 +147,7 @@ public class SparqlUtils {
             query_inside.append(".\n");
         }
         return DatabaseInfo.getPrefixes(query_inside.toString()).concat(
-                String.format("SELECT %sWHERE{\n%s}\nLIMIT 10", var.toString(), query_inside.toString()));
+                String.format("SELECT DISTINCT %sWHERE{\n%s}\nLIMIT 10", var.toString(), query_inside.toString()));
     }
 
     // Make a request to the given endpoint.

@@ -2,7 +2,7 @@ package edu.stanford.nlp.sempre.roboy.error;
 
 import edu.stanford.nlp.sempre.ContextValue;
 import edu.stanford.nlp.sempre.Derivation;
-import edu.stanford.nlp.sempre.ErrorInfo;
+import edu.stanford.nlp.sempre.roboy.ErrorInfo;
 
 import java.util.List;
 

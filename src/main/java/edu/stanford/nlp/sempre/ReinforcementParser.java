@@ -1,7 +1,6 @@
 package edu.stanford.nlp.sempre;
 
 import com.google.common.base.Joiner;
-import edu.stanford.nlp.sempre.roboy.lexicons.word2vec.Word2vec;
 import fig.basic.*;
 import fig.exec.Execution;
 import fig.prob.SampleUtils;
@@ -86,37 +85,6 @@ public class ReinforcementParser extends Parser {
 
   @Override
   public ParserState newParserState(Params params, Example ex, boolean computeExpectedCounts) {
-    if (computeExpectedCounts) { // if we learn - use sampling, otherwise, use max
-      // if we simulate non RL we just take the max and not do sampling
-      if (opts.simulateNonRlObjective) {
-        return new ReinforcementParserState.StateBuilder()
-                .parser(this)
-                .params(params)
-                .example(ex)
-                .samplingStrategy("max")
-                .computeExpectedCounts(true)
-                .createState();
-      } else {
-        return (new ReinforcementParserState.StateBuilder()
-                .parser(this)
-                .params(params)
-                .example(ex))
-                .samplingStrategy("proposal")
-                .computeExpectedCounts(true)
-                .createState();
-      }
-    }
-    return (new ReinforcementParserState.StateBuilder()
-            .parser(this)
-            .params(params)
-            .example(ex))
-            .samplingStrategy("max")
-            .computeExpectedCounts(false)
-            .createState();
-  }
-
-  @Override
-  public ParserState newParserState(Params params, Example ex, boolean computeExpectedCounts, Word2vec vec) {
     if (computeExpectedCounts) { // if we learn - use sampling, otherwise, use max
       // if we simulate non RL we just take the max and not do sampling
       if (opts.simulateNonRlObjective) {
@@ -328,6 +296,8 @@ final class ReinforcementParserState extends AbstractReinforcementParserState {
       LogInfo.logs("Expected reward = %s", objectiveValue);
     visualizeChart();
   }
+
+  public void execute() {};
 
   private void sampleHistoryAndInfer() {
 

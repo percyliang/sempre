@@ -303,10 +303,8 @@ public class Master {
     ex.preprocess();
 
     // Parse!
-    builder.parser.parse(builder.params, ex, false);
-
-    // Postprocess and specify an underspecified query
-    //ex.postprocess();
+    //builder.parser.parse(builder.params, ex, false);
+    builder.parser.parse(builder.params, ex, false, builder.error_retrieval);
 
     response.ex = ex;
     ex.logWithoutContext();

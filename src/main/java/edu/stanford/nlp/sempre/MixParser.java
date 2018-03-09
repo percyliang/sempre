@@ -150,6 +150,9 @@ class MixParserState extends ParserState {
       }
 
     }
+  }
+
+  public void execute(){
     ensureExecuted();
     if (computeExpectedCounts) {
       expectedCounts = new HashMap<>();

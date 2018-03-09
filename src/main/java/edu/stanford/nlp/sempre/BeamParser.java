@@ -122,7 +122,9 @@ class BeamParserState extends ChartParserState {
     }
 
     setPredDerivations();
+  }
 
+  public void execute() {
     if (mode == Mode.full) {
       // Compute gradient with respect to the predicted derivations
       ensureExecuted();

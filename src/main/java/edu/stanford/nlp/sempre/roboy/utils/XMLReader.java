@@ -1,14 +1,7 @@
 package edu.stanford.nlp.sempre.roboy.utils;
 
-import edu.stanford.nlp.sempre.ErrorInfo;
 import edu.stanford.nlp.sempre.ErrorValue;
-import edu.stanford.nlp.sempre.Example;
 import edu.stanford.nlp.sempre.roboy.DatabaseInfo;
-
-import java.net.SocketTimeoutException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLEncoder;
 
 import java.io.*;
 import java.util.*;
@@ -17,18 +10,14 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.w3c.dom.NamedNodeMap;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import com.google.common.collect.Lists;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import com.google.gson.Gson;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.reflect.TypeToken;
 
 /**
  * XML document reader for interpretation of server
@@ -161,10 +150,18 @@ public class XMLReader{
     public static List<Map<String,String>> readEntityXml(String xml, List<String> keywords) {
         List<Map<String, String>> output = new ArrayList<Map<String, String>>();
         NodeList results = extractResultsFromXml(keywords.get(0),xml);
+        double probability = 0;
         for (int i = 0; i < results.getLength(); i++) {
             Map<String, String> result = getTagValue(keywords.subList(1, keywords.size()), results.item(i));
-            if (result!=null && result.size() > 0)
+            if (result!=null && result.size() > 0) {
                 output.add(result);
+                probability += Double.parseDouble(result.get(keywords.get(keywords.size()-1)));
+            }
+        }
+        // normalize
+        for (Map<String, String> entry: output){
+            entry.put(keywords.get(keywords.size()-1),Double.toString(
+                    Double.parseDouble(entry.get(keywords.get(keywords.size()-1)))/probability));
         }
         return output;
     }

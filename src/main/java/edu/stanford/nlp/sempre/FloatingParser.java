@@ -582,7 +582,9 @@ class FloatingParserState extends ParserState {
     addToDerivations(anchoredCell(Rule.rootCat, 0, numTokens), predDerivations);
     for (int depth = 0; depth <= FloatingParser.opts.maxDepth; depth++)
       addToDerivations(floatingCell(Rule.rootCat, depth), predDerivations);
+  }
 
+  public void execute(){
     // Compute gradient with respect to the predicted derivations
     ensureExecuted();
     if (computeExpectedCounts) {
