@@ -69,7 +69,7 @@
   </target>
 
   <!-- Compile tables -->
-  <target name="tables" depends="init,core,corenlp">
+  <target name="tables" depends="init,core,corenlp,cprune">
     <echo message="Compiling ${ant.project.name}: tables"/>
     <mkdir dir="${classes}/tables"/>
     <javac srcdir="${src}" destdir="${classes}/tables" classpathref="lib.path" debug="true" includeantruntime="false" source="${source}" target="${target}">
@@ -79,7 +79,7 @@
   </target>
 
   <!-- Compile cprune -->
-  <target name="cprune" depends="init,core,corenlp,tables">
+  <target name="cprune" depends="init,core">
     <echo message="Compiling ${ant.project.name}: cprune"/>
     <mkdir dir="${classes}/cprune"/>
     <javac srcdir="${src}" destdir="${classes}/cprune" classpathref="lib.path" debug="true" includeantruntime="false" source="${source}" target="${target}">

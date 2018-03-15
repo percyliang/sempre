@@ -71,6 +71,7 @@ type conversion.
 
 To get the official number of a trained model, run
 
+    ./pull-dependencies tables-cprune
     ./run @mode=tables @data=u-1 @feat=all @train=0 -Derivation.showValues -Builder.inParamsPath path/to/params
 
 (Change the `@data` other options to match the ones used during training.)

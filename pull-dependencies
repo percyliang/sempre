@@ -256,6 +256,11 @@ addModule('tables-data-0.5', 'WikiTableQuestions dataset v0.5 (for backward repr
   system "cd lib/data && unzip WikiTableQuestions-0.5-compact.zip" or exit 1
 })
 
+addModule('tables-cprune', 'Neighbor information for applying macro grammar on tables', lambda {
+  pull('/u/nlp/data/semparse/cprune/nn_0.zip', 'data/nn_0', {:symlink => true})
+  system "cd lib/data/nn_0 && unzip nn_0.zip" or exit 1
+})
+
 addModule('overnight', 'Creating a parser for multiple domains', lambda {
   # Geo evaluation
   pull('/u/nlp/data/semparse/overnight/geo880.db', 'data/overnight/', {:symlink => true})
