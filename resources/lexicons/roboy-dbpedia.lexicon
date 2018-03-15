@@ -13,6 +13,7 @@
 {"lexeme": "favorite", "formula": "rb:FAVORITE", "type" : "TypeProperty"}
 
 ## Relationships
+{"lexeme": "call", "formula": "rb:NAME_OF", "type" : "Relationship"}
 {"lexeme": "like", "formula": "rb:HAS_HOBBY", "type" : "Relationship"}
 {"lexeme": "like", "formula": "rb:FRIEND_OF", "type" : "Relationship"}
 {"lexeme": "born in", "formula": "rb:BORN_IN", "type" : "Relationship"}
@@ -50,8 +51,8 @@
 {"lexeme": "university", "formula": "rb:STUDY_AT", "type" : "RelationClass"}
 {"lexeme": "child", "formula": "rb:CHILD_OF", "type" : "RelationClass"}
 {"lexeme": "friend", "formula": "rb:FRIEND_OF", "type" : "RelationClass"}
-{"lexeme": "friend of", "formula": "rb:FRIEND_OF", "type" : "RelationClass"}
 {"lexeme": "name", "formula": "rb:NAME_OF", "type" : "RelationClass"}
+{"lexeme": "home", "formula": "rb:BORN_IN", "type" : "RelationClass"}
 {"lexeme": "age", "formula": "rb:AGE", "type" : "RelationClass"}
 {"lexeme": "member", "formula": "rb:MEMBER_OF", "type" : "RelationClass"}
 {"lexeme": "member of", "formula": "rb:MEMBER_OF", "type" : "RelationClass"}

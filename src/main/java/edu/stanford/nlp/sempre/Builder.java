@@ -68,7 +68,7 @@ public class Builder {
 
     // Feature extractor
     if (extractor == null)
-      extractor = new FeatureExtractor(executor);
+      extractor = new FeatureExtractor(executor, simple_executor);
 
     // Parser
     if (parser == null)

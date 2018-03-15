@@ -4,6 +4,8 @@ import edu.stanford.nlp.sempre.ErrorValue;
 import edu.stanford.nlp.sempre.roboy.DatabaseInfo;
 
 import java.io.*;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import org.w3c.dom.Document;
@@ -115,8 +117,29 @@ public class XMLReader{
 
             String var = "?" + binding.getAttribute("name");
             String uri = getTagValue("uri", binding);
+            uri = new String(uri.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
             if (!(uri == null || (var.contains("_") || (uri.contains("#"))))){
+                if (uri.contains(":"))
+                    uri = dbInfo.uri2id(uri);
                 results.put(var,uri);
+            }
+        }
+        return results;
+    }
+
+    private static List<String> nodeToLiteral(Node result) {
+        List<String> results = new ArrayList<>();
+        // Read bindings
+        NodeList bindings = ((Element) result).getElementsByTagName("binding");
+
+        // For each binding j (contributes some information to one column)...
+        for (int j = 0; j < bindings.getLength(); j++) {
+            Element binding = (Element) bindings.item(j);
+
+            String var = "?" + binding.getAttribute("name");
+            String uri = getTagValue("literal", binding);
+            if (!(uri == null || (var.contains("_") || (uri.contains("#"))))){
+                results.add(uri);
             }
         }
         return results;
@@ -179,4 +202,15 @@ public class XMLReader{
         return output;
     }
 
+    public static List<List<String>> readLiteralXml(String xml) {
+        List<List<String>> output = new ArrayList<>();
+        NodeList results = extractResultsFromXml("result",xml);
+        for (int i = 0; i < results.getLength(); i++) {
+            List<String> result = nodeToLiteral(results.item(i));
+            if (result!=null && result.size() > 0 && !output.contains(result)) {
+                output.add(result);
+            }
+        }
+        return output;
+    }
 }

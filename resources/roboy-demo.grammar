@@ -75,11 +75,13 @@
 #(rule $Subject ($Subject $Adjective) (TripleFn "to"))
 
 # Subject Phrase
+(rule $Value ($PHRASE) (IdentityFn))
+#(rule $Object ($PHRASE) (OpenTypeFn type))
 (rule $Object ($Noun) (IdentityFn))
 (rule $Object ($Det $Object) (SelectFn 1))
 (rule $Object ($Conj $Object) (SelectFn 1))
 (rule $Object ($Object or $Object) (ConcatFn ";"))
-(rule $Object ($Object and $Object) (ConcatFn ","))
+(rule $Object ($Object ($Conj optional) $Object) (ConcatFn ","))
 (rule $Object ($Object , $Object) (ConcatFn ","))
 #(rule $Object ($Adjective $Object) (TripleFn "ot"))
 #(rule $Object ($Object $Adjective) (TripleFn "to"))
@@ -104,11 +106,13 @@
 (rule $Predicate ($Relat) (IdentityFn))
 (rule $Predicate ($RelatClass) (IdentityFn))
 (rule $Predicate ($Not $Predicate) (ConcatFn " "))
-(rule $Predicate ($Predicate ($Conj optional) $Predicate) (ConcatFn ","))
+(rule $Predicate ($Predicate and $Predicate) (ConcatFn ","))
+(rule $Predicate ($Predicate , $Predicate) (ConcatFn ","))
 (rule $Predicate ($Predicate or $Predicate) (ConcatFn ";"))
 #(rule $Predicate ($TypeProperty $PHRASE) (SelectFn 0))
 (rule $Predicate ($TypeProperty $ObjectClass) (TripleFn "pt"))
 (rule $Pred ($TypeProperty $ObjectClass) (TripleFn "pt"))
+#(rule $ROOT ($Predicate) (IdentityFn))
 
 # Question Phrase
 (rule $Quest ($Wh) (SimpleLexiconFn (type Question)))
@@ -132,18 +136,15 @@
 (rule $Expr ($Expr $SubSen) (ConcatFn ")->("))
 (rule $Expr ($SubSen $Expr) (ConcatFn ")<-("))
 
-# Expressions
-#(rule $Expr ($Subject ($BE optional) $AdjPhrase) (ConcatFn ","))
-#(rule $Expr ($Subject ($BE optional) $Noun) (ConcatFn ","))
-#(rule $Expr ($Subject ($BE optional) $Noun) (ConcatFn ","))
-(rule $Expr ($Subject $Predicate ($BE optional) $Object) (TripleFn "spo"))
-(rule $Expr ($Noun ($BE optional) $Subject $Predicate) (TripleFn "osp"))
+# Statement expressions
+(rule $Expr ($Subject $Predicate ($BE optional) $PHRASE) (TripleFn "spo"))
+#(rule $Expr ($Subject $Predicate ($BE optional) $Value) (TripleFn "spo"))
+(rule $Expr ($PHRASE ($BE optional) $Subject $Predicate) (TripleFn "osp"))
 (rule $Expr ($Subject $Predicate ($BE optional) $AdjPhrase) (TripleFn "spo"))
 (rule $Expr ($AdjPhrase ($BE optional) $Subject $Predicate) (TripleFn "osp"))
-#(rule $Expr ($Noun is $Subject $Predicate) (TripleFn "osp"))
-#(rule $Expr ($Subject $Predicate $AdjPhrase) (TripleFn "spo"))
-#(rule $Expr ($Subject $Predicate $Subject) (ConcatFn ","))
-#(rule $Expr ($Subject $Predicate $Noun) (ConcatFn ","))
+(rule $Expr ($PHRASE ($BE optional) $Subject $Predicate) (TripleFn "osp"))
+(rule $Expr ($Predicate $Subject $Object) (TripleFn "pso"))
+(rule $Expr ($Predicate $Subject) (TripleFn "pso"))
 
 (rule $Expr ($Quest $Expr) (SelectFn 1))
 #(rule $Expr ($Quest $BE $Subject) (ConcatFn "."))
@@ -154,10 +155,9 @@
 #(rule $Expr ($Quest $Predicate $Subject $AdjPhrase) (ConcatFn "."))
 #
 (rule $ROOT ($Expr) (IdentityFn))
-(rule $ROOT ($Pred) (IdentityFn))
 (rule $ROOT ($Expr or $Expr) (ConcatFn " or "))
 (rule $ROOT ($Not $Expr) (ConcatFn " "))
-(rule $ROOT ($Expr ($Conj optional) $Expr) (ConcatFn " and "))
+(rule $ROOT ($Expr ($Conj optional) $Expr) (ConcatFn "; "))
 
 # Math expressions
 (include math.grammar)
@@ -173,5 +173,8 @@
 (rule $Set (what is $Binary $Entity) (JoinFn forward))
 (rule $Set (what is $Entity $Binary) (JoinFn backward))
 (rule $Question ($Set) (IdentityFn))
-(rule $ROOT ($PHRASE) (OpenTypeFn type))
 (rule $ROOT ($Set) (IdentityFn))
+
+#TEST SET
+(rule $ROOT ($Noun) (OpenTypeFn type))
+(rule $ROOT ($Verb) (OpenTypeFn relation))

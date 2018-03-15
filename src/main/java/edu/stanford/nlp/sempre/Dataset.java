@@ -240,7 +240,7 @@ public class Dataset {
       // Skip example if too long
       if (ex.numTokens() > opts.maxTokens) continue;
 
-      LogInfo.logs("Example %s (%d): %s => %s", ex.id, examples.size(), ex.getTokens(), ex.targetValue);
+      LogInfo.logs("Example %s (%d): %s => %s => %s", ex.id, examples.size(), ex.getTokens(), ex.targetValue, ex.targetFormula);
 
       examples.add(ex);
       numTokensFig.add(ex.numTokens());

@@ -144,8 +144,11 @@ public class Learner {
   public void onlineLearnExample(Example ex) {
     LogInfo.begin_track("onlineLearnExample: %s derivations", ex.predDerivations.size());
     HashMap<String, Double> counts = new HashMap<>();
-    for (Derivation deriv : ex.predDerivations)
+    for (Derivation deriv : ex.predDerivations) {
       deriv.compatibility = parser.valueEvaluator.getCompatibility(ex.targetValue, deriv.value);
+      if (Double.isNaN(deriv.compatibility))
+        deriv.compatibility = 0;
+    }
     ParserState.computeExpectedCounts(ex.predDerivations, counts);
     params.update(counts);
     LogInfo.end_track();
@@ -203,8 +206,8 @@ public class Learner {
             checkGradient(ex, state);
             LogInfo.end_track();
           }
-
-          SempreUtils.addToDoubleMap(counts, state.expectedCounts);
+          if (state.expectedCounts!=null)
+            SempreUtils.addToDoubleMap(counts, state.expectedCounts);
 
           batchSize++;
           if (batchSize >= opts.batchSize) {

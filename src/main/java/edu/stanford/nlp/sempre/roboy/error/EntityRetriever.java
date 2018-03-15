@@ -42,29 +42,30 @@ public class EntityRetriever extends KnowledgeRetriever {
     public ErrorInfo analyze(Derivation dev) {
         ErrorInfo errorInfo = new ErrorInfo();
         List <Map<String,String>> results = new ArrayList<Map<String, String>>();
-        String entity = new String();
+        String unknown = new String();
         String formula = dev.getFormula().toString();
-        while (formula.contains("OpenType")){
-            int start = formula.indexOf("OpenType(")+"OpenType(".length();
-            int end = formula.indexOf(")",formula.indexOf("OpenType("));
+        while (formula.contains("Open")){
+            int start = formula.indexOf("Open")+"Open".length();
+            int end = formula.indexOf("\''",start);
             if (start > formula.length() || start < 0 || end < 0 ||end > formula.length())
                 return errorInfo;
-            entity = formula.substring(start,end);
-            //System.out.println("Checking entity:" + entity);
+            unknown = formula.substring(start,end);
+            String entity = unknown.substring(unknown.indexOf("\'")+1);
             // Extract the results from XML now.
             String url = endpointUrl.concat(entity);
             url = url.replace(" ","_");
             SparqlUtils sparql = new SparqlUtils();
             SparqlUtils.ServerResponse response = sparql.makeRequest(url);
-            results = reader.readEntityXml(response.getXml(),keywords);
+            if (response.getXml()!=null)
+                results = reader.readEntityXml(response.getXml(),keywords);
             for (Map<String,String> c: results){
                 if (errorInfo.getCandidates().containsKey(entity)) {
                     errorInfo.getCandidates().get(entity).add(gson.toJson(c));
-//                    LogInfo.logs("Entity: %s",gson.toJson(c));
+                    //LogInfo.logs("Entity: %s",gson.toJson(c));
                 }
                 else {
                     errorInfo.getCandidates().put(entity, new ArrayList<>(Arrays.asList(gson.toJson(c))));
-//                    LogInfo.logs("Entity: %s",gson.toJson(c));
+                    //LogInfo.logs("Entity: %s",gson.toJson(c));
                 }
             }
             formula = formula.substring(end);

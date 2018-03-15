@@ -23,26 +23,20 @@ public class ContextValue extends Value {
     public final String utterance;
     public final Formula formula;
     public final Value value;
-    public final String intent;
-    public final String sentiment;
-    public final List<String> keywords;
+    public final GeneralInfo genInfo;
     
-    public Exchange(String utterance, Formula formula, Value value, String intent, String sentiment, List<String> keywords) {
+    public Exchange(String utterance, Formula formula, Value value, GeneralInfo genInfo) {
       this.utterance = utterance;
       this.formula = formula;
       this.value = value;
-      this.intent = intent;
-      this.sentiment = sentiment;
-      this.keywords = keywords;
+      this.genInfo = genInfo;
     }
 
     public Exchange(String utterance, Formula formula, Value value) {
       this.utterance = utterance;
       this.formula = formula;
       this.value = value;
-      this.intent = null;
-      this.sentiment = null;
-      this.keywords = null;
+      this.genInfo = null;
     }
 
     public Exchange(LispTree tree) {
@@ -50,25 +44,22 @@ public class ContextValue extends Value {
       this.formula = Formulas.fromLispTree(tree.child(2));
       this.value = Values.fromLispTree(tree.child(3));
       if (tree.children.size()>4) {
-        this.intent = tree.child(4).value;
-        this.sentiment = tree.child(5).value;
-        this.keywords = new ArrayList(Arrays.asList(tree.child(6).value.split(",")));
+        this.genInfo = new GeneralInfo(tree.child(4).value);
       }
       else{
-        this.intent = null;
-        this.sentiment = null;
-        this.keywords = null;
+        this.genInfo = null;
       }
     }
     public LispTree toLispTree() {
       LispTree tree = LispTree.proto.newList();
       tree.addChild("exchange");
       tree.addChild(utterance);
-      tree.addChild(formula.toLispTree());
-      tree.addChild(value.toLispTree());
-      tree.addChild(intent);
-      tree.addChild(sentiment);
-      tree.addChild(String.join(",", keywords));
+      if (formula!=null)
+        tree.addChild(formula.toLispTree());
+      if (value!=null)
+        tree.addChild(value.toLispTree());
+      if (genInfo!=null)
+        tree.addChild(genInfo.toLispTree());
       return tree;
     }
     @Override public String toString() { return toLispTree().toString(); }

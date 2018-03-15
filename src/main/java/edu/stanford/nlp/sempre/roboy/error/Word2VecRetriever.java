@@ -37,11 +37,11 @@ public class Word2VecRetriever extends KnowledgeRetriever {
         String formula = dev.getFormula().toString();
         while (formula.contains("Open")){
             int start = formula.indexOf("Open")+"Open".length();
-            int end = formula.indexOf(")",formula.indexOf("Open"));
+            int end = formula.indexOf("\''",start);
             if (start > formula.length() || start < 0 || end < 0 ||end > formula.length())
                 return errorInfo;
             unknown = formula.substring(start,end);
-            String entity = unknown.substring(unknown.indexOf("(")+1);
+            String entity = unknown.substring(unknown.indexOf("\'")+1);
             List<String> known_words= new ArrayList<String>(SimpleLexicon.getSingleton().lookup_type(entity));
             List<String> candidate = this.vec.getBest(entity,known_words);
             for (String c: candidate){
@@ -53,11 +53,11 @@ public class Word2VecRetriever extends KnowledgeRetriever {
                     record.put("URI",entry.formula.toString());
                     if (errorInfo.getCandidates().containsKey(entity)){
                         errorInfo.getCandidates().get(entity).add(gson.toJson(record));
-//                        LogInfo.logs("Label: %s",gson.toJson(record));
+                        //LogInfo.logs("Word2Vec: %s",gson.toJson(record));
                     }
                     else{
                         errorInfo.getCandidates().put(entity, new ArrayList<>(Arrays.asList(gson.toJson(record))));
-//                        LogInfo.logs("Label: %s",gson.toJson(record));
+                        //LogInfo.logs("Word2Vec: %s",gson.toJson(record));
                     }
                 }
             }

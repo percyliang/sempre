@@ -275,7 +275,6 @@ public class TripleFn extends SemanticFn {
                 }
                 else if (c.childStringValue(0).contains("{")){
                     out = final_formula(c.childStringValue(0),c.childStringValue(1));
-                    System.out.println("String -> "+out);
                     return new Derivation.Builder()
                             .withCallable(c)
                             .withTripleFormulaFrom(out)

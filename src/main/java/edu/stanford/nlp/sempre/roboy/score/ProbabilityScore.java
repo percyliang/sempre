@@ -66,7 +66,7 @@ public class ProbabilityScore extends ScoringFunction {
                 Map<String, String> c = new HashMap<>();
                 c = gson.fromJson(candidate, c.getClass());
                 // Check similarity
-                System.out.println("Probability:"+key+":" + c.get("Label") + "->" + c.get("Refcount"));
+                //System.out.println("Probability:"+key+":" + c.get("Label") + "->" + c.get("Refcount"));
                 key_scores.put(candidate,Double.valueOf(c.get("Refcount"))*this.weight);
             }
             result.getScored().put(key,key_scores);

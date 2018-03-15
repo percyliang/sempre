@@ -25,7 +25,7 @@ public class Word2vec {
     private final Word2Vec vec;
     private final WeightLookupTable weightLookupTable;
     private final Iterator<INDArray> vectors;
-    private final double threshold;
+    private double threshold;
 
     public Word2vec() throws Exception {
         InputStream input = new FileInputStream("config.properties");
@@ -54,8 +54,12 @@ public class Word2vec {
         LogInfo.begin_track("Tests -> ");
         LogInfo.logs("Closest words: %s", this.getClosest("queen",10));
         LogInfo.logs("Closest word to female from : \"women\",\"queen\",\"elisabeth\" -> %s", this.getBest("female", Arrays.asList("women","queen","elisabeth")));
-        LogInfo.logs("Closest word to swimming from : \"literature\",\"music\",\"sports\" -> : %s",this.getBest("swimming", Arrays.asList("literature","music","sports")));
+        LogInfo.logs("Closest word to swimming from : \"literature\",\"activity\",\"sports\" -> : %s",this.getBest("swimming", Arrays.asList("literature","activity","sports")));
         LogInfo.end_track();
+    }
+
+    public void setThreshold(double t){
+        threshold = t;
     }
 
     public Collection<String> getClosest(String word, int number){
@@ -88,10 +92,9 @@ public class Word2vec {
         try{
             Word2vec vec = new Word2vec();
             LogInfo.logs("Tests -> ");
-            System.out.println("Similarity check: "+vec.getSimilarity("elisabeth", "elisa"));
-            System.out.println("Similarity check simple: "+"elisa".compareToIgnoreCase("elisabeth"));
+            vec.setThreshold(0);
             System.out.println("Closest words: "+vec.getClosest("queen",10));
-            System.out.println("Closest word to female from : \"women\",\"queen\",\"elisabeth\" -> "+vec.getBest("female", Arrays.asList("women","queen","elisabeth")));
+            System.out.println("Closest word to female from : \"people\",\"activities\",\"politics\",\"culture\" -> "+vec.getBest("queen", Arrays.asList("people","activities","politics","culture")));
             System.out.println("Closest word to swimming from : \"literature\",\"music\",\"sports\" -> : "+vec.getBest("swimming", Arrays.asList("literature","music","sports")));
 
 //            System.out.println("Word vector: "+ Arrays.toString(vec.getWordVector("day")));

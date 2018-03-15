@@ -40,10 +40,19 @@ public class FeatureExtractor {
   }
 
   private Executor executor;
+  private Executor simple_executor;
   private List<FeatureComputer> featureComputers = new ArrayList<>();
 
   public FeatureExtractor(Executor executor) {
     this.executor = executor;
+    for (String featureComputer : opts.featureComputers) {
+      featureComputers.add((FeatureComputer) Utils.newInstanceHard(SempreUtils.resolveClassName(featureComputer)));
+    }
+  }
+
+  public FeatureExtractor(Executor executor, Executor simple_executor) {
+    this.executor = executor;
+    this.simple_executor = simple_executor;
     for (String featureComputer : opts.featureComputers) {
       featureComputers.add((FeatureComputer) Utils.newInstanceHard(SempreUtils.resolveClassName(featureComputer)));
     }
@@ -94,8 +103,11 @@ public class FeatureExtractor {
   void extractDenotationFeatures(Example ex, Derivation deriv) {
     if (!containsDomain("denotation")) return;
     if (!deriv.isRoot(ex.numTokens())) return;
-
-    deriv.ensureExecuted(executor, ex.context);
+    System.out.println(deriv.getFormula().toString());
+    if (deriv.getFormula().toString().contains("triple")||deriv.getFormula().toString().contains("rb:"))
+      deriv.ensureExecuted(simple_executor, ex.context);
+    else
+      deriv.ensureExecuted(executor, ex.context);
 
     if (deriv.value instanceof ErrorValue) {
       deriv.addFeature("denotation", "error");

@@ -33,15 +33,6 @@ public class Example {
   // Input utterance
   @JsonProperty public final String utterance;
 
-  // Input sentiment
-  @JsonProperty public String sentiment;
-
-  // Input intention
-  @JsonProperty public String intent;
-
-  // Input topic keywords
-  @JsonProperty public List<String> keywords;
-
   // Context
   @JsonProperty public ContextValue context;
 
@@ -55,6 +46,9 @@ public class Example {
 
   //// Information after Information Extraction step.
   public RelationInfo relationInfo = null;
+
+  //// Information after General Info Extraction step.
+  public GeneralInfo genInfo = null;
 
   //// Output of the parser.
 
@@ -70,38 +64,32 @@ public class Example {
   public static class Builder {
     private String id;
     private String utterance;
-    private String sentiment;
-    private String intent;
-    private List<String> keywords;
     private ContextValue context;
     private Formula targetFormula;
     private Value targetValue;
+    private GeneralInfo genInfo;
     private LanguageInfo languageInfo;
     private RelationInfo relationInfo;
 
     public Builder setId(String id) { this.id = id; return this; }
     public Builder setUtterance(String utterance) { this.utterance = utterance; return this; }
-    public Builder setSentiment(String sentiment) { this.sentiment = sentiment; return this; }
-    public Builder setIntent(String intent) { this.intent = intent; return this; }
-    public Builder setKeywords(List<String> keywords) { this.keywords = keywords; return this; }
     public Builder setContext(ContextValue context) { this.context = context; return this; }
     public Builder setTargetFormula(Formula targetFormula) { this.targetFormula = targetFormula; return this; }
     public Builder setTargetValue(Value targetValue) { this.targetValue = targetValue; return this; }
+    public Builder setGenInfo(GeneralInfo genInfo) { this.genInfo = genInfo; return this; }
     public Builder setLanguageInfo(LanguageInfo languageInfo) { this.languageInfo = languageInfo; return this; }
     public Builder setRelationInfo(RelationInfo relationInfo) { this.relationInfo = relationInfo; return this; }
     public Builder withExample(Example ex) {
       setId(ex.id);
       setUtterance(ex.utterance);
-      setSentiment(ex.sentiment);
-      setIntent(ex.intent);
-      setKeywords(ex.keywords);
+      setGenInfo(ex.getGenInfo());
       setContext(ex.context);
       setTargetFormula(ex.targetFormula);
       setTargetValue(ex.targetValue);
       return this;
     }
     public Example createExample() {
-      return new Example(id, utterance, intent, sentiment, keywords, context, targetFormula, targetValue, languageInfo, relationInfo);
+      return new Example(id, utterance, context, targetFormula, targetValue, genInfo, languageInfo, relationInfo);
     }
   }
 
@@ -111,6 +99,7 @@ public class Example {
                  @JsonProperty("context") ContextValue context,
                  @JsonProperty("targetFormula") Formula targetFormula,
                  @JsonProperty("targetValue") Value targetValue,
+                 @JsonProperty("generalInfo") GeneralInfo genInfo,
                  @JsonProperty("languageInfo") LanguageInfo languageInfo,
                  @JsonProperty("relationInfo") RelationInfo relationInfo) {
     this.id = id;
@@ -120,41 +109,32 @@ public class Example {
     this.targetValue = targetValue;
     this.languageInfo = languageInfo;
     this.relationInfo = relationInfo;
-    this.intent = null;
-    this.keywords = null;
-    this.sentiment = null;
+    this.genInfo = genInfo;
   }
 
 
   @JsonCreator
   public Example(@JsonProperty("id") String id,
                  @JsonProperty("utterance") String utterance,
-                 @JsonProperty("intent") String intent,
-                 @JsonProperty("sentiment") String sentiment,
-                 @JsonProperty("keywords") List<String> keywords,
                  @JsonProperty("context") ContextValue context,
                  @JsonProperty("targetFormula") Formula targetFormula,
-                 @JsonProperty("targetValue") Value targetValue,
-                 @JsonProperty("languageInfo") LanguageInfo languageInfo,
-                 @JsonProperty("relationInfo") RelationInfo relationInfo) {
+                 @JsonProperty("targetValue") Value targetValue) {
     this.id = id;
     this.utterance = utterance;
     this.context = context;
     this.targetFormula = targetFormula;
     this.targetValue = targetValue;
-    this.languageInfo = languageInfo;
-    this.relationInfo = relationInfo;
-    this.intent = intent;
-    this.sentiment = sentiment;
-    this.keywords = keywords;
+    this.genInfo = new GeneralInfo();
+    this.languageInfo = new LanguageInfo();
+    this.relationInfo = new RelationInfo();
   }
 
   // Accessors
   public String getId() { return id; }
   public String getUtterance() { return utterance; }
-  public String getIntent() { return intent; }
-  public String getSentiment() { return sentiment; }
-  public List<String> getKeywords() { return keywords; }
+  public GeneralInfo getGenInfo() { return genInfo; }
+  public LanguageInfo getLanInfo() { return languageInfo; }
+  public RelationInfo getRelInfo() { return relationInfo; }
   public int numTokens() { return languageInfo.tokens.size(); }
   public List<Derivation> getPredDerivations() {
     Set<Derivation> hs = new HashSet<>();
@@ -164,9 +144,6 @@ public class Example {
     return predDerivations;
   }
 
-  public void setIntent(String intent) { this.intent = intent;}
-  public void setSentiment(String sentiment) { this.sentiment = sentiment;}
-  public void setKeywords(List<String> keywords) { this.keywords = keywords;}
   public void setContext(ContextValue context) { this.context = context; }
   public void setTargetFormula(Formula targetFormula) { this.targetFormula = targetFormula; }
   public void setAlternativeFormulas(List<Formula> alternativeFormulas) { this.alternativeFormulas = alternativeFormulas; }
@@ -208,12 +185,6 @@ public class Example {
         b.setId(arg.child(1).value);
       } else if ("utterance".equals(label)) {
         b.setUtterance(arg.child(1).value);
-      } else if ("intent".equals(label)) {
-        b.setIntent(arg.child(1).value);
-      }  else if ("sentiment".equals(label)) {
-        b.setSentiment(arg.child(1).value);
-      } else if ("keywords".equals(label)) {
-        b.setKeywords(Arrays.asList(arg.child(1).value.split(",")));
       } else if ("canonicalUtterance".equals(label)) {
         b.setUtterance(arg.child(1).value);
       } else if ("targetFormula".equals(label)) {
@@ -271,37 +242,20 @@ public class Example {
     return ex;
   }
 
-  public List<String> extractKeywords() {
-    List<String> keywords = new ArrayList();
-    try {
-      InputStream input = new FileInputStream("config.properties");
-      Properties prop = new Properties();
-      prop.load(input);
-      String keyword_tags = prop.getProperty("KEYWORD_TAGS");
-      for (int i = 0; i< this.languageInfo.tokens.size(); i++){
-        if (keyword_tags.contains(this.languageInfo.posTags.get(i)))
-          keywords.add(this.languageInfo.tokens.get(i));
-      }
-      LogInfo.logs("Extracted keywords: %s", String.join(", ", keywords));
-    }
-    catch (Exception e){
-      LogInfo.errors("Couldn't read keyword tags %s",e.getMessage());
-    }
-    return keywords;
-  }
-
   public void preprocess() {
     // Get Full information
     InfoAnalyzer.CoreNLPInfo info = InfoAnalyzer.getSingleton().analyze(this.utterance);
     this.languageInfo = info.lanInfo;
     this.relationInfo = info.relInfo;
-    this.sentiment = info.senInfo;
-    this.keywords = extractKeywords();
+    this.genInfo = info.senInfo;
 
     // Update context
     List<ContextValue.Exchange> newExchanges = new ArrayList<ContextValue.Exchange>();
-    newExchanges.add(new ContextValue.Exchange(this.utterance, null, null, this.intent, this.sentiment, this.keywords));
-    context = context.withNewExchange(newExchanges);
+    newExchanges.add(new ContextValue.Exchange(this.utterance, null, null, this.genInfo));
+    if (context != null)
+      context = context.withNewExchange(newExchanges);
+    else
+      context = new ContextValue(null, null, newExchanges, null);
 
     this.targetValue = TargetValuePreprocessor.getSingleton().preprocess(this.targetValue, this);
   }
@@ -319,6 +273,8 @@ public class Example {
       LogInfo.logs("targetFormula: %s", targetFormula);
     if (targetValue != null)
       LogInfo.logs("targetValue: %s", targetValue);
+    LogInfo.logs("Sentiment: %s", genInfo.sentiment);
+    LogInfo.logs("Keywords: %s", genInfo.keywords.toString());
     LogInfo.logs("Dependency children: %s", languageInfo.dependencyChildren);
     LogInfo.logs("Extracted relations: %s", relationInfo.relations.toString());
     LogInfo.end_track();
@@ -335,6 +291,8 @@ public class Example {
       LogInfo.logs("targetFormula: %s", targetFormula);
     if (targetValue != null)
       LogInfo.logs("targetValue: %s", targetValue);
+    LogInfo.logs("Sentiment: %s", genInfo.sentiment);
+    LogInfo.logs("Keywords: %s", genInfo.keywords.toString());
     LogInfo.logs("Dependency children: %s", languageInfo.dependencyChildren);
     LogInfo.logs("Extracted relations: %s", relationInfo.relations.toString());
     LogInfo.end_track();

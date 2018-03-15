@@ -151,7 +151,10 @@ public final class SimpleLexicon {
 
       // Features
       StringDoubleVec features = null;
-      Map<String, Double> featureMap = (Map<String, Double>) map.get("features");
+      t = new TypeToken<Map<String, Double>>(){}.getType();
+      Map<String, Double> feat = gson.fromJson(map.get("features").toString(), t);
+
+      Map<String, Double> featureMap = feat;//(Map<String, Double>) map.get("features");
       if (featureMap != null) {
         features = new StringDoubleVec();
         for (Map.Entry<String, Double> e : featureMap.entrySet())
@@ -161,7 +164,8 @@ public final class SimpleLexicon {
 
       Entry entry = new Entry(rawPhrase, formula, type, features);
       String phrase = entry.rawPhrase.toLowerCase();
-      MapUtils.addToList(entries, phrase, entry);
+      if (!entries.containsValue(entry))
+        MapUtils.addToList(entries, phrase, entry);
 
       // For last names
       String[] parts = phrase.split(" ");
@@ -175,7 +179,8 @@ public final class SimpleLexicon {
         newFeatures.trimToSize();
 
         Entry newEntry = new Entry(rawPhrase, formula, type, newFeatures);
-        MapUtils.addToList(entries, parts[parts.length - 1], newEntry);
+        if (!entries.containsValue(newEntry))
+          MapUtils.addToList(entries, parts[parts.length - 1], newEntry);
       }
   }
 

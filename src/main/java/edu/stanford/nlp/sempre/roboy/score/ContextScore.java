@@ -64,14 +64,22 @@ public class ContextScore extends ScoringFunction {
                 c = gson.fromJson(candidate, c.getClass());
                 // Check similarity
                 double max = 0;
-                for (String keyword: context.exchanges.get(context.exchanges.size() - 1).keywords) {
+                for (String keyword: context.exchanges.get(context.exchanges.size() - 1).genInfo.keywords) {
                     double score = this.vec.getSimilarity(keyword, c.get("Label"));
                     if (!Double.isNaN(score) && score > max)
                         max = score;
                 }
+                // If there is more context values,
+                if (context.exchanges.size() > 1){
+                    for (String keyword: context.exchanges.get(context.exchanges.size() - 2).genInfo.keywords) {
+                        double score = this.vec.getSimilarity(keyword, c.get("Label"));
+                        if (!Double.isNaN(score) && score > max)
+                            max = score;
+                    }
+                }
                 if (!Double.isNaN(max))
-                    max = -1.0;
-                System.out.println("Context:"+key+":" + c.get("Label") + "->" + max);
+                    max = 0.0;
+                //System.out.println("Context:"+key+":" + c.get("Label") + "->" + max);
                 key_scores.put(candidate,max*this.weight);
             }
             result.getScored().put(key,key_scores);

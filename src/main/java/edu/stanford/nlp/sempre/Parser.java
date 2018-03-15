@@ -287,6 +287,8 @@ public abstract class Parser {
       for (int i = 0; i < numCandidates; i++) {
         Derivation deriv = predDerivations.get(i);
         compatibilities[i] = deriv.compatibility;
+        if (Double.isNaN(compatibilities[i]))
+          compatibilities[i] = 0;
         // Must be fully compatible to count as correct.
         if (compatibilities[i] == 1 && correctIndex == -1)
           correctIndex = i;
@@ -309,6 +311,17 @@ public abstract class Parser {
         }
       }
     }
+    else if (ex.targetFormula != null){
+      compatibilities = new double[numCandidates];
+      for (int i = 0; i < numCandidates; i++) {
+        Derivation deriv = predDerivations.get(i);
+        if (deriv.getFormula().toString().equals(ex.targetFormula)) {
+          numCorrect++;
+        } else {
+          numIncorrect++;
+        }
+      }
+    }
 
     // Compute probabilities
     double[] probs = Derivation.getProbs(predDerivations, 1);
@@ -320,7 +333,7 @@ public abstract class Parser {
     // Number of derivations which have the same top score
     int numTop = 0;
     double topMass = 0;
-    if (ex.targetValue != null) {
+    if (ex.targetValue != null || ex.targetFormula != null) {
       while (numTop < numCandidates &&
           Math.abs(predDerivations.get(numTop).score - predDerivations.get(0).score) < 1e-10) {
         topMass += probs[numTop];

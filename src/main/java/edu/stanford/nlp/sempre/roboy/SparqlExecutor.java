@@ -86,6 +86,15 @@ public class SparqlExecutor extends Executor {
   public SparqlExecutor() {
     this.dbInfo = DatabaseInfo.getSingleton();
     this.query2xmlCache = StringCacheUtils.create(opts.cachePath);
+    try {
+      InputStream input = new FileInputStream("config.properties");
+      Properties prop = new Properties();
+      prop.load(input);
+      opts.endpointUrl = prop.getProperty("DB_SPARQL");
+    }
+    catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public class ServerResponse {

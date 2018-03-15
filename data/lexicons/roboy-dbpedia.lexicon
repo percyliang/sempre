@@ -13,6 +13,7 @@
 {"lexeme": "favorite", "formula": "rb:FAVORITE", "type" : "TypeProperty"}
 
 ## Relationships
+{"lexeme": "call", "formula": "rb:NAME_OF", "type" : "Relationship"}
 {"lexeme": "like", "formula": "rb:HAS_HOBBY", "type" : "Relationship"}
 {"lexeme": "like", "formula": "rb:FRIEND_OF", "type" : "Relationship"}
 {"lexeme": "born in", "formula": "rb:BORN_IN", "type" : "Relationship"}

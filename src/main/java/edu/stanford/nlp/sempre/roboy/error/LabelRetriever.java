@@ -47,11 +47,11 @@ public class LabelRetriever extends KnowledgeRetriever {
         String formula = dev.getFormula().toString();
         while (formula.contains("Open")){
             int start = formula.indexOf("Open")+"Open".length();
-            int end = formula.indexOf(")",formula.indexOf("Open"));
+            int end = formula.indexOf("\''",start);
             if (start > formula.length() || start < 0 || end < 0 ||end > formula.length())
                 return errorInfo;
             unknown = formula.substring(start,end);
-            String entity = unknown.substring(unknown.indexOf("(")+1);
+            String entity = unknown.substring(unknown.indexOf("\'")+1);
             // Extract the results from XML now.
             Set<String> uri = sparqlUtil.returnURI(entity, endpointUrl, false);
             Set<String> uri_cap = sparqlUtil.returnURI( WordUtils.capitalize(entity), endpointUrl, false);
@@ -67,11 +67,11 @@ public class LabelRetriever extends KnowledgeRetriever {
                     single.put("URI", u);
                     if (errorInfo.getCandidates().containsKey(entity)) {
                         errorInfo.getCandidates().get(entity).add(gson.toJson(single));
-//                        LogInfo.logs("Label: %s",gson.toJson(single));
+                        //LogInfo.logs("Label: %s",gson.toJson(single));
                     }
                     else{
                         errorInfo.getCandidates().put(entity, new ArrayList<>(Arrays.asList(gson.toJson(single))));
-//                        LogInfo.logs("Label: %s",gson.toJson(single));
+                        //LogInfo.logs("Label: %s",gson.toJson(single));
                     }
                 }
             }

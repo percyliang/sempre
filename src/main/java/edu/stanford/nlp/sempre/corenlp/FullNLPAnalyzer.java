@@ -22,6 +22,7 @@ import com.google.common.collect.Lists;
 import com.google.common.base.Joiner;
 
 import fig.basic.*;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.*;
 import java.util.*;
@@ -60,8 +61,18 @@ public class FullNLPAnalyzer extends InfoAnalyzer {
     private static final String AUX_VERB_TAG = "BE";
 
     public static StanfordCoreNLP pipeline = null;
+    public static String keyword_tags = null;
 
     public static void initModels() {
+        try {
+            InputStream input = new FileInputStream("config.properties");
+            Properties prop = new Properties();
+            prop.load(input);
+            keyword_tags = prop.getProperty("KEYWORD_TAGS");
+        }
+        catch(IOException e){
+            LogInfo.errors("Exception during reading a file %s", e.getStackTrace());
+        }
         if (pipeline != null) return;
         Properties props = new Properties();
         props.put("annotators", Joiner.on(',').join(opts.annotators));
@@ -100,7 +111,7 @@ public class FullNLPAnalyzer extends InfoAnalyzer {
         // Get full info
         coreInfo.lanInfo = getLang(annotation);
         coreInfo.relInfo = getRel(annotation);
-        coreInfo.senInfo = getSent(annotation);
+        coreInfo.senInfo = getSent(coreInfo.lanInfo, annotation);
 
         return coreInfo;
     }
@@ -167,35 +178,70 @@ public class FullNLPAnalyzer extends InfoAnalyzer {
             Collection<RelationTriple> triples =
                     sentence.get(NaturalLogicAnnotations.RelationTriplesAnnotation.class);
             // Print the triples
-            System.out.println("\n[relation analyzer:] OpenIE triples:");
+//            LogInfo.begin_track("OpenIE triples:");
             for (RelationTriple triple : triples) {
-                System.out.println("(" +
-                        triple.subjectLemmaGloss() + "," +
-                        triple.relationLemmaGloss() + "," +
-                        triple.objectLemmaGloss() + ")");
-                System.out.println("Triple confidence: " + triple.confidence);
+//                LogInfo.logs("(%s, %s, %s) ",
+//                        triple.subjectLemmaGloss(),
+//                        triple.relationLemmaGloss(),
+//                        triple.objectLemmaGloss());
+//                System.out.println("Triple confidence: " + triple.confidence);
+                //LogInfo.logs("Triple confidence: %d ",triple.confidence);
                 StringBuilder sb = new StringBuilder();
                 sb.append("(").append(triple.subjectLemmaGloss()).append(",");
                 sb.append(triple.relationLemmaGloss()).append(",");
                 sb.append(triple.objectLemmaGloss()).append(")");
                 relationInfo.relations.put(sb.toString(), triple.confidence);
             }
-            System.out.println("[relation analyzer:] No more triples \n");
+//            LogInfo.end_track();
         }
         return relationInfo;
     }
 
-    public String getSent(Annotation annotation) {
-        String type = new String();
+    public GeneralInfo getSent(LanguageInfo languageInfo, Annotation annotation) {
+        GeneralInfo genInfo = new GeneralInfo();
         for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
             Tree tree = sentence.get(SentimentCoreAnnotations.SentimentAnnotatedTree.class);
-            LogInfo.logs("Tree extracted: %s", tree);
-            int sentiment = RNNCoreAnnotations.getPredictedClass(tree);
-            type = sentence.get(SentimentCoreAnnotations.SentimentClass.class);
-            LogInfo.logs("Sentiment extracted: %s", type);
-            System.out.println();
+//            LogInfo.logs("Dependency tree: %s", tree);
+            genInfo.keywords = getKeywords(tree);
+//            LogInfo.logs("Keywords extracted: %s", genInfo.keywords.toString());
+            genInfo.sentiment_type = RNNCoreAnnotations.getPredictedClass(tree);
+            genInfo.sentiment = sentence.get(SentimentCoreAnnotations.SentimentClass.class);
+//            LogInfo.logs("Sentiment extracted: %s", genInfo.sentiment);
         }
-        return type;
+        return genInfo;
+    }
+
+    public List<String> getKeywords(Tree tree){
+        List<String> result = new ArrayList<>();
+        String keyword = new String();
+        for (Tree child: tree.children()) {
+            if (child.isLeaf()){
+                if (keyword.length() > 0)
+                    keyword.concat(" ");
+                result.add(child.toString());
+            }
+            else{
+                if (child.isPreTerminal()){
+                    if (keyword_tags.toString().contains(child.label().toString())){
+                        for (Tree single:child.children())
+                            result.add(single.label().toString());
+                    }
+                }
+                else {
+                    if (child.isPrePreTerminal()) {
+                        if (keyword_tags.toString().contains(child.label().toString())) {
+                            result.add(String.join(" ", getKeywords(child)));
+                        }
+                    }
+                    if (!child.isPrePreTerminal()) {
+                        List<String> array = getKeywords(child);
+                        if (!array.isEmpty())
+                            result.addAll(array);
+                    }
+                }
+            }
+        }
+        return result;
     }
 
     // Test on example sentence.

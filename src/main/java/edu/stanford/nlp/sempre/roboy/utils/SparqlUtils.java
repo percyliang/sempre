@@ -95,7 +95,12 @@ public class SparqlUtils {
             //System.out.println("SPARQL query: "+formQuery(json));
 //            System.out.println("Query: "+url);
             ServerResponse response = makeRequest(url);
-            List<Map<String,String>> list = reader.readArrayXml(response.getXml());
+
+            List<Map<String,String>> list = new ArrayList<>();
+            if (response.getXml() != null)
+            {
+                list = reader.readArrayXml(response.getXml());
+            }
 //            System.out.println("Query: "+list.toString());
 
             if (list.size()>0) {
@@ -107,6 +112,41 @@ public class SparqlUtils {
             }
             else
                 return null;
+        }
+        catch(UnsupportedEncodingException e){
+            LogInfo.logs("WrongFormat of the input: %s", json);
+        }
+        return null;
+    }
+
+
+    // Form query based on triple form
+    public String returnDescr(String entity, String endpointUrl){
+        //System.out.println("Entity: "+entity);
+        List<Map<String,String>> triples = new ArrayList();
+        Map<String,String> t1 = new HashMap();
+        t1.put("subject", entity);
+        t1.put("predicate","dbpedia:abstract");
+        triples.add(t1);
+        Gson gson = new Gson();
+        String json = gson.toJson((triples));
+        try {
+            String url = String.format("%s?default-graph-uri=http://dbpedia.org&query=%s&format=xml", endpointUrl, URLEncoder.encode(formQuery(json,"en"), "UTF-8"));
+            //System.out.println("SPARQL query: "+formQuery(json,"en"));
+//            System.out.println("Query: "+url);
+            ServerResponse response = makeRequest(url);
+
+            List<List<String>> list = new ArrayList<>();
+
+            if (response.getXml() != null) {
+                list = reader.readLiteralXml(response.getXml());
+                if (list!=null && list.size()>0) {
+                    //System.out.println("Query: " + list.get(0));
+                    return list.get(0).get(0);
+                }
+                else
+                    return null;
+            }
         }
         catch(UnsupportedEncodingException e){
             LogInfo.logs("WrongFormat of the input: %s", json);
@@ -150,6 +190,41 @@ public class SparqlUtils {
                 String.format("SELECT DISTINCT %sWHERE{\n%s}\nLIMIT 10", var.toString(), query_inside.toString()));
     }
 
+    // Form query based on triple form
+    public String formQuery(String json, String lang) {
+        StringBuilder query_inside = new StringBuilder();
+        StringBuilder var = new StringBuilder();
+        String[] keys = {"subject","predicate","object"};
+
+        // Read triples from json
+        List<Map<String, String>> triple_list = new ArrayList();
+        Type t = new TypeToken<List<Map<String, String>>>(){}.getType();
+        triple_list = gson.fromJson(json, t);
+
+        for (Map<String, String> triple : triple_list)
+        {
+            int index = 0;
+            // Read single triples from json
+            for (String key :keys) {
+                if (triple.containsKey(key)) {
+                    query_inside.append(triple.get(key));
+                    query_inside.append(" ");
+                } else {
+                    query_inside.append("?x");
+                    query_inside.append(index);
+                    query_inside.append(" ");
+                    var.append("?x");
+                    var.append(index);
+                    var.append(" ");
+                }
+                index++;
+            }
+            query_inside.append(".\n");
+        }
+        return DatabaseInfo.getPrefixes(query_inside.toString()).concat(
+                String.format("SELECT DISTINCT %sWHERE{\n%s\nFILTER (lang(%s) = '%s'). }\nLIMIT 10", var.toString(), query_inside.toString(), var.toString(), lang));
+    }
+
     // Make a request to the given endpoint.
     // Return the XML.
     public ServerResponse makeRequest(String query) {
@@ -184,6 +259,9 @@ public class SparqlUtils {
             // Sometimes the SPARQL server throws a 408 to signify a server timeout.
             if (e.toString().contains("HTTP response code: 408"))
                 return new ServerResponse(ErrorValue.server408);
+            // Sometimes the SPARQL server throws a 408 to signify a server timeout.
+            if (e.toString().contains("HTTP response code: 400"))
+                return new ServerResponse(ErrorValue.badFormat);
             if (e.toString().contains("HTTP response code: 500"))
                 return new ServerResponse(ErrorValue.server500);
             throw new RuntimeException(e);  // Haven't seen this happen yet...

@@ -139,6 +139,7 @@
 (rule $Expr ($Subject $Predicate ($BE optional) $Object) (TripleFn "spo"))
 (rule $Expr ($Noun ($BE optional) $Subject $Predicate) (TripleFn "osp"))
 (rule $Expr ($Subject $Predicate ($BE optional) $AdjPhrase) (TripleFn "spo"))
+(rule $Expr ($Predicate $Subject $AdjPhrase) (TripleFn "pso"))
 (rule $Expr ($AdjPhrase ($BE optional) $Subject $Predicate) (TripleFn "osp"))
 #(rule $Expr ($Noun is $Subject $Predicate) (TripleFn "osp"))
 #(rule $Expr ($Subject $Predicate $AdjPhrase) (TripleFn "spo"))

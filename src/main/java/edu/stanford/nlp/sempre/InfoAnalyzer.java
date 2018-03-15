@@ -20,11 +20,11 @@ public abstract class InfoAnalyzer {
     public class CoreNLPInfo {
         public LanguageInfo lanInfo;
         public RelationInfo relInfo;
-        public String senInfo;
+        public GeneralInfo senInfo;
         public CoreNLPInfo (){
             this.lanInfo = new LanguageInfo();
             this.relInfo = new RelationInfo();
-            this.senInfo = new String();
+            this.senInfo = new GeneralInfo();
         }
     }
     public static Options opts = new Options();

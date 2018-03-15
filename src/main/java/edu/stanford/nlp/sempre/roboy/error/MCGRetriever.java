@@ -43,14 +43,15 @@ public class MCGRetriever extends KnowledgeRetriever {
     public ErrorInfo analyze(Derivation dev) {
         ErrorInfo errorInfo = new ErrorInfo();
         Map<String,Double> results = new HashMap();
-        String entity = new String();
+        String unknown = new String();
         String formula = dev.getFormula().toString();
-        while (formula.contains("OpenType")){
-            int start = formula.indexOf("OpenType(")+"OpenType(".length();
-            int end = formula.indexOf(")",formula.indexOf("OpenType("));
+        while (formula.contains("Open")){
+            int start = formula.indexOf("Open")+"Open".length();
+            int end = formula.indexOf("\''",start);
             if (start > formula.length() || start < 0 || end < 0 ||end > formula.length())
                 return errorInfo;
-            entity = formula.substring(start,end);
+            unknown = formula.substring(start,end);
+            String entity = unknown.substring(unknown.indexOf("\'")+1);
             // Extract the results from XML now.
             String url = (endpointUrl.concat(entity.replace(" ","+"))).concat("&topK=10");
             SparqlUtils.ServerResponse response = sparqlUtil.makeRequest(url);
@@ -71,12 +72,16 @@ public class MCGRetriever extends KnowledgeRetriever {
             }
             for (Map<String,String> c: labels){
                 if (errorInfo.getCandidates().containsKey(entity)) {
-                    errorInfo.getCandidates().get(entity).add(gson.toJson(c));
-//                    LogInfo.logs("MCG: %s",gson.toJson(c));
+                    if (!errorInfo.getCandidates().get(entity).contains(gson.toJson(c))) {
+                        errorInfo.getCandidates().get(entity).add(gson.toJson(c));
+                        //LogInfo.logs("MCG: %s", gson.toJson(c));
+                    }
+                    //else
+                    //    LogInfo.logs("Repeat MCG: %s", gson.toJson(c));
                 }
                 else {
                     errorInfo.getCandidates().put(entity, new ArrayList<>(Arrays.asList(gson.toJson(c))));
-//                    LogInfo.logs("MCG: %s",gson.toJson(c));
+                    //LogInfo.logs("MCG: %s",gson.toJson(c));
                 }
             }
             formula = formula.substring(end);
