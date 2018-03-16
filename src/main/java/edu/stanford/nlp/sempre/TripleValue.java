@@ -1,6 +1,7 @@
 package edu.stanford.nlp.sempre;
 
 import fig.basic.LispTree;
+import fig.basic.LogInfo;
 
 import java.util.*;
 
@@ -156,22 +157,30 @@ public class TripleValue extends Value {
             String[] candidates = str.split("&");
             this.triples.add(new Triple(str));
         }
-        //System.out.println("Triples: "+this.triples.toString());
-        //System.out.println("Triples children: "+this.children.toString());
     }
 
     public TripleValue(LispTree tree) {
         this.triples = new ArrayList();
         this.children = new ArrayList();
         for (int i = 1; i < tree.children.size(); i++) {
-
-            //System.out.println("Triple lisp"+tree.child(i).value.toString());
-            if (tree.child(i).value.toString().contains(";")
-                    ||tree.child(i).value.toString().contains("&"))
-                this.children.add(new TripleValue(tree.child(i).value));
+            if (tree.child(i).value != null)
+            {
+                if (tree.child(i).value.toString().equals("or"))
+                {
+                    this.type = TripleType.OR;
+                }
+            }
             else
-                this.triples.add(new Triple(tree.child(i).value));
-            //System.out.println("LispTree: "+tree.child(i).value);
+            {
+                if (tree.child(i).toString().contains("triples "))
+                {
+                    this.children.add(new TripleValue(tree.child(i)));
+                }
+                else if (tree.child(i).toString().contains("triple "))
+                {
+                    this.triples.add(new Triple(tree.child(i)));
+                }
+            }
         }
     }
 
@@ -273,6 +282,12 @@ public class TripleValue extends Value {
             return false;
         for(int i = 0; i < this.triples.size(); i++) {
             if (!this.triples.get(i).equals(that.triples.get(i)))
+                return false;
+        }
+        if (this.children.size() != that.children.size())
+            return false;
+        for(int i = 0; i < this.children.size(); i++) {
+            if (!this.children.get(i).equals(that.children.get(i)))
                 return false;
         }
         return true;

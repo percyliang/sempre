@@ -1,10 +1,10 @@
 package edu.stanford.nlp.sempre.roboy.error;
 
 import edu.stanford.nlp.sempre.Derivation;
+import edu.stanford.nlp.sempre.roboy.config.ConfigManager;
 import edu.stanford.nlp.sempre.roboy.ErrorInfo;
 import edu.stanford.nlp.sempre.roboy.utils.SparqlUtils;
 
-import java.io.*;
 import java.util.*;
 
 import java.lang.reflect.Type;
@@ -29,11 +29,9 @@ public class MCGRetriever extends KnowledgeRetriever {
 
     public MCGRetriever(){
         try {
-            InputStream input = new FileInputStream("config.properties");
-            prop.load(input);
-            endpointUrl = prop.getProperty("MCG_SEARCH");
-            dbpediaUrl = prop.getProperty("DB_SPARQL");
-            keywords = Arrays.asList(prop.getProperty("MCG_KEYWORDS").split(","));
+            endpointUrl = ConfigManager.MCG_SEARCH;
+            dbpediaUrl = ConfigManager.DB_SPARQL;
+            keywords = Arrays.asList(ConfigManager.MCG_KEYWORDS);
         }
         catch (Exception e) {
             throw new RuntimeException(e);
@@ -74,14 +72,16 @@ public class MCGRetriever extends KnowledgeRetriever {
                 if (errorInfo.getCandidates().containsKey(entity)) {
                     if (!errorInfo.getCandidates().get(entity).contains(gson.toJson(c))) {
                         errorInfo.getCandidates().get(entity).add(gson.toJson(c));
-                        //LogInfo.logs("MCG: %s", gson.toJson(c));
+                        if (ConfigManager.DEBUG > 3)
+                            LogInfo.logs("MCG: %s", gson.toJson(c));
                     }
                     //else
                     //    LogInfo.logs("Repeat MCG: %s", gson.toJson(c));
                 }
                 else {
                     errorInfo.getCandidates().put(entity, new ArrayList<>(Arrays.asList(gson.toJson(c))));
-                    //LogInfo.logs("MCG: %s",gson.toJson(c));
+                    if (ConfigManager.DEBUG > 3)
+                        LogInfo.logs("MCG: %s",gson.toJson(c));
                 }
             }
             formula = formula.substring(end);

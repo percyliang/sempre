@@ -1,10 +1,10 @@
 package edu.stanford.nlp.sempre.roboy.error;
 
 import edu.stanford.nlp.sempre.Derivation;
+import edu.stanford.nlp.sempre.roboy.config.ConfigManager;
 import edu.stanford.nlp.sempre.roboy.ErrorInfo;
 import edu.stanford.nlp.sempre.roboy.utils.SparqlUtils;
 
-import java.io.*;
 import java.util.*;
 
 import edu.stanford.nlp.sempre.roboy.utils.XMLReader;
@@ -18,10 +18,8 @@ import fig.basic.LogInfo;
  * @author emlozin
  */
 public class EntityRetriever extends KnowledgeRetriever {
-    public static Properties prop = new Properties();
     public static Gson gson = new Gson();
 
-    private Map<String, String> entities;
     public static XMLReader reader = new XMLReader();
 
     public static String endpointUrl = new String();
@@ -29,10 +27,8 @@ public class EntityRetriever extends KnowledgeRetriever {
 
     public EntityRetriever(){
         try {
-            InputStream input = new FileInputStream("config.properties");
-            prop.load(input);
-            endpointUrl = prop.getProperty("DB_SEARCH");
-            keywords = Arrays.asList(prop.getProperty("DB_KEYWORDS").split(","));
+            endpointUrl = ConfigManager.DB_SEARCH;
+            keywords = Arrays.asList(ConfigManager.DB_KEYWORDS);
         }
         catch (Exception e) {
             throw new RuntimeException(e);
@@ -61,11 +57,15 @@ public class EntityRetriever extends KnowledgeRetriever {
             for (Map<String,String> c: results){
                 if (errorInfo.getCandidates().containsKey(entity)) {
                     errorInfo.getCandidates().get(entity).add(gson.toJson(c));
-                    //LogInfo.logs("Entity: %s",gson.toJson(c));
+                    if (ConfigManager.DEBUG > 3) {
+                        LogInfo.logs("Entity: %s", gson.toJson(c));
+                    }
                 }
                 else {
                     errorInfo.getCandidates().put(entity, new ArrayList<>(Arrays.asList(gson.toJson(c))));
-                    //LogInfo.logs("Entity: %s",gson.toJson(c));
+                    if (ConfigManager.DEBUG > 3) {
+                        LogInfo.logs("Entity: %s", gson.toJson(c));
+                    }
                 }
             }
             formula = formula.substring(end);

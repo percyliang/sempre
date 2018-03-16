@@ -6,17 +6,15 @@ import com.google.common.collect.HashBiMap;
 import edu.stanford.nlp.sempre.roboy.DbFormulasInfo.BinaryFormulaInfo;
 import edu.stanford.nlp.sempre.roboy.DbFormulasInfo.UnaryFormulaInfo;
 import edu.stanford.nlp.sempre.*;
+import edu.stanford.nlp.sempre.roboy.config.ConfigManager;
 import fig.basic.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.*;
-import java.io.InputStream;
-import java.io.FileInputStream;
 import java.util.Properties;
 import java.io.FileReader;
 import java.lang.reflect.Type;
-import java.net.URLEncoder;
 
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
@@ -83,15 +81,9 @@ public final class DatabaseInfo {
 
   private DatabaseInfo() {
     try {
-      InputStream input = new FileInputStream("config.properties");
-      prop.load(input);
-      opts.schemaPath = prop.getProperty("SCHEMA");
-      JsonReader reader = new JsonReader(new FileReader(prop.getProperty("GLOSSARY")));
-      Type type = new TypeToken<Map<String, String>>(){}.getType();
-      glossary = gson.fromJson(reader, type);
-      reader = new JsonReader(new FileReader(prop.getProperty("TYPES")));
-      type = new TypeToken<Map<String, Map<String,String>>>(){}.getType();
-      mapTypes = gson.fromJson(reader, type);
+      opts.schemaPath = ConfigManager.SCHEMA_FILE;
+      glossary = ConfigManager.DB_GLOSSARY;
+      mapTypes = ConfigManager.DB_TYPES;
     }
     catch (Exception e) {
       throw new RuntimeException(e);

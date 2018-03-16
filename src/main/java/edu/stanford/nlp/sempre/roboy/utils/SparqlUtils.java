@@ -91,7 +91,8 @@ public class SparqlUtils {
         Gson gson = new Gson();
         String json = gson.toJson((triples));
         try {
-            String url = String.format("%s?default-graph-uri=http://dbpedia.org&query=%s&format=xml", endpointUrl, URLEncoder.encode(formQuery(json), "UTF-8"));
+            String url = String.format("%s?default-graph-uri=http://dbpedia.org&query=%s&format=xml",
+                    endpointUrl, URLEncoder.encode(formQuery(json), "UTF-8"));
             //System.out.println("SPARQL query: "+formQuery(json));
 //            System.out.println("Query: "+url);
             ServerResponse response = makeRequest(url);
@@ -131,7 +132,8 @@ public class SparqlUtils {
         Gson gson = new Gson();
         String json = gson.toJson((triples));
         try {
-            String url = String.format("%s?default-graph-uri=http://dbpedia.org&query=%s&format=xml", endpointUrl, URLEncoder.encode(formQuery(json,"en"), "UTF-8"));
+            String url = String.format("%s?default-graph-uri=http://dbpedia.org&query=%s&format=xml",
+                    endpointUrl, URLEncoder.encode(formQuery(json,"en"), "UTF-8"));
             //System.out.println("SPARQL query: "+formQuery(json,"en"));
 //            System.out.println("Query: "+url);
             ServerResponse response = makeRequest(url);
@@ -222,7 +224,8 @@ public class SparqlUtils {
             query_inside.append(".\n");
         }
         return DatabaseInfo.getPrefixes(query_inside.toString()).concat(
-                String.format("SELECT DISTINCT %sWHERE{\n%s\nFILTER (lang(%s) = '%s'). }\nLIMIT 10", var.toString(), query_inside.toString(), var.toString(), lang));
+                String.format("SELECT DISTINCT %sWHERE{\n%s\nFILTER (lang(%s) = '%s'). }\nLIMIT 10",
+                        var.toString(), query_inside.toString(), var.toString(), lang));
     }
 
     // Make a request to the given endpoint.

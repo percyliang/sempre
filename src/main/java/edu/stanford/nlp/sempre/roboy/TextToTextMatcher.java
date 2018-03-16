@@ -1,5 +1,6 @@
 package edu.stanford.nlp.sempre.roboy;
 
+import edu.stanford.nlp.sempre.roboy.config.ConfigManager;
 import edu.stanford.nlp.sempre.roboy.lexicons.TokenLevelMatchFeatures;
 import edu.stanford.nlp.sempre.*;
 import edu.stanford.nlp.stats.ClassicCounter;
@@ -116,7 +117,7 @@ public class TextToTextMatcher {
       Counters.maxInPlace(tokenFeatures, TokenLevelMatchFeatures.extractTokenMatchFeatures(exampleLemmas, fbDescTokens, true));
       Counters.maxInPlace(stemFeatures, TokenLevelMatchFeatures.extractTokenMatchFeatures(exampleStems, fbDescStems, false));
     }
-    if (opts.verbose >= 3) {
+    if (ConfigManager.DEBUG >= 3) {
       LogInfo.logs("Binary formula desc: %s, token match: %s, stem match: %s", fbDescs, tokenFeatures, stemFeatures);
     }
     addFeaturesToVector(tokenFeatures, "binary_token", vector);

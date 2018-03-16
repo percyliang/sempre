@@ -1,17 +1,14 @@
 package edu.stanford.nlp.sempre.roboy.error;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import edu.stanford.nlp.sempre.Derivation;
+import edu.stanford.nlp.sempre.roboy.config.ConfigManager;
 import edu.stanford.nlp.sempre.roboy.ErrorInfo;
 import edu.stanford.nlp.sempre.roboy.utils.SparqlUtils;
 import edu.stanford.nlp.sempre.roboy.utils.XMLReader;
 import fig.basic.LogInfo;
 import org.apache.commons.lang.WordUtils;
 
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.lang.reflect.Type;
 import java.util.*;
 
 /**
@@ -20,7 +17,6 @@ import java.util.*;
  * @author emlozin
  */
 public class LabelRetriever extends KnowledgeRetriever {
-    public static Properties prop = new Properties();
     public static Gson gson = new Gson();
 
     public static XMLReader reader = new XMLReader();
@@ -28,13 +24,10 @@ public class LabelRetriever extends KnowledgeRetriever {
     private SparqlUtils sparqlUtil = new SparqlUtils();
 
     public static String endpointUrl = new String();
-    public static List<String> keywords = new ArrayList();
 
     public LabelRetriever(){
         try {
-            InputStream input = new FileInputStream("config.properties");
-            prop.load(input);
-            endpointUrl = prop.getProperty("DB_SPARQL");
+            endpointUrl = ConfigManager.DB_SPARQL;
         }
         catch (Exception e) {
             throw new RuntimeException(e);
@@ -67,11 +60,13 @@ public class LabelRetriever extends KnowledgeRetriever {
                     single.put("URI", u);
                     if (errorInfo.getCandidates().containsKey(entity)) {
                         errorInfo.getCandidates().get(entity).add(gson.toJson(single));
-                        //LogInfo.logs("Label: %s",gson.toJson(single));
+                        if (ConfigManager.DEBUG > 3)
+                            LogInfo.logs("Label: %s",gson.toJson(single));
                     }
                     else{
                         errorInfo.getCandidates().put(entity, new ArrayList<>(Arrays.asList(gson.toJson(single))));
-                        //LogInfo.logs("Label: %s",gson.toJson(single));
+                        if (ConfigManager.DEBUG > 3)
+                            LogInfo.logs("Label: %s",gson.toJson(single));
                     }
                 }
             }

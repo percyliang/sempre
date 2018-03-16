@@ -3,6 +3,7 @@ package edu.stanford.nlp.sempre;
 import java.lang.reflect.Constructor;
 
 
+import fig.basic.LogInfo;
 import fig.basic.Option;
 import fig.exec.Execution;
 
@@ -53,9 +54,6 @@ public class Main implements Runnable {
  }
 
  public static void main(String[] args) {
-//   String[] arguments = "-FeatureExtractor.featureDomains rule -Dataset.inPaths train:data/rpqa-train.examples -Learner.maxTrainIters 1 -Builder.executor roboy.SparqlExecutor -Builder.simple_executor JavaExecutor -FeatureExtractor.featureDomains rule -Parser.coarsePrune true -JoinFn.typeInference true -Grammar.inPaths resources/roboy-demo.grammar -Main.interactive true -SimpleLexicon.inPaths resources/lexicons/roboy-dbpedia.lexicon -LanguageAnalyzer.languageAnalyzer corenlp.CoreNLPAnalyzer -Main.server true".split(" ");
-  String[] arguments = "-Builder.executor roboy.SparqlExecutor -Builder.simple_executor JavaExecutor -FeatureExtractor.featureDomains rule -Parser.coarsePrune true -JoinFn.typeInference true -Grammar.inPaths resources/roboy-demo.grammar -Main.interactive true -SimpleLexicon.inPaths resources/lexicons/roboy-dbpedia.lexicon -LanguageAnalyzer.languageAnalyzer corenlp.CoreNLPAnalyzer -Main.server true".split(" ");
-//  String[] arguments = "-Builder.executor roboy.SparqlExecutor -Builder.simple_executor JavaExecutor -FeatureExtractor.featureDomains rule -Parser.coarsePrune true -JoinFn.typeInference true -Grammar.inPaths resources/roboy-demo.grammar -SimpleLexicon.inPaths resources/lexicons/roboy-dbpedia.lexicon -LanguageAnalyzer.languageAnalyzer corenlp.CoreNLPAnalyzer -Main.socket true".split(" ");
-  Execution.run(arguments, "Main", new Main(), Master.getOptionsParser());
+  Execution.run(args, "Main", new Main(), Master.getOptionsParser());
  }
 }

@@ -3,12 +3,14 @@ package edu.stanford.nlp.sempre.roboy;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import edu.stanford.nlp.sempre.*;
+import edu.stanford.nlp.sempre.roboy.config.ConfigManager;
 import edu.stanford.nlp.sempre.roboy.error.*;
 import edu.stanford.nlp.sempre.roboy.lexicons.LexicalEntry;
 import edu.stanford.nlp.sempre.roboy.lexicons.word2vec.Word2vec;
 import edu.stanford.nlp.sempre.roboy.score.*;
 import fig.basic.LispTree;
 import fig.basic.LogInfo;
+import fig.basic.Option;
 
 import java.lang.reflect.Type;
 import java.util.*;
@@ -33,6 +35,10 @@ public class ErrorRetrieval {
     private List<ScoringFunction> scorers;      /**< List of scoring functions objects */
     private FollowUpHandler followUps;
 
+    public static class Options {
+        @Option(gloss = "Enabling follow-up questions") public boolean followUps = false;
+    }
+    public static ErrorRetrieval.Options opts = new ErrorRetrieval.Options();
     /**
      * A constructor.
      * Creates ErrorRetrieval object.
@@ -41,7 +47,7 @@ public class ErrorRetrieval {
      */
     public ErrorRetrieval(String utterance, ContextValue context, List<Derivation> derivations){
         // Create base objects
-        this.follow_ups = true;
+        this.follow_ups = opts.followUps;
         this.utterance = utterance;
         this.context = context;
         this.derivations = derivations;
@@ -78,7 +84,7 @@ public class ErrorRetrieval {
      */
     public ErrorRetrieval(){
         // Create base objects
-        this.follow_ups = true;
+        this.follow_ups = opts.followUps;
         this.utterance = null;
         this.context = null;
         this.derivations = null;
@@ -317,7 +323,7 @@ public class ErrorRetrieval {
         String result = new String();
         Map<String,Double> candidate = errorInfo.getScored().get(term);
         List<Map.Entry<String,Double>> sorted = new ArrayList<>(candidate.entrySet());
-        sorted.sort((o1, o2) -> o1.getValue().compareTo(o2.getValue()));
+        sorted.sort((o1, o2) -> o2.getValue().compareTo(o1.getValue()));
         Map.Entry<String,Double> best = sorted.get(0);
         for (Map.Entry<String,Double> entry : sorted)
         {

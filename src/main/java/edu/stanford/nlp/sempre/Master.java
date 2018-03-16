@@ -3,6 +3,7 @@ package edu.stanford.nlp.sempre;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import edu.stanford.nlp.sempre.roboy.config.ConfigManager;
 import fig.basic.*;
 import jline.console.ConsoleReader;
 
@@ -14,14 +15,7 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-
-import java.io.InputStream;
-import java.io.FileInputStream;
-import java.util.Properties;
-
-import java.lang.reflect.Type;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 /**
  * A Master manages multiple sessions. Currently, they all share the same model,
@@ -94,6 +88,7 @@ public class Master {
       interpretation.put("lemma_tokens",ex.getLemmaTokens());
       interpretation.put("postags",ex.getPosTag());
       interpretation.put("relations",ex.getRelation());
+      interpretation.put("type",ex.getType());
 
     /* // Convert JSON string back to Map.
       Type type = new TypeToken<Map<String, String>>(){}.getType();
@@ -120,7 +115,7 @@ public class Master {
       // Convert a Map into JSON string.
       Gson gson = new Gson();
       String json = gson.toJson(interpretation);
-      //System.out.println("json = " + json);
+      System.out.println("json = " + json);
       return json;
     }
     public List<String> getLines() { return lines; }
@@ -188,10 +183,7 @@ public class Master {
     Session session = getSession("stdin");
     try
     {
-      Properties prop = new Properties();
-      InputStream input = new FileInputStream("config.properties");
-      prop.load(input);
-      ServerSocket serverSocket = new ServerSocket(Integer.parseInt(prop.getProperty("PARSER_PORT")));
+      ServerSocket serverSocket = new ServerSocket(ConfigManager.PARSER_PORT);
       while (true) {
         Socket clientSocket = serverSocket.accept();
         Runnable connectionHandler = new SocketConnectionHandler(clientSocket, session, this);
@@ -219,7 +211,8 @@ public class Master {
       while ((line = reader.readLine()) != null) {
         int indent = LogInfo.getIndLevel();
         try {
-          processQuery(session, line);
+          Response res = processQuery(session, line);
+          System.out.println(res.getAll());
         } catch (Throwable t) {
           while (LogInfo.getIndLevel() > indent)
             LogInfo.end_track();

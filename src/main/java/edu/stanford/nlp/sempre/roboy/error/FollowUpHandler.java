@@ -2,14 +2,13 @@ package edu.stanford.nlp.sempre.roboy.error;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import edu.stanford.nlp.sempre.roboy.config.ConfigManager;
 import edu.stanford.nlp.sempre.roboy.ErrorInfo;
 import edu.stanford.nlp.sempre.roboy.utils.SparqlUtils;
-import fig.basic.LogInfo;
 
 import java.io.*;
 import java.lang.reflect.Type;
 import java.net.Socket;
-import java.net.URLEncoder;
 import java.util.*;
 
 
@@ -21,7 +20,6 @@ public class FollowUpHandler {
     private Socket clientSocket;  /**< Client socket for the follow-up question */
     private PrintWriter out;      /**< Output stream for the follow-up question */
     private BufferedReader in;    /**< Input stream from the follow-up question */
-    private boolean debug = true; /**< Boolean variable for debugging purpose */
     private Gson gson;
     public  String dbpediaUrl;
     private SparqlUtils sparqlUtil = new SparqlUtils();
@@ -31,13 +29,9 @@ public class FollowUpHandler {
      * Creates FollowUpHandler class and connects the parser to DM using a socket.
      */
     public FollowUpHandler(int portNumber) {
-        this.debug = true;
         this.gson = new Gson();
         try {
-            InputStream input = new FileInputStream("config.properties");
-            Properties prop = new Properties();
-            prop.load(input);
-            dbpediaUrl = prop.getProperty("DB_SPARQL");
+            dbpediaUrl = ConfigManager.DB_SPARQL;
             // Create string-string socket
             this.clientSocket = new Socket("localhost", portNumber);
             // Declaring input
@@ -68,26 +62,21 @@ public class FollowUpHandler {
             Map<String, String> c_map = this.gson.fromJson(c, type);
             String desc = sparqlUtil.returnDescr(c_map.get("URI"),dbpediaUrl);
             if (desc!=null) {
-                LogInfo.logs("Abstract: %s", desc);
                 if (desc.contains(".")) {
                     desc = desc.substring(0, desc.indexOf("."));
                 }
-                LogInfo.logs("Abstract after: %s", desc);
                 if (desc.contains("(")) {
                     String new_desc = desc.substring(0, desc.indexOf("("));
-                    LogInfo.logs("Abstract after: %s", desc);
                     new_desc = new_desc.concat(desc.substring(desc.indexOf(")")+2));
                     desc = new_desc;
-                    LogInfo.logs("Abstract after: %s", desc);
                 }
                 desc = desc.replaceAll(" is ", ", ");
                 desc = desc.replaceAll(" was ", ", ");
-                LogInfo.logs("Abstract after: %s", desc);
 
-                result.add(String.format("Did you mean %s as %s the %s?", term, c_map.get("Label"), desc));
+                result.add(String.format("Did you mean %s as %s, %s?", term, c_map.get("Label"), desc));
             }
             else
-                result.add(String.format("Did you mean %s as the %s?", term, c_map.get("Label")));
+                result.add(String.format("Did you mean %s as %s?", term, c_map.get("Label")));
         }
         return result;
     }

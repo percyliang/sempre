@@ -2,18 +2,9 @@ package edu.stanford.nlp.sempre.roboy;
 
 import java.util.*;
 import com.google.common.collect.Lists;
+import edu.stanford.nlp.sempre.roboy.config.ConfigManager;
 import fig.basic.*;
 import edu.stanford.nlp.sempre.*;
-import java.io.InputStream;
-import java.io.FileInputStream;
-import java.util.Properties;
-import java.io.FileReader;
-import java.lang.reflect.Type;
-import java.net.URLEncoder;
-
-import com.google.gson.Gson;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.reflect.TypeToken;
 
 /**
  * Utilities for constructing SPARQL expressions.
@@ -54,17 +45,9 @@ class SparqlBlock implements SparqlExpr {
   void addStatement(PrimitiveFormula arg1, String property, PrimitiveFormula arg2, boolean optional) {
     // Check multiple prefixes
     boolean correct_prefix = false;
-    Properties prop = new Properties();
-    InputStream input;
-    Gson gson = new Gson();
     Map<String, String> glossary = new HashMap();
     try {
-        input = new FileInputStream("config.properties");
-        prop.load(input);
-        JsonReader reader = new JsonReader(new FileReader(prop.getProperty("GLOSSARY")));
-        Type type = new TypeToken<Map<String, String>>() {
-        }.getType();
-        glossary = gson.fromJson(reader, type);
+        glossary = ConfigManager.DB_GLOSSARY;
     }
     catch (Exception e) {
         throw new RuntimeException(e);

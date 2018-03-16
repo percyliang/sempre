@@ -38,6 +38,7 @@ public class Example {
 
   // What we should try to predict.
   @JsonProperty public Formula targetFormula;  // Logical form (e.g., database query)
+  public String formulaType;
   public List<Formula> alternativeFormulas;    // Alternative logical form (less canonical)
   @JsonProperty public Value targetValue;      // Denotation (e.g., answer)
 
@@ -66,6 +67,7 @@ public class Example {
     private String utterance;
     private ContextValue context;
     private Formula targetFormula;
+    private String formulaType;
     private Value targetValue;
     private GeneralInfo genInfo;
     private LanguageInfo languageInfo;
@@ -74,7 +76,11 @@ public class Example {
     public Builder setId(String id) { this.id = id; return this; }
     public Builder setUtterance(String utterance) { this.utterance = utterance; return this; }
     public Builder setContext(ContextValue context) { this.context = context; return this; }
-    public Builder setTargetFormula(Formula targetFormula) { this.targetFormula = targetFormula; return this; }
+    public Builder setTargetFormula(Formula targetFormula) { this.targetFormula = targetFormula;
+      if (this.targetFormula!= null && this.targetFormula.toString().contains("triples"))
+        this.formulaType = "statement";
+      else
+        this.formulaType = "question"; return this; }
     public Builder setTargetValue(Value targetValue) { this.targetValue = targetValue; return this; }
     public Builder setGenInfo(GeneralInfo genInfo) { this.genInfo = genInfo; return this; }
     public Builder setLanguageInfo(LanguageInfo languageInfo) { this.languageInfo = languageInfo; return this; }
@@ -106,6 +112,10 @@ public class Example {
     this.utterance = utterance;
     this.context = context;
     this.targetFormula = targetFormula;
+    if (this.targetFormula!= null && this.targetFormula.toString().contains("triples"))
+      this.formulaType = "statement";
+    else
+      this.formulaType = "question";
     this.targetValue = targetValue;
     this.languageInfo = languageInfo;
     this.relationInfo = relationInfo;
@@ -124,6 +134,10 @@ public class Example {
     this.context = context;
     this.targetFormula = targetFormula;
     this.targetValue = targetValue;
+    if (this.targetFormula!= null && this.targetFormula.toString().contains("triples"))
+      this.formulaType = "statement";
+    else
+      this.formulaType = "question";
     this.genInfo = new GeneralInfo();
     this.languageInfo = new LanguageInfo();
     this.relationInfo = new RelationInfo();
@@ -171,6 +185,7 @@ public class Example {
   public String phrase(int start, int end) { return languageInfo.phrase(start, end); }
   public String lemmaPhrase(int start, int end) { return languageInfo.lemmaPhrase(start, end); }
   public Map<String,Double> getRelation() { return relationInfo.relations; }
+  public String getType(){return formulaType;}
 
   public String toJson() { return Json.writeValueAsStringHard(this); }
   public static Example fromJson(String json) { return Json.readValueHard(json, Example.class); }

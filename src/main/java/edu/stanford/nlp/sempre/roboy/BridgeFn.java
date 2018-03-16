@@ -2,6 +2,7 @@ package edu.stanford.nlp.sempre.roboy;
 
 import edu.stanford.nlp.sempre.roboy.DbFormulasInfo.BinaryFormulaInfo;
 import edu.stanford.nlp.sempre.MergeFormula.Mode;
+import edu.stanford.nlp.sempre.roboy.config.ConfigManager;
 import fig.basic.LispTree;
 import fig.basic.LogInfo;
 import fig.basic.Option;
@@ -126,7 +127,7 @@ public class BridgeFn extends SemanticFn {
           continue;
         BinaryFormulaInfo binaryInfo = fbFormulaInfo.getBinaryInfo(binary);
 
-        if (opts.verbose >= 3)
+        if (ConfigManager.DEBUG >= 3)
           LogInfo.logs("%s => %s", modifierType, binary);
 
         if (headTypes.contains(binaryInfo.expectedType1)) {
@@ -147,7 +148,7 @@ public class BridgeFn extends SemanticFn {
     Set<String> modifierTypes = getSupertypes(modifierDeriv.type, new HashSet<>());
     ArrayList<BridgingInfo> bridgingInfoList = new ArrayList<>();
 
-    if (opts.verbose >= 1)
+    if (ConfigManager.DEBUG >= 1)
       LogInfo.logs("bridgeEntity: %s | %s", modifierDeriv, modifierTypes);
 
     for (String modifierType : modifierTypes) { // For each head type...
@@ -157,7 +158,7 @@ public class BridgeFn extends SemanticFn {
           continue;
         BinaryFormulaInfo binaryInfo = fbFormulaInfo.getBinaryInfo(binary);
 
-        if (opts.verbose >= 3)
+        if (ConfigManager.DEBUG >= 3)
           LogInfo.logs("%s => %s", modifierType, binary);
 
         BridgingInfo bridgingInfo = new BridgingInfo(ex, c, binaryInfo, headFirst, null, modifierDeriv);
@@ -225,7 +226,7 @@ public class BridgeFn extends SemanticFn {
   private DerivationStream injectIntoCvt(Example ex, Callable c) {
     assert ex != null;
 
-    if (opts.verbose >= 2)
+    if (ConfigManager.DEBUG >= 2)
       LogInfo.logs("child1=%s, child2=%s", ex.phrase(c.child(0).start, c.child(0).end), ex.phrase(c.child(1).start, c.child(1).end));
 
     // Example: modifier[Braveheart] head[Mel Gibson plays in]
@@ -348,17 +349,17 @@ public class BridgeFn extends SemanticFn {
         default:
           throw new RuntimeException("Bad description " + description);
       }
-      if (opts.verbose >= 2)
+      if (ConfigManager.DEBUG >= 2)
         LogInfo.logs("mode=%s,deriv=%s", description, res);
       return res;
     }
     // not every BridgingInfo produces a derivation so we iterate until we find one
     private Derivation nextEntity() {
 
-      if (opts.verbose >= 3)
+      if (ConfigManager.DEBUG >= 3)
         LogInfo.begin_track("Compute next entity");
       BridgingInfo currBridgingInfo = bridgingInfoList.get(currIndex++);
-      if (opts.verbose >= 2)
+      if (ConfigManager.DEBUG >= 2)
         LogInfo.logs("BridgeFn.nextEntity: binary=%s, popularity=%s", currBridgingInfo.bInfo.formula,
                 currBridgingInfo.bInfo.popularity);
       List<List<String>> exampleInfo = generateExampleInfo(currBridgingInfo.ex, currBridgingInfo.c); // this is not done in text to text matcher so done here
@@ -378,7 +379,7 @@ public class BridgeFn extends SemanticFn {
                         currBridgingInfo.modifierDeriv.startEndString(currBridgingInfo.ex.getTokens()), currBridgingInfo.modifierDeriv.formula));
       }
 
-      if (opts.verbose >= 2)
+      if (ConfigManager.DEBUG >= 2)
         LogInfo.logs("BridgeStringFn: %s", join);
 
       // features
@@ -396,7 +397,7 @@ public class BridgeFn extends SemanticFn {
       res.addFeatures(textMatchFeatures);
 
 
-      if (opts.verbose >= 3)
+      if (ConfigManager.DEBUG >= 3)
         LogInfo.end_track();
       return res;
     }
@@ -421,7 +422,7 @@ public class BridgeFn extends SemanticFn {
 
     private Derivation nextInject() {
       BridgingInfo currBridgingInfo = bridgingInfoList.get(currIndex++);
-      if (opts.verbose >= 2)
+      if (ConfigManager.DEBUG >= 2)
         LogInfo.logs("BridgingFn.nextInject: binary=%s, popularity=%s", currBridgingInfo.bInfo.formula,
                 currBridgingInfo.bInfo.popularity);
       JoinFormula headFormula = (JoinFormula) Formulas.betaReduction(currBridgingInfo.headDeriv.formula);
@@ -444,7 +445,7 @@ public class BridgeFn extends SemanticFn {
                         currBridgingInfo.modifierDeriv.startEndString(currBridgingInfo.ex.getTokens()), currBridgingInfo.modifierDeriv.formula));
       }
 
-      if (opts.verbose >= 3)
+      if (ConfigManager.DEBUG >= 3)
         LogInfo.logs("BridgeFn: injecting %s to %s --> %s ", currBridgingInfo.modifierDeriv.formula, headFormula, bridgedFormula);
 
       String headModifierOrder = headFirst ? "head-modifier" : "modifier-head";
@@ -468,7 +469,7 @@ public class BridgeFn extends SemanticFn {
     private Derivation nextUnary() {
       BridgingInfo currBridgingInfo = bridgingInfoList.get(currIndex++);
 
-      if (opts.verbose >= 2)
+      if (ConfigManager.DEBUG >= 2)
         LogInfo.logs("BridgingFn.nextUnary: binary=%s, popularity=%s", currBridgingInfo.bInfo.formula,
                 currBridgingInfo.bInfo.popularity);
 

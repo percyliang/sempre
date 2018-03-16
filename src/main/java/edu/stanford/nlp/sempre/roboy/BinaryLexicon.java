@@ -4,6 +4,7 @@ import com.google.common.base.Strings;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.sempre.*;
 import edu.stanford.nlp.sempre.roboy.DbFormulasInfo.BinaryFormulaInfo;
+import edu.stanford.nlp.sempre.roboy.config.ConfigManager;
 import edu.stanford.nlp.sempre.roboy.lexicons.EntrySource;
 import edu.stanford.nlp.sempre.roboy.lexicons.LexicalEntry.BinaryLexicalEntry;
 import edu.stanford.nlp.sempre.roboy.lexicons.LexicalEntry.LexiconValue;
@@ -101,7 +102,7 @@ public final class BinaryLexicon {
       return Collections.emptyList();
 
     if (info == null) {
-      if (opts.verbose >= 3)
+      if (ConfigManager.DEBUG >= 3)
         LogInfo.log("BinaryLexicon: skipping entry since there is no info for formula: " + lexValue.formula.toString());
       return Collections.emptyList();
     }
@@ -142,7 +143,7 @@ public final class BinaryLexicon {
   public boolean validBinaryFormula(Formula formula) {
     if (dbFormulasInfo.hasOpposite(formula)) {
       boolean valid = dbFormulasInfo.isReversed(formula);
-      if (opts.verbose >= 3) {
+      if (ConfigManager.DEBUG >= 3) {
         if (!valid)
           LogInfo.logs("BinaryLexicon: invalid formula: %s", formula);
         else
@@ -155,7 +156,7 @@ public final class BinaryLexicon {
 
   public void updateLexicon(Pair<String, Formula> lexemeFormulaPair, int support) {
     StopWatchSet.begin("BinaryLexicon.updateLexicon");
-    if (opts.verbose > 0)
+    if (ConfigManager.DEBUG > 0)
       LogInfo.logs("Pair=%s, score=%s", lexemeFormulaPair, support);
     boolean exists = false;
     String lexeme = lexemeFormulaPair.getFirst();
@@ -165,7 +166,7 @@ public final class BinaryLexicon {
     for (BinaryLexicalEntry bEntry : bEntries) {
       if (bEntry.formula.equals(formula)) {
         bEntry.alignmentScores.put("Feedback", (double) support);
-        if (opts.verbose > 0)
+        if (ConfigManager.DEBUG > 0)
           LogInfo.logs("Entry exists: %s", bEntry);
         exists = true;
         break;
@@ -196,7 +197,7 @@ public final class BinaryLexicon {
             new BinaryLexEntrybyFeaturesComparator(params);
     for (String lexeme : lexemeToEntryList.keySet()) {
       Collections.sort(lexemeToEntryList.get(lexeme), comparator);
-      if (opts.verbose > 1) {
+      if (ConfigManager.DEBUG > 1) {
         LogInfo.logs("Sorted list for lexeme=%s", lexeme);
         for (BinaryLexicalEntry bEntry : lexemeToEntryList.get(lexeme)) {
           FeatureVector fv = new FeatureVector();

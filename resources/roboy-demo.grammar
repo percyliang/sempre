@@ -137,7 +137,7 @@
 (rule $Expr ($SubSen $Expr) (ConcatFn ")<-("))
 
 # Statement expressions
-(rule $Expr ($Subject $Predicate ($BE optional) $PHRASE) (TripleFn "spo"))
+(rule $Expr ($Subject $Predicate ($BE optional) $Object) (TripleFn "spo"))
 #(rule $Expr ($Subject $Predicate ($BE optional) $Value) (TripleFn "spo"))
 (rule $Expr ($PHRASE ($BE optional) $Subject $Predicate) (TripleFn "osp"))
 (rule $Expr ($Subject $Predicate ($BE optional) $AdjPhrase) (TripleFn "spo"))

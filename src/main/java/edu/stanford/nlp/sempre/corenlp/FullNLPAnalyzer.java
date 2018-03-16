@@ -13,6 +13,7 @@ import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
+import edu.stanford.nlp.sempre.roboy.config.ConfigManager;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
@@ -22,7 +23,6 @@ import com.google.common.collect.Lists;
 import com.google.common.base.Joiner;
 
 import fig.basic.*;
-import org.apache.commons.lang.StringUtils;
 
 import java.io.*;
 import java.util.*;
@@ -64,15 +64,7 @@ public class FullNLPAnalyzer extends InfoAnalyzer {
     public static String keyword_tags = null;
 
     public static void initModels() {
-        try {
-            InputStream input = new FileInputStream("config.properties");
-            Properties prop = new Properties();
-            prop.load(input);
-            keyword_tags = prop.getProperty("KEYWORD_TAGS");
-        }
-        catch(IOException e){
-            LogInfo.errors("Exception during reading a file %s", e.getStackTrace());
-        }
+        keyword_tags = String.join(" ", ConfigManager.KEYWORDS_TAGS);
         if (pipeline != null) return;
         Properties props = new Properties();
         props.put("annotators", Joiner.on(',').join(opts.annotators));

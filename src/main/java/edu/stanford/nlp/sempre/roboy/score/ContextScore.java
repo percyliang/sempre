@@ -1,16 +1,12 @@
 package edu.stanford.nlp.sempre.roboy.score;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import com.google.gson.stream.JsonReader;
 import edu.stanford.nlp.sempre.ContextValue;
+import edu.stanford.nlp.sempre.roboy.config.ConfigManager;
 import edu.stanford.nlp.sempre.roboy.ErrorInfo;
 import edu.stanford.nlp.sempre.roboy.lexicons.word2vec.Word2vec;
+import fig.basic.LogInfo;
 
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.InputStream;
-import java.lang.reflect.Type;
 import java.util.*;
 
 /**
@@ -31,12 +27,7 @@ public class ContextScore extends ScoringFunction {
      */
     public ContextScore(Word2vec vec){
         try {
-            InputStream input = new FileInputStream("config.properties");
-            prop.load(input);
-            JsonReader reader = new JsonReader(new FileReader(prop.getProperty("SCORE_WEIGHTS")));
-            Type type = new TypeToken<Map<String, Double>>(){}.getType();
-            Map<String, Double> weights = gson.fromJson(reader, type);
-            this.weight = weights.get("Context");
+            this.weight = ConfigManager.SCORING_WEIGHTS.get("Context");
             this.vec = vec;
         }
         catch (Exception e) {
@@ -79,7 +70,8 @@ public class ContextScore extends ScoringFunction {
                 }
                 if (!Double.isNaN(max))
                     max = 0.0;
-                //System.out.println("Context:"+key+":" + c.get("Label") + "->" + max);
+                if (ConfigManager.DEBUG > 3)
+                    LogInfo.logs("Context: %s , %s -> %s", key, c.get("Label"), c.get("Refcount"));
                 key_scores.put(candidate,max*this.weight);
             }
             result.getScored().put(key,key_scores);

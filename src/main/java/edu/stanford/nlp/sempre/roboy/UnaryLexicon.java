@@ -4,6 +4,7 @@ import com.google.common.base.Strings;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.sempre.*;
 import edu.stanford.nlp.sempre.roboy.DbFormulasInfo.UnaryFormulaInfo;
+import edu.stanford.nlp.sempre.roboy.config.ConfigManager;
 import edu.stanford.nlp.sempre.roboy.lexicons.EntrySource;
 import edu.stanford.nlp.sempre.roboy.lexicons.LexicalEntry.LexiconValue;
 import edu.stanford.nlp.sempre.roboy.lexicons.LexicalEntry.UnaryLexicalEntry;
@@ -79,7 +80,7 @@ public final class UnaryLexicon {
               uInfo.popularity, new TreeMap<>(featureMap), uInfo.types);
       MapUtils.addToList(lexemeToEntryList, nl, uEntry);
     } else {
-      if (opts.verbose >= 3) LogInfo.warnings("Missing info for unary: %s ", formula);
+      if (ConfigManager.DEBUG >= 3) LogInfo.warnings("Missing info for unary: %s ", formula);
     }
   }
 

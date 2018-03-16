@@ -1,16 +1,13 @@
 package edu.stanford.nlp.sempre.roboy.lexicons.word2vec;
 
+import edu.stanford.nlp.sempre.roboy.config.ConfigManager;
 import fig.basic.LogInfo;
 import org.deeplearning4j.models.embeddings.WeightLookupTable;
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
 import org.deeplearning4j.models.word2vec.Word2Vec;
-//import org.deeplearning4j.exception;
-//import org.apache.commons.io;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.util.*;
 
 
@@ -28,10 +25,7 @@ public class Word2vec {
     private double threshold;
 
     public Word2vec() throws Exception {
-        InputStream input = new FileInputStream("config.properties");
-        Properties prop = new Properties();
-        prop.load(input);
-        threshold = Double.parseDouble(prop.getProperty("W2V_THRES"));
+        threshold = ConfigManager.W2V_THRES;
 
         // Get all files paths
         // LogInfo.logs("Loading files...");
@@ -91,16 +85,20 @@ public class Word2vec {
     public static void main(String[] args) throws Exception {
         try{
             Word2vec vec = new Word2vec();
-            LogInfo.logs("Tests -> ");
-            vec.setThreshold(0);
-            System.out.println("Closest words: "+vec.getClosest("queen",10));
-            System.out.println("Closest word to female from : \"people\",\"activities\",\"politics\",\"culture\" -> "+vec.getBest("queen", Arrays.asList("people","activities","politics","culture")));
-            System.out.println("Closest word to swimming from : \"literature\",\"music\",\"sports\" -> : "+vec.getBest("swimming", Arrays.asList("literature","music","sports")));
-
-//            System.out.println("Word vector: "+ Arrays.toString(vec.getWordVector("day")));
-//            System.out.println("Word vector: "+vec.getMatrix("day"));
-        }catch(Exception e){
-            System.out.println("Exception in Word2Vec: "+e.getMessage());
+            if (ConfigManager.DEBUG > 3) {
+                LogInfo.logs("Tests -> ");
+                vec.setThreshold(0);
+                LogInfo.logs("Closest words: %s", vec.getClosest("queen", 10).toString());
+                LogInfo.logs("Closest word to queen from : " +
+                        "\"people\",\"activities\",\"politics\",\"culture\" -> %s",
+                        vec.getBest("queen",
+                                Arrays.asList("people", "activities", "politics", "culture")).toString());
+                LogInfo.logs("Closest word to swimming from : \"literature\",\"music\",\"sports\" -> : %s",
+                        vec.getBest("swimming",
+                                Arrays.asList("literature", "music", "sports")).toString());
+            }
+        } catch(Exception e){
+            LogInfo.errors("Exception in Word2Vec: %s", e.getMessage());
         }
 
     }

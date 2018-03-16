@@ -78,6 +78,8 @@ public class FeatureExtractor {
     extractBigramFeatures(ex, deriv);
     for (FeatureComputer featureComputer : featureComputers)
       featureComputer.extractLocal(ex, deriv);
+//    for (String key:deriv.getLocalFeatureVector().toMap().keySet())
+//      LogInfo.logs("Key: %s -> Entry: %s",key,deriv.getAllFeatureVector().get(key));
     StopWatchSet.end();
   }
 
@@ -104,8 +106,9 @@ public class FeatureExtractor {
     if (!containsDomain("denotation")) return;
     if (!deriv.isRoot(ex.numTokens())) return;
     System.out.println(deriv.getFormula().toString());
-    if (deriv.getFormula().toString().contains("triple")||deriv.getFormula().toString().contains("rb:"))
+    if (deriv.getType()==SemType.tripleType||deriv.getType()==SemType.stringType||deriv.getFormula().toString().contains("lambda")) {
       deriv.ensureExecuted(simple_executor, ex.context);
+    }
     else
       deriv.ensureExecuted(executor, ex.context);
 

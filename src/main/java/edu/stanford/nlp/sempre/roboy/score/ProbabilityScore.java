@@ -1,20 +1,15 @@
 package edu.stanford.nlp.sempre.roboy.score;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import com.google.gson.stream.JsonReader;
 import edu.stanford.nlp.sempre.ContextValue;
+import edu.stanford.nlp.sempre.roboy.config.ConfigManager;
 import edu.stanford.nlp.sempre.roboy.ErrorInfo;
 import edu.stanford.nlp.sempre.roboy.lexicons.word2vec.Word2vec;
+import fig.basic.LogInfo;
 
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.InputStream;
-import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 /**
  * ProbabilityScore creates a score based on its probability among other candidates of the same group
@@ -22,7 +17,6 @@ import java.util.Properties;
  * @author emlozin
  */
 public class ProbabilityScore extends ScoringFunction {
-    public static Properties prop = new Properties();       /**< Read properties */
     public static Gson gson = new Gson();                   /**< Gson object */
 
     private double weight;                                  /**< Weight of the score in general score*/
@@ -34,12 +28,7 @@ public class ProbabilityScore extends ScoringFunction {
      */
     public ProbabilityScore(Word2vec vec){
         try {
-            InputStream input = new FileInputStream("config.properties");
-            prop.load(input);
-            JsonReader reader = new JsonReader(new FileReader(prop.getProperty("SCORE_WEIGHTS")));
-            Type type = new TypeToken<Map<String, Double>>(){}.getType();
-            Map<String, Double> weights = gson.fromJson(reader, type);
-            this.weight = weights.get("Probability");
+            this.weight = ConfigManager.SCORING_WEIGHTS.get("Probability");
             this.vec = vec;
         }
         catch (Exception e) {
@@ -66,7 +55,8 @@ public class ProbabilityScore extends ScoringFunction {
                 Map<String, String> c = new HashMap<>();
                 c = gson.fromJson(candidate, c.getClass());
                 // Check similarity
-                //System.out.println("Probability:"+key+":" + c.get("Label") + "->" + c.get("Refcount"));
+                if (ConfigManager.DEBUG > 3)
+                    LogInfo.logs("Probability: %s , %s -> %s", key, c.get("Label"), c.get("Refcount"));
                 key_scores.put(candidate,Double.valueOf(c.get("Refcount"))*this.weight);
             }
             result.getScored().put(key,key_scores);

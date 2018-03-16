@@ -2,6 +2,7 @@ package edu.stanford.nlp.sempre.roboy;
 
 import com.google.common.base.Joiner;
 import edu.stanford.nlp.sempre.*;
+import edu.stanford.nlp.sempre.roboy.config.ConfigManager;
 import edu.stanford.nlp.sempre.roboy.lexicons.LexicalEntry;
 import edu.stanford.nlp.sempre.roboy.lexicons.LexicalEntry.BinaryLexicalEntry;
 import fig.basic.*;
@@ -178,7 +179,7 @@ public class LexiconFn extends SemanticFn {
     if (SemanticFn.opts.trackLocalChoices)
       newDeriv.addLocalChoice("LexiconFn " + newDeriv.startEndString(ex.getTokens()) + " " + entry);
 
-    if (opts.verbose >= 3) {
+    if (ConfigManager.DEBUG >= 3) {
       LogInfo.logs(
               "LexiconFn: %s [%s => %s ~ %s | %s]: popularity = %s, distance = %s, type = %s, source=%s",
               mode, word, entry.normalizedTextDesc, entry.dbDescriptions, newDeriv.formula,
@@ -189,7 +190,7 @@ public class LexiconFn extends SemanticFn {
 
   public DerivationStream call(Example ex, Callable c) {
 
-    if (opts.verbose >= 5) LogInfo.begin_track("LexicalFn.call: %s", c.childStringValue(0));
+    if (ConfigManager.DEBUG >= 5) LogInfo.begin_track("LexicalFn.call: %s", c.childStringValue(0));
 
     String query = c.childStringValue(0);
     DerivationStream res;
@@ -198,7 +199,7 @@ public class LexiconFn extends SemanticFn {
       switch (mode) {
         // Entities
         case "entity": {
-          // if (opts.verbose >= 2)
+          // if (ConfigManager.DEBUG >= 2)
           // LogInfo.log("LexiconFn: querying for entity: " + query);
 
           List<? extends LexicalEntry> entries = lexicon.lookupEntities(query, entitySearchStrategy);
@@ -237,7 +238,7 @@ public class LexiconFn extends SemanticFn {
       throw new RuntimeException(e);
     }
 
-    if (opts.verbose >= 5) LogInfo.end_track();
+    if (ConfigManager.DEBUG >= 5) LogInfo.end_track();
     return res;
   }
 
@@ -326,7 +327,7 @@ public class LexiconFn extends SemanticFn {
         break;
 
       if (!rightContext[0].equals(ex.lemmaToken(deriv.end + i))) {
-        if (opts.verbose >= 4) {
+        if (ConfigManager.DEBUG >= 4) {
           LogInfo.logs(
                   "RIGHT CONTEXT MISMATCH: full lexeme=%s, normalized text=%s left context=%s, right context=%s example=%s, formula=%s",
                   bEntry.fullLexeme,
@@ -345,7 +346,7 @@ public class LexiconFn extends SemanticFn {
       if (deriv.start - i - 1 < 0) // in this case all context words were matched and some were dropped but there was no mismatch
         break;
       if (!leftContext[leftContext.length - i - 1].equals(ex.lemmaToken(deriv.start - i - 1))) {
-        if (opts.verbose >= 2) {
+        if (ConfigManager.DEBUG >= 2) {
           LogInfo.logs(
                   "LEFT CONTEXT MISMATCH: full lexeme=%s, normalized text=%s left context=%s, right context=%s example=%s, formula=%s",
                   bEntry.fullLexeme,

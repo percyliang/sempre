@@ -240,13 +240,13 @@ public abstract class ParserState {
     List<String> formulas = new ArrayList();
     for (Derivation deriv : predDerivations) {
       // TODO: Add postprocess(deriv, ex.context);
-      if (!formulas.toString().equals(deriv.formula.toString()))
+      if (!String.join(" ",formulas).contains(deriv.formula.toString()))
         formulas.add(deriv.formula.toString());
       else {
         remove.add(deriv);
         continue;
       }
-      if (deriv.getType()==SemType.tripleType||deriv.getFormula().toString().contains("lambda")||deriv.getFormula().toString().contains("rb:")||deriv.getFormula().toString().contains("string")){
+      if (deriv.getType()==SemType.tripleType||deriv.getType()==SemType.stringType||deriv.getFormula().toString().contains("lambda")){
         deriv.ensureExecuted(parser.simple_executor, ex.context);
       }
       else
@@ -327,10 +327,10 @@ public abstract class ParserState {
         default:
           throw new RuntimeException("Unknown customExpectedCounts: " + opts.customExpectedCounts);
       }
-      if (Double.isNaN(trueScores[i]))
-        trueScores[i] = 0;
-      if (Double.isNaN(predScores[i]))
-        predScores[i] = 0;
+//      if (Double.isNaN(trueScores[i]))
+//        trueScores[i] = 0;
+//      if (Double.isNaN(predScores[i]))
+//        predScores[i] = 0;
     }
 
     // Usually this happens when there are no derivations.
@@ -342,8 +342,6 @@ public abstract class ParserState {
       Derivation deriv = derivations.get(i);
       double incr = trueScores[i] - predScores[i];
       if (incr == 0) continue;
-
-      LogInfo.logs("HELLO");
       deriv.incrementAllFeatureVector(incr, counts);
     }
   }

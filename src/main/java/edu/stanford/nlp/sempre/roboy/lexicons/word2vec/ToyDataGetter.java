@@ -9,16 +9,8 @@ import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 
-
-import java.io.InputStream;
-import java.io.FileInputStream;
-import java.util.Properties;
-import java.io.FileReader;
-import java.lang.reflect.Type;
-
 import com.google.gson.Gson;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.reflect.TypeToken;
+import edu.stanford.nlp.sempre.roboy.config.ConfigManager;
 
 /**
  * Utility class to load toy data from the internet if necessary.
@@ -29,17 +21,12 @@ public class ToyDataGetter {
     private final boolean verbose;
     private final boolean roboy;
 
-    public static Properties prop = new Properties();
     public static Gson gson = new Gson();
     private Map<String,String> file_map = new HashMap();
 
     public ToyDataGetter(boolean verbose) throws Exception{
         this.roboy = true;
-        InputStream input = new FileInputStream("config.properties");
-        prop.load(input);
-        JsonReader reader = new JsonReader(new FileReader(prop.getProperty("WORD2VEC")));
-        Type type = new TypeToken<Map<String, String>>(){}.getType();
-        this.file_map = this.gson.fromJson(reader, type);
+        this.file_map = ConfigManager.WORD2VEC_MODELS;
         this.verbose = verbose;
     }
 
