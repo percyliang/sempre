@@ -175,12 +175,15 @@ public abstract class Parser {
     // Execute target formula (if applicable).
     if (ex.targetFormula != null && ex.targetValue == null){
       //TODO: Executors
-      if (ex.targetFormula.toString().contains("triple")||ex.targetFormula.toString().contains("lambda")||ex.targetFormula.toString().contains("rb:")||ex.targetFormula.toString().contains("string")) {
+
+      if (ex.targetFormula.toString().contains("triple")||
+              ex.targetFormula.toString().contains("string")||
+              ex.targetFormula.toString().contains("lambda")||
+              ex.targetFormula.toString().contains("rb:")){
         ex.targetValue = simple_executor.execute(ex.targetFormula, ex.context).value;
       }
-      else {
+      else
         ex.targetValue = executor.execute(ex.targetFormula, ex.context).value;
-      }
     }
 
     // Parse
@@ -264,6 +267,7 @@ public abstract class Parser {
   public void addToEvaluation(ParserState state, Evaluation evaluation) {
     Example ex = state.ex;
     List<Derivation> predDerivations = state.predDerivations;
+    state.ensureExecuted();
 
     boolean printAllPredictions = opts.printAllPredictions;
     int numCandidates = predDerivations.size();

@@ -2,6 +2,8 @@
   {"type": "NAME", "targetFormula": "(triples (triple rb:active_person rb:NAME_OF emily))", "utterance": "my name is emily"},
   {"type": "NAME", "targetFormula": "(triples (triple rb:active_person rb:NAME_OF anna))", "utterance": "anna is my name"},
   {"type": "NAME", "targetFormula": "(triples (triple rb:active_person rb:NAME_OF christina))", "utterance": "call me christina"},
+  {"type": "NAME", "targetFormula": "(triples (triple rb:active_person rb:NAME_OF elsa) (triple rb:active_person rb:NAME_OF anna))", "utterance": "my name is elsa and anna"},
+  {"type": "NAME", "targetFormula": "(triples or (triples or (triples (triple rb:active_person rb:NAME_OF emily) (triple rb:active_person rb:NAME_OF alona)) (triples (triple rb:active_person rb:HAS_HOBBY emily) (triple rb:active_person rb:HAS_HOBBY alona))) (triples or (triples (triple rb:Roboy rb:NAME_OF emily) (triple rb:Roboy rb:NAME_OF alona)) (triples (triple rb:Roboy rb:HAS_HOBBY emily) (triple rb:Roboy rb:HAS_HOBBY alona))))", "utterance": "my or your name or hobby is emily and alona"},
   {"type": "NAME", "targetFormula": "(!rb:NAME_OF rb:Roboy)", "utterance": "How can I call you?"},
   {"type": "NAME", "targetFormula": "(!rb:NAME_OF rb:Roboy)", "utterance": "What is your name?"},
   {"type": "NAME", "targetFormula": "(!rb:NAME_OF rb:Roboy)", "utterance": "Who are you?"},

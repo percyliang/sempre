@@ -46,7 +46,7 @@ public class Learner {
     @Option(gloss = "Whether to update weights")
     public boolean updateWeights = true;
     @Option(gloss = "Whether to check gradient")
-    public boolean checkGradient = false;
+    public boolean checkGradient = true;
 
     @Option(gloss = "Whether to skip the 'train' group in the last iteration and non-'train' groups in other iterations")
     public boolean skipUnnecessaryGroups = false;

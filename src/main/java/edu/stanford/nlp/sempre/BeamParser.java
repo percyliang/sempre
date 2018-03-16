@@ -101,6 +101,7 @@ class BeamParserState extends ChartParserState {
 
     if (parser.verbose(2)) LogInfo.begin_track("ParserState.infer");
 
+    LogInfo.logs(this.mode.toString());
     // Base case
     for (Derivation deriv : gatherTokenAndPhraseDerivations()) {
       featurizeAndScoreDerivation(deriv);

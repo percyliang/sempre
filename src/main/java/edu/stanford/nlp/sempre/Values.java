@@ -28,6 +28,7 @@ public final class Values {
     if ("date".equals(type)) return new DateValue(tree);
     if ("error".equals(type)) return new ErrorValue(tree);
     if ("time".equals(type)) return new TimeValue(tree);
+    if ("triples".equals(type)) return new TripleValue(tree);
     if ("triple".equals(type)) return new TripleValue(tree);
     return null;
   }
