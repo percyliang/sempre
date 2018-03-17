@@ -148,29 +148,10 @@ addModule('roboy', 'Roboy extra utilities (need to compile)', lambda {
   system 'make -C fig' or exit 1
   system 'mkdir -p lib && cd lib && ln -sf ../fig/fig.jar' or exit 1
 
-  if not File.exists?('lib/stanford-corenlp-full-2015-12-09')
-    system "cd lib && unzip stanford-corenlp-full-2015-12-09.zip" or exit 1
-  end
-  pull('/u/nlp/data/semparse/resources/stanford-corenlp-caseless-2015-04-20-models.jar',
-       'stanford-corenlp-full-2015-12-09', {:symlink => true})
-  # Remove old file (for backward compatibility)
-  if Dir.glob('lib/stanford-corenlp*.jar').any?
-    system 'rm -v lib/stanford-corenlp*.jar' or exit 1
-  end
-  {'stanford-corenlp-3.5.0-models.jar' => 'stanford-corenlp-models.jar',
-   'stanford-corenlp-caseless-2015-04-20-models.jar' => 'stanford-corenlp-models-3.5.2.jar',
-   'joda-time.jar' => 'joda-time.jar',
-   'jollyday.jar' => 'jollyday.jar',
-   'ejml-0.23.jar' => 'ejml.jar',
-   'slf4j-api.jar' => 'slf4j-api.jar',
-   'slf4j-simple.jar' => 'slf4j-simple.jar',
-  }.each { |key, value|
-    system "ln -sfv stanford-corenlp-full-2015-12-09/#{key} lib/#{value}" or exit 1
-  }
-
 })
 
 addModule('corenlp', 'Stanford CoreNLP 3.6.0', lambda {
+  pull('/u/nlp/data/semparse/resources/stanford-corenlp-full-2015-12-09.zip', '', {:symlink => true})
   if not File.exists?('lib/stanford-corenlp-full-2015-12-09')
     system "cd lib && unzip stanford-corenlp-full-2015-12-09.zip" or exit 1
   end
@@ -180,8 +161,9 @@ addModule('corenlp', 'Stanford CoreNLP 3.6.0', lambda {
   if Dir.glob('lib/stanford-corenlp*.jar').any?
     system 'rm -v lib/stanford-corenlp*.jar' or exit 1
   end
-  {'stanford-corenlp-3.5.0-models.jar' => 'stanford-corenlp-models.jar',
-   'stanford-corenlp-caseless-2015-04-20-models.jar' => 'stanford-corenlp-models-3.5.2.jar',
+  {'stanford-corenlp-3.6.0.jar' => 'stanford-corenlp.jar',
+   'stanford-corenlp-3.6.0-models.jar' => 'stanford-corenlp-models.jar',
+   'stanford-corenlp-caseless-2015-04-20-models.jar' => 'stanford-corenlp-caseless-models.jar',
    'joda-time.jar' => 'joda-time.jar',
    'jollyday.jar' => 'jollyday.jar',
    'ejml-0.23.jar' => 'ejml.jar',
