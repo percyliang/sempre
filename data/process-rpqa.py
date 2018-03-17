@@ -7,11 +7,18 @@ import codecs
 
 f = codecs.open('rpqa-train.json', 'r', 'UTF-8')
 data = json.load(f)
-output = open("rpqa-train.examples", "w")
+output = open("rpqa-train-a.examples", "w")
+output_json = open("rpqa-train-a.json", "w")
 
+output_json.write("[\n")
 for record in data:
     print record
-    output.write("(example\n")
-    output.write("\t(utterance \"" + record["utterance"].encode('utf-8') + "\")\n")
-    output.write("\t(targetFormula "  + record["targetFormula"].encode('utf-8') + ")\n)")
-    output.write("\n")
+    if record["type"][0] != 'Q':
+        output.write("(example\n")
+        output.write("\t(utterance \"" + record["utterance"].encode('utf-8') + "\")\n")
+        output.write("\t(targetFormula "  + record["targetFormula"].encode('utf-8') + ")\n)")
+        output.write("\n")
+        json.dump(record, output_json)
+        output_json.write(",\n")
+
+output_json.write("\n]")

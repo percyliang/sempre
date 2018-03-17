@@ -8,6 +8,7 @@
 (rule $Not (nor) (ConstantFn (string not)))
 
 (rule $Class ($PHRASE) (SimpleLexiconFn (type "ClassNoun")))
+(rule $QRelClass ($PHRASE) (SimpleLexiconFn (type "QRelat")))
 (rule $RelClass ($PHRASE) (SimpleLexiconFn (type "RelationalNoun")))
 (rule $RelatClass ($PHRASE) (SimpleLexiconFn (type "RelationClass")))
 (rule $DatPropClass ($PHRASE) (SimpleLexiconFn (type "DataPropertyNoun")))
@@ -18,6 +19,7 @@
 (rule $StateVerb ($LEMMA_PHRASE) (SimpleLexiconFn (type "StateVerb")))
 (rule $Relat ($LEMMA_PHRASE) (SimpleLexiconFn (type "Relationship")))
 (rule $Relat ($LEMMA_TOKEN) (SimpleLexiconFn (type "Relationship")))
+(rule $QRelat ($LEMMA_TOKEN) (SimpleLexiconFn (type "QuRelat")))
 (rule $ConsequenceVerb ($LEMMA_PHRASE) (SimpleLexiconFn (type "ConsequenceVerb")))
 
 (rule $RelAdj ($PHRASE) (SimpleLexiconFn (type "RelationalAdjective")))
@@ -28,6 +30,7 @@
 # NER Tags
 (rule $Number ($PHRASE) (FilterNerSpanFn span NUMBER))
 (rule $Number ($PHRASE) (FilterNerSpanFn span DATE))
+(rule $PersonName ($PHRASE) (FilterNerSpanFn span PERSON))
 (rule $NamedEntity ($PHRASE) (FilterNerSpanFn span PERSON ORGANIZATION LOCATION MISC))
 
 # POS Tags
@@ -51,6 +54,7 @@
 #(rule $ForeignWord ($TOKEN) (FilterPosTagFn token FW))
 (rule $Wh ($TOKEN) (FilterPosTagFn token WP WP$))
 (rule $BE ($PHRASE) (FilterPosTagFn span BE))
+(rule $HAVE ($PHRASE) (FilterPosTagFn span HAVE))
 (rule $Number ($PHRASE) (FilterPosTagFn span CD))
 
 # Link words
@@ -58,33 +62,40 @@
 #(rule $VerbTo ($Verb $To) (ConcatFn " "))
 #(rule $VerbTo ($To $Verb) (SelectFn 1))
 
-# Subject Phrase
-(rule $Subject ($Class) (IdentityFn))
-(rule $Subject ($DatPropClass) (IdentityFn))
-(rule $Subject ($ProNoun) (SimpleLexiconFn (type "Person")))
-(rule $Subject ($RelClass $Preposition) (SelectFn 0))
-(rule $Subject ($RelClass $To) (SelectFn 0))
-(rule $Subject ($Subject $RelatClass) (ConcatFn ","))
-(rule $Subject ($Det $Subject) (SelectFn 1))
-(rule $Subject ($Entity) (IdentityFn))
-(rule $Subject ($Subject or $Subject) (ConcatFn ";"))
-(rule $Subject ($Subject ($Conj optional) $Subject) (ConcatFn ","))
-(rule $Subject ($Subject (, optional) $Subject) (ConcatFn ","))
-(rule $Subject ($Subject $ProNounEnd) (SelectFn 0))
-#(rule $Subject ($Adjective $Subject) (TripleFn "ot"))
-#(rule $Subject ($Subject $Adjective) (TripleFn "to"))
+# Roboy Subject Phrase
+(rule $RSubject ($ObjectClass) (IdentityFn))
+(rule $RSubject ($ProNoun) (SimpleLexiconFn (type "Person")))
+(rule $RSubject ($RSubject or $RSubject) (ConcatFn ";"))
+(rule $RSubject ($RSubject ($Conj optional) $RSubject) (ConcatFn ","))
+(rule $RSubject ($RSubject (, optional) $RSubject) (ConcatFn ","))
+(rule $RSubject ($RSubject $ProNounEnd) (SelectFn 0))
 
-# Subject Phrase
-(rule $Value ($PHRASE) (IdentityFn))
-#(rule $Object ($PHRASE) (OpenTypeFn type))
-(rule $Object ($Noun) (IdentityFn))
-(rule $Object ($Det $Object) (SelectFn 1))
-(rule $Object ($Conj $Object) (SelectFn 1))
-(rule $Object ($Object or $Object) (ConcatFn ";"))
-(rule $Object ($Object ($Conj optional) $Object) (ConcatFn ","))
-(rule $Object ($Object , $Object) (ConcatFn ","))
-#(rule $Object ($Adjective $Object) (TripleFn "ot"))
-#(rule $Object ($Object $Adjective) (TripleFn "to"))
+
+# Roboy Predicate Phrase
+(rule $RPredicate (($BE optional) $Relat) (IdentityFn))
+(rule $RPredicate (($HAVE optional) $Relat) (IdentityFn))
+(rule $RPredicate ($RelatClass) (IdentityFn))
+(rule $RPredicate ($Not $RPredicate) (ConcatFn " "))
+(rule $RPredicate ($RPredicate and $RPredicate) (ConcatFn ","))
+(rule $RPredicate ($RPredicate , $RPredicate) (ConcatFn ","))
+(rule $RPredicate ($RPredicate or $RPredicate) (ConcatFn ";"))
+(rule $RPredicate ($TypeProperty $ObjectClass) (TripleFn "pt"))
+
+(rule $N ($BE) (ConstantFn rb:NAME_OF))
+(rule $MEMBER ($BE) (ConstantFn rb:MEMBER_OF))
+(rule $OCCUP ($BE $Det) (ConstantFn rb:OCCUPIED_AS))
+(rule $OCCUP ($BE $Preposition) (ConstantFn rb:OCCUPIED_AS))
+
+# Object Phrase
+(rule $Value ($Noun) (IdentityFn))
+(rule $Value ($LEMMA_PHRASE) (FilterPosTagFn span VBG))
+(rule $Value ($Det $Value) (SelectFn 1))
+(rule $Value ($Conj $Value) (SelectFn 1))
+(rule $Value ($Value or $Value) (ConcatFn ";"))
+(rule $Value ($Value ($Conj optional) $Value) (ConcatFn ","))
+(rule $Value ($Value , $Value) (ConcatFn ","))
+(rule $Value ($Adjective $Value) (TripleFn "ot"))
+(rule $Value ($Value $Adjective) (TripleFn "to"))
 
 # Adjective Phrase
 (rule $AdjPhrase ($Adjective) (IdentityFn))
@@ -98,66 +109,44 @@
 (rule $AdjPhrase ($Adverb $AdjPhrase) (ConcatFn " "))
 (rule $AdjPhrase ($Conj $AdjPhrase) (SelectFn 1))
 (rule $AdjPhrase ($AdjPhrase and $AdjPhrase) (ConcatFn ","))
+(rule $Value ($AdjPhrase) (IdentityFn))
 
-# Predicate Phrase
-#(rule $Predicate ($PHRASE) (OpenTypeFn relation))
-(rule $Predicate ($StateVerb) (IdentityFn))
-(rule $Predicate ($ConsequenceVerb) (IdentityFn))
-(rule $Predicate ($Relat) (IdentityFn))
-(rule $Predicate ($RelatClass) (IdentityFn))
-(rule $Predicate ($Not $Predicate) (ConcatFn " "))
-(rule $Predicate ($Predicate and $Predicate) (ConcatFn ","))
-(rule $Predicate ($Predicate , $Predicate) (ConcatFn ","))
-(rule $Predicate ($Predicate or $Predicate) (ConcatFn ";"))
-#(rule $Predicate ($TypeProperty $PHRASE) (SelectFn 0))
-(rule $Predicate ($TypeProperty $ObjectClass) (TripleFn "pt"))
-(rule $Pred ($TypeProperty $ObjectClass) (TripleFn "pt"))
-#(rule $ROOT ($Predicate) (IdentityFn))
+# Statement expressions
+(rule $Expr ($RSubject $MEMBER $Value member) (TripleFn "spo"))
+(rule $Expr ($RSubject $OCCUP $Value) (TripleFn "spo"))
+(rule $Expr ($RSubject $N $PersonName) (TripleFn "spo"))
+(rule $Expr ($RSubject $RPredicate ($TOKEN optional) ($BE optional) $Value) (TripleFn "spo"))
+(rule $Expr ($Value ($BE optional) $RSubject $RPredicate) (TripleFn "osp"))
+(rule $Expr ($RSubject $RPredicate ($BE optional) $Value) (TripleFn "spo"))
+(rule $Expr ($AdjPhrase ($BE optional) $RSubject $RPredicate) (TripleFn "osp"))
+(rule $Expr ($RPredicate $RSubject $Value) (TripleFn "pso"))
+(rule $ROOT ($Expr) (IdentityFn))
+(rule $ROOT (($PHRASE optional) $Expr) (IdentityFn))
 
 # Question Phrase
 (rule $Quest ($Wh) (SimpleLexiconFn (type Question)))
 (rule $Quest ($Wh) (IdentityFn))
-(rule $Quest ($Quest and $Quest) (ConcatFn "&"))
-(rule $Quest ($Quest $Quest) (ConcatFn "&"))
-(rule $Quest ($Quest or $Quest) (ConcatFn "|"))
-(rule $Quest ($Quest $BE) (SelectFn 0))
+(rule $Quest (who) (ConstantFn (rdf:type foaf:person) foaf:person))
+(rule $Quest (who) (ConstantFn (rdf:type dbpedia:Organization) dbpedia:Organization))
+(rule $Quest (who) (ConstantFn (rdf:type dbpedia:Company) dbpedia:Company))
+(rule $Quest (where) (ConstantFn (rdf:type dbpedia:Organization) dbpedia:Organization))
+(rule $Quest (where) (ConstantFn (rdf:type dbpedia:Place) dbpedia:Place))
+(rule $Quest (where) (ConstantFn (rdf:type dbpedia:EducationalInstitution) dbpedia:EducationalInstitution))
+(rule $Quest (when) (ConstantFn (rdf:type xsd:date) xsd:date))
+(rule $Q ($Wh date) (ConstantFn (rdf:type xsd:date) xsd:date))
+(rule $Q ($Wh year) (ConstantFn (rdf:type xsd:date) xsd:date))
+(rule $Q ($Wh day) (ConstantFn (rdf:type xsd:date) xsd:date))
 
-# Subordinating conjunctions I
-(rule $SubTime ($PHRASE) (SimpleLexiconFn (type subordinate.time)))
-(rule $SubPlace ($PHRASE) (SimpleLexiconFn (type subordinate.place)))
-(rule $SubEffect ($PHRASE) (SimpleLexiconFn (type subordinate.effect)))
-(rule $SubCause ($PHRASE) (SimpleLexiconFn (type subordinate.cause)))
-
-# Subordinating conjunctions II
-(rule $SubSen ($SubTime $Expr) (ConcatFn ":"))
-(rule $SubSen ($SubPlace $Expr) (ConcatFn ":"))
-(rule $SubSen ($SubEffect $Expr) (ConcatFn ":"))
-(rule $SubSen ($SubCause $Expr) (ConcatFn ":"))
-(rule $Expr ($Expr $SubSen) (ConcatFn ")->("))
-(rule $Expr ($SubSen $Expr) (ConcatFn ")<-("))
-
-# Statement expressions
-(rule $Expr ($Subject $Predicate ($BE optional) $Object) (TripleFn "spo"))
-#(rule $Expr ($Subject $Predicate ($BE optional) $Value) (TripleFn "spo"))
-(rule $Expr ($PHRASE ($BE optional) $Subject $Predicate) (TripleFn "osp"))
-(rule $Expr ($Subject $Predicate ($BE optional) $AdjPhrase) (TripleFn "spo"))
-(rule $Expr ($AdjPhrase ($BE optional) $Subject $Predicate) (TripleFn "osp"))
-(rule $Expr ($PHRASE ($BE optional) $Subject $Predicate) (TripleFn "osp"))
-(rule $Expr ($Predicate $Subject $Object) (TripleFn "pso"))
-(rule $Expr ($Predicate $Subject) (TripleFn "pso"))
-
-(rule $Expr ($Quest $Expr) (SelectFn 1))
-#(rule $Expr ($Quest $BE $Subject) (ConcatFn "."))
-#(rule $Expr ($Quest $BE $AdjPhrase) (ConcatFn "."))
-#(rule $Expr ($Quest $Predicate $Subject) (ConcatFn "."))
-#(rule $Expr ($Quest $Predicate $AdjPhrase) (ConcatFn "."))
-#(rule $Expr ($Quest $Predicate $Subject $Predicate) (ConcatFn "."))
-#(rule $Expr ($Quest $Predicate $Subject $AdjPhrase) (ConcatFn "."))
-#
-(rule $ROOT ($Expr) (IdentityFn))
-(rule $ROOT ($Expr or $Expr) (ConcatFn " or "))
-(rule $ROOT ($Not $Expr) (ConcatFn " "))
-(rule $ROOT ($Expr ($Conj optional) $Expr) (ConcatFn "; "))
+# Question expressions
+(rule $Binary ($QRelatClass) (IdentityFn))
+(rule $Binary ($QRelat) (IdentityFn))
+(rule $RSet ($RSubject) (IdentityFn))
+(rule $RSet ($Quest) (IdentityFn))
+(rule $RSet (($Wh optional) $RSet $RSet) (MergeFn and))
+(rule $RSet (($Wh optional) $Entity $Binary) (JoinFn backward))
+(rule $RSet (what is $Binary $RSubject) (JoinFn forward))
+(rule $RSet (what is $RSubject $Binary) (JoinFn backward))
+(rule $ROOT ($RSet) (IdentityFn))
 
 # Math expressions
 (include math.grammar)
@@ -167,12 +156,12 @@
 (rule $Binary ($RelClass) (IdentityFn))
 (rule $Set ($Entity) (IdentityFn))
 (rule $Set ($Unary) (IdentityFn))
-(rule $Set (($Quest optional) $Unary $Set) (MergeFn and))
-(rule $Set (($Quest optional) $Binary $Entity) (JoinFn forward))
-(rule $Set (($Quest optional) $Entity $Binary) (JoinFn backward))
+(rule $Set ($Quest) (IdentityFn))
+(rule $Set (($Wh optional) $Unary $Set) (MergeFn and))
+(rule $Set (($Wh optional) $Binary $Entity) (JoinFn forward))
+(rule $Set (($Wh optional) $Entity $Binary) (JoinFn backward))
 (rule $Set (what is $Binary $Entity) (JoinFn forward))
 (rule $Set (what is $Entity $Binary) (JoinFn backward))
-(rule $Question ($Set) (IdentityFn))
 (rule $ROOT ($Set) (IdentityFn))
 
 #TEST SET

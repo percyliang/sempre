@@ -56,15 +56,17 @@ public class MCGRetriever extends KnowledgeRetriever {
             Type t = new TypeToken<Map<String, String>>(){}.getType();
             results = gson.fromJson(response.getXml(), t);
             List<Map<String,String>> labels = new ArrayList();
-            for (String result : results.keySet()) {
-                Map<String,String> single = new HashMap();
-                Set<String> uri = sparqlUtil.returnURI(result, dbpediaUrl, false);
-                if (uri != null) {
-                    single.put("Label", result);
-                    single.put("Refcount", String.valueOf(results.get(result)));
-                    for (String u: uri) {
-                        single.put("URI", u);
-                        labels.add(single);
+            if (results!=null) {
+                for (String result : results.keySet()) {
+                    Map<String, String> single = new HashMap();
+                    Set<String> uri = sparqlUtil.returnURI(result, dbpediaUrl, false);
+                    if (uri != null) {
+                        single.put("Label", result);
+                        single.put("Refcount", String.valueOf(results.get(result)));
+                        for (String u : uri) {
+                            single.put("URI", u);
+                            labels.add(single);
+                        }
                     }
                 }
             }

@@ -257,6 +257,8 @@ public class SparqlUtils {
             return new ServerResponse(buf.toString());
         } catch (SocketTimeoutException e) {
             return new ServerResponse(ErrorValue.timeout);
+        } catch (FileNotFoundException e) {
+            return new ServerResponse(ErrorValue.empty);
         } catch (IOException e) {
             LogInfo.errors("Server exception: %s", e);
             // Sometimes the SPARQL server throws a 408 to signify a server timeout.

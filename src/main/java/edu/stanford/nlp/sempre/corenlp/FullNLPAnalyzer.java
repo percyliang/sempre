@@ -59,6 +59,9 @@ public class FullNLPAnalyzer extends InfoAnalyzer {
     private static final String[] AUX_VERB_ARR = new String[] {"is", "are", "am"};
     private static final Set<String> AUX_VERBS = new HashSet<String>(Arrays.asList(AUX_VERB_ARR));
     private static final String AUX_VERB_TAG = "BE";
+    private static final String[] HAVE_VERB_ARR = new String[] {"has", "have"};
+    private static final Set<String> HAVE_VERBS = new HashSet<String>(Arrays.asList(HAVE_VERB_ARR));
+    private static final String HAVE_VERB_TAG = "HAVE";
 
     public static StanfordCoreNLP pipeline = null;
     public static String keyword_tags = null;
@@ -131,7 +134,9 @@ public class FullNLPAnalyzer extends InfoAnalyzer {
             languageInfo.posTags.add(
                     AUX_VERBS.contains(wordLower) ?
                             AUX_VERB_TAG :
-                            token.get(PartOfSpeechAnnotation.class));
+                            (HAVE_VERBS.contains(wordLower) ?
+                                    HAVE_VERB_TAG :
+                                    token.get(PartOfSpeechAnnotation.class)));
             languageInfo.nerTags.add(token.get(NamedEntityTagAnnotation.class));
             languageInfo.lemmaTokens.add(token.get(LemmaAnnotation.class));
             languageInfo.nerValues.add(token.get(NormalizedNamedEntityTagAnnotation.class));

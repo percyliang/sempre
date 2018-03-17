@@ -9,7 +9,7 @@ Semantic Parser based on [SEMPRE](https://nlp.stanford.edu/software/sempre/).
 You must have the following already installed on your system.
 
 - Java 8 (not 7)
-- Ant 1.8.2
+- Maven
 - Ruby 1.8.7 or 1.9
 - wget
 - make (for compiling fig and Virtuoso)
@@ -23,23 +23,30 @@ similar your system is.
 
 In order to build application with all needed dependencies run:
 ```
-./pull-dependencies core
-./pull-dependencies corenlp
-./pull-dependencies freebase
-./pull-dependencies virtuoso
-ant roboy
+./pull-dependencies roboy
+mvn clean install
+mvn compile
 ```
 
 # Run
 
 ## Roboy Talk Grammar and Lexicon
 
-To run SEMPRE with Roboy grammar run in interactive mode (from command line):
+To run SEMPRE with Roboy grammar in interactive mode (from command line):
 ```
-./run @mode=simple -Grammar.inPaths data/roboy-talk.grammar -FeatureExtractor.featureDomains rule -Dataset.inPaths train:data/roboy-talk.examples -Learner.maxTrainIters 10 -languageAnalyzer corenlp.CoreNLPAnalyzer -SimpleLexicon.inPaths data/roboy-talk.lexicon
+mvn exec:java@interactive -Dexec.mainClass=edu.stanford.nlp.sempre.Main
 ```
 
-To run SEMPRE with Roboy grammar run in socket mode (port 5000):
+To run SEMPRE with Roboy grammar in socket mode (port 5000):
 ```
-./run @mode=socket -Grammar.inPaths data/roboy-talk.grammar -FeatureExtractor.featureDomains rule -Dataset.inPaths train:data/roboy-talk.examples -Learner.maxTrainIters 10 -languageAnalyzer corenlp.CoreNLPAnalyzer -SimpleLexicon.inPaths data/roboy-talk.lexicon
+mvn exec:java@demo -Dexec.mainClass=edu.stanford.nlp.sempre.Main
+```
+To run SEMPRE with Roboy grammar in socket mode (port 5000) with training:
+```
+mvn exec:java@test -Dexec.mainClass=edu.stanford.nlp.sempre.Main
+```
+
+To run SEMPRE with Roboy grammar in web server mode:
+```
+mvn exec:java@debug -Dexec.mainClass=edu.stanford.nlp.sempre.Main
 ```

@@ -1,5 +1,6 @@
 {
   "lex": "http://github.com/cunger/lemon.dbpedia/target/dbpedia_all#",
+  "rb": "http://roboy.org/ontology/",
   "dbpedia": "http://dbpedia.org/ontology/",
   "resource": "http://dbpedia.org/resource/",
   "property": "http://dbpedia.org/property/",

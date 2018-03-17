@@ -12,7 +12,6 @@
 
     <build>
         <plugins>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -75,9 +74,9 @@
                             <repositoryLayout>default</repositoryLayout>
                             <groupId>edu.stanford.nlp</groupId>
                             <artifactId>stanford-corenlp</artifactId>
-                            <version>3.5.0</version>
+                            <version>3.5.2</version>
                             <classifier>models</classifier>
-                            <file>${project.basedir}/lib/stanford-corenlp-caseless-models-3.5.0.jar</file>
+                            <file>${project.basedir}/lib/stanford-corenlp-models-3.5.2.jar</file>
                             <packaging>jar</packaging>
                             <generatePom>true</generatePom>
                         </configuration>
@@ -104,6 +103,7 @@
 
                 </executions>
             </plugin>
+
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
@@ -164,7 +164,7 @@
                                 <argument>resources/lexicons/roboy-dbpedia.lexicon</argument>
                                 <argument>-languageAnalyzer</argument>
                                 <argument>corenlp.CoreNLPAnalyzer</argument>
-                                <argument>-Main.server</argument>
+                                <argument>-Main.socket</argument>
                                 <argument>true</argument>
                                 <argument>-ErrorRetrieval.followUps</argument>
                                 <argument>true</argument>
@@ -223,6 +223,17 @@
                             </arguments>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>Generating module-classes</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>ruby</executable>
+                            <commandlineArgs>${project.basedir}/scripts/extract-module-classes.rb</commandlineArgs>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
         </plugins>
@@ -277,6 +288,12 @@
     </repositories>
 
     <dependencies>
+
+        <dependency>
+            <groupId>org.jruby</groupId>
+            <artifactId>jruby-complete</artifactId>
+            <version>1.7.10</version>
+        </dependency>
 
         <dependency>
             <groupId>fig</groupId>

@@ -178,8 +178,7 @@ public abstract class Parser {
 
       if (ex.targetFormula.toString().contains("triple")||
               ex.targetFormula.toString().contains("string")||
-              ex.targetFormula.toString().contains("lambda")||
-              ex.targetFormula.toString().contains("rb:")){
+              ex.targetFormula.toString().contains("lambda")){
         ex.targetValue = simple_executor.execute(ex.targetFormula, ex.context).value;
       }
       else
