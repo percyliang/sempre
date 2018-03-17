@@ -76,7 +76,7 @@
                             <artifactId>stanford-corenlp</artifactId>
                             <version>3.5.2</version>
                             <classifier>models</classifier>
-                            <file>${project.basedir}/lib/stanford-corenlp-models-3.5.2.jar</file>
+                            <file>${project.basedir}/lib/stanford-corenlp-caseless-models.jar</file>
                             <packaging>jar</packaging>
                             <generatePom>true</generatePom>
                         </configuration>
@@ -527,3 +527,4 @@
     </dependencies>
 
 </project>
+
