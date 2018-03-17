@@ -84,7 +84,6 @@
 (rule $N ($BE) (ConstantFn rb:NAME_OF))
 (rule $MEMBER ($BE) (ConstantFn rb:MEMBER_OF))
 (rule $OCCUP ($BE $Det) (ConstantFn rb:OCCUPIED_AS))
-(rule $OCCUP ($BE $Preposition) (ConstantFn rb:OCCUPIED_AS))
 
 # Object Phrase
 (rule $Value ($Noun) (IdentityFn))
