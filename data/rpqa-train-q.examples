@@ -12,19 +12,19 @@
 )
 (example
 	(utterance "Where are you from?")
-	(targetFormula (!rb:BORN_IN rb:Roboy))
+	(targetFormula (!rb:FROM rb:Roboy))
 )
 (example
 	(utterance "Where were you born?")
-	(targetFormula (!rb:BORN_IN rb:Roboy))
+	(targetFormula (!rb:FROM rb:Roboy))
 )
 (example
 	(utterance "What is your home countr?")
-	(targetFormula (!rb:BORN_IN rb:Roboy))
+	(targetFormula (!rb:FROM rb:Roboy))
 )
 (example
 	(utterance "Which town do you call your home?")
-	(targetFormula (!rb:BORN_IN rb:Roboy))
+	(targetFormula (!rb:FROM rb:Roboy))
 )
 (example
 	(utterance "What is your favorite thing to do?")

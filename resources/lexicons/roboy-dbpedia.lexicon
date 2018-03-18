@@ -16,9 +16,9 @@
 {"lexeme": "call", "formula": "rb:NAME_OF", "type" : "Relationship"}
 {"lexeme": "like", "formula": "rb:HAS_HOBBY", "type" : "Relationship"}
 {"lexeme": "like", "formula": "rb:FRIEND_OF", "type" : "Relationship"}
-{"lexeme": "born in", "formula": "rb:BORN_IN", "type" : "Relationship"}
-{"lexeme": "come from", "formula": "rb:BORN_IN", "type" : "Relationship"}
-{"lexeme": "be from", "formula": "rb:BORN_IN", "type" : "Relationship"}
+{"lexeme": "born in", "formula": "rb:FROM", "type" : "Relationship"}
+{"lexeme": "come from", "formula": "rb:FROM", "type" : "Relationship"}
+{"lexeme": "be from", "formula": "rb:FROM", "type" : "Relationship"}
 {"lexeme": "go to", "formula": "rb:STUDY_AT", "type" : "Relationship"}
 {"lexeme": "study", "formula": "rb:STUDY_AT", "type" : "Relationship"}
 {"lexeme": "study at", "formula": "rb:STUDY_AT", "type" : "Relationship"}
@@ -52,7 +52,7 @@
 {"lexeme": "child", "formula": "rb:CHILD_OF", "type" : "RelationClass"}
 {"lexeme": "friend", "formula": "rb:FRIEND_OF", "type" : "RelationClass"}
 {"lexeme": "name", "formula": "rb:NAME_OF", "type" : "RelationClass"}
-{"lexeme": "home", "formula": "rb:BORN_IN", "type" : "RelationClass"}
+{"lexeme": "home", "formula": "rb:FROM", "type" : "RelationClass"}
 {"lexeme": "age", "formula": "rb:AGE", "type" : "RelationClass"}
 {"lexeme": "member", "formula": "rb:MEMBER_OF", "type" : "RelationClass"}
 {"lexeme": "member of", "formula": "rb:MEMBER_OF", "type" : "RelationClass"}

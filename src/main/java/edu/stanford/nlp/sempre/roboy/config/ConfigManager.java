@@ -35,6 +35,7 @@ public class ConfigManager {
     // Other parameters
     public static int PARSER_PORT = -1;
     public static double W2V_THRES = 0.3;
+    public static boolean WORD2VEC_GOOGLE = false;
     public static String[] DB_KEYWORDS = {"Result","Label","URI","Refcount"};
     public static String[] MCG_KEYWORDS = {"KeyValueOfstringdouble","Key","Value"};
     public static String[] KEYWORDS_TAGS = {"NNP","NN","NP"};
@@ -88,6 +89,7 @@ public class ConfigManager {
             DEBUG           = yamlConfig.getInt("DEBUG");
             PARSER_PORT     = yamlConfig.getInt("PARSER_PORT");
 
+            WORD2VEC_GOOGLE       = yamlConfig.getBoolean("WORD2VEC_GOOGLE");
             W2V_THRES       = yamlConfig.getDouble("W2V_THRES");
 
             DB_KEYWORDS     = yamlConfig.getStringArray("DB_KEYWORDS");

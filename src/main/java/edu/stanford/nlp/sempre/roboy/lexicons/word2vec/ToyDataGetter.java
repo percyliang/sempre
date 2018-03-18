@@ -25,7 +25,7 @@ public class ToyDataGetter {
     private Map<String,String> file_map = new HashMap();
 
     public ToyDataGetter(boolean verbose) throws Exception{
-        this.roboy = true;
+        this.roboy = ConfigManager.WORD2VEC_GOOGLE;
         this.file_map = ConfigManager.WORD2VEC_MODELS;
         this.verbose = verbose;
     }

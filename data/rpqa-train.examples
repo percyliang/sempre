@@ -40,39 +40,39 @@
 )
 (example
 	(utterance "i come from poland")
-	(targetFormula (triples (triple rb:active_person rb:BORN_IN poland)))
+	(targetFormula (triples (triple rb:active_person rb:FROM poland)))
 )
 (example
 	(utterance "i am from russia")
-	(targetFormula (triples (triple rb:active_person rb:BORN_IN russia)))
+	(targetFormula (triples (triple rb:active_person rb:FROM russia)))
 )
 (example
 	(utterance "my home country is ukraine")
-	(targetFormula (triples (triple rb:active_person rb:BORN_IN ukraine)))
+	(targetFormula (triples (triple rb:active_person rb:FROM ukraine)))
 )
 (example
 	(utterance "i was born in nicaragua")
-	(targetFormula (triples (triple rb:active_person rb:BORN_IN nicaragua)))
+	(targetFormula (triples (triple rb:active_person rb:FROM nicaragua)))
 )
 (example
 	(utterance "i was born in poland or russia")
-	(targetFormula (triples or (triple rb:active_person rb:BORN_IN poland) (triple rb:active_person rb:BORN_IN russia)))
+	(targetFormula (triples or (triple rb:active_person rb:FROM poland) (triple rb:active_person rb:FROM russia)))
 )
 (example
 	(utterance "Where are you from?")
-	(targetFormula (!rb:BORN_IN rb:Roboy))
+	(targetFormula (!rb:FROM rb:Roboy))
 )
 (example
 	(utterance "Where were you born?")
-	(targetFormula (!rb:BORN_IN rb:Roboy))
+	(targetFormula (!rb:FROM rb:Roboy))
 )
 (example
 	(utterance "What is your home countr?")
-	(targetFormula (!rb:BORN_IN rb:Roboy))
+	(targetFormula (!rb:FROM rb:Roboy))
 )
 (example
 	(utterance "Which town do you call your home?")
-	(targetFormula (!rb:BORN_IN rb:Roboy))
+	(targetFormula (!rb:FROM rb:Roboy))
 )
 (example
 	(utterance "my favorite thing to do is swimming")
