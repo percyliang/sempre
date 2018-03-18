@@ -21,6 +21,7 @@ public class EntityRetriever extends KnowledgeRetriever {
     public static Gson gson = new Gson();
 
     public static XMLReader reader = new XMLReader();
+    public static SparqlUtils sparql = new SparqlUtils();
 
     public static String endpointUrl = new String();
     public static List<String> keywords = new ArrayList();
@@ -50,7 +51,6 @@ public class EntityRetriever extends KnowledgeRetriever {
             // Extract the results from XML now.
             String url = endpointUrl.concat(entity);
             url = url.replace(" ","_");
-            SparqlUtils sparql = new SparqlUtils();
             SparqlUtils.ServerResponse response = sparql.makeRequest(url);
             if (response.getXml()!=null)
                 results = reader.readEntityXml(response.getXml(),keywords);

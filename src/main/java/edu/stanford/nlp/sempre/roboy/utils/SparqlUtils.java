@@ -269,6 +269,8 @@ public class SparqlUtils {
                 return new ServerResponse(ErrorValue.badFormat);
             if (e.toString().contains("HTTP response code: 500"))
                 return new ServerResponse(ErrorValue.server500);
+            if (e.toString().contains("HTTP response code: 503"))
+                return new ServerResponse(ErrorValue.empty);
             throw new RuntimeException(e);  // Haven't seen this happen yet...
         }
     }

@@ -30,6 +30,9 @@ mvn clean install
 mvn compile
 ```
 
+# Word2Vec Model
+Small model for parser has to be manually downloaded from [this link](https://drive.google.com/uc?export=download&confirm&id=1LVOKk7KnDIJphkHRZDa5fDm7ffIcS_Yz).
+
 # Run
 
 ## Roboy Talk Grammar and Lexicon

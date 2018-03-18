@@ -75,7 +75,7 @@
                             <groupId>edu.stanford.nlp</groupId>
                             <artifactId>stanford-corenlp</artifactId>
                             <version>3.5.2</version>
-                            <classifier>models</classifier>
+                            <classifier>caseless-models</classifier>
                             <file>${project.basedir}/lib/stanford-corenlp-caseless-models.jar</file>
                             <packaging>jar</packaging>
                             <generatePom>true</generatePom>
@@ -505,15 +505,15 @@
         <dependency>
             <groupId>edu.stanford.nlp</groupId>
             <artifactId>stanford-corenlp</artifactId>
-            <version>3.5.2</version>
             <classifier>models</classifier>
+            <version>3.8.0</version>
         </dependency>
 
         <dependency>
             <groupId>edu.stanford.nlp</groupId>
             <artifactId>stanford-corenlp</artifactId>
-            <version>3.8.0</version>
-            <classifier>models</classifier>
+            <version>3.5.2</version>
+            <classifier>caseless-models</classifier>
         </dependency>
 
         <dependency>

@@ -88,7 +88,7 @@ public class Master {
       interpretation.put("lemma_tokens",ex.getLemmaTokens());
       interpretation.put("postags",ex.getPosTag());
       interpretation.put("relations",ex.getRelation());
-      interpretation.put("type",ex.getType());
+      interpretation.put("sentiment",ex.getGenInfo().sentiment);
 
     /* // Convert JSON string back to Map.
       Type type = new TypeToken<Map<String, String>>(){}.getType();
@@ -110,6 +110,11 @@ public class Master {
         deriv.ensureExecuted(builder.executor, ex.context);
         interpretation.put("parse",deriv.getFormula().toString());
         interpretation.put("answer",deriv.getValue().toString());
+        interpretation.put("followUp",deriv.followUps);
+        if (deriv.getFormula().toString().contains("triple") || deriv.getFormula().toString().contains("string"))
+          interpretation.put("type", "statement");
+        else
+          interpretation.put("type", "question");
       }
 
       // Convert a Map into JSON string.
@@ -188,8 +193,7 @@ public class Master {
         Socket clientSocket = serverSocket.accept();
         Runnable connectionHandler = new SocketConnectionHandler(clientSocket, session, this);
         new Thread(connectionHandler).start();
-      
-     }
+      }
     }
     catch (IOException e)
     {
@@ -219,6 +223,7 @@ public class Master {
           t.printStackTrace();
         }
       }
+      reader.close();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

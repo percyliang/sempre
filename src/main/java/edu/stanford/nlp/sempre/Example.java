@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
+import edu.stanford.nlp.sempre.roboy.ErrorInfo;
 import fig.basic.Evaluation;
 import fig.basic.LispTree;
 import fig.basic.LogInfo;
@@ -67,7 +68,6 @@ public class Example {
     private String utterance;
     private ContextValue context;
     private Formula targetFormula;
-    private String formulaType;
     private Value targetValue;
     private GeneralInfo genInfo;
     private LanguageInfo languageInfo;
@@ -76,11 +76,7 @@ public class Example {
     public Builder setId(String id) { this.id = id; return this; }
     public Builder setUtterance(String utterance) { this.utterance = utterance; return this; }
     public Builder setContext(ContextValue context) { this.context = context; return this; }
-    public Builder setTargetFormula(Formula targetFormula) { this.targetFormula = targetFormula;
-      if (this.targetFormula!= null && this.targetFormula.toString().contains("triples"))
-        this.formulaType = "statement";
-      else
-        this.formulaType = "question"; return this; }
+    public Builder setTargetFormula(Formula targetFormula) { this.targetFormula = targetFormula; return this; }
     public Builder setTargetValue(Value targetValue) { this.targetValue = targetValue; return this; }
     public Builder setGenInfo(GeneralInfo genInfo) { this.genInfo = genInfo; return this; }
     public Builder setLanguageInfo(LanguageInfo languageInfo) { this.languageInfo = languageInfo; return this; }

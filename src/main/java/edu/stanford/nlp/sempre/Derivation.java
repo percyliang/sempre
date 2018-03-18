@@ -78,6 +78,7 @@ public class Derivation implements SemanticFn.Callable, HasScore {
 
   public Formula formula; // Logical form produced by this derivation
   public SemType type; // Type corresponding to that logical form
+  public List<Map.Entry<String, String>> followUps;
 
   //// Fields produced by feature extractor, evaluation, etc.
 

@@ -299,7 +299,7 @@ public final class DatabaseInfo {
 
   public static String uri2id(String uri) {
     for (String key : glossary.keySet()) {
-      if (uri.contains(glossary.get(key)) && !uri.contains(",")) {
+      if (uri.contains(glossary.get(key)) && !uri.contains(",") && !uri.contains("(")) {
           uri = uri.replaceAll(glossary.get(key),key + ":").replaceAll("/", ".");
       }
 //      if (uri.contains(",")) {
@@ -310,7 +310,7 @@ public final class DatabaseInfo {
 //        }
 //      }
     }
-    if (uri.contains(",")) {
+    if (uri.contains("/") && (uri.contains(",") || uri.contains("("))) {
        uri = "<".concat(uri).concat(">");
     }
     // LogInfo.logs("Warning: invalid Database uri!: %s", uri);

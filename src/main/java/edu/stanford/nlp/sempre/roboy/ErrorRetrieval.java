@@ -8,6 +8,7 @@ import edu.stanford.nlp.sempre.roboy.error.*;
 import edu.stanford.nlp.sempre.roboy.lexicons.LexicalEntry;
 import edu.stanford.nlp.sempre.roboy.lexicons.word2vec.Word2vec;
 import edu.stanford.nlp.sempre.roboy.score.*;
+import edu.stanford.nlp.sempre.roboy.utils.SparqlUtils;
 import fig.basic.LispTree;
 import fig.basic.LogInfo;
 import fig.basic.Option;
@@ -22,18 +23,21 @@ import java.util.*;
  * @author emlozin
  */
 public class ErrorRetrieval {
+    private Gson gson = new Gson();
     private boolean follow_ups;                 /**< Enabling/disabling follow_up questions */
     private String utterance;                   /**< Currently processed user utterance */
     private ContextValue context;               /**< Context Value storing history of a conversation */
     private List<Derivation> derivations;       /**< List of predicted derivations */
     private ErrorInfo errorInfo;                /**< Error solutions object */
 
-    private Gson gson = new Gson();
+    public  String dbpediaUrl = ConfigManager.DB_SPARQL;
+    private SparqlUtils sparqlUtil = new SparqlUtils();
+
+
     // Postprocessing analyzers
     private Word2vec vec;                       /**< Word2vec object */
     private List<KnowledgeRetriever> helpers;   /**< List of error retrieval objects */
     private List<ScoringFunction> scorers;      /**< List of scoring functions objects */
-    private FollowUpHandler followUps;
 
     public static class Options {
         @Option(gloss = "Enabling follow-up questions") public boolean followUps = false;
@@ -52,7 +56,7 @@ public class ErrorRetrieval {
         this.context = context;
         this.derivations = derivations;
         this.errorInfo = new ErrorInfo();
-        this.followUps = new FollowUpHandler(5001);
+
 
         // Adding error retrieval mechanisms
 //        LogInfo.begin_track("Building error retrieval module:");
@@ -89,7 +93,6 @@ public class ErrorRetrieval {
         this.context = null;
         this.derivations = null;
         this.errorInfo = new ErrorInfo();
-        this.followUps = new FollowUpHandler(5001);
 
         // Adding error retrieval mechanisms
         // LogInfo.begin_track("Building error retrieval module:");
@@ -319,6 +322,53 @@ public class ErrorRetrieval {
         return new_formula;
     }
 
+
+    /**
+     * Function forming questions.
+     *
+     * @param term          term that is underspecified
+     * @param candidate     list of potential candidates
+     * @return Follow-up question
+     */
+    public List<Map.Entry<String,String>> formQuestion(String term, List<String> candidate) {
+        List<Map.Entry<String,String>> result = new ArrayList<>();
+        for (String c:candidate) {
+            Type type = new TypeToken<Map<String, String>>(){}.getType();
+            Map<String, String> c_map = this.gson.fromJson(c, type);
+            String desc = sparqlUtil.returnDescr(c_map.get("URI"),dbpediaUrl);
+            if (desc!=null) {
+                if (desc.contains(".")) {
+                    desc = desc.substring(0, desc.indexOf("."));
+                }
+                if (desc.contains("(")) {
+                    String new_desc = desc.substring(0, desc.indexOf("("));
+                    new_desc = new_desc.concat(desc.substring(desc.indexOf(")")+2));
+                    desc = new_desc;
+                }
+                desc = desc.replaceAll(" is ", ", ");
+                desc = desc.replaceAll(" was ", ", ");
+                Map.Entry<String, String> entry = new java.util.AbstractMap.SimpleEntry<String, String>
+                        (String.format("Did you mean %s as %s, %s?", term, c_map.get("Label"), desc), c_map.get("URI"));
+                result.add(entry);
+                LogInfo.logs("Question:%s", entry.getKey());
+            }
+            else {
+                Map.Entry<String, String> entry = new java.util.AbstractMap.SimpleEntry<String, String>
+                        (String.format("Did you mean %s as %s?", term, c_map.get("Label")), c_map.get("URI"));
+                result.add(entry);
+                LogInfo.logs("Question:%s", entry.getKey());
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Function scoring candidates in a list
+     *
+     * @param errorInfo        current information about candidates
+     * @param term             underspecified term
+     * @return Best candidate
+     */
     public String getBestCandidate(ErrorInfo errorInfo, String term){
         String result = new String();
         Map<String,Double> candidate = errorInfo.getScored().get(term);
@@ -327,25 +377,17 @@ public class ErrorRetrieval {
         Map.Entry<String,Double> best = sorted.get(0);
         for (Map.Entry<String,Double> entry : sorted)
         {
-            //LogInfo.logs("Entry:%s", entry.getKey());
-            if (errorInfo.getFollowUps().containsKey(term))
-                errorInfo.getFollowUps().get(term).add(entry.getKey());
-            else
-                errorInfo.getFollowUps().put(term,new ArrayList<>(Arrays.asList(entry.getKey())));
-        }
-        String answer = followUps.askFollowUp(errorInfo);
-        for (String t: errorInfo.getFollowUps().keySet()){
-            List<String> c = errorInfo.getFollowUps().get(t);
-            List<String> questions = followUps.formQuestion(t,c);
-            for (int i = 0; i < questions.size(); i++) {
-                LogInfo.logs("Question:%s", questions.get(i));
+            if (this.errorInfo.getFollowUps().containsKey(term)) {
+                this.errorInfo.getFollowUps().get(term).add(entry.getKey());
             }
-
+            else {
+                this.errorInfo.getFollowUps().put(term, new ArrayList<>(Arrays.asList(entry.getKey())));
+            }
         }
-        if (answer==null)
-            return best.getKey();
-        else
-            return answer;
+        for (String key: this.errorInfo.getFollowUps().keySet()){
+            LogInfo.logs("FollowUp %s -> %s",key,String.join(" ",this.errorInfo.getFollowUps().get(key)));
+        }
+        return best.getKey();
     }
 
     /**
@@ -355,6 +397,7 @@ public class ErrorRetrieval {
      */
     public Derivation replace(Derivation deriv, Map<String,String> replacements){
         LispTree new_formula = deriv.getFormula().toLispTree();
+        LispTree best_formula = deriv.getFormula().toLispTree();
         String formula = deriv.getFormula().toString();
         while (formula.contains("Open")){
             int start = formula.indexOf("Open")+"Open".length();
@@ -364,11 +407,28 @@ public class ErrorRetrieval {
             String full_type = formula.substring(formula.indexOf("Open"),formula.indexOf("\''")+2);
             String entity = formula.substring(start,end).substring(formula.substring(start,end).indexOf("\'")+1);
             String best = replacements.get(entity);
+            LogInfo.logs("Forming: %s|", entity);
+            if (errorInfo.getFollowUps().containsKey(entity)) {
+                List<String> c = errorInfo.getFollowUps().get(entity);
+                LogInfo.logs("Forming: %s|", String.join(" ", c));
+                List<Map.Entry<String, String>> questions = formQuestion(entity, c);
+                for (int i = 0; i < questions.size(); i++) {
+                    LogInfo.logs("Question:%s", questions.get(i));
+                    Map.Entry<String, String> entry = new java.util.AbstractMap.SimpleEntry<String, String>
+                            (questions.get(i).getKey(),
+                                    Formulas.fromLispTree(replaceEntity(best_formula,
+                                            full_type, questions.get(i).getValue())).toString());
+                    if (deriv.followUps!=null)
+                        deriv.followUps.add(entry);
+                    else
+                        deriv.followUps = new ArrayList<>(Arrays.asList(entry));
+                }
+            }
             if (best!=null) {
                 Type type = new TypeToken<Map<String, String>>() {
                 }.getType();
-                Map<String, String> c = this.gson.fromJson(best, type);
-                new_formula = replaceEntity(new_formula, full_type, c.get("URI"));
+                Map<String, String> cand = this.gson.fromJson(best, type);
+                new_formula = replaceEntity(new_formula, full_type, cand.get("URI"));
             }
             formula = formula.substring(end);
         }
@@ -404,6 +464,7 @@ public class ErrorRetrieval {
             // Replace
             for (Derivation deriv: this.derivations){
                 // Replace with the best
+                LogInfo.logs("Derivation %s", replaces.entrySet().toString());
                 if (replaces.keySet().size() > 0)
                     replace(deriv,replaces);
             }

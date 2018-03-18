@@ -20,7 +20,7 @@ public class ErrorInfo implements MemUsage.Instrumented {
     private Gson gson = new Gson();
     private String utterance = new String();                 /**< Current user utterance*/
     private Map<String, List<String>> follow_up
-            = new HashMap<>();                               /**< Map of follow up questions-answers pairs*/
+            = new HashMap<>();                               /**< Map of entity - follow up questions pairs*/
     private Map<String, List<String>> candidates
             = new HashMap<>();                               /**< Map of underspecified terms*/
     private Map<String, Map<String,Double>> candidates_scored
