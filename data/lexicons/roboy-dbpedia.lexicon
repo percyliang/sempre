@@ -27,7 +27,7 @@
 {"lexeme": "work as", "formula": "rb:OCCUPIED_AS", "type" : "Relationship"}
 {"lexeme": "live in", "formula": "rb:LIVE_IN", "type" : "Relationship"}
 {"lexeme": "lives in", "formula": "rb:LIVE_IN", "type" : "Relationship"}
-{"lexeme": "belong to", "formula": "rb:MEMBER_OF", "type" : "Relationship"}
+{"lexeme": "belong", "formula": "rb:MEMBER_OF", "type" : "Relationship"}
 
 {"lexeme": "call", "formula": "!rb:NAME_OF", "type" : "QuRelat"}
 {"lexeme": "like", "formula": "!rb:HAS_HOBBY", "type" : "QuRelat"}
@@ -64,6 +64,7 @@
 {"lexeme": "employer", "formula": "rb:WORK_FOR", "type" : "RelationClass"}
 {"lexeme": "location", "formula": "rb:LIVE_IN", "type" : "RelationClass"}
 {"lexeme": "home", "formula": "rb:BORN_IN", "type" : "RelationClass"}
+{"lexeme": "free time", "formula": "rb:HAS_HOBBY", "type" : "RelationClass"}
 {"lexeme": "current home", "formula": "rb:LIVE_IN", "type" : "RelationClass"}
 {"lexeme": "movie", "formula": "rb:FAVORITE_MOVIE", "type" : "RelationClass"}
 {"lexeme": "university", "formula": "rb:STUDY_AT", "type" : "RelationClass"}

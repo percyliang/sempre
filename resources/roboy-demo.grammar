@@ -80,6 +80,8 @@
 (rule $RPredicate ($RPredicate , $RPredicate) (ConcatFn ","))
 (rule $RPredicate ($RPredicate or $RPredicate) (ConcatFn ";"))
 (rule $RPredicate ($TypeProperty $ObjectClass) (TripleFn "pt"))
+(rule $RPredicate ($BE $RPredicate) (SelectFn 1))
+(rule $RPredicate ($HAVE $RPredicate) (SelectFn 1))
 
 (rule $N ($BE) (ConstantFn rb:NAME_OF))
 (rule $MEMBER ($BE) (ConstantFn rb:MEMBER_OF))
@@ -113,14 +115,18 @@
 # Statement expressions
 (rule $Expr ($RSubject $MEMBER $Value member) (TripleFn "spo"))
 (rule $Expr ($RSubject $OCCUP $Value) (TripleFn "spo"))
-(rule $Expr ($RSubject $N $PersonName) (TripleFn "spo"))
+(rule $Expr ($Person $N $PersonName) (TripleFn "spo"))
+(rule $Expr ($ObjectClass $N $PersonName) (TripleFn "spo"))
+(rule $Expr ($RSubject $Value $Preposition ($TOKEN optional) $RPredicate) (TripleFn "sop"))
+(rule $Expr ($RSubject $RPredicate ($Preposition optional) $Value) (TripleFn "spo"))
 (rule $Expr ($RSubject $RPredicate ($TOKEN optional) ($BE optional) $Value) (TripleFn "spo"))
 (rule $Expr ($Value ($BE optional) $RSubject $RPredicate) (TripleFn "osp"))
 (rule $Expr ($RSubject $RPredicate ($BE optional) $Value) (TripleFn "spo"))
 (rule $Expr ($AdjPhrase ($BE optional) $RSubject $RPredicate) (TripleFn "osp"))
 (rule $Expr ($RPredicate $RSubject $Value) (TripleFn "pso"))
 (rule $ROOT ($Expr) (IdentityFn))
-(rule $ROOT (($PHRASE optional) $Expr) (IdentityFn))
+(rule $ROOT (($Noun optional) $Expr) (IdentityFn))
+(rule $ROOT (($Ignore optional) $Expr) (IdentityFn))
 
 # Question Phrase
 (rule $Quest ($Wh) (SimpleLexiconFn (type Question)))

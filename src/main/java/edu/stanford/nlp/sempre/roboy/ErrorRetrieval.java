@@ -350,13 +350,15 @@ public class ErrorRetrieval {
                 Map.Entry<String, String> entry = new java.util.AbstractMap.SimpleEntry<String, String>
                         (String.format("Did you mean %s as %s, %s?", term, c_map.get("Label"), desc), c_map.get("URI"));
                 result.add(entry);
-                LogInfo.logs("Question:%s", entry.getKey());
+                if (ConfigManager.DEBUG > 3)
+                    LogInfo.logs("Question:%s", entry.getKey());
             }
             else {
                 Map.Entry<String, String> entry = new java.util.AbstractMap.SimpleEntry<String, String>
                         (String.format("Did you mean %s as %s?", term, c_map.get("Label")), c_map.get("URI"));
                 result.add(entry);
-                LogInfo.logs("Question:%s", entry.getKey());
+                if (ConfigManager.DEBUG > 3)
+                    LogInfo.logs("Question:%s", entry.getKey());
             }
         }
         return result;
@@ -384,8 +386,11 @@ public class ErrorRetrieval {
                 this.errorInfo.getFollowUps().put(term, new ArrayList<>(Arrays.asList(entry.getKey())));
             }
         }
-        for (String key: this.errorInfo.getFollowUps().keySet()){
-            LogInfo.logs("FollowUp %s -> %s",key,String.join(" ",this.errorInfo.getFollowUps().get(key)));
+
+        if (ConfigManager.DEBUG > 3) {
+            for (String key : this.errorInfo.getFollowUps().keySet()) {
+                LogInfo.logs("FollowUp %s -> %s", key, String.join(" ", this.errorInfo.getFollowUps().get(key)));
+            }
         }
         return best.getKey();
     }
@@ -407,13 +412,16 @@ public class ErrorRetrieval {
             String full_type = formula.substring(formula.indexOf("Open"),formula.indexOf("\''")+2);
             String entity = formula.substring(start,end).substring(formula.substring(start,end).indexOf("\'")+1);
             String best = replacements.get(entity);
-            LogInfo.logs("Forming: %s|", entity);
+            if (ConfigManager.DEBUG > 5)
+                LogInfo.logs("Forming: %s|", entity);
             if (errorInfo.getFollowUps().containsKey(entity)) {
                 List<String> c = errorInfo.getFollowUps().get(entity);
-                LogInfo.logs("Forming: %s|", String.join(" ", c));
+                if (ConfigManager.DEBUG > 5)
+                    LogInfo.logs("Forming: %s|", String.join(" ", c));
                 List<Map.Entry<String, String>> questions = formQuestion(entity, c);
                 for (int i = 0; i < questions.size(); i++) {
-                    LogInfo.logs("Question:%s", questions.get(i));
+                    if (ConfigManager.DEBUG > 5)
+                        LogInfo.logs("Question 1 :%s", questions.get(i));
                     Map.Entry<String, String> entry = new java.util.AbstractMap.SimpleEntry<String, String>
                             (questions.get(i).getKey(),
                                     Formulas.fromLispTree(replaceEntity(best_formula,
@@ -464,7 +472,8 @@ public class ErrorRetrieval {
             // Replace
             for (Derivation deriv: this.derivations){
                 // Replace with the best
-                LogInfo.logs("Derivation %s", replaces.entrySet().toString());
+                if (ConfigManager.DEBUG > 5)
+                    LogInfo.logs("Derivation %s", replaces.entrySet().toString());
                 if (replaces.keySet().size() > 0)
                     replace(deriv,replaces);
             }

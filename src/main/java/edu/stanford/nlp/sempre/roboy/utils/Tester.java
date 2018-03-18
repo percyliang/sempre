@@ -3,6 +3,7 @@ package edu.stanford.nlp.sempre.roboy.utils;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
+import fig.basic.LogInfo;
 
 import java.io.*;
 import java.lang.reflect.Type;
@@ -65,7 +66,7 @@ public class Tester {
     public static void main(String[] args) {
         double success = 0;
         double unparsed = 0;
-        double full = 0;
+        double fail = 0;
         Tester test = new Tester(5000);
         try {
             JsonReader reader = new JsonReader(new FileReader("./data/rpqa-train-a.json"));
@@ -88,13 +89,15 @@ public class Tester {
                         System.out.println("TEST:" + entry.get("utterance"));
                         System.out.println("UP: " + resMap.get("parse"));
                     } else {
+                        fail++;
                         System.out.println("TEST:" + entry.get("utterance"));
                         System.out.println("IC: " + resMap.get("parse"));
                     }
-                    full++;
                 }
             }
-            System.out.println("Success rate:" + success/testSet.size() + " Unparsed: " + unparsed/testSet.size());
+            LogInfo.logs("Success rate: %f", success/testSet.size());
+            LogInfo.logs("Unparsed: %f", unparsed/testSet.size());
+            LogInfo.logs("Failure: %f", fail/testSet.size());
 
         }
         catch(FileNotFoundException e){
