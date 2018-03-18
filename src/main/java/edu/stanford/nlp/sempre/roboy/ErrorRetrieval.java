@@ -240,6 +240,9 @@ public class ErrorRetrieval {
     {
         String formula = deriv.getFormula().toString();
         Set<String> lexemes = new HashSet<>();
+        if (result.getCandidates() == null) {
+            return lexemes;
+        }
         while (formula.contains("Open")){
             int start = formula.indexOf("Open")+"Open".length();
             int end = formula.indexOf("\''",start);
