@@ -267,19 +267,21 @@ public class ErrorRetrieval {
                 }
             }
             else if (full_type.contains("Type")){
-                for (String candidate: result.getCandidates().get(term))
-                {
-                    Type type = new TypeToken<Map<String, String>>(){}.getType();
-                    Map<String, String> entry = this.gson.fromJson(candidate, type);
-                    Map<String, String> lexeme = new HashMap();
-                    lexeme.put("lexeme", entry.get("Label").toLowerCase());
-                    lexeme.put("formula", entry.get("URI"));
-                    lexeme.put("type", "ClassNoun");
-                    lexeme.put("features", " {score:" + Double.toString(result.getScored().get(term).get(candidate))+"} ");
-                    // Add with knowledge base label
-                    lexemes.add(gson.toJson(lexeme));
-                    lexeme.put("lexeme", term);
-                    lexemes.add(gson.toJson(lexeme));
+                if (result.getCandidates().containsKey(term)) {
+                    for (String candidate : result.getCandidates().get(term)) {
+                        Type type = new TypeToken<Map<String, String>>() {
+                        }.getType();
+                        Map<String, String> entry = this.gson.fromJson(candidate, type);
+                        Map<String, String> lexeme = new HashMap();
+                        lexeme.put("lexeme", entry.get("Label").toLowerCase());
+                        lexeme.put("formula", entry.get("URI"));
+                        lexeme.put("type", "ClassNoun");
+                        lexeme.put("features", " {score:" + Double.toString(result.getScored().get(term).get(candidate)) + "} ");
+                        // Add with knowledge base label
+                        lexemes.add(gson.toJson(lexeme));
+                        lexeme.put("lexeme", term);
+                        lexemes.add(gson.toJson(lexeme));
+                    }
                 }
             }
             else if (full_type.contains("Relation")){
