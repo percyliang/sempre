@@ -69,7 +69,7 @@ public class Tester {
         double fail = 0;
         Tester test = new Tester(5000);
         try {
-            JsonReader reader = new JsonReader(new FileReader("./data/rpqa-train-q.json"));
+            JsonReader reader = new JsonReader(new FileReader("./data/rpqa/1/test.json"));
             Type type = new TypeToken<List<Map<String, String>>>() {
             }.getType();
             Gson gson = new Gson();

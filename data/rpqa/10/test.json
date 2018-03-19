@@ -1,0 +1,14 @@
+[
+	{"type": "QSTUDY_AT", "utterance": "What is my alma mater?", "targetFormula": "(!rb:STUDY_AT rb:active_person)"},
+	{"type": "NAME", "utterance": "anna is my name", "targetFormula": "(triples (triple rb:active_person rb:NAME_OF anna))"},
+	{"type": "QWORK_FOR", "utterance": "Where do I work?", "targetFormula": "(!rb:WORK_FOR rb:active_person)"},
+	{"type": "QSTUDY_AT", "utterance": "Which university do you go to?", "targetFormula": "(!rb:STUDY_AT rb:Roboy)"},
+	{"type": "QSTUDY_AT", "utterance": "Where do I study?", "targetFormula": "(!rb:STUDY_AT rb:active_person)"},
+	{"type": "QFROM", "utterance": "What is my home country?", "targetFormula": "(!rb:FROM rb:active_person)"},
+	{"type": "WORK_FOR", "utterance": "my employer is Samsung", "targetFormula": "(triples (triple rb:active_person rb:WORK_FOR samsung))"},
+	{"type": "QNAME", "utterance": "Who are you?", "targetFormula": "(!rb:NAME_OF rb:Roboy)"},
+	{"type": "QMEMBER_OF", "utterance": "Do you belong to any organizations?", "targetFormula": "(!rb:MEMBER_OF rb:Roboy)"},
+	{"type": "QFROM", "utterance": "Where were you born?", "targetFormula": "(!rb:FROM rb:Roboy)"},
+	{"type": "QWORK_FOR", "utterance": "Where are you employed?", "targetFormula": "(!rb:WORK_FOR rb:Roboy)"},
+	{"type": "MEMBER_OF", "utterance": "i belong to IAESTE and you belong to Roboy", "targetFormula": "(list (triples (triple rb:active_person rb:MEMBER_OF iaeste)) (triples (triple rb:Roboy rb:MEMBER_OF Roboy)))"}
+]

@@ -1,0 +1,12 @@
+[
+{"type": "FRIEND_OF", "utterance": "my best friend is ben", "targetFormula": "(triples (triple rb:active_person rb:FRIEND_OF ben))"},
+{"type": "WORK_FOR", "utterance": "i earn my living at Samsung and you work at Roboy", "targetFormula": "(list (triples (triple rb:active_person rb:WORK_FOR samsung)) (triples (triple rb:active_person rb:WORK_FOR roboy)))"},
+{"type": "FROM", "utterance": "i was born in nicaragua", "targetFormula": "(triples (triple rb:active_person rb:FROM nicaragua))"},
+{"type": "LIVE_IN", "utterance": "i live in munich", "targetFormula": "(triples (triple rb:active_person rb:LIVE_IN munich))"},
+{"type": "STUDY_AT", "utterance": "i go to UW", "targetFormula": "(triples (triple rb:active_person rb:STUDY_AT uw))"},
+{"type": "LIVE_IN", "utterance": "my current home is warsaw", "targetFormula": "(triples (triple rb:active_person rb:LIVE_IN warsaw))"},
+{"type": "NAME", "utterance": "anna is my name", "targetFormula": "(triples (triple rb:active_person rb:NAME_OF anna))"},
+{"type": "WORK_FOR", "utterance": "i am employed at Samsung", "targetFormula": "(triples (triple rb:active_person rb:WORK_FOR samsung))"},
+{"type": "OCCUPIED_AS", "utterance": "i work as a nurse", "targetFormula": "(triples (triple rb:active_person rb:OCCUPIED_AS nurse))"},
+{"type": "FROM", "utterance": "i was born in poland and you were born in switzerland", "targetFormula": "(list (triples (triple rb:active_person rb:FROM poland)) (triples (triple rb:Roboy rb:FROM switzerland)))"}
+]

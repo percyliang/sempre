@@ -1,0 +1,14 @@
+[
+{"utterance": "i like swimming", "type": "HAS_HOBBY", "targetFormula": "(triples (triple rb:active_person rb:HAS_HOBBY swim))"},
+{"utterance": "For which company do you work?", "type": "QWORK_FOR", "targetFormula": "(!rb:WORK_FOR rb:Roboy)"},
+{"utterance": "i was born in poland and you were born in switzerland", "type": "FROM", "targetFormula": "(list (triples (triple rb:active_person rb:FROM poland)) (triples (triple rb:Roboy rb:FROM switzerland)))"},
+{"utterance": "What is your hobby?", "type": "QHAS_HOBBY", "targetFormula": "(!rb:HAS_HOBBY rb:Roboy)"},
+{"utterance": "What is your favorite pastime activity?", "type": "QHAS_HOBBY", "targetFormula": "(!rb:HAS_HOBBY rb:Roboy)"},
+{"utterance": "i am friends with ben", "type": "FRIEND_OF", "targetFormula": "(triples (triple rb:active_person rb:FRIEND_OF ben))"},
+{"utterance": "Which organization do you work at?", "type": "QWORK_FOR", "targetFormula": "(!rb:WORK_FOR rb:Roboy)"},
+{"utterance": "my field of expertise is finance", "type": "OCCUPIED_AS", "targetFormula": "(triples (triple rb:active_person rb:OCCUPIED_AS finance))"},
+{"utterance": "Are you a member of some cool organization?", "type": "QMEMBER_OF", "targetFormula": "(!rb:MEMBER_OF rb:Roboy)"},
+{"utterance": "you met my friend ben", "type": "FRIEND_OF", "targetFormula": "(triples (triple rb:active_person rb:FRIEND_OF ben))"},
+{"utterance": "Who is your best friend?", "type": "QFRIEND_OF", "targetFormula": "(!rb:FRIEND_OF rb:Roboy)"},
+{"utterance": "my name is emily", "type": "NAME", "targetFormula": "(triples (triple rb:active_person rb:NAME_OF emily))"}
+]

@@ -206,8 +206,7 @@
 (rule $RSet ($Unary $Unary) (MergeFn and))
 (rule $RSet ($Binary $RSet) (JoinFn forward))
 (rule $RSet ($RSet $Binary) (JoinFn backward))
-(rule $ROOT ($Wh $RSet) (SelectFn 1))
-(rule $ROOT ($Wh $BE $RSet) (SelectFn 2))
+(rule $ROOT ($Wh ($BE optional) $RSet) (SelectFn 1))
 (rule $ROOT ($Ignore $RSet) (SelectFn 1))
 
 

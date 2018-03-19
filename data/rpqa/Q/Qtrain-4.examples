@@ -1,0 +1,56 @@
+(example
+	(utterance "What is your favourite movie?")
+	(targetFormula (!rb:FAVORITE_MOVIE rb:Roboy))
+)
+(example
+	(utterance "Where am I from?")
+	(targetFormula (!rb:FROM rb:active_person))
+)
+(example
+	(utterance "How can I call you?")
+	(targetFormula (!rb:NAME_OF rb:Roboy))
+)
+(example
+	(utterance "Who is your employer?")
+	(targetFormula (!rb:WORK_FOR rb:Roboy))
+)
+(example
+	(utterance "What is your profession?")
+	(targetFormula (!rb:OCCUPIED_AS rb:Roboy))
+)
+(example
+	(utterance "Where do you live?")
+	(targetFormula (!rb:LIVE_IN rb:Roboy))
+)
+(example
+	(utterance "How do you spend your free time?")
+	(targetFormula (!rb:HAS_HOBBY rb:Roboy))
+)
+(example
+	(utterance "Where do I earn my living?")
+	(targetFormula (!rb:WORK_FOR rb:active_person))
+)
+(example
+	(utterance "What is my home country?")
+	(targetFormula (!rb:FROM rb:active_person))
+)
+(example
+	(utterance "Which university do I study at?")
+	(targetFormula (!rb:STUDY_AT rb:active_person))
+)
+(example
+	(utterance "For which company do I work?")
+	(targetFormula (!rb:WORK_FOR rb:active_person))
+)
+(example
+	(utterance "Are you a member of some cool organization?")
+	(targetFormula (!rb:MEMBER_OF rb:Roboy))
+)
+(example
+	(utterance "Which university do you study at?")
+	(targetFormula (!rb:STUDY_AT rb:Roboy))
+)
+(example
+	(utterance "What was the last movie you saw in the cinema?")
+	(targetFormula (!rb:FAVORITE_MOVIE rb:Roboy))
+)

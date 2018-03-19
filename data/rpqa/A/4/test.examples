@@ -1,0 +1,48 @@
+(example
+	(utterance "What is my favorite TV show?")
+	(targetFormula (!rb:FAVORITE_MOVIE rb:active_person))
+)
+(example
+	(utterance "What do you do?")
+	(targetFormula (!rb:OCCUPIED_AS rb:Roboy))
+)
+(example
+	(utterance "i go to UW")
+	(targetFormula (triples (triple rb:active_person rb:STUDY_AT uw)))
+)
+(example
+	(utterance "Am I a member of some cool organization?")
+	(targetFormula (!rb:MEMBER_OF rb:active_person))
+)
+(example
+	(utterance "i work at Nokia")
+	(targetFormula (triples (triple rb:active_person rb:WORK_FOR nokia)))
+)
+(example
+	(utterance "How do you spend your free time?")
+	(targetFormula (!rb:HAS_HOBBY rb:Roboy))
+)
+(example
+	(utterance "i earn my living at Samsung")
+	(targetFormula (triples (triple rb:active_person rb:WORK_FOR samsung)))
+)
+(example
+	(utterance "i was born in nicaragua")
+	(targetFormula (triples (triple rb:active_person rb:FROM nicaragua)))
+)
+(example
+	(utterance "my hobby is swimming")
+	(targetFormula (triples (triple rb:active_person rb:HAS_HOBBY swim)))
+)
+(example
+	(utterance "What is your name?")
+	(targetFormula (!rb:NAME_OF rb:Roboy))
+)
+(example
+	(utterance "Where was I born?")
+	(targetFormula (!rb:FROM rb:active_person))
+)
+(example
+	(utterance "my or your name or hobby is emily and alona")
+	(targetFormula (triples or (triples or (triples (triple rb:active_person rb:NAME_OF emily) (triple rb:active_person rb:NAME_OF alona)) (triples (triple rb:active_person rb:HAS_HOBBY emily) (triple rb:active_person rb:HAS_HOBBY alona))) (triples or (triples (triple rb:Roboy rb:NAME_OF emily) (triple rb:Roboy rb:NAME_OF alona)) (triples (triple rb:Roboy rb:HAS_HOBBY emily) (triple rb:Roboy rb:HAS_HOBBY alona)))))
+)
