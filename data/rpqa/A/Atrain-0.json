@@ -1,0 +1,12 @@
+[
+{"type": "HAS_HOBBY", "utterance": "my favorite thing to do is swimming", "targetFormula": "(triples (triple rb:active_person rb:HAS_HOBBY swim))"},
+{"type": "HAS_HOBBY", "utterance": "i like swimming", "targetFormula": "(triples (triple rb:active_person rb:HAS_HOBBY swim))"},
+{"type": "HAS_HOBBY", "utterance": "i spend my free time swimming", "targetFormula": "(triples (triple rb:active_person rb:HAS_HOBBY swim))"},
+{"type": "MOVIES", "utterance": "i like pulp fiction the most", "targetFormula": "(triples (triple rb:active_person rb:FAVORITE_MOVIE pulp_fiction))"},
+{"type": "FRIEND_OF", "utterance": "you met my friend ben", "targetFormula": "(triples (triple rb:active_person rb:FRIEND_OF ben))"},
+{"type": "FROM", "utterance": "i am from russia", "targetFormula": "(triples (triple rb:active_person rb:FROM russia))"},
+{"type": "WORK_FOR", "utterance": "i earn my living at Samsung", "targetFormula": "(triples (triple rb:active_person rb:WORK_FOR samsung))"},
+{"type": "STUDY_AT", "utterance": "my alma mater is TUW and you go to TUM", "targetFormula": "(list (triples (triple rb:active_person rb:STUDY_AT tuw)) (triples (triple rb:Roboy rb:STUDY_AT tum)))"},
+{"type": "OCCUPIED_AS", "utterance": "my field of expertise is finance", "targetFormula": "(triples (triple rb:active_person rb:OCCUPIED_AS finance))"},
+{"type": "MEMBER_OF", "utterance": "i belong to IAESTE and you belong to Roboy", "targetFormula": "(list (triples (triple rb:active_person rb:MEMBER_OF iaeste)) (triples (triple rb:Roboy rb:MEMBER_OF Roboy)))"}
+]

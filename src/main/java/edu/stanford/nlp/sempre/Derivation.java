@@ -171,6 +171,12 @@ public class Derivation implements SemanticFn.Callable, HasScore {
       return this;
     }
 
+    public Builder withListFormulaFrom(LispTree tree) {
+      this.formula = new ValueFormula<>(new ListValue(tree));
+      this.type = SemType.bottomType;
+      return this;
+    }
+
     public Builder withFormulaFrom(Derivation deriv) {
       this.formula = deriv.formula;
       this.type = deriv.type;

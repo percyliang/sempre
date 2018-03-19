@@ -1,0 +1,14 @@
+[
+{"utterance": "Where was I born?", "type": "QFROM", "targetFormula": "(!rb:FROM rb:active_person)"},
+{"utterance": "my or your name or hobby is emily and alona", "type": "NAME", "targetFormula": "(triples or (triples or (triples (triple rb:active_person rb:NAME_OF emily) (triple rb:active_person rb:NAME_OF alona)) (triples (triple rb:active_person rb:HAS_HOBBY emily) (triple rb:active_person rb:HAS_HOBBY alona))) (triples or (triples (triple rb:Roboy rb:NAME_OF emily) (triple rb:Roboy rb:NAME_OF alona)) (triples (triple rb:Roboy rb:HAS_HOBBY emily) (triple rb:Roboy rb:HAS_HOBBY alona))))"},
+{"utterance": "Where do you work?", "type": "QWORK_FOR", "targetFormula": "(!rb:WORK_FOR rb:Roboy)"},
+{"utterance": "What is your alma mater?", "type": "QSTUDY_AT", "targetFormula": "(!rb:STUDY_AT rb:Roboy)"},
+{"type": "NAME", "utterance": "my name is emily and your name is roboy", "targetFormula": "(list (triples (triple rb:active_person rb:NAME_OF emily)) (triples (triple rb:Roboy rb:NAME_OF roboy)))"},
+{"utterance": "What is my favorite thing to do?", "type": "QHAS_HOBBY", "targetFormula": "(!rb:HAS_HOBBY rb:active_person)"},
+{"utterance": "What do you work as?", "type": "QOCCUPIED_AS", "targetFormula": "(!rb:OCCUPIED_AS rb:Roboy)"},
+{"utterance": "my favorite tv show is ellen and your favorite movie is titanic", "type": "MOVIES", "targetFormula": "(list (triples (triple rb:active_person rb:FAVORITE_MOVIE ellen)) (triples (triple rb:Roboy rb:FAVORITE_MOVIE titanic)))"},
+{"utterance": "my name is elsa and anna", "type": "NAME", "targetFormula": "(triples (triple rb:active_person rb:NAME_OF elsa) (triple rb:active_person rb:NAME_OF anna))"},
+{"utterance": "Where do I earn my living?", "type": "QWORK_FOR", "targetFormula": "(!rb:WORK_FOR rb:active_person)"},
+{"utterance": "i am employed at Samsung", "type": "WORK_FOR", "targetFormula": "(triples (triple rb:active_person rb:WORK_FOR samsung))"},
+{"utterance": "What is your favorite TV show?", "type": "QMOVIES", "targetFormula": "(!rb:FAVORITE_MOVIE rb:Roboy)"}
+]

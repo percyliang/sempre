@@ -1,0 +1,48 @@
+(example
+	(utterance "Who is your best friend?")
+	(targetFormula (!rb:FRIEND_OF rb:Roboy))
+)
+(example
+	(utterance "my name is emily")
+	(targetFormula (triples (triple rb:active_person rb:NAME_OF emily)))
+)
+(example
+	(utterance "my current home is warsaw and your current home is munich")
+	(targetFormula (list (triples (triple rb:active_person rb:LIVE_IN warsaw)) (triples (triple rb:roboy rb:LIVE_IN munich))))
+)
+(example
+	(utterance "What is your home country?")
+	(targetFormula (!rb:FROM rb:Roboy))
+)
+(example
+	(utterance "people call me sam")
+	(targetFormula (triples (triple rb:active_person rb:NAME_OF sam)))
+)
+(example
+	(utterance "my favorite activity is swimming")
+	(targetFormula (triples (triple rb:active_person rb:HAS_HOBBY swim)))
+)
+(example
+	(utterance "Who is my best friend?")
+	(targetFormula (!rb:FRIEND_OF rb:active_person))
+)
+(example
+	(utterance "What is my field of expertise?")
+	(targetFormula (!rb:OCCUPIED_AS rb:active_person))
+)
+(example
+	(utterance "i am a teacher")
+	(targetFormula (triples (triple rb:active_person rb:OCCUPIED_AS teacher)))
+)
+(example
+	(utterance "Where am I employed?")
+	(targetFormula (!rb:WORK_FOR rb:active_person))
+)
+(example
+	(utterance "my home country is ukraine")
+	(targetFormula (triples (triple rb:active_person rb:FROM ukraine)))
+)
+(example
+	(utterance "Where is your current home?")
+	(targetFormula (!rb:LIVE_IN rb:Roboy))
+)

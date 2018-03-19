@@ -120,6 +120,46 @@ public class SparqlUtils {
         return null;
     }
 
+    // Form query based on triple form
+    public Set<String> returnLabel(String entity, String endpointUrl, boolean object){
+        //System.out.println("Entity: "+entity);
+        List<Map<String,String>> triples = new ArrayList();
+        Map<String,String> t1 = new HashMap();
+        t1.put("predicate","rdfs:label");
+        t1.put("subject",entity);
+        triples.add(t1);
+        Gson gson = new Gson();
+        String json = gson.toJson((triples));
+        try {
+            String url = String.format("%s?default-graph-uri=http://dbpedia.org&query=%s&format=xml",
+                    endpointUrl, URLEncoder.encode(formQuery(json,"en"), "UTF-8"));
+            System.out.println("SPARQL query: "+formQuery(json));
+            System.out.println("Query: "+url);
+            ServerResponse response = makeRequest(url);
+
+            List<Map<String,String>> list = new ArrayList<>();
+            if (response.getXml() != null)
+            {
+                list = reader.readArrayXml(response.getXml());
+            }
+//            System.out.println("Query: "+list.toString());
+
+            if (list.size()>0) {
+                Set<String> labels = new HashSet<>();
+                for (Map<String,String> map: list){
+                    labels.addAll(map.values());
+                }
+                return labels;
+            }
+            else
+                return null;
+        }
+        catch(UnsupportedEncodingException e){
+            LogInfo.logs("WrongFormat of the input: %s", json);
+        }
+        return null;
+    }
+
 
     // Form query based on triple form
     public String returnDescr(String entity, String endpointUrl){

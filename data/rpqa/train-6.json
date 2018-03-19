@@ -1,0 +1,14 @@
+[
+{"utterance": "Do I belong to any organizations?", "type": "QMEMBER_OF", "targetFormula": "(!rb:MEMBER_OF rb:active_person)"},
+{"utterance": "Who is my employer?", "type": "QWORK_FOR", "targetFormula": "(!rb:WORK_FOR rb:active_person)"},
+{"utterance": "Which organization do I work at?", "type": "QWORK_FOR", "targetFormula": "(!rb:WORK_FOR rb:active_person)"},
+{"utterance": "What is your field of expertise?", "type": "QOCCUPIED_AS", "targetFormula": "(!rb:OCCUPIED_AS rb:Roboy)"},
+{"utterance": "What is my name?", "type": "QNAME", "targetFormula": "(!rb:NAME_OF rb:active_person)"},
+{"utterance": "i earn my living at Samsung and you work at Roboy", "type": "WORK_FOR", "targetFormula": "(list (triples (triple rb:active_person rb:WORK_FOR samsung)) (triples (triple rb:active_person rb:WORK_FOR roboy)))"},
+{"utterance": "my favorite movie is titanic", "type": "MOVIES", "targetFormula": "(triples (triple rb:active_person rb:FAVORITE_MOVIE titanic))"},
+{"utterance": "Which city do I live in?", "type": "QLIVE_IN", "targetFormula": "(!rb:LIVE_IN rb:active_person)"},
+{"utterance": "i live in munich", "type": "LIVE_IN", "targetFormula": "(triples (triple rb:active_person rb:LIVE_IN munich))"},
+{"utterance": "Have I met any of your friends?", "type": "QFRIEND_OF", "targetFormula": "(!rb:FRIEND_OF rb:Roboy)"},
+{"utterance": "my alma mater is TUW and you go to TUM", "type": "STUDY_AT", "targetFormula": "(list (triples (triple rb:active_person rb:STUDY_AT tuw)) (triples (triple rb:Roboy rb:STUDY_AT tum)))"},
+{"utterance": "Which university do I go to?", "type": "QSTUDY_AT", "targetFormula": "(!rb:STUDY_AT rb:active_person)"}
+]

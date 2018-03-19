@@ -1,0 +1,14 @@
+[
+{"utterance": "Which university do you study at?", "type": "QSTUDY_AT", "targetFormula": "(!rb:STUDY_AT rb:Roboy)"},
+{"utterance": "Where is my current home?", "type": "QLIVE_IN", "targetFormula": "(!rb:LIVE_IN rb:active_person)"},
+{"utterance": "my favorite thing to do is swimming", "type": "HAS_HOBBY", "targetFormula": "(triples (triple rb:active_person rb:HAS_HOBBY swim))"},
+{"utterance": "Which university do I study at?", "type": "QSTUDY_AT", "targetFormula": "(!rb:STUDY_AT rb:active_person)"},
+{"utterance": "my best friend is ben", "type": "FRIEND_OF", "targetFormula": "(triples (triple rb:active_person rb:FRIEND_OF ben))"},
+{"utterance": "How can I call you?", "type": "QNAME", "targetFormula": "(!rb:NAME_OF rb:Roboy)"},
+{"utterance": "What do you do in your free time?", "type": "QHAS_HOBBY", "targetFormula": "(!rb:HAS_HOBBY rb:Roboy)"},
+{"utterance": "i work as a nurse", "type": "OCCUPIED_AS", "targetFormula": "(triples (triple rb:active_person rb:OCCUPIED_AS nurse))"},
+{"utterance": "Which city do you live in?", "type": "QLIVE_IN", "targetFormula": "(!rb:LIVE_IN rb:Roboy)"},
+{"utterance": "Where are you from?", "type": "QFROM", "targetFormula": "(!rb:FROM rb:Roboy)"},
+{"utterance": "What is my alma mater?", "type": "QSTUDY_AT", "targetFormula": "(!rb:STUDY_AT rb:active_person)"},
+{"utterance": "anna is my name", "type": "NAME", "targetFormula": "(triples (triple rb:active_person rb:NAME_OF anna))"}
+]

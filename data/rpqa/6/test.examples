@@ -1,0 +1,48 @@
+(example
+	(utterance "i am employed at Samsung")
+	(targetFormula (triples (triple rb:active_person rb:WORK_FOR samsung)))
+)
+(example
+	(utterance "What is your favorite TV show?")
+	(targetFormula (!rb:FAVORITE_MOVIE rb:Roboy))
+)
+(example
+	(utterance "Which comedy do you like the most?")
+	(targetFormula (!rb:FAVORITE_MOVIE rb:Roboy))
+)
+(example
+	(utterance "i belong to IAESTE")
+	(targetFormula (triples (triple rb:active_person rb:MEMBER_OF iaeste)))
+)
+(example
+	(utterance "i come from poland")
+	(targetFormula (triples (triple rb:active_person rb:FROM poland)))
+)
+(example
+	(utterance "i study at TUM")
+	(targetFormula (triples (triple rb:active_person rb:STUDY_AT tum)))
+)
+(example
+	(utterance "How do I spend my free time?")
+	(targetFormula (!rb:HAS_HOBBY rb:active_person))
+)
+(example
+	(utterance "What is my favourite movie?")
+	(targetFormula (!rb:FAVORITE_MOVIE rb:active_person))
+)
+(example
+	(utterance "my favorite tv show is ellen")
+	(targetFormula (triples (triple rb:active_person rb:FAVORITE_MOVIE ellen)))
+)
+(example
+	(utterance "For which company do I work?")
+	(targetFormula (!rb:WORK_FOR rb:active_person))
+)
+(example
+	(utterance "Do I belong to any organizations?")
+	(targetFormula (!rb:MEMBER_OF rb:active_person))
+)
+(example
+	(utterance "Who is my employer?")
+	(targetFormula (!rb:WORK_FOR rb:active_person))
+)

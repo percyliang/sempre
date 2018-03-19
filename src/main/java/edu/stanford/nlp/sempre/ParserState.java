@@ -239,14 +239,13 @@ public abstract class ParserState {
     List<Derivation> remove = new ArrayList();
     List<String> formulas = new ArrayList();
     for (Derivation deriv : predDerivations) {
-      // TODO: Add postprocess(deriv, ex.context);
       if (!String.join(" ",formulas).contains(deriv.formula.toString()))
         formulas.add(deriv.formula.toString());
       else {
         remove.add(deriv);
         continue;
       }
-      if (deriv.getType()==SemType.tripleType||deriv.getType()==SemType.stringType||deriv.getFormula().toString().contains("lambda")){
+      if (deriv.getType()==SemType.stringType||deriv.getFormula().toString().contains("lambda")||deriv.getFormula().toString().contains("triple")){
         deriv.ensureExecuted(parser.simple_executor, ex.context);
       }
       else
@@ -254,7 +253,7 @@ public abstract class ParserState {
       if (ex.targetValue != null)
         deriv.compatibility = parser.valueEvaluator.getCompatibility(ex.targetValue, deriv.value);
       if (!computeExpectedCounts && Parser.opts.executeTopFormulaOnly) break;
-      if ((deriv.value==null || deriv.value.toString().equals("BADFORMAT") || deriv.value.toString().equals("(list)")) && !deriv.value.toString().contains("rb"))
+      if ((deriv.value==null || deriv.value.toString().equals("BADFORMAT")) && !deriv.formula.toString().contains("rb"))
         remove.add(deriv);
     }
     for (Derivation deriv : remove)

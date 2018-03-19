@@ -181,7 +181,7 @@ public class ErrorRetrieval {
         String formula = deriv.getFormula().toString();
         while (formula.contains("Open")){
             int start = formula.indexOf("Open")+"Open".length();
-            int end = formula.indexOf("\''",start);
+            int end = formula.indexOf("''",start);
             if (start > formula.length() || start < 0 || end < 0 ||end > formula.length())
                 break;
             String term = formula.substring(start,end).substring(formula.substring(start,end).indexOf("\'")+1);
@@ -205,7 +205,7 @@ public class ErrorRetrieval {
         String formula = deriv.getFormula().toString();
         while (formula.contains("Open")){
             int start = formula.indexOf("Open")+"Open".length();
-            int end = formula.indexOf("\''",start);
+            int end = formula.indexOf("''",start);
             if (start > formula.length() || start < 0 || end < 0 ||end > formula.length())
                 break;
             String term = formula.substring(start,end).substring(formula.substring(start,end).indexOf("\'")+1);
@@ -244,12 +244,13 @@ public class ErrorRetrieval {
             return lexemes;
         }
         while (formula.contains("Open")){
+            LogInfo.logs(formula);
             int start = formula.indexOf("Open")+"Open".length();
-            int end = formula.indexOf("\''",start);
-            if (start > formula.length() || start < 0 || end < 0 ||end > formula.length())
+            int end = formula.indexOf("''",start);
+            if (start > formula.length() || start < 0 || end < 0 ||end+2 > formula.length())
                 break;
-            String full_type = formula.substring(formula.indexOf("Open"),formula.indexOf("\''")+2);
-            String term = formula.substring(start,end).substring(formula.substring(start,end).indexOf("\'")+1);
+            String full_type = formula.substring(formula.indexOf("Open"),formula.indexOf("''")+2);
+            String term = formula.substring(start,end).substring(formula.substring(start,end).indexOf("'")+1);
             if (full_type.contains("Entity")){
                 for (String candidate: result.getCandidates().get(term))
                 {
@@ -258,7 +259,7 @@ public class ErrorRetrieval {
                     Map<String, String> lexeme = new HashMap();
                     lexeme.put("lexeme", entry.get("Label").toLowerCase());
                     lexeme.put("formula", entry.get("URI"));
-                    lexeme.put("type", "NamedEntity");
+                    lexeme.put("type", "NewEntity");
                     lexeme.put("features", " {score:" + Double.toString(result.getScored().get(term).get(candidate))+"} ");
                     // Add with knowledge base label
                     lexemes.add(gson.toJson(lexeme));
@@ -267,21 +268,19 @@ public class ErrorRetrieval {
                 }
             }
             else if (full_type.contains("Type")){
-                if (result.getCandidates().containsKey(term)) {
-                    for (String candidate : result.getCandidates().get(term)) {
-                        Type type = new TypeToken<Map<String, String>>() {
-                        }.getType();
-                        Map<String, String> entry = this.gson.fromJson(candidate, type);
-                        Map<String, String> lexeme = new HashMap();
-                        lexeme.put("lexeme", entry.get("Label").toLowerCase());
-                        lexeme.put("formula", entry.get("URI"));
-                        lexeme.put("type", "ClassNoun");
-                        lexeme.put("features", " {score:" + Double.toString(result.getScored().get(term).get(candidate)) + "} ");
-                        // Add with knowledge base label
-                        lexemes.add(gson.toJson(lexeme));
-                        lexeme.put("lexeme", term);
-                        lexemes.add(gson.toJson(lexeme));
-                    }
+                for (String candidate: result.getCandidates().get(term))
+                {
+                    Type type = new TypeToken<Map<String, String>>(){}.getType();
+                    Map<String, String> entry = this.gson.fromJson(candidate, type);
+                    Map<String, String> lexeme = new HashMap();
+                    lexeme.put("lexeme", entry.get("Label").toLowerCase());
+                    lexeme.put("formula", entry.get("URI"));
+                    lexeme.put("type", "NewType");
+                    lexeme.put("features", " {score:" + Double.toString(result.getScored().get(term).get(candidate))+"} ");
+                    // Add with knowledge base label
+                    lexemes.add(gson.toJson(lexeme));
+                    lexeme.put("lexeme", term);
+                    lexemes.add(gson.toJson(lexeme));
                 }
             }
             else if (full_type.contains("Relation")){
@@ -292,7 +291,7 @@ public class ErrorRetrieval {
                     Map<String, String> lexeme = new HashMap();
                     lexeme.put("lexeme", entry.get("Label").toLowerCase());
                     lexeme.put("formula", entry.get("URI"));
-                    lexeme.put("type", "RelationalNoun");
+                    lexeme.put("type", "NewRelation");
                     lexeme.put("features", " {score:" + Double.toString(result.getScored().get(term).get(candidate))+"} ");
                     // Add with knowledge base label
                     lexemes.add(gson.toJson(lexeme));
@@ -300,7 +299,7 @@ public class ErrorRetrieval {
                     lexemes.add(gson.toJson(lexeme));
                 }
             }
-            formula = formula.substring(end);
+            formula = formula.substring(end+2);
         }
         return lexemes;
     }
@@ -312,8 +311,10 @@ public class ErrorRetrieval {
      * @param key             term to replace
      */
     public LispTree replaceEntity(LispTree new_formula, String replace, String key) {
-        if (new_formula!= null && new_formula.isLeaf())
-            return new_formula;
+        if (new_formula!= null && new_formula.isLeaf()) {
+            LispTree listTree = LispTree.proto.newLeaf(new_formula.value.replaceAll(replace, key));
+            return listTree;
+        }
         else if (new_formula.children.get(0).value!= null && new_formula.children.get(0).value == "string"){
             NameValue result = new NameValue(new_formula.children.get(1).value.replaceAll(replace, key));
             return result.toLispTree();
@@ -411,22 +412,18 @@ public class ErrorRetrieval {
         String formula = deriv.getFormula().toString();
         while (formula.contains("Open")){
             int start = formula.indexOf("Open")+"Open".length();
-            int end = formula.indexOf("\''",start);
+            int end = formula.indexOf("''",start);
             if (start > formula.length() || start < 0 || end < 0 ||end > formula.length())
                 break;
-            String full_type = formula.substring(formula.indexOf("Open"),formula.indexOf("\''")+2);
-            String entity = formula.substring(start,end).substring(formula.substring(start,end).indexOf("\'")+1);
+            String full_type = formula.substring(formula.indexOf("Open"),formula.indexOf("''")+2);
+            String entity = formula.substring(start,end).substring(formula.substring(start,end).indexOf("'")+1);
             String best = replacements.get(entity);
-            if (ConfigManager.DEBUG > 5)
-                LogInfo.logs("Forming: %s|", entity);
+            if (ConfigManager.DEBUG > 1)
+                LogInfo.logs("Forming: %s|%s|%s", entity, best, full_type);
             if (errorInfo.getFollowUps().containsKey(entity)) {
                 List<String> c = errorInfo.getFollowUps().get(entity);
-                if (ConfigManager.DEBUG > 5)
-                    LogInfo.logs("Forming: %s|", String.join(" ", c));
                 List<Map.Entry<String, String>> questions = formQuestion(entity, c);
                 for (int i = 0; i < questions.size(); i++) {
-                    if (ConfigManager.DEBUG > 5)
-                        LogInfo.logs("Question 1 :%s", questions.get(i));
                     Map.Entry<String, String> entry = new java.util.AbstractMap.SimpleEntry<String, String>
                             (questions.get(i).getKey(),
                                     Formulas.fromLispTree(replaceEntity(best_formula,
@@ -442,8 +439,10 @@ public class ErrorRetrieval {
                 }.getType();
                 Map<String, String> cand = this.gson.fromJson(best, type);
                 new_formula = replaceEntity(new_formula, full_type, cand.get("URI"));
+                if (ConfigManager.DEBUG > 1)
+                    LogInfo.logs("Replaced: %s", new_formula.toString());
             }
-            formula = formula.substring(end);
+            formula = formula.substring(end+2);
         }
         deriv.setFormula(Formulas.fromLispTree(new_formula));
         return deriv;
@@ -457,6 +456,18 @@ public class ErrorRetrieval {
         ErrorInfo result = new ErrorInfo();
         Set<String> update = new HashSet<>();
         LogInfo.begin_track("Error retrieval:");
+        List<Derivation> remove = new ArrayList();
+        List<String> formulas = new ArrayList();
+        for (Derivation deriv : this.derivations) {
+            if (!String.join(" ", formulas).contains(deriv.formula.toString()))
+                formulas.add(deriv.formula.toString());
+            else {
+                remove.add(deriv);
+                continue;
+            }
+        }
+        this.derivations.removeAll(remove);
+        LogInfo.logs("%d",this.derivations.size());
         if (this.derivations != null) {
             // Get candidates
             for (Derivation deriv : this.derivations) {
