@@ -8,7 +8,8 @@
 (rule $Not (nor) (ConstantFn (string not)))
 
 (rule $Class ($PHRASE) (SimpleLexiconFn (type "ClassNoun")))
-(rule $RelClass ($PHRASE) (SimpleLexiconFn (type "RelationalNoun")))
+(rule $ObjProp ($PHRASE) (SimpleLexiconFn (type "ObjProp")))
+(rule $DataProp ($PHRASE) (SimpleLexiconFn (type "DataProp")))
 (rule $RelatClass ($PHRASE) (SimpleLexiconFn (type "RelationClass")))
 (rule $DatPropClass ($PHRASE) (SimpleLexiconFn (type "DataPropertyNoun")))
 (rule $ObjPropClass ($PHRASE) (SimpleLexiconFn (type "ObjectProperty")))
@@ -59,9 +60,9 @@
 (rule $Number ($PHRASE) (FilterPosTagFn span CD))
 
 # Link words
-#(rule $VerbPrep ($Verb $Preposition) (ConcatFn " "))
-#(rule $VerbTo ($Verb $To) (ConcatFn " "))
-#(rule $VerbTo ($To $Verb) (SelectFn 1))
+(rule $VerbPhrase ($Verb $Preposition) (ConcatFn " "))
+(rule $VerbPhrase ($Verb $To) (ConcatFn " "))
+(rule $VerbPhrase ($To $Verb) (SelectFn 1))
 
 # Roboy Subject Phrase
 (rule $RSubject ($ObjectClass) (IdentityFn))
@@ -71,11 +72,10 @@
 (rule $RSubject ($RSubject (, optional) $RSubject) (ConcatFn ","))
 (rule $RSubject ($RSubject $ProNounEnd) (SelectFn 0))
 
-
 # Roboy Predicate Phrase
-(rule $RPredicate (($BE optional) $Relat) (IdentityFn))
-(rule $RPredicate (($HAVE optional) $Relat) (IdentityFn))
-(rule $RPredicate ($RelatClass) (IdentityFn))
+(rule $RPredicate (($BE optional) $ObjProp) (IdentityFn))
+(rule $RPredicate (($HAVE optional) $ObjProp) (IdentityFn))
+(rule $RPredicate ($ObjProp) (IdentityFn))
 (rule $RPredicate ($Not $RPredicate) (ConcatFn " "))
 (rule $RPredicate ($RPredicate and $RPredicate) (ConcatFn ","))
 (rule $RPredicate ($RPredicate , $RPredicate) (ConcatFn ","))
@@ -85,12 +85,43 @@
 (rule $RPredicate ($HAVE $RPredicate) (SelectFn 1))
 (rule $RPredicate ($AdjPhrase $RPredicate) (SelectFn 1))
 (rule $RPredicate ($Adverb $RPredicate) (SelectFn 1))
+(rule $RPredicate ($VerbPhrase) (OpenTypeFn relation))
+(rule $RPredicate ($VerbPhrase) (SimpleLexiconFn (type "NewRelation")))
+
+
+(rule $RDataPredicate (($BE optional) $DataProp) (IdentityFn))
+(rule $RDataPredicate (($HAVE optional) $DataProp) (IdentityFn))
+(rule $RDataPredicate ($DataProp) (IdentityFn))
+(rule $RDataPredicate ($Not $RDataPredicate) (ConcatFn " "))
+(rule $RDataPredicate ($RDataPredicate and $RDataPredicate) (ConcatFn ","))
+(rule $RDataPredicate ($RDataPredicate , $RDataPredicate) (ConcatFn ","))
+(rule $RDataPredicate ($RDataPredicate or $RDataPredicate) (ConcatFn ";"))
+(rule $RDataPredicate ($TypeProperty $ObjectClass) (TripleFn "pt"))
+(rule $RDataPredicate ($BE $RDataPredicate) (SelectFn 1))
+(rule $RDataPredicate ($HAVE $RDataPredicate) (SelectFn 1))
+(rule $RDataPredicate ($AdjPhrase $RDataPredicate) (SelectFn 1))
+(rule $RDataPredicate ($Adverb $RDataPredicate) (SelectFn 1))
+(rule $RDataPredicate ($VerbPhrase) (OpenTypeFn relation))
+(rule $RDataPredicate ($VerbPhrase) (SimpleLexiconFn (type "NewRelation")))
 
 (rule $N ($BE) (ConstantFn rb:NAME_OF))
 (rule $MEMBER ($BE) (ConstantFn rb:MEMBER_OF))
 (rule $OCCUP ($BE $Det) (ConstantFn rb:OCCUPIED_AS))
 
 # Object Phrase
+(rule $Object ($Noun) (OpenTypeFn type))
+(rule $Object ($NamedEntity) (OpenTypeFn entity))
+(rule $Object ($Noun) (SimpleLexiconFn (type "NewType")))
+(rule $Object ($NamedEntity) (SimpleLexiconFn (type "NewEntity")))
+(rule $Object ($Det $Object) (SelectFn 1))
+(rule $Object ($Conj $Object) (SelectFn 1))
+(rule $Object ($Object or $Object) (ConcatFn ";"))
+(rule $Object ($Object ($Conj optional) $Object) (ConcatFn ","))
+(rule $Object ($Object , $Object) (ConcatFn ","))
+(rule $Object ($Adjective $Object) (TripleFn "ot"))
+(rule $Object ($Object $Adjective) (TripleFn "to"))
+
+# Value Phrase
 (rule $Value ($Noun) (IdentityFn))
 (rule $Value ($LEMMA_PHRASE) (FilterPosTagFn span VBG))
 (rule $Value ($Det $Value) (SelectFn 1))
@@ -120,13 +151,26 @@
 (rule $Expr ($RSubject $OCCUP $Value) (TripleFn "spo"))
 (rule $Expr ($Person $N $PersonName) (TripleFn "spo"))
 (rule $Expr ($ObjectClass $N $PersonName) (TripleFn "spo"))
-(rule $Expr ($RSubject $Value $Preposition ($TOKEN optional) $RPredicate) (TripleFn "sop"))
-(rule $Expr ($RSubject $RPredicate ($Preposition optional) $Value) (TripleFn "spo"))
-(rule $Expr ($RSubject $RPredicate ($TOKEN optional) ($BE optional) $Value) (TripleFn "spo"))
-(rule $Expr ($Value ($BE optional) $RSubject $RPredicate) (TripleFn "osp"))
-(rule $Expr ($RSubject $RPredicate ($BE optional) $Value) (TripleFn "spo"))
+(rule $Expr ($RSubject $Value $Preposition ($TOKEN optional) $RDataPredicate) (TripleFn "sop"))
+(rule $Expr ($RSubject $RDataPredicate ($Preposition optional) $Value) (TripleFn "spo"))
+(rule $Expr ($RSubject $RDataPredicate ($TOKEN optional) ($BE optional) $Value) (TripleFn "spo"))
+(rule $Expr ($Value ($BE optional) $RSubject $RDataPredicate) (TripleFn "osp"))
+(rule $Expr ($RSubject $RDataPredicate ($BE optional) $Value) (TripleFn "spo"))
+(rule $Expr ($AdjPhrase ($BE optional) $RSubject $RDataPredicate) (TripleFn "osp"))
+(rule $Expr ($RDataPredicate $RSubject $Value) (TripleFn "pso"))
+
+(rule $Expr ($RSubject $MEMBER $Object member) (TripleFn "spo"))
+(rule $Expr ($RSubject $OCCUP $Object) (TripleFn "spo"))
+(rule $Expr ($Person $N $PersonName) (TripleFn "spo"))
+(rule $Expr ($ObjectClass $N $PersonName) (TripleFn "spo"))
+(rule $Expr ($RSubject $Object $Preposition ($TOKEN optional) $RPredicate) (TripleFn "sop"))
+(rule $Expr ($RSubject $RPredicate ($Preposition optional) $Object) (TripleFn "spo"))
+(rule $Expr ($RSubject $RPredicate ($TOKEN optional) ($BE optional) $Object) (TripleFn "spo"))
+(rule $Expr ($Object ($BE optional) $RSubject $RPredicate) (TripleFn "osp"))
+(rule $Expr ($RSubject $RPredicate ($BE optional) $Object) (TripleFn "spo"))
 (rule $Expr ($AdjPhrase ($BE optional) $RSubject $RPredicate) (TripleFn "osp"))
-(rule $Expr ($RPredicate $RSubject $Value) (TripleFn "pso"))
+(rule $Expr ($RPredicate $RSubject $Object) (TripleFn "pso"))
+
 (rule $ROOT ($Expr) (IdentityFn))
 (rule $ROOT ($Expr ($Conj optional) $Expr) (ListFn))
 (rule $ROOT (($Noun optional) $Expr) (IdentityFn))
@@ -162,8 +206,9 @@
 (rule $RSet ($Unary $Unary) (MergeFn and))
 (rule $RSet ($Binary $RSet) (JoinFn forward))
 (rule $RSet ($RSet $Binary) (JoinFn backward))
-(rule $ROOT (($Wh optional) $RSet) (IdentityFn))
-(rule $ROOT ((what optional) (is optional) $RSet) (IdentityFn))
+(rule $ROOT ($Wh $RSet) (SelectFn 1))
+(rule $ROOT ($Wh $BE $RSet) (SelectFn 2))
+(rule $ROOT ($Ignore $RSet) (SelectFn 1))
 
 
 #TEST SET

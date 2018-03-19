@@ -117,8 +117,8 @@ public class XMLReader{
 
             String var = "?" + binding.getAttribute("name");
             String uri = getTagValue("uri", binding);
-            uri = new String(uri.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
             if (!(uri == null || (var.contains("_") || (uri.contains("#"))))){
+                uri = new String(uri.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
                 if (uri.contains(":"))
                     uri = dbInfo.uri2id(uri);
                 results.put(var,uri);

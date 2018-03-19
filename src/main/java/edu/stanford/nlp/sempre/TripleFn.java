@@ -28,7 +28,8 @@ public class TripleFn extends SemanticFn {
     }
 
     public String initial_formula(String string1, String string2) {
-        // TODO: Check types to form only with one database only
+        string1 = org.apache.commons.lang.StringEscapeUtils.unescapeJava(string1);
+        string2 = org.apache.commons.lang.StringEscapeUtils.unescapeJava(string2);
         Map<String,Object> triple = new HashMap<>();
         if (this.mode.equals("spo")) {
             triple.put("subject", string1);
@@ -80,6 +81,8 @@ public class TripleFn extends SemanticFn {
 
     public String merge_formula(String string1, String string2) {
         // Convert JSON string back to Map.
+        string1 = org.apache.commons.lang.StringEscapeUtils.unescapeJava(string1);
+        string2 = org.apache.commons.lang.StringEscapeUtils.unescapeJava(string2);
         Gson gson = new Gson();
         Type type = new TypeToken<Map<String, String>>(){}.getType();
         Map<String, String> triple = gson.fromJson(string1, type);
@@ -112,6 +115,8 @@ public class TripleFn extends SemanticFn {
         Gson gson = new Gson();
         Type type = new TypeToken<Map<String, String>>(){}.getType();
         Map<String, String> triple = new HashMap();
+        string1 = org.apache.commons.lang.StringEscapeUtils.unescapeJava(string1);
+        string2 = org.apache.commons.lang.StringEscapeUtils.unescapeJava(string2);
         if (string1.contains("{")){
             triple = gson.fromJson(string1, type);
             if (this.mode.equals("spo")) {

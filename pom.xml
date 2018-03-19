@@ -163,7 +163,7 @@
                                 <argument>-Params.initWeightsRandomly</argument>
                                 <argument>true</argument>
                                 <argument>-Learner.maxTrainIters</argument>
-                                <argument>1</argument>
+                                <argument>1000</argument>
                                 <argument>-Builder.executor</argument>
                                 <argument>roboy.SparqlExecutor</argument>
                                 <argument>-Builder.simple_executor</argument>
@@ -216,18 +216,18 @@
                         </goals>
                         <configuration>
                             <arguments>
-                                <argument>-FeatureExtractor.featureDomains</argument>
-                                <argument>rule</argument>
-                                <!--<argument>span</argument>-->
-                                <argument>dependencyParse</argument>
-                                <argument>-Dataset.inPaths</argument>
-                                <argument>train:data/rpqa-train.examples</argument>
-                                <argument>-Derivation.derivComparator</argument>
-                                <argument>ScoredDerivationComparator</argument>
-                                <argument>-Params.initWeightsRandomly</argument>
-                                <argument>true</argument>
-                                <argument>-Learner.maxTrainIters</argument>
-                                <argument>1</argument>
+                                <!--<argument>-FeatureExtractor.featureDomains</argument>-->
+                                <!--<argument>rule</argument>-->
+                                <!--&lt;!&ndash;<argument>span</argument>&ndash;&gt;-->
+                                <!--<argument>dependencyParse</argument>-->
+                                <!--<argument>-Dataset.inPaths</argument>-->
+                                <!--<argument>train:data/rpqa-train.examples</argument>-->
+                                <!--<argument>-Derivation.derivComparator</argument>-->
+                                <!--<argument>ScoredDerivationComparator</argument>-->
+                                <!--<argument>-Params.initWeightsRandomly</argument>-->
+                                <!--<argument>true</argument>-->
+                                <!--<argument>-Learner.maxTrainIters</argument>-->
+                                <!--<argument>1</argument>-->
                                 <argument>-Builder.executor</argument>
                                 <argument>roboy.SparqlExecutor</argument>
                                 <argument>-Builder.simple_executor</argument>
@@ -237,7 +237,7 @@
                                 <argument>-Grammar.inPaths</argument>
                                 <argument>resources/roboy-demo.grammar</argument>
                                 <argument>-SimpleLexicon.inPaths</argument>
-                                <argument>resources/lexicons/roboy-dbpedia.lexicon</argument>
+                                <argument>resources/lexicons/roboy-demo.lexicon</argument>
                                 <argument>-languageAnalyzer</argument>
                                 <argument>corenlp.CoreNLPAnalyzer</argument>
                                 <argument>-Main.server</argument>

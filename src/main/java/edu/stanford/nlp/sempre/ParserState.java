@@ -239,7 +239,6 @@ public abstract class ParserState {
     List<Derivation> remove = new ArrayList();
     List<String> formulas = new ArrayList();
     for (Derivation deriv : predDerivations) {
-      // TODO: Add postprocess(deriv, ex.context);
       if (!String.join(" ",formulas).contains(deriv.formula.toString()))
         formulas.add(deriv.formula.toString());
       else {

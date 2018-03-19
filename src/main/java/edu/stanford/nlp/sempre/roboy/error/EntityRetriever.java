@@ -43,11 +43,11 @@ public class EntityRetriever extends KnowledgeRetriever {
         String formula = dev.getFormula().toString();
         while (formula.contains("Open")){
             int start = formula.indexOf("Open")+"Open".length();
-            int end = formula.indexOf("\''",start);
+            int end = formula.indexOf("''",start);
             if (start > formula.length() || start < 0 || end < 0 ||end > formula.length())
                 return errorInfo;
             unknown = formula.substring(start,end);
-            String entity = unknown.substring(unknown.indexOf("\'")+1);
+            String entity = unknown.substring(unknown.indexOf("'")+1);
             // Extract the results from XML now.
             String url = endpointUrl.concat(entity);
             url = url.replace(" ","_");
@@ -56,12 +56,14 @@ public class EntityRetriever extends KnowledgeRetriever {
                 results = reader.readEntityXml(response.getXml(),keywords);
             for (Map<String,String> c: results){
                 if (errorInfo.getCandidates().containsKey(entity)) {
+                    c.put("Label",c.get("Label").toLowerCase());
                     errorInfo.getCandidates().get(entity).add(gson.toJson(c));
                     if (ConfigManager.DEBUG > 3) {
                         LogInfo.logs("Entity: %s", gson.toJson(c));
                     }
                 }
                 else {
+                    c.put("Label",c.get("Label").toLowerCase());
                     errorInfo.getCandidates().put(entity, new ArrayList<>(Arrays.asList(gson.toJson(c))));
                     if (ConfigManager.DEBUG > 3) {
                         LogInfo.logs("Entity: %s", gson.toJson(c));
