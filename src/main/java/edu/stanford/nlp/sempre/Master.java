@@ -112,7 +112,8 @@ public class Master {
         deriv.ensureExecuted(builder.executor, ex.context);
         interpretation.put("parse",deriv.getFormula().toString());
         interpretation.put("answer",deriv.getValue().toString());
-        interpretation.put("followUp",deriv.followUps);
+        interpretation.put("followUpQ",deriv.followUps.get(0).getKey());
+        interpretation.put("followUpA",deriv.followUps.get(0).getValue());
         if (deriv.getFormula().toString().contains("triple") || deriv.getFormula().toString().contains("string"))
           interpretation.put("type", "statement");
         else
