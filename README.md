@@ -24,9 +24,8 @@ similar your system is.
 In order to build application with all needed dependencies run:
 ```
 ./pull-dependencies roboy
-./pull-dependencies corenlp
-./pull-dependencies freebase
-mvn clean install
+mvn clean
+mvn install
 mvn compile
 ```
 
