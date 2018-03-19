@@ -19,13 +19,13 @@ import edu.stanford.nlp.sempre.roboy.config.ConfigManager;
 public class ToyDataGetter {
 
     private final boolean verbose;
-    private final boolean roboy;
+    private final boolean google;
 
     public static Gson gson = new Gson();
     private Map<String,String> file_map = new HashMap();
 
     public ToyDataGetter(boolean verbose) throws Exception{
-        this.roboy = ConfigManager.WORD2VEC_GOOGLE;
+        this.google = ConfigManager.WORD2VEC_GOOGLE;
         this.file_map = ConfigManager.WORD2VEC_MODELS;
         this.verbose = verbose;
     }
@@ -35,7 +35,7 @@ public class ToyDataGetter {
         return file_map.get("dataFilePath");
     }
     public String getToyModelFilePath(){
-        if (this.roboy)
+        if (!this.google)
             return file_map.get("roboyModelFilePath");
         else
             return file_map.get("googleModelFilePath");
@@ -79,7 +79,7 @@ public class ToyDataGetter {
 
         String modelFilePath;
         // check if already downloaded
-        if (roboy) {
+        if (!google) {
             modelFilePath = file_map.get("roboyModelFilePath");
         }
         else{

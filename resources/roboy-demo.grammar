@@ -82,6 +82,8 @@
 (rule $RPredicate ($TypeProperty $ObjectClass) (TripleFn "pt"))
 (rule $RPredicate ($BE $RPredicate) (SelectFn 1))
 (rule $RPredicate ($HAVE $RPredicate) (SelectFn 1))
+(rule $RPredicate ($AdjPhrase $RPredicate) (SelectFn 1))
+(rule $RPredicate ($Adverb $RPredicate) (SelectFn 1))
 
 (rule $N ($BE) (ConstantFn rb:NAME_OF))
 (rule $MEMBER ($BE) (ConstantFn rb:MEMBER_OF))
@@ -125,6 +127,7 @@
 (rule $Expr ($AdjPhrase ($BE optional) $RSubject $RPredicate) (TripleFn "osp"))
 (rule $Expr ($RPredicate $RSubject $Value) (TripleFn "pso"))
 (rule $ROOT ($Expr) (IdentityFn))
+(rule $ROOT ($Expr ($Conj optional) $Expr) (ListFn))
 (rule $ROOT (($Noun optional) $Expr) (IdentityFn))
 (rule $ROOT (($Ignore optional) $Expr) (IdentityFn))
 

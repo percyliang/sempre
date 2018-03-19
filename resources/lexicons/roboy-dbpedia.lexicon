@@ -16,7 +16,8 @@
 {"lexeme": "call", "formula": "rb:NAME_OF", "type" : "Relationship"}
 {"lexeme": "like", "formula": "rb:HAS_HOBBY", "type" : "Relationship"}
 {"lexeme": "like", "formula": "rb:FRIEND_OF", "type" : "Relationship"}
-{"lexeme": "born in", "formula": "rb:FROM", "type" : "Relationship"}
+{"lexeme": "bear in", "formula": "rb:FROM", "type" : "Relationship"}
+{"lexeme": "be bear in", "formula": "rb:FROM", "type" : "Relationship"}
 {"lexeme": "come from", "formula": "rb:FROM", "type" : "Relationship"}
 {"lexeme": "be from", "formula": "rb:FROM", "type" : "Relationship"}
 {"lexeme": "go to", "formula": "rb:STUDY_AT", "type" : "Relationship"}
@@ -24,9 +25,11 @@
 {"lexeme": "study at", "formula": "rb:STUDY_AT", "type" : "Relationship"}
 {"lexeme": "work for", "formula": "rb:WORK_FOR", "type" : "Relationship"}
 {"lexeme": "work at", "formula": "rb:WORK_FOR", "type" : "Relationship"}
+{"lexeme": "be employ", "formula": "rb:WORK_FOR", "type" : "Relationship"}
 {"lexeme": "work as", "formula": "rb:OCCUPIED_AS", "type" : "Relationship"}
 {"lexeme": "live in", "formula": "rb:LIVE_IN", "type" : "Relationship"}
 {"lexeme": "lives in", "formula": "rb:LIVE_IN", "type" : "Relationship"}
+{"lexeme": "be friend with", "formula": "rb:FRIEND_OF", "type" : "Relationship"}
 {"lexeme": "belong to", "formula": "rb:MEMBER_OF", "type" : "Relationship"}
 
 ## Classes
@@ -44,10 +47,15 @@
 
 ## Relationship Classes
 {"lexeme": "hobby", "formula": "rb:HAS_HOBBY", "type" : "RelationClass"}
+{"lexeme": "favorite activity", "formula": "rb:HAS_HOBBY", "type" : "RelationClass"}
+{"lexeme": "favorite thing to do", "formula": "rb:HAS_HOBBY", "type" : "RelationClass"}
 {"lexeme": "employer", "formula": "rb:WORK_FOR", "type" : "RelationClass"}
 {"lexeme": "location", "formula": "rb:LIVE_IN", "type" : "RelationClass"}
 {"lexeme": "home", "formula": "rb:LIVE_IN", "type" : "RelationClass"}
 {"lexeme": "movie", "formula": "rb:FAVORITE_MOVIE", "type" : "RelationClass"}
+{"lexeme": "favorite tv show", "formula": "rb:FAVORITE_MOVIE", "type" : "RelationClass"}
+{"lexeme": "favorite movie", "formula": "rb:FAVORITE_MOVIE", "type" : "RelationClass"}
+{"lexeme": "alma mater", "formula": "rb:STUDY_AT", "type" : "RelationClass"}
 {"lexeme": "university", "formula": "rb:STUDY_AT", "type" : "RelationClass"}
 {"lexeme": "child", "formula": "rb:CHILD_OF", "type" : "RelationClass"}
 {"lexeme": "friend", "formula": "rb:FRIEND_OF", "type" : "RelationClass"}
@@ -55,7 +63,6 @@
 {"lexeme": "home", "formula": "rb:FROM", "type" : "RelationClass"}
 {"lexeme": "age", "formula": "rb:AGE", "type" : "RelationClass"}
 {"lexeme": "member", "formula": "rb:MEMBER_OF", "type" : "RelationClass"}
-{"lexeme": "member of", "formula": "rb:MEMBER_OF", "type" : "RelationClass"}
 {"lexeme": "part", "formula": "rb:PART_OF", "type" : "RelationClass"}
 {"lexeme": "relative", "formula": "rb:RELATIVE_OF", "type" : "RelationClass"}
 

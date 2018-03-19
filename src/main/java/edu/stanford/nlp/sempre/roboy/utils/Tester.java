@@ -74,6 +74,7 @@ public class Tester {
             }.getType();
             Gson gson = new Gson();
             List<Map<String, String>> testSet = gson.fromJson(reader, type);
+            test.query("(reload resources/roboy-demo.grammar)");
             for (Map<String, String> entry : testSet) {
                 String response = test.query(entry.get("utterance"));
                 if (response != null) {

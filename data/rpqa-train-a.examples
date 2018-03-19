@@ -3,6 +3,10 @@
 	(targetFormula (triples (triple rb:active_person rb:NAME_OF emily)))
 )
 (example
+	(utterance "my name is emily and your name is roboy")
+	(targetFormula (triples (triple rb:active_person rb:NAME_OF emily)) (triples (triple rb:Roboy rb:NAME_OF roboy)))
+)
+(example
 	(utterance "anna is my name")
 	(targetFormula (triples (triple rb:active_person rb:NAME_OF anna)))
 )

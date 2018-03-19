@@ -1,5 +1,6 @@
 [
   {"utterance": "my name is emily", "type": "NAME", "targetFormula": "(triples (triple rb:active_person rb:NAME_OF emily))"},
+  {"utterance": "my name is emily and your name is roboy", "type": "NAME", "targetFormula": "(list (triples (triple rb:active_person rb:NAME_OF emily)) (triples (triple rb:Roboy rb:NAME_OF roboy)))"},
   {"utterance": "anna is my name", "type": "NAME", "targetFormula": "(triples (triple rb:active_person rb:NAME_OF anna))"},
   {"utterance": "i am hannah", "type": "NAME", "targetFormula": "(triples (triple rb:active_person rb:NAME_OF hannah))"},
   {"utterance": "call me christina", "type": "NAME", "targetFormula": "(triples (triple rb:active_person rb:NAME_OF christina))"},
@@ -10,6 +11,7 @@
   {"utterance": "What is your name?", "type": "QNAME", "targetFormula": "(!rb:NAME_OF rb:Roboy)"},
   {"utterance": "Who are you?", "type": "QNAME", "targetFormula": "(!rb:NAME_OF rb:Roboy)"},
   {"utterance": "i come from poland", "type": "FROM", "targetFormula": "(triples (triple rb:active_person rb:FROM poland))"},
+  {"utterance": "i come from poland and you come from germany", "type": "NAME", "targetFormula": "(list (triples (triple rb:active_person rb:FROM poland)) (triples (triple rb:Roboy rb:FROM germany)))"},
   {"utterance": "i am from russia", "type": "FROM", "targetFormula": "(triples (triple rb:active_person rb:FROM russia))"},
   {"utterance": "my home country is ukraine", "type": "FROM", "targetFormula": "(triples (triple rb:active_person rb:FROM ukraine))"},
   {"utterance": "i was born in nicaragua", "type": "FROM", "targetFormula": "(triples (triple rb:active_person rb:FROM nicaragua))"},

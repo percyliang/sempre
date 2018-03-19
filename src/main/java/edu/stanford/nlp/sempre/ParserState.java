@@ -246,7 +246,7 @@ public abstract class ParserState {
         remove.add(deriv);
         continue;
       }
-      if (deriv.getType()==SemType.tripleType||deriv.getType()==SemType.stringType||deriv.getFormula().toString().contains("lambda")){
+      if (deriv.getType()==SemType.stringType||deriv.getFormula().toString().contains("lambda")||deriv.getFormula().toString().contains("triple")){
         deriv.ensureExecuted(parser.simple_executor, ex.context);
       }
       else
