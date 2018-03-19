@@ -120,8 +120,8 @@
                                 <argument>rule</argument>
                                 <!--<argument>span</argument>-->
                                 <argument>dependencyParse</argument>
-                                <argument>-Dataset.inPaths</argument>
-                                <argument>train:data/rpqa/1/train.examples</argument>
+                                <!--<argument>-Dataset.inPaths</argument>-->
+                                <!--<argument>train:data/rpqa/1/train.examples</argument>-->
                                 <argument>-Derivation.derivComparator</argument>
                                 <argument>ScoredDerivationComparator</argument>
                                 <argument>-Params.initWeightsRandomly</argument>
