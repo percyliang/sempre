@@ -26,7 +26,6 @@ In order to build application with all needed dependencies run:
 ./pull-dependencies roboy
 mvn clean
 mvn install
-mvn compile
 ```
 
 # Word2Vec Model

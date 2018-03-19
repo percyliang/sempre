@@ -249,7 +249,7 @@
                     </execution>
                     <execution>
                         <id>Generating module-classes</id>
-                        <phase>compile</phase>
+                        <phase>install</phase>
                         <goals>
                             <goal>exec</goal>
                         </goals>
