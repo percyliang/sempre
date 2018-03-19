@@ -18,7 +18,7 @@
   {"utterance": "i was born in poland or russia", "type": "FROM", "targetFormula": "(triples or (triple rb:active_person rb:FROM poland) (triple rb:active_person rb:FROM russia))"},
   {"utterance": "Where are you from?", "type": "QFROM", "targetFormula": "(!rb:FROM rb:Roboy)"},
   {"utterance": "Where were you born?", "type": "QFROM", "targetFormula": "(!rb:FROM rb:Roboy)"},
-  {"utterance": "What is your home countr?", "type": "QFROM", "targetFormula": "(!rb:FROM rb:Roboy)"},
+  {"utterance": "What is your home country?", "type": "QFROM", "targetFormula": "(!rb:FROM rb:Roboy)"},
   {"utterance": "Which town do you call your home?", "type": "QFROM", "targetFormula": "(!rb:FROM rb:Roboy)"},
   {"utterance": "my favorite thing to do is swimming", "type": "HAS_HOBBY", "targetFormula": "(triples (triple rb:active_person rb:HAS_HOBBY swim))"},
   {"utterance": "my hobby is swimming", "type": "HAS_HOBBY", "targetFormula": "(triples (triple rb:active_person rb:HAS_HOBBY swim))"},

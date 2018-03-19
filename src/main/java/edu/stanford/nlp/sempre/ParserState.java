@@ -254,7 +254,7 @@ public abstract class ParserState {
       if (ex.targetValue != null)
         deriv.compatibility = parser.valueEvaluator.getCompatibility(ex.targetValue, deriv.value);
       if (!computeExpectedCounts && Parser.opts.executeTopFormulaOnly) break;
-      if ((deriv.value==null || deriv.value.toString().equals("BADFORMAT") || deriv.value.toString().equals("(list)")) && !deriv.value.toString().contains("rb"))
+      if ((deriv.value==null || deriv.value.toString().equals("BADFORMAT")) && !deriv.formula.toString().contains("rb"))
         remove.add(deriv);
     }
     for (Derivation deriv : remove)

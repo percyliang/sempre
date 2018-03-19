@@ -8,7 +8,6 @@
 (rule $Not (nor) (ConstantFn (string not)))
 
 (rule $Class ($PHRASE) (SimpleLexiconFn (type "ClassNoun")))
-(rule $QRelClass ($PHRASE) (SimpleLexiconFn (type "QRelat")))
 (rule $RelClass ($PHRASE) (SimpleLexiconFn (type "RelationalNoun")))
 (rule $RelatClass ($PHRASE) (SimpleLexiconFn (type "RelationClass")))
 (rule $DatPropClass ($PHRASE) (SimpleLexiconFn (type "DataPropertyNoun")))
@@ -19,13 +18,15 @@
 (rule $StateVerb ($LEMMA_PHRASE) (SimpleLexiconFn (type "StateVerb")))
 (rule $Relat ($LEMMA_PHRASE) (SimpleLexiconFn (type "Relationship")))
 (rule $Relat ($LEMMA_TOKEN) (SimpleLexiconFn (type "Relationship")))
-(rule $QRelat ($LEMMA_TOKEN) (SimpleLexiconFn (type "QuRelat")))
 (rule $ConsequenceVerb ($LEMMA_PHRASE) (SimpleLexiconFn (type "ConsequenceVerb")))
 
 (rule $RelAdj ($PHRASE) (SimpleLexiconFn (type "RelationalAdjective")))
 (rule $ObjectPropAdj ($PHRASE) (SimpleLexiconFn (type "IntersectiveObjectPropertyAdjective")))
 (rule $DataPropAdj ($PHRASE) (SimpleLexiconFn (type "IntersectiveDataPropertyAdjective")))
 (rule $InterAdj ($PHRASE) (SimpleLexiconFn (type "IntersectiveAdjective")))
+
+(rule $QRelClass ($PHRASE) (SimpleLexiconFn (type "QRoboy")))
+(rule $QRelat ($LEMMA_TOKEN) (SimpleLexiconFn (type "QRoboy")))
 
 # NER Tags
 (rule $Number ($PHRASE) (FilterNerSpanFn span NUMBER))
@@ -52,7 +53,7 @@
 (rule $To ($TOKEN) (FilterPosTagFn token TO))
 #(rule $Exist ($TOKEN) (FilterPosTagFn token EX))
 #(rule $ForeignWord ($TOKEN) (FilterPosTagFn token FW))
-(rule $Wh ($TOKEN) (FilterPosTagFn token WP WP$))
+(rule $Wh ($TOKEN) (FilterPosTagFn token WP WP$ WDT))
 (rule $BE ($PHRASE) (FilterPosTagFn span BE))
 (rule $HAVE ($PHRASE) (FilterPosTagFn span HAVE))
 (rule $Number ($PHRASE) (FilterPosTagFn span CD))
@@ -132,8 +133,6 @@
 (rule $ROOT (($Ignore optional) $Expr) (IdentityFn))
 
 # Question Phrase
-(rule $Quest ($Wh) (SimpleLexiconFn (type Question)))
-(rule $Quest ($Wh) (IdentityFn))
 (rule $Quest (who) (ConstantFn (rdf:type foaf:person) foaf:person))
 (rule $Quest (who) (ConstantFn (rdf:type dbpedia:Organization) dbpedia:Organization))
 (rule $Quest (who) (ConstantFn (rdf:type dbpedia:Company) dbpedia:Company))
@@ -141,37 +140,36 @@
 (rule $Quest (where) (ConstantFn (rdf:type dbpedia:Place) dbpedia:Place))
 (rule $Quest (where) (ConstantFn (rdf:type dbpedia:EducationalInstitution) dbpedia:EducationalInstitution))
 (rule $Quest (when) (ConstantFn (rdf:type xsd:date) xsd:date))
+(rule $Q ($Wh) (ConstantFn (rdf:type rdf:type)))
 (rule $Q ($Wh date) (ConstantFn (rdf:type xsd:date) xsd:date))
 (rule $Q ($Wh year) (ConstantFn (rdf:type xsd:date) xsd:date))
 (rule $Q ($Wh day) (ConstantFn (rdf:type xsd:date) xsd:date))
+(rule $Q ($Wh $TOKEN) (JoinFn forward))
+(rule $Ignore ($LEMMA_PHRASE) (SimpleLexiconFn (type "Ignore")))
 
 # Question expressions
-(rule $Binary ($QRelatClass) (IdentityFn))
+(rule $Ignore ($PHRASE) (IdentityFn))
+(rule $Ignore ($Q) (IdentityFn))
+(rule $Binary ($QRelClass) (IdentityFn))
 (rule $Binary ($QRelat) (IdentityFn))
-(rule $RSet ($RSubject) (IdentityFn))
-(rule $RSet ($Quest) (IdentityFn))
-(rule $RSet (($Wh optional) $RSet $RSet) (MergeFn and))
-(rule $RSet (($Wh optional) $Entity $Binary) (JoinFn backward))
-(rule $RSet (what is $Binary $RSubject) (JoinFn forward))
-(rule $RSet (what is $RSubject $Binary) (JoinFn backward))
-(rule $ROOT ($RSet) (IdentityFn))
+(rule $QSubject ($ProNoun) (SimpleLexiconFn (type "Person")))
+(rule $Unary ($QSubject) (IdentityFn))
+(rule $Binary ($Ignore $QRelat) (SelectFn 1))
+(rule $Unary ($Ignore $QSubject) (SelectFn 1))
+(rule $Binary ($QRelat $Ignore) (SelectFn 0))
+(rule $Unary ($QSubject $Ignore) (SelectFn 0))
+(rule $RSet ($Unary) (IdentityFn))
+(rule $RSet ($Unary $Unary) (MergeFn and))
+(rule $RSet ($Binary $RSet) (JoinFn forward))
+(rule $RSet ($RSet $Binary) (JoinFn backward))
+(rule $ROOT (($Wh optional) $RSet) (IdentityFn))
+(rule $ROOT ((what optional) (is optional) $RSet) (IdentityFn))
+
+
+#TEST SET
+#(rule $ROOT ($RSet) (IdentityFn))
+#(rule $ROOT ($Binary) (IdentityFn))
+
 
 # Math expressions
 (include math.grammar)
-
-(rule $Entity ($NamedEntity) (SimpleLexiconFn (type "NamedEntity")))
-(rule $Entity ($NamedEntity) (OpenTypeFn entity))
-(rule $Binary ($RelClass) (IdentityFn))
-(rule $Set ($Entity) (IdentityFn))
-(rule $Set ($Unary) (IdentityFn))
-(rule $Set ($Quest) (IdentityFn))
-(rule $Set (($Wh optional) $Unary $Set) (MergeFn and))
-(rule $Set (($Wh optional) $Binary $Entity) (JoinFn forward))
-(rule $Set (($Wh optional) $Entity $Binary) (JoinFn backward))
-(rule $Set (what is $Binary $Entity) (JoinFn forward))
-(rule $Set (what is $Entity $Binary) (JoinFn backward))
-(rule $ROOT ($Set) (IdentityFn))
-
-#TEST SET
-(rule $ROOT ($Noun) (OpenTypeFn type))
-(rule $ROOT ($Verb) (OpenTypeFn relation))
