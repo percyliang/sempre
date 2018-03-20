@@ -62,19 +62,18 @@ public class Tester {
         }
         return null;
     }
-
     public static void main(String[] args) {
         double success = 0;
         double unparsed = 0;
         double fail = 0;
         Tester test = new Tester(5000);
         try {
-            JsonReader reader = new JsonReader(new FileReader("./data/rpqa/1/test.json"));
+            PrintWriter writer = new PrintWriter("log-webq.txt", "UTF-8");
+            JsonReader reader = new JsonReader(new FileReader("./data/webq-test.json"));
             Type type = new TypeToken<List<Map<String, String>>>() {
             }.getType();
             Gson gson = new Gson();
             List<Map<String, String>> testSet = gson.fromJson(reader, type);
-            test.query("(reload resources/roboy-demo.grammar)");
             for (Map<String, String> entry : testSet) {
                 String response = test.query(entry.get("utterance"));
                 if (response != null) {
@@ -82,27 +81,76 @@ public class Tester {
                     type = new TypeToken<Map<String, Object>>() {
                     }.getType();
                     Map<String, String> resMap = gson.fromJson(response, type);
-                    if (resMap.get("parse").equals(entry.get("targetFormula"))) {
+                    if (resMap.get("answer").equals(entry.get("targetAnswer"))) {
                         success++;
                         //System.out.println("CP: " + resMap.get("parse"));
-                    } else if (resMap.get("parse").equals("(no answer)")) {
+                    } else if (resMap.get("answer").equals("(no answer)")) {
                         unparsed++;
-                        System.out.println("TEST:" + entry.get("utterance"));
-                        System.out.println("UP: " + resMap.get("parse"));
+                        LogInfo.logs("TEST: %s", entry.get("utterance"));
+//                        writer.println("TEST: " + entry.get("utterance"));
+                        LogInfo.logs("UP: %s", resMap.get("answer"));
+//                        writer.println("UP: %s" + resMap.get("answer"));
                     } else {
                         fail++;
-                        System.out.println("TEST:" + entry.get("utterance"));
-                        System.out.println("IC: " + resMap.get("parse"));
+                        LogInfo.logs("TEST: %s", entry.get("utterance"));
+                        writer.println("TEST: " + entry.get("utterance"));
+                        LogInfo.logs("IC: %s", resMap.get("answer"));
+                        writer.println("IC PARSE: %s" + resMap.get("parse"));
+                        writer.println("IC: %s" + resMap.get("answer"));
                     }
                 }
             }
             LogInfo.logs("Success rate: %f", success/testSet.size());
             LogInfo.logs("Unparsed: %f", unparsed/testSet.size());
             LogInfo.logs("Failure: %f", fail/testSet.size());
-
         }
         catch(FileNotFoundException e){
             e.printStackTrace();
         }
+        catch(Exception e){
+            e.printStackTrace();
         }
+    }
+//    public static void main(String[] args) {
+//        double success = 0;
+//        double unparsed = 0;
+//        double fail = 0;
+//        Tester test = new Tester(5000);
+//        try {
+//            JsonReader reader = new JsonReader(new FileReader("./data/rpqa/1/test.json"));
+//            Type type = new TypeToken<List<Map<String, String>>>() {
+//            }.getType();
+//            Gson gson = new Gson();
+//            List<Map<String, String>> testSet = gson.fromJson(reader, type);
+//            test.query("(reload resources/roboy-demo.grammar)");
+//            for (Map<String, String> entry : testSet) {
+//                String response = test.query(entry.get("utterance"));
+//                if (response != null) {
+//                    // Convert JSON string back to Map.
+//                    type = new TypeToken<Map<String, Object>>() {
+//                    }.getType();
+//                    Map<String, String> resMap = gson.fromJson(response, type);
+//                    if (resMap.get("parse").equals(entry.get("targetFormula"))) {
+//                        success++;
+//                        //System.out.println("CP: " + resMap.get("parse"));
+//                    } else if (resMap.get("parse").equals("(no answer)")) {
+//                        unparsed++;
+//                        System.out.println("TEST:" + entry.get("utterance"));
+//                        System.out.println("UP: " + resMap.get("parse"));
+//                    } else {
+//                        fail++;
+//                        System.out.println("TEST:" + entry.get("utterance"));
+//                        System.out.println("IC: " + resMap.get("parse"));
+//                    }
+//                }
+//            }
+//            LogInfo.logs("Success rate: %f", success/testSet.size());
+//            LogInfo.logs("Unparsed: %f", unparsed/testSet.size());
+//            LogInfo.logs("Failure: %f", fail/testSet.size());
+//
+//        }
+//        catch(FileNotFoundException e){
+//            e.printStackTrace();
+//        }
+//        }
 }

@@ -184,6 +184,42 @@
                         </configuration>
                     </execution>
                     <execution>
+                        <id>webquestions</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <arguments>
+                                <argument>-FeatureExtractor.featureDomains</argument>
+                                <argument>rule</argument>
+                                <!--<argument>span</argument>-->
+                                <argument>dependencyParse</argument>
+                                <argument>-Dataset.inPaths</argument>
+                                <argument>train:data/webq-train.examples</argument>
+                                <argument>-Params.initWeightsRandomly</argument>
+                                <argument>true</argument>
+                                <argument>-Learner.maxTrainIters</argument>
+                                <argument>10</argument>
+                                <argument>-Builder.executor</argument>
+                                <argument>roboy.SparqlExecutor</argument>
+                                <argument>-Builder.simple_executor</argument>
+                                <argument>JavaExecutor</argument>
+                                <argument>-SparqlExecutor.endpointUrl</argument>
+                                <argument>http://dbpedia.org/sparql</argument>
+                                <argument>-Grammar.inPaths</argument>
+                                <argument>resources/roboy-webq.grammar</argument>
+                                <argument>-SimpleLexicon.inPaths</argument>
+                                <argument>resources/lexicons/roboy-demo.lexicon</argument>
+                                <argument>-languageAnalyzer</argument>
+                                <argument>corenlp.CoreNLPAnalyzer</argument>
+                                <argument>-Main.socket</argument>
+                                <argument>true</argument>
+                                <argument>-ErrorRetrieval.followUps</argument>
+                                <argument>true</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>demo</id>
                         <goals>
                             <goal>java</goal>
@@ -249,7 +285,7 @@
                     </execution>
                     <execution>
                         <id>Generating module-classes</id>
-                        <phase>install</phase>
+                        <phase>compile</phase>
                         <goals>
                             <goal>exec</goal>
                         </goals>

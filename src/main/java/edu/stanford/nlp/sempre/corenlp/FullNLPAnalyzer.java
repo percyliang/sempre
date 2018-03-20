@@ -211,9 +211,7 @@ public class FullNLPAnalyzer extends InfoAnalyzer {
     public List<String> getKeywords(Tree tree){
         List<String> result = new ArrayList<>();
         String keyword = new String();
-        LogInfo.logs("Tree: %s", tree.toString());
         for (Tree child: tree.children()) {
-            LogInfo.logs("Child: %s", child.toString());
             if (child.isLeaf()){
                 if (keyword.length() > 0)
                     keyword.concat(" ");
@@ -224,7 +222,6 @@ public class FullNLPAnalyzer extends InfoAnalyzer {
                 if (keyword_tags.toString().contains(child.label().toString())) {
                     result.add(String.join(" ", getKeywords(child)));
                 }
-                LogInfo.logs("PrePreChild: %s", child.toString());
             }
             else{
                 if (keyword_tags.toString().contains(child.label().toString()))
