@@ -136,8 +136,8 @@ public class SparqlUtils {
             String url = String.format("%s?default-graph-uri=http://dbpedia.org&query=%s&format=xml",
                     endpointUrl, URLEncoder.encode(formQuery(json,"en"), "UTF-8"));
             if(ConfigManager.DEBUG > 5) {
-                LogInfo.logs("SPARQL query: " + formQuery(json));
-                LogInfo.logs("Query: " + url);
+                LogInfo.logs("SPARQL query: %s", formQuery(json));
+                LogInfo.logs("Query: %s", url);
             }
             ServerResponse response = makeRequest(url);
 
