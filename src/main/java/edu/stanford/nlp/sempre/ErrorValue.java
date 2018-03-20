@@ -21,6 +21,9 @@ public class ErrorValue extends Value {
   // Server dropped the connection (sometimes because the request is taking too long).
   public static final ErrorValue server408 = new ErrorValue("SERVER408");
 
+  // Syntax error
+  public static final ErrorValue server400 = new ErrorValue("SERVER400");
+
   // Internal server error (happens when Virtuoso thinks its going to take too long).
   // Example: Virtuoso 42000 Error The estimated execution time 541 (sec) exceeds the limit of 400 (sec).
   public static final ErrorValue server500 = new ErrorValue("SERVER500");

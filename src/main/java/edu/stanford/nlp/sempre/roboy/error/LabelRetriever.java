@@ -67,11 +67,11 @@ public class LabelRetriever extends KnowledgeRetriever {
                             single.put("Label", l);
                             if (errorInfo.getCandidates().containsKey(entity)) {
                                 errorInfo.getCandidates().get(entity).add(gson.toJson(single));
-                                if (ConfigManager.DEBUG > 3)
+                                if (ConfigManager.DEBUG > 5)
                                     LogInfo.logs("Label: %s", gson.toJson(single));
                             } else {
                                 errorInfo.getCandidates().put(entity, new ArrayList<>(Arrays.asList(gson.toJson(single))));
-                                if (ConfigManager.DEBUG > 3)
+                                if (ConfigManager.DEBUG > 5)
                                     LogInfo.logs("Label: %s", gson.toJson(single));
                             }
                         }

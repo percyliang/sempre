@@ -125,7 +125,6 @@ public class Master {
       // Convert a Map into JSON string.
       Gson gson = new Gson();
       String json = gson.toJson(interpretation);
-      System.out.println("json = " + json);
       return json;
     }
     public List<String> getLines() { return lines; }

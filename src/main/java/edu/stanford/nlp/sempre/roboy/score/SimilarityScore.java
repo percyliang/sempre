@@ -59,7 +59,7 @@ public class SimilarityScore extends ScoringFunction {
                 if (c.get("Label").toLowerCase().contains(key))
                     score = 1;
 
-                if (ConfigManager.DEBUG > 3)
+                if (ConfigManager.DEBUG > 5)
                     LogInfo.logs("Similarity: %s , %s -> %s", key, c.get("Label"), c.get("Refcount"));
                 key_scores.put(candidate,score*this.weight);
             }

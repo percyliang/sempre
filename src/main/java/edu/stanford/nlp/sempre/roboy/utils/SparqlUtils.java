@@ -304,13 +304,11 @@ public class SparqlUtils {
         } catch (FileNotFoundException e) {
             return new ServerResponse(ErrorValue.empty);
         } catch (IOException e) {
-            LogInfo.errors("Server exception: %s", e);
             // Sometimes the SPARQL server throws a 408 to signify a server timeout.
             if (e.toString().contains("HTTP response code: 408"))
                 return new ServerResponse(ErrorValue.server408);
-            // Sometimes the SPARQL server throws a 408 to signify a server timeout.
             if (e.toString().contains("HTTP response code: 400"))
-                return new ServerResponse(ErrorValue.badFormat);
+                return new ServerResponse(ErrorValue.server400);
             if (e.toString().contains("HTTP response code: 500"))
                 return new ServerResponse(ErrorValue.server500);
             if (e.toString().contains("HTTP response code: 503"))

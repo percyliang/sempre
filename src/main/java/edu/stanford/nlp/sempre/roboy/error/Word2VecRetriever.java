@@ -3,6 +3,7 @@ package edu.stanford.nlp.sempre.roboy.error;
 import edu.stanford.nlp.sempre.Derivation;
 import edu.stanford.nlp.sempre.SimpleLexicon;
 import edu.stanford.nlp.sempre.roboy.ErrorInfo;
+import edu.stanford.nlp.sempre.roboy.config.ConfigManager;
 import edu.stanford.nlp.sempre.roboy.utils.SparqlUtils;
 import edu.stanford.nlp.sempre.roboy.lexicons.word2vec.Word2vec;
 
@@ -53,11 +54,13 @@ public class Word2VecRetriever extends KnowledgeRetriever {
                     record.put("URI",entry.formula.toString());
                     if (errorInfo.getCandidates().containsKey(entity)){
                         errorInfo.getCandidates().get(entity).add(gson.toJson(record));
-                        //LogInfo.logs("Word2Vec: %s",gson.toJson(record));
+                        if (ConfigManager.DEBUG > 5)
+                            LogInfo.logs("Word2Vec: %s",gson.toJson(record));
                     }
                     else{
                         errorInfo.getCandidates().put(entity, new ArrayList<>(Arrays.asList(gson.toJson(record))));
-                        //LogInfo.logs("Word2Vec: %s",gson.toJson(record));
+                        if (ConfigManager.DEBUG > 5)
+                            LogInfo.logs("Word2Vec: %s",gson.toJson(record));
                     }
                 }
             }

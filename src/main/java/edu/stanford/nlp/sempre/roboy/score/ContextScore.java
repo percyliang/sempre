@@ -70,7 +70,7 @@ public class ContextScore extends ScoringFunction {
                 }
                 if (!Double.isNaN(max))
                     max = 0.0;
-                if (ConfigManager.DEBUG > 3)
+                if (ConfigManager.DEBUG > 5)
                     LogInfo.logs("Context: %s , %s -> %s", key, c.get("Label"), c.get("Refcount"));
                 key_scores.put(candidate,max*this.weight);
             }

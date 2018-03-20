@@ -1,0 +1,127 @@
+# Roboy Parser Grammar
+
+## POS Tags
+(rule $Verb ($PHRASE) (FilterPosTagFn span VB VBD VBN VBG VBP VBZ VBD-AUX))
+(rule $ProNoun ($TOKEN) (FilterPosTagFn token PRP PRP$))
+(rule $ProNounEnd ($TOKEN) (FilterPosTagFn token POS))
+(rule $Preposition ($TOKEN) (FilterPosTagFn token IN))
+(rule $Conj ($TOKEN) (FilterPosTagFn token CC))
+(rule $Det ($TOKEN) (FilterPosTagFn token DT PDT))
+(rule $To ($TOKEN) (FilterPosTagFn token TO))
+(rule $Wh ($TOKEN) (FilterPosTagFn token WP WP$))
+(rule $Number ($PHRASE) (FilterPosTagFn span CD))
+(rule $BE ($PHRASE) (FilterPosTagFn span BE))
+(rule $HAVE ($PHRASE) (FilterPosTagFn span HAVE))
+
+# Words ignored
+(rule $Ignore ($PHRASE) (FilterPosTagFn span MD FW RB RBR RBS UH EX IN DT PDT TO))
+(rule $PHRASE ($Ignore $PHRASE) (SelectFn 1))
+(rule $PHRASE ($PHRASE $Ignore) (SelectFn 0))
+
+## Limiting number of words in a phrase
+(rule $VerbPhrase ($PHRASE) (FilterPosTagFn span IN VB VBD VBN VBG VBP VBZ VBD-AUX))
+(rule $ValuePhrase ($LEMMA_PHRASE) (FilterPosTagFn span NN NNP CD))
+(rule $NounPhrase ($LEMMA_PHRASE) (FilterPosTagFn span NN NNP))
+(rule $AdjPhrase ($LEMMA_PHRASE) (FilterPosTagFn span JJ))
+(rule $AdjToken ($AdjPhrase) (FilterSpanLengthFn 1 2))
+(rule $VerbToken ($VerbPhrase) (FilterSpanLengthFn 1 2))
+(rule $ValueToken ($ValuePhrase) (FilterSpanLengthFn 1 2))
+(rule $NounToken ($NounPhrase) (FilterSpanLengthFn 1 3))
+(rule $EntityToken ($NounPhrase) (FilterSpanLengthFn 1 4))
+(rule $Limited ($PHRASE) (FilterSpanLengthFn 1 3))
+(rule $IPhrase ($PHRASE) (FilterSpanLengthFn 1 3))
+
+## SimpleLexiconFn
+
+### Unaries
+(rule $FullObjProp ($AdjToken) (SimpleLexiconFn (type "IntersectiveObjectPropertyAdjective")))
+(rule $FullObjProp ($NounToken) (SimpleLexiconFn (type "ObjectProperty")))
+
+(rule $FullDataProp ($NounToken) (SimpleLexiconFn (type "DataPropertyNoun")))
+(rule $FullDataProp ($AdjToken) (SimpleLexiconFn (type "IntersectiveDataPropertyAdjective")))
+
+(rule $FullObjType ($NounToken) (SimpleLexiconFn (type "ClassNoun")))
+(rule $FullObjType ($NounToken) (SimpleLexiconFn (type "RoboyClassNoun")))
+
+### Binaries
+(rule $PartObjProp ($NounToken) (SimpleLexiconFn (type "RelationalNoun")))
+(rule $PartDataProp ($NounToken) (SimpleLexiconFn (type "RelationalNoun")))
+(rule $RObjProp ($NounToken) (SimpleLexiconFn (type "RoboyRelNoun")))
+(rule $RDataProp ($NounToken) (SimpleLexiconFn (type "RoboyDataProp")))
+
+(rule $PartObjProp ($VerbToken) (SimpleLexiconFn (type "StateVerb")))
+(rule $PartObjProp ($AdjToken) (SimpleLexiconFn (type "RelationalAdjective")))
+
+(rule $RObjProp ($Limited) (SimpleLexiconFn (type "ObjProp")))
+(rule $RDataProp ($Limited) (SimpleLexiconFn (type "DataProp")))
+
+### Entities
+(rule $Entity ($EntityToken) (SimpleLexiconFn (type "NamedEntity")))
+(rule $Person ($ProNoun) (SimpleLexiconFn (type "Person")))
+
+## OpenTypes
+(rule $FullObjType ($NounToken) (OpenTypeFn type))
+(rule $FullDataProp ($NounToken) (OpenTypeFn type))
+
+(rule $PartObjProp ($NounToken) (OpenTypeFn relation))
+(rule $PartDataProp ($NounToken) (OpenTypeFn relation))
+(rule $PartObjProp ($VerbToken) (OpenTypeFn relation))
+(rule $PartDataProp ($VerbToken) (OpenTypeFn relation))
+
+(rule $Entity ($EntityToken) (OpenTypeFn entity))
+
+## Forming Subject
+(rule $Subject ($Person) (IdentityFn))
+(rule $Subject ($Entity) (IdentityFn))
+(rule $Subject ($Subject or $Subject) (ConcatFn ";"))
+(rule $Subject ($Subject ($Conj optional) $Subject) (ConcatFn ","))
+(rule $Subject ($Subject (, optional) $Subject) (ConcatFn ","))
+
+(rule $RobSubject ($Person) (IdentityFn))
+(rule $RobSubject ($RobSubject or $RobSubject) (ConcatFn ";"))
+(rule $RobSubject ($RobSubject ($Conj optional) $RobSubject) (ConcatFn ","))
+(rule $RobSubject ($RobSubject (, optional) $RobSubject) (ConcatFn ","))
+
+## Forming Predicate
+(rule $Predicate ($PartObjProp) (IdentityFn))
+(rule $Predicate ($PartDataProp) (IdentityFn))
+(rule $Predicate ($Predicate or $Predicate) (ConcatFn ";"))
+(rule $Predicate ($Predicate ($Conj optional) $Predicate) (ConcatFn ","))
+(rule $Predicate ($Predicate (, optional) $Predicate) (ConcatFn ","))
+
+(rule $RObjPred ($RObjProp) (IdentityFn))
+(rule $RObjPred ($RObjPred or $RObjPred) (ConcatFn ";"))
+(rule $RObjPred ($RObjPred ($Conj optional) $RObjPred) (ConcatFn ","))
+(rule $RObjPred ($RObjPred (, optional) $RObjPred) (ConcatFn ","))
+
+(rule $RDataPred ($RDataProp) (IdentityFn))
+(rule $RDataPred ($RDataPred or $RDataPred) (ConcatFn ";"))
+(rule $RDataPred ($RDataPred ($Conj optional) $RDataPred) (ConcatFn ","))
+(rule $RDataPred ($RDataPred (, optional) $RDataPred) (ConcatFn ","))
+
+## Forming Objects
+(rule $Object ($Subject) (IdentityFn))
+(rule $Object ($BE $Object) (SelectFn 1))
+(rule $Object ($Object or $Object) (ConcatFn ";"))
+(rule $Object ($Object ($Conj optional) $Object) (ConcatFn ","))
+(rule $Object ($Object (, optional) $Object) (ConcatFn ","))
+
+## Forming POs
+(rule $PredObj ($FullObjProp) (IdentityFn))
+(rule $PredObj ($FullObjType) (IdentityFn))
+(rule $PredObj ($FullDataProp) (IdentityFn))
+
+## Forming Values
+(rule $Value ($ValueToken) (IdentityFn))
+(rule $Value ($BE $Value) (SelectFn 1))
+(rule $Value ($Value or $Value) (ConcatFn ";"))
+(rule $Value ($Value ($Conj optional) $Value) (ConcatFn ","))
+(rule $Value ($Value (, optional) $Value) (ConcatFn ","))
+
+(rule $Expr ($RobSubject $RObjPred $Object) (TripleFn spo))
+(rule $Expr ($RobSubject $RDataPred $Value) (TripleFn spo))
+(rule $ROOT ($Expr) (IdentityFn))
+(rule $ROOT ($Expr ($Conj optional) $Expr) (ListFn))
+
+# Math expressions
+(include math.grammar)

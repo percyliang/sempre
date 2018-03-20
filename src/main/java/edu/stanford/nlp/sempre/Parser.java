@@ -174,8 +174,6 @@ public abstract class Parser {
   public ParserState parse(Params params, Example ex, boolean computeExpectedCounts) {
     // Execute target formula (if applicable).
     if (ex.targetFormula != null && ex.targetValue == null){
-      //TODO: Executors
-
       if (ex.targetFormula.toString().contains("triple")||
               ex.targetFormula.toString().contains("string")||
               ex.targetFormula.toString().contains("lambda")){

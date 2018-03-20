@@ -1,3 +1,111 @@
+# Roboy
+
+## Person of interest
+{"lexeme": "i", "formula": "rb:active_person", "type": "Person"}
+{"lexeme": "me", "formula": "rb:active_person", "type": "Person"}
+{"lexeme": "mine", "formula": "rb:active_person", "type": "Person"}
+{"lexeme": "my", "formula": "rb:active_person", "type": "Person"}
+{"lexeme": "you", "formula": "rb:Roboy", "type": "Person"}
+{"lexeme": "your", "formula": "rb:Roboy", "type": "Person"}
+{"lexeme": "yours", "formula": "rb:Roboy", "type": "Person"}
+{"lexeme": "Roboy", "formula": "rb:Roboy", "type": "Person"}
+
+## Type relationships
+{"lexeme": "favorite", "formula": "rb:FAVORITE", "type" : "TypeProperty"}
+
+## Relationships
+{"lexeme": "call", "formula": "rb:NAME_OF", "type" : "DataProp"}
+{"lexeme": "like", "formula": "rb:HAS_HOBBY", "type" : "ObjProp"}
+{"lexeme": "like", "formula": "rb:FRIEND_OF", "type" : "DataProp"}
+{"lexeme": "friend", "formula": "rb:FRIEND_OF", "type" : "DataProp"}
+{"lexeme": "bear in", "formula": "rb:FROM", "type" : "ObjProp"}
+{"lexeme": "come from", "formula": "rb:FROM", "type" : "ObjProp"}
+{"lexeme": "be from", "formula": "rb:FROM", "type" : "ObjProp"}
+{"lexeme": "go to", "formula": "rb:STUDY_AT", "type" : "ObjProp"}
+{"lexeme": "study", "formula": "rb:STUDY_AT", "type" : "ObjProp"}
+{"lexeme": "study at", "formula": "rb:STUDY_AT", "type" : "ObjProp"}
+{"lexeme": "work for", "formula": "rb:WORK_FOR", "type" : "ObjProp"}
+{"lexeme": "work at", "formula": "rb:WORK_FOR", "type" : "ObjProp"}
+{"lexeme": "employ", "formula": "rb:WORK_FOR", "type" : "ObjProp"}
+{"lexeme": "work as", "formula": "rb:OCCUPIED_AS", "type" : "ObjProp"}
+{"lexeme": "live in", "formula": "rb:LIVE_IN", "type" : "ObjProp"}
+{"lexeme": "belong to", "formula": "rb:MEMBER_OF", "type" : "ObjProp"}
+
+{"lexeme": "call", "formula": "!rb:NAME_OF", "type" : "DataProp"}
+{"lexeme": "like", "formula": "!rb:HAS_HOBBY", "type" : "ObjProp"}
+{"lexeme": "like", "formula": "!rb:FRIEND_OF", "type" : "DataProp"}
+{"lexeme": "friend", "formula": "!rb:FRIEND_OF", "type" : "DataProp"}
+{"lexeme": "bear in", "formula": "!rb:FROM", "type" : "ObjProp"}
+{"lexeme": "come from", "formula": "!rb:FROM", "type" : "ObjProp"}
+{"lexeme": "be from", "formula": "!rb:FROM", "type" : "ObjProp"}
+{"lexeme": "go to", "formula": "!rb:STUDY_AT", "type" : "ObjProp"}
+{"lexeme": "study", "formula": "!rb:STUDY_AT", "type" : "ObjProp"}
+{"lexeme": "study at", "formula": "!rb:STUDY_AT", "type" : "ObjProp"}
+{"lexeme": "work for", "formula": "!rb:WORK_FOR", "type" : "ObjProp"}
+{"lexeme": "work at", "formula": "!rb:WORK_FOR", "type" : "ObjProp"}
+{"lexeme": "employ", "formula": "!rb:WORK_FOR", "type" : "ObjProp"}
+{"lexeme": "work as", "formula": "!rb:OCCUPIED_AS", "type" : "ObjProp"}
+{"lexeme": "live in", "formula": "!rb:LIVE_IN", "type" : "ObjProp"}
+{"lexeme": "belong to", "formula": "!rb:MEMBER_OF", "type" : "ObjProp"}
+
+## Classes
+{"lexeme": "object", "formula": "(rdf:type rb:OBJECT)", "type" : "RoboyClassNoun"}
+{"lexeme": "person", "formula": "(rdf:type rb:PERSON)", "type" : "RoboyClassNoun"}
+{"lexeme": "robot", "formula": "(rdf:type rb:ROBOT)", "type" : "RoboyClassNoun"}
+{"lexeme": "city", "formula": "(rdf:type rb:CITY)", "type" : "RoboyClassNoun"}
+{"lexeme": "company", "formula": "(rdf:type rb:COMPANY)", "type" : "RoboyClassNoun"}
+{"lexeme": "continent", "formula": "(rdf:type rb:CONTINENT)", "type" : "RoboyClassNoun"}
+{"lexeme": "country", "formula": "(rdf:type rb:COUNTRY)", "type" : "RoboyClassNoun"}
+{"lexeme": "division", "formula": "(rdf:type rb:DIVISION)", "type" : "RoboyClassNoun"}
+{"lexeme": "name", "formula": "(rdf:type rb:NAME)", "type" : "RoboyClassNoun"}
+{"lexeme": "color", "formula": "(rdf:type rb:COLOR)", "type" : "RoboyClassNoun"}
+{"lexeme": "animal", "formula": "(rdf:type rb:ANIMAL)", "type" : "RoboyClassNoun"}
+
+## Relationship Classes
+{"lexeme": "hobby", "formula": "rb:HAS_HOBBY", "type" : "RoboyRelNoun"}
+{"lexeme": "favorite activity", "formula": "rb:HAS_HOBBY", "type" : "RoboyRelNoun"}
+{"lexeme": "favorite thing to do", "formula": "rb:HAS_HOBBY", "type" : "RoboyRelNoun"}
+{"lexeme": "employer", "formula": "rb:WORK_FOR", "type" : "RoboyRelNoun"}
+{"lexeme": "location", "formula": "rb:LIVE_IN", "type" : "RoboyRelNoun"}
+{"lexeme": "home", "formula": "rb:LIVE_IN", "type" : "RoboyRelNoun"}
+{"lexeme": "movie", "formula": "rb:FAVORITE_MOVIE", "type" : "RoboyRelNoun"}
+{"lexeme": "favorite tv show", "formula": "rb:FAVORITE_MOVIE", "type" : "RoboyRelNoun"}
+{"lexeme": "favorite movie", "formula": "rb:FAVORITE_MOVIE", "type" : "RoboyRelNoun"}
+{"lexeme": "alma mater", "formula": "rb:STUDY_AT", "type" : "RoboyRelNoun"}
+{"lexeme": "university", "formula": "rb:STUDY_AT", "type" : "RoboyRelNoun"}
+{"lexeme": "child", "formula": "rb:CHILD_OF", "type" : "RoboyRelNoun"}
+{"lexeme": "friend", "formula": "rb:FRIEND_OF", "type" : "RoboyRelNoun"}
+{"lexeme": "field of expertise", "formula": "rb:OCCUPIED_AS", "type" : "RoboyRelNoun"}
+{"lexeme": "profession", "formula": "rb:OCCUPIED_AS", "type" : "RoboyRelNoun"}
+{"lexeme": "name", "formula": "rb:NAME_OF", "type" : "RoboyDataProp"}
+{"lexeme": "home", "formula": "rb:FROM", "type" : "RoboyRelNoun"}
+{"lexeme": "age", "formula": "rb:AGE", "type" : "RoboyDataProp"}
+{"lexeme": "member", "formula": "rb:MEMBER_OF", "type" : "RoboyRelNoun"}
+{"lexeme": "part", "formula": "rb:PART_OF", "type" : "RoboyRelNoun"}
+{"lexeme": "relative", "formula": "rb:RELATIVE_OF", "type" : "RoboyRelNoun"}
+
+{"lexeme": "hobby", "formula": "!rb:HAS_HOBBY", "type" : "RoboyRelNoun"}
+{"lexeme": "favorite activity", "formula": "!rb:HAS_HOBBY", "type" : "RoboyRelNoun"}
+{"lexeme": "favorite thing to do", "formula": "!rb:HAS_HOBBY", "type" : "RoboyRelNoun"}
+{"lexeme": "employer", "formula": "!rb:WORK_FOR", "type" : "RoboyRelNoun"}
+{"lexeme": "location", "formula": "!rb:LIVE_IN", "type" : "RoboyRelNoun"}
+{"lexeme": "home", "formula": "!rb:LIVE_IN", "type" : "RoboyRelNoun"}
+{"lexeme": "movie", "formula": "!rb:FAVORITE_MOVIE", "type" : "RoboyRelNoun"}
+{"lexeme": "favorite tv show", "formula": "!rb:FAVORITE_MOVIE", "type" : "RoboyRelNoun"}
+{"lexeme": "favorite movie", "formula": "!rb:FAVORITE_MOVIE", "type" : "RoboyRelNoun"}
+{"lexeme": "alma mater", "formula": "!rb:STUDY_AT", "type" : "RoboyRelNoun"}
+{"lexeme": "university", "formula": "!rb:STUDY_AT", "type" : "RoboyRelNoun"}
+{"lexeme": "child", "formula": "!rb:CHILD_OF", "type" : "RoboyRelNoun"}
+{"lexeme": "friend", "formula": "!rb:FRIEND_OF", "type" : "RoboyRelNoun"}
+{"lexeme": "field of expertise", "formula": "!rb:OCCUPIED_AS", "type" : "RoboyRelNoun"}
+{"lexeme": "profession", "formula": "!rb:OCCUPIED_AS", "type" : "RoboyRelNoun"}
+{"lexeme": "name", "formula": "!rb:NAME_OF", "type" : "RoboyDataProp"}
+{"lexeme": "home", "formula": "!rb:FROM", "type" : "RoboyRelNoun"}
+{"lexeme": "age", "formula": "!rb:AGE", "type" : "RoboyDataProp"}
+{"lexeme": "member", "formula": "!rb:MEMBER_OF", "type" : "RoboyRelNoun"}
+{"lexeme": "part", "formula": "!rb:PART_OF", "type" : "RoboyRelNoun"}
+{"lexeme": "relative", "formula": "!rb:RELATIVE_OF", "type" : "RoboyRelNoun"}
+
 # DBpedia
 
 {"lexeme": "name", "formula": "foaf:name", "type": "RelationalNoun"}
@@ -978,10 +1086,10 @@
 {"lexeme": "women", "formula": "(dbpedia:gender resource:Female)", "type": "ObjectProperty"}
 {"lexeme": "man", "formula": "(dbpedia:gender resource:Male)", "type": "ObjectProperty"}
 {"lexeme": "men", "formula": "(dbpedia:gender resource:Male)", "type": "ObjectProperty"}
-{"lexeme": "woman", "formula": "(foaf:gender 'female'@en)", "type": "ObjectProperty"}
-{"lexeme": "women", "formula": "(foaf:gender 'female'@en)", "type": "ObjectProperty"}
-{"lexeme": "man", "formula": "(foaf:gender 'male'@en)", "type": "ObjectProperty"}
-{"lexeme": "men", "formula": "(foaf:gender 'male'@en)", "type": "ObjectProperty"}
+{"lexeme": "woman", "formula": "(foaf:gender 'female'@en)", "type": "IntersectiveDataPropertyAdjective"}
+{"lexeme": "women", "formula": "(foaf:gender 'female'@en)", "type": "IntersectiveDataPropertyAdjective"}
+{"lexeme": "man", "formula": "(foaf:gender 'male'@en)", "type": "IntersectiveDataPropertyAdjective"}
+{"lexeme": "men", "formula": "(foaf:gender 'male'@en)", "type": "IntersectiveDataPropertyAdjective"}
 {"lexeme": "ethnic group", "formula": "(rdf:type dbpedia:EthnicGroup)", "type": "ClassNoun"}
 {"lexeme": "name", "formula": "(rdf:type dbpedia:Name)", "type": "ClassNoun"}
 {"lexeme": "given name", "formula": "(rdf:type dbpedia:GivenName)", "type": "ClassNoun"}

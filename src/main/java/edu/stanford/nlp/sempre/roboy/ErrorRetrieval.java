@@ -365,16 +365,15 @@ public class ErrorRetrieval {
                 Map.Entry<String, String> entry = new java.util.AbstractMap.SimpleEntry<String, String>
                         (String.format("Did you mean %s as %s, %s?", term, c_map.get("Label"), desc), c_map.get("URI"));
                 result.add(entry);
-                if (ConfigManager.DEBUG > 3)
-                    LogInfo.logs("Question:%s", entry.getKey());
             }
             else {
                 Map.Entry<String, String> entry = new java.util.AbstractMap.SimpleEntry<String, String>
                         (String.format("Did you mean %s as %s?", term, c_map.get("Label")), c_map.get("URI"));
                 result.add(entry);
-                if (ConfigManager.DEBUG > 3)
-                    LogInfo.logs("Question:%s", entry.getKey());
             }
+        }
+        if (ConfigManager.DEBUG > 3 && result.size()>0){
+            LogInfo.logs("Question:%s", result.get(0).getKey());
         }
         return result;
     }
@@ -401,12 +400,6 @@ public class ErrorRetrieval {
                 this.errorInfo.getFollowUps().put(term, new ArrayList<>(Arrays.asList(entry.getKey())));
             }
         }
-
-        if (ConfigManager.DEBUG > 3) {
-            for (String key : this.errorInfo.getFollowUps().keySet()) {
-                LogInfo.logs("FollowUp %s -> %s", key, String.join(" ", this.errorInfo.getFollowUps().get(key)));
-            }
-        }
         return best.getKey();
     }
 
@@ -427,8 +420,8 @@ public class ErrorRetrieval {
             String full_type = formula.substring(formula.indexOf("Open"),formula.indexOf("''")+2);
             String entity = formula.substring(start,end).substring(formula.substring(start,end).indexOf("'")+1);
             String best = replacements.get(entity);
-            if (ConfigManager.DEBUG > 1)
-                LogInfo.logs("Forming: %s|%s|%s", entity, best, full_type);
+            if (ConfigManager.DEBUG > 5)
+                LogInfo.logs("Forming: %s - %s", best, full_type);
             if (errorInfo.getFollowUps().containsKey(entity)) {
                 List<String> c = errorInfo.getFollowUps().get(entity);
                 List<Map.Entry<String, String>> questions = formQuestion(entity, c);
@@ -474,7 +467,8 @@ public class ErrorRetrieval {
             }
         }
         this.derivations.removeAll(remove);
-        LogInfo.logs("%d",this.derivations.size());
+        if (ConfigManager.DEBUG > 0)
+            LogInfo.logs("Checking %d derivations",this.derivations.size());
         if (this.derivations != null) {
             // Get candidates
             for (Derivation deriv : this.derivations) {
@@ -500,20 +494,17 @@ public class ErrorRetrieval {
                 if (replaces.keySet().size() > 0)
                     replace(deriv,replaces);
             }
-//            for (String key: result.getCandidates().keySet()) {
-//                List<SimpleLexicon.Entry> entries = SimpleLexicon.getSingleton().lookup(key);
-//                for (SimpleLexicon.Entry e : entries)
-//                    LogInfo.logs("New Entry: %s", e.toString());
-//            }
         }
 
-        // Show results
-        for (String entity : result.getScored().keySet()) {
-            for(String key: result.getScored().get(entity).keySet()) {
-                LogInfo.logs("Results: %s -> %s",key,result.getScored().get(entity).get(key).toString());
+        if (ConfigManager.DEBUG > 0) {
+            // Show results
+            for (String entity : result.getScored().keySet()) {
+                for (String key : result.getScored().get(entity).keySet()) {
+                    LogInfo.logs("Results: %s -> %s", key, result.getScored().get(entity).get(key).toString());
+                }
+                // Save new entries
+                updateLexicon(update);
             }
-            // Save new entries
-            updateLexicon(update);
         }
         LogInfo.end_track();
         return this.derivations;

@@ -105,7 +105,7 @@ public class FeatureExtractor {
   void extractDenotationFeatures(Example ex, Derivation deriv) {
     if (!containsDomain("denotation")) return;
     if (!deriv.isRoot(ex.numTokens())) return;
-    System.out.println(deriv.getFormula().toString());
+    //System.out.println(deriv.getFormula().toString());
     if (deriv.getType()==SemType.tripleType||deriv.getType()==SemType.stringType||deriv.getFormula().toString().contains("lambda")) {
       deriv.ensureExecuted(simple_executor, ex.context);
     }

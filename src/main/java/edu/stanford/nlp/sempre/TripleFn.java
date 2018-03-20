@@ -277,6 +277,9 @@ public class TripleFn extends SemanticFn {
                 String out = new String();
                 if (c.childStringValue(0) == null || c.childStringValue(1) == null)
                     return null;
+                // Do not accept reverse values
+                if (c.childStringValue(0).contains("!") || c.childStringValue(1).contains("!"))
+                    return null;
                 if (c.childStringValue(0).contains("{") && c.childStringValue(1).contains("{")){
                     out = merge_formula(c.childStringValue(0),c.childStringValue(1));
                 }

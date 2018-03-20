@@ -74,7 +74,7 @@ public class MCGRetriever extends KnowledgeRetriever {
                 if (errorInfo.getCandidates().containsKey(entity)) {
                     if (!errorInfo.getCandidates().get(entity).contains(gson.toJson(c))) {
                         errorInfo.getCandidates().get(entity).add(gson.toJson(c));
-                        if (ConfigManager.DEBUG > 3)
+                        if (ConfigManager.DEBUG > 5)
                             LogInfo.logs("MCG: %s", gson.toJson(c));
                     }
                     //else
@@ -82,7 +82,7 @@ public class MCGRetriever extends KnowledgeRetriever {
                 }
                 else {
                     errorInfo.getCandidates().put(entity, new ArrayList<>(Arrays.asList(gson.toJson(c))));
-                    if (ConfigManager.DEBUG > 3)
+                    if (ConfigManager.DEBUG > 5)
                         LogInfo.logs("MCG: %s",gson.toJson(c));
                 }
             }

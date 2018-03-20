@@ -3,9 +3,11 @@ package edu.stanford.nlp.sempre;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 
+import edu.stanford.nlp.sempre.roboy.config.ConfigManager;
 import edu.stanford.nlp.sempre.roboy.lexicons.word2vec.Word2vec;
 import fig.basic.*;
 import fig.exec.Execution;
+import sun.security.krb5.Config;
 
 import java.util.*;
 
@@ -99,9 +101,8 @@ class BeamParserState extends ChartParserState {
     if (numTokens == 0)
       return;
 
-    if (parser.verbose(2)) LogInfo.begin_track("ParserState.infer");
+    if (ConfigManager.DEBUG > 2) LogInfo.begin_track("ParserState.infer");
 
-    LogInfo.logs(this.mode.toString());
     // Base case
     for (Derivation deriv : gatherTokenAndPhraseDerivations()) {
       featurizeAndScoreDerivation(deriv);
@@ -153,7 +154,7 @@ class BeamParserState extends ChartParserState {
 
   // Return number of new derivations added
   private int applyRule(int start, int end, Rule rule, List<Derivation> children) {
-    if (Parser.opts.verbose >= 5) LogInfo.logs("applyRule %s %s %s %s", start, end, rule, children);
+    if (ConfigManager.DEBUG >= 8) LogInfo.logs("applyRule %s %s %s %s", start, end, rule, children);
     try {
       if (mode == Mode.full) {
         StopWatchSet.begin(rule.getSemRepn());

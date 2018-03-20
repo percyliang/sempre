@@ -130,7 +130,7 @@ public class SparqlExecutor extends Executor {
     } catch (SocketTimeoutException e) {
       return new ServerResponse(ErrorValue.timeout);
     } catch (IOException e) {
-      if (ConfigManager.DEBUG > 0)
+      if (ConfigManager.DEBUG > 5)
         LogInfo.errors("Server exception: %s", e);
       if (e.toString().contains("HTTP response code: 400"))
         return new ServerResponse(ErrorValue.badFormat);

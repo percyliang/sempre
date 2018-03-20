@@ -57,7 +57,7 @@ public class Word2VecScore extends ScoringFunction {
                 if (Double.isNaN(score))
                     score = 0.0;
 
-                if (ConfigManager.DEBUG > 3)
+                if (ConfigManager.DEBUG > 5)
                     LogInfo.logs("Word2Vec: %s , %s -> %s", key, c.get("Label"), c.get("Refcount"));
                 key_scores.put(candidate,score*this.weight);
             }

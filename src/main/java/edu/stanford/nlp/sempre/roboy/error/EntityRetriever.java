@@ -58,14 +58,14 @@ public class EntityRetriever extends KnowledgeRetriever {
                 if (errorInfo.getCandidates().containsKey(entity)) {
                     c.put("Label",c.get("Label").toLowerCase());
                     errorInfo.getCandidates().get(entity).add(gson.toJson(c));
-                    if (ConfigManager.DEBUG > 3) {
+                    if (ConfigManager.DEBUG > 5) {
                         LogInfo.logs("Entity: %s", gson.toJson(c));
                     }
                 }
                 else {
                     c.put("Label",c.get("Label").toLowerCase());
                     errorInfo.getCandidates().put(entity, new ArrayList<>(Arrays.asList(gson.toJson(c))));
-                    if (ConfigManager.DEBUG > 3) {
+                    if (ConfigManager.DEBUG > 5) {
                         LogInfo.logs("Entity: %s", gson.toJson(c));
                     }
                 }
