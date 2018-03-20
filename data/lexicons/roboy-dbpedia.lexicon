@@ -8,42 +8,55 @@
 {"lexeme": "you", "formula": "rb:Roboy", "type": "Person"}
 {"lexeme": "your", "formula": "rb:Roboy", "type": "Person"}
 {"lexeme": "yours", "formula": "rb:Roboy", "type": "Person"}
+{"lexeme": "Roboy", "formula": "rb:Roboy", "type": "Person"}
 
 ## Type relationships
 {"lexeme": "favorite", "formula": "rb:FAVORITE", "type" : "TypeProperty"}
 
 ## Relationships
-{"lexeme": "call", "formula": "rb:NAME_OF", "type" : "Relationship"}
-{"lexeme": "like", "formula": "rb:HAS_HOBBY", "type" : "Relationship"}
-{"lexeme": "like", "formula": "rb:FRIEND_OF", "type" : "Relationship"}
-{"lexeme": "born in", "formula": "rb:BORN_IN", "type" : "Relationship"}
-{"lexeme": "come from", "formula": "rb:BORN_IN", "type" : "Relationship"}
-{"lexeme": "be from", "formula": "rb:BORN_IN", "type" : "Relationship"}
-{"lexeme": "go to", "formula": "rb:STUDY_AT", "type" : "Relationship"}
-{"lexeme": "study", "formula": "rb:STUDY_AT", "type" : "Relationship"}
-{"lexeme": "study at", "formula": "rb:STUDY_AT", "type" : "Relationship"}
-{"lexeme": "work for", "formula": "rb:WORK_FOR", "type" : "Relationship"}
-{"lexeme": "work at", "formula": "rb:WORK_FOR", "type" : "Relationship"}
-{"lexeme": "work as", "formula": "rb:OCCUPIED_AS", "type" : "Relationship"}
-{"lexeme": "live in", "formula": "rb:LIVE_IN", "type" : "Relationship"}
-{"lexeme": "lives in", "formula": "rb:LIVE_IN", "type" : "Relationship"}
-{"lexeme": "belong", "formula": "rb:MEMBER_OF", "type" : "Relationship"}
+{"lexeme": "call", "formula": "rb:NAME_OF", "type" : "DataProp"}
+{"lexeme": "like", "formula": "rb:HAS_HOBBY", "type" : "ObjProp"}
+{"lexeme": "like", "formula": "rb:FRIEND_OF", "type" : "DataProp"}
+{"lexeme": "bear in", "formula": "rb:FROM", "type" : "ObjProp"}
+{"lexeme": "be bear in", "formula": "rb:FROM", "type" : "ObjProp"}
+{"lexeme": "come from", "formula": "rb:FROM", "type" : "ObjProp"}
+{"lexeme": "be from", "formula": "rb:FROM", "type" : "ObjProp"}
+{"lexeme": "go to", "formula": "rb:STUDY_AT", "type" : "ObjProp"}
+{"lexeme": "study", "formula": "rb:STUDY_AT", "type" : "ObjProp"}
+{"lexeme": "study at", "formula": "rb:STUDY_AT", "type" : "ObjProp"}
+{"lexeme": "work for", "formula": "rb:WORK_FOR", "type" : "ObjProp"}
+{"lexeme": "work at", "formula": "rb:WORK_FOR", "type" : "ObjProp"}
+{"lexeme": "be employ", "formula": "rb:WORK_FOR", "type" : "ObjProp"}
+{"lexeme": "work as", "formula": "rb:OCCUPIED_AS", "type" : "ObjProp"}
+{"lexeme": "live in", "formula": "rb:LIVE_IN", "type" : "ObjProp"}
+{"lexeme": "lives in", "formula": "rb:LIVE_IN", "type" : "ObjProp"}
+{"lexeme": "be friend with", "formula": "rb:FRIEND_OF", "type" : "DataProp"}
+{"lexeme": "belong to", "formula": "rb:MEMBER_OF", "type" : "ObjProp"}
 
-{"lexeme": "call", "formula": "!rb:NAME_OF", "type" : "QuRelat"}
-{"lexeme": "like", "formula": "!rb:HAS_HOBBY", "type" : "QuRelat"}
-{"lexeme": "like", "formula": "!rb:FRIEND_OF", "type" : "QuRelat"}
-{"lexeme": "born in", "formula": "!rb:BORN_IN", "type" : "QuRelat"}
-{"lexeme": "come from", "formula": "!rb:BORN_IN", "type" : "QuRelat"}
-{"lexeme": "be from", "formula": "!rb:BORN_IN", "type" : "QuRelat"}
-{"lexeme": "go to", "formula": "!rb:STUDY_AT", "type" : "QuRelat"}
-{"lexeme": "study", "formula": "!rb:STUDY_AT", "type" : "QuRelat"}
-{"lexeme": "study at", "formula": "!rb:STUDY_AT", "type" : "QuRelat"}
-{"lexeme": "work for", "formula": "!rb:WORK_FOR", "type" : "QuRelat"}
-{"lexeme": "work at", "formula": "!rb:WORK_FOR", "type" : "QuRelat"}
-{"lexeme": "work as", "formula": "!rb:OCCUPIED_AS", "type" : "QuRelat"}
-{"lexeme": "live in", "formula": "!rb:LIVE_IN", "type" : "QuRelat"}
-{"lexeme": "lives in", "formula": "!rb:LIVE_IN", "type" : "QuRelat"}
-{"lexeme": "belong to", "formula": "!rb:MEMBER_OF", "type" : "QuRelat"}
+{"lexeme": "call", "formula": "!rb:NAME_OF", "type" : "QRoboy"}
+{"lexeme": "like", "formula": "!rb:HAS_HOBBY", "type" : "QRoboy"}
+{"lexeme": "like", "formula": "!rb:FRIEND_OF", "type" : "QRoboy"}
+{"lexeme": "like", "formula": "!rb:FAVORITE_MOVIE", "type" : "QRoboy"}
+{"lexeme": "bear", "formula": "!rb:FROM", "type" : "QRoboy"}
+{"lexeme": "bear in", "formula": "!rb:FROM", "type" : "QRoboy"}
+{"lexeme": "be bear in", "formula": "!rb:FROM", "type" : "QRoboy"}
+{"lexeme": "come from", "formula": "!rb:FROM", "type" : "QRoboy"}
+{"lexeme": "be from", "formula": "!rb:FROM", "type" : "QRoboy"}
+{"lexeme": "from", "formula": "!rb:FROM", "type" : "QRoboy"}
+{"lexeme": "go to", "formula": "!rb:STUDY_AT", "type" : "QRoboy"}
+{"lexeme": "study", "formula": "!rb:STUDY_AT", "type" : "QRoboy"}
+{"lexeme": "study at", "formula": "!rb:STUDY_AT", "type" : "QRoboy"}
+{"lexeme": "work for", "formula": "!rb:WORK_FOR", "type" : "QRoboy"}
+{"lexeme": "work at", "formula": "!rb:WORK_FOR", "type" : "QRoboy"}
+{"lexeme": "be employ", "formula": "!rb:WORK_FOR", "type" : "QRoboy"}
+{"lexeme": "employ", "formula": "!rb:WORK_FOR", "type" : "QRoboy"}
+{"lexeme": "work as", "formula": "!rb:OCCUPIED_AS", "type" : "QRoboy"}
+{"lexeme": "live in", "formula": "!rb:LIVE_IN", "type" : "QRoboy"}
+{"lexeme": "live", "formula": "!rb:LIVE_IN", "type" : "QRoboy"}
+{"lexeme": "lives in", "formula": "!rb:LIVE_IN", "type" : "QRoboy"}
+{"lexeme": "be friend with", "formula": "!rb:FRIEND_OF", "type" : "QRoboy"}
+{"lexeme": "friend with", "formula": "!rb:FRIEND_OF", "type" : "QRoboy"}
+{"lexeme": "belong to", "formula": "!rb:MEMBER_OF", "type" : "QRoboy"}
 
 ## Classes
 {"lexeme": "object", "formula": "rb:OBJECT", "type" : "ObjectClass"}
@@ -59,43 +72,55 @@
 {"lexeme": "animal", "formula": "rb:ANIMAL", "type" : "ObjectClass"}
 
 ## Relationship Classes
-{"lexeme": "hobby", "formula": "rb:HAS_HOBBY", "type" : "RelationClass"}
-{"lexeme": "activity", "formula": "rb:HAS_HOBBY", "type" : "RelationClass"}
-{"lexeme": "employer", "formula": "rb:WORK_FOR", "type" : "RelationClass"}
-{"lexeme": "location", "formula": "rb:LIVE_IN", "type" : "RelationClass"}
-{"lexeme": "home", "formula": "rb:BORN_IN", "type" : "RelationClass"}
-{"lexeme": "free time", "formula": "rb:HAS_HOBBY", "type" : "RelationClass"}
-{"lexeme": "current home", "formula": "rb:LIVE_IN", "type" : "RelationClass"}
-{"lexeme": "movie", "formula": "rb:FAVORITE_MOVIE", "type" : "RelationClass"}
-{"lexeme": "university", "formula": "rb:STUDY_AT", "type" : "RelationClass"}
-{"lexeme": "child", "formula": "rb:CHILD_OF", "type" : "RelationClass"}
-{"lexeme": "friend", "formula": "rb:FRIEND_OF", "type" : "RelationClass"}
-{"lexeme": "friend of", "formula": "rb:FRIEND_OF", "type" : "RelationClass"}
-{"lexeme": "name", "formula": "rb:NAME_OF", "type" : "RelationClass"}
-{"lexeme": "expertise", "formula": "rb:OCCUPIED_AS", "type" : "RelationClass"}
-{"lexeme": "age", "formula": "rb:AGE", "type" : "RelationClass"}
-{"lexeme": "member", "formula": "rb:MEMBER_OF", "type" : "RelationClass"}
-{"lexeme": "member of", "formula": "rb:MEMBER_OF", "type" : "RelationClass"}
-{"lexeme": "part", "formula": "rb:PART_OF", "type" : "RelationClass"}
-{"lexeme": "relative", "formula": "rb:RELATIVE_OF", "type" : "RelationClass"}
+{"lexeme": "hobby", "formula": "rb:HAS_HOBBY", "type" : "ObjProp"}
+{"lexeme": "favorite activity", "formula": "rb:HAS_HOBBY", "type" : "ObjProp"}
+{"lexeme": "favorite thing to do", "formula": "rb:HAS_HOBBY", "type" : "ObjProp"}
+{"lexeme": "employer", "formula": "rb:WORK_FOR", "type" : "ObjProp"}
+{"lexeme": "location", "formula": "rb:LIVE_IN", "type" : "ObjProp"}
+{"lexeme": "home", "formula": "rb:LIVE_IN", "type" : "ObjProp"}
+{"lexeme": "movie", "formula": "rb:FAVORITE_MOVIE", "type" : "ObjProp"}
+{"lexeme": "favorite tv show", "formula": "rb:FAVORITE_MOVIE", "type" : "ObjProp"}
+{"lexeme": "favorite movie", "formula": "rb:FAVORITE_MOVIE", "type" : "ObjProp"}
+{"lexeme": "alma mater", "formula": "rb:STUDY_AT", "type" : "ObjProp"}
+{"lexeme": "university", "formula": "rb:STUDY_AT", "type" : "ObjProp"}
+{"lexeme": "child", "formula": "rb:CHILD_OF", "type" : "ObjProp"}
+{"lexeme": "friend", "formula": "rb:FRIEND_OF", "type" : "ObjProp"}
+{"lexeme": "field of expertise", "formula": "rb:OCCUPIED_AS", "type" : "ObjProp"}
+{"lexeme": "profession", "formula": "rb:OCCUPIED_AS", "type" : "ObjProp"}
+{"lexeme": "name", "formula": "rb:NAME_OF", "type" : "DataProp"}
+{"lexeme": "home", "formula": "rb:FROM", "type" : "ObjProp"}
+{"lexeme": "age", "formula": "rb:AGE", "type" : "DataProp"}
+{"lexeme": "member", "formula": "rb:MEMBER_OF", "type" : "ObjProp"}
+{"lexeme": "part", "formula": "rb:PART_OF", "type" : "ObjProp"}
+{"lexeme": "relative", "formula": "rb:RELATIVE_OF", "type" : "ObjProp"}
 
-{"lexeme": "hobby", "formula": "!rb:HAS_HOBBY", "type" : "QRelatC"}
-{"lexeme": "employer", "formula": "!rb:WORK_FOR", "type" : "QRelatC"}
-{"lexeme": "location", "formula": "!rb:LIVE_IN", "type" : "QRelatC"}
-{"lexeme": "home", "formula": "!rb:BORN_IN", "type" : "QRelatC"}
-{"lexeme": "current home", "formula": "!rb:LIVE_IN", "type" : "QRelatC"}
-{"lexeme": "movie", "formula": "!rb:FAVORITE_MOVIE", "type" : "QRelatC"}
-{"lexeme": "university", "formula": "!rb:STUDY_AT", "type" : "QRelatC"}
-{"lexeme": "child", "formula": "!rb:CHILD_OF", "type" : "QRelatC"}
-{"lexeme": "friend", "formula": "!rb:FRIEND_OF", "type" : "QRelatC"}
-{"lexeme": "friend of", "formula": "!rb:FRIEND_OF", "type" : "QRelatC"}
-{"lexeme": "name", "formula": "!rb:NAME_OF", "type" : "QRelatC"}
-{"lexeme": "field of expertise", "formula": "!rb:OCCUPIED_AS", "type" : "QRelatC"}
-{"lexeme": "age", "formula": "!rb:AGE", "type" : "QRelatC"}
-{"lexeme": "member", "formula": "!rb:MEMBER_OF", "type" : "QRelatC"}
-{"lexeme": "member of", "formula": "!rb:MEMBER_OF", "type" : "QRelatC"}
-{"lexeme": "part", "formula": "!rb:PART_OF", "type" : "QRelatC"}
-{"lexeme": "relative", "formula": "!rb:RELATIVE_OF", "type" : "QRelatC"}
+{"lexeme": "hobby", "formula": "!rb:HAS_HOBBY", "type" : "QRoboy"}
+{"lexeme": "activity", "formula": "!rb:HAS_HOBBY", "type" : "QRoboy"}
+{"lexeme": "favourite activity", "formula": "!rb:HAS_HOBBY", "type" : "QRoboy"}
+{"lexeme": "favorite activity", "formula": "!rb:HAS_HOBBY", "type" : "QRoboy"}
+{"lexeme": "free time", "formula": "!rb:HAS_HOBBY", "type" : "QRoboy"}
+{"lexeme": "favourite thing to do", "formula": "!rb:HAS_HOBBY", "type" : "QRoboy"}
+{"lexeme": "favorite thing to do", "formula": "!rb:HAS_HOBBY", "type" : "QRoboy"}
+{"lexeme": "employer", "formula": "!rb:WORK_FOR", "type" : "QRoboy"}
+{"lexeme": "location", "formula": "!rb:LIVE_IN", "type" : "QRoboy"}
+{"lexeme": "current home", "formula": "!rb:LIVE_IN", "type" : "QRoboy"}
+{"lexeme": "movie", "formula": "!rb:FAVORITE_MOVIE", "type" : "QRoboy"}
+{"lexeme": "field of expertise", "formula": "!rb:OCCUPIED_AS", "type" : "QRoboy"}
+{"lexeme": "profession", "formula": "!rb:OCCUPIED_AS", "type" : "QRoboy"}
+{"lexeme": "favorite tv show", "formula": "!rb:FAVORITE_MOVIE", "type" : "QRoboy"}
+{"lexeme": "favorite movie", "formula": "!rb:FAVORITE_MOVIE", "type" : "QRoboy"}
+{"lexeme": "favourite tv show", "formula": "!rb:FAVORITE_MOVIE", "type" : "QRoboy"}
+{"lexeme": "favourite movie", "formula": "!rb:FAVORITE_MOVIE", "type" : "QRoboy"}
+{"lexeme": "alma mater", "formula": "!rb:STUDY_AT", "type" : "QRoboy"}
+{"lexeme": "university", "formula": "!rb:STUDY_AT", "type" : "QRoboy"}
+{"lexeme": "child", "formula": "!rb:CHILD_OF", "type" : "QRoboy"}
+{"lexeme": "friend", "formula": "!rb:FRIEND_OF", "type" : "QRoboy"}
+{"lexeme": "name", "formula": "!rb:NAME_OF", "type" : "QRoboy"}
+{"lexeme": "home", "formula": "!rb:FROM", "type" : "QRoboy"}
+{"lexeme": "age", "formula": "!rb:AGE", "type" : "QRoboy"}
+{"lexeme": "member", "formula": "!rb:MEMBER_OF", "type" : "QRoboy"}
+{"lexeme": "part", "formula": "!rb:PART_OF", "type" : "QRoboy"}
+{"lexeme": "relative", "formula": "!rb:RELATIVE_OF", "type" : "QRoboy"}
 
 {"lexeme": "when", "formula": "rb:WHEN", "type" : "subordinate.time"}
 {"lexeme": "whenever", "formula": "rb:WHEN", "type" : "subordinate.time"}
@@ -126,41 +151,20 @@
 {"lexeme": "that", "formula": "rb:EFFECT", "type" : "subordinate.effect"}
 {"lexeme": "this is why", "formula": "rb:EFFECT", "type" : "subordinate.effect"}
 
-# QUESTION
-{"lexeme": "who", "formula": "rb:question.person", "type" : "Question"}
-{"lexeme": "who", "formula": "rb:question.organization", "type" : "Question"}
-{"lexeme": "who", "formula": "rb:question.business", "type" : "Question"}
-{"lexeme": "where", "formula": "rb:question.location", "type" : "Question"}
-{"lexeme": "where", "formula": "rb:question.organization", "type" : "Question"}
-{"lexeme": "where", "formula": "rb:question.educational_institution", "type" : "Question"}
-{"lexeme": "when", "formula": "rb:question.datetime", "type" : "Question"}
-{"lexeme": "why", "formula": "rb:question.cause", "type" : "Question"}
-{"lexeme": "what for", "formula": "rb:question.effect", "type" : "Question"}
-{"lexeme": "what", "formula": "rb:question.object", "type" : "Question"}
-{"lexeme": "what kind of", "formula": "rb:question.type", "type" : "Question"}
-{"lexeme": "how", "formula": "rb:question.quantity", "type" : "Question"}
-{"lexeme": "do", "formula": "rb:question.activity", "type" : "Question"}
-{"lexeme": "does", "formula": "rb:question.activity", "type" : "Question"}
-
-# Freebase
-{"lexeme": "california", "formula": "fb:en.california"}
-{"lexeme": "the golden state", "formula": "fb:en.california"}
-{"lexeme": "cities", "formula": "(fb:type.object.type fb:location.citytown)"}
-{"lexeme": "towns", "formula": "(fb:type.object.type fb:location.citytown)"}
-{"lexeme": "in", "formula": "fb:location.location.containedby"}
-{"lexeme": "located in", "formula": "fb:location.location.containedby"}
+# Ignore for questions
+{"lexeme": "have", "formula": "rb:EFFECT", "type" : "Ignore"}
+{"lexeme": "can", "formula": "rb:EFFECT", "type" : "Ignore"}
+{"lexeme": "be", "formula": "rb:EFFECT", "type" : "Ignore"}
+{"lexeme": "do", "formula": "rb:EFFECT", "type" : "Ignore"}
+{"lexeme": "have i", "formula": "rb:EFFECT", "type" : "Ignore"}
+{"lexeme": "can i", "formula": "rb:EFFECT", "type" : "Ignore"}
 
 # DBpedia
-{"lexeme": "name", "formula": "!foaf:name", "type": "RelationalNoun"}
 {"lexeme": "name", "formula": "foaf:name", "type": "RelationalNoun"}
 {"lexeme": "surname", "formula": "foaf:surname", "type": "RelationalNoun"}
-{"lexeme": "surname", "formula": "!foaf:surname", "type": "RelationalNoun"}
 {"lexeme": "given name", "formula": "foaf:name", "type": "RelationalNoun"}
-{"lexeme": "given name", "formula": "!foaf:name", "type": "RelationalNoun"}
 {"lexeme": "type", "formula": "rdf:type", "type": "ClassNoun"}
-{"lexeme": "type", "formula": "!rdf:type", "type": "ClassNoun"}
 {"lexeme": "birth date", "formula": "!dbpedia:birthDate", "type": "RelationalNoun"}
-{"lexeme": "birth place", "formula": "!dbpedia:birthPlace", "type": "RelationalNoun"}
 {"lexeme": "anatomical structure", "formula": "dbpedia:AnatomicalStructure", "type": "ClassNoun"}
 {"lexeme": "brain", "formula": "dbpedia:Brain", "type": "ClassNoun"}
 {"lexeme": "bone", "formula": "dbpedia:Bone", "type": "ClassNoun"}
@@ -236,7 +240,7 @@
 {"lexeme": "mayor", "formula": "dbpedia:Mayor", "type": "ClassNoun"}
 {"lexeme": "mayor", "formula": "(dbpedia:leaderTitle 'Mayor'@en)", "type": "DataPropertyNoun"}
 {"lexeme": "senator", "formula": "dbpedia:Senator", "type": "ClassNoun"}
-{"lexeme": "senator", "formula": "(dbpedia:office 'Senator@en)", "type": "DataPropertyNoun"}
+{"lexeme": "senator", "formula": "(dbpedia:office 'Senator'@en)", "type": "DataPropertyNoun"}
 {"lexeme": "ambassador", "formula": "dbpedia:Ambassador", "type": "ClassNoun"}
 {"lexeme": "law firm", "formula": "dbpedia:LawFirm", "type": "ClassNoun"}
 {"lexeme": "case", "formula": "dbpedia:Case", "type": "ClassNoun"}
@@ -889,6 +893,10 @@
 {"lexeme": "women", "formula": "(dbpedia:gender resource:Female)", "type": "ObjectProperty"}
 {"lexeme": "man", "formula": "(dbpedia:gender resource:Male)", "type": "ObjectProperty"}
 {"lexeme": "men", "formula": "(dbpedia:gender resource:Male)", "type": "ObjectProperty"}
+{"lexeme": "woman", "formula": "(foaf:gender 'female'@en)", "type": "ObjectProperty"}
+{"lexeme": "women", "formula": "(foaf:gender 'female'@en)", "type": "ObjectProperty"}
+{"lexeme": "man", "formula": "(foaf:gender 'male'@en)", "type": "ObjectProperty"}
+{"lexeme": "men", "formula": "(foaf:gender 'male'@en)", "type": "ObjectProperty"}
 {"lexeme": "ethnic group", "formula": "dbpedia:EthnicGroup", "type": "ClassNoun"}
 {"lexeme": "name", "formula": "dbpedia:Name", "type": "ClassNoun"}
 {"lexeme": "given name", "formula": "dbpedia:GivenName", "type": "ClassNoun"}
@@ -1018,6 +1026,8 @@
 {"lexeme": "buried", "formula": "dbpedia:restingPlace", "type": "RelationalAdjective"}
 {"lexeme": "female", "formula": "(dbpedia:gender resource:Female)", "type": "IntersectiveObjectPropertyAdjective"}
 {"lexeme": "male", "formula": "(dbpedia:gender resource:Male)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "female", "formula": "(foaf:gender 'female'@en)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "male", "formula": "(foaf:gender 'male'@en)", "type": "IntersectiveObjectPropertyAdjective"}
 {"lexeme": "relative", "formula": "dbpedia:relative", "type": "RelationalNoun"}
 {"lexeme": "related", "formula": "dbpedia:relative", "type": "RelationalAdjective"}
 {"lexeme": "child", "formula": "dbpedia:child", "type": "RelationalNoun"}

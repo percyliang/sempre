@@ -115,13 +115,20 @@ public class ErrorInfo implements MemUsage.Instrumented {
         if (this.candidates_scored.isEmpty())
             this.candidates_scored = errorInfo.getScored();
         else {
-            for (String key : this.candidates_scored.keySet()) {
-                for (String record : this.candidates_scored.get(key).keySet()) {
-                    double score = this.candidates_scored.get(key).get(record)
-                            + errorInfo.getScored().get(key).get(record);
-//                    System.out.println("Adding scores" + this.candidates_scored.get(key).get(record)
-//                            + "and " + errorInfo.getScored().get(key).get(record));
-                    this.candidates_scored.get(key).put(record, score);
+            for (String key : errorInfo.getScored().keySet()) {
+                if (this.candidates_scored.containsKey(key)){
+                    for (String record : errorInfo.getScored().get(key).keySet()) {
+                        if (this.candidates_scored.get(key).containsKey(record)) {
+                            double score = this.candidates_scored.get(key).get(record)
+                                    + errorInfo.getScored().get(key).get(record);
+                            this.candidates_scored.get(key).put(record, score);
+                        }
+                        else
+                            this.candidates_scored.get(key).put(record,errorInfo.getScored().get(key).get(record));
+                    }
+                }
+                else{
+                    this.candidates_scored.put(key,errorInfo.getScored().get(key));
                 }
             }
         }

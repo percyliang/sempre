@@ -58,21 +58,22 @@ public class LabelRetriever extends KnowledgeRetriever {
                 for (String u: uri) {
                     single.put("URI", u);
                     // Get rid of categories
-                    if (u.contains("Category"))
-                        single.put("Refcount", String.valueOf(0.1));
-                    Set<String> labels = sparqlUtil.returnLabel(u, endpointUrl, false);
-                    if (labels == null)
-                        labels = new HashSet<>(Arrays.asList(entity));
-                    for (String l: labels) {
-                        single.put("Label", l);
-                        if (errorInfo.getCandidates().containsKey(entity)) {
-                            errorInfo.getCandidates().get(entity).add(gson.toJson(single));
-                            if (ConfigManager.DEBUG > 3)
-                                LogInfo.logs("Label: %s", gson.toJson(single));
-                        } else {
-                            errorInfo.getCandidates().put(entity, new ArrayList<>(Arrays.asList(gson.toJson(single))));
-                            if (ConfigManager.DEBUG > 3)
-                                LogInfo.logs("Label: %s", gson.toJson(single));
+                    if (!u.contains("Category"))
+                    {
+                        Set<String> labels = sparqlUtil.returnLabel(u, endpointUrl, false);
+                        if (labels == null)
+                            labels = new HashSet<>(Arrays.asList(entity));
+                        for (String l : labels) {
+                            single.put("Label", l);
+                            if (errorInfo.getCandidates().containsKey(entity)) {
+                                errorInfo.getCandidates().get(entity).add(gson.toJson(single));
+                                if (ConfigManager.DEBUG > 3)
+                                    LogInfo.logs("Label: %s", gson.toJson(single));
+                            } else {
+                                errorInfo.getCandidates().put(entity, new ArrayList<>(Arrays.asList(gson.toJson(single))));
+                                if (ConfigManager.DEBUG > 3)
+                                    LogInfo.logs("Label: %s", gson.toJson(single));
+                            }
                         }
                     }
                 }

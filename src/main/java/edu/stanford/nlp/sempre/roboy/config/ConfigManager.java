@@ -35,6 +35,7 @@ public class ConfigManager {
     // Other parameters
     public static int PARSER_PORT = -1;
     public static double W2V_THRES = 0.3;
+    public static double LEXICON_THRES = 0.3;
     public static boolean WORD2VEC_GOOGLE = false;
     public static String[] DB_KEYWORDS = {"Result","Label","URI","Refcount"};
     public static String[] MCG_KEYWORDS = {"KeyValueOfstringdouble","Key","Value"};
@@ -95,6 +96,7 @@ public class ConfigManager {
             DB_KEYWORDS     = yamlConfig.getStringArray("DB_KEYWORDS");
             MCG_KEYWORDS    = yamlConfig.getStringArray("MCG_KEYWORDS");
             KEYWORDS_TAGS    = yamlConfig.getStringArray("KEYWORDS_TAGS");
+            LEXICON_THRES       = yamlConfig.getDouble("LEXICON_THRES");
 
             // Read all parameters from JSON files
             JsonReader reader = new JsonReader(new FileReader(SCORE_WEIGHTS_FILE));

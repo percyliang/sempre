@@ -12,6 +12,8 @@ import java.net.URLEncoder;
 
 import java.io.*;
 import java.util.*;
+
+import edu.stanford.nlp.sempre.roboy.config.ConfigManager;
 import fig.basic.*;
 
 import org.w3c.dom.Document;
@@ -133,8 +135,10 @@ public class SparqlUtils {
         try {
             String url = String.format("%s?default-graph-uri=http://dbpedia.org&query=%s&format=xml",
                     endpointUrl, URLEncoder.encode(formQuery(json,"en"), "UTF-8"));
-            System.out.println("SPARQL query: "+formQuery(json));
-            System.out.println("Query: "+url);
+            if(ConfigManager.DEBUG > 5) {
+                LogInfo.logs("SPARQL query: " + formQuery(json));
+                LogInfo.logs("Query: " + url);
+            }
             ServerResponse response = makeRequest(url);
 
             List<Map<String,String>> list = new ArrayList<>();

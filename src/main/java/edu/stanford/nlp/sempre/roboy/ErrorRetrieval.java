@@ -12,6 +12,7 @@ import edu.stanford.nlp.sempre.roboy.utils.SparqlUtils;
 import fig.basic.LispTree;
 import fig.basic.LogInfo;
 import fig.basic.Option;
+import sun.rmi.runtime.Log;
 
 import java.lang.reflect.Type;
 import java.util.*;
@@ -184,7 +185,7 @@ public class ErrorRetrieval {
             int end = formula.indexOf("''",start);
             if (start > formula.length() || start < 0 || end < 0 ||end > formula.length())
                 break;
-            String term = formula.substring(start,end).substring(formula.substring(start,end).indexOf("\'")+1);
+            String term = formula.substring(start,end).substring(formula.substring(start,end).indexOf("'")+1);
             if (!errorInfo.getCandidates().containsKey(term)) {
                 for (KnowledgeRetriever helper : this.helpers) {
                     errorInfo.addCandidates(helper.analyze(deriv));
@@ -208,7 +209,7 @@ public class ErrorRetrieval {
             int end = formula.indexOf("''",start);
             if (start > formula.length() || start < 0 || end < 0 ||end > formula.length())
                 break;
-            String term = formula.substring(start,end).substring(formula.substring(start,end).indexOf("\'")+1);
+            String term = formula.substring(start,end).substring(formula.substring(start,end).indexOf("'")+1);
             if (!errorInfo.getScored().containsKey(term)) {
                 for (ScoringFunction scorer : this.scorers) {
                     errorInfo.addScores(scorer.score(errorInfo, this.context));
@@ -254,49 +255,58 @@ public class ErrorRetrieval {
             if (full_type.contains("Entity")){
                 for (String candidate: result.getCandidates().get(term))
                 {
-                    Type type = new TypeToken<Map<String, String>>(){}.getType();
-                    Map<String, String> entry = this.gson.fromJson(candidate, type);
-                    Map<String, String> lexeme = new HashMap();
-                    lexeme.put("lexeme", entry.get("Label").toLowerCase());
-                    lexeme.put("formula", entry.get("URI"));
-                    lexeme.put("type", "NewEntity");
-                    lexeme.put("features", " {score:" + Double.toString(result.getScored().get(term).get(candidate))+"} ");
-                    // Add with knowledge base label
-                    lexemes.add(gson.toJson(lexeme));
-                    lexeme.put("lexeme", term);
-                    lexemes.add(gson.toJson(lexeme));
+                    if ((result.getScored().get(term).get(candidate)) > ConfigManager.LEXICON_THRES) {
+                        Type type = new TypeToken<Map<String, String>>() {
+                        }.getType();
+                        Map<String, String> entry = this.gson.fromJson(candidate, type);
+                        Map<String, String> lexeme = new HashMap();
+                        lexeme.put("lexeme", entry.get("Label").toLowerCase());
+                        lexeme.put("formula", entry.get("URI"));
+                        lexeme.put("type", "NewEntity");
+                        lexeme.put("features", " {score:" + Double.toString(result.getScored().get(term).get(candidate)) + "} ");
+                        // Add with knowledge base label
+                        lexemes.add(gson.toJson(lexeme));
+                        lexeme.put("lexeme", term);
+                        lexemes.add(gson.toJson(lexeme));
+                    }
                 }
             }
             else if (full_type.contains("Type")){
                 for (String candidate: result.getCandidates().get(term))
                 {
-                    Type type = new TypeToken<Map<String, String>>(){}.getType();
-                    Map<String, String> entry = this.gson.fromJson(candidate, type);
-                    Map<String, String> lexeme = new HashMap();
-                    lexeme.put("lexeme", entry.get("Label").toLowerCase());
-                    lexeme.put("formula", entry.get("URI"));
-                    lexeme.put("type", "NewType");
-                    lexeme.put("features", " {score:" + Double.toString(result.getScored().get(term).get(candidate))+"} ");
-                    // Add with knowledge base label
-                    lexemes.add(gson.toJson(lexeme));
-                    lexeme.put("lexeme", term);
-                    lexemes.add(gson.toJson(lexeme));
+                    if ((result.getScored().get(term).get(candidate)) > ConfigManager.LEXICON_THRES) {
+                        Type type = new TypeToken<Map<String, String>>() {
+                        }.getType();
+                        Map<String, String> entry = this.gson.fromJson(candidate, type);
+                        Map<String, String> lexeme = new HashMap();
+                        lexeme.put("lexeme", entry.get("Label").toLowerCase());
+                        lexeme.put("formula", entry.get("URI"));
+                        lexeme.put("type", "NewType");
+                        lexeme.put("features", " {score:" + Double.toString(result.getScored().get(term).get(candidate)) + "} ");
+                        // Add with knowledge base label
+                        lexemes.add(gson.toJson(lexeme));
+                        lexeme.put("lexeme", term);
+                        lexemes.add(gson.toJson(lexeme));
+                    }
                 }
             }
             else if (full_type.contains("Relation")){
                 for (String candidate: result.getCandidates().get(term))
                 {
-                    Type type = new TypeToken<Map<String, String>>(){}.getType();
-                    Map<String, String> entry = this.gson.fromJson(candidate, type);
-                    Map<String, String> lexeme = new HashMap();
-                    lexeme.put("lexeme", entry.get("Label").toLowerCase());
-                    lexeme.put("formula", entry.get("URI"));
-                    lexeme.put("type", "NewRelation");
-                    lexeme.put("features", " {score:" + Double.toString(result.getScored().get(term).get(candidate))+"} ");
-                    // Add with knowledge base label
-                    lexemes.add(gson.toJson(lexeme));
-                    lexeme.put("lexeme", term);
-                    lexemes.add(gson.toJson(lexeme));
+                    if ((result.getScored().get(term).get(candidate)) > ConfigManager.LEXICON_THRES) {
+                        Type type = new TypeToken<Map<String, String>>() {
+                        }.getType();
+                        Map<String, String> entry = this.gson.fromJson(candidate, type);
+                        Map<String, String> lexeme = new HashMap();
+                        lexeme.put("lexeme", entry.get("Label").toLowerCase());
+                        lexeme.put("formula", entry.get("URI"));
+                        lexeme.put("type", "NewRelation");
+                        lexeme.put("features", " {score:" + Double.toString(result.getScored().get(term).get(candidate)) + "} ");
+                        // Add with knowledge base label
+                        lexemes.add(gson.toJson(lexeme));
+                        lexeme.put("lexeme", term);
+                        lexemes.add(gson.toJson(lexeme));
+                    }
                 }
             }
             formula = formula.substring(end+2);
