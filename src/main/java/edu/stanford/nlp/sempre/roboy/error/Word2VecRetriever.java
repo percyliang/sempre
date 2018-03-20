@@ -37,11 +37,11 @@ public class Word2VecRetriever extends KnowledgeRetriever {
         String formula = dev.getFormula().toString();
         while (formula.contains("Open")){
             int start = formula.indexOf("Open")+"Open".length();
-            int end = formula.indexOf("\''",start);
+            int end = formula.indexOf("''",start);
             if (start > formula.length() || start < 0 || end < 0 ||end > formula.length())
                 return errorInfo;
             unknown = formula.substring(start,end);
-            String entity = unknown.substring(unknown.indexOf("\'")+1);
+            String entity = unknown.substring(unknown.indexOf("'")+1);
             List<String> known_words= new ArrayList<String>(SimpleLexicon.getSingleton().lookup_type(entity));
             List<String> candidate = this.vec.getBest(entity,known_words);
             for (String c: candidate){

@@ -1,0 +1,40 @@
+(example
+	(utterance "my best friend is ben")
+	(targetFormula (triples (triple rb:active_person rb:FRIEND_OF ben)))
+)
+(example
+	(utterance "i earn my living at Samsung and you work at Roboy")
+	(targetFormula (list (triples (triple rb:active_person rb:WORK_FOR samsung)) (triples (triple rb:active_person rb:WORK_FOR roboy))))
+)
+(example
+	(utterance "i was born in nicaragua")
+	(targetFormula (triples (triple rb:active_person rb:FROM nicaragua)))
+)
+(example
+	(utterance "i live in munich")
+	(targetFormula (triples (triple rb:active_person rb:LIVE_IN munich)))
+)
+(example
+	(utterance "i go to UW")
+	(targetFormula (triples (triple rb:active_person rb:STUDY_AT uw)))
+)
+(example
+	(utterance "my current home is warsaw")
+	(targetFormula (triples (triple rb:active_person rb:LIVE_IN warsaw)))
+)
+(example
+	(utterance "anna is my name")
+	(targetFormula (triples (triple rb:active_person rb:NAME_OF anna)))
+)
+(example
+	(utterance "i am employed at Samsung")
+	(targetFormula (triples (triple rb:active_person rb:WORK_FOR samsung)))
+)
+(example
+	(utterance "i work as a nurse")
+	(targetFormula (triples (triple rb:active_person rb:OCCUPIED_AS nurse)))
+)
+(example
+	(utterance "i was born in poland and you were born in switzerland")
+	(targetFormula (list (triples (triple rb:active_person rb:FROM poland)) (triples (triple rb:Roboy rb:FROM switzerland))))
+)

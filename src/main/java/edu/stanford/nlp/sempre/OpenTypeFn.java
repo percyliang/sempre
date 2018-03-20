@@ -41,16 +41,16 @@ public class OpenTypeFn extends SemanticFn {
       @Override
       public Derivation createDerivation() {
         StringBuilder out = new StringBuilder();
-        if (type) out.append("OpenType\'");
-        if (rel) out.append("OpenRel\'");
-        if (entity) out.append("OpenEntity\'");
+        if (type) out.append("OpenType'");
+        if (rel) out.append("OpenRel'");
+        if (entity) out.append("OpenEntity'");
         for (int i = 0; i < c.getChildren().size(); i++) {
           if (i > 0)
             out.append(" ");
           out.append(c.childStringValue(i));
         }
-        out.append("\''");
-        if (SimpleLexicon.getSingleton().lookup(out.toString().substring(out.toString().indexOf("\'")+1,out.toString().indexOf("\''"))).isEmpty())
+        out.append("''");
+        if (SimpleLexicon.getSingleton().lookup(out.toString().substring(out.toString().indexOf("'")+1,out.toString().indexOf("''"))).isEmpty())
               return new Derivation.Builder()
                       .withCallable(c)
                       .withStringFormulaFrom(out.toString())

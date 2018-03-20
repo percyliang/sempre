@@ -1,0 +1,14 @@
+[
+	{"type": "WORK_FOR", "utterance": "i am employed at Samsung", "targetFormula": "(triples (triple rb:active_person rb:WORK_FOR samsung))"},
+	{"type": "QMOVIES", "utterance": "What is your favorite TV show?", "targetFormula": "(!rb:FAVORITE_MOVIE rb:Roboy)"},
+	{"type": "QMOVIES", "utterance": "Which comedy do you like the most?", "targetFormula": "(!rb:FAVORITE_MOVIE rb:Roboy)"},
+	{"type": "MEMBER_OF", "utterance": "i belong to IAESTE", "targetFormula": "(triples (triple rb:active_person rb:MEMBER_OF iaeste))"},
+	{"type": "FROM", "utterance": "i come from poland", "targetFormula": "(triples (triple rb:active_person rb:FROM poland))"},
+	{"type": "STUDY_AT", "utterance": "i study at TUM", "targetFormula": "(triples (triple rb:active_person rb:STUDY_AT tum))"},
+	{"type": "QHAS_HOBBY", "utterance": "How do I spend my free time?", "targetFormula": "(!rb:HAS_HOBBY rb:active_person)"},
+	{"type": "QMOVIES", "utterance": "What is my favourite movie?", "targetFormula": "(!rb:FAVORITE_MOVIE rb:active_person)"},
+	{"type": "MOVIES", "utterance": "my favorite tv show is ellen", "targetFormula": "(triples (triple rb:active_person rb:FAVORITE_MOVIE ellen))"},
+	{"type": "QWORK_FOR", "utterance": "For which company do I work?", "targetFormula": "(!rb:WORK_FOR rb:active_person)"},
+	{"type": "QMEMBER_OF", "utterance": "Do I belong to any organizations?", "targetFormula": "(!rb:MEMBER_OF rb:active_person)"},
+	{"type": "QWORK_FOR", "utterance": "Who is my employer?", "targetFormula": "(!rb:WORK_FOR rb:active_person)"}
+]

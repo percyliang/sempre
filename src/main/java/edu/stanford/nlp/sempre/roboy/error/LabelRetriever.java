@@ -40,11 +40,11 @@ public class LabelRetriever extends KnowledgeRetriever {
         String formula = dev.getFormula().toString();
         while (formula.contains("Open")){
             int start = formula.indexOf("Open")+"Open".length();
-            int end = formula.indexOf("\''",start);
+            int end = formula.indexOf("''",start);
             if (start > formula.length() || start < 0 || end < 0 ||end > formula.length())
                 return errorInfo;
             unknown = formula.substring(start,end);
-            String entity = unknown.substring(unknown.indexOf("\'")+1);
+            String entity = unknown.substring(unknown.indexOf("'")+1);
             // Extract the results from XML now.
             Set<String> uri = sparqlUtil.returnURI(entity, endpointUrl, false);
             Set<String> uri_cap = sparqlUtil.returnURI( WordUtils.capitalize(entity), endpointUrl, false);
@@ -54,19 +54,27 @@ public class LabelRetriever extends KnowledgeRetriever {
                 uri.addAll(uri_cap);
             Map<String,String> single = new HashMap();
             if (uri != null) {
-                single.put("Label", entity);
                 single.put("Refcount", String.valueOf(new Double(1.0/uri.size())));
                 for (String u: uri) {
                     single.put("URI", u);
-                    if (errorInfo.getCandidates().containsKey(entity)) {
-                        errorInfo.getCandidates().get(entity).add(gson.toJson(single));
-                        if (ConfigManager.DEBUG > 3)
-                            LogInfo.logs("Label: %s",gson.toJson(single));
-                    }
-                    else{
-                        errorInfo.getCandidates().put(entity, new ArrayList<>(Arrays.asList(gson.toJson(single))));
-                        if (ConfigManager.DEBUG > 3)
-                            LogInfo.logs("Label: %s",gson.toJson(single));
+                    // Get rid of categories
+                    if (!u.contains("Category"))
+                    {
+                        Set<String> labels = sparqlUtil.returnLabel(u, endpointUrl, false);
+                        if (labels == null)
+                            labels = new HashSet<>(Arrays.asList(entity));
+                        for (String l : labels) {
+                            single.put("Label", l);
+                            if (errorInfo.getCandidates().containsKey(entity)) {
+                                errorInfo.getCandidates().get(entity).add(gson.toJson(single));
+                                if (ConfigManager.DEBUG > 3)
+                                    LogInfo.logs("Label: %s", gson.toJson(single));
+                            } else {
+                                errorInfo.getCandidates().put(entity, new ArrayList<>(Arrays.asList(gson.toJson(single))));
+                                if (ConfigManager.DEBUG > 3)
+                                    LogInfo.logs("Label: %s", gson.toJson(single));
+                            }
+                        }
                     }
                 }
             }

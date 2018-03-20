@@ -45,11 +45,11 @@ public class MCGRetriever extends KnowledgeRetriever {
         String formula = dev.getFormula().toString();
         while (formula.contains("Open")){
             int start = formula.indexOf("Open")+"Open".length();
-            int end = formula.indexOf("\''",start);
+            int end = formula.indexOf("''",start);
             if (start > formula.length() || start < 0 || end < 0 ||end > formula.length())
                 return errorInfo;
             unknown = formula.substring(start,end);
-            String entity = unknown.substring(unknown.indexOf("\'")+1);
+            String entity = unknown.substring(unknown.indexOf("'")+1);
             // Extract the results from XML now.
             String url = (endpointUrl.concat(entity.replace(" ","+"))).concat("&topK=10");
             SparqlUtils.ServerResponse response = sparqlUtil.makeRequest(url);

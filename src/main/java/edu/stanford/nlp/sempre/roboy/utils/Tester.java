@@ -69,11 +69,12 @@ public class Tester {
         double fail = 0;
         Tester test = new Tester(5000);
         try {
-            JsonReader reader = new JsonReader(new FileReader("./data/rpqa-train-a.json"));
+            JsonReader reader = new JsonReader(new FileReader("./data/rpqa/1/test.json"));
             Type type = new TypeToken<List<Map<String, String>>>() {
             }.getType();
             Gson gson = new Gson();
             List<Map<String, String>> testSet = gson.fromJson(reader, type);
+            test.query("(reload resources/roboy-demo.grammar)");
             for (Map<String, String> entry : testSet) {
                 String response = test.query(entry.get("utterance"));
                 if (response != null) {

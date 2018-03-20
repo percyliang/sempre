@@ -1,0 +1,14 @@
+[
+{"utterance": "Who is your best friend?", "type": "QFRIEND_OF", "targetFormula": "(!rb:FRIEND_OF rb:Roboy)"},
+{"utterance": "my name is emily", "type": "NAME", "targetFormula": "(triples (triple rb:active_person rb:NAME_OF emily))"},
+{"utterance": "my current home is warsaw and your current home is munich", "type": "LIVE_IN", "targetFormula": "(list (triples (triple rb:active_person rb:LIVE_IN warsaw)) (triples (triple rb:roboy rb:LIVE_IN munich)))"},
+{"utterance": "What is your home country?", "type": "QFROM", "targetFormula": "(!rb:FROM rb:Roboy)"},
+{"utterance": "people call me sam", "type": "NAME", "targetFormula": "(triples (triple rb:active_person rb:NAME_OF sam))"},
+{"utterance": "my favorite activity is swimming", "type": "HAS_HOBBY", "targetFormula": "(triples (triple rb:active_person rb:HAS_HOBBY swim))"},
+{"utterance": "Who is my best friend?", "type": "QFRIEND_OF", "targetFormula": "(!rb:FRIEND_OF rb:active_person)"},
+{"utterance": "What is my field of expertise?", "type": "QOCCUPIED_AS", "targetFormula": "(!rb:OCCUPIED_AS rb:active_person)"},
+{"utterance": "i am a teacher", "type": "OCCUPIED_AS", "targetFormula": "(triples (triple rb:active_person rb:OCCUPIED_AS teacher))"},
+{"utterance": "Where am I employed?", "type": "QWORK_FOR", "targetFormula": "(!rb:WORK_FOR rb:active_person)"},
+{"utterance": "my home country is ukraine", "type": "FROM", "targetFormula": "(triples (triple rb:active_person rb:FROM ukraine))"},
+{"utterance": "Where is your current home?", "type": "QLIVE_IN", "targetFormula": "(!rb:LIVE_IN rb:Roboy)"}
+]

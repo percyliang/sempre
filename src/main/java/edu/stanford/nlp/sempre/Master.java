@@ -82,7 +82,8 @@ public class Master {
     }
 
     public String getAll() {
-
+      if (ex == null)
+        return null;
       Map<String,Object> interpretation = new HashMap<>();
       interpretation.put("tokens",ex.getTokens());
       interpretation.put("lemma_tokens",ex.getLemmaTokens());
@@ -106,6 +107,7 @@ public class Master {
         interpretation.put("answer","(not selected)");
       }
       else {
+        LogInfo.logs("%d",candidateIndex);
         Derivation deriv = getDerivation();
         deriv.ensureExecuted(builder.executor, ex.context);
         interpretation.put("parse",deriv.getFormula().toString());
