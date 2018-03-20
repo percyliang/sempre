@@ -24,14 +24,14 @@ similar your system is.
 In order to build application with all needed dependencies run:
 ```
 ./pull-dependencies roboy
-./pull-dependencies corenlp
-./pull-dependencies freebase
-mvn clean install
-mvn compile
+mvn clean
+mvn install
 ```
 
 # Word2Vec Model
-Small model for parser has to be manually downloaded from [this link](https://drive.google.com/uc?export=download&confirm&id=1LVOKk7KnDIJphkHRZDa5fDm7ffIcS_Yz).
+Small model for parser has to be manually downloaded from [this link](https://drive.google.com/uc?export=download&confirm&id=1LVOKk7KnDIJphkHRZDa5fDm7ffIcS_Yz) and put it in data/word2vec.
+Other models:
+[google_model](https://s3.amazonaws.com/dl4j-distribution/GoogleNews-vectors-negative300.bin.gz)
 
 # Run
 

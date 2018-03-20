@@ -211,31 +211,26 @@ public class FullNLPAnalyzer extends InfoAnalyzer {
     public List<String> getKeywords(Tree tree){
         List<String> result = new ArrayList<>();
         String keyword = new String();
+        LogInfo.logs("Tree: %s", tree.toString());
         for (Tree child: tree.children()) {
+            LogInfo.logs("Child: %s", child.toString());
             if (child.isLeaf()){
                 if (keyword.length() > 0)
                     keyword.concat(" ");
                 result.add(child.toString());
             }
+            if (child.isPreTerminal()) {
+                List<String> keywords = getKeywords(child);
+                if (keyword_tags.toString().contains(child.label().toString())) {
+                    result.add(String.join(" ", getKeywords(child)));
+                }
+                LogInfo.logs("PrePreChild: %s", child.toString());
+            }
             else{
-                if (child.isPreTerminal()){
-                    if (keyword_tags.toString().contains(child.label().toString())){
-                        for (Tree single:child.children())
-                            result.add(single.label().toString());
-                    }
-                }
-                else {
-                    if (child.isPrePreTerminal()) {
-                        if (keyword_tags.toString().contains(child.label().toString())) {
-                            result.add(String.join(" ", getKeywords(child)));
-                        }
-                    }
-                    if (!child.isPrePreTerminal()) {
-                        List<String> array = getKeywords(child);
-                        if (!array.isEmpty())
-                            result.addAll(array);
-                    }
-                }
+                if (keyword_tags.toString().contains(child.label().toString()))
+                    result.add(String.join(" ",getKeywords(child)));
+                else
+                    result.addAll(getKeywords(child));
             }
         }
         return result;
