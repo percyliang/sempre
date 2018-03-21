@@ -19,6 +19,7 @@
 {"lexeme": "like", "formula": "rb:FRIEND_OF", "type" : "DataProp"}
 {"lexeme": "friend", "formula": "rb:FRIEND_OF", "type" : "DataProp"}
 {"lexeme": "bear in", "formula": "rb:FROM", "type" : "ObjProp"}
+{"lexeme": "born in", "formula": "rb:FROM", "type" : "ObjProp"}
 {"lexeme": "come from", "formula": "rb:FROM", "type" : "ObjProp"}
 {"lexeme": "be from", "formula": "rb:FROM", "type" : "ObjProp"}
 {"lexeme": "go to", "formula": "rb:STUDY_AT", "type" : "ObjProp"}

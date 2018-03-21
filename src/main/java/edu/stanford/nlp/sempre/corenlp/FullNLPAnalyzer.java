@@ -56,10 +56,10 @@ public class FullNLPAnalyzer extends InfoAnalyzer {
 //  private static final Set<String> AUX_VERBS = new HashSet<String>(Arrays.asList(AUX_VERB_ARR));
 //  private static final String AUX_VERB_TAG = "VBD-AUX";
 
-    private static final String[] AUX_VERB_ARR = new String[] {"is", "are", "am"};
+    private static final String[] AUX_VERB_ARR = new String[] {"is", "are", "am", "was", "were", "been"};
     private static final Set<String> AUX_VERBS = new HashSet<String>(Arrays.asList(AUX_VERB_ARR));
     private static final String AUX_VERB_TAG = "BE";
-    private static final String[] HAVE_VERB_ARR = new String[] {"has", "have"};
+    private static final String[] HAVE_VERB_ARR = new String[] {"has", "have", "had"};
     private static final Set<String> HAVE_VERBS = new HashSet<String>(Arrays.asList(HAVE_VERB_ARR));
     private static final String HAVE_VERB_TAG = "HAVE";
 

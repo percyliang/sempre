@@ -547,10 +547,6 @@ public class Grammar {
       name = tree.child(0).value;
     }
 
-    // For backward compatibility: SemanticFn which have moved.
-    if (name.equals("LexiconFn") || name.equals("BridgeFn"))
-      name = "freebase." + name;
-
     SemanticFn fn;
     fn = (SemanticFn) Utils.newInstanceHard(SempreUtils.resolveClassName(name));
     if (fn == null)

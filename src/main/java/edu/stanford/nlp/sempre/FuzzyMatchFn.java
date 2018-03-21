@@ -5,7 +5,7 @@ import java.util.*;
 import fig.basic.*;
 
 /**
- * Similar to LexiconFn, but list all approximate matches from a FuzzyMatchable instance.
+ * Similar to SimpleLexiconFn, but list all approximate matches from a FuzzyMatchable instance.
  *
  * @author ppasupat
  */

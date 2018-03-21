@@ -312,7 +312,6 @@ public class Learner {
   // Print summary over all examples
   private void logEvaluationStats(Evaluation evaluation, String prefix) {
     LogInfo.logs("Stats for %s: %s", prefix, evaluation.summary());
-    // evaluation.add(LexiconFn.lexEval);
     evaluation.logStats(prefix);
     evaluation.putOutput(prefix);
     evaluation.putOutput(prefix.replaceAll("iter=", "").replace('.', '_'));

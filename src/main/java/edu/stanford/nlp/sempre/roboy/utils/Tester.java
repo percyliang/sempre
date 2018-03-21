@@ -69,7 +69,7 @@ public class Tester {
         Tester test = new Tester(5000);
         try {
             PrintWriter writer = new PrintWriter("log-webq.txt", "UTF-8");
-            JsonReader reader = new JsonReader(new FileReader("./data/webq-test.json"));
+            JsonReader reader = new JsonReader(new FileReader("./data/rpqa/rpqa-train-q.json"));
             Type type = new TypeToken<List<Map<String, String>>>() {
             }.getType();
             Gson gson = new Gson();
@@ -81,20 +81,20 @@ public class Tester {
                     type = new TypeToken<Map<String, Object>>() {
                     }.getType();
                     Map<String, String> resMap = gson.fromJson(response, type);
-                    if (resMap.get("answer").equals(entry.get("targetAnswer"))) {
+                    if (resMap.get("parse").equals(entry.get("targetFormula"))) {
                         success++;
-                        //System.out.println("CP: " + resMap.get("parse"));
-                    } else if (resMap.get("answer").equals("(no answer)")) {
+                        System.out.println("CP: " + resMap.get("parse"));
+                    } else if (resMap.get("parse").equals("(no answer)")) {
                         unparsed++;
                         LogInfo.logs("TEST: %s", entry.get("utterance"));
 //                        writer.println("TEST: " + entry.get("utterance"));
-                        LogInfo.logs("UP: %s", resMap.get("answer"));
+                        LogInfo.logs("UP: %s", resMap.get("parse"));
 //                        writer.println("UP: %s" + resMap.get("answer"));
                     } else {
                         fail++;
                         LogInfo.logs("TEST: %s", entry.get("utterance"));
                         writer.println("TEST: " + entry.get("utterance"));
-                        LogInfo.logs("IC: %s", resMap.get("answer"));
+                        LogInfo.logs("IC: %s", resMap.get("parse"));
                         writer.println("IC PARSE: %s" + resMap.get("parse"));
                         writer.println("IC: %s" + resMap.get("answer"));
                     }

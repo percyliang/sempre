@@ -10,8 +10,12 @@ public class ListValue extends Value {
 
   public ListValue(LispTree tree) {
     values = new ArrayList<Value>();
-    for (int i = 1; i < tree.children.size(); i++)
-      values.add(Values.fromLispTree(tree.child(i)));
+    for (int i = 1; i < tree.children.size(); i++) {
+      if (!tree.child(i).isLeaf())
+        values.add(Values.fromLispTree(tree.child(i)));
+      else
+        values.add(new NameValue(tree.child(i).toString()));
+    }
   }
 
   public ListValue(List<Value> values) { this.values = values; }

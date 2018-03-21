@@ -4,7 +4,7 @@ import java.util.*;
 import fig.basic.*;
 
 /**
- * Produces predicates (like LexiconFn) but do it from the logical forms
+ * Produces predicates but do it from the logical forms
  * in the context (inspects the ContextValue of the example).
  *
  * Takes depth, restrictType, and forbiddenTypes arguments allowing you

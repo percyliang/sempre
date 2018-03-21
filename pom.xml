@@ -226,6 +226,8 @@
                         </goals>
                         <configuration>
                             <arguments>
+                                <argument>-FeatureExtractor.featureDomains</argument>
+                                <argument>rule</argument>
                                 <argument>-Builder.executor</argument>
                                 <argument>roboy.SparqlExecutor</argument>
                                 <argument>-Builder.simple_executor</argument>
@@ -233,9 +235,9 @@
                                 <argument>-SparqlExecutor.endpointUrl</argument>
                                 <argument>http://dbpedia.org/sparql</argument>
                                 <argument>-Grammar.inPaths</argument>
-                                <argument>resources/roboy-demo.grammar</argument>
+                                <argument>resources/roboy-final.grammar</argument>
                                 <argument>-SimpleLexicon.inPaths</argument>
-                                <argument>resources/lexicons/roboy-dbpedia.lexicon</argument>
+                                <argument>resources/lexicons/roboy-demo.lexicon</argument>
                                 <argument>-languageAnalyzer</argument>
                                 <argument>corenlp.CoreNLPAnalyzer</argument>
                                 <argument>-Main.socket</argument>

@@ -387,8 +387,7 @@ public class Server {
       // TODO(pliang): generalize this to the case where the formula is a
       // NameFormula but the child is a StringFormula?
       if (deriv.getRule() != null &&
-          deriv.getRule().getSem() != null &&
-          deriv.getRule().getSem().getClass().getSimpleName().equals("LexiconFn"))
+          deriv.getRule().getSem() != null)
         predicates[deriv.getStart()].add(deriv.getFormula(), deriv.getEnd() - deriv.getStart(), deriv.getScore());
       for (Derivation child : deriv.getChildren())
         markLexical(child, predicates);

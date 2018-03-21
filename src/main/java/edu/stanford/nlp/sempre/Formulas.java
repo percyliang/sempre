@@ -350,7 +350,8 @@ public abstract class Formulas {
   // function y => x.
   public static Formula reverseFormula(Formula rawFormula) {
     if (rawFormula instanceof ValueFormula) {
-      @SuppressWarnings({ "unchecked" })
+      if (((ValueFormula) rawFormula).value instanceof StringValue)
+        return null;
       ValueFormula<NameValue> vf = (ValueFormula<NameValue>) rawFormula;
       return reverseNameFormula(vf);
     } else if (rawFormula instanceof LambdaFormula) {

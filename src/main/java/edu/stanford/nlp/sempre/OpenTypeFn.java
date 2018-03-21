@@ -53,7 +53,8 @@ public class OpenTypeFn extends SemanticFn {
         if (SimpleLexicon.getSingleton().lookup(out.toString().substring(out.toString().indexOf("'")+1,out.toString().indexOf("''"))).isEmpty())
               return new Derivation.Builder()
                       .withCallable(c)
-                      .withStringFormulaFrom(out.toString())
+                      .formula(new ValueFormula<NameValue>(new NameValue(out.toString())))
+                      .type(SemType.entityType)
                       .createDerivation();
         else
               return null;
