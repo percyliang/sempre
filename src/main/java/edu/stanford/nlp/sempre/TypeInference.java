@@ -152,6 +152,7 @@ public final class TypeInference {
       Value value = ((ValueFormula<?>) formula).value;
       if (value instanceof NumberValue) return check(type.meet(SemType.numberType));
       else if (value instanceof StringValue) return check(type.meet(SemType.stringType));
+      else if (value instanceof ListValue) return check(type.meet(SemType.listType));
       else if (value instanceof DateValue) return check(type.meet(SemType.dateType));
       else if (value instanceof TimeValue) return check(type.meet(SemType.timeType));
       else if (value instanceof NameValue) {

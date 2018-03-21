@@ -77,44 +77,44 @@
 ## Forming Subject
 (rule $Subject ($Person) (IdentityFn))
 (rule $Subject ($Entity) (IdentityFn))
-(rule $Subject ($Subject or $Subject) (ConcatFn ";"))
-(rule $Subject ($Subject ($Conj optional) $Subject) (ConcatFn ","))
-(rule $Subject ($Subject (, optional) $Subject) (ConcatFn ","))
+(rule $Subject ($Subject or $Subject) (ListFn))
+(rule $Subject ($Subject ($Conj optional) $Subject) (ListFn))
+(rule $Subject ($Subject (, optional) $Subject) (ListFn))
 
 (rule $RobSubject ($Person) (IdentityFn))
-(rule $RobSubject ($RobSubject or $RobSubject) (ConcatFn ";"))
-(rule $RobSubject ($RobSubject ($Conj optional) $RobSubject) (ConcatFn ","))
-(rule $RobSubject ($RobSubject (, optional) $RobSubject) (ConcatFn ","))
+(rule $RobSubject ($RobSubject or $RobSubject) (ListFn))
+(rule $RobSubject ($RobSubject ($Conj optional) $RobSubject) (ListFn))
+(rule $RobSubject ($RobSubject (, optional) $RobSubject) (ListFn))
 
 ## Forming Predicate
 (rule $Predicate ($PartObjProp) (IdentityFn))
 (rule $Predicate ($PartDataProp) (IdentityFn))
-(rule $Predicate ($Predicate or $Predicate) (ConcatFn ";"))
-(rule $Predicate ($Predicate ($Conj optional) $Predicate) (ConcatFn ","))
-(rule $Predicate ($Predicate (, optional) $Predicate) (ConcatFn ","))
+(rule $Predicate ($Predicate or $Predicate) (ListFn))
+(rule $Predicate ($Predicate ($Conj optional) $Predicate) (ListFn))
+(rule $Predicate ($Predicate (, optional) $Predicate) (ListFn))
 
 (rule $RObjPred ($RObjProp) (IdentityFn))
 (rule $RObjPred ($BE $RObjPred) (SelectFn 1))
 (rule $RObjPred ($HAVE $RObjPred) (SelectFn 1))
-(rule $RObjPred ($RObjPred or $RObjPred) (ConcatFn ";"))
-(rule $RObjPred ($RObjPred ($Conj optional) $RObjPred) (ConcatFn ","))
-(rule $RObjPred ($RObjPred (, optional) $RObjPred) (ConcatFn ","))
+(rule $RObjPred ($RObjPred or $RObjPred) (ListFn))
+(rule $RObjPred ($RObjPred ($Conj optional) $RObjPred) (ListFn))
+(rule $RObjPred ($RObjPred (, optional) $RObjPred) (ListFn))
 
 (rule $RDataPred ($RDataProp) (IdentityFn))
 (rule $RDataPred ($BE $RDataProp) (SelectFn 1))
 (rule $RDataPred ($HAVE $RDataProp) (SelectFn 1))
 (rule $RDataProp ($Limited $RDataProp) (SelectFn 1))
 (rule $RDataProp ($RDataProp $Limited) (SelectFn 0))
-(rule $RDataPred ($RDataPred or $RDataPred) (ConcatFn ";"))
-(rule $RDataPred ($RDataPred ($Conj optional) $RDataPred) (ConcatFn ","))
-(rule $RDataPred ($RDataPred (, optional) $RDataPred) (ConcatFn ","))
+(rule $RDataPred ($RDataPred or $RDataPred) (ListFn))
+(rule $RDataPred ($RDataPred ($Conj optional) $RDataPred) (ListFn))
+(rule $RDataPred ($RDataPred (, optional) $RDataPred) (ListFn))
 
 ## Forming Objects
 (rule $Object ($Subject) (IdentityFn))
 (rule $Object ($BE $Object) (SelectFn 1))
-(rule $Object ($Object or $Object) (ConcatFn ";"))
-(rule $Object ($Object ($Conj optional) $Object) (ConcatFn ","))
-(rule $Object ($Object (, optional) $Object) (ConcatFn ","))
+(rule $Object ($Object or $Object) (ListFn))
+(rule $Object ($Object ($Conj optional) $Object) (ListFn))
+(rule $Object ($Object (, optional) $Object) (ListFn))
 
 ## Forming POs
 (rule $PredObj ($FullObjProp) (IdentityFn))
@@ -125,9 +125,9 @@
 ## Forming Values
 (rule $Value ($ValueToken) (IdentityFn))
 (rule $Value ($BE $ValueToken) (SelectFn 1))
-(rule $Value ($Value or $Value) (ConcatFn ";"))
-(rule $Value ($Value ($Conj optional) $Value) (ConcatFn ","))
-(rule $Value ($Value (, optional) $Value) (ConcatFn ","))
+(rule $Value ($Value or $Value) (ListFn))
+(rule $Value ($Value ($Conj optional) $Value) (ListFn))
+(rule $Value ($Value (, optional) $Value) (ListFn))
 
 # Expressions Roboy
 ############################################################
@@ -153,7 +153,7 @@
 (rule $Quest (where) (ConstantFn (rdf:type dbpedia:EducationalInstitution) dbpedia:EducationalInstitution))
 (rule $Quest (when) (ConstantFn (rdf:type xsd:date) xsd:date))
 (rule $Quest (what) (ConstantFn null null))
-(rule $Quest (tell me) (ConstantFn null null))
+(rule $Quest (tell me (something optional)) (ConstantFn null null))
 (rule $Quest (date) (ConstantFn (rdf:type xsd:date) xsd:date))
 (rule $Quest (year) (ConstantFn (rdf:type xsd:date) xsd:date))
 (rule $Quest (day) (ConstantFn (rdf:type xsd:date) xsd:date))

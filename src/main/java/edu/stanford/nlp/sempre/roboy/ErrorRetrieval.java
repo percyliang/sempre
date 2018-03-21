@@ -485,6 +485,7 @@ public class ErrorRetrieval {
         List<Derivation> remove = new ArrayList();
         List<String> formulas = new ArrayList();
         for (Derivation deriv : this.derivations) {
+            System.out.println(deriv.formula);
             if (!String.join(" ", formulas).contains(deriv.formula.toString()))
                 formulas.add(deriv.formula.toString());
             else {

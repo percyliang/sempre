@@ -22,17 +22,24 @@ public class JoinFormula extends Formula {
 
   public JoinFormula(String relation, Formula child) {
     this(Formulas.newNameFormula(relation), child);
+    System.out.println("REL");
+    System.out.println(relation);
   }
 
   public JoinFormula(Formula relation, Formula child) {
+    System.out.println("Form");
+    System.out.println(relation);
+    System.out.println(child);
     this.relation = relation;
     this.child = child;
   }
 
   public LispTree toLispTree() {
     LispTree tree = LispTree.proto.newList();
-    tree.addChild(relation.toLispTree());
-    tree.addChild(child.toLispTree());
+    if (relation!=null)
+      tree.addChild(relation.toLispTree());
+    if (child!=null)
+      tree.addChild(child.toLispTree());
     return tree;
   }
 

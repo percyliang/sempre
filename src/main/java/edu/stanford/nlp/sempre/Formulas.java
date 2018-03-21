@@ -352,6 +352,8 @@ public abstract class Formulas {
     if (rawFormula instanceof ValueFormula) {
       if (((ValueFormula) rawFormula).value instanceof StringValue)
         return null;
+      if (((ValueFormula) rawFormula).value instanceof ListValue)
+        return null;
       ValueFormula<NameValue> vf = (ValueFormula<NameValue>) rawFormula;
       return reverseNameFormula(vf);
     } else if (rawFormula instanceof LambdaFormula) {
