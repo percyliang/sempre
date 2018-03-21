@@ -501,7 +501,7 @@ public class ErrorRetrieval {
             List<UnspecInfo> missingTerms = checkUnderspecified();
             if (ConfigManager.DEBUG > 0) {
                 for (UnspecInfo i : missingTerms) {
-                    LogInfo.logs("Detected underspecified term: %s", i.term);
+                    LogInfo.logs("Detected underspecified term: %s %s", i.term, i.type.name());
                 }
             }
 

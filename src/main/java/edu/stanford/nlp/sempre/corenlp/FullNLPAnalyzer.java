@@ -64,6 +64,7 @@ public class FullNLPAnalyzer extends InfoAnalyzer {
     private static final String HAVE_VERB_TAG = "HAVE";
 
     public static StanfordCoreNLP pipeline = null;
+    public static StanfordCoreNLP sentence = null;
     public static String keyword_tags = null;
 
     public static void initModels() {
@@ -107,6 +108,7 @@ public class FullNLPAnalyzer extends InfoAnalyzer {
         coreInfo.lanInfo = getLang(annotation);
         coreInfo.relInfo = getRel(annotation);
         coreInfo.senInfo = getSent(coreInfo.lanInfo, annotation);
+        coreInfo.sentences = getSentences(annotation);
 
         return coreInfo;
     }
@@ -165,6 +167,15 @@ public class FullNLPAnalyzer extends InfoAnalyzer {
             }
         }
         return languageInfo;
+    }
+
+    public List<String> getSentences(Annotation annotation){
+        List<String> results = new ArrayList<>();
+        for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
+            results.add(sentence.toString());
+            LogInfo.logs(sentence.toString());
+        }
+        return results;
     }
 
     public RelationInfo getRel(Annotation annotation) {

@@ -3,6 +3,9 @@ package edu.stanford.nlp.sempre;
 import fig.basic.Option;
 import fig.basic.Utils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * RelationAnalyzer takes an utterance and applies relationship extraction methods
  * to return RelationInfo object.
@@ -21,10 +24,12 @@ public abstract class InfoAnalyzer {
         public LanguageInfo lanInfo;
         public RelationInfo relInfo;
         public GeneralInfo senInfo;
+        public List<String> sentences;
         public CoreNLPInfo (){
             this.lanInfo = new LanguageInfo();
             this.relInfo = new RelationInfo();
             this.senInfo = new GeneralInfo();
+            this.sentences = new ArrayList<>();
         }
     }
     public static Options opts = new Options();

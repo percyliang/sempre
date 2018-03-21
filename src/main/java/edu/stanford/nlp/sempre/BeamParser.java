@@ -154,7 +154,7 @@ class BeamParserState extends ChartParserState {
 
   // Return number of new derivations added
   private int applyRule(int start, int end, Rule rule, List<Derivation> children) {
-    if (ConfigManager.DEBUG >= 8) LogInfo.logs("applyRule %s %s %s %s", start, end, rule, children);
+    if (ConfigManager.DEBUG >= 0) LogInfo.logs("applyRule %s %s %s %s", start, end, rule, children);
     try {
       if (mode == Mode.full) {
         StopWatchSet.begin(rule.getSemRepn());

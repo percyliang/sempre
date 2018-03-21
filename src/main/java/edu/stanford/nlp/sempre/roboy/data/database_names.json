@@ -31,7 +31,7 @@
     "PERSON": "foaf:person",
     "CVT": "fb:type.cvt",
     "TYPE": "rdf:type",
-    "NAME": "property:name",
+    "NAME": "rdf:label",
     "PROF": "property:profession",
     "ALIAS": "purl:description"
   }

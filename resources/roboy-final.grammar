@@ -20,13 +20,15 @@
 ## Limiting number of words in a phrase
 (rule $VerbPhrase ($LEMMAS) (FilterPosTagFn span IN VB VBD VBN VBG VBP VBZ VBD-AUX))
 (rule $ValuePhrase ($PHRASE) (FilterPosTagFn span NN NNP CD))
-(rule $NounPhrase ($PHRASE) (FilterPosTagFn span NN NNP))
+(rule $NounPhrase ($PHRASE) (FilterPosTagFn span NN))
+(rule $EntityPhrase ($PHRASE) (FilterPosTagFn span NNP))
 (rule $AdjPhrase ($LEMMAS) (FilterPosTagFn span JJ))
 (rule $AdjToken ($AdjPhrase) (FilterSpanLengthFn 1 2))
 (rule $VerbToken ($VerbPhrase) (FilterSpanLengthFn 1 2))
 (rule $ValueToken ($ValuePhrase) (FilterSpanLengthFn 1 2))
 (rule $NounToken ($NounPhrase) (FilterSpanLengthFn 1 3))
-(rule $EntityToken ($NounPhrase) (FilterSpanLengthFn 1 4))
+(rule $EntityToken ($EntityPhrase) (FilterSpanLengthFn 1 4))
+(rule $Ignore ($LEMMA_PHRASE) (FilterSpanLengthFn 1 3))
 (rule $Limited ($LEMMA_PHRASE) (FilterSpanLengthFn 1 3))
 
 ## SimpleLexiconFn
@@ -68,9 +70,9 @@
 
 (rule $Entity ($EntityToken) (OpenTypeFn entity))
 
-(rule $ROOT ($PHRASE) (OpenTypeFn type))
-(rule $ROOT ($PHRASE) (OpenTypeFn relation))
-(rule $ROOT ($PHRASE) (OpenTypeFn entity))
+#(rule $ROOT ($PHRASE) (OpenTypeFn type))
+#(rule $ROOT ($PHRASE) (OpenTypeFn relation))
+#(rule $ROOT ($PHRASE) (OpenTypeFn entity))
 
 ## Forming Subject
 (rule $Subject ($Person) (IdentityFn))
@@ -151,6 +153,7 @@
 (rule $Quest (where) (ConstantFn (rdf:type dbpedia:EducationalInstitution) dbpedia:EducationalInstitution))
 (rule $Quest (when) (ConstantFn (rdf:type xsd:date) xsd:date))
 (rule $Quest (what) (ConstantFn null null))
+(rule $Quest (tell me) (ConstantFn null null))
 (rule $Quest (date) (ConstantFn (rdf:type xsd:date) xsd:date))
 (rule $Quest (year) (ConstantFn (rdf:type xsd:date) xsd:date))
 (rule $Quest (day) (ConstantFn (rdf:type xsd:date) xsd:date))
@@ -180,7 +183,7 @@
 (rule $Set ($Binary $Entity) (JoinFn forward))
 (rule $Set ($Entity $Binary) (JoinFn backward))
 (rule $Unary ($PredObj) (IdentityFn))
-(rule $Set ($Entity) (IdentityFn))
+#(rule $ROOT ($Entity) (IdentityFn))
 (rule $Set ($Unary) (IdentityFn))
 (rule $BaseSet ($Subject ($Limited optional) $Predicate) (JoinFn unary,binary unaryCanBeArg0 unaryCanBeArg1))
 (rule $BaseSet ($Predicate ($Limited optional) $Subject) (JoinFn binary,unary unaryCanBeArg0 unaryCanBeArg1))
@@ -190,7 +193,7 @@
 (rule $BaseSet ($Predicate ($Limited optional) $Value) (JoinFn binary,unary unaryCanBeArg0 unaryCanBeArg1))
 (rule $Set ($BaseSet) (IdentityFn))
 (rule $Set ($Set ($Limited optional) $Set) (MergeFn and))
-(rule $ROOT (($Quest optional) $Set) (IdentityFn))
+(rule $ROOT ($Quest $Set) (SelectFn 1))
 
 # Math expressions
 (include math.grammar)

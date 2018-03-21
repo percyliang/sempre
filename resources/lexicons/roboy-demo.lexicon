@@ -109,6 +109,7 @@
 
 # DBpedia
 
+{"lexeme": "about", "formula": "!dbpedia:abstract", "type": "RelationalNoun"}
 {"lexeme": "name", "formula": "foaf:name", "type": "RelationalNoun"}
 {"lexeme": "name", "formula": "!foaf:name", "type": "RelationalNoun"}
 {"lexeme": "surname", "formula": "foaf:surname", "type": "RelationalNoun"}
@@ -116,8 +117,8 @@
 {"lexeme": "given name", "formula": "foaf:name", "type": "RelationalNoun"}
 {"lexeme": "given name", "formula": "!foaf:name", "type": "RelationalNoun"}
 {"lexeme": "type", "formula": "(rdf:type rdf:type)", "type": "ClassNoun"}
+{"lexeme": "birth date", "formula": "dbpedia:birthDate", "type": "RelationalNoun"}
 {"lexeme": "birth date", "formula": "!dbpedia:birthDate", "type": "RelationalNoun"}
-{"lexeme": "birth date", "formula": "!!dbpedia:birthDate", "type": "RelationalNoun"}
 {"lexeme": "anatomical structure", "formula": "(rdf:type dbpedia:AnatomicalStructure)", "type": "ClassNoun"}
 {"lexeme": "brain", "formula": "(rdf:type dbpedia:Brain)", "type": "ClassNoun"}
 {"lexeme": "bone", "formula": "(rdf:type dbpedia:Bone)", "type": "ClassNoun"}
