@@ -2,6 +2,7 @@ package edu.stanford.nlp.sempre.roboy.score;
 
 import com.google.gson.Gson;
 import edu.stanford.nlp.sempre.ContextValue;
+import edu.stanford.nlp.sempre.roboy.UnspecInfo;
 import edu.stanford.nlp.sempre.roboy.config.ConfigManager;
 import edu.stanford.nlp.sempre.roboy.ErrorInfo;
 import edu.stanford.nlp.sempre.roboy.lexicons.word2vec.Word2vec;
@@ -17,7 +18,7 @@ import java.util.*;
 public class Word2VecScore extends ScoringFunction {
     public static Gson gson = new Gson();               /**< Gson object */
 
-    private double weight;                                  /**< Weight of the score in general score*/
+    private double weight;                              /**< Weight of the score in general score*/
     private final Word2vec vec;                         /**< Word2Vec handler */
 
     /**
@@ -34,6 +35,41 @@ public class Word2VecScore extends ScoringFunction {
         }
     }
 
+    /**
+     * Scoring function.
+     * Takes ErrorInfo as well as ContextValue objects and calculates score of each
+     * candidate for unknown terms.
+     */
+    public UnspecInfo score(UnspecInfo info, ContextValue context){
+        UnspecInfo result = new UnspecInfo(info.term, info.type);
+        result.candidates = info.candidates;
+        result.candidatesInfo = info.candidatesInfo;
+        // Check for all candidates for checked unknown term
+        for (String canString: info.candidatesInfo){
+            Map<String, String> candidate = new HashMap<>();
+            candidate = this.gson.fromJson(canString, candidate.getClass());
+            // Check similarity
+            String[] tokensTerm = info.term.split(" ");
+            String[] tokensCand = candidate.get("Label").split(" ");
+            double score = 0, help, max;
+            for (String tokenTerm: tokensTerm){
+                max = 0;
+                for (String tokenCand: tokensCand){
+                    help = this.vec.getSimilarity(tokenTerm, tokenCand);
+                    if (help > max){
+                        max = help;
+                    }
+                }
+                score = score + max;
+            }
+            if (Double.isNaN(score))
+                score = 0.0;
+            if (ConfigManager.DEBUG > 4)
+                LogInfo.logs("Word2Vec: %s -> %s", candidate.get("URI"), score*this.weight);
+            result.candidatesScores.add(score*this.weight);
+        }
+        return result;
+    }
     /**
      * Scoring function.
      * Takes ErrorInfo as well as ContextValue objects and calculates score of each

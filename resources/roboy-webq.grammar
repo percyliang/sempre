@@ -18,7 +18,6 @@
 (rule $Entity ($NamedEntity) (OpenTypeFn entity))
 
 (rule $Entity ($PHRASE) (DateFn)) # Example: 2002
-(rule $Binary ($CompositeRel) (LexiconFn binary)) # Example: "capital", "developed"
 (rule $Binary ($PHRASE) (SimpleLexiconFn (type "RelationalNoun")))
 (rule $Binary ($PHRASE) (SimpleLexiconFn (type "RelationalAdjective")))
 (rule $Binary ($PHRASE) (SimpleLexiconFn (type "StateVerb")))

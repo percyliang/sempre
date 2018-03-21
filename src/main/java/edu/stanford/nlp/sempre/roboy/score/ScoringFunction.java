@@ -2,6 +2,7 @@ package edu.stanford.nlp.sempre.roboy.score;
 
 import edu.stanford.nlp.sempre.ContextValue;
 import edu.stanford.nlp.sempre.roboy.ErrorInfo;
+import edu.stanford.nlp.sempre.roboy.UnspecInfo;
 
 import java.util.List;
 import java.util.Map;
@@ -18,8 +19,8 @@ public abstract class ScoringFunction {
 
     /**
      * Scoring function.
-     * Takes ErrorInfo as well as ContextValue objects and calculates score of each
+     * Takes UnspecInfo as well as ContextValue objects and calculates score of each
      * candidate for unknown terms.
      */
-    public abstract ErrorInfo score(ErrorInfo errorInfo, ContextValue context);
+    public abstract UnspecInfo score(UnspecInfo info, ContextValue context);
 }

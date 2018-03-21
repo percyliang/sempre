@@ -1,6 +1,7 @@
 package edu.stanford.nlp.sempre.roboy.error;
 
 import edu.stanford.nlp.sempre.Derivation;
+import edu.stanford.nlp.sempre.roboy.UnspecInfo;
 import edu.stanford.nlp.sempre.roboy.config.ConfigManager;
 import edu.stanford.nlp.sempre.roboy.ErrorInfo;
 import edu.stanford.nlp.sempre.roboy.utils.SparqlUtils;
@@ -38,57 +39,32 @@ public class MCGRetriever extends KnowledgeRetriever {
         }
     }
 
-    public ErrorInfo analyze(Derivation dev) {
-        ErrorInfo errorInfo = new ErrorInfo();
-        Map<String,Double> results = new HashMap();
-        String unknown = new String();
-        String formula = dev.getFormula().toString();
-        while (formula.contains("Open")){
-            int start = formula.indexOf("Open")+"Open".length();
-            int end = formula.indexOf("''",start);
-            if (start > formula.length() || start < 0 || end < 0 ||end > formula.length())
-                return errorInfo;
-            unknown = formula.substring(start,end);
-            String entity = unknown.substring(unknown.indexOf("'")+1);
-            // Extract the results from XML now.
-            String url = (endpointUrl.concat(entity.replace(" ","+"))).concat("&topK=10");
-            SparqlUtils.ServerResponse response = sparqlUtil.makeRequest(url);
-            Type t = new TypeToken<Map<String, String>>(){}.getType();
-            results = gson.fromJson(response.getXml(), t);
-            List<Map<String,String>> labels = new ArrayList();
-            if (results!=null) {
-                for (String result : results.keySet()) {
-                    Map<String, String> single = new HashMap();
-                    Set<String> uri = sparqlUtil.returnURI(result, dbpediaUrl, false);
-                    if (uri != null) {
-                        single.put("Label", result);
-                        single.put("Refcount", String.valueOf(results.get(result)));
-                        for (String u : uri) {
-                            single.put("URI", u);
-                            labels.add(single);
+    public UnspecInfo analyze(UnspecInfo underTerm) {
+        String entity = underTerm.term;
+        UnspecInfo result = new UnspecInfo(entity, underTerm.type);
+        String url = (endpointUrl.concat(entity.replace(" ","+"))).concat("&topK=10");
+        SparqlUtils.ServerResponse response = sparqlUtil.makeRequest(url);
+        Type t = new TypeToken<Map<String, String>>(){}.getType();
+        Map<String,Double> results = gson.fromJson(response.getXml(), t);
+        if (results!=null) {
+            for (String res : results.keySet()) {
+                Map<String, String> single = new HashMap();
+                Set<String> uri = sparqlUtil.returnURI(res, dbpediaUrl, false);
+                if (uri != null) {
+                    single.put("Label", res);
+                    single.put("Refcount", String.valueOf(results.get(res)));
+                    for (String u : uri) {
+                        single.put("URI", u);
+                        result.candidates.add(single.get("URI"));
+                        result.candidatesInfo.add(gson.toJson(single));
+                        if (ConfigManager.DEBUG > 3){
+                            LogInfo.logs("MCG candidate: %s", single.toString());
                         }
                     }
                 }
             }
-            for (Map<String,String> c: labels){
-                if (errorInfo.getCandidates().containsKey(entity)) {
-                    if (!errorInfo.getCandidates().get(entity).contains(gson.toJson(c))) {
-                        errorInfo.getCandidates().get(entity).add(gson.toJson(c));
-                        if (ConfigManager.DEBUG > 5)
-                            LogInfo.logs("MCG: %s", gson.toJson(c));
-                    }
-                    //else
-                    //    LogInfo.logs("Repeat MCG: %s", gson.toJson(c));
-                }
-                else {
-                    errorInfo.getCandidates().put(entity, new ArrayList<>(Arrays.asList(gson.toJson(c))));
-                    if (ConfigManager.DEBUG > 5)
-                        LogInfo.logs("MCG: %s",gson.toJson(c));
-                }
-            }
-            formula = formula.substring(end);
         }
-        return errorInfo;
+        return result;
     }
 
 }

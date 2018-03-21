@@ -10,6 +10,7 @@ import org.apache.commons.configuration2.ex.ConfigurationException;
 import java.io.*;
 import java.lang.reflect.Type;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ConfigManager {
@@ -28,6 +29,7 @@ public class ConfigManager {
     public static String WORD2VEC_FILE = "src/main/java/edu/stanford/nlp/sempre/roboy/data/word2vec.json";
     public static String SCORE_WEIGHTS_FILE = "src/main/java/edu/stanford/nlp/sempre/roboy/data/score_weights.json";
     public static String DB_TYPES_FILE = "src/main/java/edu/stanford/nlp/sempre/roboy/data/database_names.json";
+    public static String FOLLOW_FILE = "src/main/java/edu/stanford/nlp/sempre/roboy/data/follow_up_patterns.json";
 
     // Flags
     public static int DEBUG = 1;
@@ -35,6 +37,8 @@ public class ConfigManager {
     // Other parameters
     public static int PARSER_PORT = -1;
     public static double W2V_THRES = 0.3;
+    public static int CONTEXT_DEPTH = 3;
+    public static double FOLLOW_THRES = 0.3;
     public static double LEXICON_THRES = 0.3;
     public static boolean WORD2VEC_GOOGLE = false;
     public static String[] DB_KEYWORDS = {"Result","Label","URI","Refcount"};
@@ -42,6 +46,7 @@ public class ConfigManager {
     public static String[] KEYWORDS_TAGS = {"NNP","NN","NP"};
 
     // JSON objects to be read
+    public static Map<String, List<String>> FOLLOW_UPS = new HashMap<>();
     public static Map<String, Double> SCORING_WEIGHTS = new HashMap<>();
     public static Map<String, String> WORD2VEC_MODELS = new HashMap<>();
     public static Map<String, String> DB_GLOSSARY = new HashMap<>();
@@ -86,16 +91,19 @@ public class ConfigManager {
             SCORE_WEIGHTS_FILE   = yamlConfig.getString("SCORE_WEIGHTS_FILE");
             DB_TYPES_FILE        = yamlConfig.getString("TYPES_FILE");
             SCHEMA_FILE          = yamlConfig.getString("SCHEMA_FILE");
+            FOLLOW_FILE          = yamlConfig.getString("FOLLOW_FILE");
 
             DEBUG           = yamlConfig.getInt("DEBUG");
             PARSER_PORT     = yamlConfig.getInt("PARSER_PORT");
 
             WORD2VEC_GOOGLE       = yamlConfig.getBoolean("WORD2VEC_GOOGLE");
             W2V_THRES       = yamlConfig.getDouble("W2V_THRES");
+            CONTEXT_DEPTH     = yamlConfig.getInt("CONTEXT_DEPTH");
 
             DB_KEYWORDS     = yamlConfig.getStringArray("DB_KEYWORDS");
             MCG_KEYWORDS    = yamlConfig.getStringArray("MCG_KEYWORDS");
             KEYWORDS_TAGS    = yamlConfig.getStringArray("KEYWORDS_TAGS");
+            FOLLOW_THRES       = yamlConfig.getDouble("FOLLOW_THRES");
             LEXICON_THRES       = yamlConfig.getDouble("LEXICON_THRES");
 
             // Read all parameters from JSON files
@@ -114,6 +122,10 @@ public class ConfigManager {
             reader = new JsonReader(new FileReader(DB_TYPES_FILE));
             type = new TypeToken<Map<String, Map<String,String> >>(){}.getType();
             DB_TYPES = gson.fromJson(reader, type);
+
+            reader = new JsonReader(new FileReader(FOLLOW_FILE));
+            type = new TypeToken<Map<String, List<String> >>(){}.getType();
+            FOLLOW_UPS = gson.fromJson(reader, type);
 
         } catch(ConfigurationException | IOException e) {
             LogInfo.errors("Exception while reading YAML configurations from %s", yamlConfigFile);

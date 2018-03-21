@@ -147,10 +147,10 @@ public class Example {
   public RelationInfo getRelInfo() { return relationInfo; }
   public int numTokens() { return languageInfo.tokens.size(); }
   public List<Derivation> getPredDerivations() {
-    Set<Derivation> hs = new HashSet<>();
-    hs.addAll(predDerivations);
-    predDerivations.clear();
-    predDerivations.addAll(hs);
+//    Set<Derivation> hs = new HashSet<>();
+//    hs.addAll(predDerivations);
+//    predDerivations.clear();
+//    predDerivations.addAll(hs);
     return predDerivations;
   }
 

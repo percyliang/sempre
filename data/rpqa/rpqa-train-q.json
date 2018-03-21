@@ -17,7 +17,6 @@
 {"utterance": "Who is your best friend?", "type": "QFRIEND_OF", "targetFormula": "(!rb:FRIEND_OF rb:Roboy)"},
 {"utterance": "Have I met any of your friends?", "type": "QFRIEND_OF", "targetFormula": "(!rb:FRIEND_OF rb:Roboy)"},
 {"utterance": "Do you have a friend whom I have met?", "type": "QFRIEND_OF", "targetFormula": "(!rb:FRIEND_OF rb:Roboy)"},
-{"utterance": "Maybe I know some friends of yours. Would you name one?", "type": "QFRIEND_OF", "targetFormula": "(!rb:FRIEND_OF rb:Roboy)"},
 {"utterance": "Where do you study?", "type": "QSTUDY_AT", "targetFormula": "(!rb:STUDY_AT rb:Roboy)"},
 {"utterance": "Which university do you go to?", "type": "QSTUDY_AT", "targetFormula": "(!rb:STUDY_AT rb:Roboy)"},
 {"utterance": "Which university do you study at?", "type": "QSTUDY_AT", "targetFormula": "(!rb:STUDY_AT rb:Roboy)"},

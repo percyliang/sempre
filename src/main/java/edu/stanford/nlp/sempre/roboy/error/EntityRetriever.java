@@ -1,8 +1,7 @@
 package edu.stanford.nlp.sempre.roboy.error;
 
-import edu.stanford.nlp.sempre.Derivation;
+import edu.stanford.nlp.sempre.roboy.UnspecInfo;
 import edu.stanford.nlp.sempre.roboy.config.ConfigManager;
-import edu.stanford.nlp.sempre.roboy.ErrorInfo;
 import edu.stanford.nlp.sempre.roboy.utils.SparqlUtils;
 
 import java.util.*;
@@ -13,7 +12,7 @@ import com.google.gson.Gson;
 import fig.basic.LogInfo;
 
 /**
- * Entity Helper use Entity Searcher APIs to resolve underspecified entities in the lexicon
+ * Entity Helper use DBpedia Lookup APIs or similar API to resolve underspecified entities in the lexicon
  *
  * @author emlozin
  */
@@ -36,43 +35,24 @@ public class EntityRetriever extends KnowledgeRetriever {
         }
     }
 
-    public ErrorInfo analyze(Derivation dev) {
-        ErrorInfo errorInfo = new ErrorInfo();
-        List <Map<String,String>> results = new ArrayList<Map<String, String>>();
-        String unknown = new String();
-        String formula = dev.getFormula().toString();
-        while (formula.contains("Open")){
-            int start = formula.indexOf("Open")+"Open".length();
-            int end = formula.indexOf("''",start);
-            if (start > formula.length() || start < 0 || end < 0 ||end > formula.length())
-                return errorInfo;
-            unknown = formula.substring(start,end);
-            String entity = unknown.substring(unknown.indexOf("'")+1);
-            // Extract the results from XML now.
-            String url = endpointUrl.concat(entity);
-            url = url.replace(" ","_");
-            SparqlUtils.ServerResponse response = sparql.makeRequest(url);
-            if (response.getXml()!=null)
-                results = reader.readEntityXml(response.getXml(),keywords);
-            for (Map<String,String> c: results){
-                if (errorInfo.getCandidates().containsKey(entity)) {
-                    c.put("Label",c.get("Label").toLowerCase());
-                    errorInfo.getCandidates().get(entity).add(gson.toJson(c));
-                    if (ConfigManager.DEBUG > 5) {
-                        LogInfo.logs("Entity: %s", gson.toJson(c));
-                    }
-                }
-                else {
-                    c.put("Label",c.get("Label").toLowerCase());
-                    errorInfo.getCandidates().put(entity, new ArrayList<>(Arrays.asList(gson.toJson(c))));
-                    if (ConfigManager.DEBUG > 5) {
-                        LogInfo.logs("Entity: %s", gson.toJson(c));
-                    }
-                }
+    public UnspecInfo analyze(UnspecInfo underTerm) {
+        String entity = underTerm.term;
+        UnspecInfo result = new UnspecInfo(entity, underTerm.type);
+        String url = endpointUrl.concat(entity);
+        url = url.replace(" ","_");
+        SparqlUtils.ServerResponse response = sparql.makeRequest(url);
+        List<Map<String, String>> results = new ArrayList<>();
+        if (response.getXml()!=null)
+            results = reader.readEntityXml(response.getXml(),keywords);
+        for (Map<String,String> c: results){
+            c.put("Label",c.get("Label").toLowerCase());
+            result.candidates.add(c.get("URI"));
+            result.candidatesInfo.add(this.gson.toJson(c));
+            if (ConfigManager.DEBUG > 3){
+                LogInfo.logs("Entity candidate: %s", c.toString());
             }
-            formula = formula.substring(end);
         }
-        return errorInfo;
+        return result;
     }
 
 }

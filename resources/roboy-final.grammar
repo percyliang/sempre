@@ -68,6 +68,10 @@
 
 (rule $Entity ($EntityToken) (OpenTypeFn entity))
 
+(rule $ROOT ($PHRASE) (OpenTypeFn type))
+(rule $ROOT ($PHRASE) (OpenTypeFn relation))
+(rule $ROOT ($PHRASE) (OpenTypeFn entity))
+
 ## Forming Subject
 (rule $Subject ($Person) (IdentityFn))
 (rule $Subject ($Entity) (IdentityFn))
@@ -186,7 +190,7 @@
 (rule $BaseSet ($Predicate ($Limited optional) $Value) (JoinFn binary,unary unaryCanBeArg0 unaryCanBeArg1))
 (rule $Set ($BaseSet) (IdentityFn))
 (rule $Set ($Set ($Limited optional) $Set) (MergeFn and))
-(rule $ROOT ($Quest $Set) (SelectFn 1))
+(rule $ROOT (($Quest optional) $Set) (IdentityFn))
 
 # Math expressions
 (include math.grammar)

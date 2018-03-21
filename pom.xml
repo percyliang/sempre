@@ -142,8 +142,6 @@
                                 <argument>corenlp.CoreNLPAnalyzer</argument>
                                 <argument>-Main.interactive</argument>
                                 <argument>true</argument>
-                                <argument>-ErrorRetrieval.followUps</argument>
-                                <argument>true</argument>
                             </arguments>
                         </configuration>
                     </execution>
@@ -177,8 +175,6 @@
                                 <argument>-languageAnalyzer</argument>
                                 <argument>corenlp.CoreNLPAnalyzer</argument>
                                 <argument>-Main.socket</argument>
-                                <argument>true</argument>
-                                <argument>-ErrorRetrieval.followUps</argument>
                                 <argument>true</argument>
                             </arguments>
                         </configuration>
@@ -214,8 +210,6 @@
                                 <argument>corenlp.CoreNLPAnalyzer</argument>
                                 <argument>-Main.socket</argument>
                                 <argument>true</argument>
-                                <argument>-ErrorRetrieval.followUps</argument>
-                                <argument>true</argument>
                             </arguments>
                         </configuration>
                     </execution>
@@ -242,8 +236,6 @@
                                 <argument>corenlp.CoreNLPAnalyzer</argument>
                                 <argument>-Main.socket</argument>
                                 <argument>true</argument>
-                                <argument>-ErrorRetrieval.followUps</argument>
-                                <argument>true</argument>
                             </arguments>
                         </configuration>
                     </execution>
@@ -254,16 +246,16 @@
                         </goals>
                         <configuration>
                             <arguments>
-                                <!--<argument>-FeatureExtractor.featureDomains</argument>-->
-                                <!--<argument>rule</argument>-->
+                                <argument>-FeatureExtractor.featureDomains</argument>
+                                <argument>rule</argument>
                                 <!--&lt;!&ndash;<argument>span</argument>&ndash;&gt;-->
-                                <!--<argument>dependencyParse</argument>-->
+                                <argument>dependencyParse</argument>
                                 <!--<argument>-Dataset.inPaths</argument>-->
                                 <!--<argument>train:data/rpqa/1/train.examples</argument>-->
-                                <!--<argument>-Derivation.derivComparator</argument>-->
-                                <!--<argument>ScoredDerivationComparator</argument>-->
-                                <!--<argument>-Params.initWeightsRandomly</argument>-->
-                                <!--<argument>true</argument>-->
+                                <argument>-Derivation.derivComparator</argument>
+                                <argument>ScoredDerivationComparator</argument>
+                                <argument>-Params.initWeightsRandomly</argument>
+                                <argument>true</argument>
                                 <!--<argument>-Learner.maxTrainIters</argument>-->
                                 <!--<argument>1</argument>-->
                                 <argument>-Builder.executor</argument>
@@ -279,8 +271,6 @@
                                 <argument>-languageAnalyzer</argument>
                                 <argument>corenlp.CoreNLPAnalyzer</argument>
                                 <argument>-Main.server</argument>
-                                <argument>true</argument>
-                                <argument>-ErrorRetrieval.followUps</argument>
                                 <argument>true</argument>
                             </arguments>
                         </configuration>

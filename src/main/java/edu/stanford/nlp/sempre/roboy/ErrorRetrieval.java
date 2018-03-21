@@ -5,13 +5,13 @@ import com.google.gson.reflect.TypeToken;
 import edu.stanford.nlp.sempre.*;
 import edu.stanford.nlp.sempre.roboy.config.ConfigManager;
 import edu.stanford.nlp.sempre.roboy.error.*;
-import edu.stanford.nlp.sempre.roboy.lexicons.LexicalEntry;
 import edu.stanford.nlp.sempre.roboy.lexicons.word2vec.Word2vec;
 import edu.stanford.nlp.sempre.roboy.score.*;
 import edu.stanford.nlp.sempre.roboy.utils.SparqlUtils;
 import fig.basic.LispTree;
 import fig.basic.LogInfo;
 import fig.basic.Option;
+import sun.rmi.runtime.Log;
 
 import java.lang.reflect.Type;
 import java.util.*;
@@ -24,11 +24,11 @@ import java.util.*;
  */
 public class ErrorRetrieval {
     private Gson gson = new Gson();
-    private boolean follow_ups;                 /**< Enabling/disabling follow_up questions */
+    private Map<String,List<String>> follow_ups;                 /**< Enabling/disabling follow_up questions */
     private String utterance;                   /**< Currently processed user utterance */
     private ContextValue context;               /**< Context Value storing history of a conversation */
     private List<Derivation> derivations;       /**< List of predicted derivations */
-    private ErrorInfo errorInfo;                /**< Error solutions object */
+    private UnspecInfo underInfo;                /**< Error solutions object */
 
     public  String dbpediaUrl = ConfigManager.DB_SPARQL;
     private SparqlUtils sparqlUtil = new SparqlUtils();
@@ -39,10 +39,6 @@ public class ErrorRetrieval {
     private List<KnowledgeRetriever> helpers;   /**< List of error retrieval objects */
     private List<ScoringFunction> scorers;      /**< List of scoring functions objects */
 
-    public static class Options {
-        @Option(gloss = "Enabling follow-up questions") public boolean followUps = false;
-    }
-    public static ErrorRetrieval.Options opts = new ErrorRetrieval.Options();
     /**
      * A constructor.
      * Creates ErrorRetrieval object.
@@ -51,11 +47,11 @@ public class ErrorRetrieval {
      */
     public ErrorRetrieval(String utterance, ContextValue context, List<Derivation> derivations){
         // Create base objects
-        this.follow_ups = opts.followUps;
+        this.follow_ups = ConfigManager.FOLLOW_UPS;
         this.utterance = utterance;
         this.context = context;
         this.derivations = derivations;
-        this.errorInfo = new ErrorInfo();
+        this.underInfo = new UnspecInfo();
 
 
         // Adding error retrieval mechanisms
@@ -88,11 +84,11 @@ public class ErrorRetrieval {
      */
     public ErrorRetrieval(){
         // Create base objects
-        this.follow_ups = opts.followUps;
+        this.follow_ups = ConfigManager.FOLLOW_UPS;
         this.utterance = null;
         this.context = null;
         this.derivations = null;
-        this.errorInfo = new ErrorInfo();
+        this.underInfo = new UnspecInfo();
 
         // Adding error retrieval mechanisms
         // LogInfo.begin_track("Building error retrieval module:");
@@ -134,7 +130,7 @@ public class ErrorRetrieval {
         this.utterance = utterance;
         this.context = context;
         this.derivations = derivations;
-        this.errorInfo = new ErrorInfo();
+        this.underInfo = new UnspecInfo();
     }
 
     /**
@@ -153,7 +149,7 @@ public class ErrorRetrieval {
      */
     public void updateExample(List<Derivation> derivations){
         this.derivations = derivations;
-        this.errorInfo = new ErrorInfo();
+        this.underInfo = new UnspecInfo();
     }
 
     /**
@@ -168,56 +164,219 @@ public class ErrorRetrieval {
     /**
      * Getter function for error informations.
      */
-    public ErrorInfo getErrorInfo(){
-        return this.errorInfo;
+    public UnspecInfo getUnderInfo(){
+        return this.underInfo;
+    }
+
+
+    /**
+     * Function checking derivation for underspecified terms
+     * @return A list of underspecified terms
+     */
+    public List<UnspecInfo> checkUnderspecified () {
+        // Initialize underspecified terms
+        List<String> foundUnder = new ArrayList<>();
+        List<UnspecInfo> underTerms = new ArrayList<>();
+        for (Derivation deriv : this.derivations) {
+            String formula = deriv.getFormula().toString();
+            while (formula.contains("Open")){
+                int start = formula.indexOf("Open")+"Open".length();
+                int end = formula.indexOf("''",start);
+                if (start > formula.length() || start < 0 || end < 0 ||end > formula.length())
+                    break;
+                String full_type = formula.substring(formula.indexOf("Open"),formula.indexOf("''")+2);
+                String entity = formula.substring(start,end).substring(formula.substring(start,end).indexOf("'")+1);
+                if (!foundUnder.contains(entity)){
+                    foundUnder.add(entity);
+                    if (full_type.contains("Entity")){
+                        underTerms.add(new UnspecInfo(entity, UnspecInfo.TermType.ENTITY));
+                    }
+                    else if (full_type.contains("Type")){
+                        underTerms.add(new UnspecInfo(entity, UnspecInfo.TermType.TYPE));
+                    }
+                    else if (full_type.contains("Relation")){
+                        underTerms.add(new UnspecInfo(entity, UnspecInfo.TermType.RELATION));
+                    }
+                }
+                formula = formula.substring(end+2);
+            }
+        }
+        return underTerms;
     }
 
     /**
      * Function creating potential new ontology concepts matching unknown term.
-     * @param deriv         single potential derivation
-     * @param errorInfo     information about potential candidates
+     * @param termList      list of underspecified terms
+     * @return A list of candidates with information about them
      */
-    public ErrorInfo createCandidates(Derivation deriv, ErrorInfo errorInfo){
-        String formula = deriv.getFormula().toString();
-        while (formula.contains("Open")){
-            int start = formula.indexOf("Open")+"Open".length();
-            int end = formula.indexOf("''",start);
-            if (start > formula.length() || start < 0 || end < 0 ||end > formula.length())
-                break;
-            String term = formula.substring(start,end).substring(formula.substring(start,end).indexOf("'")+1);
-            if (!errorInfo.getCandidates().containsKey(term)) {
-                for (KnowledgeRetriever helper : this.helpers) {
-                    errorInfo.addCandidates(helper.analyze(deriv));
-                }
-                return errorInfo;
+    public List<UnspecInfo> createCandidates(List<UnspecInfo> termList){
+        for (UnspecInfo term:termList) {
+            LogInfo.begin_track("Analyzing term: %s", term.term);
+            for (KnowledgeRetriever helper : this.helpers)
+            {
+                term.addCandidates(helper.analyze(term));
             }
-            formula = formula.substring(end);
+            LogInfo.end_track();
         }
-        return errorInfo;
+        return termList;
     }
 
     /**
      * Function scoring single derivation candidates
-     * @param deriv         single potential derivation
-     * @param errorInfo   object storing created candidates
+     * @param termList      list of underspecified terms
+     * @return A list of candidates with information about them
      */
-    public ErrorInfo createScores(Derivation deriv, ErrorInfo errorInfo){
+    public List<UnspecInfo> createScores(List<UnspecInfo> termList){
+        for (UnspecInfo term:termList) {
+            LogInfo.begin_track("Scoring term: %s", term.term);
+            for (ScoringFunction scorer : this.scorers)
+            {
+                term.addScores(scorer.score(term, this.context));
+            }
+            LogInfo.end_track();
+        }
+        return termList;
+    }
+
+    /**
+     * Function extracting best candidate and forming follow up question if needed
+     *
+     * @param underInfo        current information about candidates
+     * @return Best candidate
+     */
+    public String getBestCandidate(UnspecInfo underInfo){
+        // Sort all the scores
+        List<Double> sorted = underInfo.candidatesScores;
+        Collections.sort(sorted);
+        Collections.reverse(sorted);
+        int index = underInfo.candidatesScores.indexOf(sorted.get(0));
+        // Best candidate
+        String result = underInfo.candidates.get(index);
+        if (sorted.get(0) < ConfigManager.FOLLOW_THRES || (sorted.get(1)/sorted.get(0)) > 0.5) {
+            List<String> candidates = new ArrayList<>();
+            candidates.add(underInfo.candidatesInfo.get(index));
+            double current = sorted.get(0);
+            for (int i = 1; i < sorted.size(); i++){
+                if (sorted.get(i)/current > 0.5)
+                    candidates.add(underInfo.candidatesInfo.get(underInfo.candidatesScores.indexOf(sorted.get(i))));
+                else
+                    break;
+            }
+            this.underInfo.followUps.addAll(formQuestion(underInfo.term,candidates));
+        }
+        if (ConfigManager.DEBUG > 0)
+        {
+            this.underInfo.followUps.addAll(formQuestion(underInfo.term,underInfo.candidatesInfo));
+        }
+        return result;
+    }
+
+    /**
+     * Function forming questions.
+     *
+     * @param term          term that is underspecified
+     * @param candidate     list of potential candidates
+     * @return Follow-up question
+     */
+    public List<Map.Entry<String,String>> formQuestion(String term, List<String> candidate) {
+        List<Map.Entry<String,String>> result = new ArrayList<>();
+        for (String c:candidate) {
+            Type type = new TypeToken<Map<String, String>>(){}.getType();
+            Map<String, String> c_map = this.gson.fromJson(c, type);
+            String desc = sparqlUtil.returnDescr(c_map.get("URI"),dbpediaUrl);
+            if (desc!=null) {
+                if (desc.contains(".")) {
+                    desc = desc.substring(0, desc.indexOf("."));
+                }
+                if (desc.contains("(")) {
+                    String new_desc = desc.substring(0, desc.indexOf("("));
+                    new_desc = new_desc.concat(desc.substring(desc.indexOf(")")+1));
+                    desc = new_desc;
+                }
+                desc = desc.replaceAll(" is ", ", ");
+                desc = desc.replaceAll(" was ", ", ");
+                int rnd = new Random().nextInt(this.follow_ups.get("abstract").size());
+                String question = String.format(this.follow_ups.get("abstract").get(rnd), term, c_map.get("Label"), desc);
+                Map.Entry<String, String> entry = new java.util.AbstractMap.SimpleEntry<String, String>
+                        (question, c_map.get("URI"));
+                result.add(entry);
+            }
+            else {
+                int rnd = new Random().nextInt(this.follow_ups.get("label").size());
+                String question = String.format(this.follow_ups.get("label").get(rnd), term, c_map.get("Label"), desc);
+                Map.Entry<String, String> entry = new java.util.AbstractMap.SimpleEntry<String, String>
+                        (String.format(question, term, c_map.get("Label")), c_map.get("URI"));
+                result.add(entry);
+            }
+        }
+        if (ConfigManager.DEBUG > 3 && result.size()>0){
+            LogInfo.logs("Question:%s", result.get(0).getKey());
+        }
+        return result;
+    }
+
+    /**
+     * Function replacing missing terms with the best candidate
+     * @param deriv       initial derivation
+     * @param replacements   object storing best candidates
+     */
+    public Derivation replace(Derivation deriv, Map<String,String> replacements){
+        LispTree new_formula = deriv.getFormula().toLispTree();
+        LispTree best_formula = deriv.getFormula().toLispTree();
         String formula = deriv.getFormula().toString();
         while (formula.contains("Open")){
             int start = formula.indexOf("Open")+"Open".length();
             int end = formula.indexOf("''",start);
             if (start > formula.length() || start < 0 || end < 0 ||end > formula.length())
                 break;
-            String term = formula.substring(start,end).substring(formula.substring(start,end).indexOf("'")+1);
-            if (!errorInfo.getScored().containsKey(term)) {
-                for (ScoringFunction scorer : this.scorers) {
-                    errorInfo.addScores(scorer.score(errorInfo, this.context));
+            String full_type = formula.substring(formula.indexOf("Open"),formula.indexOf("''")+2);
+            String entity = formula.substring(start,end).substring(formula.substring(start,end).indexOf("'")+1);
+            String best = replacements.get(entity);
+            if (ConfigManager.DEBUG > 5)
+                LogInfo.logs("Forming: %s - %s", best, full_type);
+            if (this.underInfo.candidates.contains(entity)) {
+                for (int i = 0; i < this.underInfo.followUps.size(); i++) {
+                    Map.Entry<String, String> entry = new java.util.AbstractMap.SimpleEntry<String, String>
+                            (this.underInfo.followUps.get(i).getKey(),
+                                    Formulas.fromLispTree(replaceEntity(best_formula,
+                                            full_type, this.underInfo.followUps.get(i).getValue())).toString());
+                    if (deriv.followUps!=null)
+                        deriv.followUps.add(entry);
+                    else
+                        deriv.followUps = new ArrayList<>(Arrays.asList(entry));
                 }
-                return errorInfo;
             }
-            formula = formula.substring(end);
+            if (best!=null) {
+                new_formula = replaceEntity(new_formula, full_type, best);
+            }
+            formula = formula.substring(end+2);
         }
-        return errorInfo;
+        deriv.setFormula(Formulas.fromLispTree(new_formula));
+        return deriv;
+    }
+
+    /**
+     * Function replacing single entity in LispTree
+     * @param new_formula     initial formula
+     * @param replace         term to be replaced
+     * @param key             term to replace
+     */
+    public LispTree replaceEntity(LispTree new_formula, String replace, String key) {
+        if (new_formula!= null && new_formula.isLeaf()) {
+            LispTree listTree = LispTree.proto.newLeaf(new_formula.value.replaceAll(replace, key));
+            return listTree;
+        }
+        else if (new_formula.children.get(0).value!= null && new_formula.children.get(0).value == "string"){
+            NameValue result = new NameValue(new_formula.children.get(1).value.replaceAll(replace, key));
+            return result.toLispTree();
+        }
+        else {
+            for (int i = 0; i < new_formula.children.size(); i++) {
+                new_formula.children.add(i,replaceEntity(new_formula.children.get(i), replace, key));
+                new_formula.children.remove(i+1);
+            }
+        }
+        return new_formula;
     }
 
     /**
@@ -314,141 +473,6 @@ public class ErrorRetrieval {
     }
 
     /**
-     * Function replacing single entity in LispTree
-     * @param new_formula     initial formula
-     * @param replace         term to be replaced
-     * @param key             term to replace
-     */
-    public LispTree replaceEntity(LispTree new_formula, String replace, String key) {
-        if (new_formula!= null && new_formula.isLeaf()) {
-            LispTree listTree = LispTree.proto.newLeaf(new_formula.value.replaceAll(replace, key));
-            return listTree;
-        }
-        else if (new_formula.children.get(0).value!= null && new_formula.children.get(0).value == "string"){
-            NameValue result = new NameValue(new_formula.children.get(1).value.replaceAll(replace, key));
-            return result.toLispTree();
-        }
-        else {
-            for (int i = 0; i < new_formula.children.size(); i++) {
-                new_formula.children.add(i,replaceEntity(new_formula.children.get(i), replace, key));
-                new_formula.children.remove(i+1);
-            }
-        }
-        return new_formula;
-    }
-
-
-    /**
-     * Function forming questions.
-     *
-     * @param term          term that is underspecified
-     * @param candidate     list of potential candidates
-     * @return Follow-up question
-     */
-    public List<Map.Entry<String,String>> formQuestion(String term, List<String> candidate) {
-        List<Map.Entry<String,String>> result = new ArrayList<>();
-        for (String c:candidate) {
-            Type type = new TypeToken<Map<String, String>>(){}.getType();
-            Map<String, String> c_map = this.gson.fromJson(c, type);
-            String desc = sparqlUtil.returnDescr(c_map.get("URI"),dbpediaUrl);
-            if (desc!=null) {
-                if (desc.contains(".")) {
-                    desc = desc.substring(0, desc.indexOf("."));
-                }
-                if (desc.contains("(")) {
-                    String new_desc = desc.substring(0, desc.indexOf("("));
-                    new_desc = new_desc.concat(desc.substring(desc.indexOf(")")+1));
-                    desc = new_desc;
-                }
-                desc = desc.replaceAll(" is ", ", ");
-                desc = desc.replaceAll(" was ", ", ");
-                Map.Entry<String, String> entry = new java.util.AbstractMap.SimpleEntry<String, String>
-                        (String.format("Did you mean %s as %s, %s?", term, c_map.get("Label"), desc), c_map.get("URI"));
-                result.add(entry);
-            }
-            else {
-                Map.Entry<String, String> entry = new java.util.AbstractMap.SimpleEntry<String, String>
-                        (String.format("Did you mean %s as %s?", term, c_map.get("Label")), c_map.get("URI"));
-                result.add(entry);
-            }
-        }
-        if (ConfigManager.DEBUG > 3 && result.size()>0){
-            LogInfo.logs("Question:%s", result.get(0).getKey());
-        }
-        return result;
-    }
-
-    /**
-     * Function scoring candidates in a list
-     *
-     * @param errorInfo        current information about candidates
-     * @param term             underspecified term
-     * @return Best candidate
-     */
-    public String getBestCandidate(ErrorInfo errorInfo, String term){
-        String result = new String();
-        Map<String,Double> candidate = errorInfo.getScored().get(term);
-        List<Map.Entry<String,Double>> sorted = new ArrayList<>(candidate.entrySet());
-        sorted.sort((o1, o2) -> o2.getValue().compareTo(o1.getValue()));
-        Map.Entry<String,Double> best = sorted.get(0);
-        for (Map.Entry<String,Double> entry : sorted)
-        {
-            if (this.errorInfo.getFollowUps().containsKey(term)) {
-                this.errorInfo.getFollowUps().get(term).add(entry.getKey());
-            }
-            else {
-                this.errorInfo.getFollowUps().put(term, new ArrayList<>(Arrays.asList(entry.getKey())));
-            }
-        }
-        return best.getKey();
-    }
-
-    /**
-     * Function replacing missing terms with the best candidate
-     * @param deriv       initial derivation
-     * @param replacements   object storing best candidates
-     */
-    public Derivation replace(Derivation deriv, Map<String,String> replacements){
-        LispTree new_formula = deriv.getFormula().toLispTree();
-        LispTree best_formula = deriv.getFormula().toLispTree();
-        String formula = deriv.getFormula().toString();
-        while (formula.contains("Open")){
-            int start = formula.indexOf("Open")+"Open".length();
-            int end = formula.indexOf("''",start);
-            if (start > formula.length() || start < 0 || end < 0 ||end > formula.length())
-                break;
-            String full_type = formula.substring(formula.indexOf("Open"),formula.indexOf("''")+2);
-            String entity = formula.substring(start,end).substring(formula.substring(start,end).indexOf("'")+1);
-            String best = replacements.get(entity);
-            if (ConfigManager.DEBUG > 5)
-                LogInfo.logs("Forming: %s - %s", best, full_type);
-            if (errorInfo.getFollowUps().containsKey(entity)) {
-                List<String> c = errorInfo.getFollowUps().get(entity);
-                List<Map.Entry<String, String>> questions = formQuestion(entity, c);
-                for (int i = 0; i < questions.size(); i++) {
-                    Map.Entry<String, String> entry = new java.util.AbstractMap.SimpleEntry<String, String>
-                            (questions.get(i).getKey(),
-                                    Formulas.fromLispTree(replaceEntity(best_formula,
-                                            full_type, questions.get(i).getValue())).toString());
-                    if (deriv.followUps!=null)
-                        deriv.followUps.add(entry);
-                    else
-                        deriv.followUps = new ArrayList<>(Arrays.asList(entry));
-                }
-            }
-            if (best!=null) {
-                Type type = new TypeToken<Map<String, String>>() {
-                }.getType();
-                Map<String, String> cand = this.gson.fromJson(best, type);
-                new_formula = replaceEntity(new_formula, full_type, cand.get("URI"));
-            }
-            formula = formula.substring(end+2);
-        }
-        deriv.setFormula(Formulas.fromLispTree(new_formula));
-        return deriv;
-    }
-
-    /**
      * Postprocessing function handling unknown terms error.
      */
     public List<Derivation> postprocess(){
@@ -456,6 +480,8 @@ public class ErrorRetrieval {
         ErrorInfo result = new ErrorInfo();
         Set<String> update = new HashSet<>();
         LogInfo.begin_track("Error retrieval:");
+
+        // Remove derivations that are the same
         List<Derivation> remove = new ArrayList();
         List<String> formulas = new ArrayList();
         for (Derivation deriv : this.derivations) {
@@ -469,43 +495,63 @@ public class ErrorRetrieval {
         this.derivations.removeAll(remove);
         if (ConfigManager.DEBUG > 0)
             LogInfo.logs("Checking %d derivations",this.derivations.size());
+
         if (this.derivations != null) {
-            // Get candidates
-            for (Derivation deriv : this.derivations) {
-                // Check if something is missing
-                //LogInfo.logs("Checked formula: " + deriv.getFormula().toString());
-                result = createCandidates(deriv, result);
-                result = createScores(deriv, result);
-                update.addAll(createLexemes(deriv,result));
+            // Get term
+            List<UnspecInfo> missingTerms = checkUnderspecified();
+            if (ConfigManager.DEBUG > 0) {
+                for (UnspecInfo i : missingTerms) {
+                    LogInfo.logs("Detected underspecified term: %s", i.term);
+                }
             }
+
+            // Get candidate list with information
+            missingTerms = createCandidates(missingTerms);
+            if (ConfigManager.DEBUG > 1) {
+                for (UnspecInfo termInfo : missingTerms) {
+                    for (int i = 0; i < termInfo.candidatesInfo.size(); i++) {
+                        LogInfo.logs("Final candidates: %s", termInfo.candidatesInfo.get(i).toString());
+                    }
+                }
+            }
+
+            // Get candidate scores
+            missingTerms = createScores(missingTerms);
+            if (ConfigManager.DEBUG > 1) {
+                for (UnspecInfo termInfo : missingTerms) {
+                    for (int i = 0; i < termInfo.candidatesScores.size(); i++) {
+                        LogInfo.logs("Final scores: %s %f", termInfo.candidates.get(i), termInfo.candidatesScores.get(i));
+                    }
+                }
+            }
+
             // Get replacements
             Map<String,String> replaces = new HashMap<>();
-            for (String term: result.getScored().keySet()){
-                if (follow_ups)
-                    replaces.put(term,getBestCandidate(result, term));
-                else
-                    replaces.put(term,result.getScored().get(term).entrySet().stream().max((entry1, entry2) -> entry1.getValue() > entry2.getValue() ? 1 : -1).get().getKey());
+            for (UnspecInfo termInfo : missingTerms)
+            {
+                replaces.put(termInfo.term,getBestCandidate(termInfo));
             }
+            if (ConfigManager.DEBUG > 1) {
+                for (String key : replaces.keySet()) {
+                    LogInfo.logs("Best replacement for %s : %s", key, replaces.get(key));
+                }
+                for (UnspecInfo termInfo : missingTerms) {
+                    for (Map.Entry<String, String> entry : termInfo.followUps) {
+                        LogInfo.logs("FollowUp question for %s", entry.getKey());
+                    }
+                }
+            }
+
             // Replace
             for (Derivation deriv: this.derivations){
                 // Replace with the best
-                if (ConfigManager.DEBUG > 5)
+                if (ConfigManager.DEBUG > 2)
                     LogInfo.logs("Derivation %s", replaces.entrySet().toString());
                 if (replaces.keySet().size() > 0)
                     replace(deriv,replaces);
             }
         }
 
-        if (ConfigManager.DEBUG > 0) {
-            // Show results
-            for (String entity : result.getScored().keySet()) {
-                for (String key : result.getScored().get(entity).keySet()) {
-                    LogInfo.logs("Results: %s -> %s", key, result.getScored().get(entity).get(key).toString());
-                }
-                // Save new entries
-                updateLexicon(update);
-            }
-        }
         LogInfo.end_track();
         return this.derivations;
     }
