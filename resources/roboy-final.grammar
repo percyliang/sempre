@@ -28,7 +28,7 @@
 (rule $ValueToken ($ValuePhrase) (FilterSpanLengthFn 1 2))
 (rule $NounToken ($NounPhrase) (FilterSpanLengthFn 1 3))
 (rule $EntityToken ($EntityPhrase) (FilterSpanLengthFn 1 4))
-(rule $Ignore ($LEMMA_PHRASE) (FilterSpanLengthFn 1 3))
+(rule $IgnPhrase ($Ignore) (FilterSpanLengthFn 1 3))
 (rule $Limited ($LEMMA_PHRASE) (FilterSpanLengthFn 1 3))
 
 ## SimpleLexiconFn
@@ -78,44 +78,46 @@
 ## Forming Subject
 (rule $Subject ($Person) (IdentityFn))
 (rule $Subject ($Entity) (IdentityFn))
-(rule $Subject ($Subject or $Subject) (ListFn))
-(rule $Subject ($Subject ($Conj optional) $Subject) (ListFn))
-(rule $Subject ($Subject (, optional) $Subject) (ListFn))
+(rule $Subject ($Subject or $Subject) (ConcatFn ";"))
+(rule $Subject ($Subject ($Conj optional) $Subject) (ConcatFn ","))
+(rule $Subject ($Subject (, optional) $Subject) (ConcatFn ","))
 
 (rule $RobSubject ($Person) (IdentityFn))
-(rule $RobSubject ($RobSubject or $RobSubject) (ListFn))
-(rule $RobSubject ($RobSubject ($Conj optional) $RobSubject) (ListFn))
-(rule $RobSubject ($RobSubject (, optional) $RobSubject) (ListFn))
+(rule $RobSubject ($RobSubject or $RobSubject) (ConcatFn ";"))
+(rule $RobSubject ($RobSubject ($Conj optional) $RobSubject) (ConcatFn ","))
+(rule $RobSubject ($RobSubject (, optional) $RobSubject) (ConcatFn ","))
 
 ## Forming Predicate
 (rule $Predicate ($PartObjProp) (IdentityFn))
 (rule $Predicate ($PartDataProp) (IdentityFn))
-(rule $Predicate ($Predicate or $Predicate) (ListFn))
-(rule $Predicate ($Predicate ($Conj optional) $Predicate) (ListFn))
-(rule $Predicate ($Predicate (, optional) $Predicate) (ListFn))
+(rule $Predicate ($Predicate or $Predicate) (ConcatFn ";"))
+(rule $Predicate ($Predicate ($Conj optional) $Predicate) (ConcatFn ","))
+(rule $Predicate ($Predicate (, optional) $Predicate) (ConcatFn ","))
 
 (rule $RObjPred ($RObjProp) (IdentityFn))
 (rule $RObjPred ($BE $RObjPred) (SelectFn 1))
 (rule $RObjPred ($HAVE $RObjPred) (SelectFn 1))
-(rule $RObjPred ($RObjPred or $RObjPred) (ListFn))
-(rule $RObjPred ($RObjPred ($Conj optional) $RObjPred) (ListFn))
-(rule $RObjPred ($RObjPred (, optional) $RObjPred) (ListFn))
+(rule $RObjPred ($IgnPhrase $RObjPred) (SelectFn 1))
+(rule $RObjPred ($RObjPred $IgnPhrase) (SelectFn 0))
+(rule $RObjPred ($RObjPred or $RObjPred) (ConcatFn ";"))
+(rule $RObjPred ($RObjPred ($Conj optional) $RObjPred) (ConcatFn ","))
+(rule $RObjPred ($RObjPred (, optional) $RObjPred) (ConcatFn ","))
 
 (rule $RDataPred ($RDataProp) (IdentityFn))
 (rule $RDataPred ($BE $RDataProp) (SelectFn 1))
 (rule $RDataPred ($HAVE $RDataProp) (SelectFn 1))
-(rule $RDataProp ($Limited $RDataProp) (SelectFn 1))
-(rule $RDataProp ($RDataProp $Limited) (SelectFn 0))
-(rule $RDataPred ($RDataPred or $RDataPred) (ListFn))
-(rule $RDataPred ($RDataPred ($Conj optional) $RDataPred) (ListFn))
-(rule $RDataPred ($RDataPred (, optional) $RDataPred) (ListFn))
+(rule $RDataProp ($IgnPhrase $RDataProp) (SelectFn 1))
+(rule $RDataProp ($RDataProp $IgnPhrase) (SelectFn 0))
+(rule $RDataPred ($RDataPred or $RDataPred) (ConcatFn ";"))
+(rule $RDataPred ($RDataPred ($Conj optional) $RDataPred) (ConcatFn ","))
+(rule $RDataPred ($RDataPred (, optional) $RDataPred) (ConcatFn ","))
 
 ## Forming Objects
 (rule $Object ($Subject) (IdentityFn))
 (rule $Object ($BE $Object) (SelectFn 1))
-(rule $Object ($Object or $Object) (ListFn))
-(rule $Object ($Object ($Conj optional) $Object) (ListFn))
-(rule $Object ($Object (, optional) $Object) (ListFn))
+(rule $Object ($Object or $Object) (ConcatFn ";"))
+(rule $Object ($Object ($Conj optional) $Object) (ConcatFn ","))
+(rule $Object ($Object (, optional) $Object) (ConcatFn ","))
 
 ## Forming POs
 (rule $PredObj ($FullObjProp) (IdentityFn))
@@ -132,13 +134,13 @@
 
 # Expressions Roboy
 ############################################################
-#(rule $Expr ($RobSubject $RObjPred $Object) (TripleFn spo))
-(rule $Expr ($RobSubject $RObjPred $Value) (TripleFn spo))
+(rule $Expr ($RobSubject $RObjPred $Object) (TripleFn spo))
+#(rule $Expr ($RobSubject $RObjPred $Value) (TripleFn spo))
 (rule $Expr ($RobSubject $RDataPred $Value) (TripleFn spo))
-#(rule $Expr ($Object $RobSubject $RObjPred ) (TripleFn osp))
-(rule $Expr ($Value $RobSubject $RObjPred ) (TripleFn osp))
+(rule $Expr ($Object $RobSubject $RObjPred ) (TripleFn osp))
+#(rule $Expr ($Value $RobSubject $RObjPred ) (TripleFn osp))
 (rule $Expr ($Value $RobSubject $RDataPred) (TripleFn osp))
-(rule $Expr ($RObjPred $RobSubject $Value) (TripleFn pso))
+(rule $Expr ($RObjPred $RobSubject $Object) (TripleFn pso))
 (rule $Expr ($RDataPred $RobSubject $Value) (TripleFn pso))
 (rule $ROOT ($Expr) (IdentityFn))
 (rule $ROOT ($Expr ($Conj optional) $Expr) (ListFn))
@@ -159,6 +161,7 @@
 (rule $Quest (date) (ConstantFn (rdf:type xsd:date) xsd:date))
 (rule $Quest (year) (ConstantFn (rdf:type xsd:date) xsd:date))
 (rule $Quest (day) (ConstantFn (rdf:type xsd:date) xsd:date))
+
 # Aggregation
 (rule $CountStr (how many) (ConstantFn null null))
 (rule $CountStr (number of) (ConstantFn null null))

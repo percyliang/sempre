@@ -33,30 +33,30 @@
 {"lexeme": "be friend with", "formula": "rb:FRIEND_OF", "type" : "DataProp"}
 {"lexeme": "belong to", "formula": "rb:MEMBER_OF", "type" : "ObjProp"}
 
-{"lexeme": "call", "formula": "!rb:NAME_OF", "type" : "QRoboy"}
-{"lexeme": "like", "formula": "!rb:HAS_HOBBY", "type" : "QRoboy"}
-{"lexeme": "like", "formula": "!rb:FRIEND_OF", "type" : "QRoboy"}
-{"lexeme": "like", "formula": "!rb:FAVORITE_MOVIE", "type" : "QRoboy"}
-{"lexeme": "bear", "formula": "!rb:FROM", "type" : "QRoboy"}
-{"lexeme": "bear in", "formula": "!rb:FROM", "type" : "QRoboy"}
-{"lexeme": "be bear in", "formula": "!rb:FROM", "type" : "QRoboy"}
-{"lexeme": "come from", "formula": "!rb:FROM", "type" : "QRoboy"}
-{"lexeme": "be from", "formula": "!rb:FROM", "type" : "QRoboy"}
-{"lexeme": "from", "formula": "!rb:FROM", "type" : "QRoboy"}
-{"lexeme": "go to", "formula": "!rb:STUDY_AT", "type" : "QRoboy"}
-{"lexeme": "study", "formula": "!rb:STUDY_AT", "type" : "QRoboy"}
-{"lexeme": "study at", "formula": "!rb:STUDY_AT", "type" : "QRoboy"}
-{"lexeme": "work for", "formula": "!rb:WORK_FOR", "type" : "QRoboy"}
-{"lexeme": "work at", "formula": "!rb:WORK_FOR", "type" : "QRoboy"}
-{"lexeme": "be employ", "formula": "!rb:WORK_FOR", "type" : "QRoboy"}
-{"lexeme": "employ", "formula": "!rb:WORK_FOR", "type" : "QRoboy"}
-{"lexeme": "work as", "formula": "!rb:OCCUPIED_AS", "type" : "QRoboy"}
-{"lexeme": "live in", "formula": "!rb:LIVE_IN", "type" : "QRoboy"}
-{"lexeme": "live", "formula": "!rb:LIVE_IN", "type" : "QRoboy"}
-{"lexeme": "lives in", "formula": "!rb:LIVE_IN", "type" : "QRoboy"}
-{"lexeme": "be friend with", "formula": "!rb:FRIEND_OF", "type" : "QRoboy"}
-{"lexeme": "friend with", "formula": "!rb:FRIEND_OF", "type" : "QRoboy"}
-{"lexeme": "belong to", "formula": "!rb:MEMBER_OF", "type" : "QRoboy"}
+{"lexeme": "call", "formula": "!rb:NAME_OF", "type" : "DataProp"}
+{"lexeme": "like", "formula": "!rb:HAS_HOBBY", "type" : "ObjProp"}
+{"lexeme": "like", "formula": "!rb:FRIEND_OF", "type" : "DataProp"}
+{"lexeme": "like", "formula": "!rb:FAVORITE_MOVIE", "type" : "ObjProp"}
+{"lexeme": "bear", "formula": "!rb:FROM", "type" : "ObjProp"}
+{"lexeme": "bear in", "formula": "!rb:FROM", "type" : "ObjProp"}
+{"lexeme": "be bear in", "formula": "!rb:FROM", "type" : "ObjProp"}
+{"lexeme": "come from", "formula": "!rb:FROM", "type" : "ObjProp"}
+{"lexeme": "be from", "formula": "!rb:FROM", "type" : "ObjProp"}
+{"lexeme": "from", "formula": "!rb:FROM", "type" : "ObjProp"}
+{"lexeme": "go to", "formula": "!rb:STUDY_AT", "type" : "ObjProp"}
+{"lexeme": "study", "formula": "!rb:STUDY_AT", "type" : "ObjProp"}
+{"lexeme": "study at", "formula": "!rb:STUDY_AT", "type" : "ObjProp"}
+{"lexeme": "work for", "formula": "!rb:WORK_FOR", "type" : "ObjProp"}
+{"lexeme": "work at", "formula": "!rb:WORK_FOR", "type" : "ObjProp"}
+{"lexeme": "be employ", "formula": "!rb:WORK_FOR", "type" : "ObjProp"}
+{"lexeme": "employ", "formula": "!rb:WORK_FOR", "type" : "ObjProp"}
+{"lexeme": "work as", "formula": "!rb:OCCUPIED_AS", "type" : "ObjProp"}
+{"lexeme": "live in", "formula": "!rb:LIVE_IN", "type" : "ObjProp"}
+{"lexeme": "live", "formula": "!rb:LIVE_IN", "type" : "ObjProp"}
+{"lexeme": "lives in", "formula": "!rb:LIVE_IN", "type" : "ObjProp"}
+{"lexeme": "be friend with", "formula": "!rb:FRIEND_OF", "type" : "DataProp"}
+{"lexeme": "friend with", "formula": "!rb:FRIEND_OF", "type" : "DataProp"}
+{"lexeme": "belong to", "formula": "!rb:MEMBER_OF", "type" : "ObjProp"}
 
 ## Classes
 {"lexeme": "object", "formula": "rb:OBJECT", "type" : "ObjectClass"}
@@ -96,10 +96,8 @@
 
 {"lexeme": "hobby", "formula": "!rb:HAS_HOBBY", "type" : "QRoboy"}
 {"lexeme": "activity", "formula": "!rb:HAS_HOBBY", "type" : "QRoboy"}
-{"lexeme": "favourite activity", "formula": "!rb:HAS_HOBBY", "type" : "QRoboy"}
-{"lexeme": "favorite activity", "formula": "!rb:HAS_HOBBY", "type" : "QRoboy"}
 {"lexeme": "free time", "formula": "!rb:HAS_HOBBY", "type" : "QRoboy"}
-{"lexeme": "favourite thing to do", "formula": "!rb:HAS_HOBBY", "type" : "QRoboy"}
+{"lexeme": " thing to do", "formula": "!rb:HAS_HOBBY", "type" : "QRoboy"}
 {"lexeme": "favorite thing to do", "formula": "!rb:HAS_HOBBY", "type" : "QRoboy"}
 {"lexeme": "employer", "formula": "!rb:WORK_FOR", "type" : "QRoboy"}
 {"lexeme": "location", "formula": "!rb:LIVE_IN", "type" : "QRoboy"}
