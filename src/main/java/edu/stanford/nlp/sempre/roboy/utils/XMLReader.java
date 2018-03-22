@@ -8,6 +8,7 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+import fig.basic.LogInfo;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -117,7 +118,7 @@ public class XMLReader{
 
             String var = "?" + binding.getAttribute("name");
             String uri = getTagValue("uri", binding);
-            if (!(uri == null || (var.contains("_") || (uri.contains("#"))))){
+            if (!(uri == null)){
                 uri = new String(uri.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
                 if (uri.contains(":"))
                     uri = dbInfo.uri2id(uri);

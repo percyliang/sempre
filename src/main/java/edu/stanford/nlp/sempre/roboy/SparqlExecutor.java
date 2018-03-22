@@ -130,7 +130,7 @@ public class SparqlExecutor extends Executor {
     } catch (SocketTimeoutException e) {
       return new ServerResponse(ErrorValue.timeout);
     } catch (IOException e) {
-      if (ConfigManager.DEBUG > 5)
+      if (ConfigManager.DEBUG > 7)
         LogInfo.errors("Server exception: %s", e);
       if (e.toString().contains("HTTP response code: 400"))
         return new ServerResponse(ErrorValue.badFormat);
@@ -167,7 +167,7 @@ public class SparqlExecutor extends Executor {
   //  - XML
   //  - Whether to print out details (coincides with whether this query was cached).
   public ServerResponse runQueryToGetXml(String queryStr, Formula formula) {
-    if (ConfigManager.DEBUG >= 3) LogInfo.logs("SparqlExecutor.execute: %s", queryStr);
+    if (ConfigManager.DEBUG >= 7) LogInfo.logs("SparqlExecutor.execute: %s", queryStr);
     ServerResponse response = null;
 
     // Note: only cache for concrete queries.
@@ -191,9 +191,9 @@ public class SparqlExecutor extends Executor {
     // if (response == null || response.xml == null || response.xml.contains("TIMEOUT")) {
     if (response == null) {
       // Note: begin_track without end_track
-      if (ConfigManager.DEBUG >= 1) {
+      if (ConfigManager.DEBUG >= 7) {
         LogInfo.begin_track("SparqlExecutor.execute: %s", formula);
-        if (ConfigManager.DEBUG >= 2) LogInfo.logs("%s", queryStr);
+        if (ConfigManager.DEBUG >= 7) LogInfo.logs("%s", queryStr);
       }
 
       // Make actual request
@@ -240,7 +240,7 @@ public class SparqlExecutor extends Executor {
     return execute(formula, 0, opts.maxResults);
   }
   public synchronized Response execute(Formula formula, int offset, int maxResults) {
-    if (ConfigManager.DEBUG >= 3)
+    if (ConfigManager.DEBUG >= 7)
       LogInfo.logs("SparqlExecutor.execute: %s", formula);
     String prefix = "exec-";
 
@@ -269,10 +269,10 @@ public class SparqlExecutor extends Executor {
       queryStats.timeFig.add(serverResponse.timeMs);
       if (serverResponse.error != null) {
         MapUtils.incr(queryStats.errors, serverResponse.error.type, 1);
-        if (serverResponse.beginTrack && ConfigManager.DEBUG >= 1)
+        if (serverResponse.beginTrack && ConfigManager.DEBUG >= 7)
           LogInfo.logs("Error: %s", serverResponse.error);
       }
-      if (serverResponse.beginTrack && ConfigManager.DEBUG >= 2) {
+      if (serverResponse.beginTrack && ConfigManager.DEBUG >= 7) {
         LogInfo.logs("time: %s", queryStats.timeFig);
         LogInfo.logs("errors: %s", queryStats.errors);
       }
@@ -280,7 +280,7 @@ public class SparqlExecutor extends Executor {
 
     // If error, then return out
     if (serverResponse.error != null) {
-      if (serverResponse.beginTrack && ConfigManager.DEBUG >= 1) LogInfo.end_track();
+      if (serverResponse.beginTrack && ConfigManager.DEBUG >= 7) LogInfo.end_track();
       if (!serverResponse.cached)
         stats.add(prefix + "error", true);
       return new Response(serverResponse.error, stats);
@@ -294,7 +294,7 @@ public class SparqlExecutor extends Executor {
     if (results == null) return new Response(ErrorValue.badFormat, stats);
     Value value = new ValuesExtractor(serverResponse.beginTrack, formula, converter).extract(results);
 
-    if (serverResponse.beginTrack && ConfigManager.DEBUG >= 1) LogInfo.end_track();
+    if (serverResponse.beginTrack && ConfigManager.DEBUG >= 7) LogInfo.end_track();
 
     return new Response(value, stats);
   }
@@ -410,7 +410,7 @@ public class SparqlExecutor extends Executor {
     }
 
     private void addSelectVar(Box box, SparqlSelect select, SparqlBlock block, VariableFormula var, boolean isAuxiliary) {
-      if (ConfigManager.DEBUG >= 5) LogInfo.logs("addSelectVar: %s : %s | %s", var, box.asValuesMap.get(var), box.asValuesMap);
+      if (ConfigManager.DEBUG >= 7) LogInfo.logs("addSelectVar: %s : %s | %s", var, box.asValuesMap.get(var), box.asValuesMap);
 
       // Check if alrady exists; if so, don't add it again
       for (SparqlSelect.Var oldVar : select.selectVars)
@@ -465,7 +465,7 @@ public class SparqlExecutor extends Executor {
 
         if (descriptionsMap.get(var) == null) {
           descriptionsMap.put(var, dbInfo.getName(dbInfo.getArg1Type(property)));
-          if (ConfigManager.DEBUG >= 3) LogInfo.logs("description arg1=%s => %s => %s", var, dbInfo.getArg1Type(property), descriptionsMap.get(var));
+          if (ConfigManager.DEBUG >= 7) LogInfo.logs("description arg1=%s => %s => %s", var, dbInfo.getArg1Type(property), descriptionsMap.get(var));
         }
       }
 
@@ -474,7 +474,7 @@ public class SparqlExecutor extends Executor {
         VariableFormula var = (VariableFormula) arg2;
         updateUnit(var, dbInfo.getUnit2(property));
         descriptionsMap.put(var, dbInfo.getName(property));
-        if (ConfigManager.DEBUG >= 3) LogInfo.logs("description arg2=%s => %s => %s", var, property, descriptionsMap.get(var));
+        if (ConfigManager.DEBUG >= 7) LogInfo.logs("description arg2=%s => %s => %s", var, property, descriptionsMap.get(var));
       }
     }
 
@@ -488,7 +488,7 @@ public class SparqlExecutor extends Executor {
 
     // Update the unit of |var| if necessary.
     void updateUnit(VariableFormula var, String unit) {
-      if (ConfigManager.DEBUG >= 5) LogInfo.logs("updateUnit: %s : %s", var, unit);
+      if (ConfigManager.DEBUG >= 7) LogInfo.logs("updateUnit: %s : %s", var, unit);
       if (unit == null) return;
       String oldUnit = unitsMap.get(var);
       if (oldUnit == null) { unitsMap.put(var, unit); return; }
@@ -504,7 +504,7 @@ public class SparqlExecutor extends Executor {
     }
 
     void updateAsValues(Box box, VariableFormula var, String asValue) {
-      if (ConfigManager.DEBUG >= 5) LogInfo.logs("updateAsValues: %s : %s", var, asValue);
+      if (ConfigManager.DEBUG >= 7) LogInfo.logs("updateAsValues: %s : %s", var, asValue);
       box.asValuesMap.put(var, asValue);
     }
 
@@ -525,7 +525,7 @@ public class SparqlExecutor extends Executor {
     // - env: mapping from lambda-DCS variables (e.g., ?city) to SPARQL variables (?x13)
     // - asValuesMap: additional constraints
     private SparqlBlock convert(Formula rawFormula, Ref<PrimitiveFormula> head, Ref<PrimitiveFormula> modifier, Box box) {
-      if (ConfigManager.DEBUG >= 5) LogInfo.begin_track("convert %s: head = %s, modifier = %s, env = %s", rawFormula, head, modifier, box.env);
+      if (ConfigManager.DEBUG >= 7) LogInfo.begin_track("convert %s: head = %s, modifier = %s, env = %s", rawFormula, head, modifier, box.env);
 
       // Check binary/unary compatibility
       boolean isNameFormula = (rawFormula instanceof ValueFormula) && (((ValueFormula) rawFormula).value instanceof NameValue);  // Either binary or unary
@@ -674,7 +674,7 @@ public class SparqlExecutor extends Executor {
           AggregateFormula.Mode mode = isMax ? AggregateFormula.Mode.max : AggregateFormula.Mode.min;
           Formula best = new MarkFormula("degree", new AggregateFormula(mode, new JoinFormula(new ReverseFormula(formula.relation), formula.head)));
           Formula transformed = new MergeFormula(MergeFormula.Mode.and, formula.head, new JoinFormula(formula.relation, best));
-          if (ConfigManager.DEBUG >= 5) LogInfo.logs("TRANSFORMED: %s", transformed);
+          if (ConfigManager.DEBUG >= 7) LogInfo.logs("TRANSFORMED: %s", transformed);
           block.add(convert(transformed, head, null, box));
         }
       } else if (rawFormula instanceof AggregateFormula) {
@@ -743,8 +743,8 @@ public class SparqlExecutor extends Executor {
         throw new RuntimeException("Unhandled formula: " + rawFormula);
       }
 
-      if (ConfigManager.DEBUG >= 5) LogInfo.logs("return: head = %s, modifier = %s, env = %s", head, modifier, box.env);
-      if (ConfigManager.DEBUG >= 5) LogInfo.end_track();
+      if (ConfigManager.DEBUG >= 7) LogInfo.logs("return: head = %s, modifier = %s, env = %s", head, modifier, box.env);
+      if (ConfigManager.DEBUG >= 7) LogInfo.end_track();
 
       return block;
     }
@@ -835,7 +835,7 @@ public class SparqlExecutor extends Executor {
     // |results| is (result (binding (uri ...)) ...) or (result (binding (literal ...)) ...)
     Value extract(NodeList results) {
       // For each result (row in a table)...
-      if (beginTrack && ConfigManager.DEBUG >= 2) {
+      if (beginTrack && ConfigManager.DEBUG >= 7) {
         LogInfo.begin_track("%d results", results.getLength());
         if (opts.returnTable) LogInfo.logs("Header: %s", header);
       }
@@ -849,9 +849,9 @@ public class SparqlExecutor extends Executor {
           rows.add(row);
         else
           firstValues.add(row.get(0));
-        if (beginTrack && ConfigManager.DEBUG >= 2) LogInfo.logs("Row %d: %s", i, row);
+        if (beginTrack && ConfigManager.DEBUG >= 7) LogInfo.logs("Row %d: %s", i, row);
       }
-      if (beginTrack && ConfigManager.DEBUG >= 2) LogInfo.end_track();
+      if (beginTrack && ConfigManager.DEBUG >= 7) LogInfo.end_track();
 
       if (opts.returnTable)
         return new TableValue(header, rows);

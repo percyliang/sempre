@@ -71,16 +71,57 @@ public class FeatureExtractor {
     StopWatchSet.begin("FeatureExtractor.extractLocal");
     extractRuleFeatures(ex, deriv);
     extractSpanFeatures(ex, deriv);
-    extractDenotationFeatures(ex, deriv);
+//    extractDenotationFeatures(ex, deriv);
     extractDependencyFeatures(ex, deriv);
     extractWhTypeFeatures(ex, deriv);
     conjoinLemmaAndBinary(ex, deriv);
     extractBigramFeatures(ex, deriv);
+    extractOntologyFeatures(ex, deriv);
+    extractTypeFeatures(ex, deriv);
     for (FeatureComputer featureComputer : featureComputers)
       featureComputer.extractLocal(ex, deriv);
 //    for (String key:deriv.getLocalFeatureVector().toMap().keySet())
 //      LogInfo.logs("Key: %s -> Entry: %s",key,deriv.getAllFeatureVector().get(key));
     StopWatchSet.end();
+  }
+
+  // This function is called on every sub-Derivation, so we should extract only
+  // features which depend in some way on |deriv|, not just on its children.
+  public void extractEnd(Example ex, Derivation deriv) {
+    extractDenotationFeatures(ex, deriv);
+    for (FeatureComputer featureComputer : featureComputers)
+      featureComputer.extractLocal(ex, deriv);
+//    for (String key:deriv.getLocalFeatureVector().toMap().keySet())
+//      LogInfo.logs("Key: %s -> Entry: %s",key,deriv.getAllFeatureVector().get(key));
+  }
+
+  // Add an indicator for ontology matching
+  void extractOntologyFeatures(Example ex, Derivation deriv) {
+    if (!containsDomain("ontology")) return;
+    double rbScore = 0, dbScore = 0;
+    String[] terms = deriv.toString().split(" ");
+    for (String term: terms){
+      if (term.contains(":") && !term.contains("fb:")){
+        if (term.contains("rb:"))
+          rbScore = rbScore + 2;
+        else
+          dbScore = dbScore + 1;
+      }
+    }
+    if (rbScore > 2 && dbScore == 0)
+      deriv.addFeature("ontology", "roboy", rbScore*100);
+    else if (rbScore > 2)
+          deriv.addFeature("ontology", "roboy", rbScore);
+    if (dbScore > 1)
+      deriv.addFeature("ontology", "dbpedia", dbScore);
+  }
+
+  // Add an indicator for results size
+  void extractTypeFeatures(Example ex, Derivation deriv) {
+    if (!containsDomain("type")) return;
+    if (deriv.formula.toString().contains("string")) {
+      deriv.addFeature("type", "non-string", -2);
+    }
   }
 
   // Add an indicator for each applied rule.
@@ -106,7 +147,7 @@ public class FeatureExtractor {
     if (!containsDomain("denotation")) return;
     if (!deriv.isRoot(ex.numTokens())) return;
     //System.out.println(deriv.getFormula().toString());
-    if (deriv.getType()==SemType.tripleType||deriv.getType()==SemType.stringType||deriv.getFormula().toString().contains("lambda")) {
+    if (deriv.getFormula().toString().contains("triple")||deriv.getFormula().toString().contains("string")||deriv.getFormula().toString().contains("lambda")) {
       deriv.ensureExecuted(simple_executor, ex.context);
     }
     else

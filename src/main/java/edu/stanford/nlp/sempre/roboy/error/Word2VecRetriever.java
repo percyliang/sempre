@@ -16,15 +16,22 @@ import fig.basic.LogInfo;
  * @author emlozin
  */
 public class Word2VecRetriever extends KnowledgeRetriever {
-    private Map<String, String> results;
-    private Word2vec vec;
-    public static Gson gson = new Gson();               /**< Gson object */
+    public static Gson gson = new Gson();                   /**< Gson object */
 
+    private Word2vec vec;                                   /**< Word2Vec model link*/
+
+    /**
+     * Constructor
+     */
     public Word2VecRetriever(Word2vec vec){
         this.vec = vec;
-        this.results = new HashMap<>();
     }
 
+    /**
+     * Analyzer retrieving new candidates
+     *
+     * @param underTerm   information about the candidates for underspecified term
+     */
     public UnspecInfo analyze(UnspecInfo underTerm) {
         String entity = underTerm.term;
         UnspecInfo result = new UnspecInfo(entity, underTerm.type);

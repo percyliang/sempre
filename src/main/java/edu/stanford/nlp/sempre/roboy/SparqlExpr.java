@@ -213,7 +213,8 @@ class SparqlStatement implements SparqlExpr {
         // Note: != is not treated specially
       }
     }
-
+    if (relation.contains("rdfs:comment"))
+        return SparqlUtils.plainStr(arg1) + " " + relation + " " + SparqlUtils.plainStr(arg2) + ". FILTER (lang(" + SparqlUtils.plainStr(arg2) + ") = 'en') ";
     return SparqlUtils.plainStr(arg1) + " " + relation + " " + SparqlUtils.plainStr(arg2);
   }
 

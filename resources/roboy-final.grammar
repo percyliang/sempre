@@ -60,16 +60,17 @@
 (rule $Person ($ProNoun) (SimpleLexiconFn (type "Person")))
 
 ## OpenTypes
-(rule $FullObjType ($NounToken) (OpenTypeFn type))
-(rule $FullDataProp ($NounToken) (OpenTypeFn type))
+(when error
+    (rule $FullObjType ($NounToken) (OpenTypeFn type))
+    (rule $FullDataProp ($NounToken) (OpenTypeFn type))
 
-(rule $PartObjProp ($NounToken) (OpenTypeFn relation))
-(rule $PartDataProp ($NounToken) (OpenTypeFn relation))
-(rule $PartObjProp ($VerbToken) (OpenTypeFn relation))
-(rule $PartDataProp ($VerbToken) (OpenTypeFn relation))
+    (rule $PartObjProp ($NounToken) (OpenTypeFn relation))
+    (rule $PartDataProp ($NounToken) (OpenTypeFn relation))
+    (rule $PartObjProp ($VerbToken) (OpenTypeFn relation))
+    (rule $PartDataProp ($VerbToken) (OpenTypeFn relation))
 
-(rule $Entity ($EntityToken) (OpenTypeFn entity))
-
+    (rule $Entity ($EntityToken) (OpenTypeFn entity))
+)
 #(rule $ROOT ($PHRASE) (OpenTypeFn type))
 #(rule $ROOT ($PHRASE) (OpenTypeFn relation))
 #(rule $ROOT ($PHRASE) (OpenTypeFn entity))
@@ -141,6 +142,7 @@
 (rule $Expr ($RDataPred $RobSubject $Value) (TripleFn pso))
 (rule $ROOT ($Expr) (IdentityFn))
 (rule $ROOT ($Expr ($Conj optional) $Expr) (ListFn))
+(rule $ROOT ($PHRASE) (SimpleLexiconFn (type "RoboyPhrases")))
 
 
 # Questions

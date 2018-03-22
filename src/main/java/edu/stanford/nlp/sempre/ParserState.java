@@ -67,6 +67,16 @@ public abstract class ParserState {
   // Execution handling.
   public abstract void execute();
 
+  protected void scoreResultDerivation(List<Derivation> predDerivations){
+    for (Derivation deriv:predDerivations){
+      // Compute features
+      parser.extractor.extractEnd(ex, deriv);
+
+      // Compute score
+      deriv.computeScoreLocal(params);
+    }
+  }
+
   protected void featurizeAndScoreDerivation(Derivation deriv) {
     if (deriv.isFeaturizedAndScored()) {
       LogInfo.warnings("Derivation already featurized: %s", deriv);
@@ -245,7 +255,7 @@ public abstract class ParserState {
         remove.add(deriv);
         continue;
       }
-      if (deriv.getType()==SemType.stringType||deriv.getFormula().toString().contains("lambda")||deriv.getFormula().toString().contains("triple")){
+      if (deriv.getFormula().toString().contains("string")||deriv.getFormula().toString().contains("lambda")||deriv.getFormula().toString().contains("triple")){
         deriv.ensureExecuted(parser.simple_executor, ex.context);
       }
       else
@@ -256,8 +266,7 @@ public abstract class ParserState {
       if ((deriv.value==null || deriv.value.toString().equals("BADFORMAT")) && !deriv.formula.toString().contains("rb"))
         remove.add(deriv);
     }
-    for (Derivation deriv : remove)
-      predDerivations.remove(deriv);
+    predDerivations.removeAll(remove);
     LogInfo.end_track();
   }
 

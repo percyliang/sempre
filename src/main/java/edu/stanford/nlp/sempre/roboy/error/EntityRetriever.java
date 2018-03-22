@@ -17,14 +17,19 @@ import fig.basic.LogInfo;
  * @author emlozin
  */
 public class EntityRetriever extends KnowledgeRetriever {
-    public static Gson gson = new Gson();
+    public static Gson gson = new Gson();               /**< Gson object */
 
-    public static XMLReader reader = new XMLReader();
-    public static SparqlUtils sparql = new SparqlUtils();
+    public static XMLReader reader = new XMLReader();   /**< XML reader helper */
 
-    public static String endpointUrl = new String();
-    public static List<String> keywords = new ArrayList();
+    private SparqlUtils sparqlUtil = new SparqlUtils(); /**< SPARQL executor helper */
 
+    public static String endpointUrl = new String();    /**< Endpoint URL for DBpedia*/
+
+    public static List<String> keywords = new ArrayList(); /**< List of keywords to extract from XML*/
+
+    /**
+     * Constructor
+     */
     public EntityRetriever(){
         try {
             endpointUrl = ConfigManager.DB_SEARCH;
@@ -35,12 +40,17 @@ public class EntityRetriever extends KnowledgeRetriever {
         }
     }
 
+    /**
+     * Analyzer retrieving new candidates
+     *
+     * @param underTerm   information about the candidates for underspecified term
+     */
     public UnspecInfo analyze(UnspecInfo underTerm) {
         String entity = underTerm.term;
         UnspecInfo result = new UnspecInfo(entity, underTerm.type);
         String url = endpointUrl.concat(entity);
         url = url.replace(" ","_");
-        SparqlUtils.ServerResponse response = sparql.makeRequest(url);
+        SparqlUtils.ServerResponse response = sparqlUtil.makeRequest(url);
         List<Map<String, String>> results = new ArrayList<>();
         if (response.getXml()!=null)
             results = reader.readEntityXml(response.getXml(),keywords);

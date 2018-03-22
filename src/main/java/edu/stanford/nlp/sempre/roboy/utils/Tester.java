@@ -69,7 +69,7 @@ public class Tester {
         Tester test = new Tester(5000);
         try {
             PrintWriter writer = new PrintWriter("log-webq.txt", "UTF-8");
-            JsonReader reader = new JsonReader(new FileReader("./data/rpqa/rpqa-train-q.json"));
+            JsonReader reader = new JsonReader(new FileReader("./data/rpqa/1/test.json"));
             Type type = new TypeToken<List<Map<String, String>>>() {
             }.getType();
             Gson gson = new Gson();

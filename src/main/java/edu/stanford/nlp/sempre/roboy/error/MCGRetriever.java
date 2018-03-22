@@ -11,6 +11,7 @@ import java.util.*;
 import java.lang.reflect.Type;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import edu.stanford.nlp.sempre.roboy.utils.XMLReader;
 import fig.basic.LogInfo;
 
 /**
@@ -19,26 +20,34 @@ import fig.basic.LogInfo;
  * @author emlozin
  */
 public class MCGRetriever extends KnowledgeRetriever {
-    public static Properties prop = new Properties();
-    public static Gson gson = new Gson();
+    public static Gson gson = new Gson();               /**< Gson object */
 
-    private SparqlUtils sparqlUtil = new SparqlUtils();
+    public static XMLReader reader = new XMLReader();   /**< XML reader helper */
 
-    public final String endpointUrl;
-    public final String dbpediaUrl;
-    public final List<String> keywords;
+    private SparqlUtils sparqlUtil = new SparqlUtils(); /**< SPARQL executor helper */
 
+    public static String endpointUrl = new String();    /**< Endpoint URL for Microsoft Concept Graph*/
+
+    public static String dbpediaUrl = new String();     /**< Endpoint URL for DBpedia*/
+
+    /**
+     * Constructor
+     */
     public MCGRetriever(){
         try {
             endpointUrl = ConfigManager.MCG_SEARCH;
             dbpediaUrl = ConfigManager.DB_SPARQL;
-            keywords = Arrays.asList(ConfigManager.MCG_KEYWORDS);
         }
         catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
+    /**
+     * Analyzer retrieving new candidates
+     *
+     * @param underTerm   information about the candidates for underspecified term
+     */
     public UnspecInfo analyze(UnspecInfo underTerm) {
         String entity = underTerm.term;
         UnspecInfo result = new UnspecInfo(entity, underTerm.type);

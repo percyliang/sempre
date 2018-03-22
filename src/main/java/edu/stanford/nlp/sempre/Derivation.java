@@ -458,12 +458,22 @@ public class Derivation implements SemanticFn.Callable, HasScore {
   public static class ScoredDerivationComparator implements Comparator<Derivation> {
     @Override
     public int compare(Derivation deriv1, Derivation deriv2) {
-      if (deriv1.score > deriv2.score) return -1;
-      if (deriv1.score < deriv2.score) return +1;
+      if (deriv1.score > deriv2.score && compareResult(deriv1,deriv2,true)) return -1;
+      if (deriv1.score < deriv2.score && compareResult(deriv1,deriv2,false)) return +1;
       // Ensure reproducible randomness
-      if (deriv1.creationIndex < deriv2.creationIndex) return -1;
-      if (deriv1.creationIndex > deriv2.creationIndex) return +1;
+      if (deriv1.creationIndex < deriv2.creationIndex && compareResult(deriv1,deriv2,true)) return -1;
+      if (deriv1.creationIndex > deriv2.creationIndex && compareResult(deriv1,deriv2,false)) return +1;
       return 0;
+    }
+
+    public boolean compareResult(Derivation deriv1, Derivation deriv2, boolean value) {
+        if (deriv1.getValue() == null || deriv2.getValue() == null) return true;
+        LogInfo.logs("%s : %s",deriv1.toString(),deriv2.toString());
+      if (!deriv1.getValue().toString().contains("(list)") && !deriv2.getValue().toString().contains("(list)")) return true;
+      if (deriv1.getValue().toString().contains("(list)") && deriv2.getValue().toString().contains("(list)")) return true;
+      if (!deriv1.getValue().toString().contains("(list)") && deriv2.getValue().toString().contains("(list)")) return value;
+      if (deriv1.getValue().toString().contains("(list)") && !deriv2.getValue().toString().contains("(list)")) return !value;
+      return true;
     }
   }
 

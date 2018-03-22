@@ -18,12 +18,15 @@ import java.util.*;
 public class LabelRetriever extends KnowledgeRetriever {
     public static Gson gson = new Gson();               /**< Gson object */
 
-    public static XMLReader reader = new XMLReader();
+    public static XMLReader reader = new XMLReader();   /**< XML reader helper */
 
-    private SparqlUtils sparqlUtil = new SparqlUtils();
+    private SparqlUtils sparqlUtil = new SparqlUtils(); /**< SPARQL executor helper */
 
-    public static String endpointUrl = new String();
+    public static String endpointUrl = new String();    /**< Endpoint URL */
 
+    /**
+     * Constructor
+     */
     public LabelRetriever(){
         try {
             endpointUrl = ConfigManager.DB_SPARQL;
@@ -33,6 +36,11 @@ public class LabelRetriever extends KnowledgeRetriever {
         }
     }
 
+    /**
+     * Analyzer retrieving new candidates
+     *
+     * @param underTerm   information about the candidates for underspecified term
+     */
     public UnspecInfo analyze(UnspecInfo underTerm) {
         String entity = underTerm.term;
         UnspecInfo result = new UnspecInfo(entity, underTerm.type);

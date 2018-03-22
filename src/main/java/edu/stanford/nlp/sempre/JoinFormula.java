@@ -22,14 +22,9 @@ public class JoinFormula extends Formula {
 
   public JoinFormula(String relation, Formula child) {
     this(Formulas.newNameFormula(relation), child);
-    System.out.println("REL");
-    System.out.println(relation);
   }
 
   public JoinFormula(Formula relation, Formula child) {
-    System.out.println("Form");
-    System.out.println(relation);
-    System.out.println(child);
     this.relation = relation;
     this.child = child;
   }

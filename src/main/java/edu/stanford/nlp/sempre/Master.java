@@ -107,7 +107,6 @@ public class Master {
         interpretation.put("answer","(not selected)");
       }
       else {
-        LogInfo.logs("%d",candidateIndex);
         Derivation deriv = getDerivation();
         deriv.ensureExecuted(builder.executor, ex.context);
         interpretation.put("parse",deriv.getFormula().toString());

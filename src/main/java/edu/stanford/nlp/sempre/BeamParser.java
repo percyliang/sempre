@@ -101,7 +101,7 @@ class BeamParserState extends ChartParserState {
     if (numTokens == 0)
       return;
 
-    if (ConfigManager.DEBUG > 2) LogInfo.begin_track("ParserState.infer");
+//    if (ConfigManager.DEBUG > 2) LogInfo.begin_track("ParserState.infer");
 
     // Base case
     for (Derivation deriv : gatherTokenAndPhraseDerivations()) {
@@ -130,6 +130,7 @@ class BeamParserState extends ChartParserState {
     if (mode == Mode.full) {
       // Compute gradient with respect to the predicted derivations
       ensureExecuted();
+      scoreResultDerivation(this.predDerivations);
       if (computeExpectedCounts) {
         expectedCounts = new HashMap<>();
         ParserState.computeExpectedCounts(predDerivations, expectedCounts);
@@ -154,7 +155,7 @@ class BeamParserState extends ChartParserState {
 
   // Return number of new derivations added
   private int applyRule(int start, int end, Rule rule, List<Derivation> children) {
-    if (ConfigManager.DEBUG >= 0) LogInfo.logs("applyRule %s %s %s %s", start, end, rule, children);
+    if (ConfigManager.DEBUG >= 6) LogInfo.logs("applyRule %s %s %s %s", start, end, rule, children);
     try {
       if (mode == Mode.full) {
         StopWatchSet.begin(rule.getSemRepn());

@@ -24,20 +24,20 @@ import java.util.*;
  */
 public class ErrorRetrieval {
     private Gson gson = new Gson();
-    private Map<String,List<String>> follow_ups;                 /**< Enabling/disabling follow_up questions */
-    private String utterance;                   /**< Currently processed user utterance */
-    private ContextValue context;               /**< Context Value storing history of a conversation */
-    private List<Derivation> derivations;       /**< List of predicted derivations */
-    private UnspecInfo underInfo;                /**< Error solutions object */
+    private Map<String,List<String>> follow_ups;    /**< List of follow up questions */
+    private String utterance;                       /**< Currently processed user utterance */
+    private ContextValue context;                   /**< Context Value storing history of a conversation */
+    private List<Derivation> derivations;           /**< List of predicted derivations */
+    private UnspecInfo underInfo;                   /**< Error solutions object */
 
-    public  String dbpediaUrl = ConfigManager.DB_SPARQL;
-    private SparqlUtils sparqlUtil = new SparqlUtils();
-
+    public  String dbpediaUrl = ConfigManager.DB_SPARQL;    /**< DBpedia SPARQL endpoint */
+    private SparqlUtils sparqlUtil = new SparqlUtils();     /**< SPARQL helper */
 
     // Postprocessing analyzers
     private Word2vec vec;                       /**< Word2vec object */
     private List<KnowledgeRetriever> helpers;   /**< List of error retrieval objects */
     private List<ScoringFunction> scorers;      /**< List of scoring functions objects */
+    private LexiconGenerator lexiconGen;        /**< Lexicon generation helper */
 
     /**
      * A constructor.
@@ -52,27 +52,21 @@ public class ErrorRetrieval {
         this.context = context;
         this.derivations = derivations;
         this.underInfo = new UnspecInfo();
+        this.lexiconGen = new LexiconGenerator();
 
-
-        // Adding error retrieval mechanisms
-//        LogInfo.begin_track("Building error retrieval module:");
-        // Adding analyzers
+        // Add error retrieval mechanisms
         this.helpers = new ArrayList<>();
         this.helpers.add(new EntityRetriever());
-//        LogInfo.logs("added Entity Retriever");
         this.helpers.add(new MCGRetriever());
-//        LogInfo.logs("added MCG Retriever");
         try {
             this.vec = new Word2vec();
-//            LogInfo.logs("word2vec Added");
             this.helpers.add(new Word2VecRetriever(this.vec));
-//            LogInfo.logs("added Word2Vec Retriever");
-        }catch(Exception e){
+        }
+        catch(Exception e){
             LogInfo.logs("Exception in Word2Vec: "+e.getMessage());
         }
-        LogInfo.end_track();
 
-        // TODO: Add scoring functions
+        // Add scoring functions
         this.scorers.add(new Word2VecScore(this.vec));
         this.scorers.add(new ContextScore(this.vec));
         this.scorers.add(new ProbabilityScore(this.vec));
@@ -89,29 +83,22 @@ public class ErrorRetrieval {
         this.context = null;
         this.derivations = null;
         this.underInfo = new UnspecInfo();
+        this.lexiconGen = new LexiconGenerator();
 
         // Adding error retrieval mechanisms
-        // LogInfo.begin_track("Building error retrieval module:");
-        // Adding analyzers
         this.helpers = new ArrayList<>();
         this.helpers.add(new LabelRetriever());
-        //LogInfo.logs("added Label Retriever");
         this.helpers.add(new EntityRetriever());
-        //LogInfo.logs("added Entity Retriever");
         this.helpers.add(new MCGRetriever());
-        //LogInfo.logs("added MCG Retriever");
         try {
             this.vec = new Word2vec();
-            //LogInfo.logs("word2vec Added");
             this.helpers.add(new Word2VecRetriever(this.vec));
-            //LogInfo.logs("added Word2Vec Retriever");
         }catch(Exception e){
             LogInfo.errors("Exception in Word2Vec: "+e.getMessage());
         }
-        //LogInfo.end_track();
 
 
-        // TODO: Add scoring functions
+        // Adding scoring functions
         this.scorers = new ArrayList<>();
         this.scorers.add(new Word2VecScore(this.vec));
         this.scorers.add(new ContextScore(this.vec));
@@ -246,28 +233,29 @@ public class ErrorRetrieval {
      */
     public String getBestCandidate(UnspecInfo underInfo){
         // Sort all the scores
-        List<Double> sorted = underInfo.candidatesScores;
+        List<Double> sorted = new ArrayList<>();
+        sorted.addAll(underInfo.candidatesScores);
         Collections.sort(sorted);
         Collections.reverse(sorted);
         int index = underInfo.candidatesScores.indexOf(sorted.get(0));
         // Best candidate
         String result = underInfo.candidates.get(index);
-        if (sorted.get(0) < ConfigManager.FOLLOW_THRES || (sorted.get(1)/sorted.get(0)) > 0.5) {
+        if (sorted.get(0) < ConfigManager.FOLLOW_THRES || (sorted.get(1)/sorted.get(0)) > 0.8) {
             List<String> candidates = new ArrayList<>();
             candidates.add(underInfo.candidatesInfo.get(index));
             double current = sorted.get(0);
             for (int i = 1; i < sorted.size(); i++){
-                if (sorted.get(i)/current > 0.5)
+                if (sorted.get(i)/current > 0.8)
                     candidates.add(underInfo.candidatesInfo.get(underInfo.candidatesScores.indexOf(sorted.get(i))));
                 else
                     break;
             }
             this.underInfo.followUps.addAll(formQuestion(underInfo.term,candidates));
         }
-        if (ConfigManager.DEBUG > 0)
-        {
-            this.underInfo.followUps.addAll(formQuestion(underInfo.term,underInfo.candidatesInfo));
-        }
+//        if (ConfigManager.DEBUG > 0 && this.underInfo.followUps.isEmpty())
+//        {
+//            this.underInfo.followUps.addAll(formQuestion(underInfo.term,underInfo.candidatesInfo));
+//        }
         return result;
     }
 
@@ -295,8 +283,8 @@ public class ErrorRetrieval {
                 }
                 desc = desc.replaceAll(" is ", ", ");
                 desc = desc.replaceAll(" was ", ", ");
-                int rnd = new Random().nextInt(this.follow_ups.get("abstract").size());
-                String question = String.format(this.follow_ups.get("abstract").get(rnd), term, c_map.get("Label"), desc);
+                int rnd = new Random().nextInt(this.follow_ups.get("label").size());
+                String question = String.format(this.follow_ups.get("label").get(rnd), term, desc);
                 Map.Entry<String, String> entry = new java.util.AbstractMap.SimpleEntry<String, String>
                         (question, c_map.get("URI"));
                 result.add(entry);
@@ -309,50 +297,50 @@ public class ErrorRetrieval {
                 result.add(entry);
             }
         }
-        if (ConfigManager.DEBUG > 3 && result.size()>0){
-            LogInfo.logs("Question:%s", result.get(0).getKey());
-        }
         return result;
     }
 
     /**
      * Function replacing missing terms with the best candidate
-     * @param deriv       initial derivation
+     * @param derivations    list of initial derivation
      * @param replacements   object storing best candidates
      */
-    public Derivation replace(Derivation deriv, Map<String,String> replacements){
-        LispTree new_formula = deriv.getFormula().toLispTree();
-        LispTree best_formula = deriv.getFormula().toLispTree();
-        String formula = deriv.getFormula().toString();
-        while (formula.contains("Open")){
-            int start = formula.indexOf("Open")+"Open".length();
-            int end = formula.indexOf("''",start);
-            if (start > formula.length() || start < 0 || end < 0 ||end > formula.length())
-                break;
-            String full_type = formula.substring(formula.indexOf("Open"),formula.indexOf("''")+2);
-            String entity = formula.substring(start,end).substring(formula.substring(start,end).indexOf("'")+1);
-            String best = replacements.get(entity);
-            if (ConfigManager.DEBUG > 5)
-                LogInfo.logs("Forming: %s - %s", best, full_type);
-            if (this.underInfo.candidates.contains(entity)) {
-                for (int i = 0; i < this.underInfo.followUps.size(); i++) {
-                    Map.Entry<String, String> entry = new java.util.AbstractMap.SimpleEntry<String, String>
-                            (this.underInfo.followUps.get(i).getKey(),
-                                    Formulas.fromLispTree(replaceEntity(best_formula,
-                                            full_type, this.underInfo.followUps.get(i).getValue())).toString());
-                    if (deriv.followUps!=null)
-                        deriv.followUps.add(entry);
-                    else
-                        deriv.followUps = new ArrayList<>(Arrays.asList(entry));
+    public void replace(List<Derivation> derivations, Map<String,String> replacements){
+        List<Derivation> newDerivs = new ArrayList<>();
+        for(Derivation deriv: derivations) {
+            LispTree new_formula = deriv.getFormula().toLispTree();
+            LispTree best_formula = deriv.getFormula().toLispTree();
+            String formula = deriv.getFormula().toString();
+            while (formula.contains("Open")) {
+                int start = formula.indexOf("Open") + "Open".length();
+                int end = formula.indexOf("''", start);
+                if (start > formula.length() || start < 0 || end < 0 || end > formula.length())
+                    break;
+                String full_type = formula.substring(formula.indexOf("Open"), formula.indexOf("''") + 2);
+                String entity = formula.substring(start, end).substring(formula.substring(start, end).indexOf("'") + 1);
+                String best = replacements.get(entity);
+                if (ConfigManager.DEBUG > 5)
+                    LogInfo.logs("Forming: %s - %s", best, full_type);
+                if (this.underInfo.candidates.contains(entity)) {
+                    for (int i = 0; i < this.underInfo.followUps.size(); i++) {
+                        Map.Entry<String, String> entry = new java.util.AbstractMap.SimpleEntry<String, String>
+                                (this.underInfo.followUps.get(i).getKey(),
+                                        Formulas.fromLispTree(replaceEntity(best_formula,
+                                                full_type, this.underInfo.followUps.get(i).getValue())).toString());
+                        if (deriv.followUps != null)
+                            deriv.followUps.add(entry);
+                        else
+                            deriv.followUps = new ArrayList<>(Arrays.asList(entry));
+                    }
                 }
+                if (best != null) {
+                    new_formula = replaceEntity(new_formula, full_type, best);
+                }
+                formula = formula.substring(end + 2);
             }
-            if (best!=null) {
-                new_formula = replaceEntity(new_formula, full_type, best);
-            }
-            formula = formula.substring(end+2);
+            deriv.setFormula(Formulas.fromLispTree(new_formula));
+            newDerivs.add(deriv);
         }
-        deriv.setFormula(Formulas.fromLispTree(new_formula));
-        return deriv;
     }
 
     /**
@@ -363,113 +351,26 @@ public class ErrorRetrieval {
      */
     public LispTree replaceEntity(LispTree new_formula, String replace, String key) {
         if (new_formula!= null && new_formula.isLeaf()) {
-            LispTree listTree = LispTree.proto.newLeaf(new_formula.value.replaceAll(replace, key));
-            return listTree;
+            LogInfo.logs("Leaf %s : %s", new_formula.toString(), replace);
+            if (!key.contains(" "))
+                return LispTree.proto.newLeaf(new_formula.value.replaceAll(replace, key));
+            else{
+                return Formula.fromString(key).toLispTree();
+            }
         }
         else if (new_formula.children.get(0).value!= null && new_formula.children.get(0).value == "string"){
+            LogInfo.logs("Name %s : %s", new_formula.toString(), replace);
             NameValue result = new NameValue(new_formula.children.get(1).value.replaceAll(replace, key));
             return result.toLispTree();
         }
         else {
+            LogInfo.logs("Else %s : %s", new_formula.toString(), replace);
             for (int i = 0; i < new_formula.children.size(); i++) {
                 new_formula.children.add(i,replaceEntity(new_formula.children.get(i), replace, key));
                 new_formula.children.remove(i+1);
             }
         }
         return new_formula;
-    }
-
-    /**
-     * Function updating lexicon
-     * @param lexemes   set of lexical entries to be added
-     */
-    public void updateLexicon(Set<String> lexemes) {
-        for (String lexeme: lexemes){
-//            LogInfo.logs("New lexeme: %s",lexeme);
-            SimpleLexicon.getSingleton().add(lexeme);
-        }
-    }
-
-    /**
-     * Function updating lexicon
-     * @param deriv     derivation candidate
-     * @param result    information about candidates
-     */
-    public Set<String> createLexemes(Derivation deriv, ErrorInfo result)
-    {
-        String formula = deriv.getFormula().toString();
-        Set<String> lexemes = new HashSet<>();
-        if (result.getCandidates() == null) {
-            return lexemes;
-        }
-        while (formula.contains("Open")){
-            int start = formula.indexOf("Open")+"Open".length();
-            int end = formula.indexOf("''",start);
-            if (start > formula.length() || start < 0 || end < 0 ||end+2 > formula.length())
-                break;
-            String full_type = formula.substring(formula.indexOf("Open"),formula.indexOf("''")+2);
-            String term = formula.substring(start,end).substring(formula.substring(start,end).indexOf("'")+1);
-            if (full_type.contains("Entity")){
-                if (result.getCandidates().containsKey(term)) {
-                    for (String candidate : result.getCandidates().get(term)) {
-                        if ((result.getScored().get(term).get(candidate)) > ConfigManager.LEXICON_THRES) {
-                            Type type = new TypeToken<Map<String, String>>() {
-                            }.getType();
-                            Map<String, String> entry = this.gson.fromJson(candidate, type);
-                            Map<String, String> lexeme = new HashMap();
-                            lexeme.put("lexeme", entry.get("Label").toLowerCase());
-                            lexeme.put("formula", entry.get("URI"));
-                            lexeme.put("type", "NewEntity");
-                            lexeme.put("features", " {score:" + Double.toString(result.getScored().get(term).get(candidate)) + "} ");
-                            // Add with knowledge base label
-                            lexemes.add(gson.toJson(lexeme));
-                            lexeme.put("lexeme", term);
-                            lexemes.add(gson.toJson(lexeme));
-                        }
-                    }
-                }
-            }
-            else if (full_type.contains("Type")){
-                if (result.getCandidates().containsKey(term)) {
-                    for (String candidate : result.getCandidates().get(term)) {
-                        Type type = new TypeToken<Map<String, String>>() {
-                        }.getType();
-                        Map<String, String> entry = this.gson.fromJson(candidate, type);
-                        Map<String, String> lexeme = new HashMap();
-                        lexeme.put("lexeme", entry.get("Label").toLowerCase());
-                        lexeme.put("formula", entry.get("URI"));
-                        lexeme.put("type", "ClassNoun");
-                        lexeme.put("features", " {score:" + Double.toString(result.getScored().get(term).get(candidate)) + "} ");
-                        // Add with knowledge base label
-                        lexemes.add(gson.toJson(lexeme));
-                        lexeme.put("lexeme", term);
-                        lexemes.add(gson.toJson(lexeme));
-                    }
-                }
-            }
-            else if (full_type.contains("Relation")){
-                if (result.getCandidates().containsKey(term)) {
-                    for (String candidate : result.getCandidates().get(term)) {
-                        if ((result.getScored().get(term).get(candidate)) > ConfigManager.LEXICON_THRES) {
-                            Type type = new TypeToken<Map<String, String>>() {
-                            }.getType();
-                            Map<String, String> entry = this.gson.fromJson(candidate, type);
-                            Map<String, String> lexeme = new HashMap();
-                            lexeme.put("lexeme", entry.get("Label").toLowerCase());
-                            lexeme.put("formula", entry.get("URI"));
-                            lexeme.put("type", "NewRelation");
-                            lexeme.put("features", " {score:" + Double.toString(result.getScored().get(term).get(candidate)) + "} ");
-                            // Add with knowledge base label
-                            lexemes.add(gson.toJson(lexeme));
-                            lexeme.put("lexeme", term);
-                            lexemes.add(gson.toJson(lexeme));
-                        }
-                    }
-                }
-            }
-            formula = formula.substring(end+2);
-        }
-        return lexemes;
     }
 
     /**
@@ -480,12 +381,10 @@ public class ErrorRetrieval {
         ErrorInfo result = new ErrorInfo();
         Set<String> update = new HashSet<>();
         LogInfo.begin_track("Error retrieval:");
-
         // Remove derivations that are the same
         List<Derivation> remove = new ArrayList();
         List<String> formulas = new ArrayList();
         for (Derivation deriv : this.derivations) {
-            System.out.println(deriv.formula);
             if (!String.join(" ", formulas).contains(deriv.formula.toString()))
                 formulas.add(deriv.formula.toString());
             else {
@@ -518,6 +417,7 @@ public class ErrorRetrieval {
 
             // Get candidate scores
             missingTerms = createScores(missingTerms);
+            missingTerms = lexiconGen.createLexemes(missingTerms);
             if (ConfigManager.DEBUG > 1) {
                 for (UnspecInfo termInfo : missingTerms) {
                     for (int i = 0; i < termInfo.candidatesScores.size(); i++) {
@@ -536,20 +436,17 @@ public class ErrorRetrieval {
                 for (String key : replaces.keySet()) {
                     LogInfo.logs("Best replacement for %s : %s", key, replaces.get(key));
                 }
-                for (UnspecInfo termInfo : missingTerms) {
-                    for (Map.Entry<String, String> entry : termInfo.followUps) {
-                        LogInfo.logs("FollowUp question for %s", entry.getKey());
-                    }
+                for (Map.Entry<String, String> entry : this.underInfo.followUps) {
+                    LogInfo.logs("FollowUp question -> %s", entry.getKey());
                 }
             }
 
             // Replace
-            for (Derivation deriv: this.derivations){
+            if (missingTerms.size() > 0)
+            {
                 // Replace with the best
-                if (ConfigManager.DEBUG > 2)
-                    LogInfo.logs("Derivation %s", replaces.entrySet().toString());
                 if (replaces.keySet().size() > 0)
-                    replace(deriv,replaces);
+                    replace(this.derivations, replaces);
             }
         }
 

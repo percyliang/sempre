@@ -4,6 +4,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+import fig.basic.LispTree;
 import fig.basic.MapUtils;
 import fig.basic.Option;
 
@@ -196,8 +197,11 @@ public class JavaExecutor extends Executor {
   }
 
   private Object processFormula(Formula formula, ContextValue context) {
-    if (formula instanceof ValueFormula)  // Unpack value and convert to object (e.g., for ints)
+    if (formula.toString().contains("string"))
+      return toObject(ErrorValue.badFormat);
+    if (formula instanceof ValueFormula) {  // Unpack value and convert to object (e.g., for ints)
       return toObject(((ValueFormula) formula).value);
+    }
 
     if (formula instanceof CallFormula) {  // Invoke the function.
       // Recurse

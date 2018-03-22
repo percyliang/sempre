@@ -10,5 +10,10 @@ import edu.stanford.nlp.sempre.roboy.UnspecInfo;
  */
 public abstract class KnowledgeRetriever {
 
-    public abstract UnspecInfo analyze(UnspecInfo under);
+    /**
+     * Analyzer retrieving new candidates
+     *
+     * @param underTerm   information about the candidates for underspecified term
+     */
+    public abstract UnspecInfo analyze(UnspecInfo underTerm);
 }

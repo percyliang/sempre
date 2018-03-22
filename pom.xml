@@ -249,7 +249,11 @@
                                 <argument>-FeatureExtractor.featureDomains</argument>
                                 <argument>rule</argument>
                                 <!--&lt;!&ndash;<argument>span</argument>&ndash;&gt;-->
+                                <argument>denotation</argument>
                                 <argument>dependencyParse</argument>
+                                <argument>ontology</argument>
+                                <argument>type</argument>
+                                <argument>results</argument>
                                 <!--<argument>-Dataset.inPaths</argument>-->
                                 <!--<argument>train:data/rpqa/1/train.examples</argument>-->
                                 <argument>-Derivation.derivComparator</argument>
@@ -266,6 +270,8 @@
                                 <argument>http://dbpedia.org/sparql</argument>
                                 <argument>-Grammar.inPaths</argument>
                                 <argument>resources/roboy-final.grammar</argument>
+                                <argument>-Grammar.tags</argument>
+                                <argument>error</argument>
                                 <argument>-SimpleLexicon.inPaths</argument>
                                 <argument>resources/lexicons/roboy-demo.lexicon</argument>
                                 <argument>-languageAnalyzer</argument>

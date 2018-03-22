@@ -86,6 +86,7 @@
 {"lexeme": "relative", "formula": "rb:RELATIVE_OF", "type" : "RoboyRelNoun"}
 
 {"lexeme": "hobby", "formula": "!rb:HAS_HOBBY", "type" : "RoboyRelNoun"}
+{"lexeme": "pasttime activity", "formula": "!rb:HAS_HOBBY", "type" : "RoboyRelNoun"}
 {"lexeme": "favorite activity", "formula": "!rb:HAS_HOBBY", "type" : "RoboyRelNoun"}
 {"lexeme": "favorite thing to do", "formula": "!rb:HAS_HOBBY", "type" : "RoboyRelNoun"}
 {"lexeme": "employer", "formula": "!rb:WORK_FOR", "type" : "RoboyRelNoun"}
@@ -109,7 +110,7 @@
 
 # DBpedia
 
-{"lexeme": "about", "formula": "!dbpedia:abstract", "type": "RelationalNoun"}
+{"lexeme": "about", "formula": "!rdfs:comment", "type": "RelationalNoun"}
 {"lexeme": "name", "formula": "foaf:name", "type": "RelationalNoun"}
 {"lexeme": "name", "formula": "!foaf:name", "type": "RelationalNoun"}
 {"lexeme": "surname", "formula": "foaf:surname", "type": "RelationalNoun"}
@@ -272,7 +273,7 @@
 {"lexeme": "year", "formula": "(rdf:type dbpedia:Year)", "type": "ClassNoun"}
 {"lexeme": "topical concept", "formula": "(rdf:type dbpedia:TopicalConcept)", "type": "ClassNoun"}
 {"lexeme": "Christian doctrine", "formula": "(rdf:type dbpedia:ChristianDoctrine)", "type": "ClassNoun"}
-{"lexeme": "ideology", "formula": "(rdf:type dbpedia:Ideology)", "type": "ClassNoun"}
+#{"lexeme": "ideology", "formula": "(rdf:type dbpedia:Ideology)", "type": "ClassNoun"}
 {"lexeme": "unit of work", "formula": "(rdf:type dbpedia:UnitOfWork)", "type": "ClassNoun"}
 {"lexeme": "project", "formula": "(rdf:type dbpedia:Project)", "type": "ClassNoun"}
 {"lexeme": "research project", "formula": "(rdf:type dbpedia:ResearchProject)", "type": "ClassNoun"}
