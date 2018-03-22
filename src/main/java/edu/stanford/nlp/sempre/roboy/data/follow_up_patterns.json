@@ -1,0 +1,12 @@
+{
+  "abstract": [
+    "Did you mean %s as %s, %s?",
+    "Sorry, did you say %s for %s, %s?",
+    "Does %s mean %s, %s?"
+  ],
+  "label": [
+    "Did you mean %s as %s?",
+    "Sorry, did you say %s for %s?",
+    "Does %s mean %s?"
+  ]
+}
