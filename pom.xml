@@ -171,9 +171,11 @@
                                 <argument>-Grammar.inPaths</argument>
                                 <argument>resources/roboy-demo.grammar</argument>
                                 <argument>-SimpleLexicon.inPaths</argument>
-                                <argument>resources/lexicons/roboy-dbpedia.lexicon</argument>
+                                <argument>resources/lexicons/roboy-demo.lexicon</argument>
                                 <argument>-languageAnalyzer</argument>
                                 <argument>corenlp.CoreNLPAnalyzer</argument>
+                                <argument>-Master.logPath</argument>
+                                <argument>data/error_test/1.log</argument>
                                 <argument>-Main.socket</argument>
                                 <argument>true</argument>
                             </arguments>
@@ -282,8 +284,6 @@
                                 <argument>error</argument>
                                 <argument>-SimpleLexicon.inPaths</argument>
                                 <argument>resources/lexicons/roboy-demo.lexicon</argument>
-                                <argument>-languageAnalyzer</argument>
-                                <argument>corenlp.CoreNLPAnalyzer</argument>
                                 <argument>-Main.server</argument>
                                 <argument>true</argument>
                             </arguments>

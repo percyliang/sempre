@@ -1,0 +1,44 @@
+{"features":" {score:0.01452449567723343} ","formula":"dbpedia:person","lexeme":"person","type":"ObjectProp"}
+{"features":" {score:0.01452449567723343} ","formula":"!dbpedia:person","lexeme":"person","type":"ObjectProp"}
+{"features":" {score:0.015907780979827087} ","formula":"property:role","lexeme":"role","type":"DataProp"}
+{"features":" {score:0.0541113092447564} ","formula":"!property:profession","lexeme":"profession","type":"ObjProp"}
+{"features":" {score:0.01452449567723343} ","formula":"property:person","lexeme":"person","type":"ObjProp"}
+{"features":" {score:0.7749999999999999} ","formula":"property:architect","lexeme":"architect","type":"ObjProp"}
+{"features":" {score:0.8699947233529323} ","formula":"resource:Architect","lexeme":"architect","type":"NamedEntity"}
+{"features":" {score:0.7749999999999999} ","formula":"!property:architect","lexeme":"architect","type":"DataProp"}
+{"features":" {score:0.015907780979827087} ","formula":"property:role","lexeme":"role","type":"ObjProp"}
+{"features":" {score:0.0541113092447564} ","formula":"!property:profession","lexeme":"profession","type":"DataProp"}
+{"features":" {score:0.3145244956772334} ","formula":"(rdf:type dbpedia:Person)","lexeme":"person","type":"ClassNoun"}
+{"features":" {score:1.075} ","formula":"(rdf:type dbpedia:Architect)","lexeme":"architect","type":"ClassNoun"}
+{"features":" {score:0.35411130924475637} ","formula":"(rdf:type dbpedia:Profession)","lexeme":"profession","type":"ClassNoun"}
+{"features":" {score:0.16014997794236505} ","formula":"dbpedia:designer","lexeme":"designer","type":"ObjectProp"}
+{"features":" {score:0.19742107469536285} ","formula":"resource:Architecture","lexeme":"architecture","type":"NamedEntity"}
+{"features":" {score:0.7749999999999999} ","formula":"dbpedia:architect","lexeme":"architect","type":"ObjectProp"}
+{"features":" {score:0.01452449567723343} ","formula":"!property:person","lexeme":"person","type":"ObjProp"}
+{"features":" {score:0.0541113092447564} ","formula":"dbpedia:profession","lexeme":"profession","type":"ObjectProp"}
+{"features":" {score:0.03561572928335893} ","formula":"!property:specialist","lexeme":"specialist","type":"DataProp"}
+{"features":" {score:0.24538303518208124} ","formula":"resource:Gothic_Revival_architecture","lexeme":"gothic revival architecture","type":"NamedEntity"}
+{"features":" {score:0.16014997794236505} ","formula":"property:designer","lexeme":"designer","type":"ObjProp"}
+{"features":" {score:0.01452449567723343} ","formula":"property:person","lexeme":"person","type":"DataProp"}
+{"features":" {score:0.014005763688760806} ","formula":"property:stakeholder","lexeme":"stakeholder","type":"DataProp"}
+{"features":" {score:0.7749999999999999} ","formula":"property:architect","lexeme":"architect","type":"DataProp"}
+{"features":" {score:0.015907780979827087} ","formula":"!property:role","lexeme":"role","type":"ObjProp"}
+{"features":" {score:0.7749999999999999} ","formula":"!property:architect","lexeme":"architect","type":"ObjProp"}
+{"features":" {score:0.03561572928335893} ","formula":"property:specialist","lexeme":"specialist","type":"DataProp"}
+{"features":" {score:0.0541113092447564} ","formula":"property:profession","lexeme":"profession","type":"DataProp"}
+{"features":" {score:0.015907780979827087} ","formula":"!property:role","lexeme":"role","type":"DataProp"}
+{"features":" {score:0.014005763688760806} ","formula":"!property:stakeholder","lexeme":"stakeholder","type":"DataProp"}
+{"features":" {score:0.0541113092447564} ","formula":"property:profession","lexeme":"profession","type":"ObjProp"}
+{"features":" {score:0.03561572928335893} ","formula":"property:specialist","lexeme":"specialist","type":"ObjProp"}
+{"features":" {score:0.16014997794236505} ","formula":"!property:designer","lexeme":"designer","type":"ObjProp"}
+{"features":" {score:0.0541113092447564} ","formula":"!dbpedia:profession","lexeme":"profession","type":"ObjectProp"}
+{"features":" {score:0.16014997794236505} ","formula":"!dbpedia:designer","lexeme":"designer","type":"ObjectProp"}
+{"features":" {score:0.7749999999999999} ","formula":"!dbpedia:architect","lexeme":"architect","type":"ObjectProp"}
+{"features":" {score:0.014005763688760806} ","formula":"!property:stakeholder","lexeme":"stakeholder","type":"ObjProp"}
+{"features":" {score:0.16014997794236505} ","formula":"!property:designer","lexeme":"designer","type":"DataProp"}
+{"features":" {score:0.03561572928335893} ","formula":"!property:specialist","lexeme":"specialist","type":"ObjProp"}
+{"features":" {score:0.22358051973393506} ","formula":"resource:Neoclassical_architecture","lexeme":"neoclassical architecture","type":"NamedEntity"}
+{"features":" {score:0.16014997794236505} ","formula":"property:designer","lexeme":"designer","type":"DataProp"}
+{"features":" {score:0.18419243469104207} ","formula":"resource:Victorian_architecture","lexeme":"victorian architecture","type":"NamedEntity"}
+{"features":" {score:0.01452449567723343} ","formula":"!property:person","lexeme":"person","type":"DataProp"}
+{"features":" {score:0.014005763688760806} ","formula":"property:stakeholder","lexeme":"stakeholder","type":"ObjProp"}

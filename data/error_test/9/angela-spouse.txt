@@ -1,0 +1,36 @@
+{"features":" {score:0.10187720775604248} ","formula":"dbpedia:leader","lexeme":"leader","type":"ObjectProp"}
+{"features":" {score:0.45176068544387815} ","formula":"property:child","lexeme":"child","type":"ObjProp"}
+{"features":" {score:0.08794415533542634} ","formula":"property:woman","lexeme":"woman","type":"ObjProp"}
+{"features":" {score:0.5462324798107148} ","formula":"dbpedia:child","lexeme":"child","type":"ObjectProp"}
+{"features":" {score:1.0999999999999999} ","formula":"!dbpedia:spouse","lexeme":"spouse","type":"ObjectProp"}
+{"features":" {score:0.08794415533542634} ","formula":"!property:woman","lexeme":"woman","type":"DataProp"}
+{"features":" {score:0.8999999999999999} ","formula":"!property:spouse","lexeme":"spouse","type":"ObjProp"}
+{"features":" {score:0.06304805517196654} ","formula":"dbpedia:politicalLeader","lexeme":"political leader","type":"ObjectProp"}
+{"features":" {score:0.10187720775604248} ","formula":"!property:leader","lexeme":"leader","type":"ObjProp"}
+{"features":" {score:0.1977403339217691} ","formula":"resource:Morganatic_marriage","lexeme":"morganatic marriage","type":"NamedEntity"}
+{"features":" {score:0.06304805517196654} ","formula":"property:politicalLeader","lexeme":"political leader","type":"ObjProp"}
+{"features":" {score:0.1366547226905823} ","formula":"(rdf:type dbpedia:Politician)","lexeme":"politician","type":"ClassNoun"}
+{"features":" {score:0.8999999999999999} ","formula":"!property:spouse","lexeme":"spouse","type":"DataProp"}
+{"features":" {score:0.15085213184356688} ","formula":"resource:Polygamy","lexeme":"polygamy","type":"NamedEntity"}
+{"features":" {score:0.10187720775604248} ","formula":"!dbpedia:leader","lexeme":"leader","type":"ObjectProp"}
+{"features":" {score:0.06304805517196654} ","formula":"!dbpedia:politicalLeader","lexeme":"political leader","type":"ObjectProp"}
+{"features":" {score:0.7999999999999999} ","formula":"resource:Spouse","lexeme":"spouse","type":"NamedEntity"}
+{"features":" {score:0.45176068544387815} ","formula":"!property:child","lexeme":"child","type":"ObjProp"}
+{"features":" {score:0.06304805517196654} ","formula":"!property:politicalLeader","lexeme":"political leader","type":"DataProp"}
+{"features":" {score:0.8999999999999999} ","formula":"property:spouse","lexeme":"spouse","type":"DataProp"}
+{"features":" {score:0.8999999999999999} ","formula":"property:spouse","lexeme":"spouse","type":"ObjProp"}
+{"features":" {score:0.5462324798107148} ","formula":"!dbpedia:child","lexeme":"child","type":"ObjectProp"}
+{"features":" {score:1.0999999999999999} ","formula":"dbpedia:spouse","lexeme":"spouse","type":"ObjectProp"}
+{"features":" {score:0.45176068544387815} ","formula":"!property:child","lexeme":"child","type":"DataProp"}
+{"features":" {score:1.4249565217391305} ","formula":"resource:Angela_Merkel","lexeme":"angela merkel","type":"NamedEntity"}
+{"features":" {score:0.06304805517196654} ","formula":"!property:politicalLeader","lexeme":"political leader","type":"ObjProp"}
+{"features":" {score:0.22461159527301788} ","formula":"resource:Incest","lexeme":"incest","type":"NamedEntity"}
+{"features":" {score:0.45176068544387815} ","formula":"property:child","lexeme":"child","type":"DataProp"}
+{"features":" {score:0.08794415533542634} ","formula":"!property:woman","lexeme":"woman","type":"ObjProp"}
+{"features":" {score:0.08794415533542634} ","formula":"property:woman","lexeme":"woman","type":"DataProp"}
+{"features":" {score:0.11354709826409817} ","formula":"resource:Domestic_violence","lexeme":"domestic violence","type":"NamedEntity"}
+{"features":" {score:0.06304805517196654} ","formula":"property:politicalLeader","lexeme":"political leader","type":"DataProp"}
+{"features":" {score:0.16556983274572035} ","formula":"resource:Widow","lexeme":"widow","type":"NamedEntity"}
+{"features":" {score:0.10187720775604248} ","formula":"!property:leader","lexeme":"leader","type":"DataProp"}
+{"features":" {score:0.10187720775604248} ","formula":"property:leader","lexeme":"leader","type":"DataProp"}
+{"features":" {score:0.10187720775604248} ","formula":"property:leader","lexeme":"leader","type":"ObjProp"}

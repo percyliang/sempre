@@ -1,0 +1,38 @@
+{"features":" {score:0.0103717308691614} ","formula":"!property:university","lexeme":"university","type":"ObjProp"}
+ {"features":" {score:0.007279029462738301} ","formula":"property:film","lexeme":"film","type":"DataProp"}
+ {"features":" {score:0.007279029462738301} ","formula":"!property:film","lexeme":"film","type":"DataProp"}
+ {"features":" {score:0.7897536345754081} ","formula":"resource:Ludwig_Maximilian_University_of_Munich","lexeme":"ludwig maximilian university of munich","type":"NamedEntity"}
+ {"features":" {score:0.010771606719214953} ","formula":"!property:place","lexeme":"place","type":"DataProp"}
+ {"features":" {score:0.0471029847602084} ","formula":"(rdf:type dbpedia:Municipality)","lexeme":"municipality","type":"ClassNoun"}
+ {"features":" {score:0.7647454868018848} ","formula":"resource:FC_Bayern_Munich","lexeme":"fc bayern munich","type":"NamedEntity"}
+ {"features":" {score:0.0471029847602084} ","formula":"!dbpedia:municipality","lexeme":"municipality","type":"ObjectProp"}
+ {"features":" {score:0.07283882301436347} ","formula":"(rdf:type dbpedia:Airport)","lexeme":"airport","type":"ClassNoun"}
+ {"features":" {score:0.20989131628950505} ","formula":"!property:city","lexeme":"city","type":"ObjProp"}
+ {"features":" {score:0.20989131628950505} ","formula":"(rdf:type dbpedia:City)","lexeme":"city","type":"ClassNoun"}
+ {"features":" {score:0.20989131628950505} ","formula":"property:city","lexeme":"city","type":"DataProp"}
+ {"features":" {score:0.010771606719214953} ","formula":"property:place","lexeme":"place","type":"ObjProp"}
+ {"features":" {score:0.4242845780288863} ","formula":"resource:1972_Summer_Olympics","lexeme":"1972 summer olympics","type":"NamedEntity"}
+ {"features":" {score:0.20989131628950505} ","formula":"dbpedia:city","lexeme":"city","type":"ObjectProp"}
+ {"features":" {score:0.010771606719214953} ","formula":"(rdf:type dbpedia:Place)","lexeme":"place","type":"ClassNoun"}
+ {"features":" {score:0.0471029847602084} ","formula":"dbpedia:municipality","lexeme":"municipality","type":"ObjectProp"}
+ {"features":" {score:0.0103717308691614} ","formula":"!property:university","lexeme":"university","type":"DataProp"}
+ {"features":" {score:0.20989131628950505} ","formula":"!dbpedia:city","lexeme":"city","type":"ObjectProp"}
+ {"features":" {score:0.0103717308691614} ","formula":"property:university","lexeme":"university","type":"DataProp"}
+ {"features":" {score:0.007279029462738301} ","formula":"!dbpedia:film","lexeme":"film","type":"ObjectProp"}
+ {"features":" {score:0.7292970102183438} ","formula":"resource:Munich_Agreement","lexeme":"munich agreement","type":"NamedEntity"}
+ {"features":" {score:0.0103717308691614} ","formula":"!dbpedia:university","lexeme":"university","type":"ObjectProp"}
+ {"features":" {score:0.0103717308691614} ","formula":"(rdf:type dbpedia:University)","lexeme":"university","type":"ClassNoun"}
+ {"features":" {score:0.010771606719214953} ","formula":"property:place","lexeme":"place","type":"DataProp"}
+ {"features":" {score:0.0103717308691614} ","formula":"property:university","lexeme":"university","type":"ObjProp"}
+ {"features":" {score:0.007279029462738301} ","formula":"!property:film","lexeme":"film","type":"ObjProp"}
+ {"features":" {score:0.007279029462738301} ","formula":"dbpedia:film","lexeme":"film","type":"ObjectProp"}
+ {"features":" {score:0.0471029847602084} ","formula":"!property:municipality","lexeme":"municipality","type":"ObjProp"}
+ {"features":" {score:0.20989131628950505} ","formula":"property:city","lexeme":"city","type":"ObjProp"}
+ {"features":" {score:0.007279029462738301} ","formula":"property:film","lexeme":"film","type":"ObjProp"}
+ {"features":" {score:0.0471029847602084} ","formula":"property:municipality","lexeme":"municipality","type":"ObjProp"}
+ {"features":" {score:0.010771606719214953} ","formula":"!property:place","lexeme":"place","type":"ObjProp"}
+ {"features":" {score:0.0103717308691614} ","formula":"dbpedia:university","lexeme":"university","type":"ObjectProp"}
+ {"features":" {score:0.20989131628950505} ","formula":"!property:city","lexeme":"city","type":"DataProp"}
+ {"features":" {score:0.0471029847602084} ","formula":"!property:municipality","lexeme":"municipality","type":"DataProp"}
+ {"features":" {score:1.3366984200743495} ","formula":"resource:Munich","lexeme":"munich","type":"NamedEntity"}
+ {"features":" {score:0.0471029847602084} ","formula":"property:municipality","lexeme":"municipality","type":"DataProp"}

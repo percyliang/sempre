@@ -1,0 +1,39 @@
+{"features":" {score:0.011573768048966903} ","formula":"!property:firm","lexeme":"firm","type":"DataProp"}
+{"features":" {score:0.35931809850867574} ","formula":"\u003chttp://dbpedia.org/resource/Cars_(film)\u003e","lexeme":"cars (film)","type":"NamedEntity"}
+{"features":" {score:0.022484382628882905} ","formula":"!property:place","lexeme":"place","type":"DataProp"}
+{"features":" {score:0.023911517529144822} ","formula":"!property:client","lexeme":"client","type":"ObjProp"}
+{"features":" {score:0.041201716738197426} ","formula":"property:studio","lexeme":"studio","type":"ObjProp"}
+{"features":" {score:0.011573768048966903} ","formula":"property:firm","lexeme":"firm","type":"DataProp"}
+{"features":" {score:0.011573768048966903} ","formula":"!property:firm","lexeme":"firm","type":"ObjProp"}
+{"features":" {score:0.041201716738197426} ","formula":"property:studio","lexeme":"studio","type":"DataProp"}
+{"features":" {score:0.15526860663307582} ","formula":"dbpedia:company","lexeme":"company","type":"ObjectProp"}
+{"features":" {score:0.15526860663307582} ","formula":"!dbpedia:company","lexeme":"company","type":"ObjectProp"}
+{"features":" {score:0.041201716738197426} ","formula":"!property:studio","lexeme":"studio","type":"DataProp"}
+{"features":" {score:0.016738197424892704} ","formula":"!property:brand","lexeme":"brand","type":"ObjProp"}
+{"features":" {score:0.022484382628882905} ","formula":"(rdf:type dbpedia:Place)","lexeme":"place","type":"ClassNoun"}
+{"features":" {score:0.30821656050955415} ","formula":"resource:Disney_Villains","lexeme":"disney villains","type":"NamedEntity"}
+{"features":" {score:0.15526860663307582} ","formula":"!property:company","lexeme":"company","type":"ObjProp"}
+{"features":" {score:0.15526860663307582} ","formula":"(rdf:type dbpedia:Company)","lexeme":"company","type":"ClassNoun"}
+{"features":" {score:0.023911517529144822} ","formula":"property:client","lexeme":"client","type":"DataProp"}
+{"features":" {score:0.041201716738197426} ","formula":"!property:studio","lexeme":"studio","type":"ObjProp"}
+{"features":" {score:0.023911517529144822} ","formula":"property:client","lexeme":"client","type":"ObjProp"}
+{"features":" {score:0.32999999999999996} ","formula":"\u003chttp://dbpedia.org/resource/Ratatouille_(film)\u003e","lexeme":"ratatouille (film)","type":"NamedEntity"}
+{"features":" {score:0.3580773840018898} ","formula":"\u003chttp://dbpedia.org/resource/Up_(2009_film)\u003e","lexeme":"up (2009 film)","type":"NamedEntity"}
+{"features":" {score:0.023911517529144822} ","formula":"!property:client","lexeme":"client","type":"DataProp"}
+{"features":" {score:0.014163090128755365} ","formula":"property:organization","lexeme":"organization","type":"DataProp"}
+{"features":" {score:0.016738197424892704} ","formula":"property:brand","lexeme":"brand","type":"DataProp"}
+{"features":" {score:0.016738197424892704} ","formula":"property:brand","lexeme":"brand","type":"ObjProp"}
+{"features":" {score:0.15526860663307582} ","formula":"!property:company","lexeme":"company","type":"DataProp"}
+{"features":" {score:0.15526860663307582} ","formula":"property:company","lexeme":"company","type":"ObjProp"}
+{"features":" {score:0.011573768048966903} ","formula":"property:firm","lexeme":"firm","type":"ObjProp"}
+{"features":" {score:0.016738197424892704} ","formula":"!dbpedia:brand","lexeme":"brand","type":"ObjectProp"}
+{"features":" {score:0.919299363057325} ","formula":"resource:Pixar","lexeme":"pixar","type":"NamedEntity"}
+{"features":" {score:0.014163090128755365} ","formula":"!property:organization","lexeme":"organization","type":"ObjProp"}
+{"features":" {score:0.016738197424892704} ","formula":"dbpedia:brand","lexeme":"brand","type":"ObjectProp"}
+{"features":" {score:0.022484382628882905} ","formula":"!property:place","lexeme":"place","type":"ObjProp"}
+{"features":" {score:0.022484382628882905} ","formula":"property:place","lexeme":"place","type":"ObjProp"}
+{"features":" {score:0.15526860663307582} ","formula":"property:company","lexeme":"company","type":"DataProp"}
+{"features":" {score:0.014163090128755365} ","formula":"property:organization","lexeme":"organization","type":"ObjProp"}
+{"features":" {score:0.014163090128755365} ","formula":"!property:organization","lexeme":"organization","type":"DataProp"}
+{"features":" {score:0.022484382628882905} ","formula":"property:place","lexeme":"place","type":"DataProp"}
+{"features":" {score:0.016738197424892704} ","formula":"!property:brand","lexeme":"brand","type":"DataProp"}

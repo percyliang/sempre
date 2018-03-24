@@ -1,0 +1,33 @@
+{"features":" {score:0.147885784528615} ","formula":"!dbpedia:company","lexeme":"company","type":"ObjectProp"}
+{"features":" {score:0.14610363611539673} ","formula":"property:car","lexeme":"car","type":"ObjProp"}
+{"features":" {score:0.16633987288000296} ","formula":"!property:brand","lexeme":"brand","type":"DataProp"}
+{"features":" {score:0.1562217098203969} ","formula":"property:manufacturer","lexeme":"manufacturer","type":"DataProp"}
+{"features":" {score:1.3070739549839228} ","formula":"resource:Audi","lexeme":"audi","type":"NamedEntity"}
+{"features":" {score:0.147885784528615} ","formula":"dbpedia:company","lexeme":"company","type":"ObjectProp"}
+{"features":" {score:0.14610363611539673} ","formula":"!property:car","lexeme":"car","type":"ObjProp"}
+{"features":" {score:0.16633987288000296} ","formula":"dbpedia:brand","lexeme":"brand","type":"ObjectProp"}
+{"features":" {score:0.033504991318436005} ","formula":"!property:client","lexeme":"client","type":"DataProp"}
+{"features":" {score:0.033504991318436005} ","formula":"property:client","lexeme":"client","type":"DataProp"}
+{"features":" {score:0.16633987288000296} ","formula":"!dbpedia:brand","lexeme":"brand","type":"ObjectProp"}
+{"features":" {score:0.16633987288000296} ","formula":"!property:brand","lexeme":"brand","type":"ObjProp"}
+{"features":" {score:0.1562217098203969} ","formula":"property:manufacturer","lexeme":"manufacturer","type":"ObjProp"}
+{"features":" {score:0.147885784528615} ","formula":"property:company","lexeme":"company","type":"DataProp"}
+{"features":" {score:0.147885784528615} ","formula":"!property:company","lexeme":"company","type":"ObjProp"}
+{"features":" {score:0.14610363611539673} ","formula":"property:car","lexeme":"car","type":"DataProp"}
+{"features":" {score:0.147885784528615} ","formula":"property:company","lexeme":"company","type":"ObjProp"}
+{"features":" {score:0.1562217098203969} ","formula":"!dbpedia:manufacturer","lexeme":"manufacturer","type":"ObjectProp"}
+{"features":" {score:0.10857696973038278} ","formula":"!dbpedia:vehicle","lexeme":"vehicle","type":"ObjectProp"}
+{"features":" {score:0.36746846509863806} ","formula":"resource:Space_frame","lexeme":"space frame","type":"NamedEntity"}
+{"features":" {score:0.1562217098203969} ","formula":"!property:manufacturer","lexeme":"manufacturer","type":"DataProp"}
+{"features":" {score:0.1562217098203969} ","formula":"dbpedia:manufacturer","lexeme":"manufacturer","type":"ObjectProp"}
+{"features":" {score:0.575716625149227} ","formula":"resource:Volkswagen_Group","lexeme":"volkswagen group","type":"NamedEntity"}
+{"features":" {score:0.7191318327974277} ","formula":"resource:Audi_80","lexeme":"audi 80","type":"NamedEntity"}
+{"features":" {score:0.147885784528615} ","formula":"!property:company","lexeme":"company","type":"DataProp"}
+{"features":" {score:0.1562217098203969} ","formula":"!property:manufacturer","lexeme":"manufacturer","type":"ObjProp"}
+{"features":" {score:0.14610363611539673} ","formula":"!property:car","lexeme":"car","type":"DataProp"}
+{"features":" {score:0.10857696973038278} ","formula":"dbpedia:vehicle","lexeme":"vehicle","type":"ObjectProp"}
+{"features":" {score:0.033504991318436005} ","formula":"!property:client","lexeme":"client","type":"ObjProp"}
+{"features":" {score:0.033504991318436005} ","formula":"property:client","lexeme":"client","type":"ObjProp"}
+{"features":" {score:0.147885784528615} ","formula":"(rdf:type dbpedia:Company)","lexeme":"company","type":"ClassNoun"}
+{"features":" {score:0.16633987288000296} ","formula":"property:brand","lexeme":"brand","type":"DataProp"}
+{"features":" {score:0.16633987288000296} ","formula":"property:brand","lexeme":"brand","type":"ObjProp"}

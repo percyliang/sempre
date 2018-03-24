@@ -1,13 +1,18 @@
 package edu.stanford.nlp.sempre.roboy;
 
+import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import edu.stanford.nlp.sempre.Derivation;
 import edu.stanford.nlp.sempre.SimpleLexicon;
 import edu.stanford.nlp.sempre.roboy.config.ConfigManager;
 import edu.stanford.nlp.sempre.roboy.utils.SparqlUtils;
+import fig.basic.IOUtils;
 import fig.basic.LogInfo;
 
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.lang.reflect.Type;
 import java.util.*;
 
@@ -26,11 +31,15 @@ public class LexiconGenerator {
      * @param lexemes   set of lexical entries to be added
      */
     public void updateLexicon(Set<String> lexemes) {
+        PrintWriter out = IOUtils.openOutAppendHard("./data/error_test/newLexicon.txt");
+
         for (String lexeme: lexemes){
             if (ConfigManager.DEBUG > 0)
                 LogInfo.logs("New lexeme added: %s",lexeme);
+            out.println(lexeme);
             SimpleLexicon.getSingleton().add(lexeme);
         }
+        out.close();
     }
 
     /**
@@ -63,6 +72,8 @@ public class LexiconGenerator {
                         lexeme.put("formula", single.candidates.get(i));
                         lexeme.put("features", " {score:" + Double.toString(single.candidatesScores.get(i)) + "} ");
                         lexeme.put("type", "NamedEntity");
+                        c.put("type", "NamedEntity");
+                        single.candidatesInfo.set(i, gson.toJson(c));
                         lexemes.add(gson.toJson(lexeme));
                     }
                 }
@@ -85,6 +96,8 @@ public class LexiconGenerator {
                             lexeme.put("formula", "(rdf:type " + single.candidates.get(i) + ")");
                             lexeme.put("features", " {score:" + Double.toString(single.candidatesScores.get(i)) + "} ");
                             lexeme.put("type", "ClassNoun");
+                            c.put("type", "ClassNoun");
+                            single.candidatesInfo.set(i, gson.toJson(c));
                             lexemes.add(gson.toJson(lexeme));
                             c.put("URI","(rdf:type ".concat(single.candidates.get(i)).concat(")"));
                             single.candidates.set(i,"(rdf:type " + single.candidates.get(i) + ")");
@@ -100,6 +113,8 @@ public class LexiconGenerator {
                             lexeme.put("formula", single.candidates.get(i));
                             lexeme.put("features", " {score:" + Double.toString(single.candidatesScores.get(i)) + "} ");
                             lexeme.put("type", "ObjectProp");
+                            c.put("type", "Property");
+                            single.candidatesInfo.set(i, gson.toJson(c));
                             lexemes.add(gson.toJson(lexeme));
                             lexeme.put("formula", "!" + single.candidates.get(i));
                             lexemes.add(gson.toJson(lexeme));
@@ -122,6 +137,8 @@ public class LexiconGenerator {
                             lexeme.put("formula", "!" + single.candidates.get(i));
                             lexemes.add(gson.toJson(lexeme));
                             c.put("URI","!".concat(single.candidates.get(i)));
+                            c.put("type", "Property");
+                            single.candidatesInfo.set(i, gson.toJson(c));
                             single.candidates.add("!" + single.candidates.get(i));
                             single.candidatesInfo.add(gson.toJson(c));
                             single.candidatesScores.add(single.candidatesScores.get(i));
@@ -140,11 +157,13 @@ public class LexiconGenerator {
                         Type type = new TypeToken<Map<String, String>>() {}.getType();
                         Map<String, String> c = this.gson.fromJson(single.candidatesInfo.get(i), type);
                         if (single.type == UnspecInfo.TermType.RELATION)
-                            single.candidatesScores.set(i, single.candidatesScores.get(i) + 0.3);
+                            single.candidatesScores.set(i, single.candidatesScores.get(i) + 0.1);
                         lexeme.put("lexeme", c.get("Label"));
                         lexeme.put("formula", single.candidates.get(i));
                         lexeme.put("features", " {score:" + Double.toString(single.candidatesScores.get(i)) + "} ");
                         lexeme.put("type", "DataProp");
+                        c.put("type", "Property");
+                        single.candidatesInfo.set(i, gson.toJson(c));
                         lexemes.add(gson.toJson(lexeme));
                         lexeme.put("type", "ObjProp");
                         lexemes.add(gson.toJson(lexeme));

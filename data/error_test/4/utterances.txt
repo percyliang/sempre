@@ -1,0 +1,26 @@
+1.
+utterance: what is cartoon
+underspecified term: cartoon
+type: type
+result: success
+
+2.
+utterance: i work at pixar
+underspecified term: pixar
+type: entity
+result: success
+
+3.
+utterance: tell me a founder of pixar
+underspecified term: founder
+type: relation
+result: success
+
+4.
+utterance: who is the author of cinderella
+underspecified term: cinderella
+type: entity
+result: success
+underspecified term: author
+type: relation
+result: follow up

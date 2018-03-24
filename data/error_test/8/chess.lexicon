@@ -1,0 +1,31 @@
+{"features":" {score:0.15502640314142924} ","formula":"resource:FIDE","lexeme":"fide","type":"NamedEntity"}
+{"features":" {score:0.07953894959679021} ","formula":"property:club","lexeme":"club","type":"DataProp"}
+{"features":" {score:0.2586901839423016} ","formula":"!property:game","lexeme":"game","type":"ObjProp"}
+{"features":" {score:0.16687446800235348} ","formula":"resource:IBM_Personal_Computer","lexeme":"ibm personal computer","type":"NamedEntity"}
+{"features":" {score:0.2586901839423016} ","formula":"!property:game","lexeme":"game","type":"DataProp"}
+{"features":" {score:0.07953894959679021} ","formula":"!dbpedia:club","lexeme":"club","type":"ObjectProp"}
+{"features":" {score:1.0016456865688879} ","formula":"resource:Chess","lexeme":"chess","type":"NamedEntity"}
+{"features":" {score:0.4306963852638873} ","formula":"resource:Chess_Olympiad","lexeme":"chess olympiad","type":"NamedEntity"}
+{"features":" {score:0.06770797888550475} ","formula":"!property:sport","lexeme":"sport","type":"ObjProp"}
+{"features":" {score:0.027656691333709436} ","formula":"!property:activity","lexeme":"activity","type":"ObjProp"}
+{"features":" {score:0.027656691333709436} ","formula":"property:activity","lexeme":"activity","type":"ObjProp"}
+{"features":" {score:0.06770797888550475} ","formula":"dbpedia:sport","lexeme":"sport","type":"ObjectProp"}
+{"features":" {score:0.32765669133370945} ","formula":"(rdf:type dbpedia:Activity)","lexeme":"activity","type":"ClassNoun"}
+{"features":" {score:0.07953894959679021} ","formula":"!property:club","lexeme":"club","type":"DataProp"}
+{"features":" {score:0.07953894959679021} ","formula":"property:club","lexeme":"club","type":"ObjProp"}
+{"features":" {score:0.06770797888550475} ","formula":"!property:sport","lexeme":"sport","type":"DataProp"}
+{"features":" {score:0.027656691333709436} ","formula":"!dbpedia:activity","lexeme":"activity","type":"ObjectProp"}
+{"features":" {score:0.07953894959679021} ","formula":"dbpedia:club","lexeme":"club","type":"ObjectProp"}
+{"features":" {score:0.027656691333709436} ","formula":"dbpedia:activity","lexeme":"activity","type":"ObjectProp"}
+{"features":" {score:0.06770797888550475} ","formula":"property:sport","lexeme":"sport","type":"DataProp"}
+{"features":" {score:0.2586901839423016} ","formula":"property:game","lexeme":"game","type":"DataProp"}
+{"features":" {score:0.2586901839423016} ","formula":"property:game","lexeme":"game","type":"ObjProp"}
+{"features":" {score:0.07953894959679021} ","formula":"!property:club","lexeme":"club","type":"ObjProp"}
+{"features":" {score:0.5586901839423015} ","formula":"(rdf:type dbpedia:Game)","lexeme":"game","type":"ClassNoun"}
+{"features":" {score:0.14469626719991002} ","formula":"\u003chttp://dbpedia.org/resource/Grandmaster_(chess)\u003e","lexeme":"grandmaster (chess)","type":"NamedEntity"}
+{"features":" {score:0.4646975261354099} ","formula":"(rdf:type dbpedia:BoardGame)","lexeme":"board game","type":"ClassNoun"}
+{"features":" {score:0.027656691333709436} ","formula":"!property:activity","lexeme":"activity","type":"DataProp"}
+{"features":" {score:0.06770797888550475} ","formula":"property:sport","lexeme":"sport","type":"ObjProp"}
+{"features":" {score:0.027656691333709436} ","formula":"property:activity","lexeme":"activity","type":"DataProp"}
+{"features":" {score:0.06770797888550475} ","formula":"!dbpedia:sport","lexeme":"sport","type":"ObjectProp"}
+{"features":" {score:0.36770797888550477} ","formula":"(rdf:type dbpedia:Sport)","lexeme":"sport","type":"ClassNoun"}

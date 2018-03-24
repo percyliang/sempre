@@ -1,0 +1,26 @@
+{"features":" {score:0.0355524474057805} ","formula":"!property:area","lexeme":"area","type":"DataProp"}
+{"features":" {score:0.01633430535358601} ","formula":"property:site","lexeme":"site","type":"ObjProp"}
+{"features":" {score:0.2147691406527012} ","formula":"resource:Neuron","lexeme":"neuron","type":"NamedEntity"}
+{"features":" {score:0.22002124821700583} ","formula":"property:organ","lexeme":"organ","type":"ObjProp"}
+{"features":" {score:0.509767274269736} ","formula":"resource:Brain_tumor","lexeme":"brain tumor","type":"NamedEntity"}
+{"features":" {score:0.871291082215624} ","formula":"resource:Brain","lexeme":"brain","type":"NamedEntity"}
+{"features":" {score:0.01633430535358601} ","formula":"!property:site","lexeme":"site","type":"DataProp"}
+{"features":" {score:0.0355524474057805} ","formula":"property:area","lexeme":"area","type":"DataProp"}
+{"features":" {score:0.20080790948731098} ","formula":"resource:Stroke","lexeme":"stroke","type":"NamedEntity"}
+{"features":" {score:0.0355524474057805} ","formula":"property:area","lexeme":"area","type":"ObjProp"}
+{"features":" {score:0.0355524474057805} ","formula":"!property:area","lexeme":"area","type":"ObjProp"}
+{"features":" {score:0.22002124821700583} ","formula":"!dbpedia:organ","lexeme":"organ","type":"ObjectProp"}
+{"features":" {score:0.22002124821700583} ","formula":"property:organ","lexeme":"organ","type":"DataProp"}
+{"features":" {score:1.0999999999999999} ","formula":"(rdf:type dbpedia:Brain)","lexeme":"brain","type":"ClassNoun"}
+{"features":" {score:0.25182308613051774} ","formula":"resource:Magnetic_resonance_imaging","lexeme":"magnetic resonance imaging","type":"NamedEntity"}
+{"features":" {score:0.22002124821700583} ","formula":"!property:organ","lexeme":"organ","type":"ObjProp"}
+{"features":" {score:0.06486128270466952} ","formula":"property:structure","lexeme":"structure","type":"DataProp"}
+{"features":" {score:0.06486128270466952} ","formula":"!property:structure","lexeme":"structure","type":"ObjProp"}
+{"features":" {score:0.22002124821700583} ","formula":"dbpedia:organ","lexeme":"organ","type":"ObjectProp"}
+{"features":" {score:0.01633430535358601} ","formula":"property:site","lexeme":"site","type":"DataProp"}
+{"features":" {score:0.3355524474057805} ","formula":"(rdf:type dbpedia:Area)","lexeme":"area","type":"ClassNoun"}
+{"features":" {score:0.01633430535358601} ","formula":"!property:site","lexeme":"site","type":"ObjProp"}
+{"features":" {score:0.06486128270466952} ","formula":"!property:structure","lexeme":"structure","type":"DataProp"}
+{"features":" {score:0.5200212482170058} ","formula":"(rdf:type dbpedia:Organ)","lexeme":"organ","type":"ClassNoun"}
+{"features":" {score:0.22002124821700583} ","formula":"!property:organ","lexeme":"organ","type":"DataProp"}
+{"features":" {score:0.06486128270466952} ","formula":"property:structure","lexeme":"structure","type":"ObjProp"}

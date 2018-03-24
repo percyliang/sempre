@@ -1,0 +1,25 @@
+1.
+utterance: what is a cartoon
+underspecified term: cartoon
+type: type
+result: success
+
+2.
+utterance: what is abraham lincoln ideology
+underspecified term: ideology
+type: relation
+result: followUp
+
+3.
+utterance: what is a case
+underspecified term: case
+type: type
+result: success
+
+4.
+utterance: who is president of germany
+underspecified term: president
+type: relation
+underspecified term: germany
+type: entity
+result: fail

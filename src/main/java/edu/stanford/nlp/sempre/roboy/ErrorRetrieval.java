@@ -15,6 +15,7 @@ import sun.rmi.runtime.Log;
 
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.stream.IntStream;
 
 /**
  * Error retrieval class. Handles dealing with unknown terms error.
@@ -181,7 +182,7 @@ public class ErrorRetrieval {
                     else if (full_type.contains("Type")){
                         underTerms.add(new UnspecInfo(entity, UnspecInfo.TermType.TYPE));
                     }
-                    else if (full_type.contains("Relation")){
+                    else if (full_type.contains("Rel")){
                         underTerms.add(new UnspecInfo(entity, UnspecInfo.TermType.RELATION));
                     }
                 }
@@ -224,7 +225,6 @@ public class ErrorRetrieval {
         }
         return termList;
     }
-
     /**
      * Function extracting best candidate and forming follow up question if needed
      *
@@ -237,6 +237,8 @@ public class ErrorRetrieval {
         sorted.addAll(underInfo.candidatesScores);
         Collections.sort(sorted);
         Collections.reverse(sorted);
+        if (sorted.isEmpty())
+            return underInfo.term;
         int index = underInfo.candidatesScores.indexOf(sorted.get(0));
         // Best candidate
         String result = underInfo.candidates.get(index);
@@ -244,9 +246,9 @@ public class ErrorRetrieval {
             List<String> candidates = new ArrayList<>();
             candidates.add(underInfo.candidatesInfo.get(index));
             double current = sorted.get(0);
-            for (int i = 1; i < sorted.size(); i++){
-                if (sorted.get(i)/current > 0.8)
-                    candidates.add(underInfo.candidatesInfo.get(underInfo.candidatesScores.indexOf(sorted.get(i))));
+            for (int i = 0; i < underInfo.candidatesScores.size(); i++){
+                if (underInfo.candidatesScores.get(i)/current > 0.8 && i!=index)
+                    candidates.add(underInfo.candidatesInfo.get(i));
                 else
                     break;
             }
@@ -269,6 +271,7 @@ public class ErrorRetrieval {
     public List<Map.Entry<String,String>> formQuestion(String term, List<String> candidate) {
         List<Map.Entry<String,String>> result = new ArrayList<>();
         for (String c:candidate) {
+            LogInfo.logs(c);
             Type type = new TypeToken<Map<String, String>>(){}.getType();
             Map<String, String> c_map = this.gson.fromJson(c, type);
             String desc = sparqlUtil.returnDescr(c_map.get("URI"),dbpediaUrl);
@@ -291,7 +294,7 @@ public class ErrorRetrieval {
             }
             else {
                 int rnd = new Random().nextInt(this.follow_ups.get("label").size());
-                String question = String.format(this.follow_ups.get("label").get(rnd), term, c_map.get("Label"), desc);
+                String question = String.format(this.follow_ups.get("label").get(rnd), term, c_map.get("Label"));
                 Map.Entry<String, String> entry = new java.util.AbstractMap.SimpleEntry<String, String>
                         (String.format(question, term, c_map.get("Label")), c_map.get("URI"));
                 result.add(entry);
@@ -437,7 +440,7 @@ public class ErrorRetrieval {
                     LogInfo.logs("Best replacement for %s : %s", key, replaces.get(key));
                 }
                 for (Map.Entry<String, String> entry : this.underInfo.followUps) {
-                    LogInfo.logs("FollowUp question -> %s", entry.getKey());
+                    LogInfo.logs("FollowUp question -> %s -> %s", entry.getKey(), entry.getValue());
                 }
             }
 

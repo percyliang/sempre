@@ -1,0 +1,24 @@
+1. who is scientist
+underspecified term: scientist
+type: type
+result: success
+
+2.
+utterance: what is albert einstein birth date
+underspecified term: albert einstein
+type: entity
+result: success
+
+3.
+utterance: what is albert einstein author of
+underspecified term: author
+type: relation
+result: success
+
+4.
+utterance: where is nikola tesla birth place
+underspecified term: nikola tesla
+type: entity
+underspecified term: birth place
+type: relation
+result: success
