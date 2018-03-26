@@ -21,7 +21,7 @@
 (rule $VerbPhrase ($LEMMAS) (FilterPosTagFn span TO IN VB VBD VBN VBG VBP VBZ VBD-AUX JJ))
 (rule $ValuePhrase ($LEMMA_PHRASE) (FilterPosTagFn span NNS NN NNP CD VBG VB))
 (rule $NounPhrase ($PHRASE) (FilterPosTagFn span NNS NN CD))
-(rule $EntityPhrase ($PHRASE) (FilterPosTagFn span NNP NNPS))
+(rule $EntityPhrase ($PHRASE) (FilterPosTagFn span NN NNP NNPS))
 (rule $AdjPhrase ($LEMMAS) (FilterPosTagFn span JJ))
 (rule $AdjToken ($AdjPhrase) (FilterSpanLengthFn 1 2))
 (rule $VerbToken ($VerbPhrase) (FilterSpanLengthFn 1 2))
@@ -50,6 +50,7 @@
 (rule $RDataProp ($Limited) (SimpleLexiconFn (type "RoboyDataProp")))
 (rule $QObjProp ($Limited) (SimpleLexiconFn (type "RoboyQRelNoun")))
 (rule $QDataProp ($Limited) (SimpleLexiconFn (type "RoboyQDataProp")))
+(rule $TypeProperty ($Limited) (SimpleLexiconFn (type "TypeProperty")))
 
 (rule $PartObjProp ($Limited) (SimpleLexiconFn (type "StateVerb")))
 (rule $PartObjProp ($Limited) (SimpleLexiconFn (type "RelationalAdjective")))
@@ -66,15 +67,16 @@
 
 ## OpenTypes
 (when error
-    (rule $FullObjType ($NounToken) (OpenTypeFn type))
-    (rule $FullDataProp ($NounToken) (OpenTypeFn type))
+    (rule $FullObjType ($NounPhrase) (OpenTypeFn type))
 
     (rule $PartObjProp ($NounToken) (OpenTypeFn relation))
     (rule $PartDataProp ($NounToken) (OpenTypeFn relation))
     (rule $PartObjProp ($VerbToken) (OpenTypeFn relation))
     (rule $PartDataProp ($VerbToken) (OpenTypeFn relation))
+    (rule $PartObjProp ($AdjToken) (OpenTypeFn relation))
+    (rule $PartDataProp ($AdjToken) (OpenTypeFn relation))
 
-    (rule $Entity ($EntityToken) (OpenTypeFn entity))
+    (rule $NewEntity ($EntityToken) (OpenTypeFn entity))
 )
 #(rule $ROOT ($PHRASE) (OpenTypeFn type))
 #(rule $ROOT ($PHRASE) (OpenTypeFn relation))
@@ -82,7 +84,7 @@
 
 ## Forming Subject
 #(rule $Subject ($Person) (IdentityFn))
-(rule $Subject ($Entity) (IdentityFn))
+(rule $Subject ($NewEntity) (IdentityFn))
 (rule $Subject ($Subject or $Subject) (ConcatFn ";"))
 (rule $Subject ($Subject and $Subject) (ConcatFn ","))
 (rule $Subject ($Subject (, optional) $Subject) (ConcatFn ","))
@@ -99,8 +101,10 @@
 (rule $Predicate ($Predicate and $Predicate) (ConcatFn ","))
 (rule $Predicate ($Predicate (, optional) $Predicate) (ConcatFn ","))
 
+(rule $RObjPred ($TypeProperty $FullObjType) (TripleFn "pt"))
 (rule $RObjPred ($RObjProp) (IdentityFn))
 (rule $RObjPred ($BE $RObjPred) (SelectFn 1))
+(rule $RObjPred ($RObjPred $BE) (SelectFn 0))
 (rule $RObjPred ($HAVE $RObjPred) (SelectFn 1))
 (rule $RObjPred ($IgnPhrase $RObjPred) (SelectFn 1))
 (rule $RObjPred ($RObjPred $IgnPhrase) (SelectFn 0))
@@ -108,11 +112,12 @@
 (rule $RObjPred ($RObjPred and $RObjPred) (ConcatFn ","))
 (rule $RObjPred ($RObjPred (, optional) $RObjPred) (ConcatFn ","))
 
+#(rule $RDataPred ($TypeProperty $FullObjType) (TripleFn "pt"))
 (rule $RDataPred ($RDataProp) (IdentityFn))
 (rule $RDataPred ($BE $RDataProp) (SelectFn 1))
 (rule $RDataPred ($HAVE $RDataProp) (SelectFn 1))
-(rule $RDataPred ($IgnPhrase $RDataProp) (SelectFn 1))
-(rule $RDataPred ($RDataProp $IgnPhrase) (SelectFn 0))
+(rule $RDataPred ($IgnPhrase $RDataPred) (SelectFn 1))
+(rule $RDataPred ($RDataPred $IgnPhrase) (SelectFn 0))
 (rule $RDataPred ($RDataPred or $RDataPred) (ConcatFn ";"))
 (rule $RDataPred ($RDataPred and $RDataPred) (ConcatFn ","))
 (rule $RDataPred ($RDataPred (, optional) $RDataPred) (ConcatFn ","))
@@ -172,7 +177,7 @@
 (rule $Expr ($RobSubject $RDataPred $Value) (TripleFn spo))
 (rule $Expr ($Object $RobSubject $RObjPred ) (TripleFn osp))
 #(rule $Expr ($Value $RobSubject $RObjPred) (TripleFn osp))
-(rule $Expr ($Value $RobSubject $RDataPred) (TripleFn osp))
+(rule $Expr ($Value ($BE optional) $RobSubject $RDataPred) (TripleFn osp))
 #(rule $Expr ($RObjPred $RobSubject $Value) (TripleFn pso))
 (rule $Expr ($RObjPred $RobSubject $Object) (TripleFn pso))
 (rule $Expr ($RDataPred $RobSubject $Value) (TripleFn pso))
@@ -236,7 +241,6 @@
 (rule $Set ($Binary $Entity) (JoinFn forward))
 (rule $Set ($Entity $Binary) (JoinFn backward))
 (rule $Unary ($PredObj) (IdentityFn))
-(rule $ROOT (($PHRASE optional) $Entity) (IdentityFn))
 (rule $Set ($Unary) (IdentityFn))
 (rule $BaseSet ($Subject ($Limited optional) $Predicate) (JoinFn unary,binary unaryCanBeArg0 unaryCanBeArg1))
 (rule $BaseSet ($Predicate ($Limited optional) $Subject) (JoinFn binary,unary unaryCanBeArg0 unaryCanBeArg1))

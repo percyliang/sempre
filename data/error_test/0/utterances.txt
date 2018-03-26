@@ -1,6 +1,6 @@
 1.
-utterance: what is a cartoon
-underspecified term: cartoon
+utterance: what is a abraham lincoln
+underspecified term: abraham lincoln
 type: type
 result: success
 
@@ -17,9 +17,9 @@ type: type
 result: success
 
 4.
-utterance: who is president of germany
-underspecified term: president
+utterance: what is angela merkel leader of
+underspecified term: leader of
 type: relation
-underspecified term: germany
+underspecified term: angela merkel
 type: entity
 result: fail

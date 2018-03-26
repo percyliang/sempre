@@ -50,6 +50,7 @@ public class OpenTypeFn extends SemanticFn {
           out.append(c.childStringValue(i));
         }
         out.append("''");
+
         if (SimpleLexicon.getSingleton().lookup(out.toString().substring(out.toString().indexOf("'")+1,out.toString().indexOf("''"))).isEmpty())
               return new Derivation.Builder()
                       .withCallable(c)

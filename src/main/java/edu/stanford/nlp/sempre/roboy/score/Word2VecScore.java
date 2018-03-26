@@ -65,7 +65,7 @@ public class Word2VecScore extends ScoringFunction {
             if (Double.isNaN(score))
                 score = 0.0;
             if (ConfigManager.DEBUG > 4)
-                LogInfo.logs("Word2Vec: %s -> %s", candidate.get("URI"), score*this.weight);
+                LogInfo.logs("Word2Vec: %s -> %s", candidate.get("URI"), score);
             result.candidatesScores.add(score*this.weight);
         }
         return result;

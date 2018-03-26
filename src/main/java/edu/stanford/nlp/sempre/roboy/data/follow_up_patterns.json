@@ -1,8 +1,8 @@
 {
-  "abstract": [
-    "Did you mean %s as %s, %s?",
-    "Sorry, did you say %s for %s, %s?",
-    "Does %s mean %s, %s?"
+  "type": [
+    "Did you mean %s as %s, a %s?",
+    "Sorry, did you say %s for %s, a %s?",
+    "Does %s mean %s, a %s?"
   ],
   "label": [
     "Did you mean %s as %s?",

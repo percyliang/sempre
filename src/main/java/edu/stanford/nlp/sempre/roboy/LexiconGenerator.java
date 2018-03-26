@@ -1,17 +1,13 @@
 package edu.stanford.nlp.sempre.roboy;
 
-import com.google.common.base.Joiner;
-import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import edu.stanford.nlp.sempre.Derivation;
 import edu.stanford.nlp.sempre.SimpleLexicon;
 import edu.stanford.nlp.sempre.roboy.config.ConfigManager;
 import edu.stanford.nlp.sempre.roboy.utils.SparqlUtils;
 import fig.basic.IOUtils;
 import fig.basic.LogInfo;
 
-import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.lang.reflect.Type;
 import java.util.*;

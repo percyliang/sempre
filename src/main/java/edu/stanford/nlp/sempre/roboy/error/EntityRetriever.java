@@ -55,7 +55,10 @@ public class EntityRetriever extends KnowledgeRetriever {
         if (response.getXml()!=null)
             results = reader.readEntityXml(response.getXml(),keywords);
         for (Map<String,String> c: results){
-            c.put("Label",c.get("Label").toLowerCase());
+            String label = c.get("Label").toLowerCase();
+            label = label.replaceAll("\\(","");
+            label = label.replaceAll("\\)","");
+            c.put("Label",label.toLowerCase());
             result.candidates.add(c.get("URI"));
             result.candidatesInfo.add(this.gson.toJson(c));
             if (ConfigManager.DEBUG > 3){

@@ -48,7 +48,7 @@ public class ProbabilityScore extends ScoringFunction {
             candidate = this.gson.fromJson(canString, candidate.getClass());
             // Check similarity
             if (ConfigManager.DEBUG > 4)
-                LogInfo.logs("Probability: %s -> %s", candidate.get("URI"), Double.valueOf(candidate.get("Refcount"))*this.weight);
+                LogInfo.logs("Probability: %s -> %s", candidate.get("URI"), Double.valueOf(candidate.get("Refcount")));
             result.candidatesScores.add(Double.valueOf(candidate.get("Refcount"))*this.weight);
         }
         return result;

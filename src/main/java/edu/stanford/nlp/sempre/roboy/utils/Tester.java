@@ -10,6 +10,7 @@ import java.lang.reflect.Type;
 import java.net.Socket;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class Tester {
 
@@ -69,11 +70,12 @@ public class Tester {
         Tester test = new Tester(5000);
         try {
             PrintWriter writer = new PrintWriter("log-webq.txt", "UTF-8");
-            JsonReader reader = new JsonReader(new FileReader("./data/rpqa/Q/rpqa-test-q.json"));
+            JsonReader reader = new JsonReader(new FileReader("./data/rpqa/rpqa-test.json"));
             Type type = new TypeToken<List<Map<String, String>>>() {
             }.getType();
             Gson gson = new Gson();
             List<Map<String, String>> testSet = gson.fromJson(reader, type);
+            long time = System.nanoTime();
             for (Map<String, String> entry : testSet) {
                 String response = test.query(entry.get("utterance"));
                 if (response != null) {
@@ -106,6 +108,9 @@ public class Tester {
             LogInfo.logs("Success rate: %f", success/testSet.size());
             LogInfo.logs("Unparsed: %f", unparsed/testSet.size());
             LogInfo.logs("Failure: %f", fail/testSet.size());
+
+
+            LogInfo.logs("Time: %f", (double) TimeUnit.SECONDS.convert(System.nanoTime() - time, TimeUnit.NANOSECONDS));
         }
         catch(FileNotFoundException e){
             e.printStackTrace();

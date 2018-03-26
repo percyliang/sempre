@@ -61,18 +61,17 @@ public class ContextScore extends ScoringFunction {
                 for (String keyword: context.exchanges.get(context.exchanges.size() - 1).genInfo.keywords) {
                     String[] tokensCand = keyword.split(" ");
                     max2 = 0;
-                    for (String tokenTerm : tokensTerm) {
+                    for (String tokenTerm : tokensCand) {
                         max = 0;
-                        for (String tokenCand : tokensCand) {
+                        for (String tokenCand : tokensTerm) {
                             help = this.vec.getSimilarity(tokenTerm, tokenCand);
                             if (help > max) {
                                 max = help;
                             }
                         }
-                        max2 = max2 + max;
+                        max2 = max + max2;
                     }
-                    if (max2 > max3)
-                        max3 = max2;
+                    max3 = max2 + max3;
                 }
                 score = score + max3;
             }

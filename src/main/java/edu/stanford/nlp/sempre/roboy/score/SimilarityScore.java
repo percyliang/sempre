@@ -7,7 +7,9 @@ import edu.stanford.nlp.sempre.roboy.config.ConfigManager;
 import edu.stanford.nlp.sempre.roboy.lexicons.word2vec.Word2vec;
 import fig.basic.LogInfo;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -48,11 +50,12 @@ public class SimilarityScore extends ScoringFunction {
             candidate = this.gson.fromJson(canString, candidate.getClass());
             // Check similarity
             double score = 0;
-            if (candidate.get("Label").toLowerCase().equals(result.term))
+            List<String> tokens = Arrays.asList(candidate.get("Label").toLowerCase().split(" "));
+            if (tokens.contains(result.term))
                 score = 1;
             result.candidatesScores.add(score*this.weight);
             if (ConfigManager.DEBUG > 4)
-                LogInfo.logs("Similarity: %s -> %s", candidate.get("URI"), score*this.weight);
+                LogInfo.logs("Similarity: %s -> %s", candidate.get("URI"), score);
         }
         return result;
     }

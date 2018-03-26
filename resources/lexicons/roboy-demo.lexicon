@@ -41,6 +41,7 @@
 {"lexeme": "go to", "formula": "rb:STUDY_AT", "type" : "ObjProp"}
 {"lexeme": "study", "formula": "rb:STUDY_AT", "type" : "ObjProp"}
 {"lexeme": "study at", "formula": "rb:STUDY_AT", "type" : "ObjProp"}
+{"lexeme": "work", "formula": "rb:WORK_FOR", "type" : "ObjProp"}
 {"lexeme": "work for", "formula": "rb:WORK_FOR", "type" : "ObjProp"}
 {"lexeme": "work at", "formula": "rb:WORK_FOR", "type" : "ObjProp"}
 {"lexeme": "living", "formula": "rb:WORK_FOR", "type" : "ObjProp"}
@@ -65,6 +66,7 @@
 {"lexeme": "go to", "formula": "!rb:STUDY_AT", "type" : "ObjQProp"}
 {"lexeme": "study", "formula": "!rb:STUDY_AT", "type" : "ObjQProp"}
 {"lexeme": "study at", "formula": "!rb:STUDY_AT", "type" : "ObjQProp"}
+{"lexeme": "work", "formula": "!rb:WORK_FOR", "type" : "ObjQProp"}
 {"lexeme": "work for", "formula": "!rb:WORK_FOR", "type" : "ObjQProp"}
 {"lexeme": "work at", "formula": "!rb:WORK_FOR", "type" : "ObjQProp"}
 {"lexeme": "employ", "formula": "!rb:WORK_FOR", "type" : "ObjQProp"}
@@ -96,6 +98,7 @@
 {"lexeme": "profession", "formula": "rb:OCCUPIED_AS", "type" : "RoboyRelNoun"}
 {"lexeme": "name", "formula": "rb:NAME_OF", "type" : "RoboyDataProp"}
 {"lexeme": "home", "formula": "rb:FROM", "type" : "RoboyRelNoun"}
+{"lexeme": "work", "formula": "rb:WORK_FOR", "type" : "RoboyRelNoun"}
 {"lexeme": "age", "formula": "rb:AGE", "type" : "RoboyDataProp"}
 {"lexeme": "member", "formula": "rb:MEMBER_OF", "type" : "RoboyRelNoun"}
 {"lexeme": "part", "formula": "rb:PART_OF", "type" : "RoboyRelNoun"}
@@ -107,6 +110,7 @@
 {"lexeme": "favorite activity", "formula": "!rb:HAS_HOBBY", "type" : "RoboyQRelNoun"}
 {"lexeme": "favorite thing to do", "formula": "!rb:HAS_HOBBY", "type" : "RoboyQRelNoun"}
 {"lexeme": "employer", "formula": "!rb:WORK_FOR", "type" : "RoboyQRelNoun"}
+{"lexeme": "work", "formula": "!rb:WORK_FOR", "type" : "RoboyQRelNoun"}
 {"lexeme": "location", "formula": "!rb:LIVE_IN", "type" : "RoboyQRelNoun"}
 {"lexeme": "home", "formula": "!rb:FROM", "type" : "RoboyQRelNoun"}
 {"lexeme": "home", "formula": "!rb:FROM", "type" : "RoboyQRelNoun"}

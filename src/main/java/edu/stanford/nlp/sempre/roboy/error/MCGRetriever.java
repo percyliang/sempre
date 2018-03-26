@@ -60,7 +60,9 @@ public class MCGRetriever extends KnowledgeRetriever {
                 Map<String, String> single = new HashMap();
                 Set<String> uri = sparqlUtil.returnURI(res, dbpediaUrl, false);
                 if (uri != null) {
-                    single.put("Label", res);
+                    String label = res.replaceAll("\\(","");
+                    label = label.replaceAll("\\)","");
+                    single.put("Label", label.toLowerCase());
                     single.put("Refcount", String.valueOf(results.get(res)));
                     for (String u : uri) {
                         single.put("URI", u);

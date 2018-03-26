@@ -238,7 +238,7 @@ public class ErrorRetrieval {
         Collections.sort(sorted);
         Collections.reverse(sorted);
         if (sorted.isEmpty())
-            return underInfo.term;
+            return null;
         int index = underInfo.candidatesScores.indexOf(sorted.get(0));
         // Best candidate
         String result = underInfo.candidates.get(index);
@@ -249,8 +249,6 @@ public class ErrorRetrieval {
             for (int i = 0; i < underInfo.candidatesScores.size(); i++){
                 if (underInfo.candidatesScores.get(i)/current > 0.8 && i!=index)
                     candidates.add(underInfo.candidatesInfo.get(i));
-                else
-                    break;
             }
             this.underInfo.followUps.addAll(formQuestion(underInfo.term,candidates));
         }
@@ -293,8 +291,18 @@ public class ErrorRetrieval {
                 result.add(entry);
             }
             else {
-                int rnd = new Random().nextInt(this.follow_ups.get("label").size());
-                String question = String.format(this.follow_ups.get("label").get(rnd), term, c_map.get("Label"));
+                int rnd = new Random().nextInt(this.follow_ups.get("type").size());
+                String relType = new String();
+                if (c_map.get("URI").contains("type")){
+                    relType = "type of thing";
+                }
+                else if (c_map.get("URI").contains("resource")){
+                    relType = "individual thing";
+                }
+                else{
+                    relType = "feature";
+                }
+                String question = String.format(this.follow_ups.get("type").get(rnd), term, c_map.get("Label"), relType);
                 Map.Entry<String, String> entry = new java.util.AbstractMap.SimpleEntry<String, String>
                         (String.format(question, term, c_map.get("Label")), c_map.get("URI"));
                 result.add(entry);
@@ -353,27 +361,32 @@ public class ErrorRetrieval {
      * @param key             term to replace
      */
     public LispTree replaceEntity(LispTree new_formula, String replace, String key) {
-        if (new_formula!= null && new_formula.isLeaf()) {
-            LogInfo.logs("Leaf %s : %s", new_formula.toString(), replace);
-            if (!key.contains(" "))
-                return LispTree.proto.newLeaf(new_formula.value.replaceAll(replace, key));
-            else{
-                return Formula.fromString(key).toLispTree();
-            }
-        }
-        else if (new_formula.children.get(0).value!= null && new_formula.children.get(0).value == "string"){
-            LogInfo.logs("Name %s : %s", new_formula.toString(), replace);
-            NameValue result = new NameValue(new_formula.children.get(1).value.replaceAll(replace, key));
-            return result.toLispTree();
-        }
-        else {
-            LogInfo.logs("Else %s : %s", new_formula.toString(), replace);
-            for (int i = 0; i < new_formula.children.size(); i++) {
-                new_formula.children.add(i,replaceEntity(new_formula.children.get(i), replace, key));
-                new_formula.children.remove(i+1);
-            }
-        }
-        return new_formula;
+        LogInfo.logs("Old %s %s %s",replace,key,new_formula.toString());
+        if (new_formula.toString().contains("has_type") && key.contains("type"))
+            return Formula.fromString(new_formula.toString().replaceAll("has_type ".concat(replace),key.replaceAll("\\(","").replaceAll("\\)",""))).toLispTree();
+        else
+            return Formula.fromString(new_formula.toString().replaceAll(replace,key)).toLispTree();
+//        if (new_formula!= null && new_formula.isLeaf()) {
+//            LogInfo.logs("Leaf");
+//            if (!key.contains(" "))
+//                return LispTree.proto.newLeaf(new_formula.value.replaceAll(replace, key));
+//            else{
+//                return Formula.fromString(key).toLispTree();
+//            }
+//        }
+//        else if (new_formula.children.get(0).value!= null && new_formula.children.get(0).value == "string"){
+//            LogInfo.logs("String");
+//            NameValue result = new NameValue(new_formula.children.get(1).value.replaceAll(replace, key));
+//            return result.toLispTree();
+//        }
+//        else {
+//            for (int i = 0; i < new_formula.children.size(); i++) {
+//                new_formula.children.add(i,replaceEntity(new_formula.children.get(i), replace, key));
+//                new_formula.children.remove(i+1);
+//            }
+//        }
+//        LogInfo.logs("Old %s %s %s",replace,key,new_formula.toString());
+//        return new_formula;
     }
 
     /**
