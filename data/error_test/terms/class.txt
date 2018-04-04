@@ -1,0 +1,300 @@
+"company"; http://dbpedia.org/ontology/Company
+"activity"; http://dbpedia.org/ontology/Activity
+"name"; http://dbpedia.org/ontology/Name
+"person"; http://dbpedia.org/ontology/Person
+"actor"; http://dbpedia.org/ontology/Actor
+"place"; http://dbpedia.org/ontology/Place
+"publisher"; http://dbpedia.org/ontology/Publisher
+"genre"; http://dbpedia.org/ontology/Genre
+"language"; http://dbpedia.org/ontology/Language
+"department"; http://dbpedia.org/ontology/Department
+"software"; http://dbpedia.org/ontology/Software
+"school"; http://dbpedia.org/ontology/School
+"type"; http://dbpedia.org/ontology/Type
+"abbey"; http://dbpedia.org/ontology/Abbey
+"academic conference"; http://dbpedia.org/ontology/AcademicConference
+"academic journal"; http://dbpedia.org/ontology/AcademicJournal
+"academic subject"; http://dbpedia.org/ontology/AcademicSubject
+"administrative region"; http://dbpedia.org/ontology/AdministrativeRegion
+"adult (pornographic) actor"; http://dbpedia.org/ontology/AdultActor
+"agent"; http://dbpedia.org/ontology/Agent
+"agglomeration"; http://dbpedia.org/ontology/Agglomeration
+"aircraft"; http://dbpedia.org/ontology/Aircraft
+"airline"; http://dbpedia.org/ontology/Airline
+"airport"; http://dbpedia.org/ontology/Airport
+"album"; http://dbpedia.org/ontology/Album
+"altitude"; http://dbpedia.org/ontology/Altitude
+"amateur boxer"; http://dbpedia.org/ontology/AmateurBoxer
+"ambassador"; http://dbpedia.org/ontology/Ambassador
+"american football coach"; http://dbpedia.org/ontology/AmericanFootballCoach
+"american football league"; http://dbpedia.org/ontology/AmericanFootballLeague
+"american football player"; http://dbpedia.org/ontology/AmericanFootballPlayer
+"american football Team"; http://dbpedia.org/ontology/AmericanFootballTeam
+"amphibian"; http://dbpedia.org/ontology/Amphibian
+"amusement park attraction"; http://dbpedia.org/ontology/AmusementParkAttraction
+"anatomical structure"; http://dbpedia.org/ontology/AnatomicalStructure
+"animal"; http://dbpedia.org/ontology/Animal
+"animanga character"; http://dbpedia.org/ontology/AnimangaCharacter
+"Anime"; http://dbpedia.org/ontology/Anime
+"Annotation"; http://dbpedia.org/ontology/Annotation
+"arachnid"; http://dbpedia.org/ontology/Arachnid
+"archaea"; http://dbpedia.org/ontology/Archaea
+"archeologist"; http://dbpedia.org/ontology/Archeologist
+"Archer Player"; http://dbpedia.org/ontology/ArcherPlayer
+"archipelago"; http://dbpedia.org/ontology/Archipelago
+"architect"; http://dbpedia.org/ontology/Architect
+"architectural structure"; http://dbpedia.org/ontology/ArchitecturalStructure
+"Archive"; http://dbpedia.org/ontology/Archive
+"area"; http://dbpedia.org/ontology/Area
+"arena"; http://dbpedia.org/ontology/Arena
+"aristocrat"; http://dbpedia.org/ontology/Aristocrat
+"arrondissement"; http://dbpedia.org/ontology/Arrondissement
+"artery"; http://dbpedia.org/ontology/Artery
+"article"; http://dbpedia.org/ontology/Article
+"ArtificialSatellite"; http://dbpedia.org/ontology/ArtificialSatellite
+"artist"; http://dbpedia.org/ontology/Artist
+"artist discography"; http://dbpedia.org/ontology/ArtistDiscography
+"artistic genre"; http://dbpedia.org/ontology/ArtisticGenre
+"artwork"; http://dbpedia.org/ontology/Artwork
+"asteroid"; http://dbpedia.org/ontology/Asteroid
+"astronaut"; http://dbpedia.org/ontology/Astronaut
+"athlete"; http://dbpedia.org/ontology/Athlete
+"athletics"; http://dbpedia.org/ontology/Athletics
+"athletics player"; http://dbpedia.org/ontology/AthleticsPlayer
+"atoll"; http://dbpedia.org/ontology/Atoll
+"attack"; http://dbpedia.org/ontology/Attack
+"australian football league"; http://dbpedia.org/ontology/AustralianFootballLeague
+"australian football Team"; http://dbpedia.org/ontology/AustralianFootballTeam
+"Australian rules football player"; http://dbpedia.org/ontology/AustralianRulesFootballPlayer
+"auto racing league"; http://dbpedia.org/ontology/AutoRacingLeague
+"automobile"; http://dbpedia.org/ontology/Automobile
+"automobile engine"; http://dbpedia.org/ontology/AutomobileEngine
+"award"; http://dbpedia.org/ontology/Award
+"back scene"; http://dbpedia.org/ontology/BackScene
+"bacteria"; http://dbpedia.org/ontology/Bacteria
+"badminton player"; http://dbpedia.org/ontology/BadmintonPlayer
+"Band"; http://dbpedia.org/ontology/Band
+"bank"; http://dbpedia.org/ontology/Bank
+"baronet"; http://dbpedia.org/ontology/Baronet
+"baseball league"; http://dbpedia.org/ontology/BaseballLeague
+"baseball player"; http://dbpedia.org/ontology/BaseballPlayer
+"baseball season"; http://dbpedia.org/ontology/BaseballSeason
+"baseball team"; http://dbpedia.org/ontology/BaseballTeam
+"basketball league"; http://dbpedia.org/ontology/BasketballLeague
+"basketball player"; http://dbpedia.org/ontology/BasketballPlayer
+"basketball team"; http://dbpedia.org/ontology/BasketballTeam
+"bay"; http://dbpedia.org/ontology/Bay
+"beach"; http://dbpedia.org/ontology/Beach
+"beach volleyball player"; http://dbpedia.org/ontology/BeachVolleyballPlayer
+"beauty queen"; http://dbpedia.org/ontology/BeautyQueen
+"beer"; http://dbpedia.org/ontology/Beer
+"beverage"; http://dbpedia.org/ontology/Beverage
+"Biathlete"; http://dbpedia.org/ontology/Biathlete
+"Biological database"; http://dbpedia.org/ontology/BiologicalDatabase
+"biologist"; http://dbpedia.org/ontology/Biologist
+"Biomolecule"; http://dbpedia.org/ontology/Biomolecule
+"bird"; http://dbpedia.org/ontology/Bird
+"birth"; http://dbpedia.org/ontology/Birth
+"Blazon"; http://dbpedia.org/ontology/Blazon
+"blood vessel"; http://dbpedia.org/ontology/BloodVessel
+"board game"; http://dbpedia.org/ontology/BoardGame
+"BobsleighAthlete"; http://dbpedia.org/ontology/BobsleighAthlete
+"body of water"; http://dbpedia.org/ontology/BodyOfWater
+"bodybuilder"; http://dbpedia.org/ontology/Bodybuilder
+"bone"; http://dbpedia.org/ontology/Bone
+"book"; http://dbpedia.org/ontology/Book
+"bowling league"; http://dbpedia.org/ontology/BowlingLeague
+"boxer"; http://dbpedia.org/ontology/Boxer
+"boxing"; http://dbpedia.org/ontology/Boxing
+"boxing category"; http://dbpedia.org/ontology/BoxingCategory
+"boxing league"; http://dbpedia.org/ontology/BoxingLeague
+"boxing style"; http://dbpedia.org/ontology/BoxingStyle
+"brain"; http://dbpedia.org/ontology/Brain
+"brewery"; http://dbpedia.org/ontology/Brewery
+"bridge"; http://dbpedia.org/ontology/Bridge
+"British royalty"; http://dbpedia.org/ontology/BritishRoyalty
+"broadcast network"; http://dbpedia.org/ontology/BroadcastNetwork
+"broadcaster"; http://dbpedia.org/ontology/Broadcaster
+"brown dwarf"; http://dbpedia.org/ontology/BrownDwarf
+"building"; http://dbpedia.org/ontology/Building
+"bullfighter"; http://dbpedia.org/ontology/BullFighter
+"bus company"; http://dbpedia.org/ontology/BusCompany
+"businessperson"; http://dbpedia.org/ontology/BusinessPerson
+"camera"; http://dbpedia.org/ontology/Camera
+"liga de fútbol canadiense"; http://dbpedia.org/ontology/CanadianFootballLeague
+"canadian football Player"; http://dbpedia.org/ontology/CanadianFootballPlayer
+"canadian football Team"; http://dbpedia.org/ontology/CanadianFootballTeam
+"canal"; http://dbpedia.org/ontology/Canal
+"canoeist"; http://dbpedia.org/ontology/Canoeist
+"canton"; http://dbpedia.org/ontology/Canton
+"cape"; http://dbpedia.org/ontology/Cape
+"Capital"; http://dbpedia.org/ontology/Capital
+"Capital of region"; http://dbpedia.org/ontology/CapitalOfRegion
+"card game"; http://dbpedia.org/ontology/CardGame
+"cardinal"; http://dbpedia.org/ontology/Cardinal
+"Cardinal direction"; http://dbpedia.org/ontology/CardinalDirection
+"career station"; http://dbpedia.org/ontology/CareerStation
+"cartoon"; http://dbpedia.org/ontology/Cartoon
+"case"; http://dbpedia.org/ontology/Case
+"casino"; http://dbpedia.org/ontology/Casino
+"castle"; http://dbpedia.org/ontology/Castle
+"cat"; http://dbpedia.org/ontology/Cat
+"Caterer"; http://dbpedia.org/ontology/Caterer
+"cave"; http://dbpedia.org/ontology/Cave
+"celebrity"; http://dbpedia.org/ontology/Celebrity
+"celestial body"; http://dbpedia.org/ontology/CelestialBody
+"cemetery"; http://dbpedia.org/ontology/Cemetery
+"chancellor"; http://dbpedia.org/ontology/Chancellor
+"Place in the Music Charts"; http://dbpedia.org/ontology/ChartsPlacements
+"cheese"; http://dbpedia.org/ontology/Cheese
+"chef"; http://dbpedia.org/ontology/Chef
+"chemical compound"; http://dbpedia.org/ontology/ChemicalCompound
+"chemical element"; http://dbpedia.org/ontology/ChemicalElement
+"chemical substance"; http://dbpedia.org/ontology/ChemicalSubstance
+"chess player"; http://dbpedia.org/ontology/ChessPlayer
+"Christian Bishop"; http://dbpedia.org/ontology/ChristianBishop
+"Christian Doctrine"; http://dbpedia.org/ontology/ChristianDoctrine
+"Christian Patriarch"; http://dbpedia.org/ontology/ChristianPatriarch
+"church"; http://dbpedia.org/ontology/Church
+"city"; http://dbpedia.org/ontology/City
+"city district"; http://dbpedia.org/ontology/CityDistrict
+"classical music artist"; http://dbpedia.org/ontology/ClassicalMusicArtist
+"classical music composition"; http://dbpedia.org/ontology/ClassicalMusicComposition
+"cleric"; http://dbpedia.org/ontology/Cleric
+"clerical administrative region"; http://dbpedia.org/ontology/ClericalAdministrativeRegion
+"clerical order"; http://dbpedia.org/ontology/ClericalOrder
+"club moss"; http://dbpedia.org/ontology/ClubMoss
+"coach"; http://dbpedia.org/ontology/Coach
+"coal pit"; http://dbpedia.org/ontology/CoalPit
+"collection of valuables"; http://dbpedia.org/ontology/CollectionOfValuables
+"college"; http://dbpedia.org/ontology/College
+"college coach"; http://dbpedia.org/ontology/CollegeCoach
+"colour"; http://dbpedia.org/ontology/Colour
+"comedian"; http://dbpedia.org/ontology/Comedian
+"Comedy Group"; http://dbpedia.org/ontology/ComedyGroup
+"comic"; http://dbpedia.org/ontology/Comic
+"comic strip"; http://dbpedia.org/ontology/ComicStrip
+"comics character"; http://dbpedia.org/ontology/ComicsCharacter
+"comics creator"; http://dbpedia.org/ontology/ComicsCreator
+"Community"; http://dbpedia.org/ontology/Community
+"competition"; http://dbpedia.org/ontology/Competition
+"Concentration camp"; http://dbpedia.org/ontology/ConcentrationCamp
+"congressman"; http://dbpedia.org/ontology/Congressman
+"conifer"; http://dbpedia.org/ontology/Conifer
+"constellation"; http://dbpedia.org/ontology/Constellation
+"contest"; http://dbpedia.org/ontology/Contest
+"continent"; http://dbpedia.org/ontology/Continent
+"Controlled designation of origin wine"; http://dbpedia.org/ontology/ControlledDesignationOfOriginWine
+"convention"; http://dbpedia.org/ontology/Convention
+"conveyor system"; http://dbpedia.org/ontology/ConveyorSystem
+"country"; http://dbpedia.org/ontology/Country
+"country estate"; http://dbpedia.org/ontology/CountrySeat
+"crater"; http://dbpedia.org/ontology/Crater
+"creek"; http://dbpedia.org/ontology/Creek
+"cricket ground"; http://dbpedia.org/ontology/CricketGround
+"cricket league"; http://dbpedia.org/ontology/CricketLeague
+"cricket team"; http://dbpedia.org/ontology/CricketTeam
+"cricketer"; http://dbpedia.org/ontology/Cricketer
+"criminal"; http://dbpedia.org/ontology/Criminal
+"cross-country skier"; http://dbpedia.org/ontology/CrossCountrySkier
+"crustacean"; http://dbpedia.org/ontology/Crustacean
+"cultivar (cultivated variety)"; http://dbpedia.org/ontology/CultivatedVariety
+"curler"; http://dbpedia.org/ontology/Curler
+"curling league"; http://dbpedia.org/ontology/CurlingLeague
+"currency"; http://dbpedia.org/ontology/Currency
+"cycad"; http://dbpedia.org/ontology/Cycad
+"cycling competition"; http://dbpedia.org/ontology/CyclingCompetition
+"cycling league"; http://dbpedia.org/ontology/CyclingLeague
+"cycling race"; http://dbpedia.org/ontology/CyclingRace
+"cycling team"; http://dbpedia.org/ontology/CyclingTeam
+"cyclist"; http://dbpedia.org/ontology/Cyclist
+"DTM racer"; http://dbpedia.org/ontology/DTMRacer
+"dam"; http://dbpedia.org/ontology/Dam
+"dancer"; http://dbpedia.org/ontology/Dancer
+"darts player"; http://dbpedia.org/ontology/DartsPlayer
+"Database"; http://dbpedia.org/ontology/Database
+"deanery"; http://dbpedia.org/ontology/Deanery
+"death"; http://dbpedia.org/ontology/Death
+"decoration"; http://dbpedia.org/ontology/Decoration
+"deity"; http://dbpedia.org/ontology/Deity
+"demographics"; http://dbpedia.org/ontology/Demographics
+"depth"; http://dbpedia.org/ontology/Depth
+"deputy"; http://dbpedia.org/ontology/Deputy
+"Desert"; http://dbpedia.org/ontology/Desert
+"device"; http://dbpedia.org/ontology/Device
+"digital camera"; http://dbpedia.org/ontology/DigitalCamera
+"dike"; http://dbpedia.org/ontology/Dike
+"diocese"; http://dbpedia.org/ontology/Diocese
+"diploma"; http://dbpedia.org/ontology/Diploma
+"disease"; http://dbpedia.org/ontology/Disease
+"disney character"; http://dbpedia.org/ontology/DisneyCharacter
+"district"; http://dbpedia.org/ontology/District
+"district water board"; http://dbpedia.org/ontology/DistrictWaterBoard
+"divorce"; http://dbpedia.org/ontology/Divorce
+"document"; http://dbpedia.org/ontology/Document
+"Document Type"; http://dbpedia.org/ontology/DocumentType
+"dog"; http://dbpedia.org/ontology/Dog
+"drama"; http://dbpedia.org/ontology/Drama
+"drug"; http://dbpedia.org/ontology/Drug
+"earthquake"; http://dbpedia.org/ontology/Earthquake
+"economist"; http://dbpedia.org/ontology/Economist
+"educational institution"; http://dbpedia.org/ontology/EducationalInstitution
+"egyptologist"; http://dbpedia.org/ontology/Egyptologist
+"Election"; http://dbpedia.org/ontology/Election
+"Election Diagram"; http://dbpedia.org/ontology/ElectionDiagram
+"electrical substation"; http://dbpedia.org/ontology/ElectricalSubstation
+"embryology"; http://dbpedia.org/ontology/Embryology
+"Employer"; http://dbpedia.org/ontology/Employer
+"Employers' Organisation"; http://dbpedia.org/ontology/EmployersOrganisation
+"engine"; http://dbpedia.org/ontology/Engine
+"engineer"; http://dbpedia.org/ontology/Engineer
+"entomologist"; http://dbpedia.org/ontology/Entomologist
+"enzyme"; http://dbpedia.org/ontology/Enzyme
+"escalator"; http://dbpedia.org/ontology/Escalator
+"ethnic group"; http://dbpedia.org/ontology/EthnicGroup
+"eukaryote"; http://dbpedia.org/ontology/Eukaryote
+"Eurovision song contest entry"; http://dbpedia.org/ontology/EurovisionSongContestEntry
+"event"; http://dbpedia.org/ontology/Event
+"factory"; http://dbpedia.org/ontology/Factory
+"family"; http://dbpedia.org/ontology/Family
+"farmer"; http://dbpedia.org/ontology/Farmer
+"fashion"; http://dbpedia.org/ontology/Fashion
+"fashion designer"; http://dbpedia.org/ontology/FashionDesigner
+"fencer"; http://dbpedia.org/ontology/Fencer
+"fern"; http://dbpedia.org/ontology/Fern
+"fictional character"; http://dbpedia.org/ontology/FictionalCharacter
+"fiefdom"; http://dbpedia.org/ontology/Fiefdom
+"field hockey league"; http://dbpedia.org/ontology/FieldHockeyLeague
+"figure skater"; http://dbpedia.org/ontology/FigureSkater
+"file"; http://dbpedia.org/ontology/File
+"filling station"; http://dbpedia.org/ontology/FillingStation
+"movie"; http://dbpedia.org/ontology/Film
+"film festival"; http://dbpedia.org/ontology/FilmFestival
+"fish"; http://dbpedia.org/ontology/Fish
+"flag"; http://dbpedia.org/ontology/Flag
+"flowering plant"; http://dbpedia.org/ontology/FloweringPlant
+"Food"; http://dbpedia.org/ontology/Food
+"football league season"; http://dbpedia.org/ontology/FootballLeagueSeason
+"football match"; http://dbpedia.org/ontology/FootballMatch
+"forest"; http://dbpedia.org/ontology/Forest
+"one-time municipality"; http://dbpedia.org/ontology/FormerMunicipality
+"Formula One racer"; http://dbpedia.org/ontology/FormulaOneRacer
+"formula one racing"; http://dbpedia.org/ontology/FormulaOneRacing
+"formula 1 team"; http://dbpedia.org/ontology/FormulaOneTeam
+"fort"; http://dbpedia.org/ontology/Fort
+"fungus"; http://dbpedia.org/ontology/Fungus
+"Gaelic games player"; http://dbpedia.org/ontology/GaelicGamesPlayer
+"galaxy"; http://dbpedia.org/ontology/Galaxy
+"game"; http://dbpedia.org/ontology/Game
+"garden"; http://dbpedia.org/ontology/Garden
+"gate"; http://dbpedia.org/ontology/Gate
+"Gated community"; http://dbpedia.org/ontology/GatedCommunity
+"gene"; http://dbpedia.org/ontology/Gene
+"GeneLocation"; http://dbpedia.org/ontology/GeneLocation
+"geological period"; http://dbpedia.org/ontology/GeologicalPeriod
+"geopolitical organisation"; http://dbpedia.org/ontology/GeopoliticalOrganisation
+"ginkgo"; http://dbpedia.org/ontology/Ginkgo
+"given name"; http://dbpedia.org/ontology/GivenName
+"glacier"; http://dbpedia.org/ontology/Glacier
+"Globular Swarm"; http://dbpedia.org/ontology/Globularswarm
+"Gnetophytes"; http://dbpedia.org/ontology/Gnetophytes

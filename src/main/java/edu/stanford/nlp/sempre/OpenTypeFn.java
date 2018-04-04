@@ -47,7 +47,7 @@ public class OpenTypeFn extends SemanticFn {
         for (int i = 0; i < c.getChildren().size(); i++) {
           if (i > 0)
             out.append(" ");
-          out.append(c.childStringValue(i));
+          out.append(c.childStringValue(i).replaceAll("'"," "));
         }
         out.append("''");
 

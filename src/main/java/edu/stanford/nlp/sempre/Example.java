@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
-import edu.stanford.nlp.sempre.roboy.ErrorInfo;
 import fig.basic.Evaluation;
 import fig.basic.LispTree;
 import fig.basic.LogInfo;

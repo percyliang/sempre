@@ -10,12 +10,9 @@ import edu.stanford.nlp.sempre.roboy.score.*;
 import edu.stanford.nlp.sempre.roboy.utils.SparqlUtils;
 import fig.basic.LispTree;
 import fig.basic.LogInfo;
-import fig.basic.Option;
-import sun.rmi.runtime.Log;
 
 import java.lang.reflect.Type;
 import java.util.*;
-import java.util.stream.IntStream;
 
 /**
  * Error retrieval class. Handles dealing with unknown terms error.
@@ -29,7 +26,7 @@ public class ErrorRetrieval {
     private String utterance;                       /**< Currently processed user utterance */
     private ContextValue context;                   /**< Context Value storing history of a conversation */
     private List<Derivation> derivations;           /**< List of predicted derivations */
-    private UnspecInfo underInfo;                   /**< Error solutions object */
+    private UnderspecifiedInfo underInfo;                   /**< Error solutions object */
 
     public  String dbpediaUrl = ConfigManager.DB_SPARQL;    /**< DBpedia SPARQL endpoint */
     private SparqlUtils sparqlUtil = new SparqlUtils();     /**< SPARQL helper */
@@ -52,7 +49,7 @@ public class ErrorRetrieval {
         this.utterance = utterance;
         this.context = context;
         this.derivations = derivations;
-        this.underInfo = new UnspecInfo();
+        this.underInfo = new UnderspecifiedInfo();
         this.lexiconGen = new LexiconGenerator();
 
         // Add error retrieval mechanisms
@@ -68,6 +65,7 @@ public class ErrorRetrieval {
         }
 
         // Add scoring functions
+        this.scorers = new ArrayList<>();
         this.scorers.add(new Word2VecScore(this.vec));
         this.scorers.add(new ContextScore(this.vec));
         this.scorers.add(new ProbabilityScore(this.vec));
@@ -79,33 +77,7 @@ public class ErrorRetrieval {
      */
     public ErrorRetrieval(){
         // Create base objects
-        this.follow_ups = ConfigManager.FOLLOW_UPS;
-        this.utterance = null;
-        this.context = null;
-        this.derivations = null;
-        this.underInfo = new UnspecInfo();
-        this.lexiconGen = new LexiconGenerator();
-
-        // Adding error retrieval mechanisms
-        this.helpers = new ArrayList<>();
-        this.helpers.add(new LabelRetriever());
-        this.helpers.add(new EntityRetriever());
-        this.helpers.add(new MCGRetriever());
-        try {
-            this.vec = new Word2vec();
-            this.helpers.add(new Word2VecRetriever(this.vec));
-        }catch(Exception e){
-            LogInfo.errors("Exception in Word2Vec: "+e.getMessage());
-        }
-
-
-        // Adding scoring functions
-        this.scorers = new ArrayList<>();
-        this.scorers.add(new Word2VecScore(this.vec));
-        this.scorers.add(new ContextScore(this.vec));
-        this.scorers.add(new SimilarityScore(this.vec));
-        this.scorers.add(new ProbabilityScore(this.vec));
-
+        this(null,null,null);
     }
 
     /**
@@ -118,7 +90,7 @@ public class ErrorRetrieval {
         this.utterance = utterance;
         this.context = context;
         this.derivations = derivations;
-        this.underInfo = new UnspecInfo();
+        this.underInfo = new UnderspecifiedInfo();
     }
 
     /**
@@ -137,7 +109,7 @@ public class ErrorRetrieval {
      */
     public void updateExample(List<Derivation> derivations){
         this.derivations = derivations;
-        this.underInfo = new UnspecInfo();
+        this.underInfo = new UnderspecifiedInfo();
     }
 
     /**
@@ -152,7 +124,7 @@ public class ErrorRetrieval {
     /**
      * Getter function for error informations.
      */
-    public UnspecInfo getUnderInfo(){
+    public UnderspecifiedInfo getUnderInfo(){
         return this.underInfo;
     }
 
@@ -161,10 +133,10 @@ public class ErrorRetrieval {
      * Function checking derivation for underspecified terms
      * @return A list of underspecified terms
      */
-    public List<UnspecInfo> checkUnderspecified () {
+    public List<UnderspecifiedInfo> checkUnderspecified () {
         // Initialize underspecified terms
         List<String> foundUnder = new ArrayList<>();
-        List<UnspecInfo> underTerms = new ArrayList<>();
+        List<UnderspecifiedInfo> underTerms = new ArrayList<>();
         for (Derivation deriv : this.derivations) {
             String formula = deriv.getFormula().toString();
             while (formula.contains("Open")){
@@ -177,13 +149,13 @@ public class ErrorRetrieval {
                 if (!foundUnder.contains(entity)){
                     foundUnder.add(entity);
                     if (full_type.contains("Entity")){
-                        underTerms.add(new UnspecInfo(entity, UnspecInfo.TermType.ENTITY));
+                        underTerms.add(new UnderspecifiedInfo(entity, UnderspecifiedInfo.TermType.ENTITY));
                     }
                     else if (full_type.contains("Type")){
-                        underTerms.add(new UnspecInfo(entity, UnspecInfo.TermType.TYPE));
+                        underTerms.add(new UnderspecifiedInfo(entity, UnderspecifiedInfo.TermType.TYPE));
                     }
                     else if (full_type.contains("Rel")){
-                        underTerms.add(new UnspecInfo(entity, UnspecInfo.TermType.RELATION));
+                        underTerms.add(new UnderspecifiedInfo(entity, UnderspecifiedInfo.TermType.RELATION));
                     }
                 }
                 formula = formula.substring(end+2);
@@ -197,8 +169,8 @@ public class ErrorRetrieval {
      * @param termList      list of underspecified terms
      * @return A list of candidates with information about them
      */
-    public List<UnspecInfo> createCandidates(List<UnspecInfo> termList){
-        for (UnspecInfo term:termList) {
+    public List<UnderspecifiedInfo> createCandidates(List<UnderspecifiedInfo> termList){
+        for (UnderspecifiedInfo term:termList) {
             LogInfo.begin_track("Analyzing term: %s", term.term);
             for (KnowledgeRetriever helper : this.helpers)
             {
@@ -214,8 +186,8 @@ public class ErrorRetrieval {
      * @param termList      list of underspecified terms
      * @return A list of candidates with information about them
      */
-    public List<UnspecInfo> createScores(List<UnspecInfo> termList){
-        for (UnspecInfo term:termList) {
+    public List<UnderspecifiedInfo> createScores(List<UnderspecifiedInfo> termList){
+        for (UnderspecifiedInfo term:termList) {
             LogInfo.begin_track("Scoring term: %s", term.term);
             for (ScoringFunction scorer : this.scorers)
             {
@@ -231,7 +203,7 @@ public class ErrorRetrieval {
      * @param underInfo        current information about candidates
      * @return Best candidate
      */
-    public String getBestCandidate(UnspecInfo underInfo){
+    public String getBestCandidate(UnderspecifiedInfo underInfo){
         // Sort all the scores
         List<Double> sorted = new ArrayList<>();
         sorted.addAll(underInfo.candidatesScores);
@@ -242,7 +214,8 @@ public class ErrorRetrieval {
         int index = underInfo.candidatesScores.indexOf(sorted.get(0));
         // Best candidate
         String result = underInfo.candidates.get(index);
-        if (sorted.get(0) < ConfigManager.FOLLOW_THRES || (sorted.get(1)/sorted.get(0)) > 0.8) {
+
+        if (sorted.get(0) < ConfigManager.FOLLOW_THRES || (sorted.size() > 1 && (sorted.get(1)/sorted.get(0)) > 0.8)) {
             List<String> candidates = new ArrayList<>();
             candidates.add(underInfo.candidatesInfo.get(index));
             double current = sorted.get(0);
@@ -394,8 +367,6 @@ public class ErrorRetrieval {
      */
     public List<Derivation> postprocess(){
         // Create and score candidates
-        ErrorInfo result = new ErrorInfo();
-        Set<String> update = new HashSet<>();
         LogInfo.begin_track("Error retrieval:");
         // Remove derivations that are the same
         List<Derivation> remove = new ArrayList();
@@ -414,9 +385,9 @@ public class ErrorRetrieval {
 
         if (this.derivations != null) {
             // Get term
-            List<UnspecInfo> missingTerms = checkUnderspecified();
+            List<UnderspecifiedInfo> missingTerms = checkUnderspecified();
             if (ConfigManager.DEBUG > 0) {
-                for (UnspecInfo i : missingTerms) {
+                for (UnderspecifiedInfo i : missingTerms) {
                     LogInfo.logs("Detected underspecified term: %s %s", i.term, i.type.name());
                 }
             }
@@ -424,7 +395,7 @@ public class ErrorRetrieval {
             // Get candidate list with information
             missingTerms = createCandidates(missingTerms);
             if (ConfigManager.DEBUG > 1) {
-                for (UnspecInfo termInfo : missingTerms) {
+                for (UnderspecifiedInfo termInfo : missingTerms) {
                     for (int i = 0; i < termInfo.candidatesInfo.size(); i++) {
                         LogInfo.logs("Final candidates: %s", termInfo.candidatesInfo.get(i).toString());
                     }
@@ -435,7 +406,7 @@ public class ErrorRetrieval {
             missingTerms = createScores(missingTerms);
             missingTerms = lexiconGen.createLexemes(missingTerms);
             if (ConfigManager.DEBUG > 1) {
-                for (UnspecInfo termInfo : missingTerms) {
+                for (UnderspecifiedInfo termInfo : missingTerms) {
                     for (int i = 0; i < termInfo.candidatesScores.size(); i++) {
                         LogInfo.logs("Final scores: %s %f", termInfo.candidates.get(i), termInfo.candidatesScores.get(i));
                     }
@@ -444,7 +415,7 @@ public class ErrorRetrieval {
 
             // Get replacements
             Map<String,String> replaces = new HashMap<>();
-            for (UnspecInfo termInfo : missingTerms)
+            for (UnderspecifiedInfo termInfo : missingTerms)
             {
                 replaces.put(termInfo.term,getBestCandidate(termInfo));
             }

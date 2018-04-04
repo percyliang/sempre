@@ -13,7 +13,7 @@
 (rule $HAVE ($PHRASE) (FilterPosTagFn span HAVE))
 
 # Words ignored
-(rule $Ignore ($LEMMA_PHRASE) (FilterPosTagFn span BE HAVE MD FW RB RBR RBS UH EX DT PDT TO))
+(rule $Ignore ($LEMMA_PHRASE) (FilterPosTagFn span BE HAVE MD FW RB JJ RBR RBS UH EX DT PDT TO))
 (rule $LEMMAS ($Ignore $LEMMA_PHRASE) (SelectFn 1))
 (rule $LEMMAS ($LEMMA_PHRASE $Ignore) (SelectFn 0))
 
@@ -21,14 +21,13 @@
 (rule $VerbPhrase ($LEMMAS) (FilterPosTagFn span TO IN VB VBD VBN VBG VBP VBZ VBD-AUX JJ))
 (rule $ValuePhrase ($LEMMA_PHRASE) (FilterPosTagFn span NNS NN NNP CD VBG VB))
 (rule $NounPhrase ($PHRASE) (FilterPosTagFn span NNS NN CD))
-(rule $EntityPhrase ($PHRASE) (FilterPosTagFn span NN NNP NNPS JJ))
+(rule $EntityPhrase ($PHRASE) (FilterPosTagFn span NNP NNPS))
 (rule $AdjPhrase ($LEMMAS) (FilterPosTagFn span JJ))
 (rule $AdjToken ($AdjPhrase) (FilterSpanLengthFn 1 2))
 (rule $VerbToken ($VerbPhrase) (FilterSpanLengthFn 1 2))
 (rule $ValueToken ($ValuePhrase) (FilterSpanLengthFn 1 2))
 (rule $NounToken ($NounPhrase) (FilterSpanLengthFn 1 3))
 (rule $EntityToken ($EntityPhrase) (FilterSpanLengthFn 1 4))
-(rule $EntityToken ($NounPhrase $ProNounEnd $TOKEN) (ConcatFn " "))
 (rule $IgnPhrase ($Ignore) (FilterSpanLengthFn 1 3))
 (rule $Limited ($LEMMA_PHRASE) (FilterSpanLengthFn 1 3))
 
@@ -51,7 +50,6 @@
 (rule $RDataProp ($Limited) (SimpleLexiconFn (type "RoboyDataProp")))
 (rule $QObjProp ($Limited) (SimpleLexiconFn (type "RoboyQRelNoun")))
 (rule $QDataProp ($Limited) (SimpleLexiconFn (type "RoboyQDataProp")))
-(rule $TypeProperty ($Limited) (SimpleLexiconFn (type "TypeProperty")))
 
 (rule $PartObjProp ($Limited) (SimpleLexiconFn (type "StateVerb")))
 (rule $PartObjProp ($Limited) (SimpleLexiconFn (type "RelationalAdjective")))
@@ -68,7 +66,8 @@
 
 ## OpenTypes
 (when error
-    (rule $FullObjType ($NounPhrase) (OpenTypeFn type))
+    (rule $FullObjType ($NounToken) (OpenTypeFn type))
+    (rule $FullDataProp ($NounToken) (OpenTypeFn type))
 
     (rule $PartObjProp ($NounToken) (OpenTypeFn relation))
     (rule $PartDataProp ($NounToken) (OpenTypeFn relation))
@@ -77,16 +76,15 @@
     (rule $PartObjProp ($AdjToken) (OpenTypeFn relation))
     (rule $PartDataProp ($AdjToken) (OpenTypeFn relation))
 
-    (rule $NewEntity ($EntityToken) (OpenTypeFn entity))
+    (rule $Entity ($EntityToken) (OpenTypeFn entity))
 )
 #(rule $ROOT ($PHRASE) (OpenTypeFn type))
 #(rule $ROOT ($PHRASE) (OpenTypeFn relation))
-(rule $ROOT ($PHRASE) (OpenTypeFn entity))
-#(rule $ROOT ($PHRASE) (SimpleLexiconFn (type "NamedEntity")))
+#(rule $ROOT ($PHRASE) (OpenTypeFn entity))
 
 ## Forming Subject
 #(rule $Subject ($Person) (IdentityFn))
-(rule $Subject ($NewEntity) (IdentityFn))
+(rule $Subject ($Entity) (IdentityFn))
 (rule $Subject ($Subject or $Subject) (ConcatFn ";"))
 (rule $Subject ($Subject and $Subject) (ConcatFn ","))
 (rule $Subject ($Subject (, optional) $Subject) (ConcatFn ","))
@@ -103,10 +101,8 @@
 (rule $Predicate ($Predicate and $Predicate) (ConcatFn ","))
 (rule $Predicate ($Predicate (, optional) $Predicate) (ConcatFn ","))
 
-(rule $RObjPred ($TypeProperty $FullObjType) (TripleFn "pt"))
 (rule $RObjPred ($RObjProp) (IdentityFn))
 (rule $RObjPred ($BE $RObjPred) (SelectFn 1))
-(rule $RObjPred ($RObjPred $BE) (SelectFn 0))
 (rule $RObjPred ($HAVE $RObjPred) (SelectFn 1))
 (rule $RObjPred ($IgnPhrase $RObjPred) (SelectFn 1))
 (rule $RObjPred ($RObjPred $IgnPhrase) (SelectFn 0))
@@ -114,12 +110,11 @@
 (rule $RObjPred ($RObjPred and $RObjPred) (ConcatFn ","))
 (rule $RObjPred ($RObjPred (, optional) $RObjPred) (ConcatFn ","))
 
-#(rule $RDataPred ($TypeProperty $FullObjType) (TripleFn "pt"))
 (rule $RDataPred ($RDataProp) (IdentityFn))
 (rule $RDataPred ($BE $RDataProp) (SelectFn 1))
 (rule $RDataPred ($HAVE $RDataProp) (SelectFn 1))
-(rule $RDataPred ($IgnPhrase $RDataPred) (SelectFn 1))
-(rule $RDataPred ($RDataPred $IgnPhrase) (SelectFn 0))
+(rule $RDataPred ($IgnPhrase $RDataProp) (SelectFn 1))
+(rule $RDataPred ($RDataProp $IgnPhrase) (SelectFn 0))
 (rule $RDataPred ($RDataPred or $RDataPred) (ConcatFn ";"))
 (rule $RDataPred ($RDataPred and $RDataPred) (ConcatFn ","))
 (rule $RDataPred ($RDataPred (, optional) $RDataPred) (ConcatFn ","))
@@ -157,7 +152,7 @@
 (rule $PredObj ($FullObjProp) (IdentityFn))
 (rule $PredObj ($FullObjType) (IdentityFn))
 (rule $PredObj ($FullDataProp) (IdentityFn))
-#(rule $ROOT ($PredObj) (IdentityFn))
+(rule $ROOT ($PredObj) (IdentityFn))
 
 ## Forming Values
 (rule $Value ($EntityToken) (IdentityFn))
@@ -170,22 +165,25 @@
 
 # Expressions Roboy
 ############################################################
-(rule $Expr ($RobSubject $MEMBER $Object member) (TripleFn "spo"))
-(rule $Expr ($RobSubject $OCCUP $Object) (TripleFn "spo"))
+#(rule $Expr ($RobSubject $MEMBER $Object member) (TripleFn "spo"))
+#(rule $Expr ($RobSubject $OCCUP $Object) (TripleFn "spo"))
+(rule $Expr ($RobSubject $MEMBER $Value member) (TripleFn "spo"))
+(rule $Expr ($RobSubject $OCCUP $Value) (TripleFn "spo"))
 (rule $Expr ($RobSubject $NAME $EntityToken) (TripleFn "spo"))
-#(rule $Expr ($RObjPred $RobSubject $Value) (TripleFn pso))
-(rule $Expr ($RobSubject $RObjPred $Object) (TripleFn spo))
-#(rule $Expr ($RobSubject $RObjPred $Value) (TripleFn spo))
+#(rule $Expr ($RObjPred $RobSubject $Object) (TripleFn pso))
+(rule $Expr ($RObjPred $RobSubject $Value) (TripleFn pso))
+#(rule $Expr ($RobSubject $RObjPred $Object) (TripleFn spo))
+(rule $Expr ($RobSubject $RObjPred $Value) (TripleFn spo))
 (rule $Expr ($RobSubject $RDataPred $Value) (TripleFn spo))
-(rule $Expr ($Object $RobSubject $RObjPred ) (TripleFn osp))
-#(rule $Expr ($Value $RobSubject $RObjPred) (TripleFn osp))
-(rule $Expr ($Value ($BE optional) $RobSubject $RDataPred) (TripleFn osp))
-#(rule $Expr ($RObjPred $RobSubject $Value) (TripleFn pso))
-(rule $Expr ($RObjPred $RobSubject $Object) (TripleFn pso))
+#(rule $Expr ($Object $RobSubject $RObjPred ) (TripleFn osp))
+(rule $Expr ($Value $RobSubject $RObjPred) (TripleFn osp))
+(rule $Expr ($Value $RobSubject $RDataPred) (TripleFn osp))
+(rule $Expr ($RObjPred $RobSubject $Value) (TripleFn pso))
+#(rule $Expr ($RObjPred $RobSubject $Object) (TripleFn pso))
 (rule $Expr ($RDataPred $RobSubject $Value) (TripleFn pso))
-#(rule $ROOT ($Limited $Expr) (SelectFn 1))
-#(rule $ROOT ($Expr) (IdentityFn))
-#(rule $ROOT ($Expr ($Conj optional) $Expr) (ListFn))
+(rule $ROOT ($Limited $Expr) (SelectFn 1))
+(rule $ROOT ($Expr) (IdentityFn))
+(rule $ROOT ($Expr ($Conj optional) $Expr) (ListFn))
 (rule $ROOT ($PHRASE) (SimpleLexiconFn (type "RoboyPhrases")))
 
 # Questions

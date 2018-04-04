@@ -42,12 +42,12 @@ public class LexiconGenerator {
      * Function taking care of creating lexemes for lexicon
      * @param underspec  complete list of new terms
      */
-    public List<UnspecInfo> createLexemes(List<UnspecInfo> underspec)
+    public List<UnderspecifiedInfo> createLexemes(List<UnderspecifiedInfo> underspec)
     {
-        List<UnspecInfo> result = new ArrayList<>();
+        List<UnderspecifiedInfo> result = new ArrayList<>();
         Set<String> lexemes = new HashSet<>();
         // Check all underspecified terms
-        for (UnspecInfo single:underspec)
+        for (UnderspecifiedInfo single:underspec)
         {
             for (int i = 0; i < single.candidates.size(); i++)
             {
@@ -62,7 +62,7 @@ public class LexiconGenerator {
                     if (types.size() > 0) {
                         Type type = new TypeToken<Map<String, String>>() {}.getType();
                         Map<String, String> c = this.gson.fromJson(single.candidatesInfo.get(i), type);
-                        if (single.type == UnspecInfo.TermType.ENTITY)
+                        if (single.type == UnderspecifiedInfo.TermType.ENTITY)
                             single.candidatesScores.set(i, single.candidatesScores.get(i) + 0.3);
                         lexeme.put("lexeme", c.get("Label"));
                         lexeme.put("formula", single.candidates.get(i));
@@ -86,7 +86,7 @@ public class LexiconGenerator {
                             Type type = new TypeToken<Map<String, String>>() {
                             }.getType();
                             Map<String, String> c = this.gson.fromJson(single.candidatesInfo.get(i), type);
-                            if (single.type == UnspecInfo.TermType.TYPE)
+                            if (single.type == UnderspecifiedInfo.TermType.TYPE)
                                 single.candidatesScores.set(i, single.candidatesScores.get(i) + 0.3);
                             lexeme.put("lexeme", c.get("Label"));
                             lexeme.put("formula", "(rdf:type " + single.candidates.get(i) + ")");
@@ -103,7 +103,7 @@ public class LexiconGenerator {
                             Type type = new TypeToken<Map<String, String>>() {
                             }.getType();
                             Map<String, String> c = this.gson.fromJson(single.candidatesInfo.get(i), type);
-                            if (single.type == UnspecInfo.TermType.RELATION)
+                            if (single.type == UnderspecifiedInfo.TermType.RELATION)
                                 single.candidatesScores.set(i, single.candidatesScores.get(i) + 0.3);
                             lexeme.put("lexeme", c.get("Label"));
                             lexeme.put("formula", single.candidates.get(i));
@@ -123,7 +123,7 @@ public class LexiconGenerator {
                             Type type = new TypeToken<Map<String, String>>() {
                             }.getType();
                             Map<String, String> c = this.gson.fromJson(single.candidatesInfo.get(i), type);
-                            if (single.type == UnspecInfo.TermType.RELATION)
+                            if (single.type == UnderspecifiedInfo.TermType.RELATION)
                                 single.candidatesScores.set(i, single.candidatesScores.get(i) + 0.3);
                             lexeme.put("lexeme", c.get("Label"));
                             lexeme.put("formula", single.candidates.get(i));
@@ -152,7 +152,7 @@ public class LexiconGenerator {
                     if (types.size() > 0) {
                         Type type = new TypeToken<Map<String, String>>() {}.getType();
                         Map<String, String> c = this.gson.fromJson(single.candidatesInfo.get(i), type);
-                        if (single.type == UnspecInfo.TermType.RELATION)
+                        if (single.type == UnderspecifiedInfo.TermType.RELATION)
                             single.candidatesScores.set(i, single.candidatesScores.get(i) + 0.1);
                         lexeme.put("lexeme", c.get("Label"));
                         lexeme.put("formula", single.candidates.get(i));

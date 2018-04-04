@@ -2,12 +2,10 @@ package edu.stanford.nlp.sempre.roboy.score;
 
 import com.google.gson.Gson;
 import edu.stanford.nlp.sempre.ContextValue;
-import edu.stanford.nlp.sempre.roboy.UnspecInfo;
+import edu.stanford.nlp.sempre.roboy.UnderspecifiedInfo;
 import edu.stanford.nlp.sempre.roboy.config.ConfigManager;
-import edu.stanford.nlp.sempre.roboy.ErrorInfo;
 import edu.stanford.nlp.sempre.roboy.lexicons.word2vec.Word2vec;
 import fig.basic.LogInfo;
-import sun.rmi.runtime.Log;
 
 import java.util.*;
 
@@ -41,11 +39,11 @@ public class ContextScore extends ScoringFunction {
 
     /**
      * Scoring function.
-     * Takes UnspecInfo as well as ContextValue objects and calculates score of each
+     * Takes UnderspecifiedInfo as well as ContextValue objects and calculates score of each
      * candidate for unknown terms.
      */
-    public UnspecInfo score(UnspecInfo info, ContextValue context){
-        UnspecInfo result = new UnspecInfo(info.term, info.type);
+    public UnderspecifiedInfo score(UnderspecifiedInfo info, ContextValue context){
+        UnderspecifiedInfo result = new UnderspecifiedInfo(info.term, info.type);
         result.candidates = info.candidates;
         result.candidatesInfo = info.candidatesInfo;
         // Check for all candidates for checked unknown term
@@ -78,7 +76,7 @@ public class ContextScore extends ScoringFunction {
             if (Double.isNaN(score))
                 score = 0.0;
             if (ConfigManager.DEBUG > 4)
-                LogInfo.logs("Context: %s -> %f", candidate.get("URI"), score*this.weight);
+                LogInfo.logs("Context: %s -> %f", candidate.get("URI"), score);
             result.candidatesScores.add(score*this.weight);
         }
         return result;

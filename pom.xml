@@ -135,7 +135,7 @@
                                 <argument>-SparqlExecutor.endpointUrl</argument>
                                 <argument>http://dbpedia.org/sparql</argument>
                                 <argument>-Grammar.inPaths</argument>
-                                <argument>resources/roboy-demo.grammar</argument>
+                                <argument>resources/roboy-final.grammar</argument>
                                 <argument>-SimpleLexicon.inPaths</argument>
                                 <argument>resources/lexicons/roboy-dbpedia.lexicon</argument>
                                 <argument>-languageAnalyzer</argument>
@@ -250,7 +250,7 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>demo-plain</id>
+                        <id>demo</id>
                         <goals>
                             <goal>java</goal>
                         </goals>

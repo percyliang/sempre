@@ -133,3 +133,4 @@
 
 # DBpedia
 {"lexeme": "birth date", "formula": "!dbpedia:birthDate", "type": "RelationalNoun"}
+

@@ -1,0 +1,1942 @@
+Utterance: Meredith effect
+Response: {"sentiment":"Neutral","postags":["NNP","NN"],"answer":"(list)","lemma_tokens":["Meredith","effect"],"tokens":["meredith","effect"],"parse":"resource:Meredith_Effect","relations":{},"type":"question"}
+
+
+Utterance: Abdominal obesity
+Response: {"sentiment":"Neutral","postags":["JJ","NN"],"answer":"(list (name resource:Abdominal_obesity))","lemma_tokens":["abdominal","obesity"],"tokens":["abdominal","obesity"],"parse":"resource:Abdominal_obesity","relations":{},"type":"question"}
+
+
+Utterance: Achondroplasia
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Achondroplasia))","lemma_tokens":["achondroplasia"],"tokens":["achondroplasia"],"parse":"resource:Achondroplasia","relations":{},"type":"question"}
+
+
+Utterance: Acrochordon
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Acrochordon))","lemma_tokens":["acrochordon"],"tokens":["acrochordon"],"parse":"resource:Acrochordon","relations":{},"type":"question"}
+
+
+Utterance: Adrenoleukodystrophy
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Adrenoleukodystrophy))","lemma_tokens":["adrenoleukodystrophy"],"tokens":["adrenoleukodystrophy"],"parse":"resource:Adrenoleukodystrophy","relations":{},"type":"question"}
+
+
+Utterance: Agoraphobia
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Agoraphobia))","lemma_tokens":["agoraphobia"],"tokens":["agoraphobia"],"parse":"resource:Agoraphobia","relations":{},"type":"question"}
+
+
+Utterance: Algal bloom
+Response: {"sentiment":"Neutral","postags":["JJ","NNP"],"answer":"(list (name resource:Algal_bloom))","lemma_tokens":["algal","bloom"],"tokens":["algal","bloom"],"parse":"resource:Algal_bloom","relations":{},"type":"question"}
+
+
+Utterance: Allergy
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Allergy))","lemma_tokens":["allergy"],"tokens":["allergy"],"parse":"resource:Allergy","relations":{},"type":"question"}
+
+
+Utterance: Androgen insensitivity syndrome
+Response: {"sentiment":"Neutral","postags":["NN","NN","NN"],"answer":"(list (name resource:Androgen_insensitivity_syndrome))","lemma_tokens":["androgen","insensitivity","syndrome"],"tokens":["androgen","insensitivity","syndrome"],"parse":"resource:Androgen_insensitivity_syndrome","relations":{},"type":"question"}
+
+
+Utterance: Anorexia (symptom)
+Response: {"sentiment":"Neutral","postags":["NN","-LRB-","NN","-RRB-"],"answer":"(string \"\")","lemma_tokens":["anorexia","-lrb-","symptom","-rrb-"],"tokens":["anorexia","-lrb-","symptom","-rrb-"],"parse":"\"OpenEntity\u0027anorexia -lrb- symptom -rrb-\u0027\u0027\"","relations":{},"type":"question"}
+
+
+Utterance: Anthrax
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Anthrax))","lemma_tokens":["anthrax"],"tokens":["anthrax"],"parse":"resource:Anthrax","relations":{},"type":"question"}
+
+
+Utterance: Anxiety disorder
+Response: {"sentiment":"Neutral","postags":["NN","NN"],"answer":"(list (name resource:Anxiety_disorder))","lemma_tokens":["anxiety","disorder"],"tokens":["anxiety","disorder"],"parse":"resource:Anxiety_disorder","relations":{},"type":"question"}
+
+
+Utterance: Aperture-to-medium coupling loss
+Response: {"sentiment":"Neutral","postags":["NN","TO","NN","NN","NN"],"answer":"(list (name resource:Aperture-to-medium_coupling_loss))","lemma_tokens":["aperture","to","medium","coupling","loss"],"tokens":["aperture","to","medium","coupling","loss"],"parse":"resource:Aperture-to-medium_coupling_loss","relations":{},"type":"question"}
+
+
+Utterance: Apraxia
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:Apraxia))","lemma_tokens":["Apraxia"],"tokens":["apraxia"],"parse":"resource:Apraxia","relations":{},"type":"question"}
+
+
+Utterance: Asthma
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Asthma))","lemma_tokens":["asthma"],"tokens":["asthma"],"parse":"resource:Asthma","relations":{},"type":"question"}
+
+
+Utterance: Atmospheric pressure
+Response: {"sentiment":"Neutral","postags":["JJ","NN"],"answer":"(list (name resource:Atmospheric_pressure))","lemma_tokens":["atmospheric","pressure"],"tokens":["atmospheric","pressure"],"parse":"resource:Atmospheric_pressure","relations":{},"type":"question"}
+
+
+Utterance: Attenuation
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Attenuation))","lemma_tokens":["attenuation"],"tokens":["attenuation"],"parse":"resource:Attenuation","relations":{},"type":"question"}
+
+
+Utterance: Azotemia
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Azotemia))","lemma_tokens":["azotemia"],"tokens":["azotemia"],"parse":"resource:Azotemia","relations":{},"type":"question"}
+
+
+Utterance: Bell's palsy
+Response: {"sentiment":"Neutral","postags":["NNP","POS","NN"],"answer":"(string \"\")","lemma_tokens":["Bell","\u0027s","palsy"],"tokens":["bell","\u0027s","palsy"],"parse":"\"OpenEntity\u0027bell  s palsy\u0027\u0027\"","relations":{"(Bell,have,palsy)":1.0},"type":"question"}
+
+
+Utterance: Bi-curious
+Response: {"sentiment":"Neutral","postags":["NNP","JJ"],"answer":"(list (name resource:Bi-curious))","lemma_tokens":["Bi","curious"],"tokens":["bi","curious"],"parse":"resource:Bi-curious","relations":{},"type":"question"}
+
+
+Utterance: Biostasis
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Biostasis))","lemma_tokens":["biostasis"],"tokens":["biostasis"],"parse":"resource:Biostasis","relations":{},"type":"question"}
+
+
+Utterance: Bit slip
+Response: {"sentiment":"Neutral","postags":["NN","NN"],"answer":"(list (name resource:Bit_slip))","lemma_tokens":["bit","slip"],"tokens":["bit","slip"],"parse":"resource:Bit_slip","relations":{},"type":"question"}
+
+
+Utterance: Blood pressure
+Response: {"sentiment":"Neutral","postags":["NN","NN"],"answer":"(list (name resource:Blood_pressure))","lemma_tokens":["blood","pressure"],"tokens":["blood","pressure"],"parse":"resource:Blood_pressure","relations":{},"type":"question"}
+
+
+Utterance: Botulism
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:Botulism))","lemma_tokens":["Botulism"],"tokens":["botulism"],"parse":"resource:Botulism","relations":{},"type":"question"}
+
+
+Utterance: Brain tumor
+Response: {"sentiment":"Neutral","postags":["NN","NN"],"answer":"(list (name resource:Brain_tumor))","lemma_tokens":["brain","tumor"],"tokens":["brain","tumor"],"parse":"resource:Brain_tumor","relations":{},"type":"question"}
+
+
+Utterance: Canavan disease
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Canavan_disease))","lemma_tokens":["Canavan","disease"],"tokens":["canavan","disease"],"parse":"resource:Canavan_disease","relations":{},"type":"question"}
+
+
+Utterance: Capture effect
+Response: {"sentiment":"Neutral","postags":["NN","NN"],"answer":"(list (name resource:Capture_effect))","lemma_tokens":["capture","effect"],"tokens":["capture","effect"],"parse":"resource:Capture_effect","relations":{},"type":"question"}
+
+
+Utterance: Cardiomyopathy
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Cardiomyopathy))","lemma_tokens":["cardiomyopathy"],"tokens":["cardiomyopathy"],"parse":"resource:Cardiomyopathy","relations":{},"type":"question"}
+
+
+Utterance: Carpal tunnel syndrome
+Response: {"sentiment":"Neutral","postags":["JJ","NN","NN"],"answer":"(list (name resource:Carpal_tunnel_syndrome))","lemma_tokens":["carpal","tunnel","syndrome"],"tokens":["carpal","tunnel","syndrome"],"parse":"resource:Carpal_tunnel_syndrome","relations":{},"type":"question"}
+
+
+Utterance: Cervical cancer
+Response: {"sentiment":"Neutral","postags":["JJ","NN"],"answer":"(list (name resource:Cervical_cancer))","lemma_tokens":["cervical","cancer"],"tokens":["cervical","cancer"],"parse":"resource:Cervical_cancer","relations":{},"type":"question"}
+
+
+Utterance: Communication disorder
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Communication_disorder))","lemma_tokens":["Communication","disorder"],"tokens":["communication","disorder"],"parse":"resource:Communication_disorder","relations":{},"type":"question"}
+
+
+Utterance: Communications survivability
+Response: {"sentiment":"Neutral","postags":["NNS","NN"],"answer":"(list (name resource:Communications_survivability))","lemma_tokens":["communication","survivability"],"tokens":["communications","survivability"],"parse":"resource:Communications_survivability","relations":{},"type":"question"}
+
+
+Utterance: Complex regional pain syndrome
+Response: {"sentiment":"Neutral","postags":["JJ","JJ","NN","NN"],"answer":"(list (name resource:Complex_regional_pain_syndrome))","lemma_tokens":["complex","regional","pain","syndrome"],"tokens":["complex","regional","pain","syndrome"],"parse":"resource:Complex_regional_pain_syndrome","relations":{},"type":"question"}
+
+
+Utterance: Conformal map
+Response: {"sentiment":"Neutral","postags":["JJ","NN"],"answer":"(list (name resource:Conformal_map))","lemma_tokens":["conformal","map"],"tokens":["conformal","map"],"parse":"resource:Conformal_map","relations":{},"type":"question"}
+
+
+Utterance: Conjunctivitis
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Conjunctivitis))","lemma_tokens":["conjunctivitis"],"tokens":["conjunctivitis"],"parse":"resource:Conjunctivitis","relations":{},"type":"question"}
+
+
+Utterance: Convulsion
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Convulsion))","lemma_tokens":["convulsion"],"tokens":["convulsion"],"parse":"resource:Convulsion","relations":{},"type":"question"}
+
+
+Utterance: Counterfactual definiteness
+Response: {"sentiment":"Neutral","postags":["JJ","NN"],"answer":"(list (name resource:Counterfactual_definiteness))","lemma_tokens":["counterfactual","definiteness"],"tokens":["counterfactual","definiteness"],"parse":"resource:Counterfactual_definiteness","relations":{},"type":"question"}
+
+
+Utterance: Cowpox
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Cowpox))","lemma_tokens":["cowpox"],"tokens":["cowpox"],"parse":"resource:Cowpox","relations":{},"type":"question"}
+
+
+Utterance: Crop circle
+Response: {"sentiment":"Neutral","postags":["NN","NN"],"answer":"(list (name resource:Crop_circle))","lemma_tokens":["crop","circle"],"tokens":["crop","circle"],"parse":"resource:Crop_circle","relations":{},"type":"question"}
+
+
+Utterance: Cultural bias
+Response: {"sentiment":"Neutral","postags":["JJ","NN"],"answer":"(list (name resource:Cultural_bias))","lemma_tokens":["cultural","bias"],"tokens":["cultural","bias"],"parse":"resource:Cultural_bias","relations":{},"type":"question"}
+
+
+Utterance: Cystic fibrosis
+Response: {"sentiment":"Neutral","postags":["JJ","NN"],"answer":"(list (name resource:Cystic_fibrosis))","lemma_tokens":["cystic","fibrosis"],"tokens":["cystic","fibrosis"],"parse":"resource:Cystic_fibrosis","relations":{},"type":"question"}
+
+
+Utterance: Deadweight loss
+Response: {"sentiment":"Neutral","postags":["JJ","NN"],"answer":"(list (name resource:Deadweight_loss))","lemma_tokens":["deadweight","loss"],"tokens":["deadweight","loss"],"parse":"resource:Deadweight_loss","relations":{},"type":"question"}
+
+
+Utterance: Dementia
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Dementia))","lemma_tokens":["dementia"],"tokens":["dementia"],"parse":"resource:Dementia","relations":{},"type":"question"}
+
+
+Utterance: Demographics of Venezuela
+Response: {"sentiment":"Neutral","postags":["NNS","IN","NNP"],"answer":"(list (name resource:Demographics_of_Venezuela))","lemma_tokens":["demographic","of","Venezuela"],"tokens":["demographics","of","venezuela"],"parse":"resource:Demographics_of_Venezuela","relations":{},"type":"question"}
+
+
+Utterance: Dengue fever
+Response: {"sentiment":"Neutral","postags":["NN","NN"],"answer":"(list (name resource:Dengue_fever))","lemma_tokens":["dengue","fever"],"tokens":["dengue","fever"],"parse":"resource:Dengue_fever","relations":{},"type":"question"}
+
+
+Utterance: Dermatitis
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Dermatitis))","lemma_tokens":["dermatitis"],"tokens":["dermatitis"],"parse":"resource:Dermatitis","relations":{},"type":"question"}
+
+
+Utterance: Diabetes insipidus
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Diabetes_insipidus))","lemma_tokens":["Diabetes","insipidus"],"tokens":["diabetes","insipidus"],"parse":"resource:Diabetes_insipidus","relations":{},"type":"question"}
+
+
+Utterance: Diabetic ketoacidosis
+Response: {"sentiment":"Neutral","postags":["JJ","NN"],"answer":"(list (name resource:Diabetic_ketoacidosis))","lemma_tokens":["diabetic","ketoacidosis"],"tokens":["diabetic","ketoacidosis"],"parse":"resource:Diabetic_ketoacidosis","relations":{},"type":"question"}
+
+
+Utterance: Diabetic retinopathy
+Response: {"sentiment":"Neutral","postags":["JJ","NN"],"answer":"(list (name resource:Diabetic_retinopathy))","lemma_tokens":["diabetic","retinopathy"],"tokens":["diabetic","retinopathy"],"parse":"resource:Diabetic_retinopathy","relations":{},"type":"question"}
+
+
+Utterance: Diarrhea
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Diarrhea))","lemma_tokens":["diarrhea"],"tokens":["diarrhea"],"parse":"resource:Diarrhea","relations":{},"type":"question"}
+
+
+Utterance: Worldwide LHC Computing Grid
+Response: {"sentiment":"Neutral","postags":["NNP","NNP","NNP","NNP"],"answer":"(string \"\")","lemma_tokens":["Worldwide","LHC","Computing","Grid"],"tokens":["worldwide","lhc","computing","grid"],"parse":"\"OpenEntity\u0027worldwide lhc computing grid\u0027\u0027\"","relations":{},"type":"question"}
+
+
+Utterance: Trittico di Autunno
+Response: {"sentiment":"Neutral","postags":["NNP","NNP","NNP"],"answer":"(list (name resource:Trittico_di_Autunno))","lemma_tokens":["Trittico","di","Autunno"],"tokens":["trittico","di","autunno"],"parse":"resource:Trittico_di_Autunno","relations":{},"type":"question"}
+
+
+Utterance: Acetic acid bacteria
+Response: {"sentiment":"Positive","postags":["JJ","NN","NNS"],"answer":"(list (name resource:Acetic_acid_bacteria))","lemma_tokens":["acetic","acid","bacterium"],"tokens":["acetic","acid","bacteria"],"parse":"resource:Acetic_acid_bacteria","relations":{},"type":"question"}
+
+
+Utterance: Alice in Chains
+Response: {"sentiment":"Neutral","postags":["NNP","IN","NNS"],"answer":"(list (name resource:Alice_in_Chains))","lemma_tokens":["Alice","in","chain"],"tokens":["alice","in","chains"],"parse":"resource:Alice_in_Chains","relations":{"(Alice,be in,chain)":1.0},"type":"question"}
+
+
+Utterance: Alternating group
+Response: {"sentiment":"Neutral","postags":["VBG","NN"],"answer":"(list (name resource:Alternating_group))","lemma_tokens":["alternate","group"],"tokens":["alternating","group"],"parse":"resource:Alternating_group","relations":{},"type":"question"}
+
+
+Utterance: Amung people
+Response: {"sentiment":"Neutral","postags":["JJ","NNS"],"answer":"(list (name resource:Amung_people))","lemma_tokens":["amung","people"],"tokens":["amung","people"],"parse":"resource:Amung_people","relations":{},"type":"question"}
+
+
+Utterance: Anthrax (American band)
+Response: {"sentiment":"Neutral","postags":["NN","-LRB-","JJ","NN","-RRB-"],"answer":"(string \"\")","lemma_tokens":["anthrax","-lrb-","american","band","-rrb-"],"tokens":["anthrax","-lrb-","american","band","-rrb-"],"parse":"\"OpenEntity\u0027anthrax -lrb- american band -rrb-\u0027\u0027\"","relations":{},"type":"question"}
+
+
+Utterance: Asia (band)
+Response: {"sentiment":"Neutral","postags":["NNP","-LRB-","NN","-RRB-"],"answer":"(string \"\")","lemma_tokens":["Asia","-lrb-","band","-rrb-"],"tokens":["asia","-lrb-","band","-rrb-"],"parse":"\"OpenEntity\u0027asia -lrb- band -rrb-\u0027\u0027\"","relations":{},"type":"question"}
+
+
+Utterance: Associates (band)
+Response: {"sentiment":"Neutral","postags":["NNS","-LRB-","NN","-RRB-"],"answer":"(string \"\")","lemma_tokens":["associate","-lrb-","band","-rrb-"],"tokens":["associates","-lrb-","band","-rrb-"],"parse":"\"OpenEntity\u0027associates -lrb- band -rrb-\u0027\u0027\"","relations":{},"type":"question"}
+
+
+Utterance: Australia Group
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Australia_Group))","lemma_tokens":["Australia","Group"],"tokens":["australia","group"],"parse":"resource:Australia_Group","relations":{},"type":"question"}
+
+
+Utterance: Authentication
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Authentication))","lemma_tokens":["authentication"],"tokens":["authentication"],"parse":"resource:Authentication","relations":{},"type":"question"}
+
+
+Utterance: Basalt
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Basalt))","lemma_tokens":["basalt"],"tokens":["basalt"],"parse":"resource:Basalt","relations":{},"type":"question"}
+
+
+Utterance: Bauhaus (band)
+Response: {"sentiment":"Neutral","postags":["NNP","-LRB-","NN","-RRB-"],"answer":"(string \"\")","lemma_tokens":["Bauhaus","-lrb-","band","-rrb-"],"tokens":["bauhaus","-lrb-","band","-rrb-"],"parse":"\"OpenEntity\u0027bauhaus -lrb- band -rrb-\u0027\u0027\"","relations":{},"type":"question"}
+
+
+Utterance: Bay City Rollers
+Response: {"sentiment":"Neutral","postags":["NNP","NNP","NNS"],"answer":"(list (name resource:Bay_City_Rollers))","lemma_tokens":["Bay","City","roller"],"tokens":["bay","city","rollers"],"parse":"resource:Bay_City_Rollers","relations":{},"type":"question"}
+
+
+Utterance: Berbers
+Response: {"sentiment":"Neutral","postags":["NNPS"],"answer":"(list (name resource:Berbers))","lemma_tokens":["Berbers"],"tokens":["berbers"],"parse":"resource:Berbers","relations":{},"type":"question"}
+
+
+Utterance: Bill Haley & His Comets
+Response: {"sentiment":"Neutral","postags":["NNP","NNP","CC","PRP$","NNS"],"answer":"(no answer)","lemma_tokens":["Bill","Haley","\u0026","he","comet"],"tokens":["bill","haley","\u0026","his","comets"],"parse":"(no answer)","relations":{}}
+
+
+Utterance: Bland-Allison Act
+Response: {"sentiment":"Neutral","postags":["NNP","NNP","NNP"],"answer":"(list (name resource:Bland–Allison_Act))","lemma_tokens":["Bland","Allison","Act"],"tokens":["bland","allison","act"],"parse":"resource:Bland–Allison_Act","relations":{},"type":"question"}
+
+
+Utterance: Blur (band)
+Response: {"sentiment":"Neutral","postags":["VB","-LRB-","NN","-RRB-"],"answer":"(string \"\")","lemma_tokens":["blur","-lrb-","band","-rrb-"],"tokens":["blur","-lrb-","band","-rrb-"],"parse":"\"OpenEntity\u0027blur -lrb- band -rrb-\u0027\u0027\"","relations":{},"type":"question"}
+
+
+Utterance: Brave Combo
+Response: {"sentiment":"Positive","postags":["NNP","NNP"],"answer":"(list (name resource:Brave_Combo))","lemma_tokens":["Brave","Combo"],"tokens":["brave","combo"],"parse":"resource:Brave_Combo","relations":{},"type":"question"}
+
+
+Utterance: Breccia
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(no answer)","lemma_tokens":["Breccia"],"tokens":["breccia"],"parse":"(no answer)","relations":{}}
+
+
+Utterance: British Royal Family
+Response: {"sentiment":"Neutral","postags":["NNP","NNP","NN"],"answer":"(list (name resource:British_Royal_Family))","lemma_tokens":["British","Royal","family"],"tokens":["british","royal","family"],"parse":"resource:British_Royal_Family","relations":{},"type":"question"}
+
+
+Utterance: Buryats
+Response: {"sentiment":"Neutral","postags":["NNS"],"answer":"(list (name resource:Buryats))","lemma_tokens":["buryat"],"tokens":["buryats"],"parse":"resource:Buryats","relations":{},"type":"question"}
+
+
+Utterance: Burzum
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Burzum))","lemma_tokens":["burzum"],"tokens":["burzum"],"parse":"resource:Burzum","relations":{},"type":"question"}
+
+
+Utterance: Buzzcocks
+Response: {"sentiment":"Neutral","postags":["NNPS"],"answer":"(list (name resource:Buzzcocks))","lemma_tokens":["Buzzcocks"],"tokens":["buzzcocks"],"parse":"resource:Buzzcocks","relations":{},"type":"question"}
+
+
+Utterance: Cajuns
+Response: {"sentiment":"Neutral","postags":["NNPS"],"answer":"(list (name resource:Cajuns))","lemma_tokens":["Cajuns"],"tokens":["cajuns"],"parse":"resource:Cajuns","relations":{},"type":"question"}
+
+
+Utterance: Catatonia (band)
+Response: {"sentiment":"Neutral","postags":["NN","-LRB-","NN","-RRB-"],"answer":"(string \"\")","lemma_tokens":["catatonia","-lrb-","band","-rrb-"],"tokens":["catatonia","-lrb-","band","-rrb-"],"parse":"\"OpenEntity\u0027catatonia -lrb- band -rrb-\u0027\u0027\"","relations":{},"type":"question"}
+
+
+Utterance: Catfish
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Catfish))","lemma_tokens":["catfish"],"tokens":["catfish"],"parse":"resource:Catfish","relations":{},"type":"question"}
+
+
+Utterance: Cerebral palsy
+Response: {"sentiment":"Neutral","postags":["JJ","NN"],"answer":"(list (name resource:Cerebral_palsy))","lemma_tokens":["cerebral","palsy"],"tokens":["cerebral","palsy"],"parse":"resource:Cerebral_palsy","relations":{},"type":"question"}
+
+
+Utterance: Chalk
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Chalk))","lemma_tokens":["chalk"],"tokens":["chalk"],"parse":"resource:Chalk","relations":{},"type":"question"}
+
+
+Utterance: Chicago Boys
+Response: {"sentiment":"Neutral","postags":["NNP","NNPS"],"answer":"(list (name resource:Chicago_Boys))","lemma_tokens":["Chicago","Boys"],"tokens":["chicago","boys"],"parse":"resource:Chicago_Boys","relations":{},"type":"question"}
+
+
+Utterance: Chiricahua
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:Chiricahua))","lemma_tokens":["Chiricahua"],"tokens":["chiricahua"],"parse":"resource:Chiricahua","relations":{},"type":"question"}
+
+
+Utterance: Choir
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Choir))","lemma_tokens":["choir"],"tokens":["choir"],"parse":"resource:Choir","relations":{},"type":"question"}
+
+
+Utterance: Clapham Sect
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Clapham_Sect))","lemma_tokens":["Clapham","Sect"],"tokens":["clapham","sect"],"parse":"resource:Clapham_Sect","relations":{},"type":"question"}
+
+
+Utterance: Clay
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Clay))","lemma_tokens":["clay"],"tokens":["clay"],"parse":"resource:Clay","relations":{},"type":"question"}
+
+
+Utterance: Convoy
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Convoy))","lemma_tokens":["convoy"],"tokens":["convoy"],"parse":"resource:Convoy","relations":{},"type":"question"}
+
+
+Utterance: Cosmic noise
+Response: {"sentiment":"Neutral","postags":["JJ","NN"],"answer":"(list (name resource:Cosmic_noise))","lemma_tokens":["cosmic","noise"],"tokens":["cosmic","noise"],"parse":"resource:Cosmic_noise","relations":{},"type":"question"}
+
+
+Utterance: Cossacks
+Response: {"sentiment":"Neutral","postags":["NNPS"],"answer":"(list (name resource:Cossacks))","lemma_tokens":["Cossacks"],"tokens":["cossacks"],"parse":"resource:Cossacks","relations":{},"type":"question"}
+
+
+Utterance: Cracker (band)
+Response: {"sentiment":"Neutral","postags":["NN","-LRB-","NN","-RRB-"],"answer":"(string \"\")","lemma_tokens":["cracker","-lrb-","band","-rrb-"],"tokens":["cracker","-lrb-","band","-rrb-"],"parse":"\"OpenEntity\u0027cracker -lrb- band -rrb-\u0027\u0027\"","relations":{},"type":"question"}
+
+
+Utterance: Cream (band)
+Response: {"sentiment":"Neutral","postags":["NN","-LRB-","NN","-RRB-"],"answer":"(string \"\")","lemma_tokens":["cream","-lrb-","band","-rrb-"],"tokens":["cream","-lrb-","band","-rrb-"],"parse":"\"OpenEntity\u0027cream -lrb- band -rrb-\u0027\u0027\"","relations":{},"type":"question"}
+
+
+Utterance: Cyclic group
+Response: {"sentiment":"Neutral","postags":["JJ","NN"],"answer":"(list (name resource:Cyclic_group))","lemma_tokens":["cyclic","group"],"tokens":["cyclic","group"],"parse":"resource:Cyclic_group","relations":{},"type":"question"}
+
+
+Utterance: Darkthrone
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:Darkthrone))","lemma_tokens":["Darkthrone"],"tokens":["darkthrone"],"parse":"resource:Darkthrone","relations":{},"type":"question"}
+
+
+Utterance: Dauphiné Alps
+Response: {"sentiment":"Neutral","postags":["NNP","NNPS"],"answer":"(list)","lemma_tokens":["Dauphiné","Alps"],"tokens":["dauphiné","alps"],"parse":"resource:Dauphin�_Alps","relations":{},"type":"question"}
+
+
+Utterance: Dave Mattacks
+Response: {"sentiment":"Positive","postags":["NNP","NNP"],"answer":"(list (name resource:Dave_Mattacks))","lemma_tokens":["Dave","Mattacks"],"tokens":["dave","mattacks"],"parse":"resource:Dave_Mattacks","relations":{},"type":"question"}
+
+
+Utterance: Deep Purple
+Response: {"sentiment":"Neutral","postags":["JJ","JJ"],"answer":"(list (name resource:Deep_Purple))","lemma_tokens":["deep","purple"],"tokens":["deep","purple"],"parse":"resource:Deep_Purple","relations":{},"type":"question"}
+
+
+Utterance: Diatom
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Diatom))","lemma_tokens":["diatom"],"tokens":["diatom"],"parse":"resource:Diatom","relations":{},"type":"question"}
+
+
+Utterance: Digital transmission group
+Response: {"sentiment":"Neutral","postags":["NNP","NNP","NNP"],"answer":"(list (name resource:Digital_transmission_group))","lemma_tokens":["Digital","transmission","group"],"tokens":["digital","transmission","group"],"parse":"resource:Digital_transmission_group","relations":{},"type":"question"}
+
+
+Utterance: Disarmament
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Disarmament))","lemma_tokens":["disarmament"],"tokens":["disarmament"],"parse":"resource:Disarmament","relations":{},"type":"question"}
+
+
+Utterance: Discovery (observation)
+Response: {"sentiment":"Positive","postags":["NN","-LRB-","NN","-RRB-"],"answer":"(string \"\")","lemma_tokens":["discovery","-lrb-","observation","-rrb-"],"tokens":["discovery","-lrb-","observation","-rrb-"],"parse":"\"OpenEntity\u0027discovery -lrb- observation -rrb-\u0027\u0027\"","relations":{},"type":"question"}
+
+
+Utterance: Doe Maar
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Doe_Maar))","lemma_tokens":["Doe","Maar"],"tokens":["doe","maar"],"parse":"resource:Doe_Maar","relations":{},"type":"question"}
+
+
+Utterance: Dr. Feelgood (band)
+Response: {"sentiment":"Neutral","postags":["NNP","NNP","-LRB-","NN","-RRB-"],"answer":"(string \"\")","lemma_tokens":["Dr.","Feelgood","-lrb-","band","-rrb-"],"tokens":["dr.","feelgood","-lrb-","band","-rrb-"],"parse":"\"OpenEntity\u0027dr. feelgood -lrb- band -rrb-\u0027\u0027\"","relations":{},"type":"question"}
+
+
+Utterance: Acanthocephala
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Acanthocephala))","lemma_tokens":["acanthocephala"],"tokens":["acanthocephala"],"parse":"resource:Acanthocephala","relations":{},"type":"question"}
+
+
+Utterance: Acetic acid bacteria
+Response: {"sentiment":"Positive","postags":["JJ","NN","NNS"],"answer":"(no answer)","lemma_tokens":["acetic","acid","bacterium"],"tokens":["acetic","acid","bacteria"],"parse":"(no answer)","relations":{}}
+
+
+Utterance: African clawed frog
+Response: {"sentiment":"Neutral","postags":["NNP","VBD","NN"],"answer":"(list (name resource:African_clawed_frog))","lemma_tokens":["African","claw","frog"],"tokens":["african","clawed","frog"],"parse":"resource:African_clawed_frog","relations":{"(African,claw,frog)":1.0},"type":"question"}
+
+
+Utterance: Alkanna tinctoria
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Alkanna_tinctoria))","lemma_tokens":["Alkanna","tinctoria"],"tokens":["alkanna","tinctoria"],"parse":"resource:Alkanna_tinctoria","relations":{},"type":"question"}
+
+
+Utterance: Amblycera
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:Amblycera))","lemma_tokens":["Amblycera"],"tokens":["amblycera"],"parse":"resource:Amblycera","relations":{},"type":"question"}
+
+
+Utterance: American pickerel
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:American_pickerel))","lemma_tokens":["American","pickerel"],"tokens":["american","pickerel"],"parse":"resource:American_pickerel","relations":{},"type":"question"}
+
+
+Utterance: Antarctic krill
+Response: {"sentiment":"Neutral","postags":["JJ","NN"],"answer":"(list (name resource:Antarctic_krill))","lemma_tokens":["antarctic","krill"],"tokens":["antarctic","krill"],"parse":"resource:Antarctic_krill","relations":{},"type":"question"}
+
+
+Utterance: Arabidopsis
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:Arabidopsis_thaliana))","lemma_tokens":["Arabidopsis"],"tokens":["arabidopsis"],"parse":"resource:Arabidopsis_thaliana","relations":{},"type":"question"}
+
+
+Utterance: Archaeocyatha
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:Archaeocyatha))","lemma_tokens":["Archaeocyatha"],"tokens":["archaeocyatha"],"parse":"resource:Archaeocyatha","relations":{},"type":"question"}
+
+
+Utterance: Arthrobacter
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Arthrobacter))","lemma_tokens":["arthrobacter"],"tokens":["arthrobacter"],"parse":"resource:Arthrobacter","relations":{},"type":"question"}
+
+
+Utterance: Atlantic cod
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Atlantic_cod))","lemma_tokens":["Atlantic","cod"],"tokens":["atlantic","cod"],"parse":"resource:Atlantic_cod","relations":{},"type":"question"}
+
+
+Utterance: Bacillus cereus
+Response: {"sentiment":"Neutral","postags":["NN","NN"],"answer":"(list (name resource:Bacillus_cereus))","lemma_tokens":["bacillus","cereus"],"tokens":["bacillus","cereus"],"parse":"resource:Bacillus_cereus","relations":{},"type":"question"}
+
+
+Utterance: Banksia
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Banksia))","lemma_tokens":["banksia"],"tokens":["banksia"],"parse":"resource:Banksia","relations":{},"type":"question"}
+
+
+Utterance: Basidiomycota
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Basidiomycota))","lemma_tokens":["basidiomycota"],"tokens":["basidiomycota"],"parse":"resource:Basidiomycota","relations":{},"type":"question"}
+
+
+Utterance: Beefalo
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:Beefalo))","lemma_tokens":["Beefalo"],"tokens":["beefalo"],"parse":"resource:Beefalo","relations":{},"type":"question"}
+
+
+Utterance: Bird of prey
+Response: {"sentiment":"Neutral","postags":["NN","IN","NN"],"answer":"(list (name resource:Bird_of_prey))","lemma_tokens":["bird","of","prey"],"tokens":["bird","of","prey"],"parse":"resource:Bird_of_prey","relations":{},"type":"question"}
+
+
+Utterance: Black rat
+Response: {"sentiment":"Neutral","postags":["JJ","NN"],"answer":"(list (name resource:Black_rat))","lemma_tokens":["black","rat"],"tokens":["black","rat"],"parse":"resource:Black_rat","relations":{},"type":"question"}
+
+
+Utterance: Bluefish
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Bluefish))","lemma_tokens":["bluefish"],"tokens":["bluefish"],"parse":"resource:Bluefish","relations":{},"type":"question"}
+
+
+Utterance: Breadfruit
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Breadfruit))","lemma_tokens":["breadfruit"],"tokens":["breadfruit"],"parse":"resource:Breadfruit","relations":{},"type":"question"}
+
+
+Utterance: Bremsstrahlung
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:Bremsstrahlung))","lemma_tokens":["Bremsstrahlung"],"tokens":["bremsstrahlung"],"parse":"resource:Bremsstrahlung","relations":{},"type":"question"}
+
+
+Utterance: Bromeliaceae
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:Bromeliaceae))","lemma_tokens":["Bromeliaceae"],"tokens":["bromeliaceae"],"parse":"resource:Bromeliaceae","relations":{},"type":"question"}
+
+
+Utterance: Brown rat
+Response: {"sentiment":"Neutral","postags":["NNP","NN"],"answer":"(list (name resource:Brown_rat))","lemma_tokens":["Brown","rat"],"tokens":["brown","rat"],"parse":"resource:Brown_rat","relations":{},"type":"question"}
+
+
+Utterance: Butterfly
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Butterfly))","lemma_tokens":["butterfly"],"tokens":["butterfly"],"parse":"resource:Butterfly","relations":{},"type":"question"}
+
+
+Utterance: Cabbage
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:Cabbage))","lemma_tokens":["Cabbage"],"tokens":["cabbage"],"parse":"resource:Cabbage","relations":{},"type":"question"}
+
+
+Utterance: Candiru
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Candiru))","lemma_tokens":["candiru"],"tokens":["candiru"],"parse":"resource:Candiru","relations":{},"type":"question"}
+
+
+Utterance: Cannabis
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Cannabis))","lemma_tokens":["cannabis"],"tokens":["cannabis"],"parse":"resource:Cannabis","relations":{},"type":"question"}
+
+
+Utterance: Caridea
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:Caridea))","lemma_tokens":["Caridea"],"tokens":["caridea"],"parse":"resource:Caridea","relations":{},"type":"question"}
+
+
+Utterance: Catfish
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(no answer)","lemma_tokens":["catfish"],"tokens":["catfish"],"parse":"(no answer)","relations":{}}
+
+
+Utterance: Cedrus
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:Cedrus))","lemma_tokens":["Cedrus"],"tokens":["cedrus"],"parse":"resource:Cedrus","relations":{},"type":"question"}
+
+
+Utterance: Centrarchidae
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:Centrarchidae))","lemma_tokens":["Centrarchidae"],"tokens":["centrarchidae"],"parse":"resource:Centrarchidae","relations":{},"type":"question"}
+
+
+Utterance: Characidae
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:Characidae))","lemma_tokens":["Characidae"],"tokens":["characidae"],"parse":"resource:Characidae","relations":{},"type":"question"}
+
+
+Utterance: Chardonnay
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:Chardonnay))","lemma_tokens":["Chardonnay"],"tokens":["chardonnay"],"parse":"resource:Chardonnay","relations":{},"type":"question"}
+
+
+Utterance: Chicken
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Chicken))","lemma_tokens":["chicken"],"tokens":["chicken"],"parse":"resource:Chicken","relations":{},"type":"question"}
+
+
+Utterance: Chickpea
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:Chickpea))","lemma_tokens":["Chickpea"],"tokens":["chickpea"],"parse":"resource:Chickpea","relations":{},"type":"question"}
+
+
+Utterance: Chondrus crispus
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Chondrus_crispus))","lemma_tokens":["Chondrus","crispus"],"tokens":["chondrus","crispus"],"parse":"resource:Chondrus_crispus","relations":{},"type":"question"}
+
+
+Utterance: Cicada
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:Cicada))","lemma_tokens":["Cicada"],"tokens":["cicada"],"parse":"resource:Cicada","relations":{},"type":"question"}
+
+
+Utterance: Cichlid
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Cichlid))","lemma_tokens":["cichlid"],"tokens":["cichlid"],"parse":"resource:Cichlid","relations":{},"type":"question"}
+
+
+Utterance: Citrus
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Citrus))","lemma_tokens":["citrus"],"tokens":["citrus"],"parse":"resource:Citrus","relations":{},"type":"question"}
+
+
+Utterance: Clam
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Clam))","lemma_tokens":["clam"],"tokens":["clam"],"parse":"resource:Clam","relations":{},"type":"question"}
+
+
+Utterance: Clover
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:Clover))","lemma_tokens":["Clover"],"tokens":["clover"],"parse":"resource:Clover","relations":{},"type":"question"}
+
+
+Utterance: Clupeiformes
+Response: {"sentiment":"Neutral","postags":["NNS"],"answer":"(list (name resource:Clupeiformes))","lemma_tokens":["clupeiforme"],"tokens":["clupeiformes"],"parse":"resource:Clupeiformes","relations":{},"type":"question"}
+
+
+Utterance: Coconut
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list)","lemma_tokens":["Coconut"],"tokens":["coconut"],"parse":"!property:species","relations":{},"type":"question"}
+
+
+Utterance: Coral
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Coral))","lemma_tokens":["coral"],"tokens":["coral"],"parse":"resource:Coral","relations":{},"type":"question"}
+
+
+Utterance: Coregonus
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Coregonus))","lemma_tokens":["coregonus"],"tokens":["coregonus"],"parse":"resource:Coregonus","relations":{},"type":"question"}
+
+
+Utterance: Cowpox
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(no answer)","lemma_tokens":["cowpox"],"tokens":["cowpox"],"parse":"(no answer)","relations":{}}
+
+
+Utterance: Cuscuta
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:Cuscuta))","lemma_tokens":["Cuscuta"],"tokens":["cuscuta"],"parse":"resource:Cuscuta","relations":{},"type":"question"}
+
+
+Utterance: Datura stramonium
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Datura_stramonium))","lemma_tokens":["Datura","stramonium"],"tokens":["datura","stramonium"],"parse":"resource:Datura_stramonium","relations":{},"type":"question"}
+
+
+Utterance: Dendrobranchiata
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:Dendrobranchiata))","lemma_tokens":["Dendrobranchiata"],"tokens":["dendrobranchiata"],"parse":"resource:Dendrobranchiata","relations":{},"type":"question"}
+
+
+Utterance: Dew point
+Response: {"sentiment":"Neutral","postags":["NN","NN"],"answer":"(list (name resource:Dew_point))","lemma_tokens":["dew","point"],"tokens":["dew","point"],"parse":"resource:Dew_point","relations":{},"type":"question"}
+
+
+Utterance: Diatom
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(no answer)","lemma_tokens":["diatom"],"tokens":["diatom"],"parse":"(no answer)","relations":{}}
+
+
+Utterance: Finnish skittles
+Response: {"sentiment":"Neutral","postags":["JJ","NNS"],"answer":"(list (name resource:Finnish_skittles))","lemma_tokens":["finnish","skittle"],"tokens":["finnish","skittles"],"parse":"resource:Finnish_skittles","relations":{},"type":"question"}
+
+
+Utterance: Ars Magica
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Ars_Magica))","lemma_tokens":["Ars","Magica"],"tokens":["ars","magica"],"parse":"resource:Ars_Magica","relations":{},"type":"question"}
+
+
+Utterance: Baccarat (card game)
+Response: {"sentiment":"Neutral","postags":["NN","-LRB-","NN","NN","-RRB-"],"answer":"(string \"\")","lemma_tokens":["baccarat","-lrb-","card","game","-rrb-"],"tokens":["baccarat","-lrb-","card","game","-rrb-"],"parse":"\"OpenEntity\u0027baccarat -lrb- card game -rrb-\u0027\u0027\"","relations":{},"type":"question"}
+
+
+Utterance: Barber paradox
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Barber_paradox))","lemma_tokens":["Barber","paradox"],"tokens":["barber","paradox"],"parse":"resource:Barber_paradox","relations":{},"type":"question"}
+
+
+Utterance: Bud
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:Bud))","lemma_tokens":["Bud"],"tokens":["bud"],"parse":"resource:Bud","relations":{},"type":"question"}
+
+
+Utterance: Commander Keen
+Response: {"sentiment":"Neutral","postags":["NN","JJ"],"answer":"(list (name resource:Commander_Keen))","lemma_tokens":["commander","keen"],"tokens":["commander","keen"],"parse":"resource:Commander_Keen","relations":{},"type":"question"}
+
+
+Utterance: Dr. Mario
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Dr._Mario))","lemma_tokens":["Dr.","Mario"],"tokens":["dr.","mario"],"parse":"resource:Dr._Mario","relations":{},"type":"question"}
+
+
+Utterance: Fanorona
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:Fanorona))","lemma_tokens":["Fanorona"],"tokens":["fanorona"],"parse":"resource:Fanorona","relations":{},"type":"question"}
+
+
+Utterance: Fictionary
+Response: {"sentiment":"Neutral","postags":["JJ"],"answer":"(list (name resource:Fictionary))","lemma_tokens":["fictionary"],"tokens":["fictionary"],"parse":"resource:Fictionary","relations":{},"type":"question"}
+
+
+Utterance: Final Fantasy Adventure
+Response: {"sentiment":"Neutral","postags":["JJ","NN","NN"],"answer":"(list (name resource:Final_Fantasy_Adventure))","lemma_tokens":["final","fantasy","adventure"],"tokens":["final","fantasy","adventure"],"parse":"resource:Final_Fantasy_Adventure","relations":{},"type":"question"}
+
+
+Utterance: FreeCell
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:FreeCell))","lemma_tokens":["FreeCell"],"tokens":["freecell"],"parse":"resource:FreeCell","relations":{},"type":"question"}
+
+
+Utterance: GameCube
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name property:game))","lemma_tokens":["GameCube"],"tokens":["gamecube"],"parse":"property:game","relations":{},"type":"question"}
+
+
+Utterance: Game of chance
+Response: {"sentiment":"Neutral","postags":["NN","IN","NN"],"answer":"(list (name resource:Game_of_chance))","lemma_tokens":["game","of","chance"],"tokens":["game","of","chance"],"parse":"resource:Game_of_chance","relations":{},"type":"question"}
+
+
+Utterance: Gin rummy
+Response: {"sentiment":"Neutral","postags":["NN","NN"],"answer":"(list (name resource:Gin_rummy))","lemma_tokens":["gin","rummy"],"tokens":["gin","rummy"],"parse":"resource:Gin_rummy","relations":{},"type":"question"}
+
+
+Utterance: Half-Life (video game)
+Response: {"sentiment":"Neutral","postags":["DT","NN","-LRB-","NN","NN","-RRB-"],"answer":"(string \"\")","lemma_tokens":["half","life","-lrb-","video","game","-rrb-"],"tokens":["half","life","-lrb-","video","game","-rrb-"],"parse":"\"OpenEntity\u0027half life -lrb- video game -rrb-\u0027\u0027\"","relations":{},"type":"question"}
+
+
+Utterance: Hide-and-seek
+Response: {"sentiment":"Neutral","postags":["VB","CC","VB"],"answer":"(no answer)","lemma_tokens":["hide","and","seek"],"tokens":["hide","and","seek"],"parse":"(no answer)","relations":{}}
+
+
+Utterance: Kill Doctor Lucky
+Response: {"sentiment":"Neutral","postags":["VB","NN","JJ"],"answer":"(list (name resource:Kill_Doctor_Lucky))","lemma_tokens":["kill","doctor","lucky"],"tokens":["kill","doctor","lucky"],"parse":"resource:Kill_Doctor_Lucky","relations":{},"type":"question"}
+
+
+Utterance: Kiss
+Response: {"sentiment":"Neutral","postags":["VB"],"answer":"(list (name resource:Kiss))","lemma_tokens":["kiss"],"tokens":["kiss"],"parse":"resource:Kiss","relations":{},"type":"question"}
+
+
+Utterance: Klondike (solitaire)
+Response: {"sentiment":"Neutral","postags":["NNP","-LRB-","NN","-RRB-"],"answer":"(string \"\")","lemma_tokens":["Klondike","-lrb-","solitaire","-rrb-"],"tokens":["klondike","-lrb-","solitaire","-rrb-"],"parse":"\"OpenEntity\u0027klondike -lrb- solitaire -rrb-\u0027\u0027\"","relations":{},"type":"question"}
+
+
+Utterance: Kuru Kuru Kururin
+Response: {"sentiment":"Neutral","postags":["NNP","NNP","NNP"],"answer":"(list (name resource:Kuru_Kuru_Kururin))","lemma_tokens":["Kuru","Kuru","Kururin"],"tokens":["kuru","kuru","kururin"],"parse":"resource:Kuru_Kuru_Kururin","relations":{},"type":"question"}
+
+
+Utterance: Let It Ride (card game)
+Response: {"sentiment":"Negative","postags":["VB","PRP","VB","-LRB-","NN","NN","-RRB-"],"answer":"(string \"\")","lemma_tokens":["let","it","ride","-lrb-","card","game","-rrb-"],"tokens":["let","it","ride","-lrb-","card","game","-rrb-"],"parse":"\"OpenEntity\u0027let it ride -lrb- card game -rrb-\u0027\u0027\"","relations":{},"type":"question"}
+
+
+Utterance: List of chess variants
+Response: {"sentiment":"Neutral","postags":["NN","IN","NN","NNS"],"answer":"(string \"\")","lemma_tokens":["list","of","chess","variant"],"tokens":["list","of","chess","variants"],"parse":"\"OpenEntity\u0027list of chess variants\u0027\u0027\"","relations":{},"type":"question"}
+
+
+Utterance: Locost
+Response: {"sentiment":"Neutral","postags":["IN"],"answer":"(list (name resource:Locost))","lemma_tokens":["locost"],"tokens":["locost"],"parse":"resource:Locost","relations":{},"type":"question"}
+
+
+Utterance: Luge
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Luge))","lemma_tokens":["luge"],"tokens":["luge"],"parse":"resource:Luge","relations":{},"type":"question"}
+
+
+Utterance: MIDI Maze
+Response: {"sentiment":"Neutral","postags":["NNP","NN"],"answer":"(list (name resource:MIDI_Maze))","lemma_tokens":["MIDI","maze"],"tokens":["midi","maze"],"parse":"resource:MIDI_Maze","relations":{},"type":"question"}
+
+
+Utterance: Mario Kart: Super Circuit
+Response: {"sentiment":"Neutral","postags":["NNP","NNP",":","NNP","NNP"],"answer":"(no answer)","lemma_tokens":["Mario","Kart",":","Super","Circuit"],"tokens":["mario","kart",":","super","circuit"],"parse":"(no answer)","relations":{}}
+
+
+Utterance: Mornington Crescent (game)
+Response: {"sentiment":"Neutral","postags":["NNP","NNP","-LRB-","NN","-RRB-"],"answer":"(string \"\")","lemma_tokens":["Mornington","Crescent","-lrb-","game","-rrb-"],"tokens":["mornington","crescent","-lrb-","game","-rrb-"],"parse":"\"OpenEntity\u0027mornington crescent -lrb- game -rrb-\u0027\u0027\"","relations":{},"type":"question"}
+
+
+Utterance: Pachinko
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Pachinko))","lemma_tokens":["pachinko"],"tokens":["pachinko"],"parse":"resource:Pachinko","relations":{},"type":"question"}
+
+
+Utterance: Peg solitaire
+Response: {"sentiment":"Neutral","postags":["VB","NN"],"answer":"(list (name resource:Peg_solitaire))","lemma_tokens":["peg","solitaire"],"tokens":["peg","solitaire"],"parse":"resource:Peg_solitaire","relations":{},"type":"question"}
+
+
+Utterance: Quiz bowl
+Response: {"sentiment":"Neutral","postags":["NN","NN"],"answer":"(list (name resource:Quiz_bowl))","lemma_tokens":["quiz","bowl"],"tokens":["quiz","bowl"],"parse":"resource:Quiz_bowl","relations":{},"type":"question"}
+
+
+Utterance: Radiant Silvergun
+Response: {"sentiment":"Neutral","postags":["JJ","NN"],"answer":"(list (name resource:Radiant_Silvergun))","lemma_tokens":["radiant","silvergun"],"tokens":["radiant","silvergun"],"parse":"resource:Radiant_Silvergun","relations":{},"type":"question"}
+
+
+Utterance: Red dog (card game)
+Response: {"sentiment":"Neutral","postags":["NNP","NNP","-LRB-","NN","NN","-RRB-"],"answer":"(string \"\")","lemma_tokens":["Red","dog","-lrb-","card","game","-rrb-"],"tokens":["red","dog","-lrb-","card","game","-rrb-"],"parse":"\"OpenEntity\u0027red dog -lrb- card game -rrb-\u0027\u0027\"","relations":{},"type":"question"}
+
+
+Utterance: Risk (game)
+Response: {"sentiment":"Neutral","postags":["NN","-LRB-","NN","-RRB-"],"answer":"(string \"\")","lemma_tokens":["risk","-lrb-","game","-rrb-"],"tokens":["risk","-lrb-","game","-rrb-"],"parse":"\"OpenEntity\u0027risk -lrb- game -rrb-\u0027\u0027\"","relations":{},"type":"question"}
+
+
+Utterance: Rolemaster
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Rolemaster))","lemma_tokens":["rolemaster"],"tokens":["rolemaster"],"parse":"resource:Rolemaster","relations":{},"type":"question"}
+
+
+Utterance: Russian roulette
+Response: {"sentiment":"Neutral","postags":["NNP","NN"],"answer":"(list (name resource:Russian_roulette))","lemma_tokens":["Russian","roulette"],"tokens":["russian","roulette"],"parse":"resource:Russian_roulette","relations":{},"type":"question"}
+
+
+Utterance: SameGame
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:SameGame))","lemma_tokens":["SameGame"],"tokens":["samegame"],"parse":"resource:SameGame","relations":{},"type":"question"}
+
+
+Utterance: Scotland Yard (board game)
+Response: {"sentiment":"Neutral","postags":["NNP","NN","-LRB-","NN","NN","-RRB-"],"answer":"(string \"\")","lemma_tokens":["Scotland","yard","-lrb-","board","game","-rrb-"],"tokens":["scotland","yard","-lrb-","board","game","-rrb-"],"parse":"\"OpenEntity\u0027scotland yard -lrb- board game -rrb-\u0027\u0027\"","relations":{},"type":"question"}
+
+
+Utterance: Sega CD
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(no answer)","lemma_tokens":["Sega","CD"],"tokens":["sega","cd"],"parse":"(no answer)","relations":{}}
+
+
+Utterance: Set (game)
+Response: {"sentiment":"Neutral","postags":["NN","-LRB-","NN","-RRB-"],"answer":"(string \"\")","lemma_tokens":["set","-lrb-","game","-rrb-"],"tokens":["set","-lrb-","game","-rrb-"],"parse":"\"OpenEntity\u0027set -lrb- game -rrb-\u0027\u0027\"","relations":{},"type":"question"}
+
+
+Utterance: Shiritori
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Shiritori))","lemma_tokens":["shiritori"],"tokens":["shiritori"],"parse":"resource:Shiritori","relations":{},"type":"question"}
+
+
+Utterance: Six Degrees of Kevin Bacon
+Response: {"sentiment":"Neutral","postags":["CD","NNS","IN","NNP","NNP"],"answer":"(list (name resource:Six_Degrees_of_Kevin_Bacon))","lemma_tokens":["six","degree","of","Kevin","Bacon"],"tokens":["six","degrees","of","kevin","bacon"],"parse":"resource:Six_Degrees_of_Kevin_Bacon","relations":{},"type":"question"}
+
+
+Utterance: Snakes and Ladders
+Response: {"sentiment":"Neutral","postags":["NNS","CC","NNS"],"answer":"(list (name resource:Snakes_and_Ladders))","lemma_tokens":["snake","and","ladder"],"tokens":["snakes","and","ladders"],"parse":"resource:Snakes_and_Ladders","relations":{},"type":"question"}
+
+
+Utterance: Sokoban
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:Sokoban))","lemma_tokens":["Sokoban"],"tokens":["sokoban"],"parse":"resource:Sokoban","relations":{},"type":"question"}
+
+
+Utterance: Soldier of Fortune (video game)
+Response: {"sentiment":"Neutral","postags":["NN","IN","NN","-LRB-","NN","NN","-RRB-"],"answer":"(string \"\")","lemma_tokens":["soldier","of","fortune","-lrb-","video","game","-rrb-"],"tokens":["soldier","of","fortune","-lrb-","video","game","-rrb-"],"parse":"\"OpenEntity\u0027soldier of fortune -lrb- video game -rrb-\u0027\u0027\"","relations":{},"type":"question"}
+
+
+Utterance: Soma cube
+Response: {"sentiment":"Neutral","postags":["NNP","NN"],"answer":"(list (name resource:Soma_cube))","lemma_tokens":["Soma","cube"],"tokens":["soma","cube"],"parse":"resource:Soma_cube","relations":{},"type":"question"}
+
+
+Utterance: Spellevator
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Spellevator))","lemma_tokens":["spellevator"],"tokens":["spellevator"],"parse":"resource:Spellevator","relations":{},"type":"question"}
+
+
+Utterance: Storytelling game
+Response: {"sentiment":"Neutral","postags":["NN","NN"],"answer":"(list (name resource:Storytelling_game))","lemma_tokens":["storytelling","game"],"tokens":["storytelling","game"],"parse":"resource:Storytelling_game","relations":{},"type":"question"}
+
+
+Utterance: Strategic bombing
+Response: {"sentiment":"Neutral","postags":["JJ","NN"],"answer":"(list (name resource:Strategic_bombing))","lemma_tokens":["strategic","bombing"],"tokens":["strategic","bombing"],"parse":"resource:Strategic_bombing","relations":{},"type":"question"}
+
+
+Utterance: Stratego
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:Stratego))","lemma_tokens":["Stratego"],"tokens":["stratego"],"parse":"resource:Stratego","relations":{},"type":"question"}
+
+
+Utterance: Strategy game
+Response: {"sentiment":"Neutral","postags":["NN","NN"],"answer":"(list (name resource:Strategy_game))","lemma_tokens":["strategy","game"],"tokens":["strategy","game"],"parse":"resource:Strategy_game","relations":{},"type":"question"}
+
+
+Utterance: Djurab Desert
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Djurab_Desert))","lemma_tokens":["Djurab","Desert"],"tokens":["djurab","desert"],"parse":"resource:Djurab_Desert","relations":{},"type":"question"}
+
+
+Utterance: Abbasid Caliphate
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Abbasid_Caliphate))","lemma_tokens":["Abbasid","Caliphate"],"tokens":["abbasid","caliphate"],"parse":"resource:Abbasid_Caliphate","relations":{},"type":"question"}
+
+
+Utterance: Acre, Israel
+Response: {"sentiment":"Neutral","postags":["NN",",","NNP"],"answer":"(no answer)","lemma_tokens":["acre",",","Israel"],"tokens":["acre",",","israel"],"parse":"(no answer)","relations":{}}
+
+
+Utterance: Adirondack Mountains
+Response: {"sentiment":"Neutral","postags":["NNP","NNPS"],"answer":"(list (name resource:Adirondack_Mountains))","lemma_tokens":["Adirondack","Mountains"],"tokens":["adirondack","mountains"],"parse":"resource:Adirondack_Mountains","relations":{},"type":"question"}
+
+
+Utterance: Albireo
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:Albireo))","lemma_tokens":["Albireo"],"tokens":["albireo"],"parse":"resource:Albireo","relations":{},"type":"question"}
+
+
+Utterance: Albula Alps
+Response: {"sentiment":"Neutral","postags":["NNP","NNPS"],"answer":"(list (name resource:Albula_Alps))","lemma_tokens":["Albula","Alps"],"tokens":["albula","alps"],"parse":"resource:Albula_Alps","relations":{},"type":"question"}
+
+
+Utterance: Almohad Caliphate
+Response: {"sentiment":"Neutral","postags":["NNP","NN"],"answer":"(list (name resource:Almohad_Caliphate))","lemma_tokens":["Almohad","caliphate"],"tokens":["almohad","caliphate"],"parse":"resource:Almohad_Caliphate","relations":{},"type":"question"}
+
+
+Utterance: AltiVec
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:AltiVec))","lemma_tokens":["AltiVec"],"tokens":["altivec"],"parse":"resource:AltiVec","relations":{},"type":"question"}
+
+
+Utterance: Aperture
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Aperture))","lemma_tokens":["aperture"],"tokens":["aperture"],"parse":"resource:Aperture","relations":{},"type":"question"}
+
+
+Utterance: Arab League
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Arab_League))","lemma_tokens":["Arab","League"],"tokens":["arab","league"],"parse":"resource:Arab_League","relations":{},"type":"question"}
+
+
+Utterance: Ashkelon
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:Ashkelon))","lemma_tokens":["Ashkelon"],"tokens":["ashkelon"],"parse":"resource:Ashkelon","relations":{},"type":"question"}
+
+
+Utterance: Assassination market
+Response: {"sentiment":"Neutral","postags":["NN","NN"],"answer":"(list (name resource:Assassination_market))","lemma_tokens":["assassination","market"],"tokens":["assassination","market"],"parse":"resource:Assassination_market","relations":{},"type":"question"}
+
+
+Utterance: Babington Plot
+Response: {"sentiment":"Neutral","postags":["NNP","NN"],"answer":"(list (name resource:Babington_Plot))","lemma_tokens":["Babington","plot"],"tokens":["babington","plot"],"parse":"resource:Babington_Plot","relations":{},"type":"question"}
+
+
+Utterance: Bacterial growth
+Response: {"sentiment":"Neutral","postags":["JJ","NN"],"answer":"(list (name resource:Bacterial_growth))","lemma_tokens":["bacterial","growth"],"tokens":["bacterial","growth"],"parse":"resource:Bacterial_growth","relations":{},"type":"question"}
+
+
+Utterance: Bernese Alps
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Bernese_Alps))","lemma_tokens":["Bernese","Alps"],"tokens":["bernese","alps"],"parse":"resource:Bernese_Alps","relations":{},"type":"question"}
+
+
+Utterance: Betelgeuse
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:Betelgeuse))","lemma_tokens":["Betelgeuse"],"tokens":["betelgeuse"],"parse":"resource:Betelgeuse","relations":{},"type":"question"}
+
+
+Utterance: Biotope
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:Biotope))","lemma_tokens":["Biotope"],"tokens":["biotope"],"parse":"resource:Biotope","relations":{},"type":"question"}
+
+
+Utterance: Blackfriars Bridge
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Blackfriars_Bridge))","lemma_tokens":["Blackfriars","Bridge"],"tokens":["blackfriars","bridge"],"parse":"resource:Blackfriars_Bridge","relations":{},"type":"question"}
+
+
+Utterance: Brenner Pass
+Response: {"sentiment":"Neutral","postags":["NNP","NN"],"answer":"(list (name resource:Brenner_Pass))","lemma_tokens":["Brenner","pass"],"tokens":["brenner","pass"],"parse":"resource:Brenner_Pass","relations":{},"type":"question"}
+
+
+Utterance: Brooklyn Bridge
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Brooklyn_Bridge))","lemma_tokens":["Brooklyn","Bridge"],"tokens":["brooklyn","bridge"],"parse":"resource:Brooklyn_Bridge","relations":{},"type":"question"}
+
+
+Utterance: Calabria
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:Calabria))","lemma_tokens":["Calabria"],"tokens":["calabria"],"parse":"resource:Calabria","relations":{},"type":"question"}
+
+
+Utterance: Campania
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:Campania))","lemma_tokens":["Campania"],"tokens":["campania"],"parse":"resource:Campania","relations":{},"type":"question"}
+
+
+Utterance: Cape Canaveral
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Cape_Canaveral))","lemma_tokens":["Cape","Canaveral"],"tokens":["cape","canaveral"],"parse":"resource:Cape_Canaveral","relations":{},"type":"question"}
+
+
+Utterance: Cape Colony
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Cape_Colony))","lemma_tokens":["Cape","Colony"],"tokens":["cape","colony"],"parse":"resource:Cape_Colony","relations":{},"type":"question"}
+
+
+Utterance: Carpathian Mountains
+Response: {"sentiment":"Neutral","postags":["NNP","NNPS"],"answer":"(list (name resource:Carpathian_Mountains))","lemma_tokens":["Carpathian","Mountains"],"tokens":["carpathian","mountains"],"parse":"resource:Carpathian_Mountains","relations":{},"type":"question"}
+
+
+Utterance: Central Tibetan Administration
+Response: {"sentiment":"Neutral","postags":["JJ","NNP","NN"],"answer":"(list (name resource:Central_Tibetan_Administration))","lemma_tokens":["central","Tibetan","administration"],"tokens":["central","tibetan","administration"],"parse":"resource:Central_Tibetan_Administration","relations":{},"type":"question"}
+
+
+Utterance: Clef
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Clef))","lemma_tokens":["clef"],"tokens":["clef"],"parse":"resource:Clef","relations":{},"type":"question"}
+
+
+Utterance: Collinear antenna array
+Response: {"sentiment":"Neutral","postags":["NNP","NNP","NN"],"answer":"(list (name resource:Collinear_antenna_array))","lemma_tokens":["Collinear","antenna","array"],"tokens":["collinear","antenna","array"],"parse":"resource:Collinear_antenna_array","relations":{},"type":"question"}
+
+
+Utterance: Colorado Mineral Belt
+Response: {"sentiment":"Neutral","postags":["NNP","NN","NN"],"answer":"(list (name resource:Colorado_Mineral_Belt))","lemma_tokens":["Colorado","mineral","belt"],"tokens":["colorado","mineral","belt"],"parse":"resource:Colorado_Mineral_Belt","relations":{},"type":"question"}
+
+
+Utterance: Commodity market
+Response: {"sentiment":"Neutral","postags":["NN","NN"],"answer":"(list (name resource:Commodity_market))","lemma_tokens":["commodity","market"],"tokens":["commodity","market"],"parse":"resource:Commodity_market","relations":{},"type":"question"}
+
+
+Utterance: Controlled area
+Response: {"sentiment":"Neutral","postags":["JJ","NN"],"answer":"(list (name resource:Controlled_area))","lemma_tokens":["controlled","area"],"tokens":["controlled","area"],"parse":"resource:Controlled_area","relations":{},"type":"question"}
+
+
+Utterance: Corfu
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:Corfu))","lemma_tokens":["Corfu"],"tokens":["corfu"],"parse":"resource:Corfu","relations":{},"type":"question"}
+
+
+Utterance: Cottian Alps
+Response: {"sentiment":"Neutral","postags":["NNP","NNPS"],"answer":"(list (name resource:Cottian_Alps))","lemma_tokens":["Cottian","Alps"],"tokens":["cottian","alps"],"parse":"resource:Cottian_Alps","relations":{},"type":"question"}
+
+
+Utterance: County Londonderry
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:County_Londonderry))","lemma_tokens":["County","Londonderry"],"tokens":["county","londonderry"],"parse":"resource:County_Londonderry","relations":{},"type":"question"}
+
+
+Utterance: County Tyrone
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:County_Tyrone))","lemma_tokens":["County","Tyrone"],"tokens":["county","tyrone"],"parse":"resource:County_Tyrone","relations":{},"type":"question"}
+
+
+Utterance: Court-martial
+Response: {"sentiment":"Neutral","postags":["NN","NN"],"answer":"(list)","lemma_tokens":["court","martial"],"tokens":["court","martial"],"parse":"resource:Court_Martial","relations":{},"type":"question"}
+
+
+Utterance: Cyclone
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Cyclone))","lemma_tokens":["cyclone"],"tokens":["cyclone"],"parse":"resource:Cyclone","relations":{},"type":"question"}
+
+
+Utterance: Dacia
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:Dacia))","lemma_tokens":["Dacia"],"tokens":["dacia"],"parse":"resource:Dacia","relations":{},"type":"question"}
+
+
+Utterance: Dalmatia
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:Dalmatia))","lemma_tokens":["Dalmatia"],"tokens":["dalmatia"],"parse":"resource:Dalmatia","relations":{},"type":"question"}
+
+
+Utterance: Dauphiné Alps
+Response: {"sentiment":"Neutral","postags":["NNP","NNPS"],"answer":"(list)","lemma_tokens":["Dauphiné","Alps"],"tokens":["dauphiné","alps"],"parse":"resource:Dauphin�_Alps","relations":{},"type":"question"}
+
+
+Utterance: Death Valley
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Death_Valley))","lemma_tokens":["Death","Valley"],"tokens":["death","valley"],"parse":"resource:Death_Valley","relations":{},"type":"question"}
+
+
+Utterance: Democratic Republic of Afghanistan
+Response: {"sentiment":"Neutral","postags":["JJ","NN","IN","NNP"],"answer":"(list (name resource:Democratic_Republic_of_Afghanistan))","lemma_tokens":["democratic","republic","of","Afghanistan"],"tokens":["democratic","republic","of","afghanistan"],"parse":"resource:Democratic_Republic_of_Afghanistan","relations":{},"type":"question"}
+
+
+Utterance: Dodoni
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:Dodoni))","lemma_tokens":["Dodoni"],"tokens":["dodoni"],"parse":"resource:Dodoni","relations":{},"type":"question"}
+
+
+Utterance: Dolomites
+Response: {"sentiment":"Neutral","postags":["NNPS"],"answer":"(list (name resource:Dolomites))","lemma_tokens":["Dolomites"],"tokens":["dolomites"],"parse":"resource:Dolomites","relations":{},"type":"question"}
+
+
+Utterance: Double star
+Response: {"sentiment":"Neutral","postags":["JJ","NN"],"answer":"(list (name resource:Double_Star))","lemma_tokens":["double","star"],"tokens":["double","star"],"parse":"resource:Double_Star","relations":{},"type":"question"}
+
+
+Utterance: Dry ski slope
+Response: {"sentiment":"Negative","postags":["JJ","NN","NN"],"answer":"(list (name resource:Dry_ski_slope))","lemma_tokens":["dry","ski","slope"],"tokens":["dry","ski","slope"],"parse":"resource:Dry_ski_slope","relations":{},"type":"question"}
+
+
+Utterance: Duchy of Lorraine
+Response: {"sentiment":"Neutral","postags":["NNP","IN","NNP"],"answer":"(list (name resource:List_of_rulers_of_Lorraine))","lemma_tokens":["Duchy","of","Lorraine"],"tokens":["duchy","of","lorraine"],"parse":"resource:List_of_rulers_of_Lorraine","relations":{},"type":"question"}
+
+
+Utterance: Duchy of Mecklenburg-Strelitz
+Response: {"sentiment":"Neutral","postags":["NNP","IN","NNP","NNP"],"answer":"(list (name resource:Grand_Duchy_of_Mecklenburg-Strelitz))","lemma_tokens":["Duchy","of","Mecklenburg","Strelitz"],"tokens":["duchy","of","mecklenburg","strelitz"],"parse":"resource:Grand_Duchy_of_Mecklenburg-Strelitz","relations":{},"type":"question"}
+
+
+Utterance: Economy of Ukraine
+Response: {"sentiment":"Neutral","postags":["NN","IN","NNP"],"answer":"(list (name resource:Economy_of_Ukraine))","lemma_tokens":["economy","of","Ukraine"],"tokens":["economy","of","ukraine"],"parse":"resource:Economy_of_Ukraine","relations":{},"type":"question"}
+
+
+Utterance: Electromagnetic interference control
+Response: {"sentiment":"Neutral","postags":["JJ","NN","NN"],"answer":"(list (name resource:Electromagnetic_interference_control))","lemma_tokens":["electromagnetic","interference","control"],"tokens":["electromagnetic","interference","control"],"parse":"resource:Electromagnetic_interference_control","relations":{},"type":"question"}
+
+
+Utterance: Andreas Ekberg
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Andreas_Ekberg))","lemma_tokens":["Andreas","Ekberg"],"tokens":["andreas","ekberg"],"parse":"resource:Andreas_Ekberg","relations":{},"type":"question"}
+
+
+Utterance: Danilo Tognon
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Danilo_Tognon))","lemma_tokens":["Danilo","Tognon"],"tokens":["danilo","tognon"],"parse":"resource:Danilo_Tognon","relations":{},"type":"question"}
+
+
+Utterance: Lorine Livington Pruette
+Response: {"sentiment":"Neutral","postags":["NNP","NNP","NNP"],"answer":"(list (name resource:Lorine_Livington_Pruette))","lemma_tokens":["Lorine","Livington","Pruette"],"tokens":["lorine","livington","pruette"],"parse":"resource:Lorine_Livington_Pruette","relations":{},"type":"question"}
+
+
+Utterance: Megan Lawrence
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Megan_Lawrence))","lemma_tokens":["Megan","Lawrence"],"tokens":["megan","lawrence"],"parse":"resource:Megan_Lawrence","relations":{},"type":"question"}
+
+
+Utterance: Nikolaos Ventouras
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Nikolaos_Ventouras))","lemma_tokens":["Nikolaos","Ventouras"],"tokens":["nikolaos","ventouras"],"parse":"resource:Nikolaos_Ventouras","relations":{},"type":"question"}
+
+
+Utterance: Peter Ceffons
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Peter_Ceffons))","lemma_tokens":["Peter","Ceffons"],"tokens":["peter","ceffons"],"parse":"resource:Peter_Ceffons","relations":{},"type":"question"}
+
+
+Utterance: Witold Gerutto
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Witold_Gerutto))","lemma_tokens":["Witold","Gerutto"],"tokens":["witold","gerutto"],"parse":"resource:Witold_Gerutto","relations":{},"type":"question"}
+
+
+Utterance: Abdoullah Bamoussa
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Abdoullah_Bamoussa))","lemma_tokens":["Abdoullah","Bamoussa"],"tokens":["abdoullah","bamoussa"],"parse":"resource:Abdoullah_Bamoussa","relations":{},"type":"question"}
+
+
+Utterance: Abdulaziz Alshatti
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Abdulaziz_Alshatti))","lemma_tokens":["Abdulaziz","Alshatti"],"tokens":["abdulaziz","alshatti"],"parse":"resource:Abdulaziz_Alshatti","relations":{},"type":"question"}
+
+
+Utterance: Ahmad Alafasi
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Ahmad_Alafasi))","lemma_tokens":["Ahmad","Alafasi"],"tokens":["ahmad","alafasi"],"parse":"resource:Ahmad_Alafasi","relations":{},"type":"question"}
+
+
+Utterance: Ahmet Kurt Pasha
+Response: {"sentiment":"Neutral","postags":["NNP","NNP","NNP"],"answer":"(list (name resource:Ahmet_Kurt_Pasha))","lemma_tokens":["Ahmet","Kurt","Pasha"],"tokens":["ahmet","kurt","pasha"],"parse":"resource:Ahmet_Kurt_Pasha","relations":{},"type":"question"}
+
+
+Utterance: Anatoliy Abdula
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Anatoliy_Abdula))","lemma_tokens":["Anatoliy","Abdula"],"tokens":["anatoliy","abdula"],"parse":"resource:Anatoliy_Abdula","relations":{},"type":"question"}
+
+
+Utterance: Antonio Bova
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Antonio_Bova))","lemma_tokens":["Antonio","Bova"],"tokens":["antonio","bova"],"parse":"resource:Antonio_Bova","relations":{},"type":"question"}
+
+
+Utterance: Antonio Modarelli
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Antonio_Modarelli))","lemma_tokens":["Antonio","Modarelli"],"tokens":["antonio","modarelli"],"parse":"resource:Antonio_Modarelli","relations":{},"type":"question"}
+
+
+Utterance: Antun Herceg
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Antun_Herceg))","lemma_tokens":["Antun","Herceg"],"tokens":["antun","herceg"],"parse":"resource:Antun_Herceg","relations":{},"type":"question"}
+
+
+Utterance: Astrit Hafizi
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Astrit_Hafizi))","lemma_tokens":["Astrit","Hafizi"],"tokens":["astrit","hafizi"],"parse":"resource:Astrit_Hafizi","relations":{},"type":"question"}
+
+
+Utterance: Barry James
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Barry_James))","lemma_tokens":["Barry","James"],"tokens":["barry","james"],"parse":"resource:Barry_James","relations":{},"type":"question"}
+
+
+Utterance: Bojan Pandžić
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(no answer)","lemma_tokens":["Bojan","Pandžić"],"tokens":["bojan","pandžić"],"parse":"(no answer)","relations":{}}
+
+
+Utterance: Briana Provancha
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Briana_Provancha))","lemma_tokens":["Briana","Provancha"],"tokens":["briana","provancha"],"parse":"resource:Briana_Provancha","relations":{},"type":"question"}
+
+
+Utterance: Courtney Okolo
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Courtney_Okolo))","lemma_tokens":["Courtney","Okolo"],"tokens":["courtney","okolo"],"parse":"resource:Courtney_Okolo","relations":{},"type":"question"}
+
+
+Utterance: Daryl Homer
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Daryl_Homer))","lemma_tokens":["Daryl","Homer"],"tokens":["daryl","homer"],"parse":"resource:Daryl_Homer","relations":{},"type":"question"}
+
+
+Utterance: Edward Ling
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Edward_Ling))","lemma_tokens":["Edward","Ling"],"tokens":["edward","ling"],"parse":"resource:Edward_Ling","relations":{},"type":"question"}
+
+
+Utterance: Francesco Boffo
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Francesco_Boffo))","lemma_tokens":["Francesco","Boffo"],"tokens":["francesco","boffo"],"parse":"resource:Francesco_Boffo","relations":{},"type":"question"}
+
+
+Utterance: Francesco Brici
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Francesco_Brici))","lemma_tokens":["Francesco","Brici"],"tokens":["francesco","brici"],"parse":"resource:Francesco_Brici","relations":{},"type":"question"}
+
+
+Utterance: Franciszek Szymura
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Franciszek_Szymura))","lemma_tokens":["Franciszek","Szymura"],"tokens":["franciszek","szymura"],"parse":"resource:Franciszek_Szymura","relations":{},"type":"question"}
+
+
+Utterance: George Sime
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:George_Sime))","lemma_tokens":["George","Sime"],"tokens":["george","sime"],"parse":"resource:George_Sime","relations":{},"type":"question"}
+
+
+Utterance: Geremia Ghisi
+Response: {"sentiment":"Neutral","postags":["NN","NN"],"answer":"(list (name resource:Geremia_Ghisi))","lemma_tokens":["geremia","ghisi"],"tokens":["geremia","ghisi"],"parse":"resource:Geremia_Ghisi","relations":{},"type":"question"}
+
+
+Utterance: Giles Scott
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Giles_Scott))","lemma_tokens":["Giles","Scott"],"tokens":["giles","scott"],"parse":"resource:Giles_Scott","relations":{},"type":"question"}
+
+
+Utterance: Giovan Francesco Buonamici
+Response: {"sentiment":"Neutral","postags":["NNP","NNP","NNP"],"answer":"(list (name resource:Giovan_Francesco_Buonamici))","lemma_tokens":["Giovan","Francesco","Buonamici"],"tokens":["giovan","francesco","buonamici"],"parse":"resource:Giovan_Francesco_Buonamici","relations":{},"type":"question"}
+
+
+Utterance: Grace McKenzie
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Grace_McKenzie))","lemma_tokens":["Grace","McKenzie"],"tokens":["grace","mckenzie"],"parse":"resource:Grace_McKenzie","relations":{},"type":"question"}
+
+
+Utterance: Graham Dadds
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Graham_Dadds))","lemma_tokens":["Graham","Dadds"],"tokens":["graham","dadds"],"parse":"resource:Graham_Dadds","relations":{},"type":"question"}
+
+
+Utterance: Ilya Mokretsov
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Ilya_Mokretsov))","lemma_tokens":["Ilya","Mokretsov"],"tokens":["ilya","mokretsov"],"parse":"resource:Ilya_Mokretsov","relations":{},"type":"question"}
+
+
+Utterance: Kirstie Alora
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Kirstie_Alora))","lemma_tokens":["Kirstie","Alora"],"tokens":["kirstie","alora"],"parse":"resource:Kirstie_Alora","relations":{},"type":"question"}
+
+
+Utterance: Lala Abdul Rashid
+Response: {"sentiment":"Neutral","postags":["NNP","NNP","NNP"],"answer":"(list (name resource:Lala_Abdul_Rashid))","lemma_tokens":["Lala","Abdul","Rashid"],"tokens":["lala","abdul","rashid"],"parse":"resource:Lala_Abdul_Rashid","relations":{},"type":"question"}
+
+
+Utterance: Larry Hurtado
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Larry_Hurtado))","lemma_tokens":["Larry","Hurtado"],"tokens":["larry","hurtado"],"parse":"resource:Larry_Hurtado","relations":{},"type":"question"}
+
+
+Utterance: Luís Tinoco
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list)","lemma_tokens":["Luís","Tinoco"],"tokens":["luís","tinoco"],"parse":"resource:Lu�s_Tinoco","relations":{},"type":"question"}
+
+
+Utterance: Marcelo Espinal
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list)","lemma_tokens":["Marcelo","Espinal"],"tokens":["marcelo","espinal"],"parse":"resource:C.D.S._Vida__Rodolfo_Marcelo_Espinal_Paniagua__1","relations":{},"type":"question"}
+
+
+Utterance: Maximilien van Haaster
+Response: {"sentiment":"Neutral","postags":["NNP","NNP","NNP"],"answer":"(list)","lemma_tokens":["Maximilien","van","Haaster"],"tokens":["maximilien","van","haaster"],"parse":"resource:Maximilien_Van_Haaster","relations":{},"type":"question"}
+
+
+Utterance: Mohammed Al-Hakim
+Response: {"sentiment":"Neutral","postags":["NNP","NNP","NNP"],"answer":"(string \"\")","lemma_tokens":["Mohammed","Al","Hakim"],"tokens":["mohammed","al","hakim"],"parse":"\"OpenEntity\u0027mohammed al hakim\u0027\u0027\"","relations":{},"type":"question"}
+
+
+Utterance: Monica Aksamit
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Monica_Aksamit))","lemma_tokens":["Monica","Aksamit"],"tokens":["monica","aksamit"],"parse":"resource:Monica_Aksamit","relations":{},"type":"question"}
+
+
+Utterance: Norman Borrett
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Norman_Borrett))","lemma_tokens":["Norman","Borrett"],"tokens":["norman","borrett"],"parse":"resource:Norman_Borrett","relations":{},"type":"question"}
+
+
+Utterance: Olena Kravatska
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Olena_Kravatska))","lemma_tokens":["Olena","Kravatska"],"tokens":["olena","kravatska"],"parse":"resource:Olena_Kravatska","relations":{},"type":"question"}
+
+
+Utterance: Philip Skell
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Philip_Skell))","lemma_tokens":["Philip","Skell"],"tokens":["philip","skell"],"parse":"resource:Philip_Skell","relations":{},"type":"question"}
+
+
+Utterance: Pierre Moussette
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Pierre_Moussette))","lemma_tokens":["Pierre","Moussette"],"tokens":["pierre","moussette"],"parse":"resource:Pierre_Moussette","relations":{},"type":"question"}
+
+
+Utterance: Piotr Kochanowski
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Piotr_Kochanowski))","lemma_tokens":["Piotr","Kochanowski"],"tokens":["piotr","kochanowski"],"parse":"resource:Piotr_Kochanowski","relations":{},"type":"question"}
+
+
+Utterance: Robin Lindsay
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Robin_Lindsay))","lemma_tokens":["Robin","Lindsay"],"tokens":["robin","lindsay"],"parse":"resource:Robin_Lindsay","relations":{},"type":"question"}
+
+
+Utterance: Simon Lee Evans
+Response: {"sentiment":"Neutral","postags":["NNP","NNP","NNP"],"answer":"(list (name resource:Simon_Lee_Evans))","lemma_tokens":["Simon","Lee","Evans"],"tokens":["simon","lee","evans"],"parse":"resource:Simon_Lee_Evans","relations":{},"type":"question"}
+
+
+Utterance: Tamirat Tola
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Tamirat_Tola))","lemma_tokens":["Tamirat","Tola"],"tokens":["tamirat","tola"],"parse":"resource:Tamirat_Tola","relations":{},"type":"question"}
+
+
+Utterance: Tibor Resznecki
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Tibor_Resznecki))","lemma_tokens":["Tibor","Resznecki"],"tokens":["tibor","resznecki"],"parse":"resource:Tibor_Resznecki","relations":{},"type":"question"}
+
+
+Utterance: Domenico Marchiori
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Domenico_Marchiori))","lemma_tokens":["Domenico","Marchiori"],"tokens":["domenico","marchiori"],"parse":"resource:Domenico_Marchiori","relations":{},"type":"question"}
+
+
+Utterance: BMX
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:Freestyle_BMX))","lemma_tokens":["BMX"],"tokens":["bmx"],"parse":"resource:Freestyle_BMX","relations":{},"type":"question"}
+
+
+Utterance: Bobsleigh
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:Bobsleigh))","lemma_tokens":["Bobsleigh"],"tokens":["bobsleigh"],"parse":"resource:Bobsleigh","relations":{},"type":"question"}
+
+
+Utterance: Bungee jumping
+Response: {"sentiment":"Neutral","postags":["NN","VBG"],"answer":"(list (name resource:Bungee_jumping))","lemma_tokens":["bungee","jump"],"tokens":["bungee","jumping"],"parse":"resource:Bungee_jumping","relations":{},"type":"question"}
+
+
+Utterance: Commerce
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:Commerce))","lemma_tokens":["Commerce"],"tokens":["commerce"],"parse":"resource:Commerce","relations":{},"type":"question"}
+
+
+Utterance: Communications security
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Communications_security))","lemma_tokens":["Communications","security"],"tokens":["communications","security"],"parse":"resource:Communications_security","relations":{},"type":"question"}
+
+
+Utterance: Computer engineering
+Response: {"sentiment":"Neutral","postags":["NN","NN"],"answer":"(list (name resource:Computer_engineering))","lemma_tokens":["computer","engineering"],"tokens":["computer","engineering"],"parse":"resource:Computer_engineering","relations":{},"type":"question"}
+
+
+Utterance: Construction engineering
+Response: {"sentiment":"Neutral","postags":["NN","NN"],"answer":"(list (name resource:Construction_engineering))","lemma_tokens":["construction","engineering"],"tokens":["construction","engineering"],"parse":"resource:Construction_engineering","relations":{},"type":"question"}
+
+
+Utterance: Dressage
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Dressage))","lemma_tokens":["dressage"],"tokens":["dressage"],"parse":"resource:Dressage","relations":{},"type":"question"}
+
+
+Utterance: Fishing
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Fishing))","lemma_tokens":["fishing"],"tokens":["fishing"],"parse":"resource:Fishing","relations":{},"type":"question"}
+
+
+Utterance: Freeflying
+Response: {"sentiment":"Neutral","postags":["VBG"],"answer":"(list (name resource:Freeflying))","lemma_tokens":["freefly"],"tokens":["freeflying"],"parse":"resource:Freeflying","relations":{},"type":"question"}
+
+
+Utterance: Gaelic football
+Response: {"sentiment":"Neutral","postags":["JJ","NN"],"answer":"(list (name resource:Gaelic_football))","lemma_tokens":["gaelic","football"],"tokens":["gaelic","football"],"parse":"resource:Gaelic_football","relations":{},"type":"question"}
+
+
+Utterance: Genomics
+Response: {"sentiment":"Neutral","postags":["NNS"],"answer":"(list (name resource:Genomics))","lemma_tokens":["genomic"],"tokens":["genomics"],"parse":"resource:Genomics","relations":{},"type":"question"}
+
+
+Utterance: Ice dancing
+Response: {"sentiment":"Neutral","postags":["NN","NN"],"answer":"(list (name resource:Ice_dancing))","lemma_tokens":["ice","dancing"],"tokens":["ice","dancing"],"parse":"resource:Ice_dancing","relations":{},"type":"question"}
+
+
+Utterance: Luge
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(no answer)","lemma_tokens":["luge"],"tokens":["luge"],"parse":"(no answer)","relations":{}}
+
+
+Utterance: Modern pentathlon
+Response: {"sentiment":"Neutral","postags":["JJ","NN"],"answer":"(list (name resource:Modern_pentathlon))","lemma_tokens":["modern","pentathlon"],"tokens":["modern","pentathlon"],"parse":"resource:Modern_pentathlon","relations":{},"type":"question"}
+
+
+Utterance: Mountain unicycling
+Response: {"sentiment":"Neutral","postags":["NN","NN"],"answer":"(list (name resource:Mountain_unicycling))","lemma_tokens":["mountain","unicycling"],"tokens":["mountain","unicycling"],"parse":"resource:Mountain_unicycling","relations":{},"type":"question"}
+
+
+Utterance: Olympic weightlifting
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Olympic_weightlifting))","lemma_tokens":["Olympic","weightlifting"],"tokens":["olympic","weightlifting"],"parse":"resource:Olympic_weightlifting","relations":{},"type":"question"}
+
+
+Utterance: Racquetball
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Racquetball))","lemma_tokens":["racquetball"],"tokens":["racquetball"],"parse":"resource:Racquetball","relations":{},"type":"question"}
+
+
+Utterance: Safety engineering
+Response: {"sentiment":"Neutral","postags":["NN","NN"],"answer":"(list (name resource:Safety_engineering))","lemma_tokens":["safety","engineering"],"tokens":["safety","engineering"],"parse":"resource:Safety_engineering","relations":{},"type":"question"}
+
+
+Utterance: Short track speed skating
+Response: {"sentiment":"Neutral","postags":["JJ","NN","NN","VBG"],"answer":"(list (name resource:Short_track_speed_skating))","lemma_tokens":["short","track","speed","skate"],"tokens":["short","track","speed","skating"],"parse":"resource:Short_track_speed_skating","relations":{},"type":"question"}
+
+
+Utterance: Show jumping
+Response: {"sentiment":"Neutral","postags":["NN","VBG"],"answer":"(list (name resource:Show_jumping))","lemma_tokens":["show","jump"],"tokens":["show","jumping"],"parse":"resource:Show_jumping","relations":{},"type":"question"}
+
+
+Utterance: Ski jumping
+Response: {"sentiment":"Neutral","postags":["NN","VBG"],"answer":"(list (name resource:Ski_jumping))","lemma_tokens":["ski","jump"],"tokens":["ski","jumping"],"parse":"resource:Ski_jumping","relations":{},"type":"question"}
+
+
+Utterance: Snowboarding
+Response: {"sentiment":"Neutral","postags":["VBG"],"answer":"(list (name resource:Snowboarding))","lemma_tokens":["snowboard"],"tokens":["snowboarding"],"parse":"resource:Snowboarding","relations":{},"type":"question"}
+
+
+Utterance: Sport of athletics
+Response: {"sentiment":"Neutral","postags":["NN","IN","NNP"],"answer":"(list (name resource:Sport_of_athletics))","lemma_tokens":["sport","of","athletics"],"tokens":["sport","of","athletics"],"parse":"resource:Sport_of_athletics","relations":{},"type":"question"}
+
+
+Utterance: Sumo
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:Sumo))","lemma_tokens":["Sumo"],"tokens":["sumo"],"parse":"resource:Sumo","relations":{},"type":"question"}
+
+
+Utterance: Table tennis
+Response: {"sentiment":"Neutral","postags":["NN","NN"],"answer":"(list (name resource:Table_tennis))","lemma_tokens":["table","tennis"],"tokens":["table","tennis"],"parse":"resource:Table_tennis","relations":{},"type":"question"}
+
+
+Utterance: Tennis
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name property:sport))","lemma_tokens":["tennis"],"tokens":["tennis"],"parse":"property:sport","relations":{},"type":"question"}
+
+
+Utterance: Theoretical ecology
+Response: {"sentiment":"Neutral","postags":["JJ","NN"],"answer":"(list (name resource:Theoretical_ecology))","lemma_tokens":["theoretical","ecology"],"tokens":["theoretical","ecology"],"parse":"resource:Theoretical_ecology","relations":{},"type":"question"}
+
+
+Utterance: Volleyball
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name property:sport))","lemma_tokens":["volleyball"],"tokens":["volleyball"],"parse":"property:sport","relations":{},"type":"question"}
+
+
+Utterance: Wakeboarding
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:Wakeboarding))","lemma_tokens":["Wakeboarding"],"tokens":["wakeboarding"],"parse":"resource:Wakeboarding","relations":{},"type":"question"}
+
+
+Utterance: Water polo
+Response: {"sentiment":"Neutral","postags":["NN","NNP"],"answer":"(list (name resource:Water_polo))","lemma_tokens":["water","polo"],"tokens":["water","polo"],"parse":"resource:Water_polo","relations":{},"type":"question"}
+
+
+Utterance: Water skiing
+Response: {"sentiment":"Neutral","postags":["NN","NN"],"answer":"(list (name resource:World_water_skiing_champions))","lemma_tokens":["water","skiing"],"tokens":["water","skiing"],"parse":"resource:World_water_skiing_champions","relations":{},"type":"question"}
+
+
+Utterance: Winter sport
+Response: {"sentiment":"Neutral","postags":["NN","NN"],"answer":"(list (name resource:Winter_sport))","lemma_tokens":["winter","sport"],"tokens":["winter","sport"],"parse":"resource:Winter_sport","relations":{},"type":"question"}
+
+
+Utterance: Woodworking
+Response: {"sentiment":"Neutral","postags":["VBG"],"answer":"(list (name resource:Woodworking))","lemma_tokens":["woodwork"],"tokens":["woodworking"],"parse":"resource:Woodworking","relations":{},"type":"question"}
+
+
+Utterance: Business process modeling
+Response: {"sentiment":"Neutral","postags":["NN","NN","NN"],"answer":"(list (name resource:Business_process_modeling))","lemma_tokens":["business","process","modeling"],"tokens":["business","process","modeling"],"parse":"resource:Business_process_modeling","relations":{},"type":"question"}
+
+
+Utterance: Cantus
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:Cantus))","lemma_tokens":["Cantus"],"tokens":["cantus"],"parse":"resource:Cantus","relations":{},"type":"question"}
+
+
+Utterance: Crime reconstruction
+Response: {"sentiment":"Neutral","postags":["NN","NN"],"answer":"(list (name resource:Crime_reconstruction))","lemma_tokens":["crime","reconstruction"],"tokens":["crime","reconstruction"],"parse":"resource:Crime_reconstruction","relations":{},"type":"question"}
+
+
+Utterance: Formula racing
+Response: {"sentiment":"Neutral","postags":["NN","NN"],"answer":"(list (name resource:Formula_racing))","lemma_tokens":["formula","racing"],"tokens":["formula","racing"],"parse":"resource:Formula_racing","relations":{},"type":"question"}
+
+
+Utterance: Highmarking
+Response: {"sentiment":"Neutral","postags":["VBG"],"answer":"(list (name resource:Highmarking))","lemma_tokens":["highmark"],"tokens":["highmarking"],"parse":"resource:Highmarking","relations":{},"type":"question"}
+
+
+Utterance: Prognostics
+Response: {"sentiment":"Neutral","postags":["NNS"],"answer":"(list (name resource:Prognostics))","lemma_tokens":["prognostic"],"tokens":["prognostics"],"parse":"resource:Prognostics","relations":{},"type":"question"}
+
+
+Utterance: World Darts Federation
+Response: {"sentiment":"Neutral","postags":["NN","NN","NN"],"answer":"(list (name resource:World_Darts_Federation))","lemma_tokens":["world","darts","federation"],"tokens":["world","darts","federation"],"parse":"resource:World_Darts_Federation","relations":{},"type":"question"}
+
+
+Utterance: Cricket in Nepal
+Response: {"sentiment":"Neutral","postags":["NN","IN","NNP"],"answer":"(list (name resource:Cricket_in_Nepal))","lemma_tokens":["cricket","in","Nepal"],"tokens":["cricket","in","nepal"],"parse":"resource:Cricket_in_Nepal","relations":{"(cricket,be in,Nepal)":1.0},"type":"question"}
+
+
+Utterance: Athletics at the Central American and Caribbean Games
+Response: {"sentiment":"Neutral","postags":["NNS","IN","DT","JJ","JJ","CC","JJ","NNS"],"answer":"(list (name resource:Athletics_at_the_Central_American_and_Caribbean_Games))","lemma_tokens":["athletics","at","the","central","american","and","caribbean","game"],"tokens":["athletics","at","the","central","american","and","caribbean","games"],"parse":"resource:Athletics_at_the_Central_American_and_Caribbean_Games","relations":{},"type":"question"}
+
+
+Utterance: Body blading
+Response: {"sentiment":"Neutral","postags":["NN","VBG"],"answer":"(list (name resource:Body_blading))","lemma_tokens":["body","blade"],"tokens":["body","blading"],"parse":"resource:Body_blading","relations":{},"type":"question"}
+
+
+Utterance: Cheerleading in the United Kingdom
+Response: {"sentiment":"Neutral","postags":["NN","IN","DT","NNP","NNP"],"answer":"(list (name resource:Cheerleading_in_the_United_Kingdom))","lemma_tokens":["cheerleading","in","the","United","Kingdom"],"tokens":["cheerleading","in","the","united","kingdom"],"parse":"resource:Cheerleading_in_the_United_Kingdom","relations":{"(cheerleading,be in,United Kingdom)":1.0},"type":"question"}
+
+
+Utterance: European Lacrosse Federation
+Response: {"sentiment":"Neutral","postags":["NNP","NNP","NNP"],"answer":"(list (name resource:European_Lacrosse_Federation))","lemma_tokens":["European","Lacrosse","Federation"],"tokens":["european","lacrosse","federation"],"parse":"resource:European_Lacrosse_Federation","relations":{},"type":"question"}
+
+
+Utterance: FSU Flying High Circus
+Response: {"sentiment":"Neutral","postags":["NNP","NNP","NNP","NNP"],"answer":"(list (name resource:FSU_Flying_High_Circus))","lemma_tokens":["FSU","Flying","High","Circus"],"tokens":["fsu","flying","high","circus"],"parse":"resource:FSU_Flying_High_Circus","relations":{},"type":"question"}
+
+
+Utterance: Gymnastics in Azerbaijan
+Response: {"sentiment":"Neutral","postags":["NNS","IN","NNP"],"answer":"(list (name resource:Gymnastics_in_Azerbaijan))","lemma_tokens":["gymnastics","in","Azerbaijan"],"tokens":["gymnastics","in","azerbaijan"],"parse":"resource:Gymnastics_in_Azerbaijan","relations":{"(gymnastics,be in,Azerbaijan)":1.0},"type":"question"}
+
+
+Utterance: Information Warfare Monitor
+Response: {"sentiment":"Neutral","postags":["NN","NN","NN"],"answer":"(list (name resource:Information_Warfare_Monitor))","lemma_tokens":["information","warfare","monitor"],"tokens":["information","warfare","monitor"],"parse":"resource:Information_Warfare_Monitor","relations":{},"type":"question"}
+
+
+Utterance: Joint Personnel Recovery Agency
+Response: {"sentiment":"Neutral","postags":["JJ","NNS","NN","NN"],"answer":"(list (name resource:Joint_Personnel_Recovery_Agency))","lemma_tokens":["joint","personnel","recovery","agency"],"tokens":["joint","personnel","recovery","agency"],"parse":"resource:Joint_Personnel_Recovery_Agency","relations":{},"type":"question"}
+
+
+Utterance: Acoustic coupler
+Response: {"sentiment":"Neutral","postags":["JJ","NN"],"answer":"(list (name resource:Acoustic_coupler))","lemma_tokens":["acoustic","coupler"],"tokens":["acoustic","coupler"],"parse":"resource:Acoustic_coupler","relations":{},"type":"question"}
+
+
+Utterance: AirPort
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Airport))","lemma_tokens":["airport"],"tokens":["airport"],"parse":"resource:Airport","relations":{},"type":"question"}
+
+
+Utterance: Alliteration
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Alliteration))","lemma_tokens":["alliteration"],"tokens":["alliteration"],"parse":"resource:Alliteration","relations":{},"type":"question"}
+
+
+Utterance: Audio codec
+Response: {"sentiment":"Neutral","postags":["JJ","NN"],"answer":"(list (name resource:Audio_codec))","lemma_tokens":["audio","codec"],"tokens":["audio","codec"],"parse":"resource:Audio_codec","relations":{},"type":"question"}
+
+
+Utterance: Automatic call distributor
+Response: {"sentiment":"Neutral","postags":["JJ","NN","NN"],"answer":"(list (name resource:Automatic_call_distributor))","lemma_tokens":["automatic","call","distributor"],"tokens":["automatic","call","distributor"],"parse":"resource:Automatic_call_distributor","relations":{},"type":"question"}
+
+
+Utterance: Bong
+Response: {"sentiment":"Neutral","postags":["FW"],"answer":"(list (name resource:Bong))","lemma_tokens":["bong"],"tokens":["bong"],"parse":"resource:Bong","relations":{},"type":"question"}
+
+
+Utterance: Carburetor
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Carburetor))","lemma_tokens":["carburetor"],"tokens":["carburetor"],"parse":"resource:Carburetor","relations":{},"type":"question"}
+
+
+Utterance: Cash machine
+Response: {"sentiment":"Neutral","postags":["NN","NN"],"answer":"(list (name resource:Cash_Machine))","lemma_tokens":["cash","machine"],"tokens":["cash","machine"],"parse":"resource:Cash_Machine","relations":{},"type":"question"}
+
+
+Utterance: Channel service unit
+Response: {"sentiment":"Neutral","postags":["NNP","NNP","NN"],"answer":"(list (name resource:Channel_service_unit))","lemma_tokens":["Channel","service","unit"],"tokens":["channel","service","unit"],"parse":"resource:Channel_service_unit","relations":{},"type":"question"}
+
+
+Utterance: Coupling
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Coupling))","lemma_tokens":["coupling"],"tokens":["coupling"],"parse":"resource:Coupling","relations":{},"type":"question"}
+
+
+Utterance: Customer service unit
+Response: {"sentiment":"Neutral","postags":["NN","NN","NN"],"answer":"(list (name resource:Customer_service_unit))","lemma_tokens":["customer","service","unit"],"tokens":["customer","service","unit"],"parse":"resource:Customer_service_unit","relations":{},"type":"question"}
+
+
+Utterance: Data forwarder
+Response: {"sentiment":"Neutral","postags":["NNS","NN"],"answer":"(list (name resource:Data_forwarder))","lemma_tokens":["datum","forwarder"],"tokens":["data","forwarder"],"parse":"resource:Data_forwarder","relations":{},"type":"question"}
+
+
+Utterance: Direct-access storage device
+Response: {"sentiment":"Neutral","postags":["JJ","NN","NN","NN"],"answer":"(list)","lemma_tokens":["direct","access","storage","device"],"tokens":["direct","access","storage","device"],"parse":"resource:Direct_Access_Storage_Device","relations":{},"type":"question"}
+
+
+Utterance: Dosimeter
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Dosimeter))","lemma_tokens":["dosimeter"],"tokens":["dosimeter"],"parse":"resource:Dosimeter","relations":{},"type":"question"}
+
+
+Utterance: Duplexer
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:Duplexer))","lemma_tokens":["Duplexer"],"tokens":["duplexer"],"parse":"resource:Duplexer","relations":{},"type":"question"}
+
+
+Utterance: Fishing reel
+Response: {"sentiment":"Neutral","postags":["NN","NN"],"answer":"(list (name resource:Fishing_reel))","lemma_tokens":["fishing","reel"],"tokens":["fishing","reel"],"parse":"resource:Fishing_reel","relations":{},"type":"question"}
+
+
+Utterance: Fusor
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Fusor))","lemma_tokens":["fusor"],"tokens":["fusor"],"parse":"resource:Fusor","relations":{},"type":"question"}
+
+
+Utterance: GameCube
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name property:game))","lemma_tokens":["GameCube"],"tokens":["gamecube"],"parse":"property:game","relations":{},"type":"question"}
+
+
+Utterance: Game Gear
+Response: {"sentiment":"Neutral","postags":["NN","NN"],"answer":"(list (name resource:Game_Gear))","lemma_tokens":["game","gear"],"tokens":["game","gear"],"parse":"resource:Game_Gear","relations":{},"type":"question"}
+
+
+Utterance: Gender changer
+Response: {"sentiment":"Neutral","postags":["NN","NN"],"answer":"(list (name resource:Gender_changer))","lemma_tokens":["gender","changer"],"tokens":["gender","changer"],"parse":"resource:Gender_changer","relations":{},"type":"question"}
+
+
+Utterance: Gladius
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:Gladius))","lemma_tokens":["Gladius"],"tokens":["gladius"],"parse":"resource:Gladius","relations":{},"type":"question"}
+
+
+Utterance: Heavy Equipment Transport System
+Response: {"sentiment":"Negative","postags":["JJ","NN","NN","NN"],"answer":"(list (name resource:Heavy_Equipment_Transport_System))","lemma_tokens":["heavy","equipment","transport","system"],"tokens":["heavy","equipment","transport","system"],"parse":"resource:Heavy_Equipment_Transport_System","relations":{},"type":"question"}
+
+
+Utterance: Heavy Expanded Mobility Tactical Truck
+Response: {"sentiment":"Neutral","postags":["JJ","VBN","NN","JJ","NN"],"answer":"(list (name resource:Heavy_Expanded_Mobility_Tactical_Truck))","lemma_tokens":["heavy","expand","mobility","tactical","truck"],"tokens":["heavy","expanded","mobility","tactical","truck"],"parse":"resource:Heavy_Expanded_Mobility_Tactical_Truck","relations":{},"type":"question"}
+
+
+Utterance: Invention
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Invention))","lemma_tokens":["invention"],"tokens":["invention"],"parse":"resource:Invention","relations":{},"type":"question"}
+
+
+Utterance: Letter bomb
+Response: {"sentiment":"Negative","postags":["NN","NN"],"answer":"(list (name resource:Letter_bomb))","lemma_tokens":["letter","bomb"],"tokens":["letter","bomb"],"parse":"resource:Letter_bomb","relations":{},"type":"question"}
+
+
+Utterance: Light pen
+Response: {"sentiment":"Neutral","postags":["JJ","NN"],"answer":"(list (name resource:Light_pen))","lemma_tokens":["light","pen"],"tokens":["light","pen"],"parse":"resource:Light_pen","relations":{},"type":"question"}
+
+
+Utterance: Loom
+Response: {"sentiment":"Neutral","postags":["VB"],"answer":"(list (name resource:Loom))","lemma_tokens":["loom"],"tokens":["loom"],"parse":"resource:Loom","relations":{},"type":"question"}
+
+
+Utterance: Mode scrambler
+Response: {"sentiment":"Neutral","postags":["NN","NN"],"answer":"(list (name resource:Mode_scrambler))","lemma_tokens":["mode","scrambler"],"tokens":["mode","scrambler"],"parse":"resource:Mode_scrambler","relations":{},"type":"question"}
+
+
+Utterance: Network interface device
+Response: {"sentiment":"Neutral","postags":["NN","NN","NN"],"answer":"(list (name resource:Network_interface_device))","lemma_tokens":["network","interface","device"],"tokens":["network","interface","device"],"parse":"resource:Network_interface_device","relations":{},"type":"question"}
+
+
+Utterance: Network switch
+Response: {"sentiment":"Neutral","postags":["NN","NN"],"answer":"(list (name resource:Network_switch))","lemma_tokens":["network","switch"],"tokens":["network","switch"],"parse":"resource:Network_switch","relations":{},"type":"question"}
+
+
+Utterance: Nuclear explosive
+Response: {"sentiment":"Positive","postags":["JJ","NN"],"answer":"(list (name resource:Nuclear_explosive))","lemma_tokens":["nuclear","explosive"],"tokens":["nuclear","explosive"],"parse":"resource:Nuclear_explosive","relations":{},"type":"question"}
+
+
+Utterance: Optical amplifier
+Response: {"sentiment":"Neutral","postags":["JJ","NN"],"answer":"(list (name resource:Optical_amplifier))","lemma_tokens":["optical","amplifier"],"tokens":["optical","amplifier"],"parse":"resource:Optical_amplifier","relations":{},"type":"question"}
+
+
+Utterance: PalmPilot
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:PalmPilot))","lemma_tokens":["palmpilot"],"tokens":["palmpilot"],"parse":"resource:PalmPilot","relations":{},"type":"question"}
+
+
+Utterance: Parachute
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Parachute))","lemma_tokens":["parachute"],"tokens":["parachute"],"parse":"resource:Parachute","relations":{},"type":"question"}
+
+
+Utterance: Photodiode
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:Photodiode))","lemma_tokens":["Photodiode"],"tokens":["photodiode"],"parse":"resource:Photodiode","relations":{},"type":"question"}
+
+
+Utterance: Photophone
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:Photophone))","lemma_tokens":["Photophone"],"tokens":["photophone"],"parse":"resource:Photophone","relations":{},"type":"question"}
+
+
+Utterance: Pulse link repeater
+Response: {"sentiment":"Neutral","postags":["NN","NN","NN"],"answer":"(list (name resource:Pulse_link_repeater))","lemma_tokens":["pulse","link","repeater"],"tokens":["pulse","link","repeater"],"parse":"resource:Pulse_link_repeater","relations":{},"type":"question"}
+
+
+Utterance: Rapier
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Rapier))","lemma_tokens":["rapier"],"tokens":["rapier"],"parse":"resource:Rapier","relations":{},"type":"question"}
+
+
+Utterance: Repeater
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Repeater))","lemma_tokens":["repeater"],"tokens":["repeater"],"parse":"resource:Repeater","relations":{},"type":"question"}
+
+
+Utterance: Respirometer
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Respirometer))","lemma_tokens":["respirometer"],"tokens":["respirometer"],"parse":"resource:Respirometer","relations":{},"type":"question"}
+
+
+Utterance: Scrambler
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Scrambler))","lemma_tokens":["scrambler"],"tokens":["scrambler"],"parse":"resource:Scrambler","relations":{},"type":"question"}
+
+
+Utterance: Seat belt
+Response: {"sentiment":"Neutral","postags":["NN","NN"],"answer":"(list (name resource:Seat_belt))","lemma_tokens":["seat","belt"],"tokens":["seat","belt"],"parse":"resource:Seat_belt","relations":{},"type":"question"}
+
+
+Utterance: Sega CD
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(no answer)","lemma_tokens":["Sega","CD"],"tokens":["sega","cd"],"parse":"(no answer)","relations":{}}
+
+
+Utterance: Sega Saturn
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Sega_Saturn))","lemma_tokens":["Sega","Saturn"],"tokens":["sega","saturn"],"parse":"resource:Sega_Saturn","relations":{},"type":"question"}
+
+
+Utterance: Set-top box
+Response: {"sentiment":"Positive","postags":["VBN","JJ","NN"],"answer":"(list)","lemma_tokens":["set","top","box"],"tokens":["set","top","box"],"parse":"resource:Set_Top_Box","relations":{},"type":"question"}
+
+
+Utterance: Star coupler
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Star_coupler))","lemma_tokens":["Star","coupler"],"tokens":["star","coupler"],"parse":"resource:Star_coupler","relations":{},"type":"question"}
+
+
+Utterance: Steam turbine
+Response: {"sentiment":"Neutral","postags":["NN","NN"],"answer":"(list (name resource:Steam_turbine))","lemma_tokens":["steam","turbine"],"tokens":["steam","turbine"],"parse":"resource:Steam_turbine","relations":{},"type":"question"}
+
+
+Utterance: Stellarator
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Stellarator))","lemma_tokens":["stellarator"],"tokens":["stellarator"],"parse":"resource:Stellarator","relations":{},"type":"question"}
+
+
+Utterance: Stethoscope
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Stethoscope))","lemma_tokens":["stethoscope"],"tokens":["stethoscope"],"parse":"resource:Stethoscope","relations":{},"type":"question"}
+
+
+Utterance: Szczerbiec
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:Szczerbiec))","lemma_tokens":["Szczerbiec"],"tokens":["szczerbiec"],"parse":"resource:Szczerbiec","relations":{},"type":"question"}
+
+
+Utterance: A-wing
+Response: {"sentiment":"Neutral","postags":["DT","NN"],"answer":"(list (name resource:Detroit_Red_Wings))","lemma_tokens":["a","wing"],"tokens":["a","wing"],"parse":"resource:Detroit_Red_Wings","relations":{},"type":"question"}
+
+
+Utterance: Anti-Masonic Party
+Response: {"sentiment":"Neutral","postags":["JJ","JJ","NN"],"answer":"(list (name resource:Anti-Masonic_Party))","lemma_tokens":["anti","masonic","party"],"tokens":["anti","masonic","party"],"parse":"resource:Anti-Masonic_Party","relations":{},"type":"question"}
+
+
+Utterance: Canadian Alliance
+Response: {"sentiment":"Neutral","postags":["JJ","NN"],"answer":"(list (name resource:Canadian_Alliance))","lemma_tokens":["canadian","alliance"],"tokens":["canadian","alliance"],"parse":"resource:Canadian_Alliance","relations":{},"type":"question"}
+
+
+Utterance: Communist party
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Communist_Party_of_China))","lemma_tokens":["Communist","party"],"tokens":["communist","party"],"parse":"resource:Communist_Party_of_China","relations":{},"type":"question"}
+
+
+Utterance: Democratic-Republican Party
+Response: {"sentiment":"Neutral","postags":["JJ","NNP","NNP"],"answer":"(list)","lemma_tokens":["democratic","Republican","Party"],"tokens":["democratic","republican","party"],"parse":"resource:Democratic_Republican_Party","relations":{},"type":"question"}
+
+
+Utterance: Democratic Left Alliance
+Response: {"sentiment":"Neutral","postags":["JJ","VBN","NN"],"answer":"(list (name resource:Democratic_Left_Alliance))","lemma_tokens":["democratic","leave","alliance"],"tokens":["democratic","left","alliance"],"parse":"resource:Democratic_Left_Alliance","relations":{},"type":"question"}
+
+
+Utterance: Federalist Party
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(no answer)","lemma_tokens":["Federalist","Party"],"tokens":["federalist","party"],"parse":"(no answer)","relations":{}}
+
+
+Utterance: German Workers' Party
+Response: {"sentiment":"Neutral","postags":["JJ","NNS","POS","NN"],"answer":"(list (name resource:Nazi_Party))","lemma_tokens":["german","worker","\u0027","party"],"tokens":["german","workers","\u0027","party"],"parse":"resource:Nazi_Party","relations":{},"type":"question"}
+
+
+Utterance: Green Party of the United States
+Response: {"sentiment":"Neutral","postags":["NNP","NNP","IN","DT","NNP","NNPS"],"answer":"(list (name resource:Green_Party_of_the_United_States))","lemma_tokens":["Green","Party","of","the","United","States"],"tokens":["green","party","of","the","united","states"],"parse":"resource:Green_Party_of_the_United_States","relations":{},"type":"question"}
+
+
+Utterance: Iranian Green Movement
+Response: {"sentiment":"Neutral","postags":["JJ","JJ","NN"],"answer":"(list (name resource:Iranian_Green_Movement))","lemma_tokens":["iranian","green","movement"],"tokens":["iranian","green","movement"],"parse":"resource:Iranian_Green_Movement","relations":{},"type":"question"}
+
+
+Utterance: Labour United
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Labour_United))","lemma_tokens":["Labour","United"],"tokens":["labour","united"],"parse":"resource:Labour_United","relations":{},"type":"question"}
+
+
+Utterance: Melody
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:Melody))","lemma_tokens":["Melody"],"tokens":["melody"],"parse":"resource:Melody","relations":{},"type":"question"}
+
+
+Utterance: Nationalist Party of Australia
+Response: {"sentiment":"Neutral","postags":["JJ","NN","IN","NNP"],"answer":"(list (name resource:Nationalist_Party_of_Australia))","lemma_tokens":["nationalist","party","of","Australia"],"tokens":["nationalist","party","of","australia"],"parse":"resource:Nationalist_Party_of_Australia","relations":{},"type":"question"}
+
+
+Utterance: People's Party for Freedom and Democracy
+Response: {"sentiment":"Neutral","postags":["NNS","POS","NN","IN","NN","CC","NN"],"answer":"(string \"\")","lemma_tokens":["people","\u0027s","party","for","freedom","and","democracy"],"tokens":["people","\u0027s","party","for","freedom","and","democracy"],"parse":"\"OpenEntity\u0027people  s party for freedom and democracy\u0027\u0027\"","relations":{"(people,have,party for freedom)":1.0},"type":"question"}
+
+
+Utterance: Pim Fortuyn List
+Response: {"sentiment":"Neutral","postags":["NNP","NNP","NN"],"answer":"(list (name resource:Pim_Fortuyn_List))","lemma_tokens":["Pim","Fortuyn","list"],"tokens":["pim","fortuyn","list"],"parse":"resource:Pim_Fortuyn_List","relations":{},"type":"question"}
+
+
+Utterance: Polish People's Party
+Response: {"sentiment":"Neutral","postags":["JJ","NNS","POS","NN"],"answer":"(string \"\")","lemma_tokens":["polish","people","\u0027s","party"],"tokens":["polish","people","\u0027s","party"],"parse":"\"OpenEntity\u0027polish people  s party\u0027\u0027\"","relations":{"(polish people,have,party)":1.0},"type":"question"}
+
+
+Utterance: Polish United Workers' Party
+Response: {"sentiment":"Neutral","postags":["NNP","NNP","NNPS","POS","NN"],"answer":"(no answer)","lemma_tokens":["Polish","United","Workers","\u0027","party"],"tokens":["polish","united","workers","\u0027","party"],"parse":"(no answer)","relations":{}}
+
+
+Utterance: Rave
+Response: {"sentiment":"Neutral","postags":["VB"],"answer":"(list (name resource:Rave))","lemma_tokens":["rave"],"tokens":["rave"],"parse":"resource:Rave","relations":{},"type":"question"}
+
+
+Utterance: Red-green alliance
+Response: {"sentiment":"Neutral","postags":["JJ","JJ","NN"],"answer":"(list)","lemma_tokens":["red","green","alliance"],"tokens":["red","green","alliance"],"parse":"resource:Red_Green_Alliance","relations":{},"type":"question"}
+
+
+Utterance: Sandinista National Liberation Front
+Response: {"sentiment":"Neutral","postags":["NNP","NNP","NNP","NN"],"answer":"(list (name resource:Sandinista_National_Liberation_Front))","lemma_tokens":["Sandinista","National","Liberation","front"],"tokens":["sandinista","national","liberation","front"],"parse":"resource:Sandinista_National_Liberation_Front","relations":{},"type":"question"}
+
+
+Utterance: Solidarity Electoral Action
+Response: {"sentiment":"Negative","postags":["NNP","NNP","NN"],"answer":"(list (name resource:Solidarity_Electoral_Action))","lemma_tokens":["Solidarity","Electoral","action"],"tokens":["solidarity","electoral","action"],"parse":"resource:Solidarity_Electoral_Action","relations":{},"type":"question"}
+
+
+Utterance: United Australia Party
+Response: {"sentiment":"Neutral","postags":["NNP","NNP","NNP"],"answer":"(list (name resource:United_Australia_Party))","lemma_tokens":["United","Australia","Party"],"tokens":["united","australia","party"],"parse":"resource:United_Australia_Party","relations":{},"type":"question"}
+
+
+Utterance: Wedding reception
+Response: {"sentiment":"Positive","postags":["NN","NN"],"answer":"(list (name resource:Wedding_reception))","lemma_tokens":["wedding","reception"],"tokens":["wedding","reception"],"parse":"resource:Wedding_reception","relations":{},"type":"question"}
+
+
+Utterance: Y-wing
+Response: {"sentiment":"Neutral","postags":["NN","NN"],"answer":"(list)","lemma_tokens":["y","wing"],"tokens":["y","wing"],"parse":"resource:Y_Wing","relations":{},"type":"question"}
+
+
+Utterance: Anti H-Block
+Response: {"sentiment":"Neutral","postags":["JJ","NN","NN"],"answer":"(list)","lemma_tokens":["anti","h","block"],"tokens":["anti","h","block"],"parse":"resource:Anti_H_Block","relations":{},"type":"question"}
+
+
+Utterance: Freedom Alliance Party of Liberia
+Response: {"sentiment":"Neutral","postags":["NNP","NNP","NNP","IN","NNP"],"answer":"(list (name resource:Freedom_Alliance_Party_of_Liberia))","lemma_tokens":["Freedom","Alliance","Party","of","Liberia"],"tokens":["freedom","alliance","party","of","liberia"],"parse":"resource:Freedom_Alliance_Party_of_Liberia","relations":{},"type":"question"}
+
+
+Utterance: Katter's Australian Party
+Response: {"sentiment":"Neutral","postags":["NNP","POS","NNP","NNP"],"answer":"(string \"\")","lemma_tokens":["Katter","\u0027s","Australian","Party"],"tokens":["katter","\u0027s","australian","party"],"parse":"\"OpenEntity\u0027katter  s australian party\u0027\u0027\"","relations":{"(Katter,have,Australian Party)":1.0},"type":"question"}
+
+
+Utterance: Liberal and Country League
+Response: {"sentiment":"Neutral","postags":["JJ","CC","NN","NN"],"answer":"(list (name resource:Liberal_and_Country_League))","lemma_tokens":["liberal","and","country","league"],"tokens":["liberal","and","country","league"],"parse":"resource:Liberal_and_Country_League","relations":{},"type":"question"}
+
+
+Utterance: Mazdoor Kisan Party
+Response: {"sentiment":"Neutral","postags":["NNP","NNP","NNP"],"answer":"(list (name resource:Mazdoor_Kisan_Party))","lemma_tokens":["Mazdoor","Kisan","Party"],"tokens":["mazdoor","kisan","party"],"parse":"resource:Mazdoor_Kisan_Party","relations":{},"type":"question"}
+
+
+Utterance: Redeemers
+Response: {"sentiment":"Neutral","postags":["NNS"],"answer":"(list (name resource:Redeemers))","lemma_tokens":["redeemer"],"tokens":["redeemers"],"parse":"resource:Redeemers","relations":{},"type":"question"}
+
+
+Utterance: Syrian National Council
+Response: {"sentiment":"Neutral","postags":["JJ","NNP","NNP"],"answer":"(list (name resource:Syrian_National_Council))","lemma_tokens":["syrian","National","Council"],"tokens":["syrian","national","council"],"parse":"resource:Syrian_National_Council","relations":{},"type":"question"}
+
+
+Utterance: Unidad Falangista Montañesa
+Response: {"sentiment":"Neutral","postags":["NNP","NNP","NNP"],"answer":"(list)","lemma_tokens":["Unidad","Falangista","Montañesa"],"tokens":["unidad","falangista","montañesa"],"parse":"resource:Unidad_Falangista_Monta�esa","relations":{},"type":"question"}
+
+
+Utterance: White Defence League
+Response: {"sentiment":"Neutral","postags":["NNP","NNP","NNP"],"answer":"(list (name resource:White_Defence_League))","lemma_tokens":["White","Defence","League"],"tokens":["white","defence","league"],"parse":"resource:White_Defence_League","relations":{},"type":"question"}
+
+
+Utterance: AMIN Worldwide
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:AMIN_Worldwide))","lemma_tokens":["AMIN","Worldwide"],"tokens":["amin","worldwide"],"parse":"resource:AMIN_Worldwide","relations":{},"type":"question"}
+
+
+Utterance: Al-Aqsa Martyrs' Brigades
+Response: {"sentiment":"Neutral","postags":["NNP","NNP","NNS","POS","NNS"],"answer":"(no answer)","lemma_tokens":["Al","Aqsa","martyr","\u0027","brigade"],"tokens":["al","aqsa","martyrs","\u0027","brigades"],"parse":"(no answer)","relations":{}}
+
+
+Utterance: All Burma Monks' Alliance
+Response: {"sentiment":"Neutral","postags":["DT","NN","NN","\u0027\u0027","NN"],"answer":"(no answer)","lemma_tokens":["all","burma","monks","\u0027","alliance"],"tokens":["all","burma","monks","\u0027","alliance"],"parse":"(no answer)","relations":{}}
+
+
+Utterance: All Ceylon Tamil Congress
+Response: {"sentiment":"Neutral","postags":["DT","NNP","NNP","NNP"],"answer":"(list (name resource:All_Ceylon_Tamil_Congress))","lemma_tokens":["all","Ceylon","Tamil","Congress"],"tokens":["all","ceylon","tamil","congress"],"parse":"resource:All_Ceylon_Tamil_Congress","relations":{},"type":"question"}
+
+
+Utterance: Asom Bharatiya Janata Party
+Response: {"sentiment":"Neutral","postags":["NNP","NNP","NNP","NNP"],"answer":"(list (name resource:Asom_Bharatiya_Janata_Party))","lemma_tokens":["Asom","Bharatiya","Janata","Party"],"tokens":["asom","bharatiya","janata","party"],"parse":"resource:Asom_Bharatiya_Janata_Party","relations":{},"type":"question"}
+
+
+Utterance: BGO Gemini
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:BGO_Gemini))","lemma_tokens":["BGO","Gemini"],"tokens":["bgo","gemini"],"parse":"resource:BGO_Gemini","relations":{},"type":"question"}
+
+
+Utterance: Baluchistan People's Party
+Response: {"sentiment":"Neutral","postags":["NNP","NNP","POS","NN"],"answer":"(string \"\")","lemma_tokens":["Baluchistan","People","\u0027s","party"],"tokens":["baluchistan","people","\u0027s","party"],"parse":"\"OpenEntity\u0027baluchistan people  s party\u0027\u0027\"","relations":{"(Baluchistan People,have,party)":1.0},"type":"question"}
+
+
+Utterance: Bavarian People's Party
+Response: {"sentiment":"Neutral","postags":["JJ","NNS","POS","NN"],"answer":"(string \"\")","lemma_tokens":["bavarian","people","\u0027s","party"],"tokens":["bavarian","people","\u0027s","party"],"parse":"\"OpenEntity\u0027bavarian people  s party\u0027\u0027\"","relations":{"(bavarian people,have,party)":1.0},"type":"question"}
+
+
+Utterance: Bessarabian Peasants' Party
+Response: {"sentiment":"Neutral","postags":["NNP","NNPS","POS","NN"],"answer":"(no answer)","lemma_tokens":["Bessarabian","Peasants","\u0027","party"],"tokens":["bessarabian","peasants","\u0027","party"],"parse":"(no answer)","relations":{}}
+
+
+Utterance: Bharatiya Jan Congress
+Response: {"sentiment":"Neutral","postags":["NNP","NNP","NNP"],"answer":"(list (name resource:Bharatiya_Jan_Congress))","lemma_tokens":["Bharatiya","Jan","Congress"],"tokens":["bharatiya","jan","congress"],"parse":"resource:Bharatiya_Jan_Congress","relations":{},"type":"question"}
+
+
+Utterance: Bhutan Peoples' Party
+Response: {"sentiment":"Neutral","postags":["NNP","NNP","POS","NN"],"answer":"(no answer)","lemma_tokens":["Bhutan","Peoples","\u0027","party"],"tokens":["bhutan","peoples","\u0027","party"],"parse":"(no answer)","relations":{}}
+
+
+Utterance: Bihar People's Party
+Response: {"sentiment":"Neutral","postags":["NNP","NNP","POS","NN"],"answer":"(string \"\")","lemma_tokens":["Bihar","People","\u0027s","party"],"tokens":["bihar","people","\u0027s","party"],"parse":"\"OpenEntity\u0027bihar people  s party\u0027\u0027\"","relations":{"(Bihar People,have,party)":1.0},"type":"question"}
+
+
+Utterance: Blue Dog Coalition
+Response: {"sentiment":"Neutral","postags":["JJ","NN","NN"],"answer":"(list (name resource:Blue_Dog_Coalition))","lemma_tokens":["blue","dog","coalition"],"tokens":["blue","dog","coalition"],"parse":"resource:Blue_Dog_Coalition","relations":{},"type":"question"}
+
+
+Utterance: Botswana People's Party
+Response: {"sentiment":"Neutral","postags":["NNP","NNP","POS","NN"],"answer":"(string \"\")","lemma_tokens":["Botswana","People","\u0027s","party"],"tokens":["botswana","people","\u0027s","party"],"parse":"\"OpenEntity\u0027botswana people  s party\u0027\u0027\"","relations":{"(Botswana People,have,party)":1.0},"type":"question"}
+
+
+Utterance: Brunei People's Party
+Response: {"sentiment":"Neutral","postags":["NNP","NNP","POS","NN"],"answer":"(no answer)","lemma_tokens":["Brunei","People","\u0027s","party"],"tokens":["brunei","people","\u0027s","party"],"parse":"(no answer)","relations":{"(Brunei People,have,party)":1.0}}
+
+
+Utterance: Cantabrian Nationalist Council
+Response: {"sentiment":"Neutral","postags":["JJ","JJ","NN"],"answer":"(list (name resource:Cantabrian_Nationalist_Council))","lemma_tokens":["cantabrian","nationalist","council"],"tokens":["cantabrian","nationalist","council"],"parse":"resource:Cantabrian_Nationalist_Council","relations":{},"type":"question"}
+
+
+Utterance: Central Maryland Transportation Alliance
+Response: {"sentiment":"Neutral","postags":["JJ","NNP","NNP","NNP"],"answer":"(list (name resource:Central_Maryland_Transportation_Alliance))","lemma_tokens":["central","Maryland","Transportation","Alliance"],"tokens":["central","maryland","transportation","alliance"],"parse":"resource:Central_Maryland_Transportation_Alliance","relations":{},"type":"question"}
+
+
+Utterance: AIML
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:AIML))","lemma_tokens":["aiml"],"tokens":["aiml"],"parse":"resource:AIML","relations":{},"type":"question"}
+
+
+Utterance: Akkadian language
+Response: {"sentiment":"Neutral","postags":["JJ","NN"],"answer":"(list (name resource:Akkadian_language))","lemma_tokens":["akkadian","language"],"tokens":["akkadian","language"],"parse":"resource:Akkadian_language","relations":{},"type":"question"}
+
+
+Utterance: Analytic language
+Response: {"sentiment":"Neutral","postags":["JJ","NN"],"answer":"(list (name resource:Analytic_language))","lemma_tokens":["analytic","language"],"tokens":["analytic","language"],"parse":"resource:Analytic_language","relations":{},"type":"question"}
+
+
+Utterance: AutoLISP
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:AutoLISP))","lemma_tokens":["autolisp"],"tokens":["autolisp"],"parse":"resource:AutoLISP","relations":{},"type":"question"}
+
+
+Utterance: BBC BASIC
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:BBC_BASIC))","lemma_tokens":["BBC","BASIC"],"tokens":["bbc","basic"],"parse":"resource:BBC_BASIC","relations":{},"type":"question"}
+
+
+Utterance: Befunge
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:Befunge))","lemma_tokens":["Befunge"],"tokens":["befunge"],"parse":"resource:Befunge","relations":{},"type":"question"}
+
+
+Utterance: British Sign Language
+Response: {"sentiment":"Neutral","postags":["JJ","NN","NN"],"answer":"(list (name resource:British_Sign_Language))","lemma_tokens":["british","sign","language"],"tokens":["british","sign","language"],"parse":"resource:British_Sign_Language","relations":{},"type":"question"}
+
+
+Utterance: Colloquial Finnish
+Response: {"sentiment":"Neutral","postags":["JJ","JJ"],"answer":"(list (name resource:Colloquial_Finnish))","lemma_tokens":["colloquial","finnish"],"tokens":["colloquial","finnish"],"parse":"resource:Colloquial_Finnish","relations":{},"type":"question"}
+
+
+Utterance: Common Intermediate Language
+Response: {"sentiment":"Neutral","postags":["JJ","JJ","NN"],"answer":"(list (name resource:Common_Intermediate_Language))","lemma_tokens":["common","intermediate","language"],"tokens":["common","intermediate","language"],"parse":"resource:Common_Intermediate_Language","relations":{},"type":"question"}
+
+
+Utterance: Cree language
+Response: {"sentiment":"Neutral","postags":["NNP","NN"],"answer":"(list (name resource:Cree_language))","lemma_tokens":["Cree","language"],"tokens":["cree","language"],"parse":"resource:Cree_language","relations":{},"type":"question"}
+
+
+Utterance: Creole language
+Response: {"sentiment":"Neutral","postags":["NNP","NN"],"answer":"(list (name resource:Creole_language))","lemma_tokens":["Creole","language"],"tokens":["creole","language"],"parse":"resource:Creole_language","relations":{},"type":"question"}
+
+
+Utterance: Curl (programming language)
+Response: {"sentiment":"Neutral","postags":["VB","-LRB-","NN","NN","-RRB-"],"answer":"(string \"\")","lemma_tokens":["curl","-lrb-","programming","language","-rrb-"],"tokens":["curl","-lrb-","programming","language","-rrb-"],"parse":"\"OpenEntity\u0027curl -lrb- programming language -rrb-\u0027\u0027\"","relations":{},"type":"question"}
+
+
+Utterance: DATR
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:DATR))","lemma_tokens":["datr"],"tokens":["datr"],"parse":"resource:DATR","relations":{},"type":"question"}
+
+
+Utterance: Dari language
+Response: {"sentiment":"Neutral","postags":["NNP","NN"],"answer":"(list (name resource:Dari_language))","lemma_tokens":["Dari","language"],"tokens":["dari","language"],"parse":"resource:Dari_language","relations":{},"type":"question"}
+
+
+Utterance: Dida language
+Response: {"sentiment":"Neutral","postags":["NNP","NN"],"answer":"(list (name resource:Dida_language))","lemma_tokens":["Dida","language"],"tokens":["dida","language"],"parse":"resource:Dida_language","relations":{},"type":"question"}
+
+
+Utterance: DocBook
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:DocBook))","lemma_tokens":["docbook"],"tokens":["docbook"],"parse":"resource:DocBook","relations":{},"type":"question"}
+
+
+Utterance: Duala language
+Response: {"sentiment":"Neutral","postags":["NNP","NN"],"answer":"(list (name resource:Duala_language))","lemma_tokens":["Duala","language"],"tokens":["duala","language"],"parse":"resource:Duala_language","relations":{},"type":"question"}
+
+
+Utterance: Hakka Chinese
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Hakka_Chinese))","lemma_tokens":["Hakka","Chinese"],"tokens":["hakka","chinese"],"parse":"resource:Hakka_Chinese","relations":{},"type":"question"}
+
+
+Utterance: Igbo language
+Response: {"sentiment":"Neutral","postags":["JJ","NN"],"answer":"(list (name resource:Igbo_language))","lemma_tokens":["igbo","language"],"tokens":["igbo","language"],"parse":"resource:Igbo_language","relations":{},"type":"question"}
+
+
+Utterance: Indonesian language
+Response: {"sentiment":"Neutral","postags":["JJ","NN"],"answer":"(list (name resource:Indonesian_language))","lemma_tokens":["indonesian","language"],"tokens":["indonesian","language"],"parse":"resource:Indonesian_language","relations":{},"type":"question"}
+
+
+Utterance: International Sign
+Response: {"sentiment":"Neutral","postags":["NNP","NN"],"answer":"(list (name resource:International_Sign))","lemma_tokens":["International","sign"],"tokens":["international","sign"],"parse":"resource:International_Sign","relations":{},"type":"question"}
+
+
+Utterance: Jargon
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Jargon))","lemma_tokens":["jargon"],"tokens":["jargon"],"parse":"resource:Jargon","relations":{},"type":"question"}
+
+
+Utterance: Kannada
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:Kannada))","lemma_tokens":["Kannada"],"tokens":["kannada"],"parse":"resource:Kannada","relations":{},"type":"question"}
+
+
+Utterance: Kurdish languages
+Response: {"sentiment":"Neutral","postags":["JJ","NNS"],"answer":"(list (name resource:Western_Iranian_languages))","lemma_tokens":["kurdish","language"],"tokens":["kurdish","languages"],"parse":"resource:Western_Iranian_languages","relations":{},"type":"question"}
+
+
+Utterance: Ladin language
+Response: {"sentiment":"Neutral","postags":["NNP","NN"],"answer":"(list (name resource:Ladin_language))","lemma_tokens":["Ladin","language"],"tokens":["ladin","language"],"parse":"resource:Ladin_language","relations":{},"type":"question"}
+
+
+Utterance: Liberty BASIC
+Response: {"sentiment":"Neutral","postags":["NNP","NNP"],"answer":"(list (name resource:Liberty_BASIC))","lemma_tokens":["Liberty","BASIC"],"tokens":["liberty","basic"],"parse":"resource:Liberty_BASIC","relations":{},"type":"question"}
+
+
+Utterance: Lisp Machine Lisp
+Response: {"sentiment":"Neutral","postags":["NN","NN","NN"],"answer":"(list (name resource:Lisp_Machine_Lisp))","lemma_tokens":["lisp","machine","lisp"],"tokens":["lisp","machine","lisp"],"parse":"resource:Lisp_Machine_Lisp","relations":{},"type":"question"}
+
+
+Utterance: Lua (programming language)
+Response: {"sentiment":"Neutral","postags":["NNP","-LRB-","VBG","NN","-RRB-"],"answer":"(string \"\")","lemma_tokens":["Lua","-lrb-","program","language","-rrb-"],"tokens":["lua","-lrb-","programming","language","-rrb-"],"parse":"\"OpenEntity\u0027lua -lrb- programming language -rrb-\u0027\u0027\"","relations":{},"type":"question"}
+
+
+Utterance: Maclisp
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Maclisp))","lemma_tokens":["maclisp"],"tokens":["maclisp"],"parse":"resource:Maclisp","relations":{},"type":"question"}
+
+
+Utterance: MathML
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:MathML))","lemma_tokens":["MathML"],"tokens":["mathml"],"parse":"resource:MathML","relations":{},"type":"question"}
+
+
+Utterance: Metafont
+Response: {"sentiment":"Neutral","postags":["NN"],"answer":"(list (name resource:Metafont))","lemma_tokens":["metafont"],"tokens":["metafont"],"parse":"resource:Metafont","relations":{},"type":"question"}
+
+
+Utterance: Michif language
+Response: {"sentiment":"Neutral","postags":["NNP","NN"],"answer":"(list (name resource:Michif_language))","lemma_tokens":["Michif","language"],"tokens":["michif","language"],"parse":"resource:Michif_language","relations":{},"type":"question"}
+
+
+Utterance: Middle English
+Response: {"sentiment":"Neutral","postags":["JJ","NNP"],"answer":"(list (name resource:Middle_English))","lemma_tokens":["middle","English"],"tokens":["middle","english"],"parse":"resource:Middle_English","relations":{},"type":"question"}
+
+
+Utterance: Nyabwa language
+Response: {"sentiment":"Neutral","postags":["NNP","NN"],"answer":"(list (name resource:Nyabwa_language))","lemma_tokens":["Nyabwa","language"],"tokens":["nyabwa","language"],"parse":"resource:Nyabwa_language","relations":{},"type":"question"}
+
+
+Utterance: Old Church Slavonic
+Response: {"sentiment":"Neutral","postags":["JJ","NN","NN"],"answer":"(list (name resource:Old_Church_Slavonic))","lemma_tokens":["old","church","slavonic"],"tokens":["old","church","slavonic"],"parse":"resource:Old_Church_Slavonic","relations":{},"type":"question"}
+
+
+Utterance: Pali
+Response: {"sentiment":"Neutral","postags":["NNP"],"answer":"(list (name resource:Pali))","lemma_tokens":["Pali"
