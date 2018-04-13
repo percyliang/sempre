@@ -1,0 +1,26 @@
+1.
+utterance: i live in berlin
+underspecified term: berlin
+type: entity
+result: success
+
+2.
+utterance: what is a village
+underspecified term: village
+type: type
+result: success
+
+3.
+utterance: who is the king of monaco
+underspecified term: monaco
+type: entity
+result: success
+underspecified term: king
+type: relation
+result: success
+
+4.
+utterance: who is the prince of monaco
+underspecified term: prince
+type: relation
+result: follow up

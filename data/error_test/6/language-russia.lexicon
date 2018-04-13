@@ -1,0 +1,91 @@
+{"features":" {score:0.5187417168758166} ","formula":"resource:French_language","lexeme":"french language","type":"NamedEntity"}
+{"features":" {score:0.0897810477825998} ","formula":"!property:market","lexeme":"market","type":"DataProp"}
+{"features":" {score:1.06} ","formula":"!dbpedia:language","lexeme":"language","type":"ObjectProp"}
+{"features":" {score:0.14416331712296718} ","formula":"!property:aspect","lexeme":"aspect","type":"DataProp"}
+{"features":" {score:0.16286005772906748} ","formula":"!property:skill","lexeme":"skill","type":"ObjProp"}
+{"features":" {score:0.17650258035732327} ","formula":"!property:information","lexeme":"information","type":"DataProp"}
+{"features":" {score:0.021435620793223954} ","formula":"!property:power","lexeme":"power","type":"ObjProp"}
+{"features":" {score:0.5436398827001939} ","formula":"resource:Russian_Empire","lexeme":"russian empire","type":"NamedEntity"}
+{"features":" {score:0.0897810477825998} ","formula":"property:market","lexeme":"market","type":"DataProp"}
+{"features":" {score:0.76} ","formula":"resource:Language","lexeme":"language","type":"NamedEntity"}
+{"features":" {score:0.16286005772906748} ","formula":"!property:skill","lexeme":"skill","type":"DataProp"}
+{"features":" {score:0.024088286165052583} ","formula":"property:case","lexeme":"case","type":"DataProp"}
+{"features":" {score:0.040415230515447806} ","formula":"!property:place","lexeme":"place","type":"DataProp"}
+{"features":" {score:0.1482004006854814} ","formula":"property:subject","lexeme":"subject","type":"ObjProp"}
+{"features":" {score:0.040415230515447806} ","formula":"(rdf:type dbpedia:Place)","lexeme":"place","type":"ClassNoun"}
+{"features":" {score:0.16286005772906748} ","formula":"property:skill","lexeme":"skill","type":"ObjProp"}
+{"features":" {score:0.021435620793223954} ","formula":"property:power","lexeme":"power","type":"ObjProp"}
+{"features":" {score:0.18298622765857953} ","formula":"!property:topic","lexeme":"topic","type":"DataProp"}
+{"features":" {score:1.2219814265708004} ","formula":"resource:Russia","lexeme":"russia","type":"NamedEntity"}
+{"features":" {score:0.0640658044629816} ","formula":"dbpedia:state","lexeme":"state","type":"ObjectProp"}
+{"features":" {score:0.7999999999999999} ","formula":"property:russia","lexeme":"russia","type":"ObjProp"}
+{"features":" {score:0.76} ","formula":"(rdf:type dbpedia:Language)","lexeme":"language","type":"ClassNoun"}
+{"features":" {score:0.040415230515447806} ","formula":"!property:place","lexeme":"place","type":"ObjProp"}
+{"features":" {score:0.4876279671446909} ","formula":"resource:German_language","lexeme":"german language","type":"NamedEntity"}
+{"features":" {score:0.024088286165052583} ","formula":"!property:case","lexeme":"case","type":"ObjProp"}
+{"features":" {score:0.0643339765166996} ","formula":"property:region","lexeme":"region","type":"DataProp"}
+{"features":" {score:0.6169578859559037} ","formula":"resource:Soviet_Union","lexeme":"soviet union","type":"NamedEntity"}
+{"features":" {score:0.19042516828442307} ","formula":"!property:issue","lexeme":"issue","type":"ObjProp"}
+{"features":" {score:0.040415230515447806} ","formula":"property:place","lexeme":"place","type":"DataProp"}
+{"features":" {score:0.1482004006854814} ","formula":"property:subject","lexeme":"subject","type":"DataProp"}
+{"features":" {score:0.14416331712296718} ","formula":"!property:aspect","lexeme":"aspect","type":"ObjProp"}
+{"features":" {score:0.463823156895439} ","formula":"resource:Moscow","lexeme":"moscow","type":"NamedEntity"}
+{"features":" {score:0.11701253295282715} ","formula":"property:nation","lexeme":"nation","type":"ObjProp"}
+{"features":" {score:0.19042516828442307} ","formula":"property:issue","lexeme":"issue","type":"DataProp"}
+{"features":" {score:0.16286005772906748} ","formula":"property:skill","lexeme":"skill","type":"DataProp"}
+{"features":" {score:0.024088286165052583} ","formula":"!property:case","lexeme":"case","type":"DataProp"}
+{"features":" {score:1.06} ","formula":"dbpedia:language","lexeme":"language","type":"ObjectProp"}
+{"features":" {score:0.86} ","formula":"property:language","lexeme":"language","type":"DataProp"}
+{"features":" {score:0.14243908027966945} ","formula":"property:area","lexeme":"area","type":"DataProp"}
+{"features":" {score:0.0640658044629816} ","formula":"!property:state","lexeme":"state","type":"DataProp"}
+{"features":" {score:0.14243908027966945} ","formula":"!property:area","lexeme":"area","type":"DataProp"}
+{"features":" {score:0.19042516828442307} ","formula":"property:issue","lexeme":"issue","type":"ObjProp"}
+{"features":" {score:0.14243908027966945} ","formula":"property:area","lexeme":"area","type":"ObjProp"}
+{"features":" {score:0.0640658044629816} ","formula":"!property:state","lexeme":"state","type":"ObjProp"}
+{"features":" {score:0.18298622765857953} ","formula":"property:topic","lexeme":"topic","type":"DataProp"}
+{"features":" {score:0.4950854370317156} ","formula":"resource:Saint_Petersburg","lexeme":"saint petersburg","type":"NamedEntity"}
+{"features":" {score:0.86} ","formula":"!property:language","lexeme":"language","type":"DataProp"}
+{"features":" {score:0.14416331712296718} ","formula":"property:aspect","lexeme":"aspect","type":"DataProp"}
+{"features":" {score:0.86} ","formula":"property:language","lexeme":"language","type":"ObjProp"}
+{"features":" {score:0.17650258035732327} ","formula":"property:information","lexeme":"information","type":"ObjProp"}
+{"features":" {score:0.1482004006854814} ","formula":"!property:subject","lexeme":"subject","type":"ObjProp"}
+{"features":" {score:0.11701253295282715} ","formula":"!property:nation","lexeme":"nation","type":"DataProp"}
+{"features":" {score:0.0643339765166996} ","formula":"property:region","lexeme":"region","type":"ObjProp"}
+{"features":" {score:0.0640658044629816} ","formula":"property:state","lexeme":"state","type":"DataProp"}
+{"features":" {score:0.18298622765857953} ","formula":"property:topic","lexeme":"topic","type":"ObjProp"}
+{"features":" {score:0.0643339765166996} ","formula":"(rdf:type dbpedia:Region)","lexeme":"region","type":"ClassNoun"}
+{"features":" {score:0.0895798512525991} ","formula":"property:economy","lexeme":"economy","type":"ObjProp"}
+{"features":" {score:0.12812827014000705} ","formula":"resource:Latin","lexeme":"latin","type":"NamedEntity"}
+{"features":" {score:0.14416331712296718} ","formula":"property:aspect","lexeme":"aspect","type":"ObjProp"}
+{"features":" {score:0.0640658044629816} ","formula":"property:state","lexeme":"state","type":"ObjProp"}
+{"features":" {score:0.0643339765166996} ","formula":"!dbpedia:region","lexeme":"region","type":"ObjectProp"}
+{"features":" {score:0.0897810477825998} ","formula":"property:market","lexeme":"market","type":"ObjProp"}
+{"features":" {score:0.0897810477825998} ","formula":"!property:market","lexeme":"market","type":"ObjProp"}
+{"features":" {score:0.48865373835874193} ","formula":"resource:Spanish_language","lexeme":"spanish language","type":"NamedEntity"}
+{"features":" {score:0.0640658044629816} ","formula":"(rdf:type dbpedia:State)","lexeme":"state","type":"ClassNoun"}
+{"features":" {score:0.0640658044629816} ","formula":"!dbpedia:state","lexeme":"state","type":"ObjectProp"}
+{"features":" {score:0.19042516828442307} ","formula":"!property:issue","lexeme":"issue","type":"DataProp"}
+{"features":" {score:0.7999999999999999} ","formula":"!property:russia","lexeme":"russia","type":"ObjProp"}
+{"features":" {score:0.7999999999999999} ","formula":"!property:russia","lexeme":"russia","type":"DataProp"}
+{"features":" {score:0.11701253295282715} ","formula":"!property:nation","lexeme":"nation","type":"ObjProp"}
+{"features":" {score:0.17650258035732327} ","formula":"property:information","lexeme":"information","type":"DataProp"}
+{"features":" {score:0.0895798512525991} ","formula":"!property:economy","lexeme":"economy","type":"DataProp"}
+{"features":" {score:0.5779605659150392} ","formula":"resource:English_language","lexeme":"english language","type":"NamedEntity"}
+{"features":" {score:0.042439080279669444} ","formula":"(rdf:type dbpedia:Area)","lexeme":"area","type":"ClassNoun"}
+{"features":" {score:0.0895798512525991} ","formula":"!property:economy","lexeme":"economy","type":"ObjProp"}
+{"features":" {score:0.021435620793223954} ","formula":"property:power","lexeme":"power","type":"DataProp"}
+{"features":" {score:0.0643339765166996} ","formula":"!property:region","lexeme":"region","type":"ObjProp"}
+{"features":" {score:0.0643339765166996} ","formula":"dbpedia:region","lexeme":"region","type":"ObjectProp"}
+{"features":" {score:0.7999999999999999} ","formula":"property:russia","lexeme":"russia","type":"DataProp"}
+{"features":" {score:0.18298622765857953} ","formula":"!property:topic","lexeme":"topic","type":"ObjProp"}
+{"features":" {score:0.86} ","formula":"!property:language","lexeme":"language","type":"ObjProp"}
+{"features":" {score:0.0895798512525991} ","formula":"property:economy","lexeme":"economy","type":"DataProp"}
+{"features":" {score:0.0643339765166996} ","formula":"!property:region","lexeme":"region","type":"DataProp"}
+{"features":" {score:0.024088286165052583} ","formula":"property:case","lexeme":"case","type":"ObjProp"}
+{"features":" {score:0.17650258035732327} ","formula":"!property:information","lexeme":"information","type":"ObjProp"}
+{"features":" {score:0.040415230515447806} ","formula":"property:place","lexeme":"place","type":"ObjProp"}
+{"features":" {score:0.14243908027966945} ","formula":"!property:area","lexeme":"area","type":"ObjProp"}
+{"features":" {score:0.024088286165052583} ","formula":"(rdf:type dbpedia:Case)","lexeme":"case","type":"ClassNoun"}
+{"features":" {score:0.11701253295282715} ","formula":"property:nation","lexeme":"nation","type":"DataProp"}
+{"features":" {score:0.1482004006854814} ","formula":"!property:subject","lexeme":"subject","type":"DataProp"}
+{"features":" {score:0.021435620793223954} ","formula":"!property:power","lexeme":"power","type":"DataProp"}

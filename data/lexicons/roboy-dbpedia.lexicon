@@ -1,0 +1,1568 @@
+# Roboy
+
+## Person of interest
+{"lexeme": "i", "formula": "rb:active_person", "type": "Person"}
+{"lexeme": "me", "formula": "rb:active_person", "type": "Person"}
+{"lexeme": "mine", "formula": "rb:active_person", "type": "Person"}
+{"lexeme": "my", "formula": "rb:active_person", "type": "Person"}
+{"lexeme": "you", "formula": "rb:Roboy", "type": "Person"}
+{"lexeme": "your", "formula": "rb:Roboy", "type": "Person"}
+{"lexeme": "yours", "formula": "rb:Roboy", "type": "Person"}
+{"lexeme": "Roboy", "formula": "rb:Roboy", "type": "Person"}
+
+## Type relationships
+{"lexeme": "favorite", "formula": "rb:FAVORITE", "type" : "TypeProperty"}
+
+## Relationships
+{"lexeme": "call", "formula": "rb:NAME_OF", "type" : "DataProp"}
+{"lexeme": "like", "formula": "rb:HAS_HOBBY", "type" : "ObjProp"}
+{"lexeme": "like", "formula": "rb:FRIEND_OF", "type" : "DataProp"}
+{"lexeme": "bear in", "formula": "rb:FROM", "type" : "ObjProp"}
+{"lexeme": "be bear in", "formula": "rb:FROM", "type" : "ObjProp"}
+{"lexeme": "come from", "formula": "rb:FROM", "type" : "ObjProp"}
+{"lexeme": "be from", "formula": "rb:FROM", "type" : "ObjProp"}
+{"lexeme": "go to", "formula": "rb:STUDY_AT", "type" : "ObjProp"}
+{"lexeme": "study", "formula": "rb:STUDY_AT", "type" : "ObjProp"}
+{"lexeme": "study at", "formula": "rb:STUDY_AT", "type" : "ObjProp"}
+{"lexeme": "work for", "formula": "rb:WORK_FOR", "type" : "ObjProp"}
+{"lexeme": "work at", "formula": "rb:WORK_FOR", "type" : "ObjProp"}
+{"lexeme": "be employ", "formula": "rb:WORK_FOR", "type" : "ObjProp"}
+{"lexeme": "work as", "formula": "rb:OCCUPIED_AS", "type" : "ObjProp"}
+{"lexeme": "live in", "formula": "rb:LIVE_IN", "type" : "ObjProp"}
+{"lexeme": "lives in", "formula": "rb:LIVE_IN", "type" : "ObjProp"}
+{"lexeme": "be friend with", "formula": "rb:FRIEND_OF", "type" : "DataProp"}
+{"lexeme": "belong to", "formula": "rb:MEMBER_OF", "type" : "ObjProp"}
+
+{"lexeme": "call", "formula": "!rb:NAME_OF", "type" : "DataProp"}
+{"lexeme": "like", "formula": "!rb:HAS_HOBBY", "type" : "ObjProp"}
+{"lexeme": "like", "formula": "!rb:FRIEND_OF", "type" : "DataProp"}
+{"lexeme": "like", "formula": "!rb:FAVORITE_MOVIE", "type" : "ObjProp"}
+{"lexeme": "bear", "formula": "!rb:FROM", "type" : "ObjProp"}
+{"lexeme": "bear in", "formula": "!rb:FROM", "type" : "ObjProp"}
+{"lexeme": "be bear in", "formula": "!rb:FROM", "type" : "ObjProp"}
+{"lexeme": "come from", "formula": "!rb:FROM", "type" : "ObjProp"}
+{"lexeme": "be from", "formula": "!rb:FROM", "type" : "ObjProp"}
+{"lexeme": "from", "formula": "!rb:FROM", "type" : "ObjProp"}
+{"lexeme": "go to", "formula": "!rb:STUDY_AT", "type" : "ObjProp"}
+{"lexeme": "study", "formula": "!rb:STUDY_AT", "type" : "ObjProp"}
+{"lexeme": "study at", "formula": "!rb:STUDY_AT", "type" : "ObjProp"}
+{"lexeme": "work for", "formula": "!rb:WORK_FOR", "type" : "ObjProp"}
+{"lexeme": "work at", "formula": "!rb:WORK_FOR", "type" : "ObjProp"}
+{"lexeme": "be employ", "formula": "!rb:WORK_FOR", "type" : "ObjProp"}
+{"lexeme": "employ", "formula": "!rb:WORK_FOR", "type" : "ObjProp"}
+{"lexeme": "work as", "formula": "!rb:OCCUPIED_AS", "type" : "ObjProp"}
+{"lexeme": "live in", "formula": "!rb:LIVE_IN", "type" : "ObjProp"}
+{"lexeme": "live", "formula": "!rb:LIVE_IN", "type" : "ObjProp"}
+{"lexeme": "lives in", "formula": "!rb:LIVE_IN", "type" : "ObjProp"}
+{"lexeme": "be friend with", "formula": "!rb:FRIEND_OF", "type" : "DataProp"}
+{"lexeme": "friend with", "formula": "!rb:FRIEND_OF", "type" : "DataProp"}
+{"lexeme": "belong to", "formula": "!rb:MEMBER_OF", "type" : "ObjProp"}
+
+## Classes
+{"lexeme": "object", "formula": "rb:OBJECT", "type" : "ObjectClass"}
+{"lexeme": "person", "formula": "rb:PERSON", "type" : "ObjectClass"}
+{"lexeme": "robot", "formula": "rb:ROBOT", "type" : "ObjectClass"}
+{"lexeme": "city", "formula": "rb:CITY", "type" : "ObjectClass"}
+{"lexeme": "company", "formula": "rb:COMPANY", "type" : "ObjectClass"}
+{"lexeme": "continent", "formula": "rb:CONTINENT", "type" : "ObjectClass"}
+{"lexeme": "country", "formula": "rb:COUNTRY", "type" : "ObjectClass"}
+{"lexeme": "division", "formula": "rb:DIVISION", "type" : "ObjectClass"}
+{"lexeme": "name", "formula": "rb:NAME", "type" : "ObjectClass"}
+{"lexeme": "color", "formula": "rb:COLOR", "type" : "ObjectClass"}
+{"lexeme": "animal", "formula": "rb:ANIMAL", "type" : "ObjectClass"}
+
+## Relationship Classes
+{"lexeme": "hobby", "formula": "rb:HAS_HOBBY", "type" : "ObjProp"}
+{"lexeme": "favorite activity", "formula": "rb:HAS_HOBBY", "type" : "ObjProp"}
+{"lexeme": "favorite thing to do", "formula": "rb:HAS_HOBBY", "type" : "ObjProp"}
+{"lexeme": "employer", "formula": "rb:WORK_FOR", "type" : "ObjProp"}
+{"lexeme": "location", "formula": "rb:LIVE_IN", "type" : "ObjProp"}
+{"lexeme": "home", "formula": "rb:LIVE_IN", "type" : "ObjProp"}
+{"lexeme": "movie", "formula": "rb:FAVORITE_MOVIE", "type" : "ObjProp"}
+{"lexeme": "favorite tv show", "formula": "rb:FAVORITE_MOVIE", "type" : "ObjProp"}
+{"lexeme": "favorite movie", "formula": "rb:FAVORITE_MOVIE", "type" : "ObjProp"}
+{"lexeme": "alma mater", "formula": "rb:STUDY_AT", "type" : "ObjProp"}
+{"lexeme": "university", "formula": "rb:STUDY_AT", "type" : "ObjProp"}
+{"lexeme": "child", "formula": "rb:CHILD_OF", "type" : "ObjProp"}
+{"lexeme": "friend", "formula": "rb:FRIEND_OF", "type" : "ObjProp"}
+{"lexeme": "field of expertise", "formula": "rb:OCCUPIED_AS", "type" : "ObjProp"}
+{"lexeme": "profession", "formula": "rb:OCCUPIED_AS", "type" : "ObjProp"}
+{"lexeme": "name", "formula": "rb:NAME_OF", "type" : "DataProp"}
+{"lexeme": "home", "formula": "rb:FROM", "type" : "ObjProp"}
+{"lexeme": "age", "formula": "rb:AGE", "type" : "DataProp"}
+{"lexeme": "member", "formula": "rb:MEMBER_OF", "type" : "ObjProp"}
+{"lexeme": "part", "formula": "rb:PART_OF", "type" : "ObjProp"}
+{"lexeme": "relative", "formula": "rb:RELATIVE_OF", "type" : "ObjProp"}
+
+{"lexeme": "hobby", "formula": "!rb:HAS_HOBBY", "type" : "QRoboy"}
+{"lexeme": "activity", "formula": "!rb:HAS_HOBBY", "type" : "QRoboy"}
+{"lexeme": "free time", "formula": "!rb:HAS_HOBBY", "type" : "QRoboy"}
+{"lexeme": " thing to do", "formula": "!rb:HAS_HOBBY", "type" : "QRoboy"}
+{"lexeme": "favorite thing to do", "formula": "!rb:HAS_HOBBY", "type" : "QRoboy"}
+{"lexeme": "employer", "formula": "!rb:WORK_FOR", "type" : "QRoboy"}
+{"lexeme": "location", "formula": "!rb:LIVE_IN", "type" : "QRoboy"}
+{"lexeme": "current home", "formula": "!rb:LIVE_IN", "type" : "QRoboy"}
+{"lexeme": "movie", "formula": "!rb:FAVORITE_MOVIE", "type" : "QRoboy"}
+{"lexeme": "field of expertise", "formula": "!rb:OCCUPIED_AS", "type" : "QRoboy"}
+{"lexeme": "profession", "formula": "!rb:OCCUPIED_AS", "type" : "QRoboy"}
+{"lexeme": "favorite tv show", "formula": "!rb:FAVORITE_MOVIE", "type" : "QRoboy"}
+{"lexeme": "favorite movie", "formula": "!rb:FAVORITE_MOVIE", "type" : "QRoboy"}
+{"lexeme": "favourite tv show", "formula": "!rb:FAVORITE_MOVIE", "type" : "QRoboy"}
+{"lexeme": "favourite movie", "formula": "!rb:FAVORITE_MOVIE", "type" : "QRoboy"}
+{"lexeme": "alma mater", "formula": "!rb:STUDY_AT", "type" : "QRoboy"}
+{"lexeme": "university", "formula": "!rb:STUDY_AT", "type" : "QRoboy"}
+{"lexeme": "child", "formula": "!rb:CHILD_OF", "type" : "QRoboy"}
+{"lexeme": "friend", "formula": "!rb:FRIEND_OF", "type" : "QRoboy"}
+{"lexeme": "name", "formula": "!rb:NAME_OF", "type" : "QRoboy"}
+{"lexeme": "home", "formula": "!rb:FROM", "type" : "QRoboy"}
+{"lexeme": "age", "formula": "!rb:AGE", "type" : "QRoboy"}
+{"lexeme": "member", "formula": "!rb:MEMBER_OF", "type" : "QRoboy"}
+{"lexeme": "part", "formula": "!rb:PART_OF", "type" : "QRoboy"}
+{"lexeme": "relative", "formula": "!rb:RELATIVE_OF", "type" : "QRoboy"}
+
+{"lexeme": "when", "formula": "rb:WHEN", "type" : "subordinate.time"}
+{"lexeme": "whenever", "formula": "rb:WHEN", "type" : "subordinate.time"}
+{"lexeme": "as", "formula": "rb:WHEN", "type" : "subordinate.time"}
+{"lexeme": "once", "formula": "rb:WHEN", "type" : "subordinate.time"}
+{"lexeme": "while", "formula": "rb:WHILE", "type" : "subordinate.time"}
+{"lexeme": "after", "formula": "rb:AFTER", "type" : "subordinate.time"}
+{"lexeme": "before", "formula": "rb:BEFORE", "type" : "subordinate.time"}
+{"lexeme": "since", "formula": "rb:SINCE", "type" : "subordinate.time"}
+{"lexeme": "until", "formula": "rb:UNTIL", "type" : "subordinate.time"}
+
+{"lexeme": "where", "formula": "rb:WHERE", "type" : "subordinate.place"}
+{"lexeme": "whereas", "formula": "rb:WHERE", "type" : "subordinate.place"}
+{"lexeme": "wherever", "formula": "rb:WHERE", "type" : "subordinate.place"}
+
+{"lexeme": "although", "formula": "rb:ALTHOUGH", "type" : "subordinate.cause"}
+{"lexeme": "even though", "formula": "rb:ALTHOUGH", "type" : "subordinate.cause"}
+{"lexeme": "though", "formula": "rb:ALTHOUGH", "type" : "subordinate.cause"}
+{"lexeme": "unless", "formula": "rb:UNLESS", "type" : "subordinate.cause"}
+{"lexeme": "provided that", "formula": "rb:CONDITION", "type" : "subordinate.cause"}
+{"lexeme": "because", "formula": "rb:CONDITION", "type" : "subordinate.cause"}
+{"lexeme": "if", "formula": "rb:CONDITION", "type" : "subordinate.cause"}
+{"lexeme": "even if", "formula": "rb:CONDITION", "type" : "subordinate.cause"}
+{"lexeme": "whether", "formula": "rb:WHETHER", "type" : "subordinate.cause"}
+
+{"lexeme": "in order that", "formula": "rb:EFFECT", "type" : "subordinate.effect"}
+{"lexeme": "so that", "formula": "rb:EFFECT", "type" : "subordinate.effect"}
+{"lexeme": "that", "formula": "rb:EFFECT", "type" : "subordinate.effect"}
+{"lexeme": "this is why", "formula": "rb:EFFECT", "type" : "subordinate.effect"}
+
+# Ignore for questions
+{"lexeme": "have", "formula": "rb:EFFECT", "type" : "Ignore"}
+{"lexeme": "can", "formula": "rb:EFFECT", "type" : "Ignore"}
+{"lexeme": "be", "formula": "rb:EFFECT", "type" : "Ignore"}
+{"lexeme": "do", "formula": "rb:EFFECT", "type" : "Ignore"}
+{"lexeme": "have i", "formula": "rb:EFFECT", "type" : "Ignore"}
+{"lexeme": "can i", "formula": "rb:EFFECT", "type" : "Ignore"}
+
+# DBpedia
+{"lexeme": "name", "formula": "foaf:name", "type": "RelationalNoun"}
+{"lexeme": "surname", "formula": "foaf:surname", "type": "RelationalNoun"}
+{"lexeme": "given name", "formula": "foaf:name", "type": "RelationalNoun"}
+{"lexeme": "type", "formula": "rdf:type", "type": "ClassNoun"}
+{"lexeme": "birth date", "formula": "!dbpedia:birthDate", "type": "RelationalNoun"}
+{"lexeme": "anatomical structure", "formula": "dbpedia:AnatomicalStructure", "type": "ClassNoun"}
+{"lexeme": "brain", "formula": "dbpedia:Brain", "type": "ClassNoun"}
+{"lexeme": "bone", "formula": "dbpedia:Bone", "type": "ClassNoun"}
+{"lexeme": "artery", "formula": "dbpedia:Artery", "type": "ClassNoun"}
+{"lexeme": "vein", "formula": "dbpedia:Vein", "type": "ClassNoun"}
+{"lexeme": "blood vessel", "formula": "lex:BloodVessel", "type": "ClassNoun"}
+{"lexeme": "muscle", "formula": "dbpedia:Muscle", "type": "ClassNoun"}
+{"lexeme": "nerve", "formula": "dbpedia:Nerve", "type": "ClassNoun"}
+{"lexeme": "lymph", "formula": "dbpedia:Lymph", "type": "ClassNoun"}
+{"lexeme": "embryology", "formula": "dbpedia:Embryology", "type": "ClassNoun"}
+{"lexeme": "ligament", "formula": "dbpedia:Ligament", "type": "ClassNoun"}
+{"lexeme": "chemical substance", "formula": "dbpedia:ChemicalSubstance", "type": "ClassNoun"}
+{"lexeme": "chemical compound", "formula": "dbpedia:ChemicalCompound", "type": "ClassNoun"}
+{"lexeme": "chemical element", "formula": "dbpedia:ChemicalElement", "type": "ClassNoun"}
+{"lexeme": "mineral", "formula": "dbpedia:Mineral", "type": "ClassNoun"}
+{"lexeme": "biomolecule", "formula": "dbpedia:Biomolecule", "type": "ClassNoun"}
+{"lexeme": "enzyme", "formula": "dbpedia:Enzyme", "type": "ClassNoun"}
+{"lexeme": "gene", "formula": "dbpedia:Gene", "type": "ClassNoun"}
+{"lexeme": "human gene", "formula": "dbpedia:HumanGene", "type": "ClassNoun"}
+{"lexeme": "mouse gene", "formula": "dbpedia:MouseGene", "type": "ClassNoun"}
+{"lexeme": "gene location", "formula": "dbpedia:GeneLocation", "type": "ClassNoun"}
+{"lexeme": "human gene location", "formula": "dbpedia:HumanGeneLocation", "type": "ClassNoun"}
+{"lexeme": "mouse gene location", "formula": "dbpedia:MouseGeneLocation", "type": "ClassNoun"}
+{"lexeme": "protein", "formula": "dbpedia:Protein", "type": "ClassNoun"}
+{"lexeme": "disease", "formula": "dbpedia:Disease", "type": "ClassNoun"}
+{"lexeme": "illness", "formula": "dbpedia:Disease", "type": "ClassNoun"}
+{"lexeme": "sickness", "formula": "dbpedia:Disease", "type": "ClassNoun"}
+{"lexeme": "drug", "formula": "dbpedia:Drug", "type": "ClassNoun"}
+{"lexeme": "medicine", "formula": "dbpedia:Drug", "type": "ClassNoun"}
+{"lexeme": "medicament", "formula": "dbpedia:Drug", "type": "ClassNoun"}
+{"lexeme": "pharmaceutical", "formula": "dbpedia:Drug", "type": "ClassNoun"}
+{"lexeme": "blood type", "formula": "dbpedia:BloodType", "type": "ClassNoun"}
+{"lexeme": "database", "formula": "dbpedia:Database", "type": "ClassNoun"}
+{"lexeme": "biological database", "formula": "dbpedia:BiologicalDatabase", "type": "ClassNoun"}
+{"lexeme": "precursor", "formula": "dbpedia:precursor", "type": "RelationalNoun"}
+{"lexeme": "precede", "formula": "dbpedia:precursor", "type": "StateVerb"}
+{"lexeme": "develop", "formula": "dbpedia:precursor", "type": "StateVerb"}
+{"lexeme": "Entrez Gene ID", "formula": "dbpedia:entrezgene", "type": "RelationalNoun"}
+{"lexeme": "Entrez ID", "formula": "dbpedia:entrezgene", "type": "RelationalNoun"}
+{"lexeme": "IUPAC name", "formula": "dbpedia:iupacName", "type": "RelationalNoun"}
+{"lexeme": "election", "formula": "dbpedia:Election", "type": "ClassNoun"}
+{"lexeme": "legislature", "formula": "dbpedia:Legislature", "type": "ClassNoun"}
+{"lexeme": "government type", "formula": "dbpedia:GovernmentType", "type": "ClassNoun"}
+{"lexeme": "monarch", "formula": "dbpedia:Monarch", "type": "ClassNoun"}
+{"lexeme": "noble", "formula": "dbpedia:Noble", "type": "ClassNoun"}
+{"lexeme": "royalty", "formula": "dbpedia:Royalty", "type": "ClassNoun"}
+{"lexeme": "British royalty", "formula": "dbpedia:BritishRoyalty", "type": "ClassNoun"}
+{"lexeme": "Polish king", "formula": "dbpedia:PolishKing", "type": "ClassNoun"}
+{"lexeme": "monarchy", "formula": "(dbpedia:governmentType resource:Monarchy)", "type": "ObjectProperty"}
+{"lexeme": "constitutional monarchy", "formula": "(dbpedia:governmentType resource:ConstitutionalMonarchy)", "type": "ObjectProperty"}
+{"lexeme": "republic", "formula": "(dbpedia:governmentType resource:Republic)", "type": "ObjectProperty"}
+{"lexeme": "office holder", "formula": "dbpedia:OfficeHolder", "type": "ClassNoun"}
+{"lexeme": "member of parliament", "formula": "dbpedia:MemberOfParliament", "type": "ClassNoun"}
+{"lexeme": "member of parliament", "formula": "(dbpedia:office 'Member-of-Parliament')", "type": "DataPropertyNoun"}
+{"lexeme": "member of the European parliament", "formula": "(dbpedia:office 'Member-of-the-European-Parliament')", "type": "DataPropertyNoun"}
+{"lexeme": "minister of foreign affairs", "formula": "(dbpedia:office 'Minister-of-Foreign-Affairs')", "type": "DataPropertyNoun"}
+{"lexeme": "minister of justice", "formula": "(dbpedia:office 'Minister-of-Justice')", "type": "DataPropertyNoun"}
+{"lexeme": "minister of defence", "formula": "(dbpedia:office 'Minister-of-Defence')", "type": "DataPropertyNoun"}
+{"lexeme": "minister of education", "formula": "(dbpedia:office 'Minister-of-education')", "type": "DataPropertyNoun"}
+{"lexeme": "congress man", "formula": "dbpedia:Congressman", "type": "ClassNoun"}
+{"lexeme": "congress men", "formula": "dbpedia:Congressman", "type": "ClassNoun"}
+{"lexeme": "politician", "formula": "dbpedia:Politician", "type": "ClassNoun"}
+{"lexeme": "governor", "formula": "dbpedia:Governor", "type": "ClassNoun"}
+{"lexeme": "governor", "formula": "(dbpedia:leaderTitle 'Governor')", "type": "DataPropertyNoun"}
+{"lexeme": "president", "formula": "dbpedia:President", "type": "ClassNoun"}
+{"lexeme": "president", "formula": "(dbpedia:leaderTitle 'President')", "type": "DataPropertyNoun"}
+{"lexeme": "vice president", "formula": "dbpedia:VicePresident", "type": "ClassNoun"}
+{"lexeme": "prime minister", "formula": "dbpedia:PrimeMinister", "type": "ClassNoun"}
+{"lexeme": "premier", "formula": "dbpedia:PrimeMinister", "type": "ClassNoun"}
+{"lexeme": "vice prime minister", "formula": "dbpedia:VicePrimeMinister", "type": "ClassNoun"}
+{"lexeme": "lieutenant", "formula": "dbpedia:Lieutenant", "type": "ClassNoun"}
+{"lexeme": "chancellor", "formula": "dbpedia:Chancellor", "type": "ClassNoun"}
+{"lexeme": "mayor", "formula": "dbpedia:Mayor", "type": "ClassNoun"}
+{"lexeme": "mayor", "formula": "(dbpedia:leaderTitle 'Mayor'@en)", "type": "DataPropertyNoun"}
+{"lexeme": "senator", "formula": "dbpedia:Senator", "type": "ClassNoun"}
+{"lexeme": "senator", "formula": "(dbpedia:office 'Senator'@en)", "type": "DataPropertyNoun"}
+{"lexeme": "ambassador", "formula": "dbpedia:Ambassador", "type": "ClassNoun"}
+{"lexeme": "law firm", "formula": "dbpedia:LawFirm", "type": "ClassNoun"}
+{"lexeme": "case", "formula": "dbpedia:Case", "type": "ClassNoun"}
+{"lexeme": "legal case", "formula": "dbpedia:LegalCase", "type": "ClassNoun"}
+{"lexeme": "court case", "formula": "dbpedia:LegalCase", "type": "ClassNoun"}
+{"lexeme": "law case", "formula": "dbpedia:LegalCase", "type": "ClassNoun"}
+{"lexeme": "legal matter", "formula": "dbpedia:LegalCase", "type": "ClassNoun"}
+{"lexeme": "Supreme Court of the United States case", "formula": "dbpedia:SupremeCourtOfTheUnitedStatesCase", "type": "ClassNoun"}
+{"lexeme": "system of law", "formula": "dbpedia:SystemOfLaw", "type": "ClassNoun"}
+{"lexeme": "criminal", "formula": "dbpedia:Criminal", "type": "ClassNoun"}
+{"lexeme": "thug", "formula": "dbpedia:Criminal", "type": "ClassNoun"}
+{"lexeme": "murderer", "formula": "dbpedia:Murderer", "type": "ClassNoun"}
+{"lexeme": "killer", "formula": "dbpedia:Murderer", "type": "ClassNoun"}
+{"lexeme": "judge", "formula": "dbpedia:Judge", "type": "ClassNoun"}
+{"lexeme": "magistrate", "formula": "dbpedia:Judge", "type": "ClassNoun"}
+{"lexeme": "deputy", "formula": "dbpedia:Deputy", "type": "ClassNoun"}
+{"lexeme": "mayor", "formula": "dbpedia:leader", "type": "RelationalNoun"}
+{"lexeme": "president", "formula": "dbpedia:leader", "type": "RelationalNoun"}
+{"lexeme": "governor", "formula": "dbpedia:leader", "type": "RelationalNoun"}
+{"lexeme": "vice chancellor", "formula": "dbpedia:viceChancellor", "type": "RelationalNoun"}
+{"lexeme": "running mate", "formula": "dbpedia:runningMate", "type": "RelationalNoun"}
+{"lexeme": "serve", "formula": "dbpedia:president", "type": "StateVerb"}
+{"lexeme": "board member", "formula": "dbpedia:board", "type": "RelationalNoun"}
+{"lexeme": "position", "formula": "dbpedia:office", "type": "RelationalNoun"}
+{"lexeme": "event", "formula": "dbpedia:Event", "type": "ClassNoun"}
+{"lexeme": "activity", "formula": "dbpedia:Activity", "type": "ClassNoun"}
+{"lexeme": "holiday", "formula": "dbpedia:Holiday", "type": "ClassNoun"}
+{"lexeme": "language", "formula": "dbpedia:Language", "type": "ClassNoun"}
+{"lexeme": "letter", "formula": "dbpedia:Letter", "type": "ClassNoun"}
+{"lexeme": "colour", "formula": "dbpedia:Colour", "type": "ClassNoun"}
+{"lexeme": "website", "formula": "dbpedia:Website", "type": "ClassNoun"}
+{"lexeme": "homepage", "formula": "dbpedia:Webiste", "type": "ClassNoun"}
+{"lexeme": "web page", "formula": "dbpedia:Website", "type": "ClassNoun"}
+{"lexeme": "food", "formula": "dbpedia:Food", "type": "ClassNoun"}
+{"lexeme": "beverage", "formula": "dbpedia:Beverage", "type": "ClassNoun"}
+{"lexeme": "drink", "formula": "dbpedia:Beverage", "type": "ClassNoun"}
+{"lexeme": "beer", "formula": "dbpedia:Beer", "type": "ClassNoun"}
+{"lexeme": "wine", "formula": "dbpedia:Wine", "type": "ClassNoun"}
+{"lexeme": "quality wine", "formula": "dbpedia:ControlledDesignationOfOriginWine", "type": "ClassNoun"}
+{"lexeme": "cheese", "formula": "dbpedia:Cheese", "type": "ClassNoun"}
+{"lexeme": "agent", "formula": "dbpedia:Agent", "type": "ClassNoun"}
+{"lexeme": "deity", "formula": "dbpedia:Deity", "type": "ClassNoun"}
+{"lexeme": "family", "formula": "dbpedia:Family", "type": "ClassNoun"}
+{"lexeme": "currency", "formula": "dbpedia:Currency", "type": "ClassNoun"}
+{"lexeme": "tax", "formula": "dbpedia:Tax", "type": "ClassNoun"}
+{"lexeme": "flag", "formula": "dbpedia:Flag", "type": "ClassNoun"}
+{"lexeme": "community", "formula": "dbpedia:Community", "type": "ClassNoun"}
+{"lexeme": "sales", "formula": "dbpedia:Sales", "type": "ClassNoun"}
+{"lexeme": "fashion", "formula": "dbpedia:Fashion", "type": "ClassNoun"}
+{"lexeme": "line of fashion", "formula": "dbpedia:LineOfFashion", "type": "ClassNoun"}
+{"lexeme": "public service", "formula": "dbpedia:PublicService", "type": "ClassNoun"}
+{"lexeme": "public service input", "formula": "dbpedia:PublicServiceInput", "type": "ClassNoun"}
+{"lexeme": "public service output", "formula": "dbpedia:PublicServiceOutput", "type": "ClassNoun"}
+{"lexeme": "polyhedron", "formula": "dbpedia:Polyhedron", "type": "ClassNoun"}
+{"lexeme": "time period", "formula": "dbpedia:TimePeriod", "type": "ClassNoun"}
+{"lexeme": "geological period", "formula": "dbpedia:GeologicalPeriod", "type": "ClassNoun"}
+{"lexeme": "historical period", "formula": "dbpedia:HistoricalPeriod", "type": "ClassNoun"}
+{"lexeme": "prehistorical period", "formula": "dbpedia:PrehistoricalPeriod", "type": "ClassNoun"}
+{"lexeme": "protohistorical period", "formula": "dbpedia:ProtohistoricalPeriod", "type": "ClassNoun"}
+{"lexeme": "art period", "formula": "dbpedia:PeriodOfArtisticStyle", "type": "ClassNoun"}
+{"lexeme": "year", "formula": "dbpedia:Year", "type": "ClassNoun"}
+{"lexeme": "topical concept", "formula": "dbpedia:TopicalConcept", "type": "ClassNoun"}
+{"lexeme": "Christian doctrine", "formula": "dbpedia:ChristianDoctrine", "type": "ClassNoun"}
+{"lexeme": "ideology", "formula": "dbpedia:Ideology", "type": "ClassNoun"}
+{"lexeme": "unit of work", "formula": "dbpedia:UnitOfWork", "type": "ClassNoun"}
+{"lexeme": "project", "formula": "dbpedia:Project", "type": "ClassNoun"}
+{"lexeme": "research project", "formula": "dbpedia:ResearchProject", "type": "ClassNoun"}
+{"lexeme": "take place", "formula": "dbpedia:place", "type": "StateVerb"}
+{"lexeme": "part", "formula": "dbpedia:isPartOf", "type": "RelationalNoun"}
+{"lexeme": "take place", "formula": "dbpedia:date", "type": "StateVerb"}
+{"lexeme": "belong", "formula": "dbpedia:division", "type": "StateVerb"}
+{"lexeme": "color", "formula": "dbpedia:colourName", "type": "RelationalNoun"}
+{"lexeme": "similar", "formula": "dbpedia:similar", "type": "RelationalAdjective"}
+{"lexeme": "synonym", "formula": "dbpedia:synonym", "type": "RelationalNoun"}
+{"lexeme": "abbreviation", "formula": "dbpedia:abbreviation", "type": "RelationalNoun"}
+{"lexeme": "abbreviate", "formula": "dbpedia:abbreviation", "type": "StateVerb"}
+{"lexeme": "abbreviated", "formula": "dbpedia:abbreviation", "type": "RelationalAdjective"}
+{"lexeme": "sublimation point", "formula": "dbpedia:sublimationPoint", "type": "RelationalNoun"}
+{"lexeme": "sublime", "formula": "dbpedia:sublimationPoint", "type": "StateVerb"}
+{"lexeme": "melting point", "formula": "dbpedia:meltingPoint", "type": "RelationalNoun"}
+{"lexeme": "melt", "formula": "dbpedia:meltingPoint", "type": "StateVerb"}
+{"lexeme": "boiling point", "formula": "dbpedia:boilingPoint", "type": "RelationalNoun"}
+{"lexeme": "boil", "formula": "dbpedia:boilingPoint", "type": "StateVerb"}
+{"lexeme": "belong", "formula": "dbpedia:languageFamily", "type": "StateVerb"}
+{"lexeme": "language family", "formula": "dbpedia:languageFamily", "type": "RelationalNoun"}
+{"lexeme": "spoken", "formula": "dbpedia:spokenIn", "type": "RelationalAdjective"}
+{"lexeme": "language", "formula": "dbpedia:spokenIn", "type": "RelationalNoun"}
+{"lexeme": "English", "formula": "(dbpedia:language resource:English_language)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Hindi", "formula": "(dbpedia:language resource:Standard_Hindi)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Spanish", "formula": "(dbpedia:language resource:Spanish_language)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "French", "formula": "(dbpedia:language resource:French_language)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Japanese", "formula": "(dbpedia:language resource:Japanese_language)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "German", "formula": "(dbpedia:language resource:German_language)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Tamil", "formula": "(dbpedia:language resource:Tamil_language)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Italian", "formula": "(dbpedia:language resource:Italian_language)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Portuguese", "formula": "(dbpedia:language resource:Portuguese_language)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Russian", "formula": "(dbpedia:language resource:Russian_language)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Dutch", "formula": "(dbpedia:language resource:Dutch_language)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Korean", "formula": "(dbpedia:language resource:Korean_language)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Arabic", "formula": "(dbpedia:language resource:Arabic_language)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Chinese", "formula": "(dbpedia:language resource:Standard_Chinese)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Chinese", "formula": "(dbpedia:language resource:Chinese_language)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Chinese", "formula": "(dbpedia:language resource:Mandarin_Chinese)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Cantonese", "formula": "(dbpedia:language resource:Cantonese_language)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Swedish", "formula": "(dbpedia:language resource:Swedish_language)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Polish", "formula": "(dbpedia:language resource:Polish_language)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Greek", "formula": "(dbpedia:language resource:Greek_language)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Hebrew", "formula": "(dbpedia:language resource:Hebrew_language)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Turkish", "formula": "(dbpedia:language resource:Turkish_language)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Danish", "formula": "(dbpedia:language resource:Danish_language)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Finnish", "formula": "(dbpedia:language resource:Finnish_language)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Norwegian", "formula": "(dbpedia:language resource:Norwegian_language)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Croatian", "formula": "(dbpedia:language resource:Croatian_language)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Romanian", "formula": "(dbpedia:language resource:Romanian_language)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Thai", "formula": "(dbpedia:language resource:Thai_language)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Hungarian", "formula": "(dbpedia:language resource:Hungarian_language)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Serbian", "formula": "(dbpedia:language resource:Serbian_language)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Slovene", "formula": "(dbpedia:language resource:Slovene_language)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Punjabi", "formula": "(dbpedia:language resource:Punjabi_language)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Albanian", "formula": "(dbpedia:language resource:Albanian_language)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Indonesian", "formula": "(dbpedia:language resource:Indonesian_language)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Estonian", "formula": "(dbpedia:language resource:Estonian_language)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "military person", "formula": "dbpedia:MilitaryPerson", "type": "ClassNoun"}
+{"lexeme": "military personnel", "formula": "dbpedia:MilitaryPerson", "type": "ClassNoun"}
+{"lexeme": "military unit", "formula": "dbpedia:MilitaryUnit", "type": "ClassNoun"}
+{"lexeme": "military conflict", "formula": "dbpedia:MilitaryConflict", "type": "ClassNoun"}
+{"lexeme": "military structure", "formula": "dbpedia:MilitaryStructure", "type": "ClassNoun"}
+{"lexeme": "war", "formula": "dbpedia:MilitaryConflict", "type": "ClassNoun"}
+{"lexeme": "battle", "formula": "dbpedia:MilitaryConflict", "type": "ClassNoun"}
+{"lexeme": "weapon", "formula": "dbpedia:Weapon", "type": "ClassNoun"}
+{"lexeme": "blazon", "formula": "dbpedia:Blazon", "type": "ClassNoun"}
+{"lexeme": "fight", "formula": "dbpedia:battle", "type": "StateVerb"}
+{"lexeme": "serve", "formula": "dbpedia:battle", "type": "StateVerb"}
+{"lexeme": "commander", "formula": "dbpedia:commander", "type": "RelationalNoun"}
+{"lexeme": "leader", "formula": "dbpedia:commander", "type": "RelationalNoun"}
+{"lexeme": "command", "formula": "dbpedia:commander", "type": "StateVerb"}
+{"lexeme": "command", "formula": "dbpedia:militaryCommand)", "type": "StateVerb"}
+{"lexeme": "serve", "formula": "dbpedia:militaryBranch", "type": "StateVerb"}
+{"lexeme": "serve", "formula": "dbpedia:militaryUnit", "type": "StateVerb"}
+{"lexeme": "casualties", "formula": "dbpedia:causalties", "type": "RelationalNoun"}
+{"lexeme": "result", "formula": "dbpedia:result", "type": "RelationalNoun"}
+{"lexeme": "part", "formula": "dbpedia:isPartOfMilitaryConflict", "type": "RelationalNoun"}
+{"lexeme": "part", "formula": "dbpedia:commandStructure", "type": "RelationalNoun"}
+{"lexeme": "subordinate", "formula": "dbpedia:commandStructure", "type": "RelationalAdjective"}
+{"lexeme": "based", "formula": "dbpedia:garrison", "type": "RelationalAdjective"}
+{"lexeme": "based", "formula": "dbpedia:garrison", "type": "RelationalAdjective"}
+{"lexeme": "sport", "formula": "dbpedia:Sport", "type": "ClassNoun"}
+{"lexeme": "sports event", "formula": "dbpedia:SportsEvent", "type": "ClassNoun"}
+{"lexeme": "cycling competition", "formula": "dbpedia:CyclingCompetition", "type": "ClassNoun"}
+{"lexeme": "football match", "formula": "dbpedia:FootballMatch", "type": "ClassNoun"}
+{"lexeme": "match", "formula": "dbpedia:FootballMatch", "type": "ClassNoun"}
+{"lexeme": "tournament", "formula": "dbpedia:Tournament", "type": "ClassNoun"}
+{"lexeme": "soccer tournament", "formula": "dbpedia:SoccerTournament", "type": "ClassNoun"}
+{"lexeme": "tennis tournament", "formula": "dbpedia:TennisTournament", "type": "ClassNoun"}
+{"lexeme": "Women's Tennis Association tournament", "formula": "dbpedia:WomensTennisAssociationTournament", "type": "ClassNoun"}
+{"lexeme": "WTA tournament", "formula": "dbpedia:WomensTennisAssociationTournament", "type": "ClassNoun"}
+{"lexeme": "wrestling event", "formula": "dbpedia:WrestlingEvent", "type": "ClassNoun"}
+{"lexeme": "Mixed Martial Arts event", "formula": "dbpedia:MixedMartialArtsEvent", "type": "ClassNoun"}
+{"lexeme": "MMA event", "formula": "dbpedia:MixedMartialArtsEvent", "type": "ClassNoun"}
+{"lexeme": "grand prix", "formula": "dbpedia:GrandPrix", "type": "ClassNoun"}
+{"lexeme": "race", "formula": "dbpedia:Race", "type": "ClassNoun"}
+{"lexeme": "race", "formula": "lex:Race", "type": "ClassNoun"}
+{"lexeme": "olympic event", "formula": "dbpedia:OlympicEvent", "type": "ClassNoun"}
+{"lexeme": "sport competition result", "formula": "dbpedia:SportCompetitionResult", "type": "ClassNoun"}
+{"lexeme": "result", "formula": "dbpedia:SportCompetitionResult", "type": "ClassNoun"}
+{"lexeme": "olympic result", "formula": "dbpedia:OlympicResult", "type": "ClassNoun"}
+{"lexeme": "penalty shootout", "formula": "dbpedia:PenaltyShootout", "type": "ClassNoun"}
+{"lexeme": "snooker world ranking", "formula": "dbpedia:SnookerWorldRanking", "type": "ClassNoun"}
+{"lexeme": "sports manager", "formula": "dbpedia:SportsManager", "type": "ClassNoun"}
+{"lexeme": "sports managers", "formula": "dbpedia:SportsManager", "type": "ClassNoun"}
+{"lexeme": "manager", "formula": "dbpedia:SportsManager", "type": "ClassNoun"}
+{"lexeme": "managers", "formula": "dbpedia:SportsManager", "type": "ClassNoun"}
+{"lexeme": "soccer manager", "formula": "dbpedia:SoccerManager", "type": "ClassNoun"}
+{"lexeme": "soccer managers", "formula": "dbpedia:SoccerManager", "type": "ClassNoun"}
+{"lexeme": "college coach", "formula": "dbpedia:CollegeCoach", "type": "ClassNoun"}
+{"lexeme": "college coaches", "formula": "dbpedia:CollegeCoach", "type": "ClassNoun"}
+{"lexeme": "volleyball coach", "formula": "dbpedia:VolleyballCoach", "type": "ClassNoun"}
+{"lexeme": "volleyball coaches", "formula": "dbpedia:VolleyballCoach", "type": "ClassNoun"}
+{"lexeme": "team member", "formula": "dbpedia:TeamMember", "type": "ClassNoun"}
+{"lexeme": "team members", "formula": "dbpedia:TeamMember", "type": "ClassNoun"}
+{"lexeme": "sports team member", "formula": "dbpedia:SportsTeamMember", "type": "ClassNoun"}
+{"lexeme": "referee", "formula": "dbpedia:Referee", "type": "ClassNoun"}
+{"lexeme": "athlete", "formula": "dbpedia:Athlete", "type": "ClassNoun"}
+{"lexeme": "sportsman", "formula": "dbpedia:Athlete", "type": "ClassNoun"}
+{"lexeme": "sportsmen", "formula": "dbpedia:Athlete", "type": "ClassNoun"}
+{"lexeme": "sportswoman", "formula": "lex:FemaleAthlete", "type": "ClassNoun"}
+{"lexeme": "sportswomen", "formula": "lex:FemaleAthlete", "type": "ClassNoun"}
+{"lexeme": "National Collegiate Athletic Association athlete", "formula": "dbpedia:NationalCollegiateAthleticAssociationAthlete", "type": "ClassNoun"}
+{"lexeme": "NCAA athlete", "formula": "dbpedia:NationalCollegiateAthleticAssociationAthlete", "type": "ClassNoun"}
+{"lexeme": "American Football player", "formula": "dbpedia:AmericanFootballPlayer", "type": "ClassNoun"}
+{"lexeme": "Gridiron Football player", "formula": "dbpedia:GridironFootballPlayer", "type": "ClassNoun"}
+{"lexeme": "Canadian Football player", "formula": "dbpedia:CanadianFootballPlayer", "type": "ClassNoun"}
+{"lexeme": "Australian rules football player", "formula": "dbpedia:AustralianRulesFootballPlayer", "type": "ClassNoun"}
+{"lexeme": "football player", "formula": "lex:FootballPlayer", "type": "ClassNoun"}
+{"lexeme": "badminton player", "formula": "dbpedia:BadmintonPlayer", "type": "ClassNoun"}
+{"lexeme": "baseball player", "formula": "dbpedia:BaseballPlayer", "type": "ClassNoun"}
+{"lexeme": "basketball player", "formula": "dbpedia:BasketballPlayer", "type": "ClassNoun"}
+{"lexeme": "body builder", "formula": "dbpedia:BodyBuilder", "type": "ClassNoun"}
+{"lexeme": "boxer", "formula": "dbpedia:Boxer", "type": "ClassNoun"}
+{"lexeme": "amateur boxer", "formula": "dbpedia:AmateurBoxer", "type": "ClassNoun"}
+{"lexeme": "bull fighter", "formula": "dbpedia:BullFighter", "type": "ClassNoun"}
+{"lexeme": "bullfighter", "formula": "dbpedia:BullFighter", "type": "ClassNoun"}
+{"lexeme": "chess player", "formula": "dbpedia:ChessPlayer", "type": "ClassNoun"}
+{"lexeme": "cricketer", "formula": "dbpedia:Cricketer", "type": "ClassNoun"}
+{"lexeme": "curler", "formula": "dbpedia:Curler", "type": "ClassNoun"}
+{"lexeme": "cyclist", "formula": "dbpedia:Cyclist", "type": "ClassNoun"}
+{"lexeme": "darts player", "formula": "dbpedia:DartsPlayer", "type": "ClassNoun"}
+{"lexeme": "figure skater", "formula": "dbpedia:FigureSkater", "type": "ClassNoun"}
+{"lexeme": "Gaelic games game player", "formula": "dbpedia:GaelicGamesPlayer", "type": "ClassNoun"}
+{"lexeme": "golf player", "formula": "dbpedia:GolfPlayer", "type": "ClassNoun"}
+{"lexeme": "gymnast", "formula": "dbpedia:Gymnast", "type": "ClassNoun"}
+{"lexeme": "handball player", "formula": "dbpedia:HandballPlayer", "type": "ClassNoun"}
+{"lexeme": "horse rider", "formula": "dbpedia:HorseRider", "type": "ClassNoun"}
+{"lexeme": "ice hockey player", "formula": "dbpedia:IceHockeyPlayer", "type": "ClassNoun"}
+{"lexeme": "jockey", "formula": "dbpedia:Jockey", "type": "ClassNoun"}
+{"lexeme": "lacrosse player", "formula": "dbpedia:LacrossePlayer", "type": "ClassNoun"}
+{"lexeme": "martial artist", "formula": "dbpedia:MartialArtist", "type": "ClassNoun"}
+{"lexeme": "motorcycle rider", "formula": "dbpedia:MotorcycleRider", "type": "ClassNoun"}
+{"lexeme": "motorcyclist", "formula": "dbpedia:MotorcycleRider", "type": "ClassNoun"}
+{"lexeme": "speedway rider", "formula": "dbpedia:SpeedwayRider", "type": "ClassNoun"}
+{"lexeme": "netball player", "formula": "dbpedia:NetballPlayer", "type": "ClassNoun"}
+{"lexeme": "poker player", "formula": "dbpedia:PokerPlayer", "type": "ClassNoun"}
+{"lexeme": "Formula One racer", "formula": "dbpedia:FormulaOneRacer", "type": "ClassNoun"}
+{"lexeme": "NASCAR driver", "formula": "dbpedia:NascarDriver", "type": "ClassNoun"}
+{"lexeme": "racing driver", "formula": "dbpedia:RacingDriver", "type": "ClassNoun"}
+{"lexeme": "race driver", "formula": "dbpedia:RacingDriver", "type": "ClassNoun"}
+{"lexeme": "race driver", "formula": "lex:RaceDriver", "type": "ClassNoun"}
+{"lexeme": "rugby player", "formula": "dbpedia:RugbyPlayer", "type": "ClassNoun"}
+{"lexeme": "skater", "formula": "dbpedia:Skater", "type": "ClassNoun"}
+{"lexeme": "skier", "formula": "dbpedia:Skier", "type": "ClassNoun"}
+{"lexeme": "snooker player", "formula": "dbpedia:SnookerPlayer", "type": "ClassNoun"}
+{"lexeme": "snooker champ", "formula": "dbpedia:SnookerChamp", "type": "ClassNoun"}
+{"lexeme": "snooker champion", "formula": "dbpedia:SnookerChamp", "type": "ClassNoun"}
+{"lexeme": "soccer player", "formula": "dbpedia:SoccerPlayer", "type": "ClassNoun"}
+{"lexeme": "squash player", "formula": "dbpedia:SquashPlayer", "type": "ClassNoun"}
+{"lexeme": "swimmer", "formula": "dbpedia:Swimmer", "type": "ClassNoun"}
+{"lexeme": "table tennis player", "formula": "dbpedia:TableTennisPlayer", "type": "ClassNoun"}
+{"lexeme": "tennis player", "formula": "dbpedia:TennisPlayer", "type": "ClassNoun"}
+{"lexeme": "volleyball player", "formula": "dbpedia:VolleyballPlayer", "type": "ClassNoun"}
+{"lexeme": "beach volleyball player", "formula": "dbpedia:BeachVolleyballPlayer", "type": "ClassNoun"}
+{"lexeme": "wrestler", "formula": "dbpedia:Wrestler", "type": "ClassNoun"}
+{"lexeme": "sumo wrestler", "formula": "dbpedia:SumoWrestler", "type": "ClassNoun"}
+{"lexeme": "surfer", "formula": "(dbpedia:profession resource:Surfer)", "type": "ObjectProperty"}
+{"lexeme": "player", "formula": "lex:Player", "type": "ClassNoun"}
+{"lexeme": "sports team", "formula": "dbpedia:SportsTeam", "type": "ClassNoun"}
+{"lexeme": "team", "formula": "dbpedia:SportsTeam", "type": "ClassNoun"}
+{"lexeme": "American Football team", "formula": "dbpedia:AmericanFootballTeam", "type": "ClassNoun"}
+{"lexeme": "football team", "formula": "lex:FootballTeam", "type": "ClassNoun"}
+{"lexeme": "baseball team", "formula": "dbpedia:BaseballTeam", "type": "ClassNoun"}
+{"lexeme": "basketball team", "formula": "dbpedia:BasketballTeam", "type": "ClassNoun"}
+{"lexeme": "Canadian Football team", "formula": "dbpedia:CanadianFootballTeam", "type": "ClassNoun"}
+{"lexeme": "cycling team", "formula": "dbpedia:CyclingTeam", "type": "ClassNoun"}
+{"lexeme": "hockey team", "formula": "dbpedia:HockeyTeam", "type": "ClassNoun"}
+{"lexeme": "rugby club", "formula": "dbpedia:RugbyClub", "type": "ClassNoun"}
+{"lexeme": "soccer club", "formula": "dbpedia:SoccerClub", "type": "ClassNoun"}
+{"lexeme": "soccer team", "formula": "dbpedia:SoccerClub", "type": "ClassNoun"}
+{"lexeme": "national soccer club", "formula": "dbpedia:NationalSoccerClub", "type": "ClassNoun"}
+{"lexeme": "national soccer team", "formula": "dbpedia:NationalSoccerClub", "type": "ClassNoun"}
+{"lexeme": "speedway team", "formula": "dbpedia:SpeedwayTeam", "type": "ClassNoun"}
+{"lexeme": "sports league", "formula": "dbpedia:SportsLeague", "type": "ClassNoun"}
+{"lexeme": "league", "formula": "dbpedia:SportsLeague", "type": "ClassNoun"}
+{"lexeme": "American Football league", "formula": "dbpedia:AmericanFootballLeague", "type": "ClassNoun"}
+{"lexeme": "Australian Football league", "formula": "dbpedia:AustralianFootballLeague", "type": "ClassNoun"}
+{"lexeme": "football league", "formula": "lex:FootballLeague", "type": "ClassNoun"}
+{"lexeme": "auto racing league", "formula": "dbpedia:AutoRacingLeague", "type": "ClassNoun"}
+{"lexeme": "car racing league", "formula": "dbpedia:AutoRacingLeague", "type": "ClassNoun"}
+{"lexeme": "racing league", "formula": "dbpedia:AutoRacingLeague", "type": "ClassNoun"}
+{"lexeme": "baseball league", "formula": "dbpedia:BaseballLeague", "type": "ClassNoun"}
+{"lexeme": "basketball league", "formula": "dbpedia:BasketballLeague", "type": "ClassNoun"}
+{"lexeme": "bowling league", "formula": "dbpedia:BowlingLeague", "type": "ClassNoun"}
+{"lexeme": "boxing league", "formula": "dbpedia:BoxingLeague", "type": "ClassNoun"}
+{"lexeme": "Canadian Football league", "formula": "dbpedia:CanadianFootballLeague", "type": "ClassNoun"}
+{"lexeme": "cricket league", "formula": "dbpedia:CricketLeague", "type": "ClassNoun"}
+{"lexeme": "curling league", "formula": "dbpedia:CurlingLeague", "type": "ClassNoun"}
+{"lexeme": "cycling league", "formula": "dbpedia:CyclingLeague", "type": "ClassNoun"}
+{"lexeme": "field hockey league", "formula": "dbpedia:FieldHockeyLeague", "type": "ClassNoun"}
+{"lexeme": "Formula One racing league", "formula": "dbpedia:FormulaOneRacingLeague", "type": "ClassNoun"}
+{"lexeme": "racing league", "formula": "dbpedia:FormulaOneRacingLeague", "type": "ClassNoun"}
+{"lexeme": "golf league", "formula": "dbpedia:GolfLeague", "type": "ClassNoun"}
+{"lexeme": "handball league", "formula": "dbpedia:HandballLeague", "type": "ClassNoun"}
+{"lexeme": "ice hockey league", "formula": "dbpedia:IceHockeyLeague", "type": "ClassNoun"}
+{"lexeme": "inline hockey league", "formula": "dbpedia:InlineHockeyLeague", "type": "ClassNoun"}
+{"lexeme": "hockey league", "formula": "lex:HockeyLeague", "type": "ClassNoun"}
+{"lexeme": "lacrosse league", "formula": "dbpedia:LacrosseLeague", "type": "ClassNoun"}
+{"lexeme": "mixed martial arts league", "formula": "dbpedia:MixedMartialArtsLeague", "type": "ClassNoun"}
+{"lexeme": "MMA league", "formula": "dbpedia:MixedMartialArtsLeague", "type": "ClassNoun"}
+{"lexeme": "martial arts league", "formula": "dbpedia:MixedMartialArtsLeague", "type": "ClassNoun"}
+{"lexeme": "motorcycle racing league", "formula": "dbpedia:MotorcycleRacingLeague", "type": "ClassNoun"}
+{"lexeme": "paintball league", "formula": "dbpedia:PaintballLeague", "type": "ClassNoun"}
+{"lexeme": "polo league", "formula": "dbpedia:PoloLeague", "type": "ClassNoun"}
+{"lexeme": "radio-controlled racing league", "formula": "dbpedia:RadioControlledRacingLeague", "type": "ClassNoun"}
+{"lexeme": "rugby league", "formula": "dbpedia:RugbyLeague", "type": "ClassNoun"}
+{"lexeme": "soccer league", "formula": "dbpedia:SoccerLeague", "type": "ClassNoun"}
+{"lexeme": "softball league", "formula": "dbpedia:SoftballLeague", "type": "ClassNoun"}
+{"lexeme": "speedway league", "formula": "dbpedia:SpeedwayLeague", "type": "ClassNoun"}
+{"lexeme": "tennis league", "formula": "dbpedia:TennisLeague", "type": "ClassNoun"}
+{"lexeme": "video games league", "formula": "dbpedia:VideoGamesLeague", "type": "ClassNoun"}
+{"lexeme": "volleyball league", "formula": "dbpedia:VolleyballLeague", "type": "ClassNoun"}
+{"lexeme": "team", "formula": "dbpedia:team", "type": "RelationalNoun"}
+{"lexeme": "play", "formula": "dbpedia:team", "type": "StateVerb"}
+{"lexeme": "play", "formula": "dbpedia:league", "type": "StateVerb"}
+{"lexeme": "play", "formula": "dbpedia:college", "type": "StateVerb"}
+{"lexeme": "graduate", "formula": "dbpedia:college", "type": "StateVerb"}
+{"lexeme": "attend", "formula": "dbpedia:college", "type": "StateVerb"}
+{"lexeme": "player", "formula": "dbpedia:team", "type": "RelationalNoun"}
+{"lexeme": "race", "formula": "dbpedia:team", "type": "StateVerb"}
+{"lexeme": "manager", "formula": "dbpedia:team", "type": "RelationalNoun"}
+{"lexeme": "manage", "formula": "dbpedia:team", "type": "StateVerb"}
+{"lexeme": "manager", "formula": "dbpedia:managerClub", "type": "RelationalNoun"}
+{"lexeme": "manage", "formula": "dbpedia:managerClub", "type": "StateVerb"}
+{"lexeme": "manager", "formula": "dbpedia:manager", "type": "RelationalNoun"}
+{"lexeme": "manage", "formula": "dbpedia:manager", "type": "StateVerb"}
+{"lexeme": "home arena", "formula": "dbpedia:homeArena", "type": "RelationalNoun"}
+{"lexeme": "home stadium", "formula": "dbpedia:homeArena", "type": "RelationalNoun"}
+{"lexeme": "home stadium", "formula": "dbpedia:ground", "type": "RelationalNoun"}
+{"lexeme": "based", "formula": "dbpedia:ground", "type": "RelationalAdjective"}
+{"lexeme": "home", "formula": "dbpedia:homeArena", "type": "RelationalNoun"}
+{"lexeme": "home", "formula": "dbpedia:ground", "type": "RelationalNoun"}
+{"lexeme": "play", "formula": "dbpedia:tenant", "type": "StateVerb"}
+{"lexeme": "host", "formula": "dbpedia:tenant", "type": "StateVerb"}
+{"lexeme": "home", "formula": "dbpedia:operator", "type": "RelationalNoun"}
+{"lexeme": "ride", "formula": "dbpedia:raceHorse", "type": "StateVerb"}
+{"lexeme": "capacity", "formula": "dbpedia:capacity", "type": "RelationalNoun"}
+{"lexeme": "accommodate", "formula": "dbpedia:capacity", "type": "StateVerb"}
+{"lexeme": "position", "formula": "dbpedia:position", "type": "RelationalNoun"}
+{"lexeme": "shirt number", "formula": "dbpedia:number", "type": "RelationalNoun"}
+{"lexeme": "shirt number", "formula": "dbpedia:squadNumber", "type": "RelationalNoun"}
+{"lexeme": "squad number", "formula": "dbpedia:number", "type": "RelationalNoun"}
+{"lexeme": "squad number", "formula": "dbpedia:squadNumber", "type": "RelationalNoun"}
+{"lexeme": "former coach", "formula": "dbpedia:formerCoach", "type": "RelationalNoun"}
+{"lexeme": "right-handed", "formula": "(dbpedia:plays 'Right-handed')", "type": "IntersectiveDataPropertyAdjective"}
+{"lexeme": "right-handed", "formula": "(dbpedia:plays 'Right-handed-(two-handed-backhand)')", "type": "IntersectiveDataPropertyAdjective"}
+{"lexeme": "right-handed", "formula": "(dbpedia:plays 'Right-handed-(one-handed-backhand)')", "type": "IntersectiveDataPropertyAdjective"}
+{"lexeme": "left-handed", "formula": "(dbpedia:plays 'Left-handed')", "type": "IntersectiveDataPropertyAdjective"}
+{"lexeme": "left-handed", "formula": "(dbpedia:plays 'Left-handed-(two-handed-backhand)')", "type": "IntersectiveDataPropertyAdjective"}
+{"lexeme": "left-handed", "formula": "(dbpedia:plays 'Left-handed-(one-handed-backhand)')", "type": "IntersectiveDataPropertyAdjective"}
+{"lexeme": "ambidextrous", "formula": "(dbpedia:plays 'Ambidextrous)", "type": "IntersectiveDataPropertyAdjective"}
+{"lexeme": "ambidextrous", "formula": "(dbpedia:shoots 'Ambidextrous)", "type": "IntersectiveDataPropertyAdjective"}
+{"lexeme": "chairman", "formula": "dbpedia:chairman", "type": "RelationalNoun"}
+{"lexeme": "debut", "formula": "dbpedia:debutTeam", "type": "StateVerb"}
+{"lexeme": "device", "formula": "dbpedia:Device", "type": "ClassNoun"}
+{"lexeme": "camera", "formula": "dbpedia:Camera", "type": "ClassNoun"}
+{"lexeme": "digital camera", "formula": "dbpedia:DigitalCamera", "type": "ClassNoun"}
+{"lexeme": "information appliance", "formula": "dbpedia:InformationAppliance", "type": "ClassNoun"}
+{"lexeme": "software", "formula": "dbpedia:Software", "type": "ClassNoun"}
+{"lexeme": "piece of software", "formula": "dbpedia:Software", "type": "ClassNoun"}
+{"lexeme": "pieces of software", "formula": "dbpedia:Software", "type": "ClassNoun"}
+{"lexeme": "programming language", "formula": "dbpedia:ProgrammingLanguage", "type": "ClassNoun"}
+{"lexeme": "freeware", "formula": "(dbpedia:license resource:Freeware)", "type": "ObjectProperty"}
+{"lexeme": "shareware", "formula": "(dbpedia:license resource:Shareware)", "type": "ObjectProperty"}
+{"lexeme": "video game", "formula": "dbpedia:VideoGame", "type": "ClassNoun"}
+{"lexeme": "automobile engine", "formula": "dbpedia:AutomobileEngine", "type": "ClassNoun"}
+{"lexeme": "mean of transportation", "formula": "dbpedia:MeanOfTransportation", "type": "ClassNoun"}
+{"lexeme": "means of transportation", "formula": "dbpedia:MeanOfTransportation", "type": "ClassNoun"}
+{"lexeme": "ship", "formula": "dbpedia:Ship", "type": "ClassNoun"}
+{"lexeme": "boat", "formula": "dbpedia:Ship", "type": "ClassNoun"}
+{"lexeme": "aircraft", "formula": "dbpedia:Aircraft", "type": "ClassNoun"}
+{"lexeme": "aircraft", "formula": "dbpedia:Aircraft", "type": "ClassNoun"}
+{"lexeme": "airplane", "formula": "dbpedia:Aircraft", "type": "ClassNoun"}
+{"lexeme": "plane", "formula": "dbpedia:Aircraft", "type": "ClassNoun"}
+{"lexeme": "airline", "formula": "dbpedia:Airline", "type": "ClassNoun"}
+{"lexeme": "automobile", "formula": "dbpedia:Automobile", "type": "ClassNoun"}
+{"lexeme": "auto", "formula": "dbpedia:Automobile", "type": "ClassNoun"}
+{"lexeme": "car", "formula": "dbpedia:Automobile", "type": "ClassNoun"}
+{"lexeme": "vehicle", "formula": "dbpedia:Automobile", "type": "ClassNoun"}
+{"lexeme": "coupe", "formula": "(dbpedia:bodyStyle resource:Coupe)", "type": "ObjectProperty"}
+{"lexeme": "hatchback", "formula": "(dbpedia:bodyStyle resource:Hatchback)", "type": "ObjectProperty"}
+{"lexeme": "convertible", "formula": "(dbpedia:bodyStyle resource:Convertible)", "type": "ObjectProperty"}
+{"lexeme": "station wagon", "formula": "(dbpedia:bodyStyle resource:Station_wagon)", "type": "ObjectProperty"}
+{"lexeme": "pickup", "formula": "(dbpedia:bodyStyle resource:Pickup_truck)", "type": "ObjectProperty"}
+{"lexeme": "pickup truck", "formula": "(dbpedia:bodyStyle resource:Pickup_truck)", "type": "ObjectProperty"}
+{"lexeme": "locomotive", "formula": "dbpedia:Locomotive", "type": "ClassNoun"}
+{"lexeme": "engine", "formula": "dbpedia:Locomotive", "type": "ClassNoun"}
+{"lexeme": "train", "formula": "dbpedia:Train", "type": "ClassNoun"}
+{"lexeme": "made", "formula": "dbpedia:origin", "type": "RelationalAdjective"}
+{"lexeme": "average speed", "formula": "dbpedia:averageSpeed", "type": "RelationalNoun"}
+{"lexeme": "top speed", "formula": "dbpedia:topSpeed", "type": "RelationalNoun"}
+{"lexeme": "displacement", "formula": "dbpedia:displacement", "type": "RelationalNoun"}
+{"lexeme": "engine displacement", "formula": "dbpedia:displacement", "type": "RelationalNoun"}
+{"lexeme": "developer", "formula": "dbpedia:developer", "type": "RelationalNoun"}
+{"lexeme": "develop", "formula": "dbpedia:developer", "type": "StateVerb"}
+{"lexeme": "developed", "formula": "dbpedia:computingPlatform", "type": "RelationalAdjective"}
+{"lexeme": "ported", "formula": "dbpedia:computingPlatform", "type": "RelationalAdjective"}
+{"lexeme": "released", "formula": "dbpedia:computingMedia", "type": "RelationalAdjective"}
+{"lexeme": "use", "formula": "dbpedia:computingInput", "type": "StateVerb"}
+{"lexeme": "play", "formula": "dbpedia:computingInput", "type": "StateVerb"}
+{"lexeme": "run", "formula": "dbpedia:operatingSystem", "type": "StateVerb"}
+{"lexeme": "programming language", "formula": "dbpedia:programmingLanguage", "type": "RelationalNoun"}
+{"lexeme": "written", "formula": "dbpedia:programmingLanguage", "type": "RelationalAdjective"}
+{"lexeme": "licensed", "formula": "dbpedia:license", "type": "RelationalAdjective"}
+{"lexeme": "proprietary", "formula": "(dbpedia:license resource:Proprietary_software)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "open source", "formula": "(dbpedia:license resource:Open_source)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "intersect", "formula": "dbpedia:routeJunction", "type": "StateVerb"}
+{"lexeme": "cross", "formula": "dbpedia:routeJunction", "type": "StateVerb"}
+{"lexeme": "begin", "formula": "dbpedia:routeStart", "type": "StateVerb"}
+{"lexeme": "begin", "formula": "dbpedia:routeStart", "type": "StateVerb"}
+{"lexeme": "end", "formula": "dbpedia:routeEnd", "type": "StateVerb"}
+{"lexeme": "end", "formula": "dbpedia:routeEnd", "type": "StateVerb"}
+{"lexeme": "beam", "formula": "dbpedia:shipBeam", "type": "RelationalNoun"}
+{"lexeme": "draft", "formula": "dbpedia:shipDraft", "type": "RelationalNoun"}
+{"lexeme": "format", "formula": "dbpedia:format", "type": "RelationalNoun"}
+{"lexeme": "color", "formula": "(dbpedia:format resource:Color)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "black-and-white", "formula": "(dbpedia:format resource:Black-and-white)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "stereo", "formula": "(dbpedia:format resource:Stereophonic_sound)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "stereo", "formula": "(dbpedia:format resource:Dolby_Stereo)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "straight-four", "formula": "(dbpedia:configuration 'straight-four'^^datatype:engineConfiguration)", "type": "IntersectiveDataPropertyAdjective"}
+{"lexeme": "inline-four", "formula": "(dbpedia:configuration 'straight-four'^^datatype:engineConfiguration)", "type": "IntersectiveDataPropertyAdjective"}
+{"lexeme": "straight-six", "formula": "(dbpedia:configuration 'straight-six'^^datatype:engineConfiguration)", "type": "IntersectiveDataPropertyAdjective"}
+{"lexeme": "inline-six", "formula": "(dbpedia:configuration 'straight-six'^^datatype:engineConfiguration)", "type": "IntersectiveDataPropertyAdjective"}
+{"lexeme": "V6", "formula": "(dbpedia:configuration 'V6'^^datatype:engineConfiguration)", "type": "IntersectiveDataPropertyAdjective"}
+{"lexeme": "V8", "formula": "(dbpedia:configuration 'V8'^^datatype:engineConfiguration)", "type": "IntersectiveDataPropertyAdjective"}
+{"lexeme": "assembled", "formula": "dbpedia:assembly", "type": "RelationalAdjective"}
+{"lexeme": "commissioned", "formula": "dbpedia:commissioningDate", "type": "RelationalAdjective"}
+{"lexeme": "decommissioned", "formula": "dbpedia:decommissioningDate", "type": "RelationalAdjective"}
+{"lexeme": "build", "formula": "dbpedia:builder", "type": "StateVerb"}
+{"lexeme": "design", "formula": "dbpedia:designer", "type": "StateVerb"}
+{"lexeme": "develop", "formula": "dbpedia:designer", "type": "StateVerb"}
+{"lexeme": "create", "formula": "dbpedia:designer", "type": "StateVerb"}
+{"lexeme": "based", "formula": "dbpedia:relatedMeanOfTransportation", "type": "RelationalAdjective"}
+{"lexeme": "operate", "formula": "dbpedia:operatedBy", "type": "StateVerb"}
+{"lexeme": "operate", "formula": "dbpedia:operator", "type": "StateVerb"}
+{"lexeme": "serve", "formula": "dbpedia:servingRailwayLine", "type": "StateVerb"}
+{"lexeme": "laid down", "formula": "dbpedia:layingDown", "type": "RelationalAdjective"}
+{"lexeme": "launched", "formula": "dbpedia:shipLaunch", "type": "RelationalAdjective"}
+{"lexeme": "ICAO identifier", "formula": "dbpedia:icaoLocationIdentifier", "type": "RelationalNoun"}
+{"lexeme": "ICAO code", "formula": "dbpedia:icaoLocationIdentifier", "type": "RelationalNoun"}
+{"lexeme": "location indicator", "formula": "dbpedia:icaoLocationIdentifier", "type": "RelationalNoun"}
+{"lexeme": "IATA location identifier", "formula": "dbpedia:iataLocationIdentifier", "type": "RelationalNoun"}
+{"lexeme": "IATA identifier", "formula": "dbpedia:iataLocationIdentifier", "type": "RelationalNoun"}
+{"lexeme": "IATA code", "formula": "dbpedia:iataLocationIdentifier", "type": "RelationalNoun"}
+{"lexeme": "current release", "formula": "dbpedia:latestReleaseVersion", "type": "RelationalNoun"}
+{"lexeme": "latest version", "formula": "dbpedia:latestReleaseVersion", "type": "RelationalNoun"}
+{"lexeme": "station code", "formula": "dbpedia:agencyStationCode", "type": "RelationalNoun"}
+{"lexeme": "celestial body", "formula": "dbpedia:CelestialBody", "type": "ClassNoun"}
+{"lexeme": "celestial bodies", "formula": "dbpedia:CelestialBody", "type": "ClassNoun"}
+{"lexeme": "star", "formula": "dbpedia:Star", "type": "ClassNoun"}
+{"lexeme": "stars", "formula": "dbpedia:Star", "type": "ClassNoun"}
+{"lexeme": "sun", "formula": "dbpedia:Star", "type": "ClassNoun"}
+{"lexeme": "suns", "formula": "dbpedia:Star", "type": "ClassNoun"}
+{"lexeme": "planet", "formula": "dbpedia:Planet", "type": "ClassNoun"}
+{"lexeme": "planets", "formula": "dbpedia:Planet", "type": "ClassNoun"}
+{"lexeme": "galaxy", "formula": "dbpedia:Galaxy", "type": "ClassNoun"}
+{"lexeme": "galaxies", "formula": "dbpedia:Galaxy", "type": "ClassNoun"}
+{"lexeme": "asteroid", "formula": "dbpedia:Asteroid", "type": "ClassNoun"}
+{"lexeme": "asteroids", "formula": "dbpedia:Asteroid", "type": "ClassNoun"}
+{"lexeme": "constellation", "formula": "dbpedia:Constellation", "type": "ClassNoun"}
+{"lexeme": "constellations", "formula": "dbpedia:Constellation", "type": "ClassNoun"}
+{"lexeme": "lunar crater", "formula": "dbpedia:LunarCrater", "type": "ClassNoun"}
+{"lexeme": "lunar craters", "formula": "dbpedia:LunarCrater", "type": "ClassNoun"}
+{"lexeme": "moon crater", "formula": "dbpedia:LunarCrater", "type": "ClassNoun"}
+{"lexeme": "moon craters", "formula": "dbpedia:LunarCrater", "type": "ClassNoun"}
+{"lexeme": "rocket", "formula": "dbpedia:Rocket", "type": "ClassNoun"}
+{"lexeme": "rockets", "formula": "dbpedia:Rocket", "type": "ClassNoun"}
+{"lexeme": "launch pad", "formula": "dbpedia:LaunchPad", "type": "ClassNoun"}
+{"lexeme": "launch pads", "formula": "dbpedia:LaunchPad", "type": "ClassNoun"}
+{"lexeme": "launchpad", "formula": "dbpedia:LaunchPad", "type": "ClassNoun"}
+{"lexeme": "launchpads", "formula": "dbpedia:LaunchPad", "type": "ClassNoun"}
+{"lexeme": "spacecraft", "formula": "dbpedia:Spacecraft", "type": "ClassNoun"}
+{"lexeme": "spacecrafts", "formula": "dbpedia:Spacecraft", "type": "ClassNoun"}
+{"lexeme": "spaceship", "formula": "dbpedia:Spacecraft", "type": "ClassNoun"}
+{"lexeme": "spaceships", "formula": "dbpedia:Spacecraft", "type": "ClassNoun"}
+{"lexeme": "space station", "formula": "dbpedia:SpaceStation", "type": "ClassNoun"}
+{"lexeme": "space stations", "formula": "dbpedia:SpaceStation", "type": "ClassNoun"}
+{"lexeme": "space shuttle", "formula": "dbpedia:SpaceShuttle", "type": "ClassNoun"}
+{"lexeme": "space shuttles", "formula": "dbpedia:SpaceShuttle", "type": "ClassNoun"}
+{"lexeme": "space mission", "formula": "dbpedia:SpaceMission", "type": "ClassNoun"}
+{"lexeme": "space missions", "formula": "dbpedia:SpaceMission", "type": "ClassNoun"}
+{"lexeme": "year in spaceflight", "formula": "dbpedia:YearInSpaceflight", "type": "ClassNoun"}
+{"lexeme": "years in spaceflight", "formula": "dbpedia:YearInSpaceflight", "type": "ClassNoun"}
+{"lexeme": "astronaut", "formula": "dbpedia:Astronaut", "type": "ClassNoun"}
+{"lexeme": "astronauts", "formula": "dbpedia:Astronaut", "type": "ClassNoun"}
+{"lexeme": "cosmonaut", "formula": "lex:Cosmonaut", "type": "ClassNoun"}
+{"lexeme": "cosmonauts", "formula": "lex:Cosmonaut", "type": "ClassNoun"}
+{"lexeme": "taikonaut", "formula": "lex:Taikonaut", "type": "ClassNoun"}
+{"lexeme": "taikonauts", "formula": "lex:Taikonaut", "type": "ClassNoun"}
+{"lexeme": "mean temperature", "formula": "dbpedia:meanTemperature", "type": "RelationalNoun"}
+{"lexeme": "density", "formula": "dbpedia:density", "type": "RelationalNoun"}
+{"lexeme": "orbital period", "formula": "dbpedia:orbitalPeriod", "type": "RelationalNoun"}
+{"lexeme": "periapsis", "formula": "dbpedia:periapsis", "type": "RelationalNoun"}
+{"lexeme": "periapse", "formula": "dbpedia:periapsis", "type": "RelationalNoun"}
+{"lexeme": "apoapsis", "formula": "dbpedia:apoapsis", "type": "RelationalNoun"}
+{"lexeme": "epoch", "formula": "dbpedia:epoch", "type": "RelationalNoun"}
+{"lexeme": "absolute magnitude", "formula": "dbpedia:absoluteMagnitude", "type": "RelationalNoun"}
+{"lexeme": "magnitude", "formula": "dbpedia:magnitude", "type": "RelationalNoun"}
+{"lexeme": "launch off", "formula": "dbpedia:associatedRocket", "type": "StateVerb"}
+{"lexeme": "take off", "formula": "dbpedia:associatedRocket", "type": "StateVerb"}
+{"lexeme": "blast off", "formula": "dbpedia:associatedRocket", "type": "StateVerb"}
+{"lexeme": "launched", "formula": "dbpedia:launchDate", "type": "RelationalAdjective"}
+{"lexeme": "place", "formula": "dbpedia:Place", "type": "ClassNoun"}
+{"lexeme": "location", "formula": "dbpedia:Place", "type": "ClassNoun"}
+{"lexeme": "populated place", "formula": "dbpedia:PopulatedPlace", "type": "ClassNoun"}
+{"lexeme": "continent", "formula": "dbpedia:Continent", "type": "ClassNoun"}
+{"lexeme": "country", "formula": "dbpedia:Country", "type": "ClassNoun"}
+{"lexeme": "nation", "formula": "dbpedia:Country", "type": "ClassNoun"}
+{"lexeme": "state", "formula": "dbpedia:State", "type": "ClassNoun"}
+{"lexeme": "department", "formula": "dbpedia:Department", "type": "ClassNoun"}
+{"lexeme": "overseas department", "formula": "dbpedia:OverseasDepartment", "type": "ClassNoun"}
+{"lexeme": "intercommunality", "formula": "dbpedia:Intercommunality", "type": "ClassNoun"}
+{"lexeme": "locality", "formula": "dbpedia:Locality", "type": "ClassNoun"}
+{"lexeme": "French locality", "formula": "dbpedia:FrenchLocality", "type": "ClassNoun"}
+{"lexeme": "arrondissement", "formula": "lex:Arrondissement", "type": "ClassNoun"}
+{"lexeme": "prefecture", "formula": "dbpedia:Prefecture", "type": "ClassNoun"}
+{"lexeme": "settlement", "formula": "dbpedia:Settlement", "type": "ClassNoun"}
+{"lexeme": "Iran settlement", "formula": "dbpedia:IranSettlement", "type": "ClassNoun"}
+{"lexeme": "city", "formula": "dbpedia:City", "type": "ClassNoun"}
+{"lexeme": "city district", "formula": "dbpedia:CityDistrict", "type": "ClassNoun"}
+{"lexeme": "town", "formula": "dbpedia:Town", "type": "ClassNoun"}
+{"lexeme": "village", "formula": "dbpedia:Village", "type": "ClassNoun"}
+{"lexeme": "region", "formula": "dbpedia:Region", "type": "ClassNoun"}
+{"lexeme": "administrative region", "formula": "dbpedia:AdministrativeRegion", "type": "ClassNoun"}
+{"lexeme": "clerical administrative region", "formula": "dbpedia:ClericalAdministrativeRegion", "type": "ClassNoun"}
+{"lexeme": "deanery", "formula": "dbpedia:Deanary", "type": "ClassNoun"}
+{"lexeme": "diocese", "formula": "dbpedia:Diocese", "type": "ClassNoun"}
+{"lexeme": "parish", "formula": "dbpedia:Parish", "type": "ClassNoun"}
+{"lexeme": "governmental administrative region", "formula": "dbpedia:GovernmentalAdministrativeRegion", "type": "ClassNoun"}
+{"lexeme": "district", "formula": "dbpedia:District", "type": "ClassNoun"}
+{"lexeme": "district water board", "formula": "dbpedia:DistrictWaterBoard", "type": "ClassNoun"}
+{"lexeme": "water board", "formula": "dbpedia:DistrictWaterBoard", "type": "ClassNoun"}
+{"lexeme": "municipality", "formula": "dbpedia:Municipality", "type": "ClassNoun"}
+{"lexeme": "sub-municipality", "formula": "dbpedia:SubMunicipality", "type": "ClassNoun"}
+{"lexeme": "province", "formula": "dbpedia:Province", "type": "ClassNoun"}
+{"lexeme": "regency", "formula": "dbpedia:Regency", "type": "ClassNoun"}
+{"lexeme": "territory", "formula": "dbpedia:Territory", "type": "ClassNoun"}
+{"lexeme": "old territory", "formula": "dbpedia:OldTerritory", "type": "ClassNoun"}
+{"lexeme": "natural region", "formula": "dbpedia:NaturalRegion", "type": "ClassNoun"}
+{"lexeme": "ski region", "formula": "dbpedia:SkiArea", "type": "ClassNoun"}
+{"lexeme": "ski resort", "formula": "dbpedia:SkiResort", "type": "ClassNoun"}
+{"lexeme": "wine region", "formula": "dbpedia:WineRegion", "type": "ClassNoun"}
+{"lexeme": "protected area", "formula": "dbpedia:ProtectedArea", "type": "ClassNoun"}
+{"lexeme": "natural place", "formula": "dbpedia:NaturalPlace", "type": "ClassNoun"}
+{"lexeme": "body of water", "formula": "dbpedia:BodyOfWater", "type": "ClassNoun"}
+{"lexeme": "stream", "formula": "dbpedia:Stream", "type": "ClassNoun"}
+{"lexeme": "river", "formula": "dbpedia:River", "type": "ClassNoun"}
+{"lexeme": "canal", "formula": "dbpedia:Canal", "type": "ClassNoun"}
+{"lexeme": "lake", "formula": "dbpedia:Lake", "type": "ClassNoun"}
+{"lexeme": "island", "formula": "dbpedia:Island", "type": "ClassNoun"}
+{"lexeme": "atoll", "formula": "dbpedia:Atoll", "type": "ClassNoun"}
+{"lexeme": "mountain", "formula": "dbpedia:Mountain", "type": "ClassNoun"}
+{"lexeme": "mountain range", "formula": "dbpedia:MountainRange", "type": "ClassNoun"}
+{"lexeme": "mountain chain", "formula": "dbpedia:MountainRange", "type": "ClassNoun"}
+{"lexeme": "ridge", "formula": "dbpedia:MountainRange", "type": "ClassNoun"}
+{"lexeme": "mountain pass", "formula": "dbpedia:MountainPass", "type": "ClassNoun"}
+{"lexeme": "cave", "formula": "dbpedia:Cave", "type": "ClassNoun"}
+{"lexeme": "cavern", "formula": "dbpedia:Cave", "type": "ClassNoun"}
+{"lexeme": "grotto", "formula": "dbpedia:Cave", "type": "ClassNoun"}
+{"lexeme": "valley", "formula": "dbpedia:Valley", "type": "ClassNoun"}
+{"lexeme": "volcano", "formula": "dbpedia:Volcano", "type": "ClassNoun"}
+{"lexeme": "world heritage site", "formula": "dbpedia:WorldHeritageSite", "type": "ClassNoun"}
+{"lexeme": "site of special scientific interest", "formula": "dbpedia:SiteOfSpecialScientificInterest", "type": "ClassNoun"}
+{"lexeme": "located", "formula": "dbpedia:country", "type": "RelationalAdjective"}
+{"lexeme": "located", "formula": "dbpedia:range", "type": "RelationalAdjective"}
+{"lexeme": "located", "formula": "dbpedia:city", "type": "RelationalAdjective"}
+{"lexeme": "located", "formula": "dbpedia:location", "type": "RelationalAdjective"}
+{"lexeme": "located", "formula": "dbpedia:locatedInArea", "type": "RelationalAdjective"}
+{"lexeme": "located", "formula": "dbpedia:region", "type": "RelationalAdjective"}
+{"lexeme": "located", "formula": "dbpedia:state", "type": "RelationalAdjective"}
+{"lexeme": "located", "formula": "dbpedia:county", "type": "RelationalAdjective"}
+{"lexeme": "located", "formula": "dbpedia:district", "type": "RelationalAdjective"}
+{"lexeme": "located", "formula": "dbpedia:province", "type": "RelationalAdjective"}
+{"lexeme": "located", "formula": "dbpedia:department", "type": "RelationalAdjective"}
+{"lexeme": "located", "formula": "dbpedia:arrondissement", "type": "RelationalAdjective"}
+{"lexeme": "located", "formula": "dbpedia:canton", "type": "RelationalAdjective"}
+{"lexeme": "situated", "formula": "dbpedia:region", "type": "RelationalAdjective"}
+{"lexeme": "situated", "formula": "dbpedia:state", "type": "RelationalAdjective"}
+{"lexeme": "situated", "formula": "dbpedia:county", "type": "RelationalAdjective"}
+{"lexeme": "situated", "formula": "dbpedia:district", "type": "RelationalAdjective"}
+{"lexeme": "situated", "formula": "dbpedia:province", "type": "RelationalAdjective"}
+{"lexeme": "situated", "formula": "dbpedia:department", "type": "RelationalAdjective"}
+{"lexeme": "situated", "formula": "dbpedia:arrondissement", "type": "RelationalAdjective"}
+{"lexeme": "situated", "formula": "dbpedia:canton", "type": "RelationalAdjective"}
+{"lexeme": "part", "formula": "dbpedia:range", "type": "RelationalNoun"}
+{"lexeme": "part", "formula": "dbpedia:mountainRange", "type": "RelationalNoun"}
+{"lexeme": "close", "formula": "dbpedia:nearestCity", "type": "RelationalAdjective"}
+{"lexeme": "located", "formula": "dbpedia:closestCity", "type": "RelationalAdjective"}
+{"lexeme": "situated", "formula": "dbpedia:closestCity", "type": "RelationalAdjective"}
+{"lexeme": "part", "formula": "dbpedia:intercommunality", "type": "RelationalNoun"}
+{"lexeme": "suburb", "formula": "dbpedia:intercommunality", "type": "RelationalNoun"}
+{"lexeme": "cross", "formula": "dbpedia:crosses", "type": "StateVerb"}
+{"lexeme": "traverse", "formula": "dbpedia:crosses", "type": "StateVerb"}
+{"lexeme": "bridge", "formula": "dbpedia:crosses", "type": "StateVerb"}
+{"lexeme": "span", "formula": "dbpedia:crosses", "type": "StateVerb"}
+{"lexeme": "crossing", "formula": "dbpedia:crosses", "type": "RelationalNoun"}
+{"lexeme": "bridge", "formula": "dbpedia:crosses", "type": "RelationalNoun"}
+{"lexeme": "source", "formula": "dbpedia:source", "type": "RelationalNoun"}
+{"lexeme": "originate", "formula": "dbpedia:source", "type": "StateVerb"}
+{"lexeme": "originate", "formula": "dbpedia:sourceCountry", "type": "StateVerb"}
+{"lexeme": "originate", "formula": "dbpedia:origin", "type": "StateVerb"}
+{"lexeme": "flow", "formula": "dbpedia:riverMouth", "type": "StateVerb"}
+{"lexeme": "run", "formula": "dbpedia:riverMouth", "type": "StateVerb"}
+{"lexeme": "flow", "formula": "dbpedia:mouthMountain", "type": "StateVerb"}
+{"lexeme": "run", "formula": "dbpedia:mouthMountain", "type": "StateVerb"}
+{"lexeme": "flow", "formula": "dbpedia:mouthPlace", "type": "StateVerb"}
+{"lexeme": "run", "formula": "dbpedia:mouthPlace", "type": "StateVerb"}
+{"lexeme": "border", "formula": "dbpedia:border", "type": "StateVerb"}
+{"lexeme": "neighboring municipality", "formula": "dbpedia:neighboringMunicipality", "type": "RelationalNoun"}
+{"lexeme": "residence", "formula": "dbpedia:residence", "type": "RelationalNoun"}
+{"lexeme": "reside", "formula": "dbpedia:residence", "type": "StateVerb"}
+{"lexeme": "highest mountain", "formula": "dbpedia:highestMountain", "type": "RelationalNoun"}
+{"lexeme": "highest mountain", "formula": "dbpedia:highestMountain", "type": "RelationalNoun"}
+{"lexeme": "elevation", "formula": "dbpedia:elevation", "type": "RelationalNoun"}
+{"lexeme": "altitude", "formula": "dbpedia:elevation", "type": "RelationalNoun"}
+{"lexeme": "maximum altitude", "formula": "dbpedia:maximumElevation", "type": "RelationalNoun"}
+{"lexeme": "minimum altitude", "formula": "dbpedia:minimumElevation", "type": "RelationalNoun"}
+{"lexeme": "height", "formula": "dbpedia:elevation", "type": "RelationalNoun"}
+{"lexeme": "stand", "formula": "dbpedia:elevation", "type": "StateVerb"}
+{"lexeme": "rise", "formula": "dbpedia:elevation", "type": "StateVerb"}
+{"lexeme": "rise", "formula": "dbpedia:maximumElevation", "type": "StateVerb"}
+{"lexeme": "depth", "formula": "dbpedia:depth", "type": "RelationalNoun"}
+{"lexeme": "population", "formula": "dbpedia:populationTotal", "type": "RelationalNoun"}
+{"lexeme": "population", "formula": "dbpedia:totalPopulation", "type": "RelationalNoun"}
+{"lexeme": "population", "formula": "dbpedia:populationUrban", "type": "RelationalNoun"}
+{"lexeme": "population", "formula": "dbpedia:populationMetro", "type": "RelationalNoun"}
+{"lexeme": "total population", "formula": "dbpedia:populationTotal", "type": "RelationalNoun"}
+{"lexeme": "total population", "formula": "dbpedia:totalPopulation", "type": "RelationalNoun"}
+{"lexeme": "urban population", "formula": "dbpedia:populationUrban", "type": "RelationalNoun"}
+{"lexeme": "metropolitan population", "formula": "dbpedia:populationMetro", "type": "RelationalNoun"}
+{"lexeme": "area", "formula": "dbpedia:area", "type": "RelationalNoun"}
+{"lexeme": "area", "formula": "dbpedia:areaTotal", "type": "RelationalNoun"}
+{"lexeme": "area", "formula": "dbpedia:areaUrban", "type": "RelationalNoun"}
+{"lexeme": "area", "formula": "dbpedia:areaMetro", "type": "RelationalNoun"}
+{"lexeme": "total area", "formula": "dbpedia:areaTotal", "type": "RelationalNoun"}
+{"lexeme": "urban area", "formula": "dbpedia:areaUrban", "type": "RelationalNoun"}
+{"lexeme": "land area", "formula": "dbpedia:areaLand", "type": "RelationalNoun"}
+{"lexeme": "water area", "formula": "dbpedia:areaWater", "type": "RelationalNoun"}
+{"lexeme": "population density", "formula": "dbpedia:populationDensity", "type": "RelationalNoun"}
+{"lexeme": "population density", "formula": "dbpedia:populationUrbanDensity", "type": "RelationalNoun"}
+{"lexeme": "population density", "formula": "dbpedia:populationMetroDensity", "type": "RelationalNoun"}
+{"lexeme": "area code", "formula": "dbpedia:areaCode", "type": "RelationalNoun"}
+{"lexeme": "postal code", "formula": "dbpedia:postalCode", "type": "RelationalNoun"}
+{"lexeme": "post code", "formula": "dbpedia:postalCode", "type": "RelationalNoun"}
+{"lexeme": "time zone", "formula": "dbpedia:timeZone", "type": "RelationalNoun"}
+{"lexeme": "UTC offset", "formula": "dbpedia:utcOffset", "type": "RelationalNoun"}
+{"lexeme": "time zone offset", "formula": "dbpedia:utcOffset", "type": "RelationalNoun"}
+{"lexeme": "opened", "formula": "dbpedia:dateUse", "type": "RelationalAdjective"}
+{"lexeme": "opened", "formula": "dbpedia:openingDate", "type": "RelationalAdjective"}
+{"lexeme": "opened", "formula": "dbpedia:openingYear", "type": "RelationalAdjective"}
+{"lexeme": "completed", "formula": "dbpedia:completionDate", "type": "RelationalAdjective"}
+{"lexeme": "completed", "formula": "dbpedia:dateCompleted", "type": "RelationalAdjective"}
+{"lexeme": "based", "formula": "dbpedia:headquarter", "type": "RelationalAdjective"}
+{"lexeme": "length", "formula": "dbpedia:length", "type": "RelationalNoun"}
+{"lexeme": "width", "formula": "dbpedia:width", "type": "RelationalNoun"}
+{"lexeme": "grid reference", "formula": "dbpedia:gridReference", "type": "RelationalNoun"}
+{"lexeme": "highest region", "formula": "dbpedia:highestRegion", "type": "RelationalNoun"}
+{"lexeme": "motto", "formula": "dbpedia:motto", "type": "RelationalNoun"}
+{"lexeme": "NRHP reference number", "formula": "dbpedia:nrhpReferenceNumber", "type": "RelationalNoun"}
+{"lexeme": "National Register reference number", "formula": "dbpedia:nrhpReferenceNumber", "type": "RelationalNoun"}
+{"lexeme": "reference number", "formula": "dbpedia:nrhpReferenceNumber", "type": "RelationalNoun"}
+{"lexeme": "person", "formula": "dbpedia:Person", "type": "ClassNoun"}
+{"lexeme": "woman", "formula": "(dbpedia:gender resource:Female)", "type": "ObjectProperty"}
+{"lexeme": "women", "formula": "(dbpedia:gender resource:Female)", "type": "ObjectProperty"}
+{"lexeme": "man", "formula": "(dbpedia:gender resource:Male)", "type": "ObjectProperty"}
+{"lexeme": "men", "formula": "(dbpedia:gender resource:Male)", "type": "ObjectProperty"}
+{"lexeme": "woman", "formula": "(foaf:gender 'female'@en)", "type": "ObjectProperty"}
+{"lexeme": "women", "formula": "(foaf:gender 'female'@en)", "type": "ObjectProperty"}
+{"lexeme": "man", "formula": "(foaf:gender 'male'@en)", "type": "ObjectProperty"}
+{"lexeme": "men", "formula": "(foaf:gender 'male'@en)", "type": "ObjectProperty"}
+{"lexeme": "ethnic group", "formula": "dbpedia:EthnicGroup", "type": "ClassNoun"}
+{"lexeme": "name", "formula": "dbpedia:Name", "type": "ClassNoun"}
+{"lexeme": "given name", "formula": "dbpedia:GivenName", "type": "ClassNoun"}
+{"lexeme": "first name", "formula": "dbpedia:GivenName", "type": "ClassNoun"}
+{"lexeme": "surname", "formula": "dbpedia:Surname", "type": "ClassNoun"}
+{"lexeme": "last name", "formula": "dbpedia:Surname", "type": "ClassNoun"}
+{"lexeme": "career station", "formula": "dbpedia:CareerStation", "type": "ClassNoun"}
+{"lexeme": "scientist", "formula": "dbpedia:Scientist", "type": "ClassNoun"}
+{"lexeme": "researcher", "formula": "dbpedia:Scientist", "type": "ClassNoun"}
+{"lexeme": "medician", "formula": "dbpedia:Medician", "type": "ClassNoun"}
+{"lexeme": "professor", "formula": "dbpedia:Professor", "type": "ClassNoun"}
+{"lexeme": "historian", "formula": "(dbpedia:profession resource:Historian)", "type": "ObjectProperty"}
+{"lexeme": "chemist", "formula": "(dbpedia:profession resource:Chemist)", "type": "ObjectProperty"}
+{"lexeme": "biologist", "formula": "(dbpedia:profession resource:Biologist)", "type": "ObjectProperty"}
+{"lexeme": "economist", "formula": "(dbpedia:profession resource:Economist)", "type": "ObjectProperty"}
+{"lexeme": "engineer", "formula": "dbpedia:Engineer", "type": "ClassNoun"}
+{"lexeme": "teacher", "formula": "(dbpedia:profession resource:Teacher)", "type": "ObjectProperty"}
+{"lexeme": "revolutionary", "formula": "(dbpedia:profession resource:Revolutionary)", "type": "ObjectProperty"}
+{"lexeme": "poet", "formula": "(dbpedia:profession resource:Poet)", "type": "ObjectProperty"}
+{"lexeme": "architect", "formula": "dbpedia:Architect", "type": "ClassNoun"}
+{"lexeme": "journalist", "formula": "dbpedia:Journalist", "type": "ClassNoun"}
+{"lexeme": "philosopher", "formula": "dbpedia:Philosopher", "type": "ClassNoun"}
+{"lexeme": "aristocrat", "formula": "dbpedia:Aristocrat", "type": "ClassNoun"}
+{"lexeme": "chef", "formula": "dbpedia:Chef", "type": "ClassNoun"}
+{"lexeme": "horse trainer", "formula": "dbpedia:HorseTrainer", "type": "ClassNoun"}
+{"lexeme": "model", "formula": "dbpedia:Model", "type": "ClassNoun"}
+{"lexeme": "celebrity", "formula": "dbpedia:Celebrity", "type": "ClassNoun"}
+{"lexeme": "beauty queen", "formula": "dbpedia:BeautyQueen", "type": "ClassNoun"}
+{"lexeme": "Russian", "formula": "(dbpedia:nationality resource:Russia)", "type": "ObjectProperty"}
+{"lexeme": "Russian", "formula": "(dbpedia:nationality resource:Russia)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Chinese", "formula": "(dbpedia:nationality resource:China)", "type": "ObjectProperty"}
+{"lexeme": "Chinese", "formula": "(dbpedia:nationality resource:China)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "US American", "formula": "(dbpedia:nationality resource:United_States)", "type": "ObjectProperty"}
+{"lexeme": "US American", "formula": "(dbpedia:nationality resource:United_States)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "American", "formula": "(dbpedia:nationality resource:Americans)", "type": "ObjectProperty"}
+{"lexeme": "American", "formula": "(dbpedia:nationality resource:Americans)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "British", "formula": "(dbpedia:nationality resource:United_Kingdom)", "type": "ObjectProperty"}
+{"lexeme": "British", "formula": "(dbpedia:nationality resource:British_people)", "type": "ObjectProperty"}
+{"lexeme": "British", "formula": "(dbpedia:nationality resource:United_Kingdom)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "British", "formula": "(dbpedia:nationality resource:British_people)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "English", "formula": "(dbpedia:nationality resource:English)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Irishman", "formula": "(dbpedia:nationality resource:Ireland)", "type": "ObjectProperty"}
+{"lexeme": "Irishmen", "formula": "(dbpedia:nationality resource:Ireland)", "type": "ObjectProperty"}
+{"lexeme": "Irishman", "formula": "(dbpedia:nationality resource:Republic_of_Ireland)", "type": "ObjectProperty"}
+{"lexeme": "Irishmen", "formula": "(dbpedia:nationality resource:Republic_of_Ireland)", "type": "ObjectProperty"}
+{"lexeme": "Irishman", "formula": "(dbpedia:nationality resource:Irish_people)", "type": "ObjectProperty"}
+{"lexeme": "Irishmen", "formula": "(dbpedia:nationality resource:Irish_people)", "type": "ObjectProperty"}
+{"lexeme": "Irish", "formula": "(dbpedia:nationality resource:Ireland)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Irish", "formula": "(dbpedia:nationality resource:Republic_of_Ireland)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Irish", "formula": "(dbpedia:nationality resource:Irish_people)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Japanese", "formula": "(dbpedia:nationality resource:Japan)", "type": "ObjectProperty"}
+{"lexeme": "Japanese", "formula": "(dbpedia:nationality resource:Japanese_people)", "type": "ObjectProperty"}
+{"lexeme": "Japanese", "formula": "(dbpedia:nationality resource:Japan)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Japanese", "formula": "(dbpedia:nationality resource:Japanese_people)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Indian", "formula": "(dbpedia:nationality resource:Indian)", "type": "ObjectProperty"}
+{"lexeme": "Indian", "formula": "(dbpedia:nationality resource:Indian)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "German", "formula": "(dbpedia:nationality resource:German)", "type": "ObjectProperty"}
+{"lexeme": "German", "formula": "(dbpedia:nationality resource:German)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "French", "formula": "(dbpedia:nationality resource:France)", "type": "ObjectProperty"}
+{"lexeme": "French", "formula": "(dbpedia:nationality resource:France)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Canadian", "formula": "(dbpedia:nationality resource:Canada)", "type": "ObjectProperty"}
+{"lexeme": "Canadian", "formula": "(dbpedia:nationality resource:Canadians)", "type": "ObjectProperty"}
+{"lexeme": "Canadian", "formula": "(dbpedia:nationality resource:Canada)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Canadian", "formula": "(dbpedia:nationality resource:Canadians)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Italian", "formula": "(dbpedia:nationality resource:Italian)", "type": "ObjectProperty"}
+{"lexeme": "Italian", "formula": "(dbpedia:nationality resource:Italian)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Dutch", "formula": "(dbpedia:nationality resource:Netherlands)", "type": "ObjectProperty"}
+{"lexeme": "Dutch", "formula": "(dbpedia:nationality resource:Netherlands)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Belgian", "formula": "(dbpedia:nationality resource:Belgium)", "type": "ObjectProperty"}
+{"lexeme": "Belgian", "formula": "(dbpedia:nationality resource:Belgium)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Pole", "formula": "(dbpedia:nationality resource:Polish)", "type": "ObjectProperty"}
+{"lexeme": "Polish", "formula": "(dbpedia:nationality resource:Polish)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Jew", "formula": "(dbpedia:ethnicity resource:Jews)", "type": "ObjectProperty"}
+{"lexeme": "Jew", "formula": "(dbpedia:ethnicity resource:Jewish)", "type": "ObjectProperty"}
+{"lexeme": "Jewish", "formula": "(dbpedia:ethnicity resource:Jews)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Jewish", "formula": "(dbpedia:ethnicity resource:Jewish)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "African American", "formula": "(dbpedia:ethnicity resource:AfricanAmerican)", "type": "ObjectProperty"}
+{"lexeme": "African American", "formula": "(dbpedia:ethnicity resource:AfricanAmerican)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "religious", "formula": "dbpedia:Religious", "type": "IntersectiveAdjective"}
+{"lexeme": "Christian", "formula": "(dbpedia:religion resource:Christian)", "type": "ObjectProperty"}
+{"lexeme": "Christian", "formula": "(dbpedia:religion resource:Christianity)", "type": "ObjectProperty"}
+{"lexeme": "Christian", "formula": "(dbpedia:religion resource:Christian)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Christian", "formula": "(dbpedia:religion resource:Christianity)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Protestant", "formula": "(dbpedia:religion resource:Protestantism)", "type": "ObjectProperty"}
+{"lexeme": "Protestant", "formula": "(dbpedia:religion resource:Protestantism)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Catholic", "formula": "(dbpedia:religion resource:Catholic)", "type": "ObjectProperty"}
+{"lexeme": "Catholic", "formula": "(dbpedia:religion resource:Catholic_Church)", "type": "ObjectProperty"}
+{"lexeme": "Catholic", "formula": "(dbpedia:religion resource:Catholic)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Catholic", "formula": "(dbpedia:religion resource:Catholic_Church)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Hindu", "formula": "(dbpedia:religion resource:Hindu)", "type": "ObjectProperty"}
+{"lexeme": "Hindu", "formula": "(dbpedia:religion resource:Hinduism)", "type": "ObjectProperty"}
+{"lexeme": "Hindu", "formula": "(dbpedia:religion resource:Hindu)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Hindu", "formula": "(dbpedia:religion resource:Hinduims)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Muslim", "formula": "(dbpedia:religion resource:Muslim)", "type": "ObjectProperty"}
+{"lexeme": "Muslim", "formula": "(dbpedia:religion resource:Islam)", "type": "ObjectProperty"}
+{"lexeme": "Muslim", "formula": "(dbpedia:religion resource:Muslim)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Muslim", "formula": "(dbpedia:religion resource:Islam)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Buddhist", "formula": "(dbpedia:religion resource:Buddhism)", "type": "ObjectProperty"}
+{"lexeme": "Buddhist", "formula": "(dbpedia:religion resource:Buddhism)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Christian bishop", "formula": "dbpedia:ChristianBishop", "type": "ClassNoun"}
+{"lexeme": "bishop", "formula": "dbpedia:ChristianBishop", "type": "ClassNoun"}
+{"lexeme": "Christian patriarch", "formula": "dbpedia:ChristianPatriarch", "type": "ClassNoun"}
+{"lexeme": "patriarch", "formula": "dbpedia:ChristianPatriarch", "type": "ClassNoun"}
+{"lexeme": "cleric", "formula": "dbpedia:Cleric", "type": "ClassNoun"}
+{"lexeme": "clerk", "formula": "dbpedia:Cleric", "type": "ClassNoun"}
+{"lexeme": "saint", "formula": "dbpedia:Saint", "type": "ClassNoun"}
+{"lexeme": "cardinal", "formula": "dbpedia:Cardinal", "type": "ClassNoun"}
+{"lexeme": "pope", "formula": "dbpedia:Pope", "type": "ClassNoun"}
+{"lexeme": "priest", "formula": "dbpedia:Priest", "type": "ClassNoun"}
+{"lexeme": "birth date", "formula": "dbpedia:birthDate", "type": "RelationalNoun"}
+{"lexeme": "date of birth", "formula": "dbpedia:birthDate", "type": "RelationalNoun"}
+{"lexeme": "born", "formula": "dbpedia:birthDate", "type": "RelationalAdjective"}
+{"lexeme": "born", "formula": "dbpedia:birthYear", "type": "RelationalAdjective"}
+{"lexeme": "born", "formula": "dbpedia:birthPlace", "type": "RelationalAdjective"}
+{"lexeme": "born", "formula": "lex:birthCountry", "type": "RelationalAdjective"}
+{"lexeme": "born", "formula": "dbpedia:stateOfOrigin", "type": "RelationalAdjective"}
+{"lexeme": "come", "formula": "dbpedia:stateOfOrigin", "type": "StateVerb"}
+{"lexeme": "birth place", "formula": "dbpedia:birthPlace", "type": "RelationalNoun"}
+{"lexeme": "place of birth", "formula": "dbpedia:birthPlace", "type": "RelationalNoun"}
+{"lexeme": "death date", "formula": "dbpedia:deathDate", "type": "RelationalNoun"}
+{"lexeme": "die", "formula": "dbpedia:deathDate", "type": "ConsequenceVerb"}
+{"lexeme": "die", "formula": "dbpedia:deathYear", "type": "ConsequenceVerb"}
+{"lexeme": "die", "formula": "dbpedia:deathPlace", "type": "ConsequenceVerb"}
+{"lexeme": "death place", "formula": "dbpedia:deathPlace", "type": "RelationalNoun"}
+{"lexeme": "place of death", "formula": "dbpedia:deathPlace", "type": "RelationalNoun"}
+{"lexeme": "resting place", "formula": "dbpedia:restingPlace", "type": "RelationalNoun"}
+{"lexeme": "buried", "formula": "dbpedia:restingPlace", "type": "RelationalAdjective"}
+{"lexeme": "female", "formula": "(dbpedia:gender resource:Female)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "male", "formula": "(dbpedia:gender resource:Male)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "female", "formula": "(foaf:gender 'female'@en)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "male", "formula": "(foaf:gender 'male'@en)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "relative", "formula": "dbpedia:relative", "type": "RelationalNoun"}
+{"lexeme": "related", "formula": "dbpedia:relative", "type": "RelationalAdjective"}
+{"lexeme": "child", "formula": "dbpedia:child", "type": "RelationalNoun"}
+{"lexeme": "parent", "formula": "dbpedia:child", "type": "RelationalNoun"}
+{"lexeme": "parent", "formula": "dbpedia:parent", "type": "RelationalNoun"}
+{"lexeme": "child", "formula": "dbpedia:parent", "type": "RelationalNoun"}
+{"lexeme": "daughter", "formula": "dbpedia:child", "type": "RelationalNoun"}
+{"lexeme": "daughter", "formula": "dbpedia:parent", "type": "RelationalNoun"}
+{"lexeme": "son", "formula": "dbpedia:child", "type": "RelationalNoun"}
+{"lexeme": "son", "formula": "dbpedia:parent", "type": "RelationalNoun"}
+{"lexeme": "mother", "formula": "dbpedia:child", "type": "RelationalNoun"}
+{"lexeme": "mother", "formula": "dbpedia:parent", "type": "RelationalNoun"}
+{"lexeme": "father", "formula": "dbpedia:child", "type": "RelationalNoun"}
+{"lexeme": "father", "formula": "dbpedia:parent", "type": "RelationalNoun"}
+{"lexeme": "grandmother", "formula": "lex:grandchild", "type": "RelationalNoun"}
+{"lexeme": "grandfather", "formula": "lex:grandchild", "type": "RelationalNoun"}
+{"lexeme": "grandchild", "formula": "lex:grandchild", "type": "RelationalNoun"}
+{"lexeme": "granddaughter", "formula": "lex:grandchild", "type": "RelationalNoun"}
+{"lexeme": "grandson", "formula": "lex:grandchild", "type": "RelationalNoun"}
+{"lexeme": "spouse", "formula": "dbpedia:spouse", "type": "RelationalNoun"}
+{"lexeme": "wife", "formula": "dbpedia:spouse", "type": "RelationalNoun"}
+{"lexeme": "husband", "formula": "dbpedia:spouse", "type": "RelationalNoun"}
+{"lexeme": "marry", "formula": "dbpedia:spouse", "type": "ConsequenceVerb"}
+{"lexeme": "influence", "formula": "dbpedia:influenced)", "type": "StateVerb"}
+{"lexeme": "influence", "formula": "dbpedia:influencedBy", "type": "StateVerb"}
+{"lexeme": "successor", "formula": "dbpedia:successor", "type": "RelationalNoun"}
+{"lexeme": "succeed", "formula": "dbpedia:successor", "type": "StateVerb"}
+{"lexeme": "preceed", "formula": "dbpedia:successor", "type": "StateVerb"}
+{"lexeme": "predecessor", "formula": "dbpedia:successor", "type": "RelationalNoun"}
+{"lexeme": "predecessor", "formula": "dbpedia:predecessor", "type": "RelationalNoun"}
+{"lexeme": "preceed", "formula": "dbpedia:predecessor", "type": "StateVerb"}
+{"lexeme": "succeed", "formula": "dbpedia:predecessor", "type": "StateVerb"}
+{"lexeme": "successor", "formula": "dbpedia:predecessor", "type": "RelationalNoun"}
+{"lexeme": "ethnicity", "formula": "dbpedia:ethnicity", "type": "RelationalNoun"}
+{"lexeme": "religion", "formula": "dbpedia:religion", "type": "RelationalNoun"}
+{"lexeme": "related", "formula": "dbpedia:related", "type": "RelationalAdjective"}
+{"lexeme": "live", "formula": "dbpedia:populationPlace", "type": "StateVerb"}
+{"lexeme": "university", "formula": "dbpedia:university", "type": "RelationalNoun"}
+{"lexeme": "Alma Mater", "formula": "dbpedia:almaMater", "type": "RelationalNoun"}
+{"lexeme": "study", "formula": "dbpedia:university", "type": "StateVerb"}
+{"lexeme": "study", "formula": "dbpedia:almaMater", "type": "ConsequenceVerb"}
+{"lexeme": "graduate", "formula": "dbpedia:almaMater", "type": "ConsequenceVerb"}
+{"lexeme": "attend", "formula": "dbpedia:education", "type": "StateVerb"}
+{"lexeme": "study", "formula": "dbpedia:education", "type": "StateVerb"}
+{"lexeme": "go", "formula": "dbpedia:education", "type": "StateVerb"}
+{"lexeme": "field", "formula": "dbpedia:field", "type": "RelationalNoun"}
+{"lexeme": "work", "formula": "dbpedia:field", "type": "StateVerb"}
+{"lexeme": "profession", "formula": "dbpedia:profession", "type": "RelationalNoun"}
+{"lexeme": "occupation", "formula": "dbpedia:occupation", "type": "RelationalNoun"}
+{"lexeme": "work", "formula": "dbpedia:profession", "type": "StateVerb"}
+{"lexeme": "work", "formula": "dbpedia:occupation", "type": "StateVerb"}
+{"lexeme": "rector", "formula": "dbpedia:rector", "type": "RelationalNoun"}
+{"lexeme": "principal", "formula": "dbpedia:rector", "type": "RelationalNoun"}
+{"lexeme": "canonize", "formula": "dbpedia:canonizedPlace", "type": "ConsequenceVerb"}
+{"lexeme": "patron", "formula": "dbpedia:patron", "type": "RelationalNoun"}
+{"lexeme": "patron saint", "formula": "dbpedia:patron", "type": "RelationalNoun"}
+{"lexeme": "home town", "formula": "dbpedia:hometown", "type": "RelationalNoun"}
+{"lexeme": "home country", "formula": "dbpedia:nationality", "type": "RelationalNoun"}
+{"lexeme": "come", "formula": "dbpedia:hometown", "type": "StateVerb"}
+{"lexeme": "come", "formula": "dbpedia:nationality", "type": "StateVerb"}
+{"lexeme": "birth name", "formula": "dbpedia:birthName", "type": "RelationalNoun"}
+{"lexeme": "former name", "formula": "dbpedia:formerName", "type": "RelationalNoun"}
+{"lexeme": "common name", "formula": "dbpedia:commonName", "type": "RelationalNoun"}
+{"lexeme": "pseudonym", "formula": "dbpedia:pseudonym", "type": "RelationalNoun"}
+{"lexeme": "alias", "formula": "dbpedia:alias", "type": "RelationalNoun"}
+{"lexeme": "called", "formula": "dbpedia:pseudonym", "type": "RelationalAdjective"}
+{"lexeme": "called", "formula": "dbpedia:alias", "type": "RelationalAdjective"}
+{"lexeme": "called", "formula": "dbpedia:commonName", "type": "RelationalAdjective"}
+{"lexeme": "weight", "formula": "dbpedia:weight", "type": "RelationalNoun"}
+{"lexeme": "weigh", "formula": "dbpedia:weight", "type": "StateVerb"}
+{"lexeme": "building", "formula": "dbpedia:Building", "type": "ClassNoun"}
+{"lexeme": "historic building", "formula": "dbpedia:HistoricBuilding", "type": "ClassNoun"}
+{"lexeme": "historical building", "formula": "dbpedia:HistoricBuilding", "type": "ClassNoun"}
+{"lexeme": "architectural structure", "formula": "dbpedia:ArchitecturalStructure", "type": "ClassNoun"}
+{"lexeme": "casino", "formula": "dbpedia:Casino", "type": "ClassNoun"}
+{"lexeme": "castle", "formula": "dbpedia:Castle", "type": "ClassNoun"}
+{"lexeme": "factory", "formula": "dbpedia:Factory", "type": "ClassNoun"}
+{"lexeme": "shopping mall", "formula": "dbpedia:ShoppingMall", "type": "ClassNoun"}
+{"lexeme": "mall", "formula": "dbpedia:ShoppingMall", "type": "ClassNoun"}
+{"lexeme": "shopping center", "formula": "dbpedia:ShoppingMall", "type": "ClassNoun"}
+{"lexeme": "hospital", "formula": "dbpedia:Hospital", "type": "ClassNoun"}
+{"lexeme": "infirmary", "formula": "dbpedia:Hospital", "type": "ClassNoun"}
+{"lexeme": "prison", "formula": "dbpedia:Prison", "type": "ClassNoun"}
+{"lexeme": "hotel", "formula": "dbpedia:Hotel", "type": "ClassNoun"}
+{"lexeme": "restaurant", "formula": "dbpedia:Restaurant", "type": "ClassNoun"}
+{"lexeme": "skyscraper", "formula": "dbpedia:Skyscraper", "type": "ClassNoun"}
+{"lexeme": "monument", "formula": "dbpedia:Monument", "type": "ClassNoun"}
+{"lexeme": "memorial", "formula": "dbpedia:Memorial", "type": "ClassNoun"}
+{"lexeme": "lighthouse", "formula": "dbpedia:Lighthouse", "type": "ClassNoun"}
+{"lexeme": "beacon", "formula": "dbpedia:Lighthouse", "type": "ClassNoun"}
+{"lexeme": "mill", "formula": "dbpedia:Mill", "type": "ClassNoun"}
+{"lexeme": "treadmill", "formula": "dbpedia:Treadmill", "type": "ClassNoun"}
+{"lexeme": "watermill", "formula": "dbpedia:Watermill", "type": "ClassNoun"}
+{"lexeme": "windmill", "formula": "dbpedia:Windmill", "type": "ClassNoun"}
+{"lexeme": "wind motor", "formula": "dbpedia:WindMotor", "type": "ClassNoun"}
+{"lexeme": "water tower", "formula": "dbpedia:WaterTower", "type": "ClassNoun"}
+{"lexeme": "religious building", "formula": "dbpedia:ReligiousBuilding", "type": "ClassNoun"}
+{"lexeme": "abbey", "formula": "dbpedia:Abbey", "type": "ClassNoun"}
+{"lexeme": "church", "formula": "dbpedia:Church", "type": "ClassNoun"}
+{"lexeme": "monastery", "formula": "dbpedia:Monastery", "type": "ClassNoun"}
+{"lexeme": "mosque", "formula": "dbpedia:Mosque", "type": "ClassNoun"}
+{"lexeme": "shrine", "formula": "dbpedia:Shrine", "type": "ClassNoun"}
+{"lexeme": "synagogue", "formula": "dbpedia:Synagogue", "type": "ClassNoun"}
+{"lexeme": "temple", "formula": "dbpedia:Temple", "type": "ClassNoun"}
+{"lexeme": "park", "formula": "dbpedia:Park", "type": "ClassNoun"}
+{"lexeme": "hot spring", "formula": "dbpedia:HotSpring", "type": "ClassNoun"}
+{"lexeme": "venue", "formula": "dbpedia:Venue", "type": "ClassNoun"}
+{"lexeme": "theatre", "formula": "dbpedia:Theatre", "type": "ClassNoun"}
+{"lexeme": "museum", "formula": "dbpedia:Museum", "type": "ClassNoun"}
+{"lexeme": "sport facility", "formula": "dbpedia:SportFacility", "type": "ClassNoun"}
+{"lexeme": "stadium", "formula": "dbpedia:Stadium", "type": "ClassNoun"}
+{"lexeme": "arena", "formula": "dbpedia:Arena", "type": "ClassNoun"}
+{"lexeme": "race track", "formula": "dbpedia:RaceTrack", "type": "ClassNoun"}
+{"lexeme": "race course", "formula": "dbpedia:Racecourse", "type": "ClassNoun"}
+{"lexeme": "infrastructure", "formula": "dbpedia:Infrastructure", "type": "ClassNoun"}
+{"lexeme": "station", "formula": "dbpedia:Station", "type": "ClassNoun"}
+{"lexeme": "railway station", "formula": "dbpedia:RailwayStation", "type": "ClassNoun"}
+{"lexeme": "airport", "formula": "dbpedia:Airport", "type": "ClassNoun"}
+{"lexeme": "route of transportation", "formula": "dbpedia:RouteOfTransportation", "type": "ClassNoun"}
+{"lexeme": "routes of transportation", "formula": "dbpedia:RouteOfTransportation", "type": "ClassNoun"}
+{"lexeme": "bridge", "formula": "dbpedia:Bridge", "type": "ClassNoun"}
+{"lexeme": "public transit system", "formula": "dbpedia:PublicTransitSystem", "type": "ClassNoun"}
+{"lexeme": "railway line", "formula": "dbpedia:RailwayLine", "type": "ClassNoun"}
+{"lexeme": "railroad track", "formula": "dbpedia:RailwayLine", "type": "ClassNoun"}
+{"lexeme": "road", "formula": "dbpedia:Road", "type": "ClassNoun"}
+{"lexeme": "street", "formula": "dbpedia:Road", "type": "ClassNoun"}
+{"lexeme": "highway", "formula": "dbpedia:Road", "type": "ClassNoun"}
+{"lexeme": "route", "formula": "dbpedia:Road", "type": "ClassNoun"}
+{"lexeme": "tunnel", "formula": "dbpedia:Tunnel", "type": "ClassNoun"}
+{"lexeme": "railway tunnel", "formula": "dbpedia:RailwayTunnel", "type": "ClassNoun"}
+{"lexeme": "road tunnel", "formula": "dbpedia:RoadTunnel", "type": "ClassNoun"}
+{"lexeme": "waterway tunnel", "formula": "dbpedia:WaterwayTunnel", "type": "ClassNoun"}
+{"lexeme": "power station", "formula": "dbpedia:PowerStation", "type": "ClassNoun"}
+{"lexeme": "electricity station", "formula": "dbpedia:PowerStation", "type": "ClassNoun"}
+{"lexeme": "generating plant", "formula": "dbpedia:PowerStation", "type": "ClassNoun"}
+{"lexeme": "generating station", "formula": "dbpedia:PowerStation", "type": "ClassNoun"}
+{"lexeme": "power plant", "formula": "dbpedia:PowerStation", "type": "ClassNoun"}
+{"lexeme": "structural system", "formula": "dbpedia:structuralSystem", "type": "RelationalNoun"}
+{"lexeme": "made", "formula": "dbpedia:structuralSystem", "type": "RelationalAdjective"}
+{"lexeme": "address", "formula": "dbpedia:address", "type": "RelationalNoun"}
+{"lexeme": "seating capacity", "formula": "dbpedia:seatingCapacity", "type": "RelationalNoun"}
+{"lexeme": "capacity", "formula": "dbpedia:seatingCapacity", "type": "RelationalNoun"}
+{"lexeme": "located", "formula": "dbpedia:address", "type": "RelationalAdjective"}
+{"lexeme": "architect", "formula": "dbpedia:architect", "type": "RelationalNoun"}
+{"lexeme": "design", "formula": "dbpedia:architect", "type": "StateVerb"}
+{"lexeme": "build", "formula": "dbpedia:architect", "type": "StateVerb"}
+{"lexeme": "Gothic", "formula": "(dbpedia:architecturalStyle resource:Gothic_architecture)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Neo-Gothic", "formula": "(dbpedia:architecturalStyle resource:Gothic_Revival_achitecture)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Victorian Gothic", "formula": "(dbpedia:architecturalStyle resource:Gothic_Revival_achitecture)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Greek Revival", "formula": "(dbpedia:architecturalStyle resource:Greek_Revival_achitecture)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Art Deco", "formula": "(dbpedia:architecturalStyle resource:Art_Deco)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "constructed", "formula": "dbpedia:yearOfConstruction", "type": "RelationalAdjective"}
+{"lexeme": "species", "formula": "dbpedia:Species", "type": "ClassNoun"}
+{"lexeme": "species", "formula": "dbpedia:Species", "type": "ClassNoun"}
+{"lexeme": "bacteria", "formula": "dbpedia:Bacteria", "type": "ClassNoun"}
+{"lexeme": "archaea", "formula": "dbpedia:Archaea", "type": "ClassNoun"}
+{"lexeme": "animal", "formula": "dbpedia:Animal", "type": "ClassNoun"}
+{"lexeme": "amphibian", "formula": "dbpedia:Amphibian", "type": "ClassNoun"}
+{"lexeme": "eukaryote", "formula": "dbpedia:Eukaryote", "type": "ClassNoun"}
+{"lexeme": "eukaryotic", "formula": "dbpedia:Eukaryote", "type": "IntersectiveAdjective"}
+{"lexeme": "insect", "formula": "dbpedia:Insect", "type": "ClassNoun"}
+{"lexeme": "plant", "formula": "dbpedia:Plant", "type": "ClassNoun"}
+{"lexeme": "flowering plant", "formula": "dbpedia:FloweringPlant", "type": "ClassNoun"}
+{"lexeme": "gnetophyte", "formula": "dbpedia:Gnetophytes", "type": "ClassNoun"}
+{"lexeme": "gnetophytes", "formula": "dbpedia:Gnetophytes", "type": "ClassNoun"}
+{"lexeme": "grape", "formula": "dbpedia:Grape", "type": "ClassNoun"}
+{"lexeme": "cycad", "formula": "dbpedia:Cycad", "type": "ClassNoun"}
+{"lexeme": "fern", "formula": "dbpedia:Fern", "type": "ClassNoun"}
+{"lexeme": "moss", "formula": "dbpedia:Moss", "type": "ClassNoun"}
+{"lexeme": "club moss", "formula": "dbpedia:ClubMoss", "type": "ClassNoun"}
+{"lexeme": "green alga", "formula": "dbpedia:GreenAlga", "type": "ClassNoun"}
+{"lexeme": "green algae", "formula": "dbpedia:GreenAlga", "type": "ClassNoun"}
+{"lexeme": "conifer", "formula": "dbpedia:Conifer", "type": "ClassNoun"}
+{"lexeme": "ginkgo", "formula": "dbpedia:Ginkgo", "type": "ClassNoun"}
+{"lexeme": "mammal", "formula": "dbpedia:Mammal", "type": "ClassNoun"}
+{"lexeme": "fish", "formula": "dbpedia:Fish", "type": "ClassNoun"}
+{"lexeme": "fish", "formula": "dbpedia:Fish", "type": "ClassNoun"}
+{"lexeme": "bird", "formula": "dbpedia:Bird", "type": "ClassNoun"}
+{"lexeme": "dog", "formula": "dbpedia:Dog", "type": "ClassNoun"}
+{"lexeme": "race horse", "formula": "dbpedia:RaceHorse", "type": "ClassNoun"}
+{"lexeme": "fungus", "formula": "dbpedia:Fungus", "type": "ClassNoun"}
+{"lexeme": "fungi", "formula": "dbpedia:Fungus", "type": "ClassNoun"}
+{"lexeme": "mushroom", "formula": "dbpedia:Fungus", "type": "ClassNoun"}
+{"lexeme": "reptile", "formula": "dbpedia:Reptile", "type": "ClassNoun"}
+{"lexeme": "arachnid", "formula": "dbpedia:Arachnid", "type": "ClassNoun"}
+{"lexeme": "crustacean", "formula": "dbpedia:Crustacean", "type": "ClassNoun"}
+{"lexeme": "shellfish", "formula": "dbpedia:Crustacean", "type": "ClassNoun"}
+{"lexeme": "mollusc", "formula": "dbpedia:Mollusca", "type": "ClassNoun"}
+{"lexeme": "molluscs", "formula": "dbpedia:Mollusca", "type": "ClassNoun"}
+{"lexeme": "cultivated variety", "formula": "dbpedia:CultivatedVariety", "type": "ClassNoun"}
+{"lexeme": "cultivar", "formula": "dbpedia:CultivatedVariety", "type": "ClassNoun"}
+{"lexeme": "swarm", "formula": "dbpedia:Swarm", "type": "ClassNoun"}
+{"lexeme": "open swarm", "formula": "dbpedia:OpenSwarm", "type": "ClassNoun"}
+{"lexeme": "belong", "formula": "dbpedia:kingdom", "type": "StateVerb"}
+{"lexeme": "belong", "formula": "dbpedia:phylum", "type": "StateVerb"}
+{"lexeme": "belong", "formula": "dbpedia:class", "type": "StateVerb"}
+{"lexeme": "belong", "formula": "dbpedia:genus", "type": "StateVerb"}
+{"lexeme": "belong", "formula": "dbpedia:family", "type": "StateVerb"}
+{"lexeme": "belong", "formula": "dbpedia:order", "type": "StateVerb"}
+{"lexeme": "contain", "formula": "dbpedia:kingdom", "type": "StateVerb"}
+{"lexeme": "contain", "formula": "dbpedia:phylum", "type": "StateVerb"}
+{"lexeme": "contain", "formula": "dbpedia:class", "type": "StateVerb"}
+{"lexeme": "contain", "formula": "dbpedia:family", "type": "StateVerb"}
+{"lexeme": "contain", "formula": "dbpedia:order", "type": "StateVerb"}
+{"lexeme": "kingdom", "formula": "dbpedia:kingdom", "type": "RelationalNoun"}
+{"lexeme": "phylum", "formula": "dbpedia:phylum", "type": "RelationalNoun"}
+{"lexeme": "class", "formula": "dbpedia:class", "type": "RelationalNoun"}
+{"lexeme": "genus", "formula": "dbpedia:genus", "type": "RelationalNoun"}
+{"lexeme": "family", "formula": "dbpedia:family", "type": "RelationalNoun"}
+{"lexeme": "order", "formula": "dbpedia:order", "type": "RelationalNoun"}
+{"lexeme": "member", "formula": "dbpedia:kingdom", "type": "RelationalNoun"}
+{"lexeme": "member", "formula": "dbpedia:phylum", "type": "RelationalNoun"}
+{"lexeme": "member", "formula": "dbpedia:class", "type": "RelationalNoun"}
+{"lexeme": "member", "formula": "dbpedia:genus", "type": "RelationalNoun"}
+{"lexeme": "member", "formula": "dbpedia:family", "type": "RelationalNoun"}
+{"lexeme": "member", "formula": "dbpedia:order", "type": "RelationalNoun"}
+{"lexeme": "conservation status", "formula": "dbpedia:conservationStatus", "type": "RelationalNoun"}
+{"lexeme": "extinct", "formula": "(dbpedia:conservationStatus 'EX')", "type": "IntersectiveDataPropertyAdjective"}
+{"lexeme": "extinct in the wild", "formula": "(dbpedia:conservationStatus 'EW')", "type": "IntersectiveDataPropertyAdjective"}
+{"lexeme": "vulnerable", "formula": "(dbpedia:conservationStatus 'VU')", "type": "IntersectiveDataPropertyAdjective"}
+{"lexeme": "threatened", "formula": "lex:Threatened", "type": "IntersectiveAdjective"}
+{"lexeme": "endangered", "formula": "(dbpedia:conservationStatus 'EN')", "type": "IntersectiveDataPropertyAdjective"}
+{"lexeme": "critically endangered", "formula": "(dbpedia:conservationStatus 'CR')", "type": "IntersectiveDataPropertyAdjective"}
+{"lexeme": "near threatened", "formula": "(dbpedia:conservationStatus 'NT')", "type": "IntersectiveDataPropertyAdjective"}
+{"lexeme": "name", "formula": "dbpedia:binomialAuthority", "type": "StateVerb"}
+{"lexeme": "first describe", "formula": "dbpedia:binomialAuthority", "type": "StateVerb"}
+{"lexeme": "artist", "formula": "dbpedia:Artist", "type": "ClassNoun"}
+{"lexeme": "work", "formula": "dbpedia:Work", "type": "ClassNoun"}
+{"lexeme": "artwork", "formula": "dbpedia:Artwork", "type": "ClassNoun"}
+{"lexeme": "collection of valuables", "formula": "dbpedia:CollectionOfValuables", "type": "ClassNoun"}
+{"lexeme": "collection", "formula": "dbpedia:CollectionOfValuables", "type": "ClassNoun"}
+{"lexeme": "painter", "formula": "dbpedia:Painter", "type": "ClassNoun"}
+{"lexeme": "painting", "formula": "dbpedia:Painting", "type": "ClassNoun"}
+{"lexeme": "sculptor", "formula": "dbpedia:Sculptor", "type": "ClassNoun"}
+{"lexeme": "sculpture", "formula": "dbpedia:Sculpture", "type": "ClassNoun"}
+{"lexeme": "written work", "formula": "dbpedia:WrittenWork", "type": "ClassNoun"}
+{"lexeme": "book", "formula": "dbpedia:Book", "type": "ClassNoun"}
+{"lexeme": "novel", "formula": "dbpedia:Novel", "type": "ClassNoun"}
+{"lexeme": "light novel", "formula": "dbpedia:LightNovel", "type": "ClassNoun"}
+{"lexeme": "drama", "formula": "dbpedia:Drama", "type": "ClassNoun"}
+{"lexeme": "play", "formula": "dbpedia:Play", "type": "ClassNoun"}
+{"lexeme": "installment", "formula": "dbpedia:Installment", "type": "ClassNoun"}
+{"lexeme": "multi-volume publication", "formula": "dbpedia:MultiVolumePublication", "type": "ClassNoun"}
+{"lexeme": "writer", "formula": "dbpedia:Writer", "type": "ClassNoun"}
+{"lexeme": "author", "formula": "dbpedia:Author", "type": "ClassNoun"}
+{"lexeme": "cartoon", "formula": "dbpedia:Cartoon", "type": "ClassNoun"}
+{"lexeme": "anime", "formula": "dbpedia:Anime", "type": "ClassNoun"}
+{"lexeme": "Hollywood cartoon", "formula": "dbpedia:HollywoodCartoon", "type": "ClassNoun"}
+{"lexeme": "comic", "formula": "dbpedia:Comics", "type": "ClassNoun"}
+{"lexeme": "manga", "formula": "dbpedia:Manga", "type": "ClassNoun"}
+{"lexeme": "manhua", "formula": "dbpedia:Manhua", "type": "ClassNoun"}
+{"lexeme": "manhwa", "formula": "dbpedia:Manhwa", "type": "ClassNoun"}
+{"lexeme": "comics creator", "formula": "dbpedia:ComicsCreator", "type": "ClassNoun"}
+{"lexeme": "publisher", "formula": "dbpedia:Publisher", "type": "ClassNoun"}
+{"lexeme": "periodical literature", "formula": "dbpedia:PeriodicalLiterature", "type": "ClassNoun"}
+{"lexeme": "periodical", "formula": "dbpedia:PeriodicalLiterature", "type": "ClassNoun"}
+{"lexeme": "newspaper", "formula": "dbpedia:Newspaper", "type": "ClassNoun"}
+{"lexeme": "paper", "formula": "dbpedia:Newspaper", "type": "ClassNoun"}
+{"lexeme": "journal", "formula": "dbpedia:Newspaper", "type": "ClassNoun"}
+{"lexeme": "magazine", "formula": "dbpedia:Magazine", "type": "ClassNoun"}
+{"lexeme": "academical journal", "formula": "dbpedia:AcademicalJournal", "type": "ClassNoun"}
+{"lexeme": "journal", "formula": "dbpedia:AcademicJournal", "type": "ClassNoun"}
+{"lexeme": "hardcover", "formula": "(dbpedia:mediaType resource:Hardcover)", "type": "ObjectProperty"}
+{"lexeme": "paperback", "formula": "(dbpedia:mediaType resource:Paperback)", "type": "ObjectProperty"}
+{"lexeme": "e-book", "formula": "(dbpedia:mediaType resource:E-book)", "type": "ObjectProperty"}
+{"lexeme": "audiobook", "formula": "(dbpedia:mediaType resource:Audiobook)", "type": "ObjectProperty"}
+{"lexeme": "musical work", "formula": "dbpedia:MusicalWork", "type": "ClassNoun"}
+{"lexeme": "piece of work", "formula": "dbpedia:MusicalWork", "type": "ClassNoun"}
+{"lexeme": "pieces of work", "formula": "dbpedia:MusicalWork", "type": "ClassNoun"}
+{"lexeme": "discography", "formula": "dbpedia:ArtistDiscography", "type": "ClassNoun"}
+{"lexeme": "album", "formula": "dbpedia:Album", "type": "ClassNoun"}
+{"lexeme": "LP", "formula": "dbpedia:Album", "type": "ClassNoun"}
+{"lexeme": "single", "formula": "dbpedia:Single", "type": "ClassNoun"}
+{"lexeme": "song", "formula": "dbpedia:Song", "type": "ClassNoun"}
+{"lexeme": "track", "formula": "dbpedia:Song", "type": "ClassNoun"}
+{"lexeme": "list", "formula": "dbpedia:List", "type": "ClassNoun"}
+{"lexeme": "track list", "formula": "dbpedia:TrackList", "type": "ClassNoun"}
+{"lexeme": "Eurovision song contest entry", "formula": "dbpedia:EurovisionSongContestEntry", "type": "ClassNoun"}
+{"lexeme": "opera", "formula": "dbpedia:Opera", "type": "ClassNoun"}
+{"lexeme": "musician", "formula": "dbpedia:MusicalArtist", "type": "ClassNoun"}
+{"lexeme": "band", "formula": "dbpedia:Band", "type": "ClassNoun"}
+{"lexeme": "instrument", "formula": "dbpedia:Instrument", "type": "ClassNoun"}
+{"lexeme": "record label", "formula": "dbpedia:RecordLabel", "type": "ClassNoun"}
+{"lexeme": "label", "formula": "dbpedia:RecordLabel", "type": "ClassNoun"}
+{"lexeme": "genre", "formula": "dbpedia:Genre", "type": "ClassNoun"}
+{"lexeme": "music genre", "formula": "dbpedia:MusicGenre", "type": "ClassNoun"}
+{"lexeme": "film", "formula": "dbpedia:Film", "type": "ClassNoun"}
+{"lexeme": "movie", "formula": "dbpedia:Film", "type": "ClassNoun"}
+{"lexeme": "movie genre", "formula": "dbpedia:MovieGenre", "type": "ClassNoun"}
+{"lexeme": "actor", "formula": "dbpedia:Actor", "type": "ClassNoun"}
+{"lexeme": "actress", "formula": "lex:Actress", "type": "ClassNoun"}
+{"lexeme": "voice actor", "formula": "dbpedia:VoiceActor", "type": "ClassNoun"}
+{"lexeme": "voice actress", "formula": "lex:VoiceActress", "type": "ClassNoun"}
+{"lexeme": "adult actor", "formula": "dbpedia:AdultActor", "type": "ClassNoun"}
+{"lexeme": "adult actress", "formula": "lex:AdultActress", "type": "ClassNoun"}
+{"lexeme": "pornographic actor", "formula": "dbpedia:AdultActor", "type": "ClassNoun"}
+{"lexeme": "pornographic actress", "formula": "lex:AdultActress", "type": "ClassNoun"}
+{"lexeme": "porn star", "formula": "dbpedia:Pornstar", "type": "ClassNoun"}
+{"lexeme": "pornographic actor", "formula": "dbpedia:Pornstar", "type": "ClassNoun"}
+{"lexeme": "pornographic actress", "formula": "lex:PornActress", "type": "ClassNoun"}
+{"lexeme": "playboy playmate", "formula": "dbpedia:PlayboyPlaymate", "type": "ClassNoun"}
+{"lexeme": "playmate", "formula": "dbpedia:PlayboyPlaymate", "type": "ClassNoun"}
+{"lexeme": "television show", "formula": "dbpedia:TelevisionShow", "type": "ClassNoun"}
+{"lexeme": "TV show", "formula": "dbpedia:TelevisionShow", "type": "ClassNoun"}
+{"lexeme": "show", "formula": "dbpedia:TelevisionShow", "type": "ClassNoun"}
+{"lexeme": "television season", "formula": "dbpedia:TelevisionSeason", "type": "ClassNoun"}
+{"lexeme": "TV season", "formula": "dbpedia:TelevisionSeason", "type": "ClassNoun"}
+{"lexeme": "season", "formula": "dbpedia:TelevisionSeason", "type": "ClassNoun"}
+{"lexeme": "television episode", "formula": "dbpedia:TelevisionEpisode", "type": "ClassNoun"}
+{"lexeme": "TV episode", "formula": "dbpedia:TelevisionEpisode", "type": "ClassNoun"}
+{"lexeme": "episode", "formula": "dbpedia:TelevisionEpisode", "type": "ClassNoun"}
+{"lexeme": "television station", "formula": "dbpedia:TelevisionStation", "type": "ClassNoun"}
+{"lexeme": "TV station", "formula": "dbpedia:TelevisionStation", "type": "ClassNoun"}
+{"lexeme": "radio station", "formula": "dbpedia:RadioStation", "type": "ClassNoun"}
+{"lexeme": "broadcasting station", "formula": "dbpedia:RadioStation", "type": "ClassNoun"}
+{"lexeme": "broadcast", "formula": "dbpedia:Broadcast", "type": "ClassNoun"}
+{"lexeme": "broadcaster", "formula": "dbpedia:Broadcaster", "type": "ClassNoun"}
+{"lexeme": "broadcast network", "formula": "dbpedia:BroadcastNetwork", "type": "ClassNoun"}
+{"lexeme": "network", "formula": "dbpedia:BroadcastNetwork", "type": "ClassNoun"}
+{"lexeme": "radio program", "formula": "dbpedia:RadioProgram", "type": "ClassNoun"}
+{"lexeme": "presenter", "formula": "dbpedia:Presenter", "type": "ClassNoun"}
+{"lexeme": "host", "formula": "dbpedia:Host", "type": "ClassNoun"}
+{"lexeme": "radio host", "formula": "dbpedia:RadioHost", "type": "ClassNoun"}
+{"lexeme": "television host", "formula": "dbpedia:TelevisionHost", "type": "ClassNoun"}
+{"lexeme": "TV host", "formula": "dbpedia:TelevisionHost", "type": "ClassNoun"}
+{"lexeme": "game", "formula": "dbpedia:Game", "type": "ClassNoun"}
+{"lexeme": "board game", "formula": "dbpedia:BoardGame", "type": "ClassNoun"}
+{"lexeme": "comedian", "formula": "dbpedia:Comedian", "type": "ClassNoun"}
+{"lexeme": "comedy group", "formula": "dbpedia:ComedyGroup", "type": "ClassNoun"}
+{"lexeme": "fashion designer", "formula": "dbpedia:FashionDesigner", "type": "ClassNoun"}
+{"lexeme": "designer", "formula": "dbpedia:FashionDesigner", "type": "ClassNoun"}
+{"lexeme": "fictional character", "formula": "dbpedia:FictionalCharacter", "type": "ClassNoun"}
+{"lexeme": "character", "formula": "dbpedia:FictionalCharacter", "type": "ClassNoun"}
+{"lexeme": "comics character", "formula": "dbpedia:ComicsCharacter", "type": "ClassNoun"}
+{"lexeme": "animanga character", "formula": "dbpedia:AnimangaCharacter", "type": "ClassNoun"}
+{"lexeme": "soap character", "formula": "dbpedia:SoapCharacter", "type": "ClassNoun"}
+{"lexeme": "music festival", "formula": "dbpedia:MusicFestival", "type": "ClassNoun"}
+{"lexeme": "film festival", "formula": "dbpedia:FilmFestival", "type": "ClassNoun"}
+{"lexeme": "festival", "formula": "lex:Festival", "type": "ClassNoun"}
+{"lexeme": "convention", "formula": "dbpedia:Convention", "type": "ClassNoun"}
+{"lexeme": "musical", "formula": "dbpedia:Musical", "type": "ClassNoun"}
+{"lexeme": "award", "formula": "dbpedia:Award", "type": "ClassNoun"}
+{"lexeme": "prize", "formula": "dbpedia:Award", "type": "ClassNoun"}
+{"lexeme": "decoration", "formula": "dbpedia:Decoration", "type": "ClassNoun"}
+{"lexeme": "record", "formula": "dbpedia:artist", "type": "StateVerb"}
+{"lexeme": "interpreter", "formula": "dbpedia:artist", "type": "RelationalNoun"}
+{"lexeme": "genre", "formula": "dbpedia:genre", "type": "RelationalNoun"}
+{"lexeme": "genre", "formula": "dbpedia:literaryGenre", "type": "RelationalNoun"}
+{"lexeme": "make", "formula": "dbpedia:genre", "type": "StateVerb"}
+{"lexeme": "write", "formula": "dbpedia:genre", "type": "StateVerb"}
+{"lexeme": "written", "formula": "dbpedia:language", "type": "RelationalAdjective"}
+{"lexeme": "runtime", "formula": "dbpedia:runtime", "type": "RelationalNoun"}
+{"lexeme": "writer", "formula": "dbpedia:writer", "type": "RelationalNoun"}
+{"lexeme": "author", "formula": "dbpedia:writer", "type": "RelationalNoun"}
+{"lexeme": "write", "formula": "dbpedia:writer", "type": "StateVerb"}
+{"lexeme": "publisher", "formula": "dbpedia:publisher", "type": "RelationalNoun"}
+{"lexeme": "publish", "formula": "dbpedia:publisher", "type": "StateVerb"}
+{"lexeme": "distributor", "formula": "dbpedia:distributor", "type": "RelationalNoun"}
+{"lexeme": "distribute", "formula": "dbpedia:distributor", "type": "StateVerb"}
+{"lexeme": "OCLC number", "formula": "dbpedia:oclc", "type": "RelationalNoun"}
+{"lexeme": "creator", "formula": "dbpedia:creator", "type": "RelationalNoun"}
+{"lexeme": "create", "formula": "dbpedia:creator", "type": "StateVerb"}
+{"lexeme": "composer", "formula": "dbpedia:composer", "type": "RelationalNoun"}
+{"lexeme": "compose", "formula": "dbpedia:composer", "type": "StateVerb"}
+{"lexeme": "write", "formula": "dbpedia:composer", "type": "StateVerb"}
+{"lexeme": "write", "formula": "dbpedia:musicalBand", "type": "StateVerb"}
+{"lexeme": "write", "formula": "dbpedia:musicalArtist", "type": "StateVerb"}
+{"lexeme": "record", "formula": "dbpedia:musicalBand", "type": "StateVerb"}
+{"lexeme": "record", "formula": "dbpedia:musicalArtist", "type": "StateVerb"}
+{"lexeme": "interpreter", "formula": "dbpedia:musicalArtist", "type": "RelationalNoun"}
+{"lexeme": "star", "formula": "dbpedia:starring", "type": "StateVerb"}
+{"lexeme": "feature", "formula": "dbpedia:starring", "type": "StateVerb"}
+{"lexeme": "play", "formula": "dbpedia:starring", "type": "StateVerb"}
+{"lexeme": "feature", "formula": "dbpedia:guest", "type": "StateVerb"}
+{"lexeme": "appear", "formula": "dbpedia:guest", "type": "StateVerb"}
+{"lexeme": "guest star", "formula": "dbpedia:guest", "type": "RelationalNoun"}
+{"lexeme": "presenter", "formula": "dbpedia:presenter", "type": "RelationalNoun"}
+{"lexeme": "instrument", "formula": "dbpedia:instrument", "type": "RelationalNoun"}
+{"lexeme": "play", "formula": "dbpedia:instrument", "type": "StateVerb"}
+{"lexeme": "fuse", "formula": "dbpedia:musicFusionGenre", "type": "StateVerb"}
+{"lexeme": "opening film", "formula": "dbpedia:openingFilm", "type": "RelationalNoun"}
+{"lexeme": "require", "formula": "dbpedia:requirement", "type": "StateVerb"}
+{"lexeme": "requirement", "formula": "dbpedia:requirement", "type": "RelationalNoun"}
+{"lexeme": "release date", "formula": "dbpedia:releaseDate", "type": "RelationalNoun"}
+{"lexeme": "released", "formula": "dbpedia:releaseDate", "type": "RelationalAdjective"}
+{"lexeme": "come out", "formula": "dbpedia:releaseDate", "type": "StateVerb"}
+{"lexeme": "air", "formula": "dbpedia:completionDate", "type": "StateVerb"}
+{"lexeme": "air", "formula": "dbpedia:channel", "type": "StateVerb"}
+{"lexeme": "produce", "formula": "dbpedia:company", "type": "StateVerb"}
+{"lexeme": "record date", "formula": "dbpedia:recordDate", "type": "RelationalNoun"}
+{"lexeme": "recorded", "formula": "dbpedia:recordDate", "type": "RelationalAdjective"}
+{"lexeme": "recorded", "formula": "dbpedia:recordedIn", "type": "RelationalAdjective"}
+{"lexeme": "award", "formula": "dbpedia:award", "type": "RelationalNoun"}
+{"lexeme": "recipient", "formula": "dbpedia:award", "type": "RelationalNoun"}
+{"lexeme": "win", "formula": "dbpedia:award", "type": "StateVerb"}
+{"lexeme": "receive", "formula": "dbpedia:award", "type": "StateVerb"}
+{"lexeme": "awarded", "formula": "dbpedia:award", "type": "RelationalAdjective"}
+{"lexeme": "follow-up", "formula": "dbpedia:subsequentWork", "type": "RelationalNoun"}
+{"lexeme": "sequel", "formula": "dbpedia:subsequentWork", "type": "RelationalNoun"}
+{"lexeme": "prequel", "formula": "dbpedia:previousWork", "type": "RelationalNoun"}
+{"lexeme": "written", "formula": "dbpedia:previousWork", "type": "RelationalAdjective"}
+{"lexeme": "written", "formula": "dbpedia:subsequentWork", "type": "RelationalAdjective"}
+{"lexeme": "record", "formula": "dbpedia:previousWork", "type": "RelationalAdjective"}
+{"lexeme": "record", "formula": "dbpedia:subsequentWork", "type": "RelationalAdjective"}
+{"lexeme": "member", "formula": "dbpedia:bandMember", "type": "RelationalNoun"}
+{"lexeme": "ISBN", "formula": "dbpedia:isbn", "type": "RelationalNoun"}
+{"lexeme": "ISSN", "formula": "dbpedia:issn", "type": "RelationalNoun"}
+{"lexeme": "facility ID", "formula": "dbpedia:facilityId", "type": "RelationalNoun"}
+{"lexeme": "B-side", "formula": "dbpedia:bSide", "type": "RelationalNoun"}
+{"lexeme": "song", "formula": "dbpedia:album", "type": "RelationalNoun"}
+{"lexeme": "track", "formula": "dbpedia:album", "type": "RelationalNoun"}
+{"lexeme": "sister station", "formula": "dbpedia:sisterStation", "type": "RelationalNoun"}
+{"lexeme": "sister channel", "formula": "dbpedia:sisterStation", "type": "RelationalNoun"}
+{"lexeme": "sister network", "formula": "dbpedia:sisterStation", "type": "RelationalNoun"}
+{"lexeme": "budget", "formula": "dbpedia:budget", "type": "RelationalNoun"}
+{"lexeme": "gross", "formula": "dbpedia:gross", "type": "RelationalNoun"}
+{"lexeme": "make", "formula": "dbpedia:gross", "type": "StateVerb"}
+{"lexeme": "take in", "formula": "dbpedia:gross", "type": "StateVerb"}
+{"lexeme": "take over", "formula": "dbpedia:gross", "type": "StateVerb"}
+{"lexeme": "review", "formula": "dbpedia:review", "type": "RelationalNoun"}
+{"lexeme": "reviewed", "formula": "dbpedia:review", "type": "RelationalAdjective"}
+{"lexeme": "associated act", "formula": "dbpedia:associatedBand", "type": "RelationalNoun"}
+{"lexeme": "associated act", "formula": "dbpedia:associatedMusicalArtist", "type": "RelationalNoun"}
+{"lexeme": "cinematographer", "formula": "dbpedia:cinematography", "type": "RelationalNoun"}
+{"lexeme": "shoot", "formula": "dbpedia:cinematographer", "type": "StateVerb"}
+{"lexeme": "executive producer", "formula": "dbpedia:executiveProducer", "type": "RelationalNoun"}
+{"lexeme": "edit", "formula": "dbpedia:editing", "type": "StateVerb"}
+{"lexeme": "former band member", "formula": "dbpedia:formerBandMember", "type": "RelationalNoun"}
+{"lexeme": "play", "formula": "dbpedia:programmeFormat", "type": "StateVerb"}
+{"lexeme": "broadcasted", "formula": "dbpedia:broadcastArea", "type": "RelationalAdjective"}
+{"lexeme": "cover", "formula": "dbpedia:broadcastArea", "type": "StateVerb"}
+{"lexeme": "operate", "formula": "dbpedia:broadcastNetwork", "type": "StateVerb"}
+{"lexeme": "part", "formula": "dbpedia:broadcastNetwork", "type": "RelationalNoun"}
+{"lexeme": "broadcasted", "formula": "dbpedia:network", "type": "RelationalAdjective"}
+{"lexeme": "aired", "formula": "dbpedia:network", "type": "RelationalAdjective"}
+{"lexeme": "episode", "formula": "dbpedia:series", "type": "RelationalNoun"}
+{"lexeme": "part", "formula": "dbpedia:series", "type": "RelationalNoun"}
+{"lexeme": "class A", "formula": "(dbpedia:broadcastStationClass 'A')", "type": "IntersectiveDataPropertyAdjective"}
+{"lexeme": "class B", "formula": "(dbpedia:broadcastStationClass 'B')", "type": "IntersectiveDataPropertyAdjective"}
+{"lexeme": "class C", "formula": "(dbpedia:broadcastStationClass 'C')", "type": "IntersectiveDataPropertyAdjective"}
+{"lexeme": "class D", "formula": "(dbpedia:broadcastStationClass 'D')", "type": "IntersectiveDataPropertyAdjective"}
+{"lexeme": "mean", "formula": "dbpedia:callsignMeaning", "type": "StateVerb"}
+{"lexeme": "stand", "formula": "dbpedia:callsignMeaning", "type": "StateVerb"}
+{"lexeme": "spin-off", "formula": "dbpedia:related", "type": "RelationalNoun"}
+{"lexeme": "LC classification", "formula": "dbpedia:lcc", "type": "RelationalNoun"}
+{"lexeme": "Dewey classification", "formula": "dbpedia:dcc", "type": "RelationalNoun"}
+{"lexeme": "organisation", "formula": "dbpedia:Organisation", "type": "ClassNoun"}
+{"lexeme": "organisation member", "formula": "dbpedia:OrganisationMember", "type": "ClassNoun"}
+{"lexeme": "non-profit organisation", "formula": "dbpedia:Non-ProfitOrganisation", "type": "ClassNoun"}
+{"lexeme": "geopolitical organisation", "formula": "dbpedia:GeopoliticalOrganisation", "type": "ClassNoun"}
+{"lexeme": "government agency", "formula": "dbpedia:GovernmentAgency", "type": "ClassNoun"}
+{"lexeme": "group", "formula": "dbpedia:Group", "type": "ClassNoun"}
+{"lexeme": "company", "formula": "dbpedia:Company", "type": "ClassNoun"}
+{"lexeme": "airline", "formula": "dbpedia:Airline", "type": "ClassNoun"}
+{"lexeme": "educational institution", "formula": "dbpedia:EducationalInstitution", "type": "ClassNoun"}
+{"lexeme": "school", "formula": "dbpedia:School", "type": "ClassNoun"}
+{"lexeme": "samba school", "formula": "dbpedia:SambaSchool", "type": "ClassNoun"}
+{"lexeme": "college", "formula": "dbpedia:College", "type": "ClassNoun"}
+{"lexeme": "university", "formula": "dbpedia:University", "type": "ClassNoun"}
+{"lexeme": "library", "formula": "dbpedia:Library", "type": "ClassNoun"}
+{"lexeme": "political party", "formula": "dbpedia:PoliticalParty", "type": "ClassNoun"}
+{"lexeme": "party", "formula": "dbpedia:PoliticalParty", "type": "ClassNoun"}
+{"lexeme": "trade union", "formula": "dbpedia:TradeUnion", "type": "ClassNoun"}
+{"lexeme": "labor union", "formula": "dbpedia:TradeUnion", "type": "ClassNoun"}
+{"lexeme": "clerical order", "formula": "dbpedia:ClericalOrder", "type": "ClassNoun"}
+{"lexeme": "located", "formula": "dbpedia:locationCity", "type": "RelationalAdjective"}
+{"lexeme": "located", "formula": "dbpedia:locationCountry", "type": "RelationalAdjective"}
+{"lexeme": "based", "formula": "dbpedia:locationCountry", "type": "RelationalAdjective"}
+{"lexeme": "enrollment", "formula": "dbpedia:numberOfStudents", "type": "RelationalNoun"}
+{"lexeme": "student population", "formula": "dbpedia:numberOfStudents", "type": "RelationalNoun"}
+{"lexeme": "serve", "formula": "dbpedia:numberOfStudents)", "type": "StateVerb"}
+{"lexeme": "employ", "formula": "dbpedia:facultySize)", "type": "StateVerb"}
+{"lexeme": "faculty size", "formula": "dbpedia:facultySize", "type": "RelationalNoun"}
+{"lexeme": "manufacturer", "formula": "dbpedia:manufacturer", "type": "RelationalNoun"}
+{"lexeme": "manufacture", "formula": "dbpedia:manufacturer", "type": "StateVerb"}
+{"lexeme": "produce", "formula": "dbpedia:manufacturer", "type": "StateVerb"}
+{"lexeme": "construct", "formula": "dbpedia:company", "type": "StateVerb"}
+{"lexeme": "build", "formula": "dbpedia:company", "type": "StateVerb"}
+{"lexeme": "formation date", "formula": "dbpedia:formationDate", "type": "RelationalNoun"}
+{"lexeme": "formation year", "formula": "dbpedia:formationYear", "type": "RelationalNoun"}
+{"lexeme": "founding date", "formula": "dbpedia:foundingDate", "type": "RelationalNoun"}
+{"lexeme": "founding year", "formula": "dbpedia:foundingYear", "type": "RelationalNoun"}
+{"lexeme": "formed", "formula": "dbpedia:formationDate", "type": "RelationalAdjective"}
+{"lexeme": "formed", "formula": "dbpedia:formationYear", "type": "RelationalAdjective"}
+{"lexeme": "founded", "formula": "dbpedia:foundingDate", "type": "RelationalAdjective"}
+{"lexeme": "founded", "formula": "dbpedia:foundingYear", "type": "RelationalAdjective"}
+{"lexeme": "established", "formula": "dbpedia:formationDate", "type": "RelationalAdjective"}
+{"lexeme": "established", "formula": "dbpedia:formationYear", "type": "RelationalAdjective"}
+{"lexeme": "established", "formula": "dbpedia:foundingDate", "type": "RelationalAdjective"}
+{"lexeme": "established", "formula": "dbpedia:foundingYear", "type": "RelationalAdjective"}
+{"lexeme": "active", "formula": "dbpedia:activeYearsStartDate", "type": "RelationalAdjective"}
+{"lexeme": "active", "formula": "dbpedia:activeYearsStartYear", "type": "RelationalAdjective"}
+{"lexeme": "active", "formula": "dbpedia:activeYearsEndDate", "type": "RelationalAdjective"}
+{"lexeme": "active", "formula": "dbpedia:activeYearsEndYear", "type": "RelationalAdjective"}
+{"lexeme": "found", "formula": "dbpedia:foundingPerson", "type": "StateVerb"}
+{"lexeme": "establish", "formula": "dbpedia:foundingPerson", "type": "StateVerb"}
+{"lexeme": "found", "formula": "dbpedia:foundedBy", "type": "StateVerb"}
+{"lexeme": "establish", "formula": "dbpedia:foundedBy", "type": "StateVerb"}
+{"lexeme": "founder", "formula": "dbpedia:foundedBy", "type": "RelationalNoun"}
+{"lexeme": "founder", "formula": "dbpedia:foundingPerson", "type": "RelationalNoun"}
+{"lexeme": "foundation place", "formula": "dbpedia:foundationPlace", "type": "RelationalNoun"}
+{"lexeme": "found", "formula": "dbpedia:foundationPlace", "type": "ConsequenceVerb"}
+{"lexeme": "mascot", "formula": "dbpedia:mascot", "type": "RelationalNoun"}
+{"lexeme": "slogan", "formula": "dbpedia:slogan", "type": "RelationalNoun"}
+{"lexeme": "known", "formula": "dbpedia:title", "type": "RelationalAdjective"}
+{"lexeme": "affiliated", "formula": "dbpedia:affiliation", "type": "RelationalAdjective"}
+{"lexeme": "affiliated", "formula": "dbpedia:affiliation", "type": "RelationalAdjective"}
+{"lexeme": "frequency", "formula": "dbpedia:frequency", "type": "RelationalNoun"}
+{"lexeme": "broadcast", "formula": "dbpedia:frequency", "type": "StateVerb"}
+{"lexeme": "status", "formula": "dbpedia:status", "type": "RelationalNoun"}
+{"lexeme": "active", "formula": "(dbpedia:status 'Active')", "type": "IntersectiveDataPropertyAdjective"}
+{"lexeme": "retired", "formula": "(dbpedia:status 'Retired')", "type": "IntersectiveDataPropertyAdjective"}
+{"lexeme": "operational", "formula": "(dbpedia:status 'Operational')", "type": "IntersectiveDataPropertyAdjective"}
+{"lexeme": "scrapped", "formula": "(dbpedia:status 'Scrapped')", "type": "IntersectiveDataPropertyAdjective"}
+{"lexeme": "product", "formula": "dbpedia:product", "type": "RelationalNoun"}
+{"lexeme": "produce", "formula": "dbpedia:product", "type": "StateVerb"}
+{"lexeme": "create", "formula": "dbpedia:product", "type": "StateVerb"}
+{"lexeme": "develop", "formula": "dbpedia:product", "type": "StateVerb"}
+{"lexeme": "owner", "formula": "dbpedia:owner", "type": "RelationalNoun"}
+{"lexeme": "own", "formula": "dbpedia:owner", "type": "StateVerb"}
+{"lexeme": "own", "formula": "dbpedia:owningCompany", "type": "StateVerb"}
+{"lexeme": "own", "formula": "dbpedia:owningOrganization", "type": "StateVerb"}
+{"lexeme": "parent company", "formula": "dbpedia:owningCompany", "type": "RelationalNoun"}
+{"lexeme": "daughter company", "formula": "dbpedia:owningCompany", "type": "RelationalNoun"}
+{"lexeme": "subsidiary", "formula": "dbpedia:owningCompany", "type": "RelationalNoun"}
+{"lexeme": "parent company", "formula": "dbpedia:parentCompany", "type": "RelationalNoun"}
+{"lexeme": "daughter company", "formula": "dbpedia:parentCompany", "type": "RelationalNoun"}
+{"lexeme": "subsidiary", "formula": "dbpedia:parentCompany", "type": "RelationalNoun"}
+{"lexeme": "revenue", "formula": "dbpedia:revenue", "type": "RelationalNoun"}
+{"lexeme": "official color", "formula": "dbpedia:officialSchoolColour", "type": "RelationalNoun"}
+{"lexeme": "operate", "formula": "dbpedia:regionServed", "type": "StateVerb"}
+{"lexeme": "social-democratic", "formula": "(dbpedia:ideology resource:Social_democracy)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "conservatist", "formula": "(dbpedia:ideology resource:Conservatism)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "liberal", "formula": "(dbpedia:ideology resource:Liberalism)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "communist", "formula": "(dbpedia:ideology resource:Communism)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "socialist", "formula": "(dbpedia:ideology resource:Socialism)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "christian democratic", "formula": "(dbpedia:ideology resource:Christian_democracy)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "nationalistic", "formula": "(dbpedia:ideology resource:Nationalism)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Marxist-Leninist", "formula": "(dbpedia:ideology resource:Marxism_Leninism)", "type": "IntersectiveObjectPropertyAdjective"}
+{"lexeme": "Marxist", "formula": "(dbpedia:ideology resource:Marxism)", "type": "IntersectiveObjectPropertyAdjective"}

@@ -1,0 +1,30 @@
+{"features":" {score:1.1796175512457323} ","formula":"resource:Assassination_of_Abraham_Lincoln","lexeme":"assassination of abraham lincoln","type":"NamedEntity"}
+{"features":" {score:0.06180546070430793} ","formula":"property:person","lexeme":"person","type":"DataProp"}
+{"features":" {score:0.1001388375227358} ","formula":"property:man","lexeme":"man","type":"ObjProp"}
+{"features":" {score:0.1001388375227358} ","formula":"!property:man","lexeme":"man","type":"DataProp"}
+{"features":" {score:0.1815058743252474} ","formula":"(rdf:type dbpedia:President)","lexeme":"president","type":"ClassNoun"}
+{"features":" {score:0.06180546070430793} ","formula":"dbpedia:person","lexeme":"person","type":"ObjectProp"}
+{"features":" {score:0.04374357578801174} ","formula":"property:topic","lexeme":"topic","type":"ObjProp"}
+{"features":" {score:0.04374357578801174} ","formula":"!property:topic","lexeme":"topic","type":"DataProp"}
+{"features":" {score:0.1001388375227358} ","formula":"property:man","lexeme":"man","type":"DataProp"}
+{"features":" {score:0.1001388375227358} ","formula":"!property:man","lexeme":"man","type":"ObjProp"}
+{"features":" {score:1.800548902195609} ","formula":"resource:Abraham_Lincoln","lexeme":"abraham lincoln","type":"NamedEntity"}
+{"features":" {score:0.1815058743252474} ","formula":"dbpedia:president","lexeme":"president","type":"ObjectProp"}
+{"features":" {score:0.06180546070430793} ","formula":"!property:person","lexeme":"person","type":"ObjProp"}
+{"features":" {score:0.09437865194152384} ","formula":"property:leader","lexeme":"leader","type":"ObjProp"}
+{"features":" {score:0.04374357578801174} ","formula":"!property:topic","lexeme":"topic","type":"ObjProp"}
+{"features":" {score:0.09437865194152384} ","formula":"!property:leader","lexeme":"leader","type":"ObjProp"}
+{"features":" {score:0.04374357578801174} ","formula":"property:topic","lexeme":"topic","type":"DataProp"}
+{"features":" {score:0.09437865194152384} ","formula":"!property:leader","lexeme":"leader","type":"DataProp"}
+{"features":" {score:0.09437865194152384} ","formula":"dbpedia:leader","lexeme":"leader","type":"ObjectProp"}
+{"features":" {score:0.06180546070430793} ","formula":"!dbpedia:person","lexeme":"person","type":"ObjectProp"}
+{"features":" {score:0.09437865194152384} ","formula":"!dbpedia:leader","lexeme":"leader","type":"ObjectProp"}
+{"features":" {score:0.06180546070430793} ","formula":"!property:person","lexeme":"person","type":"DataProp"}
+{"features":" {score:0.06180546070430793} ","formula":"property:person","lexeme":"person","type":"ObjProp"}
+{"features":" {score:0.1815058743252474} ","formula":"!dbpedia:president","lexeme":"president","type":"ObjectProp"}
+{"features":" {score:0.06180546070430793} ","formula":"(rdf:type dbpedia:Person)","lexeme":"person","type":"ClassNoun"}
+{"features":" {score:0.8593949242266352} ","formula":"resource:Lincoln_Memorial","lexeme":"lincoln memorial","type":"NamedEntity"}
+{"features":" {score:0.4599627509088573} ","formula":"\u003chttp://dbpedia.org/resource/United_States_presidential_election,_1860\u003e","lexeme":"united states presidential election, 1860","type":"NamedEntity"}
+{"features":" {score:0.09437865194152384} ","formula":"property:leader","lexeme":"leader","type":"DataProp"}
+{"features":" {score:0.22113282956336022} ","formula":"resource:Marxism","lexeme":"marxism","type":"NamedEntity"}
+{"features":" {score:0.016165499827843453} ","formula":"resource:Marxism–Leninism","lexeme":"marxism–leninism","type":"NamedEntity"}

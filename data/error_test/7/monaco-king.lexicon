@@ -1,0 +1,52 @@
+{"features":" {score:0.95} ","formula":"property:king","lexeme":"king","type":"DataProp"}
+{"features":" {score:0.1739918999227823} ","formula":"property:author","lexeme":"author","type":"ObjProp"}
+{"features":" {score:0.11830065359477125} ","formula":"property:case","lexeme":"case","type":"DataProp"}
+{"features":" {score:0.10210973195780336} ","formula":"(rdf:type dbpedia:Name)","lexeme":"name","type":"ClassNoun"}
+{"features":" {score:0.38529306178778605} ","formula":"dbpedia:leader","lexeme":"leader","type":"ObjectProp"}
+{"features":" {score:0.08215030045096391} ","formula":"(rdf:type dbpedia:Person)","lexeme":"person","type":"ClassNoun"}
+{"features":" {score:0.1739918999227823} ","formula":"!property:author","lexeme":"author","type":"DataProp"}
+{"features":" {score:0.95} ","formula":"!property:king","lexeme":"king","type":"DataProp"}
+{"features":" {score:0.37399189992278226} ","formula":"dbpedia:author","lexeme":"author","type":"ObjectProp"}
+{"features":" {score:0.38529306178778605} ","formula":"!dbpedia:leader","lexeme":"leader","type":"ObjectProp"}
+{"features":" {score:0.3439825018262502} ","formula":"resource:Henry_VIII_of_England","lexeme":"henry viii of england","type":"NamedEntity"}
+{"features":" {score:1.2972329765429287} ","formula":"resource:Monaco","lexeme":"monaco","type":"NamedEntity"}
+{"features":" {score:0.3821503004509639} ","formula":"!dbpedia:person","lexeme":"person","type":"ObjectProp"}
+{"features":" {score:0.37399189992278226} ","formula":"!dbpedia:author","lexeme":"author","type":"ObjectProp"}
+{"features":" {score:0.19472992007249323} ","formula":"property:title","lexeme":"title","type":"DataProp"}
+{"features":" {score:0.20210973195780335} ","formula":"property:name","lexeme":"name","type":"DataProp"}
+{"features":" {score:0.11830065359477125} ","formula":"property:case","lexeme":"case","type":"ObjProp"}
+{"features":" {score:0.20210973195780335} ","formula":"property:name","lexeme":"name","type":"ObjProp"}
+{"features":" {score:0.305429788808935} ","formula":"resource:Louis_XIV_of_France","lexeme":"louis xiv of france","type":"NamedEntity"}
+{"features":" {score:0.20210973195780335} ","formula":"!property:name","lexeme":"name","type":"ObjProp"}
+{"features":" {score:0.11830065359477125} ","formula":"!property:case","lexeme":"case","type":"ObjProp"}
+{"features":" {score:0.95} ","formula":"property:king","lexeme":"king","type":"ObjProp"}
+{"features":" {score:0.8408472630834796} ","formula":"\u003chttp://dbpedia.org/resource/Albert_II,_Prince_of_Monaco\u003e","lexeme":"albert ii, prince of monaco","type":"NamedEntity"}
+{"features":" {score:0.12026143790849673} ","formula":"!property:size","lexeme":"size","type":"DataProp"}
+{"features":" {score:0.18529306178778607} ","formula":"property:leader","lexeme":"leader","type":"DataProp"}
+{"features":" {score:0.1739918999227823} ","formula":"property:author","lexeme":"author","type":"DataProp"}
+{"features":" {score:0.18529306178778607} ","formula":"!property:leader","lexeme":"leader","type":"DataProp"}
+{"features":" {score:0.19472992007249323} ","formula":"!property:title","lexeme":"title","type":"ObjProp"}
+{"features":" {score:0.12026143790849673} ","formula":"property:size","lexeme":"size","type":"ObjProp"}
+{"features":" {score:0.018300653594771243} ","formula":"(rdf:type dbpedia:Case)","lexeme":"case","type":"ClassNoun"}
+{"features":" {score:0.7829107836522188} ","formula":"resource:AS_Monaco_FC","lexeme":"as monaco fc","type":"NamedEntity"}
+{"features":" {score:0.18529306178778607} ","formula":"!property:leader","lexeme":"leader","type":"ObjProp"}
+{"features":" {score:0.18215030045096392} ","formula":"property:person","lexeme":"person","type":"ObjProp"}
+{"features":" {score:0.481908914704742} ","formula":"resource:Monte_Carlo","lexeme":"monte carlo","type":"NamedEntity"}
+{"features":" {score:0.1739918999227823} ","formula":"!property:author","lexeme":"author","type":"ObjProp"}
+{"features":" {score:0.19472992007249323} ","formula":"property:title","lexeme":"title","type":"ObjProp"}
+{"features":" {score:0.404012817424024} ","formula":"resource:Grace_Kelly","lexeme":"grace kelly","type":"NamedEntity"}
+{"features":" {score:0.95} ","formula":"!property:king","lexeme":"king","type":"ObjProp"}
+{"features":" {score:0.18215030045096392} ","formula":"!property:person","lexeme":"person","type":"ObjProp"}
+{"features":" {score:0.18215030045096392} ","formula":"property:person","lexeme":"person","type":"DataProp"}
+{"features":" {score:0.20210973195780335} ","formula":"!property:name","lexeme":"name","type":"DataProp"}
+{"features":" {score:0.11830065359477125} ","formula":"!property:case","lexeme":"case","type":"DataProp"}
+{"features":" {score:0.18529306178778607} ","formula":"property:leader","lexeme":"leader","type":"ObjProp"}
+{"features":" {score:0.18215030045096392} ","formula":"!property:person","lexeme":"person","type":"DataProp"}
+{"features":" {score:0.12026143790849673} ","formula":"property:size","lexeme":"size","type":"DataProp"}
+{"features":" {score:0.031939431781472724} ","formula":"(rdf:type dbpedia:Musical)","lexeme":"musical","type":"ClassNoun"}
+{"features":" {score:0.25786822625241657} ","formula":"resource:James_VI_and_I","lexeme":"james vi and i","type":"NamedEntity"}
+{"features":" {score:0.24672699047886693} ","formula":"resource:Charles_I_of_England","lexeme":"charles i of england","type":"NamedEntity"}
+{"features":" {score:0.3821503004509639} ","formula":"dbpedia:person","lexeme":"person","type":"ObjectProp"}
+{"features":" {score:0.19472992007249323} ","formula":"!property:title","lexeme":"title","type":"DataProp"}
+{"features":" {score:0.27839210231847555} ","formula":"resource:Charles_II_of_England","lexeme":"charles ii of england","type":"NamedEntity"}
+{"features":" {score:0.12026143790849673} ","formula":"!property:size","lexeme":"size","type":"ObjProp"}

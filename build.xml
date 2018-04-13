@@ -4,7 +4,7 @@
   <property name="target" value="1.8"/>
   <property name="source" value="1.8"/>
   <property name="root" value="."/>
-  <property name="src" location="${root}/src/"/>
+  <property name="src" location="${root}/src/main/java"/>
   <property name="classes" location="${root}/classes"/>
   <property name="lib" location="${root}/lib"/>
   <property name="libsempre" location="${root}/libsempre"/>
@@ -66,6 +66,16 @@
       <include name="edu/stanford/nlp/sempre/freebase/"/>
     </javac>
     <jar destfile="${libsempre}/sempre-freebase.jar" basedir="${classes}/freebase"/>
+  </target>
+
+  <!-- Compile roboy -->
+  <target name="roboy" depends="init,core,corenlp,cache,freebase">
+    <echo message="Compiling ${ant.project.name}: roboy"/>
+    <mkdir dir="${classes}/roboy"/>
+    <javac srcdir="${src}" destdir="${classes}/roboy" classpathref="lib.path" debug="true" includeantruntime="false" source="${source}" target="${target}">
+      <include name="edu/stanford/nlp/sempre/roboy/"/>
+    </javac>
+    <jar destfile="${libsempre}/sempre-roboy.jar" basedir="${classes}/roboy"/>
   </target>
 
   <!-- Compile tables -->

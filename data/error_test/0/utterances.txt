@@ -1,0 +1,25 @@
+1.
+utterance: what is a abraham lincoln
+underspecified term: abraham lincoln
+type: type
+result: success
+
+2.
+utterance: what is abraham lincoln ideology
+underspecified term: ideology
+type: relation
+result: followUp
+
+3.
+utterance: what is a case
+underspecified term: case
+type: type
+result: success
+
+4.
+utterance: what is angela merkel leader of
+underspecified term: leader of
+type: relation
+underspecified term: angela merkel
+type: entity
+result: fail

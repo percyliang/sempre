@@ -1,0 +1,52 @@
+{"features":" {score:0.11960177911432227} ","formula":"property:position","lexeme":"position","type":"DataProp"}
+{"features":" {score:0.1128715978948634} ","formula":"!property:title","lexeme":"title","type":"DataProp"}
+{"features":" {score:0.18822194873012446} ","formula":"!property:executive","lexeme":"executive","type":"ObjProp"}
+{"features":" {score:1.075} ","formula":"(rdf:type dbpedia:President)","lexeme":"president","type":"ClassNoun"}
+{"features":" {score:0.05188352662424011} ","formula":"!dbpedia:person","lexeme":"person","type":"ObjectProp"}
+{"features":" {score:0.1318018805669209} ","formula":"!property:officer","lexeme":"officer","type":"ObjProp"}
+{"features":" {score:0.1128715978948634} ","formula":"property:title","lexeme":"title","type":"ObjProp"}
+{"features":" {score:0.05188352662424011} ","formula":"dbpedia:person","lexeme":"person","type":"ObjectProp"}
+{"features":" {score:0.05655930184818928} ","formula":"property:role","lexeme":"role","type":"DataProp"}
+{"features":" {score:0.18059626829029546} ","formula":"!dbpedia:leader","lexeme":"leader","type":"ObjectProp"}
+{"features":" {score:0.1558805931209102} ","formula":"property:office","lexeme":"office","type":"ObjProp"}
+{"features":" {score:0.18822194873012446} ","formula":"property:executive","lexeme":"executive","type":"ObjProp"}
+{"features":" {score:0.18059626829029546} ","formula":"dbpedia:leader","lexeme":"leader","type":"ObjectProp"}
+{"features":" {score:0.059794367825584276} ","formula":"resource:Barack_Obama","lexeme":"barack obama","type":"NamedEntity"}
+{"features":" {score:0.18059626829029546} ","formula":"!property:leader","lexeme":"leader","type":"ObjProp"}
+{"features":" {score:0.7749999999999999} ","formula":"property:president","lexeme":"president","type":"DataProp"}
+{"features":" {score:0.11960177911432227} ","formula":"property:position","lexeme":"position","type":"ObjProp"}
+{"features":" {score:0.11960177911432227} ","formula":"!property:position","lexeme":"position","type":"DataProp"}
+{"features":" {score:0.1558805931209102} ","formula":"property:office","lexeme":"office","type":"DataProp"}
+{"features":" {score:0.7749999999999999} ","formula":"resource:President","lexeme":"president","type":"NamedEntity"}
+{"features":" {score:0.18822194873012446} ","formula":"!property:executive","lexeme":"executive","type":"DataProp"}
+{"features":" {score:0.18059626829029546} ","formula":"property:leader","lexeme":"leader","type":"DataProp"}
+{"features":" {score:0.11960177911432227} ","formula":"dbpedia:position","lexeme":"position","type":"ObjectProp"}
+{"features":" {score:0.22356586199500222} ","formula":"resource:Ronald_Reagan","lexeme":"ronald reagan","type":"NamedEntity"}
+{"features":" {score:0.1128715978948634} ","formula":"property:title","lexeme":"title","type":"DataProp"}
+{"features":" {score:0.7749999999999999} ","formula":"!property:president","lexeme":"president","type":"ObjProp"}
+{"features":" {score:0.05188352662424011} ","formula":"!property:person","lexeme":"person","type":"DataProp"}
+{"features":" {score:0.1318018805669209} ","formula":"property:officer","lexeme":"officer","type":"DataProp"}
+{"features":" {score:0.1558805931209102} ","formula":"!property:office","lexeme":"office","type":"ObjProp"}
+{"features":" {score:0.7749999999999999} ","formula":"dbpedia:president","lexeme":"president","type":"ObjectProp"}
+{"features":" {score:0.7749999999999999} ","formula":"!property:president","lexeme":"president","type":"DataProp"}
+{"features":" {score:0.18059626829029546} ","formula":"property:leader","lexeme":"leader","type":"ObjProp"}
+{"features":" {score:0.556158430655365} ","formula":"resource:President_of_the_United_States","lexeme":"president of the united states","type":"NamedEntity"}
+{"features":" {score:0.18059626829029546} ","formula":"!property:leader","lexeme":"leader","type":"DataProp"}
+{"features":" {score:0.05188352662424011} ","formula":"!property:person","lexeme":"person","type":"ObjProp"}
+{"features":" {score:0.05655930184818928} ","formula":"property:role","lexeme":"role","type":"ObjProp"}
+{"features":" {score:0.1318018805669209} ","formula":"!property:officer","lexeme":"officer","type":"DataProp"}
+{"features":" {score:0.05655930184818928} ","formula":"!property:role","lexeme":"role","type":"DataProp"}
+{"features":" {score:0.3518835266242401} ","formula":"(rdf:type dbpedia:Person)","lexeme":"person","type":"ClassNoun"}
+{"features":" {score:0.05188352662424011} ","formula":"property:person","lexeme":"person","type":"DataProp"}
+{"features":" {score:0.1128715978948634} ","formula":"!property:title","lexeme":"title","type":"ObjProp"}
+{"features":" {score:0.1558805931209102} ","formula":"!property:office","lexeme":"office","type":"DataProp"}
+{"features":" {score:0.05188352662424011} ","formula":"property:person","lexeme":"person","type":"ObjProp"}
+{"features":" {score:0.7749999999999999} ","formula":"property:president","lexeme":"president","type":"ObjProp"}
+{"features":" {score:0.2632383167025021} ","formula":"resource:George_W._Bush","lexeme":"george w. bush","type":"NamedEntity"}
+{"features":" {score:0.20879448568046177} ","formula":"resource:Bill_Clinton","lexeme":"bill clinton","type":"NamedEntity"}
+{"features":" {score:0.11960177911432227} ","formula":"!property:position","lexeme":"position","type":"ObjProp"}
+{"features":" {score:0.1318018805669209} ","formula":"property:officer","lexeme":"officer","type":"ObjProp"}
+{"features":" {score:0.7749999999999999} ","formula":"!dbpedia:president","lexeme":"president","type":"ObjectProp"}
+{"features":" {score:0.11960177911432227} ","formula":"!dbpedia:position","lexeme":"position","type":"ObjectProp"}
+{"features":" {score:0.18822194873012446} ","formula":"property:executive","lexeme":"executive","type":"DataProp"}
+{"features":" {score:0.05655930184818928} ","formula":"!property:role","lexeme":"role","type":"ObjProp"}

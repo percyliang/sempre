@@ -1,0 +1,55 @@
+{"features":" {score:0.13818747557057295} ","formula":"property:field","lexeme":"field","type":"DataProp"}
+{"features":" {score:0.13466387807927593} ","formula":"property:property","lexeme":"property","type":"ObjProp"}
+{"features":" {score:0.33818747557057294} ","formula":"dbpedia:field","lexeme":"field","type":"ObjectProp"}
+{"features":" {score:1.075} ","formula":"dbpedia:author","lexeme":"author","type":"ObjectProp"}
+{"features":" {score:0.11830690053044533} ","formula":"property:story","lexeme":"story","type":"ObjProp"}
+{"features":" {score:0.1232129697862933} ","formula":"!property:metadata","lexeme":"metadata","type":"DataProp"}
+{"features":" {score:0.11260132645541636} ","formula":"!property:datum","lexeme":"datum","type":"DataProp"}
+{"features":" {score:0.15810625982706217} ","formula":"!property:person","lexeme":"person","type":"ObjProp"}
+{"features":" {score:0.22801013531749442} ","formula":"property:information","lexeme":"information","type":"ObjProp"}
+{"features":" {score:0.13818747557057295} ","formula":"!property:field","lexeme":"field","type":"ObjProp"}
+{"features":" {score:0.1232129697862933} ","formula":"property:metadata","lexeme":"metadata","type":"ObjProp"}
+{"features":" {score:0.8925047438330171} ","formula":"resource:Cinderella","lexeme":"cinderella","type":"NamedEntity"}
+{"features":" {score:0.8878916047243376} ","formula":"resource:Author","lexeme":"author","type":"NamedEntity"}
+{"features":" {score:0.3346317816112169} ","formula":"resource:La_Cenerentola","lexeme":"la cenerentola","type":"NamedEntity"}
+{"features":" {score:0.15810625982706217} ","formula":"property:person","lexeme":"person","type":"ObjProp"}
+{"features":" {score:0.15512494332841328} ","formula":"!property:attribute","lexeme":"attribute","type":"DataProp"}
+{"features":" {score:0.16059515175149147} ","formula":"resource:The_New_York_Times_Best_Seller_list","lexeme":"the new york times best seller list","type":"NamedEntity"}
+{"features":" {score:0.3581062598270621} ","formula":"!dbpedia:person","lexeme":"person","type":"ObjectProp"}
+{"features":" {score:0.33818747557057294} ","formula":"!dbpedia:field","lexeme":"field","type":"ObjectProp"}
+{"features":" {score:0.12144436256448048} ","formula":"property:element","lexeme":"element","type":"ObjProp"}
+{"features":" {score:0.8749999999999999} ","formula":"property:author","lexeme":"author","type":"ObjProp"}
+{"features":" {score:1.075} ","formula":"!dbpedia:author","lexeme":"author","type":"ObjectProp"}
+{"features":" {score:0.11830690053044533} ","formula":"!property:story","lexeme":"story","type":"ObjProp"}
+{"features":" {score:0.22801013531749442} ","formula":"property:information","lexeme":"information","type":"DataProp"}
+{"features":" {score:0.13818747557057295} ","formula":"property:field","lexeme":"field","type":"ObjProp"}
+{"features":" {score:0.32485768500948764} ","formula":"\u003chttp://dbpedia.org/resource/Cinderella_(1950_film)\u003e","lexeme":"cinderella (1950 film)","type":"NamedEntity"}
+{"features":" {score:0.12144436256448048} ","formula":"property:element","lexeme":"element","type":"DataProp"}
+{"features":" {score:0.12144436256448048} ","formula":"!property:element","lexeme":"element","type":"DataProp"}
+{"features":" {score:0.15512494332841328} ","formula":"!property:attribute","lexeme":"attribute","type":"ObjProp"}
+{"features":" {score:0.11830690053044533} ","formula":"property:story","lexeme":"story","type":"DataProp"}
+{"features":" {score:0.11260132645541636} ","formula":"!property:datum","lexeme":"datum","type":"ObjProp"}
+{"features":" {score:0.1232129697862933} ","formula":"property:metadata","lexeme":"metadata","type":"DataProp"}
+{"features":" {score:0.11830690053044533} ","formula":"!property:story","lexeme":"story","type":"DataProp"}
+{"features":" {score:0.31353711585588867} ","formula":"resource:Writer","lexeme":"writer","type":"NamedEntity"}
+{"features":" {score:0.8749999999999999} ","formula":"property:author","lexeme":"author","type":"DataProp"}
+{"features":" {score:0.13466387807927593} ","formula":"property:property","lexeme":"property","type":"DataProp"}
+{"features":" {score:0.15810625982706217} ","formula":"!property:person","lexeme":"person","type":"DataProp"}
+{"features":" {score:0.15810625982706217} ","formula":"property:person","lexeme":"person","type":"DataProp"}
+{"features":" {score:0.22801013531749442} ","formula":"!property:information","lexeme":"information","type":"ObjProp"}
+{"features":" {score:0.13466387807927593} ","formula":"!property:property","lexeme":"property","type":"ObjProp"}
+{"features":" {score:0.11260132645541636} ","formula":"property:datum","lexeme":"datum","type":"ObjProp"}
+{"features":" {score:0.05810625982706215} ","formula":"(rdf:type dbpedia:Person)","lexeme":"person","type":"ClassNoun"}
+{"features":" {score:0.8749999999999999} ","formula":"!property:author","lexeme":"author","type":"ObjProp"}
+{"features":" {score:0.32333965844402274} ","formula":"\u003chttp://dbpedia.org/resource/Cinderella_(band)\u003e","lexeme":"cinderella (band)","type":"NamedEntity"}
+{"features":" {score:0.15512494332841328} ","formula":"property:attribute","lexeme":"attribute","type":"DataProp"}
+{"features":" {score:0.8749999999999999} ","formula":"!property:author","lexeme":"author","type":"DataProp"}
+{"features":" {score:0.1232129697862933} ","formula":"!property:metadata","lexeme":"metadata","type":"ObjProp"}
+{"features":" {score:0.14723568218294936} ","formula":"resource:English_literature","lexeme":"english literature","type":"NamedEntity"}
+{"features":" {score:0.13818747557057295} ","formula":"!property:field","lexeme":"field","type":"DataProp"}
+{"features":" {score:0.3581062598270621} ","formula":"dbpedia:person","lexeme":"person","type":"ObjectProp"}
+{"features":" {score:0.11260132645541636} ","formula":"property:datum","lexeme":"datum","type":"DataProp"}
+{"features":" {score:0.22801013531749442} ","formula":"!property:information","lexeme":"information","type":"DataProp"}
+{"features":" {score:0.13466387807927593} ","formula":"!property:property","lexeme":"property","type":"DataProp"}
+{"features":" {score:0.15512494332841328} ","formula":"property:attribute","lexeme":"attribute","type":"ObjProp"}
+{"features":" {score:0.12144436256448048} ","formula":"!property:element","lexeme":"element","type":"ObjProp"}

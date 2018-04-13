@@ -15,7 +15,7 @@ end
 
 def codalab(dependencies=nil)
   # Set @cl=1 to run job on CodaLab
-  dependencies ||= l(':fig', ':lib', ':module-classes.txt', ':libsempre')
+  dependencies ||= l(':fig', ':lib', ':module-classes.txt', ':target')
   l(
     letDefault(:cl, 0),
     sel(:cl,
@@ -49,7 +49,7 @@ def header(modules='core', codalabDependencies=nil)
       'impressive' => l('-Xms75G', '-Xmx90G'),
     }),
     # Classpath
-    '-cp', 'libsempre/*:lib/*',
+    '-cp', 'target/*:lib/*',
     # Profiling
     letDefault(:prof, 0), sel(:prof, l(), '-Xrunhprof:cpu=samples,depth=100,file=_OUTPATH_/java.hprof.txt'),
   nil)
@@ -119,6 +119,13 @@ def freebaseFeatureDomains
 end
 
 def sparqlOpts
+  l(
+    required(:sparqlserver, 'host:port of the Sparql server'), # Example: jonsson:3093, etc.
+    o('SparqlExecutor.endpointUrl', lambda{|e| 'http://'+e[:sparqlserver]+'/sparql'}),
+  nil)
+end
+
+def sparqlOptsNew
   l(
     required(:sparqlserver, 'host:port of the Sparql server'), # Example: jonsson:3093, etc.
     o('SparqlExecutor.endpointUrl', lambda{|e| 'http://'+e[:sparqlserver]+'/sparql'}),
@@ -334,7 +341,7 @@ addMode('freebase', 'Freebase (for EMNLP 2013, ACL 2014, TACL 2014)', lambda { |
 
 addMode('cacheserver', 'Start the general-purpose cache server that serves files with key-value maps', lambda { |e|
   l(
-    'java', '-Xmx36g', '-ea', '-cp', 'libsempre/*:lib/fig.jar',
+    'java', '-Xmx36g', '-ea', '-cp', 'target/*.jar:lib/fig.jar',
     'edu.stanford.nlp.sempre.cache.StringCacheServer',
     letDefault(:port, 4000),
     lambda { |e| o('port', e[:port]) },
@@ -448,6 +455,12 @@ addMode('simple', 'Simple shell', lambda { |e| l(
   o('Main.interactive'),
 nil) })
 
+# Just start socket shell to try out SEMPRE commands
+addMode('socket', 'Simple shell', lambda { |e| l(
+  codalab, 'java', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.Main',
+  o('Main.socket'),
+nil) })
+
 addMode('simple-sparql', 'Simple shell for querying SPARQL', lambda { |e| l(
   codalab, 'java', '-Dmodules=core,freebase', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.Main',
   o('executor', 'freebase.SparqlExecutor'),
@@ -501,6 +514,23 @@ addMode('simple-freebase-nocache', 'Simple shell for using Freebase (without a c
   o('BinaryLexicon.binaryLexiconFilesPath', '/dev/null'),
   #o('JoinFn.showTypeCheckFailures'),  # Use this to debug
   o('Grammar.inPaths', 'freebase/data/demo1.grammar'),  # Override with your own custom grammar
+  #o('SparqlExecutor.includeSupportingInfo'),  # Show full information
+  o('Main.interactive'),
+nil) })
+
+addMode('database-server', 'Simple shell for using external Knowledge Base (without a cache server)', lambda { |e| l(
+  'java', '-Dmodules=core,roboy', '-cp', 'target/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.Main',
+  o('executor', 'roboy.SparqlExecutor'),
+  o('simple_executor', 'JavaExecutor'),
+  letDefault(:sparqlserver, 'dbpedia.org'),
+  sparqlOptsNew,
+  o('FeatureExtractor.featureDomains', 'rule'),
+  o('Parser.coarsePrune'),
+  o('JoinFn.typeInference'),
+  o('UnaryLexicon.unaryLexiconFilePath', '/dev/null'),
+  o('BinaryLexicon.binaryLexiconFilesPath', '/dev/null'),
+  #o('JoinFn.showTypeCheckFailures'),  # Use this to debug
+  o('Grammar.inPaths', 'data/roboy-dbpedia.grammar'),  # Override with your own custom grammar
   #o('SparqlExecutor.includeSupportingInfo'),  # Show full information
   o('Main.interactive'),
 nil) })
@@ -654,7 +684,7 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
   }),
   # Fig parameters
   selo(:cldir, 'execDir', '_OUTPATH_', '.'),
-  o('overwriteExecDir'), o('addToView', 15), o('jarFiles', 'libsempre/*'),
+  o('overwriteExecDir'), o('addToView', 15), o('jarFiles', 'target/*.jar'),
   sel(:cldir, l(), '>/dev/null'),
   # Set environment for table execution
   o('executor', 'tables.lambdadcs.LambdaDCSExecutor'),
@@ -777,7 +807,7 @@ addMode('tables', 'QA on HTML tables', lambda { |e| l(
   letDefault(:lang, 'corenlp'),
   sel(:lang, {
     'simple' => o('LanguageAnalyzer', 'SimpleAnalyzer'),
-    'corenlp' => l(o('LanguageAnalyzer', 'corenlp.CoreNLPAnalyzer'), o('annotators', *'tokenize ssplit pos lemma ner'.split)),
+    'corenlp' => l(o('LanguageAnalyzer', 'corenlp.CoreNLPAnalyzer'), o('RelationAnalyzer', 'corenlpOpenIEAnalyzer'), o('annotators', *'tokenize ssplit pos lemma ner'.split)),
     'fullcorenlp' => l(o('LanguageAnalyzer', 'corenlp.CoreNLPAnalyzer'), o('annotators', *'tokenize ssplit pos lemma ner parse'.split)),
   }),
   # Training

@@ -1,0 +1,12 @@
+{
+  "type": [
+    "Did you mean %s as %s, a %s?",
+    "Sorry, did you say %s for %s, a %s?",
+    "Does %s mean %s, a %s?"
+  ],
+  "label": [
+    "Did you mean %s as %s?",
+    "Sorry, did you say %s for %s?",
+    "Does %s mean %s?"
+  ]
+}

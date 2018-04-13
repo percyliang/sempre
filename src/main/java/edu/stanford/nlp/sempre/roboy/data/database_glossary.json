@@ -1,0 +1,18 @@
+{
+  "lex": "http://github.com/cunger/lemon.dbpedia/target/dbpedia_all#",
+  "rb": "http://roboy.org/ontology/",
+  "dbpedia": "http://dbpedia.org/ontology/",
+  "resource": "http://dbpedia.org/resource/",
+  "property": "http://dbpedia.org/property/",
+  "datatype": "http://dbpedia.org/datatype/",
+  "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+  "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+  "lexinfo": "http://www.lexinfo.net/ontology/2.0/lexinfo#",
+  "lemon": "http://lemon-model.net/lemon#",
+  "owl": "http://www.w3.org/2002/07/owl#",
+  "xsd": "http://www.w3.org/2001/XMLSchema#",
+  "fb": "http://rdf.freebase.com/ns/",
+  "foaf": "http://xmlns.com/foaf/0.1/",
+  "rel": "http://www.perceive.net/schemas/relationship/",
+  "purl": "http://purl.org/dc/elements/1.1/"
+}

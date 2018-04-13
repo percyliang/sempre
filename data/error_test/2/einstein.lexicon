@@ -1,0 +1,17 @@
+{"features":" {score:0.03475736650333604} ","formula":"!property:individual","lexeme":"individual","type":"DataProp"}
+{"features":" {score:0.08053095188702775} ","formula":"property:person","lexeme":"person","type":"ObjProp"}
+{"features":" {score:0.3533712571538777} ","formula":"resource:Santa_Clarita_Valley","lexeme":"santa clarita valley","type":"NamedEntity"}
+{"features":" {score:0.1362879165640563} ","formula":"(rdf:type dbpedia:Scientist)","lexeme":"scientist","type":"ClassNoun"}
+{"features":" {score:0.03475736650333604} ","formula":"!property:individual","lexeme":"individual","type":"ObjProp"}
+{"features":" {score:0.08053095188702775} ","formula":"!property:person","lexeme":"person","type":"DataProp"}
+{"features":" {score:0.42321811534123} ","formula":"resource:San_Diego_Unified_School_District","lexeme":"san diego unified school district","type":"NamedEntity"}
+{"features":" {score:0.08053095188702775} ","formula":"dbpedia:person","lexeme":"person","type":"ObjectProp"}
+{"features":" {score:0.08053095188702775} ","formula":"(rdf:type dbpedia:Person)","lexeme":"person","type":"ClassNoun"}
+{"features":" {score:0.3306807669347145} ","formula":"resource:Montefiore_Medical_Center","lexeme":"montefiore medical center","type":"NamedEntity"}
+{"features":" {score:0.08053095188702775} ","formula":"property:person","lexeme":"person","type":"DataProp"}
+{"features":" {score:0.08053095188702775} ","formula":"!property:person","lexeme":"person","type":"ObjProp"}
+{"features":" {score:0.08053095188702775} ","formula":"!dbpedia:person","lexeme":"person","type":"ObjectProp"}
+{"features":" {score:0.03475736650333604} ","formula":"property:individual","lexeme":"individual","type":"DataProp"}
+{"features":" {score:0.03475736650333604} ","formula":"property:individual","lexeme":"individual","type":"ObjProp"}
+{"features":" {score:1.812749003984064} ","formula":"resource:Albert_Einstein","lexeme":"albert einstein","type":"NamedEntity"}
+{"features":" {score:1.1707625897935188} ","formula":"resource:Albert_Einstein_College_of_Medicine","lexeme":"albert einstein college of medicine","type":"NamedEntity"}

@@ -1,0 +1,63 @@
+### Lexicon: call LexiconFn on the spans.
+
+(rule $Verb ($LEMMA_TOKEN) (FilterPosTagFn token VB VBD VBN VBG VBP VBZ VBD-AUX))
+(rule $Particle ($LEMMA_TOKEN) (FilterPosTagFn token RP))
+(rule $Prep ($LEMMA_TOKEN) (FilterPosTagFn token IN TO))
+(rule $Adj ($LEMMA_TOKEN) (FilterPosTagFn token JJ))
+(rule $Noun ($LEMMA_TOKEN) (FilterPosTagFn token WRB WP NN NNS NNP NNPS))
+(rule $SimpleNounPhrase ($Noun) (ConcatFn " "))
+(rule $SimpleNounPhrase ($Noun $SimpleNounPhrase) (ConcatFn " "))
+
+# Matching entities (NamedEntity): note - don't lemmatize
+# Match an entity if it is a sequence of NE tags or NNP tags or of minimal length
+(rule $NamedEntity ($PHRASE) (FilterNerSpanFn PERSON ORGANIZATION LOCATION MISC))
+(rule $NamedEntity ($PHRASE) (FilterPosTagFn span NNP))
+
+(rule $Entity ($NamedEntity) (SimpleLexiconFn (type "NamedEntity")))
+(rule $Entity ($NamedEntity) (SimpleLexiconFn (type "NewEntity")))
+(rule $Entity ($NamedEntity) (OpenTypeFn entity))
+
+(rule $Entity ($PHRASE) (DateFn)) # Example: 2002
+(rule $Binary ($PHRASE) (SimpleLexiconFn (type "RelationalNoun")))
+(rule $Binary ($PHRASE) (SimpleLexiconFn (type "RelationalAdjective")))
+(rule $Binary ($PHRASE) (SimpleLexiconFn (type "StateVerb")))
+(rule $Binary ($PHRASE) (SimpleLexiconFn (type "NewRelation")))
+#(rule $Binary ($PHRASE) (OpenTypeFn relation))
+(rule $Unary ($PHRASE) (SimpleLexiconFn (type "ObjectProperty")))
+(rule $Unary ($PHRASE) (SimpleLexiconFn (type "IntersectiveObjectPropertyAdjective")))
+(rule $Unary ($PHRASE) (SimpleLexiconFn (type "DataPropertyNoun")))
+(rule $Unary ($PHRASE) (SimpleLexiconFn (type "ClassNoun")))
+
+(rule $Unary (how $Adj) (ConstantFn (rdf:type xsd:integer) xsd:integer))
+(rule $Unary (how $Adj) (ConstantFn (rdf:type xsd:float) xsd:float))
+
+#### Lexicon: hard coded unaries
+(rule $Unary (who) (ConstantFn (rdf:type foaf:person) foaf:person))
+(rule $Unary (who) (ConstantFn (rdf:type dbpedia:Organization) dbpedia:Organization))
+(rule $Unary (who) (ConstantFn (rdf:type dbpedia:Company) dbpedia:Company))
+(rule $Unary (where) (ConstantFn (rdf:type dbpedia:Organization) dbpedia:Organization))
+(rule $Unary (where) (ConstantFn (rdf:type dbpedia:Place) dbpedia:Place))
+(rule $Unary (where) (ConstantFn (rdf:type dbpedia:EducationalInstitution) dbpedia:EducationalInstitution))
+(rule $Unary (when) (ConstantFn (rdf:type xsd:date) xsd:date))
+(rule $Unary (date) (ConstantFn (rdf:type xsd:date) xsd:date))
+(rule $Unary (year) (ConstantFn (rdf:type xsd:date) xsd:date))
+(rule $Unary (day) (ConstantFn (rdf:type xsd:date) xsd:date))
+
+# Aggregation
+(rule $CountStr (how many) (ConstantFn null null))
+(rule $CountStr (number of) (ConstantFn null null))
+(rule $Operator ($CountStr) (ConstantFn (lambda x (count (var x))) (-> fb:type.any fb:type.any)))
+
+############################################################
+
+(rule $Padding ($PHRASE) (IdentityFn)) # Can skip these sequences
+
+(rule $ROOT (($Padding optional) $Operator ($Padding optional) $Set) (JoinFn forward betaReduce))
+(rule $ROOT (($Padding optional) $Set ($Padding optional)) (IdentityFn))
+
+### Combine entity and binary
+(rule $BaseSet ($Entity ($Padding optional) $Binary) (JoinFn unary,binary unaryCanBeArg0 unaryCanBeArg1))
+(rule $BaseSet ($Binary ($Padding optional) $Entity) (JoinFn binary,unary unaryCanBeArg0 unaryCanBeArg1))
+
+(rule $Set ($BaseSet) (IdentityFn))
+(rule $Set ($Set ($Padding optional) $Set) (MergeFn and))

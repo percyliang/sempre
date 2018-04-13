@@ -11,8 +11,8 @@ out = open(out_path, 'w')
 items = []
 core_packages = ['test']  # Packages in core which are not their own modules
 modules = {}
-Dir['src/**/*.java'].each { |path|
-  class_name = path.sub(/^src\//, '').gsub(/\//, '.').gsub(/\.java$/, '')
+Dir['src/main/java/**/*.java'].each { |path|
+  class_name = path.sub(/^src\/main\/java\//, '').gsub(/\//, '.').gsub(/\.java$/, '')
   module_name = path.sub(/^.*sempre\//, '').split(/\//)[0]
   module_name = 'core' if module_name =~ /\.java$/ || core_packages.index(module_name)
   modules[module_name] = true

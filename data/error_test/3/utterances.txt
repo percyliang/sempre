@@ -1,0 +1,26 @@
+1.
+utterance: who is architect
+underspecified term: architect
+type: type
+result: success
+
+2.
+utterance: what is renzo piano work
+underspecified term: renzo piano
+type: entity
+result: success
+underspecified term: work
+type: relation
+result: failure
+
+3.
+utterance: i live in munich
+underspecified term: munich
+type: entity
+result: success
+
+4.
+utterance: what is munich governor
+underspecified term: governor
+type: relation
+result: success

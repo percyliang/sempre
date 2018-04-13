@@ -1,0 +1,26 @@
+1.
+utterance: what is quentin tarantino birth name
+underspecified term: quentin tarantino
+type: entity
+result: success
+
+2.
+utterance: what is a play
+underspecified term: play
+type: type
+result: success
+
+3.
+utterance: who is quentin tarantino sibling
+underspecified term: sibling
+type: relation
+result: follow up
+
+4.
+utterance: where is apple headquarters
+underspecified term: apple
+type: entity
+result: failure
+underspecified term: headquarters
+type: relation
+result: failure

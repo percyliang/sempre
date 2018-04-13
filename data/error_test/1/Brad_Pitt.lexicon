@@ -1,0 +1,15 @@
+{"features":" {score:0.16851457177637097} ","formula":"(rdf:type dbpedia:Actor)","lexeme":"actor","type":"ClassNoun"}
+{"features":" {score:1.1023746701846966} ","formula":"\u003chttp://dbpedia.org/resource/Brad_Pitt_(boxer)\u003e","lexeme":"brad pitt (boxer)","type":"NamedEntity"}
+{"features":" {score:0.16851457177637097} ","formula":"!property:actor","lexeme":"actor","type":"DataProp"}
+{"features":" {score:0.1225298322811872} ","formula":"property:star","lexeme":"star","type":"ObjProp"}
+{"features":" {score:0.1225298322811872} ","formula":"!property:star","lexeme":"star","type":"DataProp"}
+{"features":" {score:0.1225298322811872} ","formula":"property:star","lexeme":"star","type":"DataProp"}
+{"features":" {score:1.1} ","formula":"resource:Brad_Pitt__1","lexeme":"brad pitt 1","type":"NamedEntity"}
+{"features":" {score:0.1225298322811872} ","formula":"!property:star","lexeme":"star","type":"ObjProp"}
+{"features":" {score:0.21154076455231896} ","formula":"(rdf:type dbpedia:Celebrity)","lexeme":"celebrity","type":"ClassNoun"}
+{"features":" {score:0.16851457177637097} ","formula":"property:actor","lexeme":"actor","type":"ObjProp"}
+{"features":" {score:0.16851457177637097} ","formula":"!property:actor","lexeme":"actor","type":"ObjProp"}
+{"features":" {score:1.1490366280078887} ","formula":"resource:Brad_Pitt_filmography","lexeme":"brad pitt filmography","type":"NamedEntity"}
+{"features":" {score:1.9972295514511875} ","formula":"resource:Brad_Pitt","lexeme":"brad pitt","type":"NamedEntity"}
+{"features":" {score:0.1225298322811872} ","formula":"(rdf:type dbpedia:Star)","lexeme":"star","type":"ClassNoun"}
+{"features":" {score:0.16851457177637097} ","formula":"property:actor","lexeme":"actor","type":"DataProp"}

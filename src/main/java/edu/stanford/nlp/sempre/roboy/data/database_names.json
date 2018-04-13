@@ -1,0 +1,38 @@
+{
+  "fb": {
+    "PREFIX": "fb:",
+    "BOOLEAN": "fb:type.boolean",
+    "INT": "fb:type.int",
+    "FLOAT": "fb:type.float",
+    "DATE": "fb:type.datetime",
+    "TEXT": "fb:type.text",
+    "TIME": "fb:type.time",
+    "NUMBER": "fb:type.number",
+    "ENTITY": "fb:common.topic",
+    "ANY": "fb:type.any",
+    "PERSON": "fb:people.person",
+    "CVT": "fb:type.cvt",
+    "TYPE": "fb:type.object.type",
+    "NAME": "fb:type.object.name",
+    "PROF": "fb:people.person.profession",
+    "ALIAS": "fb:common.topic.alias"
+  },
+  "dbpedia": {
+    "PREFIX": "dbpedia:",
+    "BOOLEAN": "xsd:boolean",
+    "INT": "xsd:integer",
+    "FLOAT": "xsd:float",
+    "DATE": "xsd:datetime",
+    "TEXT": "xsd:string",
+    "TIME": "fb:type.time",
+    "NUMBER": "fb:type.number",
+    "ENTITY": "fb:common.topic",
+    "ANY": "fb:type.any",
+    "PERSON": "foaf:person",
+    "CVT": "fb:type.cvt",
+    "TYPE": "rdf:type",
+    "NAME": "rdf:label",
+    "PROF": "property:profession",
+    "ALIAS": "purl:description"
+  }
+}

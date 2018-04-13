@@ -1,0 +1,45 @@
+{"features":" {score:0.11463414634146342} ","formula":"!property:datum","lexeme":"datum","type":"ObjProp"}
+{"features":" {score:0.06220104083899529} ","formula":"(rdf:type dbpedia:Scientist)","lexeme":"scientist","type":"ClassNoun"}
+{"features":" {score:0.04193548387096774} ","formula":"property:inventor","lexeme":"inventor","type":"ObjProp"}
+{"features":" {score:0.3561589440194572} ","formula":"dbpedia:field","lexeme":"field","type":"ObjectProp"}
+{"features":" {score:0.21163995178734385} ","formula":"!property:information","lexeme":"information","type":"ObjProp"}
+{"features":" {score:0.3021097046413502} ","formula":"resource:TPP_Nikola_Tesla","lexeme":"tpp nikola tesla","type":"NamedEntity"}
+{"features":" {score:0.15615894401945718} ","formula":"!property:field","lexeme":"field","type":"ObjProp"}
+{"features":" {score:0.17193125846182428} ","formula":"!property:attribute","lexeme":"attribute","type":"DataProp"}
+{"features":" {score:1.35} ","formula":"!property:birthPlace","lexeme":"birth place","type":"ObjProp"}
+{"features":" {score:1.35} ","formula":"property:birthPlace","lexeme":"birth place","type":"ObjProp"}
+{"features":" {score:1.55} ","formula":"dbpedia:birthPlace","lexeme":"birth place","type":"ObjectProp"}
+{"features":" {score:0.9695652173913044} ","formula":"resource:Place_of_birth","lexeme":"place of birth","type":"NamedEntity"}
+{"features":" {score:0.03358799127801772} ","formula":"property:researcher","lexeme":"researcher","type":"ObjProp"}
+{"features":" {score:0.17193125846182428} ","formula":"property:attribute","lexeme":"attribute","type":"DataProp"}
+{"features":" {score:0.0635535902553989} ","formula":"property:man","lexeme":"man","type":"ObjProp"}
+{"features":" {score:1.35} ","formula":"!property:birthPlace","lexeme":"birth place","type":"DataProp"}
+{"features":" {score:0.3561589440194572} ","formula":"!dbpedia:field","lexeme":"field","type":"ObjectProp"}
+{"features":" {score:0.03358799127801772} ","formula":"!property:researcher","lexeme":"researcher","type":"ObjProp"}
+{"features":" {score:1.001054852320675} ","formula":"resource:Nikola_Tesla","lexeme":"nikola tesla","type":"NamedEntity"}
+{"features":" {score:0.0635535902553989} ","formula":"!property:man","lexeme":"man","type":"DataProp"}
+{"features":" {score:0.11463414634146342} ","formula":"property:datum","lexeme":"datum","type":"DataProp"}
+{"features":" {score:0.11463414634146342} ","formula":"property:datum","lexeme":"datum","type":"ObjProp"}
+{"features":" {score:0.17193125846182428} ","formula":"property:attribute","lexeme":"attribute","type":"ObjProp"}
+{"features":" {score:0.21163995178734385} ","formula":"property:information","lexeme":"information","type":"ObjProp"}
+{"features":" {score:1.35} ","formula":"property:birthPlace","lexeme":"birth place","type":"DataProp"}
+{"features":" {score:0.0635535902553989} ","formula":"!property:man","lexeme":"man","type":"ObjProp"}
+{"features":" {score:0.03358799127801772} ","formula":"!property:researcher","lexeme":"researcher","type":"DataProp"}
+{"features":" {score:0.1329825673090375} ","formula":"resource:Elgar_Birthplace_Museum","lexeme":"elgar birthplace museum","type":"NamedEntity"}
+{"features":" {score:0.33392169999296656} ","formula":"resource:Belgrade_Nikola_Tesla_Airport","lexeme":"belgrade nikola tesla airport","type":"NamedEntity"}
+{"features":" {score:0.17193125846182428} ","formula":"!property:attribute","lexeme":"attribute","type":"ObjProp"}
+{"features":" {score:0.04193548387096774} ","formula":"!property:inventor","lexeme":"inventor","type":"DataProp"}
+{"features":" {score:0.11463414634146342} ","formula":"!property:datum","lexeme":"datum","type":"DataProp"}
+{"features":" {score:0.03358799127801772} ","formula":"property:researcher","lexeme":"researcher","type":"DataProp"}
+{"features":" {score:0.21163995178734385} ","formula":"!property:information","lexeme":"information","type":"DataProp"}
+{"features":" {score:0.04193548387096774} ","formula":"!property:inventor","lexeme":"inventor","type":"ObjProp"}
+{"features":" {score:0.15615894401945718} ","formula":"property:field","lexeme":"field","type":"ObjProp"}
+{"features":" {score:1.55} ","formula":"!dbpedia:birthPlace","lexeme":"birth place","type":"ObjectProp"}
+{"features":" {score:0.31766050635573734} ","formula":"resource:Nikola_Tesla_Museum","lexeme":"nikola tesla museum","type":"NamedEntity"}
+{"features":" {score:0.04193548387096774} ","formula":"property:inventor","lexeme":"inventor","type":"DataProp"}
+{"features":" {score:0.33157767141670114} ","formula":"resource:List_of_Nikola_Tesla_patents","lexeme":"list of nikola tesla patents","type":"NamedEntity"}
+{"features":" {score:0.15615894401945718} ","formula":"property:field","lexeme":"field","type":"DataProp"}
+{"features":" {score:0.09456521739130434} ","formula":"resource:Domrémy-la-Pucelle","lexeme":"domrémy-la-pucelle","type":"NamedEntity"}
+{"features":" {score:0.0635535902553989} ","formula":"property:man","lexeme":"man","type":"DataProp"}
+{"features":" {score:0.21163995178734385} ","formula":"property:information","lexeme":"information","type":"DataProp"}
+{"features":" {score:0.15615894401945718} ","formula":"!property:field","lexeme":"field","type":"DataProp"}
