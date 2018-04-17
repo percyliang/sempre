@@ -1,0 +1,100 @@
+"death place"; http://dbpedia.org/ontology/deathPlace
+"birth place"; http://dbpedia.org/ontology/birthPlace
+"academic advisor"; http://dbpedia.org/ontology/academicAdvisor
+"academic discipline"; http://dbpedia.org/ontology/academicDiscipline
+"Academy Award"; http://dbpedia.org/ontology/academyAward
+"achievement"; http://dbpedia.org/ontology/achievement
+"ACT score"; http://dbpedia.org/ontology/actScore
+"acting headteacher"; http://dbpedia.org/ontology/actingHeadteacher
+"activity"; http://dbpedia.org/ontology/activity
+"address in road"; http://dbpedia.org/ontology/addressInRoad
+"adjacent settlement of a switzerland settlement"; http://dbpedia.org/ontology/adjacentSettlement
+"administrative center"; http://dbpedia.org/ontology/administrativeCenter
+"administrative collectivity"; http://dbpedia.org/ontology/administrativeCollectivity
+"administrative district"; http://dbpedia.org/ontology/administrativeDistrict
+"head city"; http://dbpedia.org/ontology/administrativeHeadCity
+"administrator"; http://dbpedia.org/ontology/administrator
+"affiliation"; http://dbpedia.org/ontology/affiliation
+"AFI Award"; http://dbpedia.org/ontology/afiAward
+"agency"; http://dbpedia.org/ontology/agency
+"agglomeration"; http://dbpedia.org/ontology/agglomeration
+"agglomeration area"; http://dbpedia.org/ontology/agglomerationArea
+"agglomeration demographics"; http://dbpedia.org/ontology/agglomerationDemographics
+"agglomeration population"; http://dbpedia.org/ontology/agglomerationPopulation
+"aircraft attack"; http://dbpedia.org/ontology/aircraftAttack
+"aircraft bomber"; http://dbpedia.org/ontology/aircraftBomber
+"aircraft electronic"; http://dbpedia.org/ontology/aircraftElectronic
+"aircraft fighter"; http://dbpedia.org/ontology/aircraftFighter
+"aircraft helicopter"; http://dbpedia.org/ontology/aircraftHelicopter
+"aircraft helicopter attack"; http://dbpedia.org/ontology/aircraftHelicopterAttack
+"aircraft helicopter cargo"; http://dbpedia.org/ontology/aircraftHelicopterCargo
+"aircraft helicopter multirole"; http://dbpedia.org/ontology/aircraftHelicopterMultirole
+"aircraft helicopter observation"; http://dbpedia.org/ontology/aircraftHelicopterObservation
+"aircraft helicopter transport"; http://dbpedia.org/ontology/aircraftHelicopterTransport
+"aircraft helicopter utility"; http://dbpedia.org/ontology/aircraftHelicopterUtility
+"aircraft interceptor"; http://dbpedia.org/ontology/aircraftInterceptor
+"aircraft patrol"; http://dbpedia.org/ontology/aircraftPatrol
+"aircraft recon"; http://dbpedia.org/ontology/aircraftRecon
+"aircraft trainer"; http://dbpedia.org/ontology/aircraftTrainer
+"aircraft transport"; http://dbpedia.org/ontology/aircraftTransport
+"aircraft user"; http://dbpedia.org/ontology/aircraftUser
+"album"; http://dbpedia.org/ontology/album
+"alliance"; http://dbpedia.org/ontology/alliance
+"alma mater"; http://dbpedia.org/ontology/almaMater
+"alongside"; http://dbpedia.org/ontology/alongside
+"Alps group"; http://dbpedia.org/ontology/alpsGroup
+"Alps main part"; http://dbpedia.org/ontology/alpsMainPart
+"Alps major sector"; http://dbpedia.org/ontology/alpsMajorSector
+"Alps section"; http://dbpedia.org/ontology/alpsSection
+"Alps subgroup"; http://dbpedia.org/ontology/alpsSubgroup
+"Alps subsection"; http://dbpedia.org/ontology/alpsSubsection
+"Alps supergroup"; http://dbpedia.org/ontology/alpsSupergroup
+"altitude"; http://dbpedia.org/ontology/altitude
+"alumni"; http://dbpedia.org/ontology/alumni
+"amateur team"; http://dbpedia.org/ontology/amateurTeam
+"American Comedy Award"; http://dbpedia.org/ontology/americanComedyAward
+"animal"; http://dbpedia.org/ontology/animal
+"animator"; http://dbpedia.org/ontology/animator
+"announcedFrom"; http://dbpedia.org/ontology/announcedFrom
+"anthem"; http://dbpedia.org/ontology/anthem
+"apc president"; http://dbpedia.org/ontology/apcPresident
+"appointer"; http://dbpedia.org/ontology/appointer
+"approach"; http://dbpedia.org/ontology/approach
+"archipelago"; http://dbpedia.org/ontology/archipelago
+"architect"; http://dbpedia.org/ontology/architect
+"architectual bureau"; http://dbpedia.org/ontology/architectualBureau
+"architectural style"; http://dbpedia.org/ontology/architecturalStyle
+"area of search"; http://dbpedia.org/ontology/areaOfSearch
+"Ariel Award"; http://dbpedia.org/ontology/arielAward
+"arrondissement"; http://dbpedia.org/ontology/arrondissement
+"patron (art)"; http://dbpedia.org/ontology/artPatron
+"artery"; http://dbpedia.org/ontology/artery
+"performer"; http://dbpedia.org/ontology/artist
+"Aspect Ratio"; http://dbpedia.org/ontology/aspectRatio
+"assembly"; http://dbpedia.org/ontology/assembly
+"assistant principal"; http://dbpedia.org/ontology/assistantPrincipal
+"associate"; http://dbpedia.org/ontology/associate
+"associate editor"; http://dbpedia.org/ontology/associateEditor
+"associateStar"; http://dbpedia.org/ontology/associateStar
+"associated act"; http://dbpedia.org/ontology/associatedAct
+"associated band"; http://dbpedia.org/ontology/associatedBand
+"associated musical artist"; http://dbpedia.org/ontology/associatedMusicalArtist
+"associated rocket"; http://dbpedia.org/ontology/associatedRocket
+"association of local government"; http://dbpedia.org/ontology/associationOfLocalGovernment
+"astrological sign"; http://dbpedia.org/ontology/astrologicalSign
+"athletics"; http://dbpedia.org/ontology/athletics
+"athletics discipline"; http://dbpedia.org/ontology/athleticsDiscipline
+"attorney general"; http://dbpedia.org/ontology/attorneyGeneral
+"author"; http://dbpedia.org/ontology/author
+"authority"; http://dbpedia.org/ontology/authority
+"automobile platform"; http://dbpedia.org/ontology/automobilePlatform
+"autonomy"; http://dbpedia.org/ontology/autonomy
+"available smart card"; http://dbpedia.org/ontology/availableSmartCard
+"award"; http://dbpedia.org/ontology/award
+"BAFTA Award"; http://dbpedia.org/ontology/baftaAward
+"band member"; http://dbpedia.org/ontology/bandMember
+"board";http://dbpedia.org/ontology/board
+"body discovered";http://dbpedia.org/ontology/bodyDiscovered
+"body style";http://dbpedia.org/ontology/bodyStyle
+"boiler";http://dbpedia.org/ontology/boiler
+"boiler pressure";http://dbpedia.org/ontology/boilerPressure

@@ -1,6 +1,6 @@
 package edu.stanford.nlp.sempre.roboy.error;
 
-import edu.stanford.nlp.sempre.roboy.UnspecInfo;
+import edu.stanford.nlp.sempre.roboy.UnderspecifiedInfo;
 
 /**
  * KnowledgeRetriever takes an underspecified term and applies various error-retrieval
@@ -15,5 +15,5 @@ public abstract class KnowledgeRetriever {
      *
      * @param underTerm   information about the candidates for underspecified term
      */
-    public abstract UnspecInfo analyze(UnspecInfo underTerm);
+    public abstract UnderspecifiedInfo analyze(UnderspecifiedInfo underTerm);
 }

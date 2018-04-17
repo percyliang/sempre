@@ -1,14 +1,16 @@
 package edu.stanford.nlp.sempre.roboy.error;
 
-import edu.stanford.nlp.sempre.roboy.UnspecInfo;
+import edu.stanford.nlp.sempre.roboy.UnderspecifiedInfo;
 import edu.stanford.nlp.sempre.roboy.config.ConfigManager;
 import edu.stanford.nlp.sempre.roboy.utils.SparqlUtils;
 
+import java.io.PrintWriter;
 import java.util.*;
 
 import edu.stanford.nlp.sempre.roboy.utils.XMLReader;
 
 import com.google.gson.Gson;
+import fig.basic.IOUtils;
 import fig.basic.LogInfo;
 
 /**
@@ -27,6 +29,8 @@ public class EntityRetriever extends KnowledgeRetriever {
 
     public static List<String> keywords = new ArrayList(); /**< List of keywords to extract from XML*/
 
+    public PrintWriter out;
+
     /**
      * Constructor
      */
@@ -34,6 +38,8 @@ public class EntityRetriever extends KnowledgeRetriever {
         try {
             endpointUrl = ConfigManager.DB_SEARCH;
             keywords = Arrays.asList(ConfigManager.DB_KEYWORDS);
+            out = IOUtils.openOutAppendHard("./data/error_test/dbLexicon.txt");
+
         }
         catch (Exception e) {
             throw new RuntimeException(e);
@@ -45,9 +51,9 @@ public class EntityRetriever extends KnowledgeRetriever {
      *
      * @param underTerm   information about the candidates for underspecified term
      */
-    public UnspecInfo analyze(UnspecInfo underTerm) {
+    public UnderspecifiedInfo analyze(UnderspecifiedInfo underTerm) {
         String entity = underTerm.term;
-        UnspecInfo result = new UnspecInfo(entity, underTerm.type);
+        UnderspecifiedInfo result = new UnderspecifiedInfo(entity, underTerm.type);
         String url = endpointUrl.concat(entity);
         url = url.replace(" ","_");
         SparqlUtils.ServerResponse response = sparqlUtil.makeRequest(url);
@@ -61,9 +67,10 @@ public class EntityRetriever extends KnowledgeRetriever {
             c.put("Label",label.toLowerCase());
             result.candidates.add(c.get("URI"));
             result.candidatesInfo.add(this.gson.toJson(c));
-            if (ConfigManager.DEBUG > 3){
+            if (ConfigManager.DEBUG > 3) {
                 LogInfo.logs("Entity candidate: %s", c.toString());
             }
+            out.println(c.toString());
         }
         return result;
     }

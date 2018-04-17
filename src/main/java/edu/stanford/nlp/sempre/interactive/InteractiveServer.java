@@ -296,7 +296,7 @@ public class InteractiveServer {
         if (session.isLogging()) {
           logLine(opts.responseLogPath, Json.writeValueAsStringHard(jsonMap));
           if (!Strings.isNullOrEmpty(opts.fullResponseLogPath)) {
-            jsonMap.put("candidates", responseMap.get("candidates"));
+            jsonMap.put("candidates", responseMap.get("candidates").toString());
             logLine(opts.fullResponseLogPath, Json.writeValueAsStringHard(jsonMap));
           }
         } else {

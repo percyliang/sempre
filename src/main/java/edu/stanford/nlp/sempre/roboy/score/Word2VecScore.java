@@ -2,9 +2,8 @@ package edu.stanford.nlp.sempre.roboy.score;
 
 import com.google.gson.Gson;
 import edu.stanford.nlp.sempre.ContextValue;
-import edu.stanford.nlp.sempre.roboy.UnspecInfo;
+import edu.stanford.nlp.sempre.roboy.UnderspecifiedInfo;
 import edu.stanford.nlp.sempre.roboy.config.ConfigManager;
-import edu.stanford.nlp.sempre.roboy.ErrorInfo;
 import edu.stanford.nlp.sempre.roboy.lexicons.word2vec.Word2vec;
 import fig.basic.LogInfo;
 
@@ -37,11 +36,11 @@ public class Word2VecScore extends ScoringFunction {
 
     /**
      * Scoring function.
-     * Takes ErrorInfo as well as ContextValue objects and calculates score of each
+     * Takes UnderspecifiedInfo as well as ContextValue objects and calculates score of each
      * candidate for unknown terms.
      */
-    public UnspecInfo score(UnspecInfo info, ContextValue context){
-        UnspecInfo result = new UnspecInfo(info.term, info.type);
+    public UnderspecifiedInfo score(UnderspecifiedInfo info, ContextValue context){
+        UnderspecifiedInfo result = new UnderspecifiedInfo(info.term, info.type);
         result.candidates = info.candidates;
         result.candidatesInfo = info.candidatesInfo;
         // Check for all candidates for checked unknown term
@@ -70,36 +69,4 @@ public class Word2VecScore extends ScoringFunction {
         }
         return result;
     }
-    /**
-     * Scoring function.
-     * Takes ErrorInfo as well as ContextValue objects and calculates score of each
-     * candidate for unknown terms.
-     */
-    public ErrorInfo score(ErrorInfo errorInfo, ContextValue context){
-        ErrorInfo result = new ErrorInfo();
-        result.setScored(new HashMap<>());
-        result.setCandidates(errorInfo.getCandidates());
-        result.setFollowUps(errorInfo.getFollowUps());
-        // Check for all unknown terms
-        for (String key: result.getCandidates().keySet()){
-            Map<String, Double> key_scores = new HashMap<>();
-            List<String> candidates = result.getCandidates().get(key);
-            // Check for all candidates for checked unknown term
-            for (String candidate: candidates){
-                Map<String, String> c = new HashMap<>();
-                c = gson.fromJson(candidate, c.getClass());
-                // Check similarity
-                double score = this.vec.getSimilarity(key, c.get("Label"));
-                if (Double.isNaN(score))
-                    score = 0.0;
-
-                if (ConfigManager.DEBUG > 5)
-                    LogInfo.logs("Word2Vec: %s , %s -> %s", key, c.get("Label"), c.get("Refcount"));
-                key_scores.put(candidate,score*this.weight);
-            }
-            result.getScored().put(key,key_scores);
-        }
-        return result;
-    }
-
 }

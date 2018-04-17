@@ -1,17 +1,17 @@
 package edu.stanford.nlp.sempre.roboy.error;
 
-import edu.stanford.nlp.sempre.Derivation;
-import edu.stanford.nlp.sempre.roboy.UnspecInfo;
+import edu.stanford.nlp.sempre.roboy.UnderspecifiedInfo;
 import edu.stanford.nlp.sempre.roboy.config.ConfigManager;
-import edu.stanford.nlp.sempre.roboy.ErrorInfo;
 import edu.stanford.nlp.sempre.roboy.utils.SparqlUtils;
 
+import java.io.PrintWriter;
 import java.util.*;
 
 import java.lang.reflect.Type;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import edu.stanford.nlp.sempre.roboy.utils.XMLReader;
+import fig.basic.IOUtils;
 import fig.basic.LogInfo;
 
 /**
@@ -30,6 +30,7 @@ public class MCGRetriever extends KnowledgeRetriever {
 
     public static String dbpediaUrl = new String();     /**< Endpoint URL for DBpedia*/
 
+    public PrintWriter out;
     /**
      * Constructor
      */
@@ -37,6 +38,7 @@ public class MCGRetriever extends KnowledgeRetriever {
         try {
             endpointUrl = ConfigManager.MCG_SEARCH;
             dbpediaUrl = ConfigManager.DB_SPARQL;
+            out = IOUtils.openOutAppendHard("./data/error_test/mcgLexicon.txt");
         }
         catch (Exception e) {
             throw new RuntimeException(e);
@@ -48,9 +50,9 @@ public class MCGRetriever extends KnowledgeRetriever {
      *
      * @param underTerm   information about the candidates for underspecified term
      */
-    public UnspecInfo analyze(UnspecInfo underTerm) {
+    public UnderspecifiedInfo analyze(UnderspecifiedInfo underTerm) {
         String entity = underTerm.term;
-        UnspecInfo result = new UnspecInfo(entity, underTerm.type);
+        UnderspecifiedInfo result = new UnderspecifiedInfo(entity, underTerm.type);
         String url = (endpointUrl.concat(entity.replace(" ","+"))).concat("&topK=10");
         SparqlUtils.ServerResponse response = sparqlUtil.makeRequest(url);
         Type t = new TypeToken<Map<String, String>>(){}.getType();
@@ -71,6 +73,7 @@ public class MCGRetriever extends KnowledgeRetriever {
                         if (ConfigManager.DEBUG > 3){
                             LogInfo.logs("MCG candidate: %s", single.toString());
                         }
+                        out.println(single.toString());
                     }
                 }
             }

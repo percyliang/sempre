@@ -1,0 +1,100 @@
+"death date";http://dbpedia.org/ontology/deathDate
+"birth date";http://dbpedia.org/ontology/birthDate
+"Wikipage page ID";http://dbpedia.org/ontology/wikiPageID
+"Wikipage revision ID";http://dbpedia.org/ontology/wikiPageRevisionID
+"total time person has spent in space (m)";http://dbpedia.org/ontology/Astronaut/timeInSpace
+"fuel capacity (l)";http://dbpedia.org/ontology/Automobile/fuelCapacity
+"wheelbase (mm)";http://dbpedia.org/ontology/Automobile/wheelbase
+"floor area (m2)";http://dbpedia.org/ontology/Building/floorArea
+"boiling point (K)";http://dbpedia.org/ontology/ChemicalSubstance/boilingPoint
+"melting point (K)";http://dbpedia.org/ontology/ChemicalSubstance/meltingPoint
+"diameter (μ)";http://dbpedia.org/ontology/ConveyorSystem/diameter
+"height (mm)";http://dbpedia.org/ontology/ConveyorSystem/height
+"length (mm)";http://dbpedia.org/ontology/ConveyorSystem/length
+"mass (kg)";http://dbpedia.org/ontology/ConveyorSystem/mass
+"weight (kg)";http://dbpedia.org/ontology/ConveyorSystem/weight
+"width (mm)";http://dbpedia.org/ontology/ConveyorSystem/width
+"boiling point (K)";http://dbpedia.org/ontology/Drug/boilingPoint
+"melting point (K)";http://dbpedia.org/ontology/Drug/meltingPoint
+"acceleration (s)";http://dbpedia.org/ontology/Engine/acceleration
+"CO2 emission (g/km)";http://dbpedia.org/ontology/Engine/co2Emission
+"cylinder bore (mm)";http://dbpedia.org/ontology/Engine/cylinderBore
+"diameter (mm)";http://dbpedia.org/ontology/Engine/diameter
+"displacement (cc)";http://dbpedia.org/ontology/Engine/displacement
+"height (mm)";http://dbpedia.org/ontology/Engine/height
+"length (mm)";http://dbpedia.org/ontology/Engine/length
+"piston stroke (mm)";http://dbpedia.org/ontology/Engine/pistonStroke
+"power output (kW)";http://dbpedia.org/ontology/Engine/powerOutput
+"top speed (kmh)";http://dbpedia.org/ontology/Engine/topSpeed
+"torque output (Nm)";http://dbpedia.org/ontology/Engine/torqueOutput
+"weight (kg)";http://dbpedia.org/ontology/Engine/weight
+"width (mm)";http://dbpedia.org/ontology/Engine/width
+"diameter (μ)";http://dbpedia.org/ontology/Escalator/diameter
+"height (mm)";http://dbpedia.org/ontology/Escalator/height
+"length (mm)";http://dbpedia.org/ontology/Escalator/length
+"mass (kg)";http://dbpedia.org/ontology/Escalator/mass
+"weight (kg)";http://dbpedia.org/ontology/Escalator/weight
+"width (mm)";http://dbpedia.org/ontology/Escalator/width
+"apoapsis (km)";http://dbpedia.org/ontology/Galaxy/apoapsis
+"average speed (km/s)";http://dbpedia.org/ontology/Galaxy/averageSpeed
+"mass (kg)";http://dbpedia.org/ontology/Galaxy/mass
+"maximum temperature (K)";http://dbpedia.org/ontology/Galaxy/maximumTemperature
+"mean radius (km)";http://dbpedia.org/ontology/Galaxy/meanRadius
+"mean temperature (K)";http://dbpedia.org/ontology/Galaxy/meanTemperature
+"minimum temperature (K)";http://dbpedia.org/ontology/Galaxy/minimumTemperature
+"orbital period (μ)";http://dbpedia.org/ontology/Galaxy/orbitalPeriod
+"periapsis (km)";http://dbpedia.org/ontology/Galaxy/periapsis
+"surface area (km2)";http://dbpedia.org/ontology/Galaxy/surfaceArea
+"temperature (K)";http://dbpedia.org/ontology/Galaxy/temperature
+"volume (km3)";http://dbpedia.org/ontology/Galaxy/volume
+"area metro (km2)";http://dbpedia.org/ontology/GeopoliticalOrganisation/areaMetro
+"population density (/sqkm)";http://dbpedia.org/ontology/GeopoliticalOrganisation/populationDensity
+"course (km)";http://dbpedia.org/ontology/GrandPrix/course
+"distance (km)";http://dbpedia.org/ontology/GrandPrix/distance
+"length (km)";http://dbpedia.org/ontology/Infrastructure/length
+"area of catchment (km2)";http://dbpedia.org/ontology/Lake/areaOfCatchment
+"shore length (km)";http://dbpedia.org/ontology/Lake/shoreLength
+"diameter (km)";http://dbpedia.org/ontology/LunarCrater/diameter
+"height (mm)";http://dbpedia.org/ontology/MeanOfTransportation/height
+"length (mm)";http://dbpedia.org/ontology/MeanOfTransportation/length
+"mass (kg)";http://dbpedia.org/ontology/MeanOfTransportation/mass
+"weight (kg)";http://dbpedia.org/ontology/MeanOfTransportation/weight
+"width (mm)";http://dbpedia.org/ontology/MeanOfTransportation/width
+"height (mm)";http://dbpedia.org/ontology/MovingWalkway/height
+"length (mm)";http://dbpedia.org/ontology/MovingWalkway/length
+"mass (kg)";http://dbpedia.org/ontology/MovingWalkway/mass
+"weight (kg)";http://dbpedia.org/ontology/MovingWalkway/weight
+"width (mm)";http://dbpedia.org/ontology/MovingWalkway/width
+"height (mm)";http://dbpedia.org/ontology/On-SiteTransportation/height
+"length (mm)";http://dbpedia.org/ontology/On-SiteTransportation/length
+"mass (kg)";http://dbpedia.org/ontology/On-SiteTransportation/mass
+"weight (kg)";http://dbpedia.org/ontology/On-SiteTransportation/weight
+"width (mm)";http://dbpedia.org/ontology/On-SiteTransportation/width
+"height (cm)";http://dbpedia.org/ontology/Person/height
+"weight (kg)";http://dbpedia.org/ontology/Person/weight
+"apoapsis (km)";http://dbpedia.org/ontology/Planet/apoapsis
+"average speed (km/s)";http://dbpedia.org/ontology/Planet/averageSpeed
+"mass (kg)";http://dbpedia.org/ontology/Planet/mass
+"maximum temperature (K)";http://dbpedia.org/ontology/Planet/maximumTemperature
+"mean radius (km)";http://dbpedia.org/ontology/Planet/meanRadius
+"mean temperature (K)";http://dbpedia.org/ontology/Planet/meanTemperature
+"minimum temperature (K)";http://dbpedia.org/ontology/Planet/minimumTemperature
+"periapsis (km)";http://dbpedia.org/ontology/Planet/periapsis
+"surface area (km2)";http://dbpedia.org/ontology/Planet/surfaceArea
+"temperature (K)";http://dbpedia.org/ontology/Planet/temperature
+"volume (km3)";http://dbpedia.org/ontology/Planet/volume
+"area (km2)";http://dbpedia.org/ontology/PopulatedPlace/area
+"area metro (km2)";http://dbpedia.org/ontology/PopulatedPlace/areaMetro
+"area total (km2)";http://dbpedia.org/ontology/PopulatedPlace/areaTotal
+"area urban (km2)";http://dbpedia.org/ontology/PopulatedPlace/areaUrban
+"population density (/sqkm)";http://dbpedia.org/ontology/PopulatedPlace/populationDensity
+"population metro density (/sqkm)";http://dbpedia.org/ontology/PopulatedPlace/populationMetroDensity
+"population urban density (/sqkm)";http://dbpedia.org/ontology/PopulatedPlace/populationUrbanDensity
+"lower earth orbit payload (kg)";http://dbpedia.org/ontology/Rocket/lowerEarthOrbitPayload
+"mass (kg)";http://dbpedia.org/ontology/Rocket/mass
+"campus size (km2)";http://dbpedia.org/ontology/School/campusSize
+"size (MB)";http://dbpedia.org/ontology/Software/fileSize
+"distance traveled (km)";http://dbpedia.org/ontology/SpaceMission/distanceTraveled
+"lunar sample mass (kg)";http://dbpedia.org/ontology/SpaceMission/lunarSampleMass
+"mass (kg)";http://dbpedia.org/ontology/SpaceMission/mass
+"distance (km)";http://dbpedia.org/ontology/SpaceShuttle/distance

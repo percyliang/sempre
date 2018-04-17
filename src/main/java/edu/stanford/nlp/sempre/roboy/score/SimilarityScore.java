@@ -2,7 +2,7 @@ package edu.stanford.nlp.sempre.roboy.score;
 
 import com.google.gson.Gson;
 import edu.stanford.nlp.sempre.ContextValue;
-import edu.stanford.nlp.sempre.roboy.UnspecInfo;
+import edu.stanford.nlp.sempre.roboy.UnderspecifiedInfo;
 import edu.stanford.nlp.sempre.roboy.config.ConfigManager;
 import edu.stanford.nlp.sempre.roboy.lexicons.word2vec.Word2vec;
 import fig.basic.LogInfo;
@@ -37,11 +37,11 @@ public class SimilarityScore extends ScoringFunction {
 
     /**
      * Scoring function.
-     * Takes ErrorInfo as well as ContextValue objects and calculates score of each
+     * Takes UnderspecifiedInfo as well as ContextValue objects and calculates score of each
      * candidate for unknown terms.
      */
-    public UnspecInfo score(UnspecInfo info, ContextValue context){
-        UnspecInfo result = new UnspecInfo(info.term, info.type);
+    public UnderspecifiedInfo score(UnderspecifiedInfo info, ContextValue context){
+        UnderspecifiedInfo result = new UnderspecifiedInfo(info.term, info.type);
         result.candidates = info.candidates;
         result.candidatesInfo = info.candidatesInfo;
         // Check for all candidates for checked unknown term

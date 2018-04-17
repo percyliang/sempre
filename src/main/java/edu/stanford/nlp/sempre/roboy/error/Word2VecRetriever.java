@@ -1,13 +1,15 @@
 package edu.stanford.nlp.sempre.roboy.error;
 
 import edu.stanford.nlp.sempre.SimpleLexicon;
-import edu.stanford.nlp.sempre.roboy.UnspecInfo;
+import edu.stanford.nlp.sempre.roboy.UnderspecifiedInfo;
 import edu.stanford.nlp.sempre.roboy.config.ConfigManager;
 import edu.stanford.nlp.sempre.roboy.lexicons.word2vec.Word2vec;
 
+import java.io.PrintWriter;
 import java.util.*;
 
 import com.google.gson.Gson;
+import fig.basic.IOUtils;
 import fig.basic.LogInfo;
 
 /**
@@ -20,11 +22,13 @@ public class Word2VecRetriever extends KnowledgeRetriever {
 
     private Word2vec vec;                                   /**< Word2Vec model link*/
 
+    public PrintWriter out;
     /**
      * Constructor
      */
     public Word2VecRetriever(Word2vec vec){
         this.vec = vec;
+        out = IOUtils.openOutAppendHard("./data/error_test/w2vLexicon.txt");
     }
 
     /**
@@ -32,9 +36,9 @@ public class Word2VecRetriever extends KnowledgeRetriever {
      *
      * @param underTerm   information about the candidates for underspecified term
      */
-    public UnspecInfo analyze(UnspecInfo underTerm) {
+    public UnderspecifiedInfo analyze(UnderspecifiedInfo underTerm) {
         String entity = underTerm.term;
-        UnspecInfo result = new UnspecInfo(entity, underTerm.type);
+        UnderspecifiedInfo result = new UnderspecifiedInfo(entity, underTerm.type);
         List<String> known_words= new ArrayList<String>(SimpleLexicon.getSingleton().lookup_type(entity));
         List<String> candidate = this.vec.getBest(entity,known_words);
         for (String c: candidate){
@@ -48,6 +52,8 @@ public class Word2VecRetriever extends KnowledgeRetriever {
                 result.candidatesInfo.add(this.gson.toJson(record));
                 if (ConfigManager.DEBUG > 3)
                     LogInfo.logs("Word2Vec: %s",record.toString());
+
+                out.println(record.toString());
             }
         }
         return result;

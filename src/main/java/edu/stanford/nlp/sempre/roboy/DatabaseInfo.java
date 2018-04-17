@@ -34,9 +34,6 @@ public final class DatabaseInfo {
   }
 
   public static class Options {
-    @Option(gloss = "ttl file with schema information")
-    public String schemaPath; //"lib/fb_data/93.exec/schema2.ttl";
-
     public static String defaultDB; //"lib/fb_data/93.exec/schema2.ttl";
 
     public static void setDefault(String formula){
@@ -81,110 +78,12 @@ public final class DatabaseInfo {
 
   private DatabaseInfo() {
     try {
-      opts.schemaPath = ConfigManager.SCHEMA_FILE;
       glossary = ConfigManager.DB_GLOSSARY;
       mapTypes = ConfigManager.DB_TYPES;
     }
     catch (Exception e) {
       throw new RuntimeException(e);
     }
-    try {
-      readSchema();
-    } catch (NumberFormatException e) {
-      throw new RuntimeException(e);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  /**
-   * Go over schema twice - once to populate all fields except descriptions, the second time we populate descriptions after we now what
-   * are the properties we are interested in
-   * @throws NumberFormatException
-   * @throws IOException
-   */
-  // TODO: Rewrite
-  public void readSchema() throws IOException {
-    LogInfo.begin_track("Loading Database schema: %s", opts.schemaPath);
-    BufferedReader in = IOUtils.openInHard(opts.schemaPath);
-
-    // Include mediator types
-    SemTypeHierarchy.singleton.addSupertype(getType("fb:","CVT"), getType("fb:","CVT"));
-    SemTypeHierarchy.singleton.addSupertype(getType("fb:","CVT"), getType("fb:","ANY"));
-
-    String line;
-    while ((line = in.readLine()) != null) {
-      String[] tokens = edu.stanford.nlp.sempre.roboy.Utils.parseTriple(line);
-      if (tokens == null) continue;
-      String arg1 = tokens[0];
-      String property = tokens[1];
-      String arg2 = tokens[2];
-
-      if (property.equals("fb:type.property.reverse_property")) {  // reverse_property => opposite_property
-        // Duplicates logically really shouldn't happen but the Database RDF
-        // reverse properties are not 1:1.  We should monitor this and make
-        // sure we don't lose any alignments.
-        if (masterToOppositeMap.containsKey(arg1)) {
-          // LogInfo.errors("arg1 exists multiple times: %s", line);
-          continue;
-        }
-        if (masterToOppositeMap.inverse().containsKey(arg2)) {
-          // LogInfo.errors("arg2 exists multiple times: %s", line);
-          continue;
-        }
-        masterToOppositeMap.put(arg1, arg2);
-      } else if (property.equals("fb:freebase.type_hints.included_types")) {  // included_types => supertypes
-        SemTypeHierarchy.singleton.addSupertype(arg1, arg2);
-        SemTypeHierarchy.singleton.addEntitySupertypes(arg1);
-        SemTypeHierarchy.singleton.addEntitySupertypes(arg2);
-      } else if (property.equals("fb:freebase.type_hints.mediator")) {  // mediator => cvt
-        if (arg2.equals("\"true\"^^xsd:boolean")) cvts.add(arg1);
-        else if (arg2.equals("\"false\"^^xsd:boolean")) cvts.remove(arg1);
-        else throw new RuntimeException("Invalid xsd:boolean: " + arg2);
-      } else if (property.equals("fb:type.property.schema")) {  // schema => type1
-        if (type1Map.containsKey(arg1))
-          LogInfo.errors("%s already has type1 %s, assigning %s", arg1, type1Map.get(arg1), arg2);
-        type1Map.put(arg1, arg2);
-      } else if (property.equals("fb:type.property.expected_type")) {  // expected_type => type2
-        if (type2Map.containsKey(arg1))
-          LogInfo.errors("%s already has type2 %s, assigning %s", arg1, type2Map.get(arg1), arg2);
-        type2Map.put(arg1, arg2);
-      } else if (property.equals("fb:type.property.unit")) {
-        unit2Map.put(arg1, arg2);
-      } else if (property.equals("fb:user.custom.type.property.num_instances")) {
-        bPopularityMap.put(arg1, edu.stanford.nlp.sempre.roboy.Utils.parseInt(arg2));
-      } else if (property.equals("fb:user.custom.people.person.profession.num_instances")) {
-        professionPopularityMap.put(arg1, edu.stanford.nlp.sempre.roboy.Utils.parseInt(arg2));
-      } else if (property.equals("fb:user.custom.type.object.type.num_instances")) {
-        typePopularityMap.put(arg1, edu.stanford.nlp.sempre.roboy.Utils.parseInt(arg2));
-      }
-    }
-    in.close();
-
-    // Second iteration - populate descriptions assumes all properties have the fb:type.property.num_instances field
-    in = IOUtils.openInHard(opts.schemaPath);
-    while ((line = in.readLine()) != null) {
-      String[] tokens = edu.stanford.nlp.sempre.roboy.Utils.parseTriple(line);
-      if (tokens == null) continue;
-      String arg1 = tokens[0];
-      String property = tokens[1];
-      String arg2 = tokens[2];
-
-      if (property.equals(getType("fb:","NAME")) || property.equals(getType("fb:","ALIAS"))) {
-        if (bPopularityMap.containsKey(arg1)) {
-          MapUtils.addToList(bDescriptionsMap, arg1, edu.stanford.nlp.sempre.roboy.Utils.parseStr(arg2).toLowerCase());
-        } else if (professionPopularityMap.containsKey(arg1)) {
-          MapUtils.addToList(professionDescriptionsMap, arg1, edu.stanford.nlp.sempre.roboy.Utils.parseStr(arg2).toLowerCase());
-        } else if (typePopularityMap.containsKey(arg1)) {
-          MapUtils.addToList(typeDescriptionsMap, arg1, edu.stanford.nlp.sempre.roboy.Utils.parseStr(arg2).toLowerCase());
-        }
-      }
-
-      if (property.equals(getType("fb:","NAME")))
-        nameMap.put(arg1, edu.stanford.nlp.sempre.roboy.Utils.parseStr(arg2));
-    }
-    LogInfo.logs("%d CVTs, (%d,%d) property types, %d property units", cvts.size(), type1Map.size(), type2Map.size(), unit2Map.size());
-    LogInfo.end_track();
   }
 
   public Map<Formula, BinaryFormulaInfo> createBinaryFormulaInfoMap() {

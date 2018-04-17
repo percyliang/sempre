@@ -1,13 +1,15 @@
 package edu.stanford.nlp.sempre.roboy.error;
 
 import com.google.gson.Gson;
-import edu.stanford.nlp.sempre.roboy.UnspecInfo;
+import edu.stanford.nlp.sempre.roboy.UnderspecifiedInfo;
 import edu.stanford.nlp.sempre.roboy.config.ConfigManager;
 import edu.stanford.nlp.sempre.roboy.utils.SparqlUtils;
 import edu.stanford.nlp.sempre.roboy.utils.XMLReader;
+import fig.basic.IOUtils;
 import fig.basic.LogInfo;
 import org.apache.commons.lang.WordUtils;
 
+import java.io.PrintWriter;
 import java.util.*;
 
 /**
@@ -24,12 +26,14 @@ public class LabelRetriever extends KnowledgeRetriever {
 
     public static String endpointUrl = new String();    /**< Endpoint URL */
 
+    public PrintWriter out;
     /**
      * Constructor
      */
     public LabelRetriever(){
         try {
             endpointUrl = ConfigManager.DB_SPARQL;
+            out = IOUtils.openOutAppendHard("./data/error_test/lbLexicon.txt");
         }
         catch (Exception e) {
             throw new RuntimeException(e);
@@ -41,9 +45,9 @@ public class LabelRetriever extends KnowledgeRetriever {
      *
      * @param underTerm   information about the candidates for underspecified term
      */
-    public UnspecInfo analyze(UnspecInfo underTerm) {
+    public UnderspecifiedInfo analyze(UnderspecifiedInfo underTerm) {
         String entity = underTerm.term;
-        UnspecInfo result = new UnspecInfo(entity, underTerm.type);
+        UnderspecifiedInfo result = new UnderspecifiedInfo(entity, underTerm.type);
         // Extract the results from XML now.
         Set<String> uri = sparqlUtil.returnURI(entity, endpointUrl, false);
         Set<String> uri_cap = sparqlUtil.returnURI( WordUtils.capitalize(entity), endpointUrl, false);
@@ -69,6 +73,7 @@ public class LabelRetriever extends KnowledgeRetriever {
                         if (ConfigManager.DEBUG > 3){
                             LogInfo.logs("Label candidate: %s", single.toString());
                         }
+                        out.println(single.toString());
                     }
                 }
             }

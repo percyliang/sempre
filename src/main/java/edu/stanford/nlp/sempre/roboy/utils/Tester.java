@@ -70,11 +70,12 @@ public class Tester {
         Tester test = new Tester(5000);
         try {
             PrintWriter writer = new PrintWriter("log-webq.txt", "UTF-8");
-            JsonReader reader = new JsonReader(new FileReader("./data/rpqa/rpqa-test.json"));
+            JsonReader reader = new JsonReader(new FileReader("./data/rpqa/Q/rpqa-test-q.json"));
             Type type = new TypeToken<List<Map<String, String>>>() {
             }.getType();
             Gson gson = new Gson();
             List<Map<String, String>> testSet = gson.fromJson(reader, type);
+            //test.query("(reload resources/roboy-final.grammar)");
             long time = System.nanoTime();
             for (Map<String, String> entry : testSet) {
                 String response = test.query(entry.get("utterance"));
