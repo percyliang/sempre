@@ -81,7 +81,7 @@
 )
 #(rule $ROOT ($PHRASE) (OpenTypeFn type))
 #(rule $ROOT ($PHRASE) (OpenTypeFn relation))
-(rule $ROOT ($PHRASE) (OpenTypeFn entity))
+#(rule $ROOT ($PHRASE) (OpenTypeFn entity))
 #(rule $ROOT ($PHRASE) (SimpleLexiconFn (type "NamedEntity")))
 
 ## Forming Subject

@@ -33,7 +33,7 @@ public class LexiconGenerator {
             if (ConfigManager.DEBUG > 0)
                 LogInfo.logs("New lexeme added: %s",lexeme);
             out.println(lexeme);
-            SimpleLexicon.getSingleton().add(lexeme);
+//            SimpleLexicon.getSingleton().add(lexeme);
         }
         out.close();
     }

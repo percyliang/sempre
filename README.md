@@ -28,7 +28,7 @@ mvn clean
 mvn install
 ```
 
-# Word2Vec Model
+## Word2Vec Model
 Small model for parser has to be manually downloaded from [this link](https://drive.google.com/uc?export=download&confirm&id=1LVOKk7KnDIJphkHRZDa5fDm7ffIcS_Yz) and put it in data/word2vec.
 Other models:
 [google_model](https://s3.amazonaws.com/dl4j-distribution/GoogleNews-vectors-negative300.bin.gz)
@@ -42,13 +42,13 @@ To run SEMPRE with Roboy grammar in interactive mode (from command line):
 mvn exec:java@interactive -Dexec.mainClass=edu.stanford.nlp.sempre.Main
 ```
 
-To run SEMPRE with Roboy grammar in socket mode (port 5000):
+To run SEMPRE with Roboy grammar in socket mode (port 5000) WITHOUT error retrieval:
 ```
 mvn exec:java@demo -Dexec.mainClass=edu.stanford.nlp.sempre.Main
 ```
-To run SEMPRE with Roboy grammar in socket mode (port 5000) with training:
+To run SEMPRE with Roboy grammar in socket mode (port 5000) WITH error retrieval:
 ```
-mvn exec:java@test -Dexec.mainClass=edu.stanford.nlp.sempre.Main
+mvn exec:java@demo-error -Dexec.mainClass=edu.stanford.nlp.sempre.Main
 ```
 
 To run SEMPRE with Roboy grammar in web server mode:

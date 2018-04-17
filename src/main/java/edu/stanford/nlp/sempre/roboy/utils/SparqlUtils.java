@@ -95,8 +95,8 @@ public class SparqlUtils {
         try {
             String url = String.format("%s?default-graph-uri=http://dbpedia.org&query=%s&format=xml",
                     endpointUrl, URLEncoder.encode(formQuery(json), "UTF-8"));
-            //System.out.println("SPARQL query: "+formQuery(json));
-//            System.out.println("Query: "+url);
+            System.out.println("SPARQL query: "+formQuery(json));
+            System.out.println("Query: "+url);
             ServerResponse response = makeRequest(url);
 
             List<Map<String,String>> list = new ArrayList<>();

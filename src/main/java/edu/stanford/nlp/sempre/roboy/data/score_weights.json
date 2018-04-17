@@ -1,6 +1,6 @@
 {
-  "Context": 0.4,
-  "Word2Vec": 0.3,
+  "Context": 0.5,
+  "Word2Vec": 0.2,
   "Probability" : 0.2,
   "Similarity" : 0.1
 }

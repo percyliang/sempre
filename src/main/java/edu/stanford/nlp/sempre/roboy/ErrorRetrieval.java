@@ -397,7 +397,7 @@ public class ErrorRetrieval {
             if (ConfigManager.DEBUG > 1) {
                 for (UnderspecifiedInfo termInfo : missingTerms) {
                     for (int i = 0; i < termInfo.candidatesInfo.size(); i++) {
-                        LogInfo.logs("Final candidates: %s", termInfo.candidatesInfo.get(i).toString());
+                        LogInfo.logs("Final candidates: %s -> %s", termInfo.term, termInfo.candidatesInfo.get(i).toString());
                     }
                 }
             }
@@ -408,7 +408,7 @@ public class ErrorRetrieval {
             if (ConfigManager.DEBUG > 1) {
                 for (UnderspecifiedInfo termInfo : missingTerms) {
                     for (int i = 0; i < termInfo.candidatesScores.size(); i++) {
-                        LogInfo.logs("Final scores: %s %f", termInfo.candidates.get(i), termInfo.candidatesScores.get(i));
+                        LogInfo.logs("Final scores: %s %f", termInfo.candidates.get(i).toString(), termInfo.candidatesScores.get(i));
                     }
                 }
             }
