@@ -40,6 +40,15 @@ test {
   exclude 'edu/stanford/nlp/sempre/overnight/test/SimpleWorldTest.class' // you need to copy overnight/unittest.db to lib/data/overnight/test/unittest.db for this to work.
 }
 
+// this will only run on POSIX-compatible OSs. Sorry Windows.
+task extractModuleClasses(type:Exec) {
+  commandLine 'bash', '-c', './scripts/extract-module-classes.rb && mkdir -p src/main/resources/edu/stanford/nlp/sempre/ && cp module-classes.txt src/main/resources/edu/stanford/nlp/sempre/'
+}
+run.dependsOn extractModuleClasses
+
+distZip.enabled = false
+distTar.enabled = false
+
 mainClassName = 'edu.stanford.nlp.sempre.Main'
 distZip.enabled = false
 distTar.enabled = false
