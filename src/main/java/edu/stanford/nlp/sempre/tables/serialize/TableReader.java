@@ -3,7 +3,8 @@ package edu.stanford.nlp.sempre.tables.serialize;
 import java.io.*;
 import java.util.*;
 
-import au.com.bytecode.opencsv.CSVReader;
+//import au.com.bytecode.opencsv.CSVReader;
+import com.opencsv.CSVReader;
 import edu.stanford.nlp.sempre.tables.StringNormalizationUtils;
 import fig.basic.LogInfo;
 

@@ -1,0 +1,45 @@
+plugins {
+  id 'maven'
+  id 'application'
+  id 'java'
+}
+
+repositories {
+  jcenter()
+  maven { url "https://jitpack.io" }
+}
+
+dependencies {
+  compile 'org.slf4j:slf4j-api:1.7.25'
+  compile group: 'com.google.guava', name: 'guava', version: '23.0'
+  compile group: 'com.beust', name: 'jcommander', version: '1.72'
+  compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.5'
+  compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.9.5'
+  compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.5'
+  compile group: 'jline', name: 'jline', version: '2.14.6'
+  compile group: 'edu.stanford.nlp', name: 'stanford-corenlp', version: '3.7.0'
+  compile group: 'edu.stanford.nlp', name: 'stanford-corenlp', version: '3.7.0', classifier: 'models'
+  runtime group: 'edu.stanford.nlp', name: 'stanford-corenlp', version: '3.7.0', classifier: 'models-english'
+  compile group: 'joda-time', name: 'joda-time', version: '2.9.9'
+  compile group: 'de.jollyday', name: 'jollyday', version: '0.5.5'
+  compile group: 'com.googlecode.efficient-java-matrix-library', name: 'ejml', version: '0.25'
+  compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
+  compile group: 'com.opencsv', name: 'opencsv', version: '4.1'
+  compile group: 'com.github.percyliang', name: 'fig', version: 'master-SNAPSHOT'
+
+  testCompile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.25'
+  testCompile group: 'org.testng', name: 'testng', version: '6.14.3'
+  compile group: 'org.testng', name: 'testng', version: '6.14.3'
+  testCompile 'junit:junit:4.12'
+}
+
+test {
+  useTestNG()
+  exclude 'edu/stanford/nlp/sempre/interactive/test/**'
+  exclude 'edu/stanford/nlp/sempre/freebase/test/SparqlExecutorTest.class' // freebase web access is not available anymore
+  exclude 'edu/stanford/nlp/sempre/overnight/test/SimpleWorldTest.class' // you need to copy overnight/unittest.db to lib/data/overnight/test/unittest.db for this to work.
+}
+
+mainClassName = 'edu.stanford.nlp.sempre.Main'
+distZip.enabled = false
+distTar.enabled = false

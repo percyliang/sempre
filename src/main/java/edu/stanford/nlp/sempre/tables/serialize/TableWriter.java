@@ -2,7 +2,8 @@ package edu.stanford.nlp.sempre.tables.serialize;
 
 import java.io.*;
 
-import au.com.bytecode.opencsv.CSVWriter;
+//import au.com.bytecode.opencsv.CSVWriter;
+import com.opencsv.CSVWriter;
 import edu.stanford.nlp.sempre.tables.*;
 import fig.basic.LogInfo;
 
