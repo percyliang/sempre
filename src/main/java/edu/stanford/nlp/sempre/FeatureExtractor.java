@@ -109,7 +109,7 @@ public class FeatureExtractor {
       }
     }
     if (rbScore > 2 && dbScore == 0)
-      deriv.addFeature("ontology", "roboy", rbScore*100);
+      deriv.addFeature("ontology", "roboy", rbScore*10);
     else if (rbScore > 2)
           deriv.addFeature("ontology", "roboy", rbScore);
     if (dbScore > 1)

@@ -25,6 +25,9 @@ public class Params {
     @Option(gloss = "Randomly initialize the weights")
     public Random initRandom = new Random(1);
 
+    @Option(gloss = "Evenly initialize the weights")
+    public boolean initWeightsEqually = false;
+
     @Option(gloss = "Initial step size") public double initStepSize = 1;
     @Option(gloss = "How fast to reduce the step size")
     public double stepSizeReduction = 0;
@@ -207,6 +210,8 @@ public class Params {
       lazyL1Update(f);
     if (opts.initWeightsRandomly)
       return MapUtils.getDouble(weights, f, 2 * opts.initRandom.nextDouble() - 1);
+    else if (opts.initWeightsEqually)
+      return MapUtils.getDouble(weights, f, 1);
     else {
       return MapUtils.getDouble(weights, f, opts.defaultWeight);
     }

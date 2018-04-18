@@ -1,5 +1,9 @@
 # Roboy
-{"lexeme": "what do you like", "formula": "(!rb:HAS_HOBBY rb:active_person)", "type": "RoboyPhrases"}
+{"lexeme": "what do you like", "formula": "(!rb:HAS_HOBBY rb:Roboy)", "type": "RoboyPhrases"}
+{"lexeme": "what do you do", "formula": "(!rb:abilities rb:Roboy)", "type": "RoboyPhrases"}
+{"lexeme": "what do you do", "formula": "(!rb:skills rb:Roboy)", "type": "RoboyPhrases"}
+{"lexeme": "what can you do", "formula": "(!rb:abilities rb:Roboy)", "type": "RoboyPhrases"}
+{"lexeme": "what can you do", "formula": "(!rb:skills rb:Roboy)", "type": "RoboyPhrases"}
 
 ## Classes
 {"lexeme": "object", "formula": "(rdf:type rb:OBJECT)", "type" : "RoboyClassNoun"}
@@ -27,12 +31,18 @@
 ## Type relationships
 {"lexeme": "favorite", "formula": "rb:FAVORITE", "type" : "TypeProperty"}
 
-## Relationships
+## Expressions
+{"lexeme": "can", "formula": "rb:skills", "type": "RoboyExp"}
+{"lexeme": "can", "formula": "rb:abilities", "type": "RoboyExp"}
+
+## Relationship
 {"lexeme": "call", "formula": "rb:NAME_OF", "type" : "DataProp"}
 {"lexeme": "like", "formula": "rb:HAS_HOBBY", "type" : "ObjProp"}
 {"lexeme": "like", "formula": "rb:FRIEND_OF", "type" : "DataProp"}
 {"lexeme": "friend", "formula": "rb:FRIEND_OF", "type" : "DataProp"}
 {"lexeme": "bear", "formula": "rb:FROM", "type" : "ObjProp"}
+{"lexeme": "do", "formula": "rb:skills", "type" : "ObjProp"}
+{"lexeme": "do", "formula": "rb:abilities", "type" : "ObjProp"}
 {"lexeme": "bear in", "formula": "rb:FROM", "type" : "ObjProp"}
 {"lexeme": "born in", "formula": "rb:FROM", "type" : "ObjProp"}
 {"lexeme": "from", "formula": "rb:FROM", "type" : "ObjProp"}
@@ -103,6 +113,10 @@
 {"lexeme": "member", "formula": "rb:MEMBER_OF", "type" : "RoboyRelNoun"}
 {"lexeme": "part", "formula": "rb:PART_OF", "type" : "RoboyRelNoun"}
 {"lexeme": "relative", "formula": "rb:RELATIVE_OF", "type" : "RoboyRelNoun"}
+{"lexeme": "skills", "formula": "rb:skills", "type" : "RoboyRelNoun"}
+{"lexeme": "abilities", "formula": "rb:abilities", "type" : "RoboyRelNoun"}
+{"lexeme": "skill", "formula": "rb:skills", "type" : "RoboyRelNoun"}
+{"lexeme": "ability", "formula": "rb:abilities", "type" : "RoboyRelNoun"}
 
 {"lexeme": "hobby", "formula": "!rb:HAS_HOBBY", "type" : "RoboyQRelNoun"}
 {"lexeme": "free time", "formula": "!rb:HAS_HOBBY", "type" : "RoboyQRelNoun"}
@@ -133,4 +147,3 @@
 
 # DBpedia
 {"lexeme": "birth date", "formula": "!dbpedia:birthDate", "type": "RelationalNoun"}
-

@@ -230,7 +230,7 @@
                                 <!--<argument>train:data/rpqa/1/train.examples</argument>-->
                                 <argument>-Derivation.derivComparator</argument>
                                 <argument>ScoredDerivationComparator</argument>
-                                <argument>-Params.initWeightsRandomly</argument>
+                                <argument>-Params.initWeightsEqually</argument>
                                 <argument>true</argument>
                                 <!--<argument>-Learner.maxTrainIters</argument>-->
                                 <!--<argument>1</argument>-->

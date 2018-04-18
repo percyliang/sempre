@@ -87,6 +87,10 @@
 {"lexeme": "field of expertise", "formula": "rb:OCCUPIED_AS", "type" : "RelationClass"}
 {"lexeme": "profession", "formula": "rb:OCCUPIED_AS", "type" : "RelationClass"}
 {"lexeme": "name", "formula": "rb:NAME_OF", "type" : "RelationClass"}
+{"lexeme": "skills", "formula": "rb:skills", "type" : "RelationClass"}
+{"lexeme": "abilities", "formula": "rb:abilities", "type" : "RelationClass"}
+{"lexeme": "skill", "formula": "rb:skills", "type" : "RelationClass"}
+{"lexeme": "ability", "formula": "rb:abilities", "type" : "RelationClass"}
 {"lexeme": "home", "formula": "rb:FROM", "type" : "RelationClass"}
 {"lexeme": "age", "formula": "rb:AGE", "type" : "RelationClass"}
 {"lexeme": "member", "formula": "rb:MEMBER_OF", "type" : "RelationClass"}
