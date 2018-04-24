@@ -311,7 +311,7 @@ public abstract class Formulas {
     // recurse
     if (f instanceof AggregateFormula) {
       AggregateFormula aggFormula = (AggregateFormula) f;
-      extractSubpartsRecursive(aggFormula, res);
+      extractSubpartsRecursive(aggFormula.child, res);
     } else if (f instanceof CallFormula) {
       CallFormula callFormula = (CallFormula) f;
       extractSubpartsRecursive(callFormula.func, res);
