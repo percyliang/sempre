@@ -25,8 +25,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 
-import org.testng.collections.Lists;
-
 import edu.stanford.nlp.sempre.Json;
 import fig.basic.LogInfo;
 import fig.basic.Option;

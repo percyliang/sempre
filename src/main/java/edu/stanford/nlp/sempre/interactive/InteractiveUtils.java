@@ -4,12 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.testng.collections.Lists;
-
 import com.google.common.collect.ImmutableList;
 
+import com.google.common.collect.Lists;
 import edu.stanford.nlp.sempre.ActionFormula;
-import edu.stanford.nlp.sempre.BeamParser;
 import edu.stanford.nlp.sempre.Derivation;
 import edu.stanford.nlp.sempre.Example;
 import edu.stanford.nlp.sempre.Formula;

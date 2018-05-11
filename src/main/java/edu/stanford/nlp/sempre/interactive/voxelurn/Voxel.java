@@ -5,8 +5,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.testng.collections.Lists;
-
+import com.google.common.collect.Lists;
 import edu.stanford.nlp.sempre.Json;
 import edu.stanford.nlp.sempre.interactive.Item;
 

@@ -9,9 +9,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.beust.jcommander.internal.Lists;
 import com.google.common.base.Function;
 
+import com.google.common.collect.Lists;
 import edu.stanford.nlp.sempre.ActionFormula;
 import edu.stanford.nlp.sempre.ConstantFn;
 import edu.stanford.nlp.sempre.Derivation;

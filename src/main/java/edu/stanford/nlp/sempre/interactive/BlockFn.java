@@ -2,7 +2,7 @@ package edu.stanford.nlp.sempre.interactive;
 
 import java.util.List;
 
-import org.testng.collections.Lists;
+import com.google.common.collect.Lists;
 
 import edu.stanford.nlp.sempre.ActionFormula;
 import edu.stanford.nlp.sempre.Derivation;

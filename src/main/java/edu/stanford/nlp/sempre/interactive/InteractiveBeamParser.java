@@ -12,10 +12,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.beust.jcommander.internal.Lists;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 
+import com.google.common.collect.Lists;
 import edu.stanford.nlp.sempre.ChartParserState;
 import edu.stanford.nlp.sempre.Derivation;
 import edu.stanford.nlp.sempre.DerivationStream;
@@ -28,7 +28,6 @@ import edu.stanford.nlp.sempre.ParserState;
 import edu.stanford.nlp.sempre.Rule;
 import edu.stanford.nlp.sempre.SemanticFn;
 import edu.stanford.nlp.sempre.Trie;
-import fig.basic.Evaluation;
 import fig.basic.IOUtils;
 import fig.basic.IntRef;
 import fig.basic.LogInfo;
