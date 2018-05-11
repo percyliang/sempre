@@ -1,7 +1,5 @@
 package edu.stanford.nlp.sempre.interactive.test;
 
-import static org.testng.AssertJUnit.assertEquals;
-
 import java.util.*;
 import java.util.function.Predicate;
 

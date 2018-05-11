@@ -1,7 +1,6 @@
 package edu.stanford.nlp.sempre.geo880;
 
 import edu.stanford.nlp.sempre.*;
-import edu.stanford.nlp.sempre.tables.StringNormalizationUtils;
 import fig.basic.LogInfo;
 
 import java.util.List;

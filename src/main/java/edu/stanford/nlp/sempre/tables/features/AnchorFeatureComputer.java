@@ -7,7 +7,6 @@ import edu.stanford.nlp.sempre.tables.StringNormalizationUtils;
 import edu.stanford.nlp.sempre.tables.TableKnowledgeGraph;
 import edu.stanford.nlp.sempre.tables.TableCell;
 import edu.stanford.nlp.sempre.tables.TableColumn;
-import fig.basic.LogInfo;
 
 public class AnchorFeatureComputer implements FeatureComputer {
 

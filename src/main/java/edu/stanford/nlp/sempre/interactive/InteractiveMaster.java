@@ -17,7 +17,6 @@ import edu.stanford.nlp.sempre.Formulas;
 import edu.stanford.nlp.sempre.Master;
 import edu.stanford.nlp.sempre.Params;
 import edu.stanford.nlp.sempre.Parser;
-import edu.stanford.nlp.sempre.ParserState;
 import edu.stanford.nlp.sempre.Rule;
 import edu.stanford.nlp.sempre.RuleSource;
 import edu.stanford.nlp.sempre.Session;

@@ -4,10 +4,6 @@ import static org.testng.AssertJUnit.assertEquals;
 
 import org.testng.annotations.Test;
 
-import edu.stanford.nlp.sempre.*;
-import edu.stanford.nlp.sempre.overnight.*;
-import fig.basic.*;
-
 /**
  * Test simple world from overnight framework.
  * Creates a small database using SimpleWorld,

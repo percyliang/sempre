@@ -3,9 +3,7 @@ package edu.stanford.nlp.sempre.tables.serialize;
 import java.util.*;
 
 import edu.stanford.nlp.sempre.*;
-import edu.stanford.nlp.sempre.FuzzyMatchFn.FuzzyMatchFnMode;
 import edu.stanford.nlp.sempre.SemanticFn.CallInfo;
-import edu.stanford.nlp.sempre.tables.TableKnowledgeGraph;
 import fig.basic.*;
 import fig.exec.Execution;
 

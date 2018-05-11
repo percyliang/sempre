@@ -8,8 +8,6 @@ import fig.basic.Option;
 import fig.basic.LogInfo;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Type lookup for the geo880 domain, Mostly for distinguishing locations and numbers.
