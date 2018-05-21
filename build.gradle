@@ -4,9 +4,12 @@ plugins {
   id 'java'
 }
 
+group = 'com.github.timobaumann'
+
 repositories {
   jcenter()
-  maven { url "https://jitpack.io" }
+  mavenCentral()
+  maven { url "https://www.jitpack.io" }
 }
 
 dependencies {
@@ -29,6 +32,8 @@ dependencies {
   }
 }
 
+
+
 test {
   useTestNG()
   exclude 'edu/stanford/nlp/sempre/interactive/test/**'
@@ -44,5 +49,8 @@ run.dependsOn extractModuleClasses
 
 distZip.enabled = false
 distTar.enabled = false
+configurations.archives.artifacts.removeAll{it.file =~ 'zip'}
+configurations.archives.artifacts.removeAll{it.file =~ 'tar'}
+
 
 mainClassName = 'edu.stanford.nlp.sempre.Main'

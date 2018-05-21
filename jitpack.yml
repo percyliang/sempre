@@ -1,2 +1,2 @@
 install:
-   - ./gradlew clean install -x test
+   - ./gradlew --info -x test build install
