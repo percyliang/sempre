@@ -46,5 +46,3 @@ distZip.enabled = false
 distTar.enabled = false
 
 mainClassName = 'edu.stanford.nlp.sempre.Main'
-distZip.enabled = false
-distTar.enabled = false
