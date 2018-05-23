@@ -15,7 +15,7 @@ import java.util.Map;
 
 public class ConfigManager {
 
-    private static String yamlConfigFile = "config.properties";
+    private static String yamlConfigFile = "parser.properties";
 
     // Endpoints
     public static String DB_SEARCH = "http://lookup.dbpedia.org/api/search.asmx/KeywordSearch?QueryString=";
@@ -35,7 +35,6 @@ public class ConfigManager {
     public static int DEBUG = 1;
 
     // Other parameters
-    public static int PARSER_PORT = -1;
     public static double W2V_THRES = 0.3;
     public static int CONTEXT_DEPTH = 3;
     public static double FOLLOW_THRES = 0.3;
@@ -94,7 +93,6 @@ public class ConfigManager {
             FOLLOW_FILE          = yamlConfig.getString("FOLLOW_FILE");
 
             DEBUG           = yamlConfig.getInt("DEBUG");
-            PARSER_PORT     = yamlConfig.getInt("PARSER_PORT");
 
             WORD2VEC_GOOGLE       = yamlConfig.getBoolean("WORD2VEC_GOOGLE");
             W2V_THRES       = yamlConfig.getDouble("W2V_THRES");

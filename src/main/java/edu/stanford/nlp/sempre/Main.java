@@ -29,16 +29,12 @@ public class Main implements Runnable {
   Learner learner = new Learner(builder.parser, builder.params, dataset);
   learner.learn();
 
-  if (server || interactive || socket) {
+  if (server || interactive) {
    Master master = createMaster(masterType, builder);
    if (server)
     master.runServer();
-   if (interactive) {
+   if (interactive)
     master.runInteractivePrompt();
-//    master.runSocketPrompt();
-   }
-   if (socket)
-    master.runSocketPrompt();
   }
  }
 

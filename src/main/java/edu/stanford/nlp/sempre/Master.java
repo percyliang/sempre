@@ -3,7 +3,6 @@ package edu.stanford.nlp.sempre;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import edu.stanford.nlp.sempre.roboy.config.ConfigManager;
 import fig.basic.*;
 import jline.console.ConsoleReader;
 
@@ -186,25 +185,6 @@ public class Master {
     Server server = new Server(this);
     server.run();;
   }
-
-  public void runSocketPrompt() {
-    Session session = getSession("stdin");
-    try
-    {
-      ServerSocket serverSocket = new ServerSocket(ConfigManager.PARSER_PORT);
-      while (true) {
-        Socket clientSocket = serverSocket.accept();
-        Runnable connectionHandler = new SocketConnectionHandler(clientSocket, session, this);
-        new Thread(connectionHandler).start();
-      }
-    }
-    catch (IOException e)
-    {
-      e.printStackTrace();
-    }
-  }
-
-
 
   public void runInteractivePrompt() {
     Session session = getSession("stdin");
