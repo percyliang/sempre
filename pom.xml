@@ -62,72 +62,6 @@
                             <commandlineArgs>${project.basedir}/pull-dependencies roboy</commandlineArgs>
                         </configuration>
                     </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-install-plugin</artifactId>
-                <version>2.5.2</version>
-                <executions>
-                    <execution>
-                        <id>install-fig</id>
-                        <phase>clean</phase>
-                        <configuration>
-                            <repositoryLayout>default</repositoryLayout>
-                            <groupId>fig</groupId>
-                            <artifactId>basic</artifactId>
-                            <version>1.0</version>
-                            <file>${project.basedir}/lib/fig.jar</file>
-                            <packaging>jar</packaging>
-                            <generatePom>true</generatePom>
-                        </configuration>
-                        <goals>
-                            <goal>install-file</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>install-models</id>
-                        <phase>clean</phase>
-                        <configuration>
-                            <repositoryLayout>default</repositoryLayout>
-                            <groupId>edu.stanford.nlp</groupId>
-                            <artifactId>stanford-corenlp</artifactId>
-                            <version>3.5.2</version>
-                            <classifier>caseless-models</classifier>
-                            <file>${project.basedir}/lib/stanford-corenlp-caseless-models.jar</file>
-                            <packaging>jar</packaging>
-                            <generatePom>true</generatePom>
-                        </configuration>
-                        <goals>
-                            <goal>install-file</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>install-ejml</id>
-                        <phase>clean</phase>
-                        <configuration>
-                            <repositoryLayout>default</repositoryLayout>
-                            <groupId>org.ejml</groupId>
-                            <artifactId>ejml-all</artifactId>
-                            <version>0.23</version>
-                            <file>${project.basedir}/lib/ejml.jar</file>
-                            <packaging>jar</packaging>
-                            <generatePom>true</generatePom>
-                        </configuration>
-                        <goals>
-                            <goal>install-file</goal>
-                        </goals>
-                    </execution>
-
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>1.6.0</version>
-                <executions>
                     <execution>
                         <id>Generating module-classes</id>
                         <phase>compile</phase>
@@ -284,6 +218,65 @@
 
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-install-plugin</artifactId>
+                <version>2.5.2</version>
+                <executions>
+                    <execution>
+                        <id>install-fig</id>
+                        <phase>clean</phase>
+                        <configuration>
+                            <repositoryLayout>default</repositoryLayout>
+                            <groupId>fig</groupId>
+                            <artifactId>basic</artifactId>
+                            <version>1.0</version>
+                            <file>${project.basedir}/lib/fig.jar</file>
+                            <packaging>jar</packaging>
+                            <generatePom>true</generatePom>
+                        </configuration>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>install-models</id>
+                        <phase>clean</phase>
+                        <configuration>
+                            <repositoryLayout>default</repositoryLayout>
+                            <groupId>edu.stanford.nlp</groupId>
+                            <artifactId>stanford-corenlp</artifactId>
+                            <version>3.5.2</version>
+                            <classifier>caseless-models</classifier>
+                            <file>${project.basedir}/lib/stanford-corenlp-caseless-models.jar</file>
+                            <packaging>jar</packaging>
+                            <generatePom>true</generatePom>
+                        </configuration>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>install-ejml</id>
+                        <phase>clean</phase>
+                        <configuration>
+                            <repositoryLayout>default</repositoryLayout>
+                            <groupId>org.ejml</groupId>
+                            <artifactId>ejml-all</artifactId>
+                            <version>0.23</version>
+                            <file>${project.basedir}/lib/ejml.jar</file>
+                            <packaging>jar</packaging>
+                            <generatePom>true</generatePom>
+                        </configuration>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                    </execution>
+
+                </executions>
+            </plugin>
+
         </plugins>
 
         <resources>
@@ -347,18 +340,50 @@
             <groupId>fig</groupId>
             <artifactId>basic</artifactId>
             <version>1.0</version>
+            <!-- Optional to make sure that dependency-check before clean phase succeeds. -->
+            <optional>true</optional>
         </dependency>
 
         <dependency>
             <groupId>org.ejml</groupId>
             <artifactId>ejml-all</artifactId>
             <version>0.23</version>
+            <!-- Optional to make sure that dependency-check before clean phase succeeds. -->
+            <optional>true</optional>
         </dependency>
 
         <dependency>
             <groupId>org.apache.opennlp</groupId>
             <artifactId>opennlp-tools</artifactId>
             <version>1.7.0</version>
+            <!-- Optional to make sure that dependency-check before clean phase succeeds. -->
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>edu.stanford.nlp</groupId>
+            <artifactId>stanford-corenlp</artifactId>
+            <version>3.8.0</version>
+            <!-- Optional to make sure that dependency-check before clean phase succeeds. -->
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>edu.stanford.nlp</groupId>
+            <artifactId>stanford-corenlp</artifactId>
+            <classifier>models</classifier>
+            <version>3.8.0</version>
+            <!-- Optional to make sure that dependency-check before clean phase succeeds. -->
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>edu.stanford.nlp</groupId>
+            <artifactId>stanford-corenlp</artifactId>
+            <version>3.5.2</version>
+            <classifier>caseless-models</classifier>
+            <!-- Optional to make sure that dependency-check before clean phase succeeds. -->
+            <optional>true</optional>
         </dependency>
 
         <dependency>
@@ -366,7 +391,6 @@
             <artifactId>jline</artifactId>
             <version>2.14.5</version>
         </dependency>
-
 
         <dependency>
             <groupId>com.google.code.gson</groupId>
@@ -542,26 +566,6 @@
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
             <version>1.18</version>
-        </dependency>
-
-        <dependency>
-            <groupId>edu.stanford.nlp</groupId>
-            <artifactId>stanford-corenlp</artifactId>
-            <version>3.8.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>edu.stanford.nlp</groupId>
-            <artifactId>stanford-corenlp</artifactId>
-            <classifier>models</classifier>
-            <version>3.8.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>edu.stanford.nlp</groupId>
-            <artifactId>stanford-corenlp</artifactId>
-            <version>3.5.2</version>
-            <classifier>caseless-models</classifier>
         </dependency>
 
         <dependency>
