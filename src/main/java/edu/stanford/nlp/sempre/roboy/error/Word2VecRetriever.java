@@ -28,7 +28,7 @@ public class Word2VecRetriever extends KnowledgeRetriever {
      */
     public Word2VecRetriever(Word2vec vec){
         this.vec = vec;
-        out = IOUtils.openOutAppendHard("./data/error_test/w2vLexicon.txt");
+        out = IOUtils.openOutAppendHard("./roboy_parser_resources/error_test/w2vLexicon.txt");
     }
 
     /**

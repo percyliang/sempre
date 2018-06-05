@@ -33,7 +33,7 @@ public class LabelRetriever extends KnowledgeRetriever {
     public LabelRetriever(){
         try {
             endpointUrl = ConfigManager.DB_SPARQL;
-            out = IOUtils.openOutAppendHard("./data/error_test/lbLexicon.txt");
+            out = IOUtils.openOutAppendHard("./roboy_parser_resources/error_test/lbLexicon.txt");
         }
         catch (Exception e) {
             throw new RuntimeException(e);

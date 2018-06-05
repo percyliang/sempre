@@ -5,26 +5,57 @@ import com.google.common.collect.Sets;
 import edu.stanford.nlp.sempre.*;
 import java.util.*;
 
-public class SemanticAnalyzerInterface {
+/**
+ * @brief SemanticAnalyserInterface
+ */
+public class SemanticAnalyzerInterface
+{
     
-    public class Result {
-
-        public Result(Example example) {
-            ex = example;
-        }
-
+    /**
+     * @brief SemanticAnalyserInterface.Result
+     */
+    public class Result
+    {
+        private Master.Response resp;  // Parser response
         private Example ex;  // Example that was parsed
+        private String parse;
+        private String answer;
+        private String followUpQ;
+        private String followUpA;
+        private String utteranceType;
+
+        public Result(Master.Response resp, Executor executor) {
+            ex = resp.getExample();
+            if (
+                ex.getPredDerivations().size() > 0 &&
+                resp.getCandidateIndex() >= 0
+            ) {
+                Derivation deriv = resp.getDerivation();
+                deriv.ensureExecuted(executor, ex.context);
+                parse = deriv.getFormula().toString();
+                answer = deriv.getValue().toString();
+                if (deriv.followUps != null && deriv.followUps.size() > 0) {
+                    followUpQ = deriv.followUps.get(0).getKey();
+                    followUpA = deriv.followUps.get(0).getValue();
+                }
+
+                if (parse.contains("triple") || parse.contains("string"))
+                  utteranceType = "statement";
+                else
+                  utteranceType = "question";
+            }
+        }
 
         public List<String> getTokens() {
             return ex.getTokens();
         }
 
-        public List<String> getLemmaTokens() {
-            return ex.getLemmaTokens();
+        public String[] getLemmaTokens() {
+            return ex.getLemmaTokens().toArray(new String[0]);
         }
 
-        public List<String> getPostags() {
-            return ex.getPosTag();
+        public String[] getPostags() {
+            return ex.getPosTag().toArray(new String[0]);
         }
 
         public Map<String,Double> getRelations() {
@@ -34,15 +65,47 @@ public class SemanticAnalyzerInterface {
         public String getSentiment() {
             return ex.getGenInfo().sentiment;
         }
+
+        public boolean hasSuccessfulParse() {
+            return parse != null && answer != null;
+        }
+
+        public boolean hasFollowUpQA() {
+            return followUpQ != null && followUpA != null;
+        }
+
+        public String getParse() {
+            return parse;
+        }
+
+        public String getAnswer() {
+            return answer;
+        }
+
+        public String getFollowUpQ() {
+            return followUpQ;
+        }
+
+        public String getFollowUpA() {
+            return followUpA;
+        }
+
+        public String getType() {
+            return utteranceType;
+        }
     }
 
     public Session session;
     public Master master;
+    public Builder builder;
 
+    /**
+     * @brief SemanticAnalyserInterface
+     */
     public SemanticAnalyzerInterface(boolean interactive) {
         initOptions();  // Used instead of the OptionsParser from SEMPRE standalone client
 
-        Builder builder = new Builder();
+        builder = new Builder();
         builder.build();
         Dataset dataset = new Dataset();
         dataset.read();
@@ -56,6 +119,9 @@ public class SemanticAnalyzerInterface {
             master.runInteractivePrompt();
     }
 
+    /**
+     * @brief initOptions
+     */
     private void initOptions() {
         Builder.opts.executor = "roboy.SparqlExecutor";
         Builder.opts.simple_executor = "JavaExecutor";
@@ -63,20 +129,25 @@ public class SemanticAnalyzerInterface {
         LanguageAnalyzer.opts.languageAnalyzer = "corenlp.CoreNLPAnalyzer";
         Learner.opts.maxTrainIters = 10;
         Params.opts.initWeightsRandomly = true;
-        SimpleLexicon.opts.inPaths = Arrays.asList("resources/lexicons/roboy-demo.lexicon");
+        SimpleLexicon.opts.inPaths = Arrays.asList("roboy_parser_resources/lexicons/roboy-demo.lexicon");
         SparqlExecutor.opts.endpointUrl = "http://dbpedia.org/sparql";
-        Grammar.opts.inPaths = Arrays.asList("resources/roboy-final.grammar");
+        Grammar.opts.inPaths = Arrays.asList("roboy_parser_resources/roboy-final.grammar");
 
-        // Dataset.inPaths train:data/rpqa/dummy.examples
+        // Dataset.inPaths train:roboy_parser_resources/rpqa/dummy.examples
         // Derivation.derivComparator ScoredDerivationComparator
         // Grammar.tags error
     }
 
+    /**
+     * @brief analyze
+     */
     public Result analyze(String s) {
-        Master.Response resp = master.processQuery(session, s);
-        return new Result(resp.ex);
+        return new Result(master.processQuery(session, s), builder.executor);
     }
 
+    /**
+     * @brief main
+     */
     public static void main(String[] args) {
         SemanticAnalyzerInterface semanticAnalyzer = new SemanticAnalyzerInterface(true);
     }

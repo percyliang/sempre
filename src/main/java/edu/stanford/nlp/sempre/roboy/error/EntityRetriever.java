@@ -38,7 +38,7 @@ public class EntityRetriever extends KnowledgeRetriever {
         try {
             endpointUrl = ConfigManager.DB_SEARCH;
             keywords = Arrays.asList(ConfigManager.DB_KEYWORDS);
-            out = IOUtils.openOutAppendHard("./data/error_test/dbLexicon.txt");
+            out = IOUtils.openOutAppendHard("./roboy_parser_resources/error_test/dbLexicon.txt");
 
         }
         catch (Exception e) {
