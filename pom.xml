@@ -47,6 +47,25 @@
             </plugin>
 
             <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.6.0</version>
+                <executions>
+                    <execution>
+                        <id>Pull dependencies</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>ruby</executable>
+                            <commandlineArgs>${project.basedir}/pull-dependencies roboy</commandlineArgs>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-install-plugin</artifactId>
                 <version>2.5.2</version>
@@ -109,6 +128,17 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>1.6.0</version>
                 <executions>
+                    <execution>
+                        <id>Generating module-classes</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>ruby</executable>
+                            <commandlineArgs>${project.basedir}/scripts/extract-module-classes.rb</commandlineArgs>
+                        </configuration>
+                    </execution>
                     <execution>
                         <id>interactive</id>
                         <goals>
@@ -251,17 +281,7 @@
                             </arguments>
                         </configuration>
                     </execution>
-                    <execution>
-                        <id>Generating module-classes</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <executable>ruby</executable>
-                            <commandlineArgs>${project.basedir}/scripts/extract-module-classes.rb</commandlineArgs>
-                        </configuration>
-                    </execution>
+
                 </executions>
             </plugin>
         </plugins>
