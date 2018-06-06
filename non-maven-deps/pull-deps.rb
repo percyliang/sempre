@@ -50,7 +50,7 @@ def pull(sourcePath, dir=nil, opts={})
     end
     localPath = destDir + '/' + name + ext
     system "mkdir -p #{File.dirname(localPath)}" or exit 1
-    system "wget -c '#{url}' -O #{localPath}" or exit 1
+    system "wget -nv -c '#{url}' -O #{localPath}" or exit 1
     # Unzip localPath to destDir if it's a zip file
     if isZip(name)
       system "cd #{File.dirname(localPath)} && unzip -un #{File.basename(localPath)}" or exit 1
