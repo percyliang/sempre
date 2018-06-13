@@ -23,35 +23,23 @@ similar your system is.
 
 In order to build application with all needed dependencies run:
 ```
-./pull-dependencies roboy
-mvn clean
-mvn install
+mvn clean install
 ```
 
 ## Word2Vec Model
-Small model for parser has to be manually downloaded from [this link](https://drive.google.com/uc?export=download&confirm&id=1LVOKk7KnDIJphkHRZDa5fDm7ffIcS_Yz) and put it in data/word2vec.
+
+Small model for parser has to be manually downloaded from [this link](https://drive.google.com/uc?export=download&confirm&id=1LVOKk7KnDIJphkHRZDa5fDm7ffIcS_Yz) and put it in `resources_nlu/word2vec`.
 Other models:
 [google_model](https://s3.amazonaws.com/dl4j-distribution/GoogleNews-vectors-negative300.bin.gz)
 
 # Run
 
-## Roboy Talk Grammar and Lexicon
+Running the NLU module requires resources that are currently stored in the `roboy_dialog` parent repository. Please run the parser from a directory that contains a `resources_nlu` subfolder and a `parser.proeprties` file with all the required runtime resources.
 
-To run SEMPRE with Roboy grammar in interactive mode (from command line):
-```
-mvn exec:java@interactive -Dexec.mainClass=edu.stanford.nlp.sempre.Main
-```
+From such a folder, the following command may be used to start the parser:
 
-To run SEMPRE with Roboy grammar in socket mode (port 5000) WITHOUT error retrieval:
-```
-mvn exec:java@demo -Dexec.mainClass=edu.stanford.nlp.sempre.Main
-```
-To run SEMPRE with Roboy grammar in socket mode (port 5000) WITH error retrieval:
-```
-mvn exec:java@demo-error -Dexec.mainClass=edu.stanford.nlp.sempre.Main
-```
-
-To run SEMPRE with Roboy grammar in web server mode:
-```
-mvn exec:java@debug -Dexec.mainClass=edu.stanford.nlp.sempre.Main
+```bash
+java -cp \
+    nlu/parser/target/roboy-parser-2.0.0-jar-with-dependencies.jar \
+    edu.stanford.nlp.sempre.roboy.SemanticAnalyzerInterface.java
 ```

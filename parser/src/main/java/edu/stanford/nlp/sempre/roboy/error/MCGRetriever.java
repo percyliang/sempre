@@ -38,7 +38,7 @@ public class MCGRetriever extends KnowledgeRetriever {
         try {
             endpointUrl = ConfigManager.MCG_SEARCH;
             dbpediaUrl = ConfigManager.DB_SPARQL;
-            out = IOUtils.openOutAppendHard("./roboy_parser_resources/error_test/mcgLexicon.txt");
+            out = IOUtils.openOutAppendHard("./resources_nlu/error_test/mcgLexicon.txt");
         }
         catch (Exception e) {
             throw new RuntimeException(e);

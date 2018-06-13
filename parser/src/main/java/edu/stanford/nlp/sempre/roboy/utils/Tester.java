@@ -70,7 +70,7 @@ public class Tester {
         Tester test = new Tester(5000);
         try {
             PrintWriter writer = new PrintWriter("log-webq.txt", "UTF-8");
-            JsonReader reader = new JsonReader(new FileReader("./roboy_parser_resources/rpqa/Q/rpqa-test-q.json"));
+            JsonReader reader = new JsonReader(new FileReader("./resources_nlu/rpqa/Q/rpqa-test-q.json"));
             Type type = new TypeToken<List<Map<String, String>>>() {
             }.getType();
             Gson gson = new Gson();
@@ -176,7 +176,7 @@ public class Tester {
 //        double fail = 0;
 //        Tester test = new Tester(5000);
 //        try {
-//            JsonReader reader = new JsonReader(new FileReader("./roboy_parser_resources/rpqa/1/test.json"));
+//            JsonReader reader = new JsonReader(new FileReader("./resources_nlu/rpqa/1/test.json"));
 //            Type type = new TypeToken<List<Map<String, String>>>() {
 //            }.getType();
 //            Gson gson = new Gson();

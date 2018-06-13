@@ -27,7 +27,7 @@ public class LexiconGenerator {
      * @param lexemes   set of lexical entries to be added
      */
     public void updateLexicon(Set<String> lexemes) {
-        PrintWriter out = IOUtils.openOutAppendHard("./roboy_parser_resources/error_test/newLexicon.txt");
+        PrintWriter out = IOUtils.openOutAppendHard("./resources_nlu/error_test/newLexicon.txt");
 
         for (String lexeme: lexemes){
             if (ConfigManager.DEBUG > 0)

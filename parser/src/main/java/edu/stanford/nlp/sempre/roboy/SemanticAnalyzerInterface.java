@@ -129,11 +129,11 @@ public class SemanticAnalyzerInterface
         LanguageAnalyzer.opts.languageAnalyzer = "corenlp.CoreNLPAnalyzer";
         Learner.opts.maxTrainIters = 10;
         Params.opts.initWeightsRandomly = true;
-        SimpleLexicon.opts.inPaths = Arrays.asList("roboy_parser_resources/lexicons/roboy-demo.lexicon");
+        SimpleLexicon.opts.inPaths = Arrays.asList("resources_nlu/lexicons/roboy-demo.lexicon");
         SparqlExecutor.opts.endpointUrl = "http://dbpedia.org/sparql";
-        Grammar.opts.inPaths = Arrays.asList("roboy_parser_resources/roboy-final.grammar");
+        Grammar.opts.inPaths = Arrays.asList("resources_nlu/roboy-final.grammar");
 
-        // Dataset.inPaths train:roboy_parser_resources/rpqa/dummy.examples
+        // Dataset.inPaths train:resources_nlu/rpqa/dummy.examples
         // Derivation.derivComparator ScoredDerivationComparator
         // Grammar.tags error
     }
