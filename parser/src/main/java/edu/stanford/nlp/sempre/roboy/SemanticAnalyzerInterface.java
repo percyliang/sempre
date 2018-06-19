@@ -115,6 +115,9 @@ public class SemanticAnalyzerInterface
         master = new Master(builder);
         session = master.getSession("roboy");
 
+        // Run an initial query to ensure that all executors are loaded
+        new Result(master.processQuery(session, ""), builder.executor);
+
         if(interactive)
             master.runInteractivePrompt();
     }

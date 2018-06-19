@@ -34,12 +34,12 @@ Other models:
 
 # Run
 
-Running the NLU module requires resources that are currently stored in the `roboy_dialog` parent repository. Please run the parser from a directory that contains a `resources_nlu` subfolder and a `parser.proeprties` file with all the required runtime resources.
+Running the NLU module requires resources that are currently stored in the `roboy_dialog` parent repository. Please run the parser from a directory that contains a `resources_nlu` subfolder and a `parser.properties` file with all the required runtime resources.
 
 From such a folder, the following command may be used to start the parser:
 
 ```bash
-java -cp \
+java -Xmx6g -d64 -cp \
     nlu/parser/target/roboy-parser-2.0.0-jar-with-dependencies.jar \
     edu.stanford.nlp.sempre.roboy.SemanticAnalyzerInterface.java
 ```
