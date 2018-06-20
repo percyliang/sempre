@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 
 import edu.stanford.nlp.sempre.*;
 import java.util.*;
+import fig.basic.*;
 
 /**
  * @brief SemanticAnalyserInterface
@@ -135,10 +136,8 @@ public class SemanticAnalyzerInterface
         SimpleLexicon.opts.inPaths = Arrays.asList("resources_nlu/lexicons/roboy-demo.lexicon");
         SparqlExecutor.opts.endpointUrl = "http://dbpedia.org/sparql";
         Grammar.opts.inPaths = Arrays.asList("resources_nlu/roboy-final.grammar");
-
-        // Dataset.inPaths train:resources_nlu/rpqa/dummy.examples
-        // Derivation.derivComparator ScoredDerivationComparator
-        // Grammar.tags error
+        Dataset.opts.inPaths.add(new Pair<String, String>("train", "resources_nlu/rpqa/dummy.examples"));
+        SparqlExecutor.opts.endpointUrl = "http://dbpedia.org/sparql";
     }
 
     /**
