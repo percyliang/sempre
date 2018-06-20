@@ -1,1 +1,2 @@
 * text=auto
+data/word2vec/roboy_enwik8.txt filter=lfs diff=lfs merge=lfs -text

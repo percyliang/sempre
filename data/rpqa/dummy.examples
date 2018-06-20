@@ -1,4 +1,0 @@
-(example
-	(utterance "my name is emily")
-	(targetFormula (triples (triple rb:active_person rb:NAME_OF emily)))
-)

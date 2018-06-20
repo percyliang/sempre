@@ -1,0 +1,502 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.roboy.parser</groupId>
+    <artifactId>roboy-parser</artifactId>
+    <version>2.0.0</version>
+    <packaging>jar</packaging>
+    <organization>
+        <name>Roboy</name>
+    </organization>
+    
+    <name>Roboy Semantic Parser</name>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.7.0</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <classpathPrefix>lib/</classpathPrefix>
+                            <mainClass>edu.stanford.nlp.sempre.Master</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.6.0</version>
+                <executions>
+                    <execution>
+                        <id>Generating module-classes</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>ruby</executable>
+                            <commandlineArgs>${project.basedir}/scripts/extract-module-classes.rb</commandlineArgs>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>interactive</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <arguments>
+                                <argument>-FeatureExtractor.featureDomains</argument>
+                                <argument>rule</argument>
+                                <!--<argument>span</argument>-->
+                                <argument>dependencyParse</argument>
+                                <!--<argument>-Dataset.inPaths</argument>-->
+                                <!--<argument>train:data/rpqa/1/train.examples</argument>-->
+                                <argument>-Derivation.derivComparator</argument>
+                                <argument>ScoredDerivationComparator</argument>
+                                <argument>-Params.initWeightsRandomly</argument>
+                                <argument>true</argument>
+                                <argument>-Learner.maxTrainIters</argument>
+                                <argument>1</argument>
+                                <argument>-Builder.executor</argument>
+                                <argument>roboy.SparqlExecutor</argument>
+                                <argument>-Builder.simple_executor</argument>
+                                <argument>JavaExecutor</argument>
+                                <argument>-SparqlExecutor.endpointUrl</argument>
+                                <argument>http://dbpedia.org/sparql</argument>
+                                <argument>-Grammar.inPaths</argument>
+                                <argument>resources/roboy-final.grammar</argument>
+                                <argument>-SimpleLexicon.inPaths</argument>
+                                <argument>resources/lexicons/roboy-dbpedia.lexicon</argument>
+                                <argument>-languageAnalyzer</argument>
+                                <argument>corenlp.CoreNLPAnalyzer</argument>
+                                <argument>-Main.interactive</argument>
+                                <argument>true</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>demo-error</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <arguments>
+                                <argument>-FeatureExtractor.featureDomains</argument>
+                                <argument>rule</argument>
+                                <argument>-Dataset.inPaths</argument>
+                                <argument>train:data/rpqa/dummy.examples</argument>
+                                <argument>-Params.initWeightsRandomly</argument>
+                                <argument>true</argument>
+                                <argument>-Learner.maxTrainIters</argument>
+                                <argument>10</argument>
+                                <argument>-Builder.executor</argument>
+                                <argument>roboy.SparqlExecutor</argument>
+                                <argument>-Builder.simple_executor</argument>
+                                <argument>JavaExecutor</argument>
+                                <argument>-SparqlExecutor.endpointUrl</argument>
+                                <argument>http://dbpedia.org/sparql</argument>
+                                <argument>-Grammar.inPaths</argument>
+                                <argument>resources/roboy-final.grammar</argument>
+                                <argument>-Grammar.tags</argument>
+                                <argument>error</argument>
+                                <argument>-SimpleLexicon.inPaths</argument>
+                                <argument>resources/lexicons/roboy-demo.lexicon</argument>
+                                <argument>-languageAnalyzer</argument>
+                                <argument>corenlp.CoreNLPAnalyzer</argument>
+                                <argument>-Main.socket</argument>
+                                <argument>true</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>demo</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <arguments>
+                                <argument>-FeatureExtractor.featureDomains</argument>
+                                <argument>rule</argument>
+                                <argument>-Dataset.inPaths</argument>
+                                <argument>train:data/rpqa/dummy.examples</argument>
+                                <argument>-Params.initWeightsRandomly</argument>
+                                <argument>true</argument>
+                                <argument>-Learner.maxTrainIters</argument>
+                                <argument>10</argument>
+                                <argument>-Builder.executor</argument>
+                                <argument>roboy.SparqlExecutor</argument>
+                                <argument>-Builder.simple_executor</argument>
+                                <argument>JavaExecutor</argument>
+                                <argument>-SparqlExecutor.endpointUrl</argument>
+                                <argument>http://dbpedia.org/sparql</argument>
+                                <argument>-Grammar.inPaths</argument>
+                                <argument>resources/roboy-value.grammar</argument>
+                                <argument>-SimpleLexicon.inPaths</argument>
+                                <argument>resources/lexicons/roboy-demo.lexicon</argument>
+                                <argument>-languageAnalyzer</argument>
+                                <argument>corenlp.CoreNLPAnalyzer</argument>
+                                <argument>-Main.socket</argument>
+                                <argument>true</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>debug</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <arguments>
+                                <argument>-FeatureExtractor.featureDomains</argument>
+                                <argument>rule</argument>
+                                <!--&lt;!&ndash;<argument>span</argument>&ndash;&gt;-->
+                                <argument>denotation</argument>
+                                <!--<argument>dependencyParse</argument>-->
+                                <argument>ontology</argument>
+                                <argument>type</argument>
+                                <argument>results</argument>
+                                <!--<argument>-Dataset.inPaths</argument>-->
+                                <!--<argument>train:data/rpqa/1/train.examples</argument>-->
+                                <argument>-Derivation.derivComparator</argument>
+                                <argument>ScoredDerivationComparator</argument>
+                                <argument>-Params.initWeightsEqually</argument>
+                                <argument>true</argument>
+                                <!--<argument>-Learner.maxTrainIters</argument>-->
+                                <!--<argument>1</argument>-->
+                                <argument>-Builder.executor</argument>
+                                <argument>roboy.SparqlExecutor</argument>
+                                <argument>-Builder.simple_executor</argument>
+                                <argument>JavaExecutor</argument>
+                                <argument>-SparqlExecutor.endpointUrl</argument>
+                                <argument>http://dbpedia.org/sparql</argument>
+                                <argument>-Grammar.inPaths</argument>
+                                <argument>resources/roboy-final.grammar</argument>
+                                <argument>-Grammar.tags</argument>
+                                <argument>error</argument>
+                                <argument>-SimpleLexicon.inPaths</argument>
+                                <argument>resources/lexicons/roboy-demo.lexicon</argument>
+                                <argument>-Main.server</argument>
+                                <argument>true</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+
+                </executions>
+            </plugin>
+
+        </plugins>
+
+        <resources>
+            <resource>
+                <directory>resources</directory>
+            </resource>
+        </resources>
+
+    </build>
+
+    <repositories>
+
+        <repository>
+            <id>com.springsource.bundles.release</id>
+            <name>com.springsource.bundles.release</name>
+            <url>http://repository.springsource.com/maven/bundles/release</url>
+        </repository>
+
+        <repository>
+            <id>com.springsource.bundles.external</id>
+            <name>com.springsource.bundles.external</name>
+            <url>http://repository.springsource.com/maven/bundles/external</url>
+        </repository>
+
+        <repository>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <id>central</id>
+            <name>Central Repository</name>
+            <url>https://repo.maven.apache.org/maven2</url>
+        </repository>
+
+        <repository>
+            <id>snapshots-repo</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+
+        <repository>
+            <id>rosjava</id>
+            <url>https://raw.github.com/roboy/rosjava_mvn_repo/master/</url>
+        </repository>
+
+    </repositories>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>org.jruby</groupId>
+            <artifactId>jruby-complete</artifactId>
+            <version>1.7.10</version>
+        </dependency>
+
+        <dependency>
+            <groupId>fig</groupId>
+            <artifactId>basic</artifactId>
+            <version>1.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.ejml</groupId>
+            <artifactId>ejml-all</artifactId>
+            <version>0.23</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.opennlp</groupId>
+            <artifactId>opennlp-tools</artifactId>
+            <version>1.7.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>edu.stanford.nlp</groupId>
+            <artifactId>stanford-corenlp</artifactId>
+            <version>3.8.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>edu.stanford.nlp</groupId>
+            <artifactId>stanford-corenlp</artifactId>
+            <classifier>models</classifier>
+            <version>3.8.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>edu.stanford.nlp</groupId>
+            <artifactId>stanford-corenlp</artifactId>
+            <version>3.5.2</version>
+            <classifier>caseless-models</classifier>
+        </dependency>
+
+        <dependency>
+            <groupId>jline</groupId>
+            <artifactId>jline</artifactId>
+            <version>2.14.5</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.7</version>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.10</version>
+        </dependency>
+
+        <dependency>
+            <groupId>edu.wpi.rail</groupId>
+            <artifactId>jrosbridge</artifactId>
+            <version>0.2.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20160810</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mobicents.external.freetts</groupId>
+            <artifactId>freetts</artifactId>
+            <version>1.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.6.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.6.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.deeplearning4j</groupId>
+            <artifactId>deeplearning4j-nlp</artifactId>
+            <version>0.9.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.deeplearning4j</groupId>
+            <artifactId>deeplearning4j-core</artifactId>
+            <version>0.9.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.datavec</groupId>
+            <artifactId>datavec-api</artifactId>
+            <version>0.9.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.nd4j</groupId>
+            <artifactId>nd4j-api</artifactId>
+            <version>0.9.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.nd4j</groupId>
+            <artifactId>nd4j-native</artifactId>
+            <version>0.9.1</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>2.2.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.2.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>2.2.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jline</groupId>
+            <artifactId>jline-reader</artifactId>
+            <version>3.6.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-core</artifactId>
+            <version>4.4.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-analyzers-common</artifactId>
+            <version>4.4.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-queryparser</artifactId>
+            <version>4.4.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+            <version>2.9.9</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>23.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <version>1.10.19</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.jena</groupId>
+            <artifactId>jena-arq</artifactId>
+            <version>3.2.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.jena</groupId>
+            <artifactId>jena-core</artifactId>
+            <version>3.2.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>com.springsource.org.apache.commons.httpclient</artifactId>
+            <version>3.1.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-configuration2</artifactId>
+            <version>2.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.4</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.kuali.commons</groupId>
+            <artifactId>commons-beanutils</artifactId>
+            <version>1.8.3-kuali-4</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>1.18</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>6.14.2</version>
+            <!--<scope>test</scope>-->
+        </dependency>
+
+
+    </dependencies>
+
+</project>
+

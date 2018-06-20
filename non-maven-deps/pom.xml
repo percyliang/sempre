@@ -1,0 +1,104 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.roboy.parser</groupId>
+    <artifactId>roboy-parser-nonmaven-deps</artifactId>
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
+    <organization>
+        <name>Roboy</name>
+    </organization>
+
+    <name>Sempre External Dependencies</name>
+
+    <!--
+    To ensure that the pull-dependencies script and the install-file
+    executions precede all clean actions in roboy_parser, they are
+    moved into this submodule as a dependency.
+    -->
+
+    <build>
+        <plugins>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.6.0</version>
+                <executions>
+                    <execution>
+                        <id>Pull dependencies</id>
+                        <phase>pre-clean</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>ruby</executable>
+                            <commandlineArgs>${project.basedir}/pull-deps.rb roboy</commandlineArgs>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-install-plugin</artifactId>
+                <version>2.5.2</version>
+                <executions>
+                    <execution>
+                        <id>install-fig</id>
+                        <phase>pre-clean</phase>
+                        <configuration>
+                            <repositoryLayout>default</repositoryLayout>
+                            <groupId>fig</groupId>
+                            <artifactId>basic</artifactId>
+                            <version>1.0</version>
+                            <file>${project.basedir}/lib/fig.jar</file>
+                            <packaging>jar</packaging>
+                            <generatePom>true</generatePom>
+                        </configuration>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>install-models</id>
+                        <phase>pre-clean</phase>
+                        <configuration>
+                            <repositoryLayout>default</repositoryLayout>
+                            <groupId>edu.stanford.nlp</groupId>
+                            <artifactId>stanford-corenlp</artifactId>
+                            <version>3.5.2</version>
+                            <classifier>caseless-models</classifier>
+                            <file>${project.basedir}/lib/stanford-corenlp-caseless-models.jar</file>
+                            <packaging>jar</packaging>
+                            <generatePom>true</generatePom>
+                        </configuration>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>install-ejml</id>
+                        <phase>pre-clean</phase>
+                        <configuration>
+                            <repositoryLayout>default</repositoryLayout>
+                            <groupId>org.ejml</groupId>
+                            <artifactId>ejml-all</artifactId>
+                            <version>0.23</version>
+                            <file>${project.basedir}/lib/ejml.jar</file>
+                            <packaging>jar</packaging>
+                            <generatePom>true</generatePom>
+                        </configuration>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+        </plugins>
+
+    </build>
+
+</project>
+
