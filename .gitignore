@@ -44,3 +44,5 @@ interactive/.ipynb_checkpoints
 # Community server logs
 community-server/data
 community-server/data-backup
+
+*.iml
