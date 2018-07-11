@@ -9,6 +9,10 @@ import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import java.io.*;
 import java.util.*;
@@ -53,6 +57,22 @@ public class SparqlUtils {
     public static Gson gson = new Gson();
     public static XMLReader reader = new XMLReader();
 
+    public SparqlUtils() {
+        TrustManager[] trustAllCerts = new TrustManager[]{
+            new X509TrustManager() {
+                public java.security.cert.X509Certificate[] getAcceptedIssuers() {return null;}
+                public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType){}
+                public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType){}
+            }
+        };
+        try {
+            SSLContext sc = SSLContext.getInstance("SSL");
+            sc.init(null, trustAllCerts, new java.security.SecureRandom());
+            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+        }
+        catch(java.security.NoSuchAlgorithmException e) {}
+        catch(java.security.KeyManagementException e) {}
+    }
 
     public class ServerResponse {
         public ServerResponse(String xml) {
