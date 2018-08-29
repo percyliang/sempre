@@ -103,3 +103,44 @@ The table can also be viewed in pretty-printed format by calling
 or
 
     ./tables/view csv/204-csv/590.csv
+
+Generating `.tagged` Files
+--------------------------
+
+The [WikiTableQuestions](https://github.com/ppasupat/WikiTableQuestions)
+dataset contains CoreNLP tagged files.
+Here is how they were generated.
+
+The classes responsible for generating `.tagged` files are `TaggedDatasetGenerator`
+and `TaggedTableGenerator` in `edu.stanford.nlp.sempre.tables.serialize`.
+
+Suppose the LispTree `.examples` files is at `my-data.examples`, and the
+CSV table files all have paths of the form
+`table-base-directory/csv/___-csv/___.csv` where `___` are numbers.
+(The path pattern is currently hard-coded.)
+
+Please see the WikiTableQuestions dataset package for how the LispTree
+`.examples` file should be formatted (these files are stored in `data/`),
+and how the CSV table files are stored (these are stored in `csv/`; only
+.csv files are needed; .tsv, .html, and .table are not needed).
+
+For dataset `.tagged` files:
+
+```
+./run @mode=tables @class=tag-data \
+    -dataset.inpaths anygroupname:my-data.examples \
+    -baseCSVDir table-base-directory @useTaggedFile=0
+```
+
+This will invoke `TaggedDatasetGenerator`.
+The results should be in `states/exec/___.exec/___.tagged`.
+
+For table `.tagged` files:
+
+```
+./run @mode=tables @class=tag-table \
+    -baseCSVDir table-base-directory @useTaggedFile=0
+```
+
+This will invoke `TaggedTableGenerator`.
+The results should be in `states/exec/___.exec/tagged/...`
