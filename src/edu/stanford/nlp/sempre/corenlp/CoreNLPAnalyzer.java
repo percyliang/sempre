@@ -34,6 +34,9 @@ public class CoreNLPAnalyzer extends LanguageAnalyzer {
 
     @Option(gloss = "Whether to use case-sensitive models")
     public boolean caseSensitive = false;
+
+    @Option(gloss = "Disable SUTime (which does not work with Java > 8")
+    public boolean disableSUTime = false;
   }
 
   public static Options opts = new Options();
@@ -61,6 +64,9 @@ public class CoreNLPAnalyzer extends LanguageAnalyzer {
     } else {
       props.put("pos.model", "edu/stanford/nlp/models/pos-tagger/english-caseless-left3words-distsim.tagger");
       props.put("ner.model", "edu/stanford/nlp/models/ner/english.all.3class.caseless.distsim.crf.ser.gz,edu/stanford/nlp/models/ner/english.conll.4class.caseless.distsim.crf.ser.gz");
+    }
+    if (opts.disableSUTime) {
+      props.put("ner.useSUTime", "0");
     }
     pipeline = new StanfordCoreNLP(props);
   }

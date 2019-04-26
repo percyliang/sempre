@@ -523,7 +523,7 @@ def overnightFeatureDomains
 end
 
 addMode('overnight', 'Overnight semantic parsing', l(
-  header('core,freebase,overnight'),
+  header('core,corenlp,freebase,overnight'),
   'edu.stanford.nlp.sempre.Main',
   figOpts,
   o('JavaExecutor.convertNumberValues', false),
