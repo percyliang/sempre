@@ -35,7 +35,7 @@ public class CoreNLPAnalyzer extends LanguageAnalyzer {
     @Option(gloss = "Whether to use case-sensitive models")
     public boolean caseSensitive = false;
 
-    @Option(gloss = "Disable SUTime (which does not work with Java > 8")
+    @Option(gloss = "Disable SUTime (which does not work with Java > 8)")
     public boolean disableSUTime = false;
   }
 
