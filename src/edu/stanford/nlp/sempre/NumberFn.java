@@ -33,7 +33,7 @@ public class NumberFn extends SemanticFn {
     if (tree.children.size() > 1) {
       requests = new ArrayList<String>();
       for (int i = 1; i < tree.children.size(); i++)
-        requests.add(tree.child(1).value);
+        requests.add(tree.child(i).value);
     }
   }
 
