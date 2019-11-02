@@ -12,4 +12,4 @@ pexpect==4.2.0
 PyJWT==1.4.2
 python-socketio==1.6.2
 requests==2.10.0
-Werkzeug==0.11.15
+Werkzeug==0.15.3
