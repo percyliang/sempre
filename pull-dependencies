@@ -139,7 +139,7 @@ addModule('core', 'Core utilities (need to compile)', lambda {
   pull('/u/nlp/data/semparse/resources/jackson-databind-2.2.0.jar')
 
   # jLine from maven central
-  pull('http://central.maven.org/maven2/jline/jline/2.14.2/jline-2.14.2.jar')
+  pull('https://repo1.maven.org/maven2/jline/jline/2.14.6/jline-2.14.6.jar')
 })
 
 addModule('corenlp', 'Stanford CoreNLP 3.6.0', lambda {
