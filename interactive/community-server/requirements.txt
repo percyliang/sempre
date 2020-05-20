@@ -3,7 +3,7 @@ Flask==0.12
 Flask-Cors==3.0.2
 Flask-SocketIO==2.8.2
 greenlet==0.4.11
-httplib2==0.10.3
+httplib2==0.18.0
 itsdangerous==0.24
 Jinja2==2.9.4
 jsonschema==2.5.1
