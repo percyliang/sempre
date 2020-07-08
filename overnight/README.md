@@ -38,3 +38,7 @@ No PPDB features:
 Full system:
 
     ./run @mode=overnight @domain=<domain> -OvernightFeatureComputer.featureDomains match ppdb skip-bigram root alignment lexical root_lexical lf simpleworld
+
+# Generating alignment files for a new domain
+
+[See the instructions here](https://docs.google.com/document/d/1cgqThUAyArbgjQi0P7l--kCLH10copd1EXFnk_bHkY0/edit?usp=sharing) (work in progress).
