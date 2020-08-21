@@ -146,7 +146,7 @@ The possible `Value`s, along with an example are as follows:
 
     In general:
 
-        (table (<header-string-1> ... <header-string-n>) (<row-1-value-1> ... <value-1-value-n>) ...)
+        (table (<header-string-1> ... <header-string-n>) (<row-1-value-1> ... <row-1-value-n>) ...)
 
 There are some more arcane `Value`s (see `Values.java` for a list), but they
 are not that important from the point of view of specifying a logical form.
