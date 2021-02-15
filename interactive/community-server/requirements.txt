@@ -11,5 +11,5 @@ pep8==1.7.0
 pexpect==4.2.0
 PyJWT==1.4.2
 python-socketio==1.6.2
-requests==2.10.0
+requests==2.20.0
 Werkzeug==0.11.15
