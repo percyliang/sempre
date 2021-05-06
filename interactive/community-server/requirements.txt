@@ -1,6 +1,6 @@
 eventlet==0.20.1
 Flask==0.12
-Flask-Cors==3.0.2
+Flask-Cors==3.0.9
 Flask-SocketIO==2.8.2
 greenlet==0.4.11
 httplib2==0.18.0
