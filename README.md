@@ -99,7 +99,7 @@ similar your system is.
 
 2. Download the minimal core dependencies (all dependencies will be placed in `lib`):
 
-        ./pull-dependencies core
+        ruby ./pull-dependencies core
 
 3. Compile the source code (this produces `libsempre/sempre-core.jar`):
 
