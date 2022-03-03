@@ -104,10 +104,13 @@ similar your system is.
 3. Compile the source code (this produces `libsempre/sempre-core.jar`):
 
         ant core
+        
+   If there is any issue during compilation, try deleting the directories `lib` and `fig`
+   and rerunning `./pull-dependencies core`
 
 4. Run an interactive shell:
 
-        ./run @mode=simple
+        ruby ./run @mode=simple
 
     You should be able to type the following into the shell and get the answer `(number 7)`:
 
