@@ -187,6 +187,31 @@ addModule('corenlp-3.2.0', 'Stanford CoreNLP 3.2.0 (for backward reproducibility
   }
 })
 
+addModule('corenlp-3.9.2', 'Stanford CoreNLP 3.9.2 (if the default one does not run on newer Java)', lambda {
+  pull('http://nlp.stanford.edu/software/stanford-corenlp-full-2018-10-05.zip', '')
+  if not File.exists?('lib/stanford-corenlp-full-2018-10-05')
+    system "cd lib && unzip stanford-corenlp-full-2018-10-05.zip" or exit 1
+  end
+  pull('http://nlp.stanford.edu/software/stanford-english-corenlp-2018-10-05-models.jar',
+       'stanford-corenlp-full-2018-10-05', {:symlink => true})
+  pull('http://central.maven.org/maven2/javax/xml/bind/jaxb-api/2.3.0/jaxb-api-2.3.0.jar', '')
+  # Remove old file (for backward compatibility)
+  if Dir.glob('lib/stanford-corenlp*.jar').any?
+    system 'rm -v lib/stanford-corenlp*.jar' or exit 1
+  end
+  {'stanford-corenlp-3.9.2.jar' => 'stanford-corenlp.jar',
+   'stanford-corenlp-3.9.2-models.jar' => 'stanford-corenlp-models.jar',
+   'stanford-english-corenlp-2018-10-05-models.jar' => 'stanford-corenlp-caseless-models.jar',
+   'joda-time.jar' => 'joda-time.jar',
+   'jollyday.jar' => 'jollyday.jar',
+   'ejml-0.23.jar' => 'ejml.jar',
+   'slf4j-api.jar' => 'slf4j-api.jar',
+   'slf4j-simple.jar' => 'slf4j-simple.jar',
+  }.each { |key, value|
+    system "ln -sfv stanford-corenlp-full-2018-10-05/#{key} lib/#{value}" or exit 1
+  }
+})
+
 addModule('freebase', 'Freebase: need to construct Freebase schemas', lambda {
   # Freebase schema
   pull('/u/nlp/data/semparse/scr/freebase/state/execs/93.exec/schema2.ttl', 'fb_data/93.exec')
